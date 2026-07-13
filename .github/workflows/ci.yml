@@ -62,7 +62,7 @@ jobs:
           $env:REEL_USER_DATA_DIR = "$env:RUNNER_TEMP\galileo-gallery-smoke"
           & "release\win-unpacked\Galileo Gallery.exe"
           $deadline = (Get-Date).AddSeconds(90)
-          while (!(Test-Path $output) -and (Get-Date) -lt $deadline) {
+          while ((!(Test-Path $output) -or (Get-Item $output).Length -lt 1000) -and (Get-Date) -lt $deadline) {
             Start-Sleep -Milliseconds 500
           }
           if (!(Test-Path $output)) { throw "Packaged Windows export did not finish." }
