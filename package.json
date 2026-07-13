@@ -23,10 +23,10 @@
     "verify:source": "node scripts/verify-source.cjs",
     "start": "npm run build && electron .",
     "prepare:ffmpeg": "node scripts/prepare-ffmpeg.cjs",
-    "package:mac": "npm run prepare:ffmpeg && npm run build && electron-builder --mac dir",
-    "package:windows": "npm run prepare:ffmpeg && npm run build && electron-builder --win portable --x64",
-    "package:linux": "npm run prepare:ffmpeg && npm run build && electron-builder --linux AppImage --x64",
-    "dist:mac": "npm run prepare:ffmpeg && npm run build && electron-builder --mac dmg",
+    "package:mac": "npm run prepare:ffmpeg && npm run build && electron-builder --mac dir --publish never",
+    "package:windows": "npm run prepare:ffmpeg && npm run build && electron-builder --win portable --x64 --publish never",
+    "package:linux": "npm run prepare:ffmpeg && npm run build && electron-builder --linux AppImage --x64 --publish never",
+    "dist:mac": "npm run prepare:ffmpeg && npm run build && electron-builder --mac dmg --publish never",
     "smoke:export": "npm run build && REEL_SMOKE_OUTPUT=./release/galileo-gallery-smoke.mp4 electron ."
   },
   "dependencies": {

@@ -6,11 +6,11 @@ const { spawnSync } = require("node:child_process")
 
 const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "galileo-story-"))
 const compile = spawnSync(
-    path.join(__dirname, "../node_modules/.bin/tsc"),
-    ["--ignoreConfig", "--outDir", outputDir, "--module", "commonjs", "--target", "es2022", path.join(__dirname, "../src/storyTiming.ts")],
+    process.execPath,
+    [path.join(__dirname, "../node_modules/typescript/lib/tsc.js"), "--ignoreConfig", "--outDir", outputDir, "--module", "commonjs", "--target", "es2022", path.join(__dirname, "../src/storyTiming.ts")],
     { encoding: "utf8" }
 )
-if (compile.status !== 0) throw new Error(compile.stderr || compile.stdout || "Could not compile story timing test")
+if (compile.status !== 0) throw new Error(compile.error?.message || compile.stderr || compile.stdout || "Could not compile story timing test")
 
 try {
     const { sceneClock, sceneDurationMs, sceneFinaleIndex } = require(path.join(outputDir, "storyTiming.js"))
