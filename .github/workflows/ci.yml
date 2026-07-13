@@ -60,6 +60,8 @@ jobs:
           set -euo pipefail
           app="release/mac-arm64/Galileo Gallery.app"
           output="$RUNNER_TEMP/galileo-gallery-smoke.mp4"
+          # electron-builder skips signing on pull-request runners, including ad-hoc signing.
+          codesign --force --deep --sign - "$app"
           REEL_SMOKE_OUTPUT="$output" REEL_USER_DATA_DIR="$RUNNER_TEMP/galileo-gallery-user-data" \
             "$app/Contents/MacOS/Galileo Gallery"
           test "$(stat -f%z "$output")" -gt 1000
