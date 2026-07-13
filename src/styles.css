@@ -42,7 +42,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 18px 0 80px;
+    padding: 0 18px 0 92px;
     border-bottom: 1px solid var(--hairline);
     background: rgba(23, 22, 20, 0.72);
     backdrop-filter: blur(26px) saturate(145%);

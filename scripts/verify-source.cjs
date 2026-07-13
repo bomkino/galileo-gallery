@@ -37,6 +37,10 @@ if (!/\.studio \{[\s\S]*overflow: auto;/.test(css)) fail("Studio has no scroll o
 if (!css.includes(".style-gallery-shell { width:100%; height:100%; min-height:0; overflow:auto;")) fail("Home gallery has no bounded scroll owner")
 if (!/master \? "3"/.test(electron)) fail("opaque Premiere Master must use ProRes 422 HQ profile 3")
 if (!/master \? "5" : "4"/.test(electron)) fail("transparent Master must use ProRes 4444 XQ profile 5")
+if (!electron.includes("writeFileSafely(outputPath")) fail("project saves must stage before replacing the destination")
+if (!electron.includes("encoderArgs(request, stagedOutputPath)")) fail("exports must encode to a staged sibling path")
+if (electron.includes('appendSwitch("disable-renderer-backgrounding")')) fail("ordinary renderer background throttling must remain enabled")
+if (electron.includes("trafficLightPosition")) fail("macOS must use native hiddenInset traffic-light placement")
 for (const tag of ["color_primaries", "color_trc", "colorspace", "color_range"]) {
     if (!electron.includes(`"-${tag}"`)) fail(`export color tag missing: ${tag}`)
 }

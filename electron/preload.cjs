@@ -5,7 +5,7 @@ contextBridge.exposeInMainWorld("reelAPI", {
     pickMedia: () => ipcRenderer.invoke("media:pick"),
     getDroppedFile: async (file) => {
         const filePath = webUtils.getPathForFile(file)
-        return filePath ? ipcRenderer.invoke("media:from-path", filePath) : null
+        return ipcRenderer.invoke("media:from-path", filePath)
     },
     createVideoProxy: (url) => ipcRenderer.invoke("media:create-video-proxy", url),
     saveProject: (config) => ipcRenderer.invoke("project:save", config),

@@ -15,6 +15,14 @@ const fs = require("node:fs")
 const path = require("node:path")
 const { pathToFileURL } = require("node:url")
 const AdmZip = require("adm-zip")
+const {
+    inspectDroppedPath,
+    mediaKindForPath,
+    removeTemporary,
+    replaceFile,
+    temporarySiblingPath,
+    writeFileSafely,
+} = require("./file-operations.cjs")
 let ffmpegStatic = null
 try {
     ffmpegStatic = require("ffmpeg-static")
@@ -36,7 +44,6 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 app.commandLine.appendSwitch("force-device-scale-factor", "1")
-app.commandLine.appendSwitch("disable-renderer-backgrounding")
 if (process.env.REEL_USER_DATA_DIR) app.setPath("userData", path.resolve(process.env.REEL_USER_DATA_DIR))
 
 let mainWindow = null
@@ -123,9 +130,11 @@ async function savePortableProject(config, forcedOutputPath) {
             path.join(projectFolder, "project.json"),
             JSON.stringify({ type: "galileo-gallery-project", version: 1, config: { ...config, items } }, null, 2)
         )
-        const archive = new AdmZip()
-        archive.addLocalFolder(projectFolder, "project")
-        archive.writeZip(outputPath)
+        await writeFileSafely(outputPath, (stagedOutputPath) => {
+            const archive = new AdmZip()
+            archive.addLocalFolder(projectFolder, "project")
+            archive.writeZip(stagedOutputPath)
+        })
         return { outputPath }
     } finally {
         fs.rmSync(temporary, { recursive: true, force: true })
@@ -214,14 +223,19 @@ async function openSettingsTemplate(forcedSource) {
 }
 
 function fileToMedia(filePath) {
-    const extension = path.extname(filePath).toLowerCase()
-    const videoExtensions = new Set([".mp4", ".webm", ".mov", ".m4v", ".gif"])
     const token = Buffer.from(filePath).toString("base64url")
     return {
         name: path.basename(filePath),
-        type: videoExtensions.has(extension) ? "video" : "image",
+        type: mediaKindForPath(filePath) ?? "image",
         url: `reel-media://file/${token}`,
     }
+}
+
+function droppedPathResult(filePath) {
+    const result = inspectDroppedPath(filePath)
+    return result.accepted
+        ? { accepted: true, media: fileToMedia(filePath) }
+        : result
 }
 
 function mediaURLToPath(mediaURL) {
@@ -423,13 +437,12 @@ function createMainWindow() {
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: true,
-            backgroundThrottling: false,
+            zoomFactor: process.platform === "darwin" ? 1.08 : 1,
         },
     }
     if (process.platform === "darwin") {
         Object.assign(windowOptions, {
             titleBarStyle: "hiddenInset",
-            trafficLightPosition: { x: 18, y: 18 },
             vibrancy: "under-window",
             visualEffectState: "active",
         })
@@ -684,6 +697,8 @@ async function runExport(request, outputPath) {
     const posterPath = request.posterFrame && request.posterFrame !== "none"
         ? `${outputPath.slice(0, -path.extname(outputPath).length)}-poster.jpg`
         : null
+    const stagedOutputPath = temporarySiblingPath(outputPath)
+    const stagedPosterPath = posterPath ? temporarySiblingPath(posterPath) : null
     let posterImage = null
     activeExport = state
     report({ exportId, phase: "preparing", progress: 0, outputPath })
@@ -723,7 +738,7 @@ async function runExport(request, outputPath) {
         if (state.cancelled) throw new Error("Export cancelled.")
 
         const totalFrames = Math.max(1, Math.ceil((request.durationMs / 1000) * request.fps))
-        const child = spawn(ffmpegPath(), encoderArgs(request, outputPath), {
+        const child = spawn(ffmpegPath(), encoderArgs(request, stagedOutputPath), {
             stdio: ["pipe", "ignore", "pipe"],
         })
         state.process = child
@@ -783,9 +798,11 @@ async function runExport(request, outputPath) {
         child.stdin.end()
         report({ exportId, phase: "encoding", progress: 1, outputPath })
         await finished
-        if (posterPath && posterImage) {
-            fs.writeFileSync(posterPath, posterImage.toJPEG(92))
+        if (stagedPosterPath && posterImage) {
+            fs.writeFileSync(stagedPosterPath, posterImage.toJPEG(92))
         }
+        replaceFile(stagedOutputPath, outputPath)
+        if (posterPath && stagedPosterPath && posterImage) replaceFile(stagedPosterPath, posterPath)
         report({
             exportId,
             phase: "done",
@@ -797,8 +814,8 @@ async function runExport(request, outputPath) {
     } catch (error) {
         const cancelled = state.cancelled || error.message === "Export cancelled."
         state.process?.kill("SIGKILL")
-        if (fs.existsSync(outputPath)) fs.rmSync(outputPath, { force: true })
-        if (posterPath && fs.existsSync(posterPath)) fs.rmSync(posterPath, { force: true })
+        removeTemporary(stagedOutputPath)
+        removeTemporary(stagedPosterPath)
         report({
             exportId,
             phase: cancelled ? "cancelled" : "error",
@@ -847,9 +864,7 @@ app.whenReady().then(async () => {
         })
         return result.canceled ? [] : result.filePaths.map(fileToMedia)
     })
-    ipcMain.handle("media:from-path", (_event, filePath) =>
-        filePath && fs.existsSync(filePath) ? fileToMedia(filePath) : null
-    )
+    ipcMain.handle("media:from-path", (_event, filePath) => droppedPathResult(filePath))
     ipcMain.handle("media:create-video-proxy", (_event, url) => createVideoProxy(url))
     ipcMain.handle("project:save", (_event, config) => savePortableProject(config))
     ipcMain.handle("project:open", () => openPortableProject())
