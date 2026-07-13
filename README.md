@@ -4,7 +4,7 @@ Galileo Gallery is a free, local desktop motion studio for turning images, video
 
 It began as the Opening Reel Framer component and grew into 17 motion scenes distilled from 29 original components. Every scene has its own defaults, spatial rules, timing, and physical character; the importer, timeline, projects, and deterministic export pipeline are shared.
 
-Current version: **0.5.0**
+Current version: **1.0.0**
 
 ## What it can make
 
@@ -23,13 +23,28 @@ Before/After is one shared comparison surface with a gentle authored sweep. Orre
 
 ## Download
 
-Unsigned builds for macOS Apple silicon, Windows x64, and Linux x64 are published on the [GitHub Releases page](https://github.com/bomkino/galileo-gallery/releases). Because this is an early independent release, the operating system may ask you to confirm that you trust the app.
+Builds for macOS Apple silicon, Windows x64, and Linux x64 are published on the [GitHub Releases page](https://github.com/bomkino/galileo-gallery/releases). The macOS app has an ad-hoc integrity signature, but it is not Apple Developer ID signed or notarized. Gatekeeper will therefore ask you to confirm that you trust it.
+
+### Install on macOS
+
+1. Download the latest macOS Apple silicon DMG and open it.
+2. Drag **Galileo Gallery** into **Applications**.
+3. In Applications, Control-click **Galileo Gallery**, choose **Open**, then choose **Open** again.
+4. If macOS still blocks it, open **System Settings → Privacy & Security**, find the Galileo Gallery message, and choose **Open Anyway**.
+
+If macOS reports that the app is damaged after those steps, remove the downloaded file's quarantine attribute as a last resort:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/Galileo Gallery.app"
+```
+
+Only run that command after downloading Galileo Gallery from this repository's official Releases page. It bypasses Gatekeeper's quarantine check for this app; it does not notarize or establish Apple trust. Then Control-click the app and choose **Open** again. Installation help: [hello@pitch.dog](mailto:hello@pitch.dog).
 
 Linux is distributed as an AppImage. Make it executable, then run it:
 
 ```bash
-chmod +x "Galileo Gallery-0.5.0-Linux-x86_64.AppImage"
-./"Galileo Gallery-0.5.0-Linux-x86_64.AppImage"
+chmod +x "Galileo Gallery-1.0.0-Linux-x86_64.AppImage"
+./"Galileo Gallery-1.0.0-Linux-x86_64.AppImage"
 ```
 
 ## Run from source
@@ -54,7 +69,7 @@ npm run package:windows
 npm run package:linux
 ```
 
-Package on the target operating system. Each packaging command prepares that platform's FFmpeg executable, builds the renderer, and creates an unsigned app under `release/`.
+Package on the target operating system. Each packaging command prepares that platform's FFmpeg executable, builds the renderer, and creates an app under `release/`. macOS packaging uses an ad-hoc signature for bundle integrity; it does not create a trusted or notarized release.
 
 ## How export works
 

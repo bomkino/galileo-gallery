@@ -43,6 +43,33 @@ jobs:
           name: galileo-gallery-linux
           path: release/*.AppImage
 
+  package-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run package:mac
+      - name: Export from the packaged macOS app
+        shell: bash
+        run: |
+          set -euo pipefail
+          app="release/mac-arm64/Galileo Gallery.app"
+          output="$RUNNER_TEMP/galileo-gallery-smoke.mp4"
+          REEL_SMOKE_OUTPUT="$output" REEL_USER_DATA_DIR="$RUNNER_TEMP/galileo-gallery-user-data" \
+            "$app/Contents/MacOS/Galileo Gallery"
+          test "$(stat -f%z "$output")" -gt 1000
+          "$app/Contents/Resources/ffmpeg/ffmpeg" -v error -i "$output" -f null -
+          codesign --verify --deep --strict "$app"
+      - uses: actions/upload-artifact@v6
+        with:
+          name: galileo-gallery-macos
+          path: release/mac-arm64/*.app
+
   package-windows:
     runs-on: windows-latest
     steps:

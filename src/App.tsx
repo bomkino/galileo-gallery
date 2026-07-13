@@ -14,6 +14,7 @@ import type {
     ExportRequest,
     BackgroundStyle,
     CanvasPreset,
+    DroppedMediaResult,
     MediaItem,
     MotionPreset,
     PosterFrame,
@@ -546,7 +547,9 @@ function AppView() {
     const [launchPhase, setLaunchPhase] = React.useState<"visible" | "leaving" | "gone">("visible")
     const [showStyleGallery, setShowStyleGallery] = React.useState(true)
     const [saveNotice, setSaveNotice] = React.useState<string | null>(null)
+    const [documentVisible, setDocumentVisible] = React.useState(() => document.visibilityState !== "hidden")
     const configRef = React.useRef(config)
+    const hiddenAtRef = React.useRef<number | null>(null)
     const videoProxyJobs = React.useRef(new Set<string>())
     const playbackShapeRef = React.useRef("")
 
@@ -808,11 +811,29 @@ function AppView() {
     }, [saveNotice])
 
     React.useEffect(() => {
+        const onVisibilityChange = () => {
+            const now = performance.now()
+            if (document.visibilityState === "hidden") {
+                hiddenAtRef.current = now
+                setDocumentVisible(false)
+                return
+            }
+            const hiddenAt = hiddenAtRef.current
+            hiddenAtRef.current = null
+            if (hiddenAt != null) setStartedAt((current) => current + now - hiddenAt)
+            setDocumentVisible(true)
+        }
+        document.addEventListener("visibilitychange", onVisibilityChange)
+        return () => document.removeEventListener("visibilitychange", onVisibilityChange)
+    }, [])
+
+    React.useEffect(() => {
         let raf = 0
         if (!previewStarted) {
             if (!scrubPaused && !freezePreview && !isScrubbing) setPlayhead(0)
             return
         }
+        if (!documentVisible) return
         const tick = () => {
             const elapsed = performance.now() - startedAt
             if (config.settings.playKind === "loop") {
@@ -840,7 +861,7 @@ function AppView() {
         }
         raf = requestAnimationFrame(tick)
         return () => cancelAnimationFrame(raf)
-    }, [startedAt, duration, finalCycleDuration, playbackDuration, repeatCount, reelKey, previewStarted, config.settings.playKind, freezePreview, isScrubbing, scrubPaused])
+    }, [startedAt, duration, finalCycleDuration, playbackDuration, repeatCount, reelKey, previewStarted, config.settings.playKind, documentVisible, freezePreview, isScrubbing, scrubPaused])
 
     React.useEffect(
         () =>
@@ -1071,10 +1092,15 @@ function AppView() {
             onDrop={async (event) => {
                 event.preventDefault()
                 setDropping(false)
-                const media = (
-                    await Promise.all(Array.from(event.dataTransfer.files).map(reelAPI.getDroppedFile))
-                ).filter((item): item is SelectedMedia => item != null)
+                const results: DroppedMediaResult[] = await Promise.all(
+                    Array.from(event.dataTransfer.files).map(reelAPI.getDroppedFile)
+                )
+                const media = results.flatMap((result) => result.accepted ? [result.media] : [])
+                const rejected = results.filter((result) => !result.accepted)
                 await addMedia(media)
+                if (rejected.length) {
+                    setSaveNotice(`${media.length ? `${media.length} added · ` : ""}${rejected.length} unsupported ${rejected.length === 1 ? "item" : "items"} skipped`)
+                }
             }}
         >
             <header className="titlebar">

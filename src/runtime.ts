@@ -7,7 +7,7 @@ const unavailable = async () => {
 const browserAPI: ReelAPI = {
     platform: "darwin",
     pickMedia: async () => [],
-    getDroppedFile: async () => null,
+    getDroppedFile: async (file) => ({ accepted: false, name: file.name || "Dropped item", reason: "unavailable" }),
     exportReel: unavailable,
     cancelExport: async () => undefined,
     revealFile: async () => undefined,

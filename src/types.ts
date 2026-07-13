@@ -131,10 +131,14 @@ export type ExportProgress = {
 
 export type SelectedMedia = Omit<MediaItem, "id" | "ratio" | "spotlight" | "muted">
 
+export type DroppedMediaResult =
+    | { accepted: true; media: SelectedMedia }
+    | { accepted: false; name: string; reason: "unavailable" | "not-a-file" | "unsupported-type" }
+
 export interface ReelAPI {
     platform: "darwin" | "win32" | "linux"
     pickMedia(): Promise<SelectedMedia[]>
-    getDroppedFile(file: File): Promise<SelectedMedia | null>
+    getDroppedFile(file: File): Promise<DroppedMediaResult>
     exportReel(request: ExportRequest): Promise<{ cancelled?: boolean; outputPath?: string; posterPath?: string }>
     cancelExport(): Promise<void>
     revealFile(path: string): Promise<void>
