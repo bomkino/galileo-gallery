@@ -1,0 +1,14 @@
+node_modules/
+dist/
+release/
+vendor/
+plans/
+scripts/audit-originals.cjs
+
+.DS_Store
+Icon?
+*.log
+
+.env
+.env.*
+!.env.example

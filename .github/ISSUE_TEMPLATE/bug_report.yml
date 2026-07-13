@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible problem in Galileo Gallery
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping us make Galileo Gallery better.
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options: [macOS Apple silicon, macOS Intel, Windows, Linux, Other]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Galileo Gallery version
+      placeholder: 0.5.0
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Include the scene, settings, media types, and export format when relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true

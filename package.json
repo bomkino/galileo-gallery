@@ -1,0 +1,138 @@
+{
+  "name": "galileo-gallery",
+  "version": "0.5.0",
+  "private": true,
+  "author": "pitch.dog",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/bomkino/galileo-gallery",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bomkino/galileo-gallery.git"
+  },
+  "desktopName": "galileo-gallery",
+  "description": "A beautiful local studio for turning images and video into authored motion galleries.",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
+    "build": "tsc --noEmit && vite build",
+    "test": "npm run build && node scripts/verify-source.cjs && node scripts/verify-story-timing.cjs",
+    "verify:source": "node scripts/verify-source.cjs",
+    "start": "npm run build && electron .",
+    "prepare:ffmpeg": "node scripts/prepare-ffmpeg.cjs",
+    "package:mac": "npm run prepare:ffmpeg && npm run build && electron-builder --mac dir",
+    "package:windows": "npm run prepare:ffmpeg && npm run build && electron-builder --win portable --x64",
+    "package:linux": "npm run prepare:ffmpeg && npm run build && electron-builder --linux AppImage --x64",
+    "dist:mac": "npm run prepare:ffmpeg && npm run build && electron-builder --mac dmg",
+    "smoke:export": "npm run build && REEL_SMOKE_OUTPUT=./release/galileo-gallery-smoke.mp4 electron ."
+  },
+  "dependencies": {
+    "adm-zip": "0.5.16",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "6.0.3",
+    "concurrently": "10.0.3",
+    "electron": "43.1.0",
+    "electron-builder": "26.15.3",
+    "ffmpeg-static": "5.3.0",
+    "typescript": "7.0.2",
+    "vite": "8.1.4",
+    "wait-on": "9.0.10"
+  },
+  "build": {
+    "appId": "dog.pitch.galileo-gallery",
+    "productName": "Galileo Gallery",
+    "asar": true,
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "category": "public.app-category.video",
+      "icon": "build/icon.icns",
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "darkModeSupport": true,
+      "identity": null,
+      "artifactName": "${productName}-${version}-macOS-${arch}.${ext}",
+      "extraResources": [
+        {
+          "from": "vendor/ffmpeg/darwin-${arch}",
+          "to": "ffmpeg"
+        }
+      ]
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "artifactName": "${productName}-${version}-Windows-${arch}.${ext}",
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "extraResources": [
+        {
+          "from": "vendor/ffmpeg/win32-${arch}",
+          "to": "ffmpeg"
+        }
+      ]
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "category": "AudioVideo",
+      "syncDesktopName": true,
+      "artifactName": "${productName}-${version}-Linux-${arch}.${ext}",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "extraResources": [
+        {
+          "from": "vendor/ffmpeg/linux-${arch}",
+          "to": "ffmpeg"
+        }
+      ]
+    },
+    "dmg": {
+      "backgroundColor": "#171614",
+      "iconSize": 112,
+      "window": {
+        "width": 560,
+        "height": 360
+      },
+      "contents": [
+        {
+          "x": 160,
+          "y": 175
+        },
+        {
+          "x": 400,
+          "y": 175,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  package-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: xvfb-run -a env REEL_SMOKE_OUTPUT=./release/ci-smoke.mp4 ./node_modules/.bin/electron .
+      - run: node -e "if (require('fs').statSync('release/ci-smoke.mp4').size < 1000) process.exit(1)"
+      - run: npm run package:linux
+      - uses: actions/upload-artifact@v4
+        with:
+          name: galileo-gallery-linux
+          path: release/*.AppImage
+
+  package-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Export a real video
+        shell: pwsh
+        run: |
+          $env:REEL_SMOKE_OUTPUT = "$pwd\release\ci-smoke.mp4"
+          .\node_modules\.bin\electron.cmd .
+      - run: node -e "if (require('fs').statSync('release/ci-smoke.mp4').size < 1000) process.exit(1)"
+      - run: npm run package:windows
+      - uses: actions/upload-artifact@v4
+        with:
+          name: galileo-gallery-windows
+          path: release/*.exe
