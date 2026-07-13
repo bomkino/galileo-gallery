@@ -16,8 +16,8 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
@@ -27,8 +27,8 @@ jobs:
   package-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
@@ -38,7 +38,7 @@ jobs:
       - name: Export from the packaged AppImage
         run: xvfb-run -a env REEL_SMOKE_OUTPUT=./release/ci-smoke.mp4 release/*-Linux-x86_64.AppImage --appimage-extract-and-run --no-sandbox
       - run: node -e "if (require('fs').statSync('release/ci-smoke.mp4').size < 1000) process.exit(1)"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: galileo-gallery-linux
           path: release/*.AppImage
@@ -46,8 +46,8 @@ jobs:
   package-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
@@ -61,7 +61,7 @@ jobs:
           $env:REEL_USER_DATA_DIR = "$env:RUNNER_TEMP\galileo-gallery-smoke"
           & "release\win-unpacked\Galileo Gallery.exe"
       - run: node -e "if (require('fs').statSync('release/ci-smoke.mp4').size < 1000) process.exit(1)"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: galileo-gallery-windows
           path: release/*.exe
