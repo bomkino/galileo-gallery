@@ -58,8 +58,8 @@ jobs:
         shell: pwsh
         run: |
           $env:REEL_SMOKE_OUTPUT = "$pwd\release\ci-smoke.mp4"
-          $app = Get-ChildItem "release/*-Windows-x64.exe" | Select-Object -First 1
-          & $app.FullName
+          $env:REEL_USER_DATA_DIR = "$env:RUNNER_TEMP\galileo-gallery-smoke"
+          & "release\win-unpacked\Galileo Gallery.exe"
       - run: node -e "if (require('fs').statSync('release/ci-smoke.mp4').size < 1000) process.exit(1)"
       - uses: actions/upload-artifact@v4
         with:
