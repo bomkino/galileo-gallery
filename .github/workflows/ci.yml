@@ -57,10 +57,16 @@ jobs:
       - name: Export from the packaged Windows app
         shell: pwsh
         run: |
-          $env:REEL_SMOKE_OUTPUT = "$pwd\release\ci-smoke.mp4"
+          $output = "$pwd\release\ci-smoke.mp4"
+          $env:REEL_SMOKE_OUTPUT = $output
           $env:REEL_USER_DATA_DIR = "$env:RUNNER_TEMP\galileo-gallery-smoke"
           & "release\win-unpacked\Galileo Gallery.exe"
-      - run: node -e "if (require('fs').statSync('release/ci-smoke.mp4').size < 1000) process.exit(1)"
+          $deadline = (Get-Date).AddSeconds(90)
+          while (!(Test-Path $output) -and (Get-Date) -lt $deadline) {
+            Start-Sleep -Milliseconds 500
+          }
+          if (!(Test-Path $output)) { throw "Packaged Windows export did not finish." }
+          if ((Get-Item $output).Length -lt 1000) { throw "Packaged Windows export was empty." }
       - uses: actions/upload-artifact@v6
         with:
           name: galileo-gallery-windows
