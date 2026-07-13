@@ -34,9 +34,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - run: xvfb-run -a env REEL_SMOKE_OUTPUT=./release/ci-smoke.mp4 ./node_modules/.bin/electron .
-      - run: node -e "if (require('fs').statSync('release/ci-smoke.mp4').size < 1000) process.exit(1)"
       - run: npm run package:linux
+      - name: Export from the packaged AppImage
+        run: xvfb-run -a env REEL_SMOKE_OUTPUT=./release/ci-smoke.mp4 release/*-Linux-x86_64.AppImage --appimage-extract-and-run --no-sandbox
+      - run: node -e "if (require('fs').statSync('release/ci-smoke.mp4').size < 1000) process.exit(1)"
       - uses: actions/upload-artifact@v4
         with:
           name: galileo-gallery-linux
@@ -52,13 +53,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - name: Export a real video
+      - run: npm run package:windows
+      - name: Export from the packaged Windows app
         shell: pwsh
         run: |
           $env:REEL_SMOKE_OUTPUT = "$pwd\release\ci-smoke.mp4"
-          .\node_modules\.bin\electron.cmd .
+          $app = Get-ChildItem "release/*-Windows-x64.exe" | Select-Object -First 1
+          & $app.FullName
       - run: node -e "if (require('fs').statSync('release/ci-smoke.mp4').size < 1000) process.exit(1)"
-      - run: npm run package:windows
       - uses: actions/upload-artifact@v4
         with:
           name: galileo-gallery-windows

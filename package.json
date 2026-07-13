@@ -9,6 +9,10 @@
     "type": "git",
     "url": "https://github.com/bomkino/galileo-gallery.git"
   },
+  "allowScripts": {
+    "electron-winstaller@5.4.0": true,
+    "ffmpeg-static@5.3.0": true
+  },
   "desktopName": "galileo-gallery",
   "description": "A beautiful local studio for turning images and video into authored motion galleries.",
   "main": "electron/main.cjs",
