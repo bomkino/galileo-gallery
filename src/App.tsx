@@ -5,6 +5,7 @@ import ExpertControls, { type ExpertPreset, type ExpertTab } from "./ExpertContr
 import GalleryRenderer from "./GalleryRenderer"
 import StyleGallery from "./StyleGallery"
 import { ensureReelAPI } from "./runtime"
+import { projectConfigAfterOpen, projectOpenNotice } from "./projectOpen"
 import { styleProfile, styleSettings } from "./styleProfiles"
 import { placeholderItems, studioTimeline } from "./timeline"
 import { GALLERY_STYLES, galleryScene, galleryStyle, sceneVariants, type StyleDefinition } from "./styleRegistry"
@@ -547,6 +548,7 @@ function AppView() {
     const [launchPhase, setLaunchPhase] = React.useState<"visible" | "leaving" | "gone">("visible")
     const [showStyleGallery, setShowStyleGallery] = React.useState(true)
     const [saveNotice, setSaveNotice] = React.useState<string | null>(null)
+    const [projectOpening, setProjectOpening] = React.useState(false)
     const [documentVisible, setDocumentVisible] = React.useState(() => document.visibilityState !== "hidden")
     const configRef = React.useRef(config)
     const hiddenAtRef = React.useRef<number | null>(null)
@@ -1011,17 +1013,27 @@ function AppView() {
     }
 
     const openProject = async () => {
+        if (projectOpening) return
+        setProjectOpening(true)
+        setSaveNotice("Opening project…")
         try {
             const result = await reelAPI.openProject()
-            if (!result.config) return
-            const next = normalizeConfig(result.config)
+            const imported = projectConfigAfterOpen(configRef.current, result)
+            setSaveNotice(projectOpenNotice(result))
+            if (imported === configRef.current) return
+            const next = normalizeConfig(imported)
             setConfig(next)
             setSelectedItemId(next.items[0]?.id ?? null)
-            setSaveNotice("Project opened")
             restart()
         } catch (error) {
             setSaveNotice(error instanceof Error ? error.message : "Project open failed")
+        } finally {
+            setProjectOpening(false)
         }
+    }
+
+    const cancelProjectOpen = async () => {
+        await reelAPI.cancelProjectOpen()
     }
 
     const saveTemplate = async () => {
@@ -1121,13 +1133,18 @@ function AppView() {
                     <details className="project-menu">
                         <summary className="button quiet"><Icon name="folder" /> Project</summary>
                         <div>
-                            <button type="button" onClick={(event) => { void openProject(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Open project</button>
+                            <button type="button" disabled={projectOpening} onClick={(event) => { void openProject(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Open project</button>
                             <button type="button" onClick={(event) => { void saveProject(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Save project <small>media + progress</small></button>
                             <span />
                             <button type="button" onClick={(event) => { void openTemplate(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Apply template</button>
                             <button type="button" onClick={(event) => { void saveTemplate(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Save template <small>settings only</small></button>
                         </div>
                     </details>
+                    {projectOpening ? (
+                        <button className="button quiet" type="button" onClick={() => void cancelProjectOpen()}>
+                            Cancel open
+                        </button>
+                    ) : null}
                     <button className="button quiet" type="button" onClick={restart}>
                         <Icon name="play" /> Restart
                     </button>

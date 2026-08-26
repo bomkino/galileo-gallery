@@ -135,6 +135,31 @@ export type DroppedMediaResult =
     | { accepted: true; media: SelectedMedia }
     | { accepted: false; name: string; reason: "unavailable" | "not-a-file" | "unsupported-type" }
 
+export type ProjectImportFailureCode =
+    | "archive_too_large"
+    | "too_many_entries"
+    | "entry_too_large"
+    | "expanded_size_exceeded"
+    | "compression_ratio_exceeded"
+    | "insufficient_staging_space"
+    | "unsafe_entry_name"
+    | "duplicate_entry"
+    | "unsupported_archive_entry"
+    | "corrupt_archive"
+    | "manifest_missing"
+    | "manifest_invalid"
+    | "legacy_project_unsupported"
+    | "wrong_product"
+    | "future_version_unsupported"
+    | "source_unavailable"
+    | "import_conflict"
+    | "internal_error"
+
+export type ProjectOpenResult =
+    | { cancelled: true }
+    | { failure: { code: ProjectImportFailureCode; message: string } }
+    | { config: ReelConfig; sourcePath?: string }
+
 export interface ReelAPI {
     platform: "darwin" | "win32" | "linux"
     pickMedia(): Promise<SelectedMedia[]>
@@ -146,7 +171,8 @@ export interface ReelAPI {
     saveRecovery(snapshot: RecoverySnapshot): Promise<{ savedAt: number }>
     createVideoProxy(url: string): Promise<string>
     saveProject(config: ReelConfig): Promise<{ cancelled?: boolean; outputPath?: string }>
-    openProject(): Promise<{ cancelled?: boolean; config?: ReelConfig; sourcePath?: string }>
+    openProject(): Promise<ProjectOpenResult>
+    cancelProjectOpen(): Promise<{ cancelled: boolean }>
     saveTemplate(settings: ReelSettings): Promise<{ cancelled?: boolean; outputPath?: string }>
     openTemplate(): Promise<{ cancelled?: boolean; settings?: Partial<ReelSettings>; sourcePath?: string }>
     onExportProgress(callback: (progress: ExportProgress) => void): () => void

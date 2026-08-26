@@ -23,6 +23,11 @@ const {
     temporarySiblingPath,
     writeFileSafely,
 } = require("./file-operations.cjs")
+const {
+    ProjectImportError,
+    publicProjectImportFailure,
+    rejectUnsupportedProjectArchive,
+} = require("./project-import.cjs")
 let ffmpegStatic = null
 try {
     ffmpegStatic = require("ffmpeg-static")
@@ -48,6 +53,7 @@ if (process.env.REEL_USER_DATA_DIR) app.setPath("userData", path.resolve(process
 
 let mainWindow = null
 let activeExport = null
+let activeProjectImport = null
 
 function rendererURL(exportMode = false) {
     const query = exportMode ? "?export=1" : ""
@@ -141,20 +147,7 @@ async function savePortableProject(config, forcedOutputPath) {
     }
 }
 
-function findProjectManifest(folder) {
-    const direct = path.join(folder, "project.json")
-    if (fs.existsSync(direct)) return direct
-    for (const name of fs.readdirSync(folder)) {
-        const candidate = path.join(folder, name)
-        if (fs.statSync(candidate).isDirectory()) {
-            const found = findProjectManifest(candidate)
-            if (found) return found
-        }
-    }
-    return null
-}
-
-async function openPortableProject(forcedSource) {
+async function openPortableProject(forcedSource, signal) {
     let source = forcedSource
     if (!source) {
         const result = await dialog.showOpenDialog(mainWindow, {
@@ -166,25 +159,17 @@ async function openPortableProject(forcedSource) {
         if (result.canceled || !result.filePaths[0]) return { cancelled: true }
         source = result.filePaths[0]
     }
-    const stat = fs.statSync(source)
-    const key = crypto.createHash("sha1").update(`${source}:${stat.mtimeMs}:${stat.size}`).digest("hex")
-    const destination = path.join(app.getPath("userData"), "projects", key)
-    if (!fs.existsSync(destination)) {
-        fs.mkdirSync(destination, { recursive: true })
-        new AdmZip(source).extractAllTo(destination, true)
+    try {
+        await rejectUnsupportedProjectArchive({
+            sourcePath: source,
+            stagingParent: path.join(app.getPath("userData"), "project-import-staging"),
+            signal,
+        })
+        return { failure: publicProjectImportFailure(new ProjectImportError("internal_error")) }
+    } catch (error) {
+        const failure = publicProjectImportFailure(error)
+        return failure.code === "cancelled" ? { cancelled: true } : { failure }
     }
-    const manifestPath = findProjectManifest(destination)
-    if (!manifestPath) throw new Error("This file is not a Galileo Gallery project.")
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"))
-    if (!["galileo-gallery-project", "opening-reel-project"].includes(manifest.type) || !manifest.config) {
-        throw new Error("This file is not a Galileo Gallery project.")
-    }
-    const root = path.dirname(manifestPath)
-    const items = (manifest.config.items ?? []).map((item) => {
-        const { previewUrl: _previewUrl, posterUrl: _posterUrl, posterMode: _posterMode, ...portableItem } = item
-        return { ...portableItem, url: fileToMedia(path.join(root, item.url)).url }
-    })
-    return { config: { ...manifest.config, items }, sourcePath: source }
 }
 
 async function saveSettingsTemplate(settings, forcedOutputPath) {
@@ -867,7 +852,23 @@ app.whenReady().then(async () => {
     ipcMain.handle("media:from-path", (_event, filePath) => droppedPathResult(filePath))
     ipcMain.handle("media:create-video-proxy", (_event, url) => createVideoProxy(url))
     ipcMain.handle("project:save", (_event, config) => savePortableProject(config))
-    ipcMain.handle("project:open", () => openPortableProject())
+    ipcMain.handle("project:open", async () => {
+        if (activeProjectImport) {
+            return { failure: publicProjectImportFailure(new ProjectImportError("import_conflict")) }
+        }
+        const controller = new AbortController()
+        activeProjectImport = controller
+        try {
+            return await openPortableProject(undefined, controller.signal)
+        } finally {
+            if (activeProjectImport === controller) activeProjectImport = null
+        }
+    })
+    ipcMain.handle("project:cancel-open", () => {
+        if (!activeProjectImport) return { cancelled: false }
+        activeProjectImport.abort()
+        return { cancelled: true }
+    })
     ipcMain.handle("template:save", (_event, settings) => saveSettingsTemplate(settings))
     ipcMain.handle("template:open", () => openSettingsTemplate())
     ipcMain.handle("recovery:load", () => {

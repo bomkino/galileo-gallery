@@ -16,6 +16,7 @@ const browserAPI: ReelAPI = {
     createVideoProxy: async (url) => url,
     saveProject: async () => ({ cancelled: true }),
     openProject: async () => ({ cancelled: true }),
+    cancelProjectOpen: async () => ({ cancelled: false }),
     saveTemplate: async () => ({ cancelled: true }),
     openTemplate: async () => ({ cancelled: true }),
     onExportProgress: () => () => undefined,

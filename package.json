@@ -19,7 +19,7 @@
   "scripts": {
     "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
     "build": "tsc --noEmit && vite build",
-    "test": "npm run build && node scripts/verify-source.cjs && node scripts/verify-story-timing.cjs && node scripts/verify-file-operations.cjs",
+    "test": "npm run build && node scripts/verify-source.cjs && node scripts/verify-story-timing.cjs && node scripts/verify-file-operations.cjs && node scripts/verify-project-import.cjs && node --experimental-strip-types scripts/verify-project-open.mjs",
     "verify:source": "node scripts/verify-source.cjs",
     "start": "npm run build && electron .",
     "prepare:ffmpeg": "node scripts/prepare-ffmpeg.cjs",
@@ -30,9 +30,10 @@
     "smoke:export": "npm run build && REEL_SMOKE_OUTPUT=./release/galileo-gallery-smoke.mp4 electron ."
   },
   "dependencies": {
-    "adm-zip": "0.5.16",
+    "adm-zip": "0.6.0",
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "yauzl": "3.4.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld("reelAPI", {
     createVideoProxy: (url) => ipcRenderer.invoke("media:create-video-proxy", url),
     saveProject: (config) => ipcRenderer.invoke("project:save", config),
     openProject: () => ipcRenderer.invoke("project:open"),
+    cancelProjectOpen: () => ipcRenderer.invoke("project:cancel-open"),
     saveTemplate: (settings) => ipcRenderer.invoke("template:save", settings),
     openTemplate: () => ipcRenderer.invoke("template:open"),
     exportReel: (request) => ipcRenderer.invoke("export:start", request),
