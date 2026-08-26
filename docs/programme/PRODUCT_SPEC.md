@@ -26,9 +26,7 @@ These are product requirements, not proof that any current renderer satisfies th
 
 ## Final walkthrough deliverables
 
-Final acceptance still requires both annotated walkthrough artifacts:
+Final acceptance still requires the exact annotated walkthrough artifact
+`GALILEO_GALLERY_WALKTHROUGH_FOR_MANALI_AND_JENAI.pdf`.
 
-- final annotated Manali walkthrough PDF;
-- final annotated Jenai walkthrough PDF.
-
-Automated tests, screenshots, or an engineering receipt do not replace either PDF.
+Automated tests, screenshots, or an engineering receipt do not replace that PDF.

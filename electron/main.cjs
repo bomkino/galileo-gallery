@@ -14,7 +14,6 @@ const crypto = require("node:crypto")
 const fs = require("node:fs")
 const path = require("node:path")
 const { pathToFileURL } = require("node:url")
-const AdmZip = require("adm-zip")
 const {
     inspectDroppedPath,
     mediaKindForPath,
@@ -26,8 +25,11 @@ const {
 const {
     ProjectImportError,
     publicProjectImportFailure,
-    rejectUnsupportedProjectArchive,
 } = require("./project-import.cjs")
+const {
+    openPortableProjectArchive,
+    savePortableProjectArchive,
+} = require("./project-persistence.cjs")
 let ffmpegStatic = null
 try {
     ffmpegStatic = require("ffmpeg-static")
@@ -102,11 +104,6 @@ function safeProjectFolder() {
     return process.cwd()
 }
 
-function safeMediaName(index, filePath) {
-    const base = path.basename(filePath).replace(/[^a-zA-Z0-9._-]+/g, "-") || "media"
-    return `${String(index + 1).padStart(2, "0")}-${base}`
-}
-
 async function savePortableProject(config, forcedOutputPath) {
     let outputPath = forcedOutputPath
     if (!outputPath) {
@@ -119,32 +116,12 @@ async function savePortableProject(config, forcedOutputPath) {
         if (result.canceled || !result.filePath) return { cancelled: true }
         outputPath = result.filePath.endsWith(".galileo") ? result.filePath : `${result.filePath}.galileo`
     }
-    const temporary = fs.mkdtempSync(path.join(app.getPath("temp"), "galileo-gallery-save-"))
-    const projectFolder = path.join(temporary, "project")
-    const mediaFolder = path.join(projectFolder, "media")
-    fs.mkdirSync(mediaFolder, { recursive: true })
-    try {
-        const items = config.items.map((item, index) => {
-            const source = mediaURLToPath(item.url)
-            if (!fs.existsSync(source)) throw new Error(`Missing media: ${item.name}`)
-            const mediaName = safeMediaName(index, source)
-            fs.copyFileSync(source, path.join(mediaFolder, mediaName))
-            const { previewUrl: _previewUrl, posterUrl: _posterUrl, posterMode: _posterMode, ...portableItem } = item
-            return { ...portableItem, url: `media/${mediaName}` }
-        })
-        fs.writeFileSync(
-            path.join(projectFolder, "project.json"),
-            JSON.stringify({ type: "galileo-gallery-project", version: 1, config: { ...config, items } }, null, 2)
-        )
-        await writeFileSafely(outputPath, (stagedOutputPath) => {
-            const archive = new AdmZip()
-            archive.addLocalFolder(projectFolder, "project")
-            archive.writeZip(stagedOutputPath)
-        })
-        return { outputPath }
-    } finally {
-        fs.rmSync(temporary, { recursive: true, force: true })
-    }
+    return savePortableProjectArchive({
+        config,
+        outputPath,
+        tempRoot: app.getPath("temp"),
+        mediaPathFromURL: mediaURLToPath,
+    })
 }
 
 async function openPortableProject(forcedSource, signal) {
@@ -160,12 +137,14 @@ async function openPortableProject(forcedSource, signal) {
         source = result.filePaths[0]
     }
     try {
-        await rejectUnsupportedProjectArchive({
+        const opened = await openPortableProjectArchive({
             sourcePath: source,
             stagingParent: path.join(app.getPath("userData"), "project-import-staging"),
+            openedProjectsRoot: path.join(app.getPath("userData"), "opened-project-media"),
+            mediaURLFromPath: (filePath) => fileToMedia(filePath).url,
             signal,
         })
-        return { failure: publicProjectImportFailure(new ProjectImportError("internal_error")) }
+        return { config: opened.config }
     } catch (error) {
         const failure = publicProjectImportFailure(error)
         return failure.code === "cancelled" ? { cancelled: true } : { failure }

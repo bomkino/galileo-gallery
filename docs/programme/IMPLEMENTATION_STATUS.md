@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated: 26 August 2026
+Updated: 27 August 2026
 
 Repository start: `bomkino/galileo-gallery@2762043bb733aa28a6c63fe26564504b9f257564`
 
@@ -31,16 +31,20 @@ The full development-tool dependency audit still reports nine high-severity advi
 
 ## G01B — clean Project schema
 
-State: **not started**
+State: **source-ready and reviewed; runtime UI observation blocked**
 
-Still required before any archive can replace the current Project:
+Protected now:
 
-- canonical manifest and product/schema rules;
-- ordered media list, expected/unexpected entry policy, sizes, signatures/decoder acceptance, and hashes;
-- Scene identity, version, parameters, and upgrade rules for post-rebuild versions;
-- deterministic visual Timeline intent;
-- audio source/clip/lane/mix identity;
-- validated commit into the runtime/save boundary and save/reopen fixture.
+- clean `galileo-gallery-project` schema v2 with explicit product/engine identity;
+- deterministic canonical serialization and exact unknown-field policy;
+- ordered media identities, safe archive paths, byte sizes, SHA-256 hashes, detected signatures, and per-frame intent;
+- distinct canvas, Scene v1, Look v1, visual Timeline, audio-intent v1, and export-default records;
+- exact missing/unexpected entry policy and complete hash/signature validation through G01A staging;
+- app-owned media promotion only after full validation, followed by the existing one-result current-Project replacement seam;
+- atomic destination replacement only after a complete validated save archive exists;
+- safe experimental-v1, wrong-product, future, malformed, cancelled, and corrupt-media failure without prior-state or source-byte mutation.
+
+Source checks cover save/open/reopen canonical equality, ordered hashes, privacy exclusions, semantic failure matrix, cancellation before staging and during media promotion, staging cleanup, and prior destination/Project preservation. A real Electron dialog/UI journey is not yet run because the local Electron binary is absent and installation is not authorized.
 
 ## Known unsafe or unproved surfaces
 
@@ -49,6 +53,6 @@ Still required before any archive can replace the current Project:
 - decoded video/proxy/export cache budgets and eviction;
 - packaged Electron security and lifecycle;
 - exact Garuda and Apple-Silicon target behaviour;
-- UI import capture and human interaction review.
+- UI import capture and human interaction review; the local Electron launcher would download a binary, so the attempted smoke was stopped before installation.
 
-Next product ticket after G01B: `G02` Quiet Carousel browser tracer.
+Next product ticket after the G01B Electron save/open/reopen observation: `G02` Quiet Carousel browser tracer.

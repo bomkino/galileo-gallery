@@ -94,6 +94,66 @@ export type ReelConfig = {
     settings: ReelSettings
 }
 
+export type PortableGalleryMedia = {
+    id: string
+    name: string
+    kind: MediaKind
+    archivePath: string
+    bytes: number
+    sha256: string
+    signature: "png" | "jpeg" | "gif" | "webp" | "avif" | "webm" | "iso-media"
+    frame: {
+        ratio: number
+        aspectMode: "auto" | "global" | "custom"
+        ratioW: number
+        ratioH: number
+        caption: string
+        spotlight: boolean
+        muted: boolean
+    }
+}
+
+export type PortableGalleryCanvas = Pick<ReelSettings,
+    | "canvasPreset" | "canvasWidth" | "canvasHeight" | "ratioMode" | "fixedRatio"
+    | "customRatioWidth" | "customRatioHeight" | "paddingUnit" | "paddingTop"
+    | "paddingRight" | "paddingBottom" | "paddingLeft"
+>
+
+export type PortableGallerySceneParameters = Pick<ReelSettings,
+    | "imageFit" | "autoplayVideos" | "loopVideos" | "captionGap" | "motionPreset"
+    | "canvasPose" | "spotlightsEnabled" | "finaleEnabled" | "heroSize" | "finaleSize"
+    | "centerBump" | "tilt" | "sway" | "idleDim" | "idleMute" | "spotlightDim"
+    | "speedBlur" | "slideHeight" | "gap" | "cornerStyle" | "cornerSmoothing"
+    | "radius" | "shadow" | "gridSize" | "gridStrength" | "gridDrift" | "vignette" | "showHint"
+>
+
+export type PortableGalleryLookParameters = Pick<ReelSettings,
+    | "theme" | "ground" | "paper" | "backgroundStyle" | "backgroundColor2"
+    | "backgroundAngle" | "backgroundTexture"
+>
+
+export type PortableGalleryTimeline = {
+    mode: "automatic" | "fixed-duration" | "directed"
+} & Pick<ReelSettings,
+    | "playKind" | "repeatCount" | "axis" | "direction" | "startMode" | "launchMs"
+    | "arrivalMs" | "growMs" | "exitMs" | "paceMs" | "leadInMs" | "holdMs"
+    | "finaleGrowMs" | "finaleHoldMs" | "fadeMs"
+>
+
+export type PortableGalleryProjectV2 = {
+    format: "galileo-gallery-project"
+    product: "galileo-gallery"
+    schemaVersion: 2
+    engineVersion: 1
+    media: PortableGalleryMedia[]
+    canvas: PortableGalleryCanvas
+    scene: { id: string; version: 1; parameters: PortableGallerySceneParameters }
+    look: { id: string; version: 1; parameters: PortableGalleryLookParameters }
+    timeline: PortableGalleryTimeline
+    audio: { id: "gallery-audio-intent"; version: 1; sourceVideo: "per-media"; lanes: []; master: { gain: number; muted: boolean } }
+    exportIntent: { quality: ExportQuality }
+}
+
 export type RecoverySnapshot = {
     config: ReelConfig
     savedAt: number
@@ -151,6 +211,15 @@ export type ProjectImportFailureCode =
     | "legacy_project_unsupported"
     | "wrong_product"
     | "future_version_unsupported"
+    | "unexpected_archive_entry"
+    | "media_missing"
+    | "media_hash_mismatch"
+    | "media_signature_mismatch"
+    | "canvas_invalid"
+    | "scene_invalid"
+    | "look_invalid"
+    | "timeline_invalid"
+    | "audio_invalid"
     | "source_unavailable"
     | "import_conflict"
     | "internal_error"
