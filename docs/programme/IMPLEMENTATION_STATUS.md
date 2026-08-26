@@ -31,7 +31,7 @@ The full development-tool dependency audit still reports nine high-severity advi
 
 ## G01B — clean Project schema
 
-State: **source-ready and reviewed; runtime UI observation blocked**
+State: **source and Electron main-process runtime tested; window UI observation blocked**
 
 Protected now:
 
@@ -44,7 +44,7 @@ Protected now:
 - atomic destination replacement only after a complete validated save archive exists;
 - safe experimental-v1, wrong-product, future, malformed, cancelled, and corrupt-media failure without prior-state or source-byte mutation.
 
-Source checks cover save/open/reopen canonical equality, ordered hashes, privacy exclusions, semantic failure matrix, cancellation before staging and during media promotion, staging cleanup, and prior destination/Project preservation. A real Electron dialog/UI journey is not yet run because the local Electron binary is absent and installation is not authorized.
+Source checks cover save/open/reopen canonical equality, ordered hashes, privacy exclusions, semantic failure matrix, cancellation before staging and during media promotion, staging cleanup, and prior destination/Project preservation. After explicit user approval, the package-lock-pinned Electron `43.1.0` development binary was installed and its real main-process save/open/reopen smoke passed with two ordered media files. A real renderer-window/dialog journey remains unrun because the container has no X11/Wayland display server; no unpinned system package was installed.
 
 ## Known unsafe or unproved surfaces
 
@@ -53,6 +53,6 @@ Source checks cover save/open/reopen canonical equality, ordered hashes, privacy
 - decoded video/proxy/export cache budgets and eviction;
 - packaged Electron security and lifecycle;
 - exact Garuda and Apple-Silicon target behaviour;
-- UI import capture and human interaction review; the local Electron launcher would download a binary, so the attempted smoke was stopped before installation.
+- UI import capture and human interaction review; Electron window creation needs an unavailable X11/Wayland display server in this container.
 
 Next product ticket after the G01B Electron save/open/reopen observation: `G02` Quiet Carousel browser tracer.

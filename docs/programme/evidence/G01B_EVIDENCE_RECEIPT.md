@@ -11,7 +11,7 @@ Ticket: G01B — clean versioned Project schema and atomic round trip
 - Implementation commit reviewed: `4e1c1530a487c41517b6146474e48310309dbba4`
 - Final reviewed revision: this receipt's containing commit
 - Runtime: Linux `6.18.35` x86_64; Node `v24.19.0`; npm `11.9.0`
-- Highest state: **tested in source**. Not packaged, installed, released, or human-accepted.
+- Highest state: **tested in source and Electron main-process runtime**. Not packaged, app-installed, released, or human-accepted.
 
 The local and remote G01A histories diverge because the prior Work session made a
 tree-equivalent GitHub connector commit. Both starting trees were
@@ -73,6 +73,8 @@ URLs. Canonical JSON recursively sorts keys and ends with one newline.
 - `node scripts/verify-project-schema.cjs`: pass.
 - `npm test`: pass; build and all existing/source/G01A/G01B behavioural checks.
 - `npm run verify:source`: pass.
+- `npm run verify:electron-project`: pass against the installed lockfile-pinned Electron `v43.1.0`; actual main-process save/open/reopen preserved two ordered hashes, vertical canvas, Scene, Timeline, hydrated media existence, and empty import staging.
+- Electron development binary: Linux x86-64 ELF, 210 MiB, SHA-256 `2634af9941986102ad96e214a1650188099291e050d649d39ceba0905850fdd5`.
 - `node --check` on main/import/persistence/schema modules: pass.
 - `git diff --check`: pass.
 - `npm ls adm-zip yauzl --depth=0`: `adm-zip@0.6.0`, `yauzl@3.4.0`.
@@ -93,11 +95,14 @@ redesign. Schema, ordered media, canvas, Scene, Look, Timeline, audio identity,
 canonical serialization, failure preservation, and portable privacy criteria have
 causal source evidence.
 
-One acceptance observation remains unrun: a real Electron dialog/UI
-save/open/reopen journey. The checked-out Electron launcher has no local binary
-and attempted to download one; the attempt was stopped because installation and
-external communication are not authorized. No runtime UI or screenshot claim is
-made.
+One acceptance observation remains unrun: a real Electron renderer-window/dialog
+save/open/reopen journey. After explicit user approval, the lockfile-pinned
+Electron `43.1.0` development binary was downloaded. Its real main-process
+Project round trip passed, but BrowserWindow creation cannot start because this
+container has no X11/Wayland display server. `--no-sandbox` was used only because
+the isolated build container runs as root; no packaged-security claim is made.
+No unpinned display-server package was installed, and no runtime UI or screenshot
+claim is made.
 
 ### Standards axis
 
@@ -111,14 +116,16 @@ Review found and fixed two concrete issues:
    app-owned directory could remain. The hydration boundary now removes that
    directory before propagating failure.
 
-Focused and full gates passed after both fixes. A separate long-lived opened-media
+Focused, full, and Electron main-process runtime gates passed after both fixes. The
+runtime harness reuses the canonical fixture rather than duplicating Project
+defaults. A separate long-lived opened-media
 retention/revocation policy remains part of the G03 opaque HostPort authority
 work; G01B does not claim that broader repair.
 
 ## Unrun evidence and frontier
 
-- No Electron UI capture or interactive dialog journey: blocked by absent runtime
-  plus the explicit no-install/no-external-communication gate.
+- No Electron window capture or interactive dialog journey: blocked by the
+  container's absent X11/Wayland display server.
 - No package, exact Garuda, Apple-Silicon, install, signing, notarization, merge,
   release, publication, visual acceptance, motion evidence, audio playback, or
   output artifact evidence.

@@ -21,6 +21,7 @@
     "build": "tsc --noEmit && vite build",
     "test": "npm run build && node scripts/verify-source.cjs && node scripts/verify-story-timing.cjs && node scripts/verify-file-operations.cjs && node scripts/verify-project-import.cjs && node scripts/verify-project-schema.cjs && node --experimental-strip-types scripts/verify-project-open.mjs",
     "verify:source": "node scripts/verify-source.cjs",
+    "verify:electron-project": "npm run build && node scripts/verify-electron-project-runtime.cjs",
     "start": "npm run build && electron .",
     "prepare:ffmpeg": "node scripts/prepare-ffmpeg.cjs",
     "package:mac": "npm run prepare:ffmpeg && npm run build && electron-builder --mac dir --publish never",
