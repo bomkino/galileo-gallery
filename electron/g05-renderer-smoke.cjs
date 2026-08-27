@@ -109,7 +109,7 @@ async function runG05RendererSmoke(window, outputDirectory, mode) {
                 const current = required('[data-g05-audio="timeline"] summary > span:last-child').textContent.trim()
                 return current !== priorDiagnostic && current
             }, 'reopened PCM mix diagnostic')
-            if (!/Checked \d+ frames/.test(reopenedDiagnostic)) throw new Error('Reopened PCM mix failed: ' + reopenedDiagnostic)
+            if (!/Checked \\d+ frames/.test(reopenedDiagnostic)) throw new Error('Reopened PCM mix failed: ' + reopenedDiagnostic)
         }
         const root = required('[data-g02-tracer="quiet-carousel-v1"]')
         const lanes = Array.from(document.querySelectorAll('[data-g05-lane]')).map((lane) => ({
