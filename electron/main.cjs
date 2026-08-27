@@ -34,6 +34,7 @@ const {
 } = require("./project-persistence.cjs")
 const { inspectAudioFile, inspectMediaFile } = require("./project-schema.cjs")
 const { createAudioGrantStaging } = require("./audio-grant-staging.cjs")
+const { createLinuxVideoAudioRuntime } = require("./linux-video-audio-runtime.cjs")
 const {
     createAppProtocolHandler,
     installSessionSecurity,
@@ -121,10 +122,19 @@ function cleanupOpenedProjectResidue() {
 }
 
 let audioGrantStaging = null
+let videoAudioRuntime = null
 
 function audioStaging() {
     if (!audioGrantStaging) audioGrantStaging = createAudioGrantStaging({ root: path.join(app.getPath("userData"), "audio-grants"), inspect: inspectAudioFile })
     return audioGrantStaging
+}
+
+function videoAudio() {
+    if (!videoAudioRuntime) videoAudioRuntime = createLinuxVideoAudioRuntime({
+        root: path.join(app.getPath("userData"), "video-audio-cache"),
+        ffmpegPath: ffmpegPath(),
+    })
+    return videoAudioRuntime
 }
 
 function rendererURL(exportMode = false) {
@@ -343,6 +353,11 @@ async function chooseAudioForHost(role, grantMedia, signal) {
 
 function removeRevokedAudioGrant(grant) {
     if (grant?.filePath) audioStaging().remove(grant.filePath)
+    videoAudioRuntime?.revoke(grant)
+}
+
+function prepareVideoAudioForHost({ grant, durationUs, signal }) {
+    return videoAudio().prepare(grant, durationUs, signal)
 }
 
 function openedCanonicalWav(grant) {
@@ -378,13 +393,14 @@ function verifyGrantAfterRead(descriptor, grant) {
 
 function decodeAudioForHost({ grant, startFrame, frameCount, signal }) {
     if (signal?.aborted) throw new HostPortError("cancelled")
-    const descriptor = openedCanonicalWav(grant)
+    const canonicalGrant = grant.mime === "audio/wav" ? grant : videoAudio().resolve(grant)
+    const descriptor = openedCanonicalWav(canonicalGrant)
     try {
         if (startFrame > descriptor.sampleFrames - frameCount) throw new HostPortError("invalid_request")
         const bytes = Buffer.allocUnsafe(frameCount * descriptor.channels * 2)
         if (fs.readSync(descriptor.handle, bytes, 0, bytes.length, 44 + startFrame * descriptor.channels * 2) !== bytes.length) throw new HostPortError("verification_failed")
         if (signal?.aborted) throw new HostPortError("cancelled")
-        verifyGrantAfterRead(descriptor, grant)
+        verifyGrantAfterRead(descriptor, canonicalGrant)
         const samples = Array.from({ length: frameCount * descriptor.channels }, (_, index) => {
             const sample = bytes.readInt16LE(index * 2)
             return sample / (sample < 0 ? 32768 : 32767)
@@ -397,8 +413,9 @@ function decodeAudioForHost({ grant, startFrame, frameCount, signal }) {
 
 async function waveformForHost({ grant, buckets, signal }) {
     if (signal?.aborted) throw new HostPortError("cancelled")
-    if (grant.bytes > 64 * 1024 * 1024) throw new HostPortError("resource_limit")
-    const descriptor = openedCanonicalWav(grant)
+    const canonicalGrant = grant.mime === "audio/wav" ? grant : videoAudio().resolve(grant)
+    if (canonicalGrant.bytes > 256 * 1024 * 1024 + 44) throw new HostPortError("resource_limit")
+    const descriptor = openedCanonicalWav(canonicalGrant)
     try {
         if (buckets > descriptor.sampleFrames) throw new HostPortError("invalid_request")
         const startedAt = Date.now()
@@ -429,7 +446,7 @@ async function waveformForHost({ grant, buckets, signal }) {
             await new Promise((resolve) => setImmediate(resolve))
         }
         if (signal?.aborted) throw new HostPortError("cancelled")
-        verifyGrantAfterRead(descriptor, grant)
+        verifyGrantAfterRead(descriptor, canonicalGrant)
         return Object.freeze({
             sampleRate: descriptor.sampleRate,
             channels: descriptor.channels,
@@ -676,6 +693,7 @@ function createMainWindow() {
             }),
             chooseMedia: ({ grantMedia }) => chooseMediaForHost(grantMedia),
             chooseAudio: ({ role, grantMedia, signal }) => chooseAudioForHost(role, grantMedia, signal),
+            prepareVideoAudio: prepareVideoAudioForHost,
             decodeAudio: decodeAudioForHost,
             audioWaveform: waveformForHost,
             onGrantRevoked: removeRevokedAudioGrant,
@@ -808,6 +826,8 @@ function createMainWindow() {
             host.dispose()
             linuxHostControllers.delete(webContentsId)
         }
+        videoAudioRuntime?.dispose()
+        videoAudioRuntime = null
         mainWindow = null
     })
 }

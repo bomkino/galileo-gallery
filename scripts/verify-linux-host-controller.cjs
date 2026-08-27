@@ -8,6 +8,8 @@ const { HostPortError } = require("../electron/linux-host-port.cjs")
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "galileo-g03-controller-"))
 const mediaPath = path.join(temporary, "frame.png")
 fs.writeFileSync(mediaPath, "frame-bytes")
+const videoPath = path.join(temporary, "source.mov")
+fs.writeFileSync(videoPath, "video-bytes")
 const audioPath = path.join(temporary, "presenter.wav")
 const audioHeader = Buffer.alloc(44)
 audioHeader.write("RIFF", 0)
@@ -33,8 +35,13 @@ const host = createLinuxHostController({
     owner: "window-71",
     webContentsId: 71,
     identity: () => ({ productId: "galileo-gallery", protocol: 1, platform: "linux" }),
-    chooseMedia: ({ grantMedia }) => [grantMedia(mediaPath, "image/png")],
+    chooseMedia: ({ grantMedia }) => [grantMedia(mediaPath, "image/png"), grantMedia(videoPath, "video/quicktime")],
     chooseAudio: ({ role, grantMedia }) => ({ name: "presenter.wav", role, url: grantMedia(audioPath, "audio/wav").mediaURL, sampleRate: 48_000, channels: 1, sampleFrames: 4 }),
+    prepareVideoAudio: ({ grant }) => {
+        assert.equal(grant.mime, "video/quicktime")
+        assert.equal(grant.filePath, videoPath)
+        return { sampleRate: 48_000, channels: 2, sampleFrames: 96_000 }
+    },
     decodeAudio: ({ startFrame, frameCount }) => ({ sampleRate: 48_000, channels: 1, startFrame, frameCount, samples: Array.from({ length: frameCount }, () => 0) }),
     audioWaveform: ({ buckets }) => ({ sampleRate: 48_000, channels: 1, sampleFrames: 4, buckets: Array.from({ length: buckets }, () => ({ minimum: -0.5, maximum: 0.5, rms: 0.25 })) }),
     saveProject: ({ config, mediaPath: resolve }) => ({ itemCount: config.items.length, resolved: resolve(config.items[0].url) === mediaPath }),
@@ -62,6 +69,9 @@ async function run() {
     assert.equal(chosen.ok, true)
     assert.match(chosen.value[0].mediaURL, /^reel-media:\/\/grant\/[a-f0-9]{64}$/)
     assert.equal(JSON.stringify(chosen).includes(mediaPath), false)
+    const preparedVideo = await host.handle(event, envelope("audio.video.prepare", { url: chosen.value[1].mediaURL, durationUs: 2_000_000 }, 1, "request-video-audio"))
+    assert.deepEqual(preparedVideo.value, { sampleRate: 48_000, channels: 2, sampleFrames: 96_000 })
+    assert.equal(JSON.stringify(preparedVideo).includes(videoPath), false)
     const chosenAudio = await host.handle(event, envelope("audio.choose", { role: "presenter" }, 1, "request-audio-choose"))
     assert.equal(chosenAudio.value.role, "presenter")
     assert.match(chosenAudio.value.url, /^reel-media:\/\/grant\/[a-f0-9]{64}$/)
@@ -115,12 +125,15 @@ async function run() {
     const unsafe = createLinuxHostController({
         owner: "window-73", webContentsId: 73, identity: () => ({}), chooseMedia: async () => [], saveProject: async () => ({}), openProject: async () => ({ cancelled: true }),
         chooseAudio: ({ role, grantMedia }) => ({ name: "presenter.wav", role, url: grantMedia(audioPath, "audio/wav").mediaURL, sampleRate: 48_000, channels: 1, sampleFrames: 4 }),
+        prepareVideoAudio: async () => ({ sampleRate: 48_000, channels: 2, sampleFrames: Number.MAX_SAFE_INTEGER }),
         decodeAudio: async ({ startFrame, frameCount }) => ({ sampleRate: 48_000, channels: 1, startFrame, frameCount, samples: [0], path: audioPath }),
         audioWaveform: async () => ({ sampleRate: 48_000, channels: 1, sampleFrames: 4, buckets: [{ minimum: Number.NaN, maximum: 1, rms: 0.5 }] }),
     })
     const unsafeFrame = { url: "gallery-app://app/index.html" }
     const unsafeEvent = { sender: { id: 73, mainFrame: unsafeFrame }, senderFrame: unsafeFrame }
     const unsafeGrant = unsafe.grantMedia(audioPath, "audio/wav").mediaURL
+    const invalidPrepared = await unsafe.handle(unsafeEvent, { protocol: 1, requestId: "unsafe-video-audio", operation: "audio.video.prepare", generation: 1, payload: { url: unsafeGrant, durationUs: 1_000_000 } })
+    assert.equal(invalidPrepared.error.code, "verification_failed")
     const leakedDecode = await unsafe.handle(unsafeEvent, { protocol: 1, requestId: "unsafe-decode", operation: "audio.decode", generation: 1, payload: { url: unsafeGrant, startFrame: 0, frameCount: 1 } })
     assert.equal(leakedDecode.error.code, "verification_failed")
     assert.equal(JSON.stringify(leakedDecode).includes(audioPath), false)
@@ -132,6 +145,7 @@ async function run() {
     const bounded = createLinuxHostController({
         owner: "window-74", webContentsId: 74, identity: () => ({}), chooseMedia: async () => [], saveProject: async () => ({}), openProject: async () => ({ cancelled: true }),
         chooseAudio: async () => null,
+        prepareVideoAudio: ({ signal }) => new Promise((_resolve, reject) => signal.addEventListener("abort", () => reject(new HostPortError("cancelled")), { once: true })),
         decodeAudio: ({ startFrame, frameCount, signal }) => new Promise((resolve, reject) => {
             signal.addEventListener("abort", () => reject(new HostPortError("cancelled")), { once: true })
             finishAudio.push(() => resolve({ sampleRate: 48_000, channels: 1, startFrame, frameCount, samples: [0] }))
@@ -152,6 +166,12 @@ async function run() {
     finishAudio.splice(0).forEach((finish) => finish())
     assert.equal((await firstAudio).error.code, "cancelled")
     assert.equal((await secondAudio).error.code, "cancelled")
+    const boundedVideo = bounded.grantMedia(videoPath, "video/quicktime").mediaURL
+    const preparingVideo = bounded.handle(boundedEvent, { protocol: 1, requestId: "bounded-video", operation: "audio.video.prepare", generation: 1, payload: { url: boundedVideo, durationUs: 2_000_000 } })
+    await Promise.resolve()
+    const cancelledVideo = await bounded.handle(boundedEvent, { protocol: 1, requestId: "bounded-video-cancel", operation: "audio.cancel", generation: 1, payload: {} })
+    assert.deepEqual(cancelledVideo.value, { cancelled: 1 })
+    assert.equal((await preparingVideo).error.code, "cancelled")
     bounded.dispose()
 
     let chooseCall = 0

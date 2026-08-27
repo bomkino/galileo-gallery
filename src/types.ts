@@ -335,6 +335,7 @@ export interface GalleryHostPort {
     chooseMedia(): Promise<SelectedMedia[]>
     releaseMedia(urls: string[]): Promise<{ released: number }>
     chooseAudio(role: "presenter" | "soundtrack"): Promise<null | { name: string; role: "presenter" | "soundtrack"; url: string; sampleRate: number; channels: 1 | 2; sampleFrames: number }>
+    prepareVideoAudio(url: string, durationUs: number): Promise<{ sampleRate: 48000; channels: 2; sampleFrames: number }>
     decodeAudio(url: string, startFrame: number, frameCount: number): Promise<{ sampleRate: number; channels: 1 | 2; startFrame: number; frameCount: number; samples: number[] }>
     audioWaveform(url: string, buckets: number): Promise<{ sampleRate: number; channels: 1 | 2; sampleFrames: number; buckets: Array<{ minimum: number; maximum: number; rms: number }> }>
     cancelAudio(): Promise<{ cancelled: number }>

@@ -19,6 +19,12 @@
         "target": "dir",
         "arch": ["x64"]
       }
+    ],
+    "extraResources": [
+      {
+        "from": "vendor/ffmpeg/linux-${arch}",
+        "to": "ffmpeg"
+      }
     ]
   }
 }

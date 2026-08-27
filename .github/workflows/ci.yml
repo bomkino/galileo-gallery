@@ -139,6 +139,7 @@ jobs:
           sudo chmod 4755 release/g03/linux-unpacked/chrome-sandbox
           executable="$PWD/release/g03/linux-unpacked/galileo-gallery"
           test -x "$executable"
+          npm run verify:packaged-ffmpeg
           source_media="$PWD/build/icon.png"
           project="$PWD/artifacts/g03/round-trip.galileo"
           user_data="$PWD/artifacts/g03-runtime"
@@ -174,6 +175,7 @@ jobs:
           fixtures="$(node scripts/create-g05-audio-fixtures.cjs artifacts/g05-fixtures)"
           presenter="$(node -e 'process.stdout.write(JSON.parse(process.argv[1]).presenter)' "$fixtures")"
           soundtrack="$(node -e 'process.stdout.write(JSON.parse(process.argv[1]).soundtrack)' "$fixtures")"
+          video="$(node -e 'process.stdout.write(JSON.parse(process.argv[1]).video)' "$fixtures")"
           project="$PWD/artifacts/g05/round-trip.galileo"
           user_data="$PWD/artifacts/g05-runtime"
           for mode in save reopen; do
@@ -181,10 +183,11 @@ jobs:
               REEL_USER_DATA_DIR="$user_data" \
               REEL_G05_RENDERER_OUTPUT="$PWD/artifacts/g05" \
               REEL_G05_RENDERER_MODE="$mode" \
-              REEL_G03_MEDIA_SOURCES="$PWD/build/icon.png" \
+              REEL_G03_MEDIA_SOURCES="$PWD/build/icon.png:$video" \
               REEL_G03_PROJECT_PATH="$project" \
               REEL_G05_PRESENTER_SOURCE="$presenter" \
               REEL_G05_SOUNDTRACK_SOURCE="$soundtrack" \
+              REEL_G05_VIDEO_SOURCE="$video" \
               "$executable"
           done
           G05_EXPECTED_SHA="$source_sha" G05_EXPECTED_TREE="$source_tree" npm run verify:g05-renderer

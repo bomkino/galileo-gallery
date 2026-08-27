@@ -40,9 +40,17 @@ async function runG05RendererSmoke(window, outputDirectory, mode) {
         }
         let matrix = null
         let preview = null
+        let importBusy = null
         required('[data-g05-audio="timeline"]').open = true
         if (mode === 'save') {
             click('[data-g02-action="fixture"]')
+            await wait(0)
+            importBusy = {
+                ariaBusy: required('[data-g02-tracer="quiet-carousel-v1"]').getAttribute('aria-busy'),
+                projectActionsDisabled: Array.from(document.querySelectorAll('.qc-project-actions button')).every((button) => button.disabled),
+                cancelVisible: Boolean(document.querySelector('[data-g05-action="cancel"]')),
+                inspectorDisabled: required('[data-g02-control="frame-size"]').disabled,
+            }
             await waitFor(() => /source frame/.test(notice()), 'media import')
             click('[data-g05-action="soundtrack"]')
             await waitFor(() => /Soundtrack added/.test(notice()), 'soundtrack verification')
@@ -112,10 +120,11 @@ async function runG05RendererSmoke(window, outputDirectory, mode) {
             diagnostic: required('[data-g05-audio="timeline"] summary > span:last-child').textContent.trim(),
             diagnosticHash: required('[data-g05-audio="timeline"]').dataset.g05DiagnosticHash,
             matrix,
+            importBusy,
             preview,
             waveformReady: Array.from(document.querySelectorAll('[data-g05-lane]')).every((lane) => lane.dataset.g05WaveformReady === 'true'),
             waveformEnergy: Array.from(document.querySelectorAll('[data-g05-lane]')).reduce((sum, lane) => sum + Number(lane.dataset.g05WaveformEnergy || 0), 0),
-            rawPathVisible: [${JSON.stringify(process.env.REEL_G05_PRESENTER_SOURCE ?? "__no-presenter__")}, ${JSON.stringify(process.env.REEL_G05_SOUNDTRACK_SOURCE ?? "__no-soundtrack__")}].some((value) => html.includes(value)),
+            rawPathVisible: [${JSON.stringify(process.env.REEL_G05_PRESENTER_SOURCE ?? "__no-presenter__")}, ${JSON.stringify(process.env.REEL_G05_SOUNDTRACK_SOURCE ?? "__no-soundtrack__")}, ${JSON.stringify(process.env.REEL_G05_VIDEO_SOURCE ?? "__no-video__")}].some((value) => html.includes(value)),
             grantInDataset: Array.from(document.querySelectorAll('*')).some((node) => Object.values(node.dataset).some((value) => String(value).includes('reel-media://'))),
         }
     })()`)

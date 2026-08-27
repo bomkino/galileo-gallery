@@ -60,6 +60,27 @@ function roleLabel(role: AudioLaneRole) {
     return role === "presenter" ? "Presenter" : role === "soundtrack" ? "Soundtrack" : "Source video"
 }
 
+function SyncedQuietVideo({ item, timeMs, loop, fit, opacity, filter, onError }: {
+    item: ReelConfig["items"][number]
+    timeMs: number
+    loop: boolean
+    fit: "contain" | "cover"
+    opacity: number
+    filter: string
+    onError: () => void
+}) {
+    const ref = React.useRef<HTMLVideoElement>(null)
+    const sync = React.useCallback(() => {
+        const video = ref.current
+        if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return
+        video.pause()
+        const target = loop ? (timeMs / 1000) % video.duration : Math.min(timeMs / 1000, video.duration)
+        if (Math.abs(video.currentTime - target) > 0.04) video.currentTime = target
+    }, [loop, timeMs])
+    React.useEffect(sync, [sync])
+    return <video ref={ref} src={item.url} muted playsInline preload="metadata" aria-label={item.name} style={{ objectFit: fit, opacity, filter }} onLoadedMetadata={sync} onError={onError} />
+}
+
 function timeSeconds(value: RationalTime) {
     return value.numerator / value.denominator
 }
@@ -72,26 +93,36 @@ function externalAudioOnly(audio = defaultAudioIntent()) {
     return { ...audio, sources, lanes, ducking: { ...audio.ducking, targetLaneIds: audio.ducking.targetLaneIds.filter((id) => laneIds.has(id)), enabled: audio.ducking.enabled && laneIds.has(audio.ducking.triggerLaneId) && audio.ducking.targetLaneIds.some((id) => laneIds.has(id)) } }
 }
 
-async function hydrateHostMedia(config: ReelConfig) {
-    await Promise.all(config.items.map((item) => new Promise<void>((resolve, reject) => {
+async function hydrateHostMedia(config: ReelConfig, signal?: AbortSignal) {
+    const hydrated = await Promise.all(config.items.map((item) => new Promise<null | [string, number]>((resolve, reject) => {
         const media = item.type === "video" ? document.createElement("video") : new Image()
         const timeout = window.setTimeout(() => { cleanup(); reject(new Error(`Timed out hydrating ${item.name}.`)) }, 15_000)
+        const cancelled = () => { cleanup(); reject(Object.assign(new Error("Media hydration cancelled."), { code: "cancelled" })) }
         const cleanup = () => {
             window.clearTimeout(timeout)
+            signal?.removeEventListener("abort", cancelled)
             media.removeAttribute("src")
             if (media instanceof HTMLMediaElement) media.load()
         }
+        if (signal?.aborted) return cancelled()
+        signal?.addEventListener("abort", cancelled, { once: true })
         if (media instanceof HTMLVideoElement) {
             media.preload = "metadata"
-            media.onloadedmetadata = () => { cleanup(); resolve() }
+            media.onloadedmetadata = () => {
+                const durationUs = Math.round(media.duration * 1_000_000)
+                cleanup()
+                if (!Number.isSafeInteger(durationUs) || durationUs < 1) reject(new Error(`Could not read ${item.name} duration.`))
+                else resolve([item.id, durationUs])
+            }
             media.onerror = () => { cleanup(); reject(new Error(`Could not hydrate ${item.name}.`)) }
             media.src = item.url
             media.load()
         } else {
             media.src = item.url
-            media.decode().then(() => { cleanup(); resolve() }, () => { cleanup(); reject(new Error(`Could not hydrate ${item.name}.`)) })
+            media.decode().then(() => { cleanup(); resolve(null) }, () => { cleanup(); reject(new Error(`Could not hydrate ${item.name}.`)) })
         }
     })))
+    return new Map(hydrated.filter((entry): entry is [string, number] => Boolean(entry)))
 }
 
 function useStageSize(ref: React.RefObject<HTMLDivElement | null>) {
@@ -182,10 +213,30 @@ export default function QuietCarouselTracer() {
     const stageRef = React.useRef<HTMLDivElement>(null)
     const audioPreviewRef = React.useRef<{ controller: AbortController; context: AudioContext; source?: AudioBufferSourceNode } | null>(null)
     const audioRevisionRef = React.useRef(0)
+    const projectRevisionRef = React.useRef(0)
+    const busyRef = React.useRef(false)
+    const busyOperationRef = React.useRef(0)
+    const mediaImportRef = React.useRef(0)
+    const mediaImportAbortRef = React.useRef<AbortController | null>(null)
+    const projectOpenAbortRef = React.useRef<AbortController | null>(null)
     const timeRef = React.useRef(timeMs)
     const stageSize = useStageSize(stageRef)
 
     const timeline = React.useMemo(() => visualTimelineForConfig(config), [config])
+
+    const beginBusy = () => {
+        if (busyRef.current) return null
+        busyRef.current = true
+        busyOperationRef.current += 1
+        setAudioBusy(true)
+        return busyOperationRef.current
+    }
+
+    const endBusy = (operation: number) => {
+        if (busyOperationRef.current !== operation) return
+        busyRef.current = false
+        setAudioBusy(false)
+    }
 
     const evaluated = React.useMemo(() => evaluateQuietCarousel({
         items: config.items,
@@ -195,6 +246,10 @@ export default function QuietCarouselTracer() {
         stageWidth: stageSize.width,
         stageHeight: stageSize.height,
     }), [config, stageSize, timeMs, timeline])
+
+    React.useEffect(() => {
+        projectRevisionRef.current += 1
+    }, [config])
 
     React.useEffect(() => {
         setTimeMs((value) => value % timeline.durationMs)
@@ -238,15 +293,18 @@ export default function QuietCarouselTracer() {
     }, [playing, timeline.durationMs])
 
     const updateSettings = (patch: Partial<ReelSettings>) => {
+        if (busyRef.current) return
         setConfig((current) => ({ ...current, settings: { ...current.settings, ...patch } }))
     }
 
     const setTimelineMode = (mode: TimelineMode) => {
+        if (busyRef.current) return
         setConfig((current) => ({ ...current, ...timelineIntentForMode(mode) }))
         setTimeMs(0)
     }
 
     const save = async () => {
+        if (busyRef.current) return
         if (host) {
             try {
                 if (config.audio) {
@@ -269,10 +327,17 @@ export default function QuietCarouselTracer() {
     }
 
     const reload = async () => {
+        if (busyRef.current) return
         if (host) {
+            const busyOperation = beginBusy()
+            if (busyOperation === null) return
+            const controller = new AbortController()
+            projectOpenAbortRef.current = controller
+            setPlaying(false)
             let operationId = ""
             try {
                 const candidate = await host.beginProjectOpen()
+                if (controller.signal.aborted) throw Object.assign(new Error("Project open cancelled."), { code: "cancelled" })
                 if ("cancelled" in candidate) {
                     setNotice("Open cancelled · Project unchanged")
                     return
@@ -283,16 +348,27 @@ export default function QuietCarouselTracer() {
                 }
                 operationId = candidate.operationId
                 const restored = parseQuietCarouselHostProject(candidate.config)
-                await hydrateHostMedia(restored)
+                const videoDurations = await hydrateHostMedia(restored, controller.signal)
+                for (const source of (restored.audio?.sources ?? []).filter((candidate) => candidate.role === "source-video")) {
+                    const durationUs = videoDurations.get(source.mediaId!)
+                    if (!durationUs) throw new Error(`Could not read ${source.name ?? source.id} duration.`)
+                    const prepared = await host.prepareVideoAudio(source.url!, durationUs)
+                    if (controller.signal.aborted) throw Object.assign(new Error("Project open cancelled."), { code: "cancelled" })
+                    if (prepared.sampleRate !== source.sampleRate || prepared.channels !== source.channels || prepared.sampleFrames !== source.sampleFrames) {
+                        throw new Error(`Source-video audio changed for ${source.name ?? source.id}.`)
+                    }
+                }
                 await hydrateHostAudio(restored.audio)
+                if (controller.signal.aborted) throw Object.assign(new Error("Project open cancelled."), { code: "cancelled" })
                 const restoredTimeline = visualTimelineForConfig(restored)
                 if (restored.audio) {
                     const restoredAudio = compileAudioTimeline(restored.audio, { duration: millisecondsTime(restoredTimeline.durationMs) })
                     if (restoredAudio.issues.length) throw new Error("Opened audio does not match the visual story.")
                 }
                 const restoredWaveforms: Record<string, Array<{ minimum: number; maximum: number; rms: number }>> = {}
-                for (const source of (restored.audio?.sources ?? []).filter((candidate) => candidate.role !== "source-video" && candidate.url)) {
+                for (const source of (restored.audio?.sources ?? []).filter((candidate) => candidate.url)) {
                     const waveform = await readHostWaveform(host, source.url!, Math.min(48, source.sampleFrames))
+                    if (controller.signal.aborted) throw Object.assign(new Error("Project open cancelled."), { code: "cancelled" })
                     restoredWaveforms[source.id] = waveform.buckets
                 }
                 await host.acceptProjectOpen(operationId)
@@ -303,7 +379,10 @@ export default function QuietCarouselTracer() {
                 setNotice("Opened portable Project · Scene and Timeline verified")
             } catch (error) {
                 if (operationId) await host.discardProjectOpen(operationId).catch(() => undefined)
-                setNotice(error instanceof Error ? `Open failed · ${error.message}` : "Open failed · Project unchanged")
+                setNotice((error as { code?: string })?.code === "cancelled" ? "Open cancelled · Project unchanged" : error instanceof Error ? `Open failed · ${error.message}` : "Open failed · Project unchanged")
+            } finally {
+                projectOpenAbortRef.current = null
+                endBusy(busyOperation)
             }
             return
         }
@@ -321,6 +400,7 @@ export default function QuietCarouselTracer() {
     }
 
     const resetScene = () => {
+        if (busyRef.current) return
         const reset = createQuietCarouselProject(config.items)
         setConfig({ ...reset, audio: config.audio })
         setTimeMs(0)
@@ -328,6 +408,7 @@ export default function QuietCarouselTracer() {
     }
 
     const replaceWithFixture = () => {
+        if (busyRef.current) return
         const fixture = createQuietCarouselProject(quietCarouselFixtureItems())
         setConfig(fixture)
         setSelectedId(fixture.items[0]?.id ?? "")
@@ -341,12 +422,28 @@ export default function QuietCarouselTracer() {
             replaceWithFixture()
             return
         }
+        const busyOperation = beginBusy()
+        if (busyOperation === null) return
+        setPlaying(false)
+        const operation = mediaImportRef.current + 1
+        mediaImportRef.current = operation
+        const revision = projectRevisionRef.current
+        const controller = new AbortController()
+        mediaImportAbortRef.current = controller
+        let pickedURLs: string[] = []
+        const assertCurrent = () => {
+            if (controller.signal.aborted || mediaImportRef.current !== operation || projectRevisionRef.current !== revision) {
+                throw Object.assign(new Error("Source import cancelled."), { code: "cancelled" })
+            }
+        }
         try {
             const picked = await host.chooseMedia()
+            assertCurrent()
             if (!picked.length) {
                 setNotice("Import cancelled · Project unchanged")
                 return
             }
+            pickedURLs = picked.map((item) => item.url)
             const previousURLs = config.items.map((item) => item.url).filter((url) => url.startsWith("reel-media://grant/"))
             const importStamp = Date.now().toString(36)
             const imported = createQuietCarouselProject(picked.map((item, index) => ({
@@ -356,21 +453,86 @@ export default function QuietCarouselTracer() {
                 spotlight: index < 2,
                 muted: false,
             })))
-            imported.audio = externalAudioOnly(config.audio)
+            const externalAudio = externalAudioOnly(config.audio)
+            const importedTimeline = visualTimelineForConfig(imported)
+            const storyTime = millisecondsTime(importedTimeline.durationMs)
+            const videoDurations = await hydrateHostMedia(imported, controller.signal)
+            assertCurrent()
+            const sourceVideoSources = []
+            const sourceVideoLanes = []
+            const importedWaveforms: Record<string, Array<{ minimum: number; maximum: number; rms: number }>> = {}
+            let silentVideos = 0
+            for (const item of imported.items.filter((candidate) => candidate.type === "video")) {
+                let prepared
+                try {
+                    const durationUs = videoDurations.get(item.id)
+                    if (!durationUs) throw new Error(`Could not read ${item.name} duration.`)
+                    prepared = await host.prepareVideoAudio(item.url, durationUs)
+                    assertCurrent()
+                } catch (error) {
+                    if ((error as { code?: string }).code === "unsupported_capability") {
+                        silentVideos += 1
+                        continue
+                    }
+                    throw error
+                }
+                if (externalAudio.sources.length && externalAudio.sampleRate !== prepared.sampleRate) {
+                    throw new Error(`Existing Project audio is ${externalAudio.sampleRate} Hz; source-video audio is ${prepared.sampleRate} Hz.`)
+                }
+                const sourceId = `${item.id}-audio-source`
+                const laneId = `${item.id}-audio-lane`
+                const sourceTime = rational(prepared.sampleFrames, prepared.sampleRate)
+                const duration = imported.settings.loopVideos || prepared.sampleFrames * 1000 >= importedTimeline.durationMs * prepared.sampleRate
+                    ? storyTime
+                    : sourceTime
+                sourceVideoSources.push({
+                    id: sourceId, name: item.name, role: "source-video" as const, mediaId: item.id, url: item.url,
+                    sampleRate: prepared.sampleRate, channels: prepared.channels, sampleFrames: prepared.sampleFrames,
+                })
+                sourceVideoLanes.push({
+                    id: laneId, name: `${item.name} source`, role: "source-video" as const, gain: 1, muted: item.muted, solo: false,
+                    clips: [{
+                        id: `${item.id}-audio-clip`, sourceId, timelineStart: { numerator: 0, denominator: 1 }, sourceIn: { numerator: 0, denominator: 1 },
+                        sourceSpan: sourceTime, duration, loop: imported.settings.loopVideos, gain: 1, muted: item.muted,
+                        fadeIn: { numerator: 0, denominator: 1 }, fadeOut: { numerator: 0, denominator: 1 },
+                    }],
+                })
+                const waveform = await readHostWaveform(host, item.url, Math.min(48, prepared.sampleFrames))
+                assertCurrent()
+                importedWaveforms[sourceId] = waveform.buckets
+            }
+            imported.audio = sourceVideoSources.length ? {
+                ...externalAudio,
+                sampleRate: 48_000,
+                channels: 2,
+                sources: [...externalAudio.sources, ...sourceVideoSources],
+                lanes: [...externalAudio.lanes, ...sourceVideoLanes],
+            } : externalAudio
+            const compiledAudio = compileAudioTimeline(imported.audio, { duration: storyTime })
+            if (compiledAudio.issues.length) throw new Error("Imported source-video audio does not match the visual story.")
             setConfig(imported)
+            const retainedIds = new Set(imported.audio.sources.map((source) => source.id))
+            setWaveforms((current) => ({ ...Object.fromEntries(Object.entries(current).filter(([id]) => retainedIds.has(id))), ...importedWaveforms }))
             setSelectedId(imported.items[0]?.id ?? "")
             setFailedMedia(new Set())
             setTimeMs(0)
             if (previousURLs.length) await host.releaseMedia(previousURLs).catch(() => undefined)
-            setNotice(`${picked.length} source frame${picked.length === 1 ? "" : "s"} imported · order preserved`)
+            setNotice(`${picked.length} source frame${picked.length === 1 ? "" : "s"} imported · ${sourceVideoSources.length} video sound${sourceVideoSources.length === 1 ? "" : "s"} prepared${silentVideos ? ` · ${silentVideos} silent` : ""}`)
         } catch (error) {
-            setNotice(error instanceof Error ? `Import failed · ${error.message}` : "Import failed · Project unchanged")
+            if (pickedURLs.length) await host.releaseMedia(pickedURLs).catch(() => undefined)
+            setNotice((error as { code?: string })?.code === "cancelled" ? "Import cancelled · Project unchanged" : error instanceof Error ? `Import failed · ${error.message}` : "Import failed · Project unchanged")
+        } finally {
+            if (mediaImportRef.current === operation) {
+                mediaImportAbortRef.current = null
+                endBusy(busyOperation)
+            }
         }
     }
 
     const addAudio = async (role: "presenter" | "soundtrack") => {
-        if (!host || audioBusy) return
-        setAudioBusy(true)
+        if (!host) return
+        const busyOperation = beginBusy()
+        if (busyOperation === null) return
         const revision = audioRevisionRef.current
         let pickedURL = ""
         try {
@@ -382,6 +544,7 @@ export default function QuietCarouselTracer() {
                 return
             }
             pickedURL = picked.url
+            if (picked.sampleRate !== 48_000) throw new Error("Use 48 kHz PCM16 WAV audio for a portable Gallery Project.")
             const currentAudio = config.audio ?? defaultAudioIntent()
             if (currentAudio.sources.length > 0 && picked.sampleRate !== currentAudio.sampleRate) {
                 throw new Error(`Use ${currentAudio.sampleRate} Hz PCM16 WAV to match this Project.`)
@@ -444,17 +607,19 @@ export default function QuietCarouselTracer() {
             if (pickedURL) await host.releaseMedia([pickedURL]).catch(() => undefined)
             setNotice(error instanceof Error ? `Audio unchanged · ${error.message}` : "Audio unchanged · source could not be verified")
         } finally {
-            setAudioBusy(false)
+            endBusy(busyOperation)
         }
     }
 
     const updateAudioLane = (laneId: string, patch: { gain?: number; muted?: boolean; solo?: boolean }) => {
+        if (busyRef.current) return
         setConfig((current) => ({ ...current, audio: { ...(current.audio ?? defaultAudioIntent()), lanes: (current.audio ?? defaultAudioIntent()).lanes.map((lane) => lane.id === laneId ? { ...lane, ...patch } : lane) } }))
         setAudioDiagnostic("Audio controls changed · run Check mix")
         setAudioDiagnosticHash("")
     }
 
     const updateAudioClipStart = (laneId: string, startMs: number) => {
+        if (busyRef.current) return
         const bounded = Math.max(0, Math.min(Math.round(startMs), Math.max(0, timeline.durationMs - 1)))
         setConfig((current) => ({ ...current, audio: { ...(current.audio ?? defaultAudioIntent()), lanes: (current.audio ?? defaultAudioIntent()).lanes.map((lane) => lane.id === laneId ? { ...lane, clips: lane.clips.map((clip, index) => index === 0 ? { ...clip, timelineStart: millisecondsTime(bounded) } : clip) } : lane) } }))
         setAudioDiagnostic("Audio placement changed · run Check mix")
@@ -462,6 +627,7 @@ export default function QuietCarouselTracer() {
     }
 
     const resetAudio = async () => {
+        if (busyRef.current) return
         const urls = (config.audio?.sources ?? []).filter((source) => source.role !== "source-video" && source.url).map((source) => source.url!)
         setConfig((current) => ({ ...current, audio: defaultAudioIntent() }))
         setWaveforms({})
@@ -472,8 +638,9 @@ export default function QuietCarouselTracer() {
     }
 
     const checkAudioMix = async () => {
-        if (!host || !config.audio || audioBusy) return
-        setAudioBusy(true)
+        if (!host || !config.audio) return
+        const busyOperation = beginBusy()
+        if (busyOperation === null) return
         const revision = audioRevisionRef.current
         setPlaying(false)
         const probeTime = timeMs
@@ -492,12 +659,14 @@ export default function QuietCarouselTracer() {
         } catch (error) {
             setAudioDiagnostic(error instanceof Error ? error.message : "Audio mix check failed")
         } finally {
-            setAudioBusy(false)
+            endBusy(busyOperation)
         }
     }
 
     const previewAudio = async () => {
-        if (!host || !config.audio || audioBusy) return
+        if (!host || !config.audio) return
+        const busyOperation = beginBusy()
+        if (busyOperation === null) return
         audioPreviewRef.current?.controller.abort()
         try { audioPreviewRef.current?.source?.stop() } catch { /* Preview already stopped. */ }
         void audioPreviewRef.current?.context.close()
@@ -505,6 +674,7 @@ export default function QuietCarouselTracer() {
         const context = new AudioContext({ sampleRate: config.audio.sampleRate })
         if (context.sampleRate !== config.audio.sampleRate) {
             void context.close()
+            endBusy(busyOperation)
             setNotice(`Preview unavailable · audio device uses ${context.sampleRate} Hz, Project uses ${config.audio.sampleRate} Hz`)
             return
         }
@@ -545,19 +715,23 @@ export default function QuietCarouselTracer() {
             void context.close()
             setNotice(error instanceof Error ? `Preview unavailable · ${error.message}` : "Preview unavailable")
         } finally {
-            setAudioBusy(false)
+            endBusy(busyOperation)
         }
     }
 
     const cancelAudio = async () => {
+        mediaImportAbortRef.current?.abort()
+        projectOpenAbortRef.current?.abort()
         audioRevisionRef.current += 1
         audioPreviewRef.current?.controller.abort()
         try { audioPreviewRef.current?.source?.stop() } catch { /* Preview already stopped. */ }
         void audioPreviewRef.current?.context.close()
         audioPreviewRef.current = null
         setPreviewing(false)
-        if (host) await host.cancelAudio().catch(() => undefined)
-        setAudioBusy(false)
+        if (host) {
+            if (projectOpenAbortRef.current) await host.cancelProjectOpen().catch(() => undefined)
+            await host.cancelAudio().catch(() => undefined)
+        }
         setNotice("Audio work cancelled")
     }
 
@@ -566,6 +740,7 @@ export default function QuietCarouselTracer() {
 
     return (
         <main
+            aria-busy={audioBusy}
             className="qc-studio"
             data-g02-tracer="quiet-carousel-v1"
             data-axis={config.settings.axis}
@@ -609,7 +784,7 @@ export default function QuietCarouselTracer() {
                             <li data-g02-frame-id={item.id} key={item.id}>
                                 <button className={selectedId === item.id ? "is-selected" : ""} type="button" onClick={() => setSelectedId(item.id)}>
                                     <span>{String(index + 1).padStart(2, "0")}</span>
-                                    <img src={item.url} alt="" loading="lazy" />
+                                    {item.type === "video" ? <video src={item.url} aria-hidden="true" muted preload="metadata" /> : <img src={item.url} alt="" loading="lazy" />}
                                     <strong>{item.name}</strong>
                                     {failedMedia.has(item.id) ? <em>Unavailable · order kept</em> : null}
                                 </button>
@@ -652,7 +827,15 @@ export default function QuietCarouselTracer() {
                                         onPointerDown={() => setSelectedId(item.id)}
                                     >
                                         {failedMedia.has(item.id) ? <div>Media unavailable</div> : (
-                                            <img
+                                            item.type === "video" ? <SyncedQuietVideo
+                                                item={item}
+                                                timeMs={timeMs}
+                                                loop={config.settings.loopVideos}
+                                                fit={evaluated.render.fit}
+                                                opacity={evaluated.render.artworkOpacity}
+                                                filter={evaluated.render.artworkFilter}
+                                                onError={() => setFailedMedia((current) => new Set(current).add(item.id))}
+                                            /> : <img
                                                 src={item.url}
                                                 alt={item.name}
                                                 draggable={false}
@@ -676,10 +859,10 @@ export default function QuietCarouselTracer() {
                 <aside className="qc-inspector" aria-label="Contextual Inspector">
                     <div className="qc-panel-heading">
                         <div><span className="qc-eyebrow">Scene</span><strong>{quietCarouselScene.definition.name}</strong></div>
-                        <button data-g02-action="reset" type="button" onClick={resetScene}>Reset</button>
+                        <button data-g02-action="reset" type="button" disabled={audioBusy} onClick={resetScene}>Reset</button>
                     </div>
 
-                    <fieldset>
+                    <fieldset disabled={audioBusy}>
                         <legend>Canvas ratio</legend>
                         <div className="qc-segmented">
                             {RATIO_PRESETS.map((ratio) => (
@@ -688,7 +871,7 @@ export default function QuietCarouselTracer() {
                         </div>
                     </fieldset>
 
-                    <fieldset>
+                    <fieldset disabled={audioBusy}>
                         <legend>Direction</legend>
                         <div className="qc-segmented">
                             {(["horizontal", "vertical"] as const).map((axis) => <button data-g02-axis={axis} className={config.settings.axis === axis ? "is-active" : ""} type="button" key={axis} onClick={() => updateSettings({ axis })}>{axis}</button>)}
@@ -698,19 +881,19 @@ export default function QuietCarouselTracer() {
                         </div>
                     </fieldset>
 
-                    <label>{control("frame-size").label} <output>{config.settings.slideHeight}{control("frame-size").unit}</output><input data-g02-control="frame-size" type="range" min={control("frame-size").min} max={control("frame-size").max} step={control("frame-size").step} value={config.settings.slideHeight} onChange={(event) => updateSettings({ slideHeight: Number(event.target.value) })} /></label>
-                    <label>{control("gap").label} <output>{config.settings.gap} {control("gap").unit}</output><input data-g02-control="gap" type="range" min={control("gap").min} max={control("gap").max} step={control("gap").step} value={config.settings.gap} onChange={(event) => updateSettings({ gap: Number(event.target.value) })} /></label>
-                    <label>{control("pace").label} <output>{config.settings.paceMs}{control("pace").unit}</output><input data-g02-control="pace" type="range" min={control("pace").min} max={control("pace").max} step={control("pace").step} value={config.settings.paceMs} onChange={(event) => updateSettings({ paceMs: Number(event.target.value) })} /></label>
-                    <label>{control("depth").label} <output>{config.settings.centerBump}{control("depth").unit}</output><input data-g02-control="depth" type="range" min={control("depth").min} max={control("depth").max} step={control("depth").step} value={config.settings.centerBump} onChange={(event) => updateSettings({ centerBump: Number(event.target.value) })} /></label>
+                    <label>{control("frame-size").label} <output>{config.settings.slideHeight}{control("frame-size").unit}</output><input data-g02-control="frame-size" disabled={audioBusy} type="range" min={control("frame-size").min} max={control("frame-size").max} step={control("frame-size").step} value={config.settings.slideHeight} onChange={(event) => updateSettings({ slideHeight: Number(event.target.value) })} /></label>
+                    <label>{control("gap").label} <output>{config.settings.gap} {control("gap").unit}</output><input data-g02-control="gap" disabled={audioBusy} type="range" min={control("gap").min} max={control("gap").max} step={control("gap").step} value={config.settings.gap} onChange={(event) => updateSettings({ gap: Number(event.target.value) })} /></label>
+                    <label>{control("pace").label} <output>{config.settings.paceMs}{control("pace").unit}</output><input data-g02-control="pace" disabled={audioBusy} type="range" min={control("pace").min} max={control("pace").max} step={control("pace").step} value={config.settings.paceMs} onChange={(event) => updateSettings({ paceMs: Number(event.target.value) })} /></label>
+                    <label>{control("depth").label} <output>{config.settings.centerBump}{control("depth").unit}</output><input data-g02-control="depth" disabled={audioBusy} type="range" min={control("depth").min} max={control("depth").max} step={control("depth").step} value={config.settings.centerBump} onChange={(event) => updateSettings({ centerBump: Number(event.target.value) })} /></label>
 
-                    <fieldset>
+                    <fieldset disabled={audioBusy}>
                         <legend>{control("fit").label}</legend>
                         <div className="qc-segmented">
                             {(["contain", "cover"] as const).map((fit) => <button data-g02-fit={fit} className={config.settings.imageFit === fit ? "is-active" : ""} type="button" key={fit} onClick={() => updateSettings({ imageFit: fit })}>{fit}</button>)}
                         </div>
                     </fieldset>
 
-                    <fieldset>
+                    <fieldset disabled={audioBusy}>
                         <legend>{control("background").label}</legend>
                         <div className="qc-segmented">
                             <button data-g02-background="solid" className={config.settings.backgroundStyle !== "transparent" ? "is-active" : ""} type="button" onClick={() => updateSettings({ backgroundStyle: "solid" })}>clean colour</button>
@@ -725,9 +908,9 @@ export default function QuietCarouselTracer() {
                 <div className="qc-timeline-heading">
                     <div><span className="qc-eyebrow">Visual Timeline</span><strong>{formatDuration(timeline.durationMs)} · {timeline.frameCount} frames at 30 fps</strong></div>
                     <div className="qc-segmented">
-                        {(["automatic", "fixed-duration", "directed"] as const).map((mode) => <button data-g02-timeline-mode={mode} className={config.timelineMode === mode ? "is-active" : ""} type="button" key={mode} onClick={() => setTimelineMode(mode)}>{mode === "fixed-duration" ? "fixed" : mode}</button>)}
+                            {(["automatic", "fixed-duration", "directed"] as const).map((mode) => <button data-g02-timeline-mode={mode} disabled={audioBusy} className={config.timelineMode === mode ? "is-active" : ""} type="button" key={mode} onClick={() => setTimelineMode(mode)}>{mode === "fixed-duration" ? "fixed" : mode}</button>)}
                     </div>
-                    {config.timelineMode === "fixed-duration" ? <label>Duration <input data-g02-control="fixed-duration" type="number" min={1000} max={60000} step={500} value={config.timelineFixedDurationMs} onChange={(event) => setConfig((current) => ({ ...current, timelineFixedDurationMs: Number(event.target.value) }))} /> ms</label> : null}
+                    {config.timelineMode === "fixed-duration" ? <label>Duration <input data-g02-control="fixed-duration" disabled={audioBusy} type="number" min={1000} max={60000} step={500} value={config.timelineFixedDurationMs} onChange={(event) => setConfig((current) => ({ ...current, timelineFixedDurationMs: Number(event.target.value) }))} /> ms</label> : null}
                 </div>
                 <SegmentStrip config={config} timeMs={timeMs} durationMs={timeline.durationMs} />
                 <details className="qc-audio" data-g05-audio="timeline" data-g05-diagnostic-hash={audioDiagnosticHash}>

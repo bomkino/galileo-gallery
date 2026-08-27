@@ -61,6 +61,7 @@ async function invoke(operation, payload = {}, allowGenerationAdvance = false) {
 }
 
 const GRANT_URL = /^reel-media:\/\/grant\/[a-f0-9]{64}$/
+const MAX_PREPARED_VIDEO_AUDIO_FRAMES = 256 * 1024 * 1024 / 4
 const finite = (value, minimum, maximum) => typeof value === "number" && Number.isFinite(value) && value >= minimum && value <= maximum
 
 function audioChoice(value, role) {
@@ -78,6 +79,13 @@ function decodedAudio(value, startFrame, frameCount) {
         || !Number.isSafeInteger(value.sampleRate) || value.sampleRate < 8_000 || value.sampleRate > 192_000 || ![1, 2].includes(value.channels)
         || value.startFrame !== startFrame || value.frameCount !== frameCount || !Array.isArray(value.samples)
         || value.samples.length !== frameCount * value.channels || value.samples.some((sample) => !finite(sample, -1, 1))) throw new Error("Host returned invalid PCM audio.")
+    return value
+}
+
+function preparedVideoAudio(value) {
+    if (!ownExact(value, ["sampleRate", "channels", "sampleFrames"])
+        || value.sampleRate !== 48_000 || value.channels !== 2
+        || !Number.isSafeInteger(value.sampleFrames) || value.sampleFrames < 1 || value.sampleFrames > MAX_PREPARED_VIDEO_AUDIO_FRAMES) throw new Error("Host returned invalid source-video audio metadata.")
     return value
 }
 
@@ -101,6 +109,7 @@ const galleryHost = {
     chooseMedia: async () => (await invoke("media.choose")).value,
     releaseMedia: async (urls) => (await invoke("media.release", { urls })).value,
     chooseAudio: async (role) => audioChoice((await invoke("audio.choose", { role })).value, role),
+    prepareVideoAudio: async (url, durationUs) => preparedVideoAudio((await invoke("audio.video.prepare", { url, durationUs })).value),
     decodeAudio: async (url, startFrame, frameCount) => decodedAudio((await invoke("audio.decode", { url, startFrame, frameCount })).value, startFrame, frameCount),
     audioWaveform: async (url, buckets) => audioWaveform((await invoke("audio.waveform", { url, buckets })).value, buckets),
     cancelAudio: async () => cancelledAudio((await invoke("audio.cancel")).value),

@@ -10,6 +10,7 @@ const {
 } = require("./linux-host-port.cjs")
 
 const GRANT_URL = /^reel-media:\/\/grant\/([a-f0-9]{64})$/
+const MAX_PREPARED_VIDEO_AUDIO_FRAMES = 256 * 1024 * 1024 / 4
 
 function ownExact(value, keys) {
     if (!value || typeof value !== "object" || Array.isArray(value)) return false
@@ -45,6 +46,13 @@ function safeAudioDecode(value, payload) {
         || !Number.isSafeInteger(value.sampleRate) || value.sampleRate < 8_000 || value.sampleRate > 192_000 || ![1, 2].includes(value.channels)
         || value.startFrame !== payload.startFrame || value.frameCount !== payload.frameCount || !Array.isArray(value.samples)
         || value.samples.length !== value.frameCount * value.channels || value.samples.some((sample) => !finite(sample, -1, 1))) throw new HostPortError("verification_failed")
+    return value
+}
+
+function safePreparedVideoAudio(value) {
+    if (!ownExact(value, ["sampleRate", "channels", "sampleFrames"])
+        || value.sampleRate !== 48_000 || value.channels !== 2
+        || !Number.isSafeInteger(value.sampleFrames) || value.sampleFrames < 1 || value.sampleFrames > MAX_PREPARED_VIDEO_AUDIO_FRAMES) throw new HostPortError("verification_failed")
     return value
 }
 
@@ -91,6 +99,11 @@ function createLinuxHostController(options) {
         "audio.choose": {
             states: ["ready"],
             validate: (payload) => ownExact(payload, ["role"]) && ["presenter", "soundtrack"].includes(payload.role),
+        },
+        "audio.video.prepare": {
+            states: ["ready", "opening"],
+            validate: (payload) => ownExact(payload, ["url", "durationUs"]) && typeof payload.url === "string" && GRANT_URL.test(payload.url)
+                && Number.isSafeInteger(payload.durationUs) && payload.durationUs >= 1 && payload.durationUs <= 24 * 60 * 60 * 1_000_000,
         },
         "audio.decode": {
             states: ["ready", "opening"],
@@ -226,6 +239,8 @@ function createLinuxHostController(options) {
             }
             case "audio.decode":
                 return withAudioSlot(async (signal) => safeAudioDecode(await options.decodeAudio({ grant: mediaGrant(envelope.payload.url), startFrame: envelope.payload.startFrame, frameCount: envelope.payload.frameCount, signal }), envelope.payload))
+            case "audio.video.prepare":
+                return withAudioSlot(async (signal) => safePreparedVideoAudio(await options.prepareVideoAudio({ grant: mediaGrant(envelope.payload.url), durationUs: envelope.payload.durationUs, signal })))
             case "audio.waveform":
                 return withAudioSlot(async (signal) => safeWaveform(await options.audioWaveform({ grant: mediaGrant(envelope.payload.url), buckets: envelope.payload.buckets, signal }), envelope.payload))
             case "audio.cancel":
