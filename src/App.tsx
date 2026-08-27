@@ -45,6 +45,9 @@ function normalizeConfig(value: Partial<ReelConfig> | null | undefined): ReelCon
               }))
             : [],
         settings: { ...styleSettings(styleId), ...(value?.settings ?? {}) },
+        timelineMode: value?.timelineMode ?? "automatic",
+        timelineFixedDurationMs: value?.timelineFixedDurationMs ?? 0,
+        timelineSegments: value?.timelineSegments ?? [],
     }
 }
 

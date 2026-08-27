@@ -21,7 +21,7 @@ const LOOK_PARAMETER_KEYS = [
     "theme", "ground", "paper", "backgroundStyle", "backgroundColor2", "backgroundAngle", "backgroundTexture",
 ]
 const TIMELINE_KEYS = [
-    "mode", "playKind", "repeatCount", "axis", "direction", "startMode", "launchMs", "arrivalMs", "growMs",
+    "mode", "fixedDurationMs", "segments", "playKind", "repeatCount", "axis", "direction", "startMode", "launchMs", "arrivalMs", "growMs",
     "exitMs", "paceMs", "leadInMs", "holdMs", "finaleGrowMs", "finaleHoldMs", "fadeMs",
 ]
 
@@ -191,8 +191,10 @@ function portableProjectFromConfig(config, media) {
             parameters: settingsSubset(config.settings, LOOK_PARAMETER_KEYS),
         },
         timeline: {
-            mode: "automatic",
-            ...settingsSubset(config.settings, TIMELINE_KEYS.filter((key) => key !== "mode")),
+            mode: config.timelineMode ?? "automatic",
+            fixedDurationMs: config.timelineFixedDurationMs ?? 0,
+            segments: config.timelineSegments ?? [],
+            ...settingsSubset(config.settings, TIMELINE_KEYS.filter((key) => !["mode", "fixedDurationMs", "segments"].includes(key))),
         },
         audio: {
             id: "gallery-audio-intent",
@@ -287,8 +289,37 @@ function validateTimeline(timeline) {
     stringValue(timeline.axis, "timeline_invalid", "Timeline axis", { values: ["horizontal", "vertical"] })
     stringValue(timeline.direction, "timeline_invalid", "Timeline direction", { values: ["forward", "reverse"] })
     stringValue(timeline.startMode, "timeline_invalid", "Timeline start mode", { values: ["auto", "click"] })
+    numberValue(timeline.fixedDurationMs, "timeline_invalid", "Fixed duration", 0, 24 * 60 * 60 * 1000)
+    if (!Array.isArray(timeline.segments) || timeline.segments.length > 64) {
+        fail("timeline_invalid", "Timeline segments are invalid.")
+    }
+    const segmentIds = new Set()
+    let directedDurationMs = 0
+    for (const [index, segment] of timeline.segments.entries()) {
+        exactKeys(segment, ["id", "kind", "cycles", "paceScale", "durationMs"], "timeline_invalid", `Timeline segment ${index + 1}`)
+        stringValue(segment.id, "timeline_invalid", "Timeline segment id", { pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, max: 120 })
+        if (segmentIds.has(segment.id)) fail("timeline_invalid", "Timeline segment identities must be unique.")
+        segmentIds.add(segment.id)
+        stringValue(segment.kind, "timeline_invalid", "Timeline segment kind", { values: ["cycle", "hold"] })
+        numberValue(segment.cycles, "timeline_invalid", "Timeline segment cycles", 0, 1000, true)
+        numberValue(segment.paceScale, "timeline_invalid", "Timeline segment pace", 0.05, 20)
+        numberValue(segment.durationMs, "timeline_invalid", "Timeline segment duration", 0, 24 * 60 * 60 * 1000)
+        directedDurationMs += segment.durationMs
+        if (segment.kind === "cycle" && segment.cycles < 1) fail("timeline_invalid", "A cycle segment must contain at least one cycle.")
+        if (segment.kind === "hold" && segment.cycles !== 0) fail("timeline_invalid", "A hold segment cannot contain cycles.")
+    }
+    if (directedDurationMs > 24 * 60 * 60 * 1000) fail("timeline_invalid", "Directed Timeline exceeds the supported duration.")
+    if (timeline.mode === "automatic" && (timeline.fixedDurationMs !== 0 || timeline.segments.length !== 0)) {
+        fail("timeline_invalid", "Automatic Timeline cannot contain fixed or directed intent.")
+    }
+    if (timeline.mode === "fixed-duration" && (timeline.fixedDurationMs < 1000 || timeline.segments.length !== 0)) {
+        fail("timeline_invalid", "Fixed Timeline duration is invalid.")
+    }
+    if (timeline.mode === "directed" && (timeline.fixedDurationMs !== 0 || timeline.segments.length === 0)) {
+        fail("timeline_invalid", "Directed Timeline needs explicit segments.")
+    }
     numberValue(timeline.repeatCount, "timeline_invalid", "Repeat count", 1, 1000, true)
-    for (const key of TIMELINE_KEYS.filter((key) => !["mode", "playKind", "axis", "direction", "startMode", "repeatCount"].includes(key))) {
+    for (const key of TIMELINE_KEYS.filter((key) => !["mode", "fixedDurationMs", "segments", "playKind", "axis", "direction", "startMode", "repeatCount"].includes(key))) {
         numberValue(timeline[key], "timeline_invalid", key, 0, 24 * 60 * 60 * 1000)
     }
 }
@@ -346,9 +377,12 @@ function configFromPortableProject(project, urls) {
             ...project.canvas,
             ...project.scene.parameters,
             ...project.look.parameters,
-            ...Object.fromEntries(TIMELINE_KEYS.filter((key) => key !== "mode").map((key) => [key, project.timeline[key]])),
+            ...Object.fromEntries(TIMELINE_KEYS.filter((key) => !["mode", "fixedDurationMs", "segments"].includes(key)).map((key) => [key, project.timeline[key]])),
             exportQuality: project.exportIntent.quality,
         },
+        timelineMode: project.timeline.mode,
+        timelineFixedDurationMs: project.timeline.fixedDurationMs,
+        timelineSegments: project.timeline.segments,
     }
 }
 

@@ -129,8 +129,11 @@ work; G01B does not claim that broader repair.
 - No package, exact Garuda, Apple-Silicon, install, signing, notarization, merge,
   release, publication, visual acceptance, motion evidence, audio playback, or
   output artifact evidence.
-- G01B is source-ready. Ticket closure and dependency activation are withheld until
-  the real Electron save/open/reopen observation runs, so G02 is not claimed active.
+- G01B's owned schema/persistence domain boundary is source-ready and its real
+  Electron main process passed. After direct user instruction to continue, the
+  unavailable renderer observation was reclassified as target-runner evidence
+  rather than a source-work freeze; G02 source work is active. G02 still cannot
+  close or unblock later tickets without its own renderer/motion packet.
 - Existing path-encoded renderer media authority, IPC sender/origin/generation
   validation, durable opened-media retention, and decoded cache budgets remain
   explicit later HostPort/security risks.

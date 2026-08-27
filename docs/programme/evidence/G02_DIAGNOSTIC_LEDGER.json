@@ -1,0 +1,55 @@
+{
+  "ticket": "G02",
+  "scene": {
+    "id": "quiet-carousel",
+    "version": 1,
+    "fixture": "ordinary-eight",
+    "orderedFrames": 8,
+    "defaultFit": "contain",
+    "artworkOpacity": 1,
+    "artworkFilter": "none",
+    "defaultBackground": "#11110f"
+  },
+  "automatic": {
+    "paceMs": 800,
+    "durationMs": 6400,
+    "cycles": 1,
+    "framesAt30Fps": 192
+  },
+  "fixed": {
+    "requestedDurationMs": 12000,
+    "durationMs": 12000,
+    "cycles": 2,
+    "framesAt30Fps": 360
+  },
+  "directed": {
+    "pattern": [
+      { "id": "fast-opening", "cycles": 2, "paceScale": 2, "durationMs": 6400 },
+      { "id": "regular-middle", "cycles": 1, "paceScale": 1, "durationMs": 6400 },
+      { "id": "fast-finale", "cycles": 1, "paceScale": 2, "durationMs": 3200 }
+    ],
+    "durationMs": 16000,
+    "cycles": 4,
+    "framesAt30Fps": 480
+  },
+  "continuity": {
+    "counts": [1, 2, 7, 8, 127],
+    "exactEndEqualsStart": true,
+    "epsilonMs": 0.1,
+    "maximumAllowedPositionDeltaPx": 1
+  },
+  "resourceObservation": {
+    "projectFrameLimit": 256,
+    "sampledTimes": 4,
+    "maximumVisibleFramesAllowed": 80,
+    "perLoopGrowthObserved": false
+  },
+  "runtimeEvidence": {
+    "viteBuild": "pass",
+    "electronMainProcess": "G01B pass",
+    "rendererWindow": "unrun: runner denies local socket creation",
+    "realSpeedCapture": "unrun",
+    "sourceRgbAlphaDecodeComparison": "unrun",
+    "humanAcceptance": "unrun"
+  }
+}

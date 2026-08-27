@@ -25,7 +25,8 @@ The canonical manifest owns:
 - canvas format, dimensions, ratio, and safe padding independently from frame
   fit/aspect intent;
 - Scene and Look identity, version, and parameters;
-- visual Timeline mode, phases, direction, and repeat intent;
+- visual Timeline mode, explicit fixed duration, bounded directed cycle/hold
+  segments, phases, direction, and repeat intent;
 - explicit v1 audio-intent identity, per-media source-video policy, empty lane
   table for later expansion, and deterministic master defaults;
 - the creator's export-quality default.

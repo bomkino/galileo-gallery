@@ -74,6 +74,8 @@ async function run() {
         assert.equal(manifest.scene.id, "cms-slideshow")
         assert.equal(manifest.scene.version, 1)
         assert.equal(manifest.timeline.mode, "automatic")
+        assert.equal(manifest.timeline.fixedDurationMs, 0)
+        assert.deepEqual(manifest.timeline.segments, [])
         assert.deepEqual(manifest.audio, { id: "gallery-audio-intent", version: 1, sourceVideo: "per-media", lanes: [], master: { gain: 1, muted: false } })
 
         const portableText = canonicalProjectJSON(manifest)
@@ -123,6 +125,8 @@ async function run() {
             ["look_invalid", (project) => ({ ...project, look: { ...project.look, id: "gallery-look.paper" } })],
             ["look_invalid", (project) => ({ ...project, look: { ...project.look, parameters: { ...project.look.parameters, ground: "/Users/alice/private" } } })],
             ["timeline_invalid", (project) => ({ ...project, timeline: { ...project.timeline, mode: "mystery" } })],
+            ["timeline_invalid", (project) => ({ ...project, timeline: { ...project.timeline, mode: "fixed-duration", fixedDurationMs: 0 } })],
+            ["timeline_invalid", (project) => ({ ...project, timeline: { ...project.timeline, mode: "directed", segments: [{ id: "bad", kind: "cycle", cycles: 0, paceScale: 1, durationMs: 1000 }] } })],
             ["audio_invalid", (project) => ({ ...project, audio: { ...project.audio, lanes: [{}] } })],
         ]
         for (const [code, mutate] of cases) {

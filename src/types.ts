@@ -5,6 +5,15 @@ export type ExportQuality = "master" | "high" | "optimized"
 export type PosterFrame = "first" | "last" | "none"
 export type CanvasPreset = "fullHD" | "fourK" | "square" | "portrait" | "vertical" | "presentation" | "cinema" | "custom"
 export type BackgroundStyle = "solid" | "gradient" | "halo" | "paper" | "transparent"
+export type TimelineMode = "automatic" | "fixed-duration" | "directed"
+
+export type VisualTimelineSegment = {
+    id: string
+    kind: "cycle" | "hold"
+    cycles: number
+    paceScale: number
+    durationMs: number
+}
 
 export type MediaItem = {
     id: string
@@ -92,6 +101,9 @@ export type ReelConfig = {
     styleId: string
     items: MediaItem[]
     settings: ReelSettings
+    timelineMode?: TimelineMode
+    timelineFixedDurationMs?: number
+    timelineSegments?: VisualTimelineSegment[]
 }
 
 export type PortableGalleryMedia = {
@@ -133,7 +145,9 @@ export type PortableGalleryLookParameters = Pick<ReelSettings,
 >
 
 export type PortableGalleryTimeline = {
-    mode: "automatic" | "fixed-duration" | "directed"
+    mode: TimelineMode
+    fixedDurationMs: number
+    segments: VisualTimelineSegment[]
 } & Pick<ReelSettings,
     | "playKind" | "repeatCount" | "axis" | "direction" | "startMode" | "launchMs"
     | "arrivalMs" | "growMs" | "exitMs" | "paceMs" | "leadInMs" | "holdMs"

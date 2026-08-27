@@ -20,6 +20,9 @@ function fixtureConfig(media) {
     return {
         schemaVersion: 2,
         styleId: "cms-slideshow",
+        timelineMode: "automatic",
+        timelineFixedDurationMs: 0,
+        timelineSegments: [],
         items: [
             { id: "frame-one", name: "First frame.png", type: "image", url: media[0], ratio: 4 / 3, aspectMode: "auto", ratioW: 16, ratioH: 9, caption: "Opening", spotlight: true, muted: false },
             { id: "frame-two", name: "Second frame.webp", type: "image", url: media[1], ratio: 9 / 16, aspectMode: "custom", ratioW: 9, ratioH: 16, spotlight: false, muted: true },

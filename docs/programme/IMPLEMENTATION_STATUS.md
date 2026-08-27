@@ -4,7 +4,7 @@ Updated: 27 August 2026
 
 Repository start: `bomkino/galileo-gallery@2762043bb733aa28a6c63fe26564504b9f257564`
 
-Task branch: `codex/g01a-safe-archive-import`
+Task branch: `codex/g02-quiet-carousel-tracer`
 
 ## G01A — safe archive import boundary
 
@@ -31,7 +31,7 @@ The full development-tool dependency audit still reports nine high-severity advi
 
 ## G01B — clean Project schema
 
-State: **source and Electron main-process runtime tested; window UI observation blocked**
+State: **owned domain boundary source- and Electron-main-process tested; renderer UI observation deferred**
 
 Protected now:
 
@@ -44,7 +44,30 @@ Protected now:
 - atomic destination replacement only after a complete validated save archive exists;
 - safe experimental-v1, wrong-product, future, malformed, cancelled, and corrupt-media failure without prior-state or source-byte mutation.
 
-Source checks cover save/open/reopen canonical equality, ordered hashes, privacy exclusions, semantic failure matrix, cancellation before staging and during media promotion, staging cleanup, and prior destination/Project preservation. After explicit user approval, the package-lock-pinned Electron `43.1.0` development binary was installed and its real main-process save/open/reopen smoke passed with two ordered media files. A real renderer-window/dialog journey remains unrun because the container has no X11/Wayland display server; no unpinned system package was installed.
+Source checks cover save/open/reopen canonical equality, ordered hashes, privacy exclusions, semantic failure matrix, cancellation before staging and during media promotion, staging cleanup, and prior destination/Project preservation. After explicit user approval, the package-lock-pinned Electron `43.1.0` development binary was installed and its real main-process save/open/reopen smoke passed with two ordered media files.
+
+Xvfb and Xauth were later installed after direct continuation approval. Xvfb still cannot start because this managed runner denies local socket creation (`Cannot establish any listening sockets`); Chromium's headless Ozone path also terminates under the same kernel restriction. This target-runner observation remains deferred. It no longer freezes source work downstream of the stable G01B domain boundary.
+
+G02 extends visual Timeline intent inside the still-unreleased v2 schema with an explicit fixed duration and bounded directed cycle/hold segments. Automatic/fixed/directed mode and segment identity now survive browser and portable Project round trips.
+
+## G02 — Quiet Carousel browser tracer
+
+State: **source tracer edited, causally tested, and Vite-built; renderer/motion/visual acceptance unrun**
+
+Implemented on reversible route `?tracer=quiet-carousel`:
+
+- independent `quiet-carousel` v1 Scene module with canonical defaults, bounded control descriptors, pure compiler, and pure evaluator;
+- immediate ordered eight-frame generated fixture in stable Frames / Stage / Inspector / visual Timeline geography;
+- honest 16:9, 9:16, 1:1, and 4:5 canvas recomposition plus horizontal/vertical and forward/reverse policies;
+- causal frame size, 1080-design-pixel gap, pace, depth, contain/cover, clean colour/transparent, and Reset controls;
+- finite automatic, exact fixed-duration, and explicit fast x2 / regular x1 / fast x1 directed Timeline;
+- preview/scrub through the same evaluator, truthful duration/frame count, bounded visible-frame rendering, failed-media placeholder without order loss;
+- strict browser-development save/reload and exact G01B portable Timeline/Scene/media-order round trip;
+- existing application retained as the default route.
+
+Functional checks prove exact end/start state and epsilon continuity for 1, 2, 7, 8, and 127 frames; proportional preview/output-sized composition; control causality; source treatment state; bounded 256-frame observation; and automatic/fixed/directed literal examples.
+
+Not proved: running renderer UI, real decoded source RGB/alpha equality, clean captured alpha, real-speed clip, keyboard/accessibility journey, browser memory profile, or human visual/motion verdict. G02 therefore remains active and does not unblock G03/G04/G05.
 
 ## Known unsafe or unproved surfaces
 
@@ -53,6 +76,6 @@ Source checks cover save/open/reopen canonical equality, ordered hashes, privacy
 - decoded video/proxy/export cache budgets and eviction;
 - packaged Electron security and lifecycle;
 - exact Garuda and Apple-Silicon target behaviour;
-- UI import capture and human interaction review; Electron window creation needs an unavailable X11/Wayland display server in this container.
+- UI import capture and human interaction review; this runner forbids local sockets required by X11, Wayland, Xvfb, and Chromium renderer processes.
 
-Next product ticket after the G01B Electron save/open/reopen observation: `G02` Quiet Carousel browser tracer.
+Current frontier: run G02 at `?tracer=quiet-carousel` on a display-capable browser/Electron runner, capture source-fidelity and real-speed motion evidence, fix functional findings, and request separate human visual review. No later ticket is activated yet.
