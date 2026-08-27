@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, codex/g02-quiet-carousel-tracer, codex/g03-linux-host-port, codex/g05-deterministic-audio]
+    branches: [main, codex/g02-quiet-carousel-tracer, codex/g03-linux-host-port, codex/g05-deterministic-audio, codex/g08-interface-scale-core]
   pull_request:
 
 permissions:
