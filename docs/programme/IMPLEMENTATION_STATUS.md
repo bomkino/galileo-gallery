@@ -4,7 +4,7 @@ Updated: 27 August 2026
 
 Repository start: `bomkino/galileo-gallery@2762043bb733aa28a6c63fe26564504b9f257564`
 
-Task branch: `codex/g03-linux-host-port`
+Task branch: `codex/g05-deterministic-audio`
 
 ## G01A — safe archive import boundary
 
@@ -89,6 +89,22 @@ Implemented and proved:
 
 CI run `33045232888` passed source tests on Ubuntu, macOS, and Windows plus packaged renderer job `98427574258`. Artifact `9635371682` has archive digest `sha256:840e8a5e7f1ea34edcf07e1b534e301e961668f58dd40c29485970811beb5043`; the durable receipt is `G03_RENDERER_CI_RECEIPT.json`.
 
+## G05 — deterministic audio
+
+State: **engineering-complete in source and a sandboxed packaged-directory Electron save/relaunch/reopen journey; final mux/export and human listening acceptance remain unclaimed**
+
+Implemented and proved:
+
+- rational 48 kHz story clock and chunk-invariant source-video/presenter/soundtrack/master mixer;
+- placement, source-in/span, loop, fades, gain, mute, solo, master, and deterministic ducking;
+- exact source-video visual/audio duration, timestamp-offset preservation, and trailing pad;
+- opaque bounded HostPort choose/decode/waveform/prepare/cancel/revoke operations;
+- portable three-role audio identity with atomic save, fresh-grant reopen, and exact PCM readback;
+- bounded FFmpeg runtime and package-pinned approved binary identity;
+- app-authored archive output contained within the unchanged G01A import quotas.
+
+CI run `33055407716` passed source tests on Ubuntu, macOS, and Windows plus packaged renderer job `98460833564`. Artifact `9639381800` has archive digest `sha256:2ee786bc36b5dffe0e7c482399737190596d8a380dfc6fe58893f3fab30572a2`; the durable summary is `G05_RENDERER_CI_RECEIPT.json`.
+
 ## Known unsafe or unproved surfaces
 
 - legacy non-G03 package paths still exist and are not release candidates;
@@ -96,4 +112,4 @@ CI run `33045232888` passed source tests on Ubuntu, macOS, and Windows plus pack
 - exact Garuda and Apple-Silicon target behaviour;
 - human interaction, visual, motion, and audio acceptance.
 
-Current frontier: **G05 deterministic audio**. Build the rational story-clock compiler, bounded PCM mixer, portable audio identity, opaque decode/waveform host operations, collapsed contextual lanes, and causal save/reopen/preview evidence. Final mux/output remains G06. G04 remains deferred until an Apple-Silicon runner is available.
+Current frontier: **G06 verified export**, with the platform-neutral G08 Interface Scale core proceeding in an isolated parallel worktree. G06 owns immutable jobs, PNG Frames, H.264/AAC mux, verification, cancellation, and destination preservation. G08 integration follows G06 serially because both touch the tracer/HostPort shell. G04 remains deferred until an Apple-Silicon runner is available.

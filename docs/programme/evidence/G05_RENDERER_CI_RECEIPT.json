@@ -1,0 +1,43 @@
+{
+  "schema": "galileo-gallery-g05-ci-summary-v1",
+  "repository": "bomkino/galileo-gallery",
+  "branch": "codex/g05-deterministic-audio",
+  "sourceSha": "078acf4254ce04dca748d73532af9a9247a706a9",
+  "sourceTree": "7ce53b5ebfa60db6830043a815e3991c2313067e",
+  "workflowRun": 33055407716,
+  "rendererJob": 98460833564,
+  "artifact": {
+    "id": 9639381800,
+    "name": "g05-deterministic-audio-renderer-evidence",
+    "bytes": 1161453,
+    "sha256": "2ee786bc36b5dffe0e7c482399737190596d8a380dfc6fe58893f3fab30572a2"
+  },
+  "runtime": {
+    "platform": "linux",
+    "architecture": "x64",
+    "electron": "43.1.0",
+    "chromium": "150.0.7871.47",
+    "node": "24.18.0"
+  },
+  "save": {
+    "screenshotSha256": "73af64b1afd5402ac489db603d2ffc76c6571bee84594182cbe09bcdcf856801",
+    "audioLanes": 3,
+    "diagnosticSha256": "3c2ff692cfbdc1e1e7c68810647c4c8830e0563f64230fcb2c1f92784632b33c",
+    "peak": 0.901,
+    "clippedSamples": 0
+  },
+  "reopen": {
+    "screenshotSha256": "d0f9d952d4c3b58f0b1e175916b074716ec6fb77b34ae5c311a1d324d001a9db",
+    "audioLanes": 3,
+    "diagnosticSha256": "3c2ff692cfbdc1e1e7c68810647c4c8830e0563f64230fcb2c1f92784632b33c",
+    "peak": 0.901,
+    "clippedSamples": 0
+  },
+  "portableProjectSha256": "f4d8a9bb8feb572abcdc62a6d40b85310b68d7af2132e231c7b17686cc1a86b8",
+  "sourceTests": {
+    "ubuntu": "success",
+    "macos": "success",
+    "windows": "success"
+  },
+  "humanAcceptance": false
+}

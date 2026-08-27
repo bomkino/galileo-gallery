@@ -6,6 +6,8 @@ It began as the Opening Reel Framer component and grew into 17 motion scenes dis
 
 Current version: **1.0.0**
 
+> Development status: the published v1 release and its 29 registered presets predate the current hardened v2 rebuild. On the active `codex/` task branches, Quiet Carousel is the only independently authored and causally verified Scene so far; the remaining registered presets are catalogue inventory, not 28 completed Scene implementations. The current deterministic audio boundary is verified, while final mux/export, Interface Scale integration, platform candidates, and human Scene review remain in progress. See `docs/programme/IMPLEMENTATION_STATUS.md` for exact evidence.
+
 ## What it can make
 
 - 17 scene families and 29 original-informed styles
