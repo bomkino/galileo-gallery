@@ -27,7 +27,7 @@ async function runG05RendererSmoke(window, outputDirectory, mode) {
         const click = (selector) => required(selector).click()
         const setRange = (selector, value) => {
             const input = required(selector)
-            input.value = String(value)
+            Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, String(value))
             input.dispatchEvent(new Event('input', { bubbles: true }))
             input.dispatchEvent(new Event('change', { bubbles: true }))
         }

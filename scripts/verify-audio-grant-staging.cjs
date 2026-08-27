@@ -18,9 +18,21 @@ async function run() {
     const root = path.join(temporary, "audio-grants")
     const stager = createAudioGrantStaging({ root, inspect, freeSpaceReserveBytes: 8, availableBytes: () => 1_000_000, randomUUID: () => "00000000-0000-4000-8000-000000000001" })
     const staged = await stager.stage(source)
+    const stagedStat = fs.lstatSync(staged.filePath)
+    const selectionRoot = path.dirname(staged.filePath)
+    assert.equal(path.relative(root, staged.filePath).startsWith(".."), false)
+    assert.match(path.basename(selectionRoot), /^selection-[a-f0-9-]{36}$/)
+    assert.equal(stagedStat.isFile(), true)
+    assert.equal(stagedStat.isSymbolicLink(), false)
+    assert.equal(fs.existsSync(path.join(selectionRoot, ".owner.json")), true)
     assert.equal(fs.readFileSync(staged.filePath, "utf8"), "deterministic-audio-source")
     assert.equal(staged.inspection.sha256, (await inspect(source)).sha256)
-    assert.equal(fs.statSync(staged.filePath).mode & 0o777, 0o600)
+    if (process.platform !== "win32") {
+        assert.equal(fs.statSync(root).mode & 0o777, 0o700)
+        assert.equal(fs.statSync(selectionRoot).mode & 0o777, 0o700)
+        assert.equal(fs.statSync(path.join(selectionRoot, ".owner.json")).mode & 0o777, 0o600)
+        assert.equal(stagedStat.mode & 0o777, 0o600)
+    }
     assert.equal(stager.remove(staged.filePath), true)
     assert.equal(fs.existsSync(path.dirname(staged.filePath)), false)
 
