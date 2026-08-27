@@ -23,6 +23,7 @@
     "verify:source": "node scripts/verify-source.cjs",
     "verify:electron-project": "npm run build && node scripts/verify-electron-project-runtime.cjs",
     "verify:quiet-carousel": "node --experimental-strip-types scripts/verify-quiet-carousel.mjs",
+    "verify:g02-renderer": "npm run build && REEL_USER_DATA_DIR=./artifacts/g02-runtime REEL_G02_RENDERER_OUTPUT=./artifacts/g02 electron . && node scripts/verify-g02-renderer-artifacts.cjs ./artifacts/g02",
     "start": "npm run build && electron .",
     "prepare:ffmpeg": "node scripts/prepare-ffmpeg.cjs",
     "package:mac": "npm run prepare:ffmpeg && npm run build && electron-builder --mac dir --publish never",

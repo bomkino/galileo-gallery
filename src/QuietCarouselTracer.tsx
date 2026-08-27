@@ -128,14 +128,6 @@ export default function QuietCarouselTracer() {
     }), [config, stageSize, timeMs, timeline])
 
     React.useEffect(() => {
-        try {
-            localStorage.setItem(BROWSER_PROJECT_KEY, serializeQuietCarouselBrowserProject(config))
-        } catch {
-            setNotice("Browser storage full · Project remains open")
-        }
-    }, [config])
-
-    React.useEffect(() => {
         setTimeMs((value) => value % timeline.durationMs)
     }, [timeline.durationMs])
 
@@ -163,8 +155,12 @@ export default function QuietCarouselTracer() {
     }
 
     const save = () => {
-        localStorage.setItem(BROWSER_PROJECT_KEY, serializeQuietCarouselBrowserProject(config))
-        setNotice("Saved in browser · exact Scene and Timeline intent")
+        try {
+            localStorage.setItem(BROWSER_PROJECT_KEY, serializeQuietCarouselBrowserProject(config))
+            setNotice("Saved in browser · exact Scene and Timeline intent")
+        } catch {
+            setNotice("Browser storage full · Project remains open")
+        }
     }
 
     const reload = () => {
@@ -201,7 +197,25 @@ export default function QuietCarouselTracer() {
     const activeSegment = timeline.segments.find((segment) => timeMs >= segment.startMs && timeMs < segment.endMs) ?? timeline.segments[0]
 
     return (
-        <main className="qc-studio" data-g02-tracer="quiet-carousel-v1">
+        <main
+            className="qc-studio"
+            data-g02-tracer="quiet-carousel-v1"
+            data-axis={config.settings.axis}
+            data-background={config.settings.backgroundStyle === "transparent" ? "transparent" : "solid"}
+            data-canvas={`${config.settings.canvasWidth}x${config.settings.canvasHeight}`}
+            data-direction={config.settings.direction}
+            data-failed-media={failedMedia.size}
+            data-fit={config.settings.imageFit}
+            data-frame-count={config.items.length}
+            data-frame-size={config.settings.slideHeight}
+            data-gap={config.settings.gap}
+            data-pace-ms={config.settings.paceMs}
+            data-depth={config.settings.centerBump}
+            data-playing={playing}
+            data-time-ms={Math.round(timeMs)}
+            data-timeline-duration-ms={timeline.durationMs}
+            data-timeline-mode={config.timelineMode}
+        >
             <header className="qc-appbar">
                 <div>
                     <span className="qc-eyebrow">Galileo Gallery · browser tracer</span>
@@ -209,9 +223,9 @@ export default function QuietCarouselTracer() {
                 </div>
                 <div className="qc-project-actions" aria-label="Project actions">
                     <span role="status">{notice}</span>
-                    <button type="button" onClick={replaceWithFixture}>Import 8-frame fixture</button>
-                    <button type="button" onClick={save}>Save</button>
-                    <button type="button" onClick={reload}>Reload</button>
+                    <button data-g02-action="fixture" type="button" onClick={replaceWithFixture}>Import 8-frame fixture</button>
+                    <button data-g02-action="save" type="button" onClick={save}>Save</button>
+                    <button data-g02-action="reload" type="button" onClick={reload}>Reload</button>
                 </div>
             </header>
 
@@ -222,7 +236,7 @@ export default function QuietCarouselTracer() {
                     </div>
                     <ol>
                         {config.items.map((item, index) => (
-                            <li key={item.id}>
+                            <li data-g02-frame-id={item.id} key={item.id}>
                                 <button className={selectedId === item.id ? "is-selected" : ""} type="button" onClick={() => setSelectedId(item.id)}>
                                     <span>{String(index + 1).padStart(2, "0")}</span>
                                     <img src={item.url} alt="" loading="lazy" />
@@ -243,6 +257,7 @@ export default function QuietCarouselTracer() {
                     <div className="qc-stage-shell">
                         <div
                             className={`qc-stage ${config.settings.backgroundStyle === "transparent" ? "is-transparent" : ""}`}
+                            data-g02-stage="canvas"
                             ref={stageRef}
                             style={{
                                 aspectRatio: canvasRatio,
@@ -255,6 +270,7 @@ export default function QuietCarouselTracer() {
                                 return (
                                     <figure
                                         className={`qc-frame ${selectedId === item.id ? "is-selected" : ""} ${failedMedia.has(item.id) ? "is-failed" : ""}`}
+                                        data-g02-stage-frame={item.id}
                                         key={frame.id}
                                         style={{
                                             width: frame.width,
@@ -280,9 +296,9 @@ export default function QuietCarouselTracer() {
                         </div>
                     </div>
                     <div className="qc-transport">
-                        <button type="button" onClick={() => setPlaying((value) => !value)}>{playing ? "Pause" : "Play"}</button>
-                        <button type="button" onClick={() => setTimeMs(0)}>Restart</button>
-                        <input aria-label="Story playhead" type="range" min={0} max={timeline.durationMs} step={1} value={timeMs} onChange={(event) => { setPlaying(false); setTimeMs(Number(event.target.value)) }} />
+                        <button data-g02-action="play" type="button" onClick={() => setPlaying((value) => !value)}>{playing ? "Pause" : "Play"}</button>
+                        <button data-g02-action="restart" type="button" onClick={() => setTimeMs(0)}>Restart</button>
+                        <input data-g02-control="playhead" aria-label="Story playhead" type="range" min={0} max={timeline.durationMs} step={1} value={timeMs} onChange={(event) => { setPlaying(false); setTimeMs(Number(event.target.value)) }} />
                         <output>{formatDuration(timeMs)} / {formatDuration(timeline.durationMs)}</output>
                     </div>
                 </section>
@@ -290,14 +306,14 @@ export default function QuietCarouselTracer() {
                 <aside className="qc-inspector" aria-label="Contextual Inspector">
                     <div className="qc-panel-heading">
                         <div><span className="qc-eyebrow">Scene</span><strong>{quietCarouselScene.definition.name}</strong></div>
-                        <button type="button" onClick={resetScene}>Reset</button>
+                        <button data-g02-action="reset" type="button" onClick={resetScene}>Reset</button>
                     </div>
 
                     <fieldset>
                         <legend>Canvas ratio</legend>
                         <div className="qc-segmented">
                             {RATIO_PRESETS.map((ratio) => (
-                                <button className={config.settings.canvasWidth === ratio.width && config.settings.canvasHeight === ratio.height ? "is-active" : ""} type="button" key={ratio.id} onClick={() => updateSettings({ canvasPreset: ratio.id, canvasWidth: ratio.width, canvasHeight: ratio.height })}>{ratio.label}</button>
+                                <button data-g02-ratio={ratio.id} className={config.settings.canvasWidth === ratio.width && config.settings.canvasHeight === ratio.height ? "is-active" : ""} type="button" key={ratio.id} onClick={() => updateSettings({ canvasPreset: ratio.id, canvasWidth: ratio.width, canvasHeight: ratio.height })}>{ratio.label}</button>
                             ))}
                         </div>
                     </fieldset>
@@ -305,30 +321,30 @@ export default function QuietCarouselTracer() {
                     <fieldset>
                         <legend>Direction</legend>
                         <div className="qc-segmented">
-                            {(["horizontal", "vertical"] as const).map((axis) => <button className={config.settings.axis === axis ? "is-active" : ""} type="button" key={axis} onClick={() => updateSettings({ axis })}>{axis}</button>)}
+                            {(["horizontal", "vertical"] as const).map((axis) => <button data-g02-axis={axis} className={config.settings.axis === axis ? "is-active" : ""} type="button" key={axis} onClick={() => updateSettings({ axis })}>{axis}</button>)}
                         </div>
                         <div className="qc-segmented">
-                            {(["forward", "reverse"] as const).map((direction) => <button className={config.settings.direction === direction ? "is-active" : ""} type="button" key={direction} onClick={() => updateSettings({ direction })}>{direction}</button>)}
+                            {(["forward", "reverse"] as const).map((direction) => <button data-g02-direction={direction} className={config.settings.direction === direction ? "is-active" : ""} type="button" key={direction} onClick={() => updateSettings({ direction })}>{direction}</button>)}
                         </div>
                     </fieldset>
 
-                    <label>{control("frame-size").label} <output>{config.settings.slideHeight}{control("frame-size").unit}</output><input type="range" min={control("frame-size").min} max={control("frame-size").max} step={control("frame-size").step} value={config.settings.slideHeight} onChange={(event) => updateSettings({ slideHeight: Number(event.target.value) })} /></label>
-                    <label>{control("gap").label} <output>{config.settings.gap} {control("gap").unit}</output><input type="range" min={control("gap").min} max={control("gap").max} step={control("gap").step} value={config.settings.gap} onChange={(event) => updateSettings({ gap: Number(event.target.value) })} /></label>
-                    <label>{control("pace").label} <output>{config.settings.paceMs}{control("pace").unit}</output><input type="range" min={control("pace").min} max={control("pace").max} step={control("pace").step} value={config.settings.paceMs} onChange={(event) => updateSettings({ paceMs: Number(event.target.value) })} /></label>
-                    <label>{control("depth").label} <output>{config.settings.centerBump}{control("depth").unit}</output><input type="range" min={control("depth").min} max={control("depth").max} step={control("depth").step} value={config.settings.centerBump} onChange={(event) => updateSettings({ centerBump: Number(event.target.value) })} /></label>
+                    <label>{control("frame-size").label} <output>{config.settings.slideHeight}{control("frame-size").unit}</output><input data-g02-control="frame-size" type="range" min={control("frame-size").min} max={control("frame-size").max} step={control("frame-size").step} value={config.settings.slideHeight} onChange={(event) => updateSettings({ slideHeight: Number(event.target.value) })} /></label>
+                    <label>{control("gap").label} <output>{config.settings.gap} {control("gap").unit}</output><input data-g02-control="gap" type="range" min={control("gap").min} max={control("gap").max} step={control("gap").step} value={config.settings.gap} onChange={(event) => updateSettings({ gap: Number(event.target.value) })} /></label>
+                    <label>{control("pace").label} <output>{config.settings.paceMs}{control("pace").unit}</output><input data-g02-control="pace" type="range" min={control("pace").min} max={control("pace").max} step={control("pace").step} value={config.settings.paceMs} onChange={(event) => updateSettings({ paceMs: Number(event.target.value) })} /></label>
+                    <label>{control("depth").label} <output>{config.settings.centerBump}{control("depth").unit}</output><input data-g02-control="depth" type="range" min={control("depth").min} max={control("depth").max} step={control("depth").step} value={config.settings.centerBump} onChange={(event) => updateSettings({ centerBump: Number(event.target.value) })} /></label>
 
                     <fieldset>
                         <legend>{control("fit").label}</legend>
                         <div className="qc-segmented">
-                            {(["contain", "cover"] as const).map((fit) => <button className={config.settings.imageFit === fit ? "is-active" : ""} type="button" key={fit} onClick={() => updateSettings({ imageFit: fit })}>{fit}</button>)}
+                            {(["contain", "cover"] as const).map((fit) => <button data-g02-fit={fit} className={config.settings.imageFit === fit ? "is-active" : ""} type="button" key={fit} onClick={() => updateSettings({ imageFit: fit })}>{fit}</button>)}
                         </div>
                     </fieldset>
 
                     <fieldset>
                         <legend>{control("background").label}</legend>
                         <div className="qc-segmented">
-                            <button className={config.settings.backgroundStyle !== "transparent" ? "is-active" : ""} type="button" onClick={() => updateSettings({ backgroundStyle: "solid" })}>clean colour</button>
-                            <button className={config.settings.backgroundStyle === "transparent" ? "is-active" : ""} type="button" onClick={() => updateSettings({ backgroundStyle: "transparent" })}>transparent</button>
+                            <button data-g02-background="solid" className={config.settings.backgroundStyle !== "transparent" ? "is-active" : ""} type="button" onClick={() => updateSettings({ backgroundStyle: "solid" })}>clean colour</button>
+                            <button data-g02-background="transparent" className={config.settings.backgroundStyle === "transparent" ? "is-active" : ""} type="button" onClick={() => updateSettings({ backgroundStyle: "transparent" })}>transparent</button>
                         </div>
                         {config.settings.backgroundStyle !== "transparent" ? <input aria-label="Background colour" type="color" value={config.settings.ground || "#11110f"} onChange={(event) => updateSettings({ ground: event.target.value })} /> : null}
                     </fieldset>
@@ -339,9 +355,9 @@ export default function QuietCarouselTracer() {
                 <div className="qc-timeline-heading">
                     <div><span className="qc-eyebrow">Visual Timeline</span><strong>{formatDuration(timeline.durationMs)} · {timeline.frameCount} frames at 30 fps</strong></div>
                     <div className="qc-segmented">
-                        {(["automatic", "fixed-duration", "directed"] as const).map((mode) => <button className={config.timelineMode === mode ? "is-active" : ""} type="button" key={mode} onClick={() => setTimelineMode(mode)}>{mode === "fixed-duration" ? "fixed" : mode}</button>)}
+                        {(["automatic", "fixed-duration", "directed"] as const).map((mode) => <button data-g02-timeline-mode={mode} className={config.timelineMode === mode ? "is-active" : ""} type="button" key={mode} onClick={() => setTimelineMode(mode)}>{mode === "fixed-duration" ? "fixed" : mode}</button>)}
                     </div>
-                    {config.timelineMode === "fixed-duration" ? <label>Duration <input type="number" min={1000} max={60000} step={500} value={config.timelineFixedDurationMs} onChange={(event) => setConfig((current) => ({ ...current, timelineFixedDurationMs: Number(event.target.value) }))} /> ms</label> : null}
+                    {config.timelineMode === "fixed-duration" ? <label>Duration <input data-g02-control="fixed-duration" type="number" min={1000} max={60000} step={500} value={config.timelineFixedDurationMs} onChange={(event) => setConfig((current) => ({ ...current, timelineFixedDurationMs: Number(event.target.value) }))} /> ms</label> : null}
                 </div>
                 <SegmentStrip config={config} timeMs={timeMs} durationMs={timeline.durationMs} />
             </section>

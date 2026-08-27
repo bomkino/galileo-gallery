@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, codex/g02-quiet-carousel-tracer]
   pull_request:
 
 permissions:
@@ -25,6 +25,7 @@ jobs:
       - run: npm test
 
   package-linux:
+    if: github.ref_name == 'main' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -44,6 +45,7 @@ jobs:
           path: release/*.AppImage
 
   package-macos:
+    if: github.ref_name == 'main' || github.event_name == 'pull_request'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v5
@@ -73,6 +75,7 @@ jobs:
           path: release/mac-arm64/*.app
 
   package-windows:
+    if: github.ref_name == 'main' || github.event_name == 'pull_request'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
@@ -100,3 +103,21 @@ jobs:
         with:
           name: galileo-gallery-windows
           path: release/*.exe
+
+  renderer-g02:
+    if: github.ref_name == 'main' || github.ref_name == 'codex/g02-quiet-carousel-tracer' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Run the real Quiet Carousel renderer journey
+        run: xvfb-run -a npm run verify:g02-renderer
+      - uses: actions/upload-artifact@v6
+        with:
+          name: g02-quiet-carousel-renderer-evidence
+          path: artifacts/g02/

@@ -83,3 +83,25 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f7c5b6; outline-
 @media (prefers-reduced-motion: reduce) {
     .qc-frame { will-change: auto; }
 }
+
+html[data-g02-alpha-capture],
+html[data-g02-alpha-capture] body,
+html[data-g02-alpha-capture] #root,
+html[data-g02-alpha-capture] .qc-studio,
+html[data-g02-alpha-capture] .qc-workspace,
+html[data-g02-alpha-capture] .qc-stage-area,
+html[data-g02-alpha-capture] .qc-stage-shell {
+    background: transparent !important;
+}
+html[data-g02-alpha-capture] .qc-studio { display: block; min-width: 0; }
+html[data-g02-alpha-capture] .qc-appbar,
+html[data-g02-alpha-capture] .qc-frames,
+html[data-g02-alpha-capture] .qc-inspector,
+html[data-g02-alpha-capture] .qc-timeline,
+html[data-g02-alpha-capture] .qc-stage-meta,
+html[data-g02-alpha-capture] .qc-transport { display: none; }
+html[data-g02-alpha-capture] .qc-workspace,
+html[data-g02-alpha-capture] .qc-stage-area,
+html[data-g02-alpha-capture] .qc-stage-shell { display: flex; width: 100vw; height: 100vh; padding: 0; }
+html[data-g02-alpha-capture] .qc-stage { box-shadow: none; }
+html[data-g02-alpha-capture] .qc-frame.is-selected { outline: 0; }

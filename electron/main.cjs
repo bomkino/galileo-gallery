@@ -58,11 +58,14 @@ let activeExport = null
 let activeProjectImport = null
 
 function rendererURL(exportMode = false) {
-    const query = exportMode ? "?export=1" : ""
+    const query = new URLSearchParams()
+    if (exportMode) query.set("export", "1")
+    if (process.env.REEL_G02_RENDERER_OUTPUT) query.set("tracer", "quiet-carousel")
+    const suffix = query.size ? `?${query}` : ""
     if (process.env.VITE_DEV_SERVER_URL) {
-        return `${process.env.VITE_DEV_SERVER_URL}/${query}`
+        return `${process.env.VITE_DEV_SERVER_URL}/${suffix}`
     }
-    return `${pathToFileURL(path.join(__dirname, "../dist/index.html")).href}${query}`
+    return `${pathToFileURL(path.join(__dirname, "../dist/index.html")).href}${suffix}`
 }
 
 function ffmpegPath() {
@@ -393,7 +396,8 @@ function createMainWindow() {
         minWidth: 1080,
         minHeight: 700,
         show: false,
-        backgroundColor: "#171614",
+        backgroundColor: process.env.REEL_G02_RENDERER_OUTPUT ? "#00000000" : "#171614",
+        transparent: Boolean(process.env.REEL_G02_RENDERER_OUTPUT),
         title: "Galileo Gallery",
         icon: bundledIcon,
         webPreferences: {
@@ -413,6 +417,18 @@ function createMainWindow() {
     }
     mainWindow = new BrowserWindow(windowOptions)
     mainWindow.loadURL(rendererURL())
+    if (process.env.REEL_G02_RENDERER_OUTPUT) {
+        mainWindow.webContents.once("did-finish-load", async () => {
+            try {
+                const { runG02RendererSmoke } = require("./g02-renderer-smoke.cjs")
+                await runG02RendererSmoke(mainWindow, path.resolve(process.env.REEL_G02_RENDERER_OUTPUT))
+                app.exit(0)
+            } catch (error) {
+                console.error(error)
+                app.exit(1)
+            }
+        })
+    }
     mainWindow.once("ready-to-show", () => {
         mainWindow?.show()
         if (process.env.REEL_SCREENSHOT_OUTPUT && mainWindow) {
