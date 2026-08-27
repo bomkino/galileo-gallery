@@ -7,6 +7,7 @@ const {
     nativeImage,
     protocol,
     screen,
+    session,
     shell,
 } = require("electron")
 const { spawn } = require("node:child_process")
@@ -30,6 +31,11 @@ const {
     openPortableProjectArchive,
     savePortableProjectArchive,
 } = require("./project-persistence.cjs")
+const {
+    createAppProtocolHandler,
+    installSessionSecurity,
+    installWindowSecurity,
+} = require("./linux-protocols.cjs")
 let ffmpegStatic = null
 try {
     ffmpegStatic = require("ffmpeg-static")
@@ -38,6 +44,14 @@ try {
 }
 
 protocol.registerSchemesAsPrivileged([
+    {
+        scheme: "gallery-app",
+        privileges: {
+            standard: true,
+            secure: true,
+            supportFetchAPI: true,
+        },
+    },
     {
         scheme: "reel-media",
         privileges: {
@@ -57,15 +71,20 @@ let mainWindow = null
 let activeExport = null
 let activeProjectImport = null
 
+function developmentRendererOrigin() {
+    return app.isPackaged ? undefined : process.env.VITE_DEV_SERVER_URL
+}
+
 function rendererURL(exportMode = false) {
     const query = new URLSearchParams()
     if (exportMode) query.set("export", "1")
     if (process.env.REEL_G02_RENDERER_OUTPUT) query.set("tracer", "quiet-carousel")
     const suffix = query.size ? `?${query}` : ""
-    if (process.env.VITE_DEV_SERVER_URL) {
-        return `${process.env.VITE_DEV_SERVER_URL}/${suffix}`
+    const developmentOrigin = developmentRendererOrigin()
+    if (developmentOrigin) {
+        return `${developmentOrigin}/${suffix}`
     }
-    return `${pathToFileURL(path.join(__dirname, "../dist/index.html")).href}${suffix}`
+    return `gallery-app://app/index.html${suffix}`
 }
 
 function ffmpegPath() {
@@ -416,6 +435,7 @@ function createMainWindow() {
         })
     }
     mainWindow = new BrowserWindow(windowOptions)
+    installWindowSecurity(mainWindow, { developmentOrigin: developmentRendererOrigin() })
     mainWindow.loadURL(rendererURL())
     if (process.env.REEL_G02_RENDERER_OUTPUT) {
         mainWindow.webContents.once("did-finish-load", async () => {
@@ -705,6 +725,7 @@ async function runExport(request, outputPath) {
             zoomFactor: 1 / scaleFactor,
         },
     })
+    installWindowSecurity(exportWindow, { developmentOrigin: developmentRendererOrigin() })
     state.window = exportWindow
 
     try {
@@ -819,6 +840,9 @@ app.whenReady().then(async () => {
         const icon = nativeImage.createFromPath(iconPath)
         if (!icon.isEmpty()) app.dock.setIcon(icon)
     }
+    const developmentOrigin = developmentRendererOrigin()
+    protocol.handle("gallery-app", createAppProtocolHandler(path.join(__dirname, "../dist")))
+    installSessionSecurity(session.defaultSession, { developmentOrigin })
     protocol.handle("reel-media", (request) => {
         try {
             const url = new URL(request.url)

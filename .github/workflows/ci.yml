@@ -105,7 +105,7 @@ jobs:
           path: release/*.exe
 
   renderer-g02:
-    if: github.ref_name == 'main' || github.ref_name == 'codex/g02-quiet-carousel-tracer' || github.event_name == 'pull_request'
+    if: github.ref_name == 'main' || github.ref_name == 'codex/g02-quiet-carousel-tracer' || github.ref_name == 'codex/g03-linux-host-port' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
