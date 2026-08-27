@@ -44,6 +44,7 @@ function createLinuxHostController(options) {
     let currentResourceRoot = null
     let pending = null
     let opening = null
+    let nextGeneration = generation + 1
 
     const operations = Object.freeze({
         "identity.read": { states: ["ready", "opening"], validate: (payload) => ownExact(payload, []) },
@@ -100,7 +101,8 @@ function createLinuxHostController(options) {
             case "project.open.begin": {
                 state = "opening"
                 const controller = new AbortController()
-                const candidateGeneration = generation + 1
+                const candidateGeneration = nextGeneration
+                nextGeneration += 1
                 const operation = { controller, generation: candidateGeneration }
                 opening = operation
                 try {
@@ -115,11 +117,15 @@ function createLinuxHostController(options) {
                         return { cancelled: true }
                     }
                     if (opened.cancelled) {
+                        registry.revokeOwner(owner, candidateGeneration)
+                        safeRemove(opened.resourceRoot)
                         state = "ready"
                         opening = null
                         return { cancelled: true }
                     }
                     if (opened.failure) {
+                        registry.revokeOwner(owner, candidateGeneration)
+                        safeRemove(opened.resourceRoot)
                         state = "ready"
                         opening = null
                         return { failure: opened.failure }
@@ -205,12 +211,19 @@ function createLinuxHostController(options) {
         state = "closed"
     }
 
+    function abandonPending() {
+        opening?.controller.abort()
+        opening = null
+        cleanupPending()
+        if (state !== "closed") state = "ready"
+    }
+
     function bootstrap(event) {
         validateSender(event, { webContentsId })
         return Object.freeze({ protocol: 1, generation, state })
     }
 
-    return Object.freeze({ bootstrap, dispose, grantMedia, handle, mediaPath, openMedia, snapshot: () => Object.freeze({ generation, state, pending: Boolean(pending) }) })
+    return Object.freeze({ abandonPending, bootstrap, dispose, grantMedia, handle, mediaPath, openMedia, snapshot: () => Object.freeze({ generation, state, pending: Boolean(pending) }) })
 }
 
 module.exports = { createLinuxHostController, tokenFromMediaURL }

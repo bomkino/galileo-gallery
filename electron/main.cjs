@@ -69,6 +69,7 @@ protocol.registerSchemesAsPrivileged([
 
 app.commandLine.appendSwitch("force-device-scale-factor", "1")
 if (process.env.REEL_USER_DATA_DIR) app.setPath("userData", path.resolve(process.env.REEL_USER_DATA_DIR))
+if (!app.requestSingleInstanceLock()) app.quit()
 
 let mainWindow = null
 let activeExport = null
@@ -86,7 +87,7 @@ function developmentRendererOrigin() {
 }
 
 function linuxHostMode() {
-    return process.platform === "linux" && (app.isPackaged || Boolean(process.env.REEL_G03_RENDERER_OUTPUT))
+    return process.platform === "linux" && (Boolean(process.env.REEL_G03_RENDERER_OUTPUT) || (app.isPackaged && packagedBuildIdentity().profile === "g03-linux-host-port"))
 }
 
 function packagedBuildIdentity() {
@@ -94,6 +95,26 @@ function packagedBuildIdentity() {
         return JSON.parse(fs.readFileSync(path.join(__dirname, "../dist/build-identity.json"), "utf8"))
     } catch {
         return { productId: "galileo-gallery", sourceSha: "unavailable", sourceTree: "unavailable", buildId: "development" }
+    }
+}
+
+function cleanupOpenedProjectResidue() {
+    const root = path.join(app.getPath("userData"), "opened-project-media")
+    if (!fs.existsSync(root)) return
+    let rootStat
+    try {
+        rootStat = fs.lstatSync(root)
+    } catch {
+        return
+    }
+    if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) return
+    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+        if (!entry.isDirectory() || !/^open-[a-f0-9-]{36}$/.test(entry.name)) continue
+        const target = path.join(root, entry.name)
+        try {
+            const stat = fs.lstatSync(target)
+            if (stat.isDirectory() && !stat.isSymbolicLink()) fs.rmSync(target, { recursive: true, force: true })
+        } catch {}
     }
 }
 
@@ -528,6 +549,10 @@ function createMainWindow() {
             ),
         })
         linuxHostControllers.set(webContentsId, host)
+        mainWindow.webContents.on("did-start-navigation", (_event, _url, _isInPlace, isMainFrame) => {
+            if (isMainFrame) host.abandonPending()
+        })
+        mainWindow.webContents.on("render-process-gone", () => host.abandonPending())
     }
     installWindowSecurity(mainWindow, { developmentOrigin: developmentRendererOrigin(), onDecision: recordSecurityDecision })
     mainWindow.loadURL(rendererURL())
@@ -937,6 +962,7 @@ async function runExport(request, outputPath) {
 }
 
 app.whenReady().then(async () => {
+    if (linuxHostMode()) cleanupOpenedProjectResidue()
     if (process.platform === "darwin") {
         const iconPath = app.isPackaged
             ? path.join(process.resourcesPath, "icon.icns")

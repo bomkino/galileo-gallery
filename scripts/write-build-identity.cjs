@@ -8,6 +8,7 @@ function git(...args) {
 
 const identity = Object.freeze({
     productId: "galileo-gallery",
+    profile: "g03-linux-host-port",
     sourceSha: process.env.GALLERY_SOURCE_SHA || git("rev-parse", "HEAD"),
     sourceTree: process.env.GALLERY_SOURCE_TREE || git("rev-parse", "HEAD^{tree}"),
     buildId: process.env.GALLERY_BUILD_ID || `g03-${Date.now().toString(36)}`,

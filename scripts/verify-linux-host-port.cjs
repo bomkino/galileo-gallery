@@ -29,7 +29,7 @@ try {
     assert.match(media.grant, /^[a-f0-9]{64}$/)
     assert.equal(media.mediaURL.includes(mediaPath), false)
     assert.equal(Buffer.from(media.grant, "hex").length, 32)
-    assert.deepEqual(registry.snapshot(), { active: 1, byScope: { media: 1, document: 0, destination: 0 } })
+    assert.deepEqual(registry.snapshot(), { active: 1, openStreams: 0, byScope: { media: 1, document: 0, destination: 0 } })
 
     const full = registry.read({ grant: media.grant, owner: "window-1", generation: 7, range: "bytes=0-7" })
     assert.equal(full.status, 206)
@@ -115,11 +115,12 @@ try {
     assert.throws(() => registry.create({ scope: "media", filePath: zeroPath, owner: "window-1", generation: 9, mime: "image/png" }), (error) => error.code === "invalid_request")
     const largePath = path.join(temporary, "large.png")
     fs.writeFileSync(largePath, Buffer.alloc(9 * 1024 * 1024, 7))
-    const streamingRegistry = createGrantRegistry({ maximumReadBytes: 8 * 1024 * 1024 })
+    const streamingRegistry = createGrantRegistry({ maximumReadBytes: 8 * 1024 * 1024, maximumOpenStreams: 1 })
     const large = streamingRegistry.create({ scope: "media", filePath: largePath, owner: "window-large", generation: 1, mime: "image/png" })
     const largeStream = streamingRegistry.openRead({ grant: large.grant, owner: "window-large", generation: 1, range: undefined })
     assert.equal(largeStream.status, 200)
     assert.equal(largeStream.headers["content-length"], String(9 * 1024 * 1024))
+    assert.throws(() => streamingRegistry.openRead({ grant: large.grant, owner: "window-large", generation: 1, range: undefined }), (error) => error.code === "resource_limit")
     largeStream.stream.destroy()
 
     console.log("Verified: G03 opaque scoped grants, bounded verified reads, expiry/revocation/generation, strict envelopes and sender/origin checks, and path/token redaction.")

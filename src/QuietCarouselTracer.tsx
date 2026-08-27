@@ -42,7 +42,7 @@ function formatDuration(value: number) {
 async function hydrateHostMedia(config: ReelConfig) {
     await Promise.all(config.items.map((item) => new Promise<void>((resolve, reject) => {
         const media = item.type === "video" ? document.createElement("video") : new Image()
-        const timeout = window.setTimeout(() => reject(new Error(`Timed out hydrating ${item.name}.`)), 15_000)
+        const timeout = window.setTimeout(() => { cleanup(); reject(new Error(`Timed out hydrating ${item.name}.`)) }, 15_000)
         const cleanup = () => {
             window.clearTimeout(timeout)
             media.removeAttribute("src")

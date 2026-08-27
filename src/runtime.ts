@@ -1,4 +1,4 @@
-import type { GalleryHostPort, ReelAPI } from "./types"
+import type { GalleryHostPort, ReelAPI, ReelConfig } from "./types"
 
 const unavailable = async () => {
     throw new Error("This action is available in the Galileo desktop app.")
@@ -25,6 +25,42 @@ const browserAPI: ReelAPI = {
     exportReady: () => undefined,
 }
 
+function validateHostConfig(value: unknown): ReelConfig {
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Host Project is invalid.")
+    const config = value as Partial<ReelConfig>
+    if (config.schemaVersion !== 2 || typeof config.styleId !== "string" || !config.settings || !Array.isArray(config.items) || config.items.length > 256) {
+        throw new Error("Host Project is invalid.")
+    }
+    if (!config.items.every((item) => item && typeof item.id === "string" && ["image", "video"].includes(item.type) && /^reel-media:\/\/grant\/[a-f0-9]{64}$/.test(item.url))) {
+        throw new Error("Host media authority is invalid.")
+    }
+    return config as ReelConfig
+}
+
+async function hydrateHostConfig(config: ReelConfig) {
+    await Promise.all(config.items.map((item) => new Promise<void>((resolve, reject) => {
+        const media = item.type === "video" ? document.createElement("video") : new Image()
+        const timeout = window.setTimeout(() => finish(new Error(`Timed out hydrating ${item.name}.`)), 15_000)
+        const finish = (error?: Error) => {
+            window.clearTimeout(timeout)
+            media.removeAttribute("src")
+            if (media instanceof HTMLMediaElement) media.load()
+            if (error) reject(error)
+            else resolve()
+        }
+        if (media instanceof HTMLVideoElement) {
+            media.preload = "metadata"
+            media.onloadedmetadata = () => finish()
+            media.onerror = () => finish(new Error(`Could not hydrate ${item.name}.`))
+            media.src = item.url
+            media.load()
+        } else {
+            media.src = item.url
+            media.decode().then(() => finish(), () => finish(new Error(`Could not hydrate ${item.name}.`)))
+        }
+    })))
+}
+
 function hostBackedAPI(host: GalleryHostPort): ReelAPI {
     return {
         ...browserAPI,
@@ -35,8 +71,10 @@ function hostBackedAPI(host: GalleryHostPort): ReelAPI {
             const candidate = await host.beginProjectOpen()
             if ("cancelled" in candidate || "failure" in candidate) return candidate
             try {
+                const config = validateHostConfig(candidate.config)
+                await hydrateHostConfig(config)
                 await host.acceptProjectOpen(candidate.operationId)
-                return { config: candidate.config }
+                return { config }
             } catch (error) {
                 await host.discardProjectOpen(candidate.operationId).catch(() => undefined)
                 throw error

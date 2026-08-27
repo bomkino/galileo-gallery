@@ -48,8 +48,11 @@ function createGrantRegistry(options = {}) {
     const maximumGrants = options.maximumGrants ?? 512
     const maximumResourceBytes = options.maximumResourceBytes ?? 16 * 1024 * 1024 * 1024
     const maximumReadBytes = options.maximumReadBytes ?? 8 * 1024 * 1024
+    const maximumFullReadBytes = options.maximumFullReadBytes ?? 256 * 1024 * 1024
+    const maximumOpenStreams = options.maximumOpenStreams ?? 16
     const lifetimeMs = options.lifetimeMs ?? 12 * 60 * 60 * 1000
     const grants = new Map()
+    let openStreams = 0
 
     function pruneExpired() {
         const current = clock()
@@ -175,8 +178,12 @@ function createGrantRegistry(options = {}) {
             const stats = fs.fstatSync(handle)
             if (!stats.isFile() || stats.dev !== grant.device || stats.ino !== grant.inode || stats.size !== grant.bytes || stats.mtimeMs !== grant.mtimeMs) fail("verification_failed")
             const range = parseRange(input.range, stats.size)
+            if (!range.partial && stats.size > maximumFullReadBytes) fail("resource_limit")
+            if (openStreams >= maximumOpenStreams) fail("resource_limit")
             const length = range.end - range.start + 1
             const stream = fs.createReadStream(grant.filePath, { fd: handle, autoClose: true, start: range.start, end: range.end })
+            openStreams += 1
+            stream.once("close", () => { openStreams = Math.max(0, openStreams - 1) })
             return {
                 status: range.partial ? 206 : 200,
                 stream,
@@ -198,7 +205,7 @@ function createGrantRegistry(options = {}) {
         pruneExpired()
         const byScope = { media: 0, document: 0, destination: 0 }
         for (const grant of grants.values()) byScope[grant.scope] += 1
-        return Object.freeze({ active: grants.size, byScope: Object.freeze(byScope) })
+        return Object.freeze({ active: grants.size, openStreams, byScope: Object.freeze(byScope) })
     }
 
     return Object.freeze({ create, openRead, read, resolve, revoke, revokeOwner, snapshot })

@@ -62,23 +62,23 @@ async function run() {
     const acceptedCandidate = await host.handle(event, envelope("project.open.begin"))
     const accepted = await host.handle(event, envelope("project.open.accept", { operationId: acceptedCandidate.value.operationId }))
     assert.equal(accepted.ok, true)
-    assert.equal(accepted.generation, 2)
-    assert.deepEqual(host.bootstrap(event), { protocol: 1, generation: 2, state: "ready" })
+    assert.equal(accepted.generation, 3)
+    assert.deepEqual(host.bootstrap(event), { protocol: 1, generation: 3, state: "ready" })
     assert.equal(host.snapshot().state, "ready")
     assert.throws(() => host.mediaPath(chosen.value[0].mediaURL), (error) => error.code === "grant_expired")
 
     const stale = await host.handle(event, envelope("identity.read", {}, 1, "request-stale"))
     assert.equal(stale.error.code, "conflict")
-    const wrongOrigin = await host.handle({ sender, senderFrame: { url: "https://attacker.example" } }, envelope("identity.read", {}, 2, "request-origin"))
+    const wrongOrigin = await host.handle({ sender, senderFrame: { url: "https://attacker.example" } }, envelope("identity.read", {}, 3, "request-origin"))
     assert.equal(wrongOrigin.error.code, "permission_denied")
-    const malformed = await host.handle(event, { ...envelope("identity.read", {}, 2, "request-malformed"), extra: true })
+    const malformed = await host.handle(event, { ...envelope("identity.read", {}, 3, "request-malformed"), extra: true })
     assert.equal(malformed.error.code, "invalid_request")
     assert.equal(JSON.stringify(malformed).includes(mediaPath), false)
 
     host.dispose()
     assert.equal(host.snapshot().state, "closed")
 
-    let finishDelayedOpen
+    const finishDelayedOpens = []
     const raceRemoved = []
     const racy = createLinuxHostController({
         owner: "window-72",
@@ -86,11 +86,11 @@ async function run() {
         identity: () => ({}),
         chooseMedia: async () => [],
         saveProject: async () => ({}),
-        openProject: ({ grantMedia }) => new Promise((resolve) => {
-            finishDelayedOpen = () => resolve({
+        openProject: ({ grantMedia, generation }) => new Promise((resolve) => {
+            finishDelayedOpens.push(() => resolve({
                 config: { items: [{ url: grantMedia(mediaPath, "image/png").mediaURL }] },
-                resourceRoot: path.join(temporary, "racy-open"),
-            })
+                resourceRoot: path.join(temporary, `racy-open-${generation}`),
+            }))
         }),
         removeResourceRoot: (value) => raceRemoved.push(value),
     })
@@ -101,11 +101,21 @@ async function run() {
     await Promise.resolve()
     const cancelled = await racy.handle(raceEvent, { protocol: 1, requestId: "race-cancel", operation: "project.open.cancel", generation: 1, payload: {} })
     assert.equal(cancelled.ok, true)
-    finishDelayedOpen()
+    const retrying = racy.handle(raceEvent, { protocol: 1, requestId: "race-retry", operation: "project.open.begin", generation: 1, payload: {} })
+    await Promise.resolve()
+    finishDelayedOpens[0]()
     const staleCompletion = await beginning
     assert.deepEqual(staleCompletion.value, { cancelled: true })
-    assert.deepEqual(racy.snapshot(), { generation: 1, state: "ready", pending: false })
-    assert.deepEqual(raceRemoved, [path.join(temporary, "racy-open")])
+    assert.deepEqual(racy.snapshot(), { generation: 1, state: "opening", pending: false })
+    finishDelayedOpens[1]()
+    const retried = await retrying
+    assert.equal(retried.value.candidateGeneration, 3)
+    assert.equal(racy.openMedia({ url: retried.value.config.items[0].url, range: "bytes=0-1" }).status, 206)
+    const retryAccepted = await racy.handle(raceEvent, { protocol: 1, requestId: "race-accept", operation: "project.open.accept", generation: 1, payload: { operationId: retried.value.operationId } })
+    assert.equal(retryAccepted.generation, 3)
+    assert.deepEqual(raceRemoved, [path.join(temporary, "racy-open-2")])
+    racy.abandonPending()
+    assert.equal(racy.snapshot().state, "ready")
     racy.dispose()
     console.log("Verified: G03 HostPort dispatch, sender/generation/state enforcement, opaque media selection/save, and two-phase open accept/discard cleanup.")
 }
