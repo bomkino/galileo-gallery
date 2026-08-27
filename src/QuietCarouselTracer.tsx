@@ -44,10 +44,16 @@ function formatDuration(value: number) {
 }
 
 function rational(numerator: number, denominator: number): RationalTime {
+    if (!Number.isSafeInteger(numerator) || !Number.isSafeInteger(denominator) || denominator < 1) throw new Error("Time is outside the supported precision.")
     let left = Math.abs(numerator)
     let right = Math.abs(denominator)
     while (right) [left, right] = [right, left % right]
     return { numerator: numerator / left, denominator: denominator / left }
+}
+
+function millisecondsTime(milliseconds: number) {
+    if (!Number.isFinite(milliseconds) || milliseconds < 0) throw new Error("Time is outside the supported range.")
+    return rational(Math.round(milliseconds * 1000), 1_000_000)
 }
 
 function roleLabel(role: AudioLaneRole) {
@@ -118,6 +124,19 @@ function paramsFromConfig(config: ReelConfig): QuietCarouselParameters {
     }
 }
 
+function visualTimelineForConfig(config: ReelConfig) {
+    return compileQuietTimeline({
+        mode: config.timelineMode ?? "automatic",
+        axis: config.settings.axis,
+        direction: config.settings.direction,
+        mediaCount: config.items.length,
+        paceMs: config.settings.paceMs,
+        fixedDurationMs: config.timelineFixedDurationMs ?? 0,
+        segments: config.timelineSegments ?? [],
+        fps: 30,
+    })
+}
+
 function SegmentStrip({ config, timeMs, durationMs }: { config: ReelConfig; timeMs: number; durationMs: number }) {
     const timeline = compileQuietTimeline({
         mode: config.timelineMode ?? "automatic",
@@ -156,23 +175,17 @@ export default function QuietCarouselTracer() {
     const [notice, setNotice] = React.useState("Browser Project ready")
     const [failedMedia, setFailedMedia] = React.useState<Set<string>>(() => new Set())
     const [audioBusy, setAudioBusy] = React.useState(false)
+    const [previewing, setPreviewing] = React.useState(false)
     const [audioDiagnostic, setAudioDiagnostic] = React.useState("No audio mix checked")
     const [audioDiagnosticHash, setAudioDiagnosticHash] = React.useState("")
     const [waveforms, setWaveforms] = React.useState<Record<string, Array<{ minimum: number; maximum: number; rms: number }>>>({})
     const stageRef = React.useRef<HTMLDivElement>(null)
     const audioPreviewRef = React.useRef<{ controller: AbortController; context: AudioContext; source?: AudioBufferSourceNode } | null>(null)
+    const audioRevisionRef = React.useRef(0)
+    const timeRef = React.useRef(timeMs)
     const stageSize = useStageSize(stageRef)
 
-    const timeline = React.useMemo(() => compileQuietTimeline({
-        mode: config.timelineMode ?? "automatic",
-        axis: config.settings.axis,
-        direction: config.settings.direction,
-        mediaCount: config.items.length,
-        paceMs: config.settings.paceMs,
-        fixedDurationMs: config.timelineFixedDurationMs ?? 0,
-        segments: config.timelineSegments ?? [],
-        fps: 30,
-    }), [config])
+    const timeline = React.useMemo(() => visualTimelineForConfig(config), [config])
 
     const evaluated = React.useMemo(() => evaluateQuietCarousel({
         items: config.items,
@@ -186,6 +199,29 @@ export default function QuietCarouselTracer() {
     React.useEffect(() => {
         setTimeMs((value) => value % timeline.durationMs)
     }, [timeline.durationMs])
+
+    React.useEffect(() => {
+        audioRevisionRef.current += 1
+        setAudioDiagnosticHash("")
+        setAudioDiagnostic((current) => current.startsWith("Checked ") ? "Audio changed · run Check mix" : current)
+        audioPreviewRef.current?.controller.abort()
+        try { audioPreviewRef.current?.source?.stop() } catch { /* Preview already stopped. */ }
+        void audioPreviewRef.current?.context.close()
+        audioPreviewRef.current = null
+        setPreviewing(false)
+    }, [config.audio, timeline.durationMs])
+
+    React.useEffect(() => {
+        timeRef.current = timeMs
+        setAudioDiagnosticHash("")
+        setAudioDiagnostic((current) => current.startsWith("Checked ") ? "Playhead changed · run Check mix" : current)
+    }, [timeMs])
+
+    React.useEffect(() => () => {
+        audioPreviewRef.current?.controller.abort()
+        try { audioPreviewRef.current?.source?.stop() } catch { /* Preview already stopped. */ }
+        void audioPreviewRef.current?.context.close()
+    }, [])
 
     React.useEffect(() => {
         if (!playing) return
@@ -214,7 +250,7 @@ export default function QuietCarouselTracer() {
         if (host) {
             try {
                 if (config.audio) {
-                    const plan = compileAudioTimeline(config.audio, { duration: rational(timeline.durationMs, 1000) })
+                    const plan = compileAudioTimeline(config.audio, { duration: millisecondsTime(timeline.durationMs) })
                     if (plan.issues.length) throw new Error("Audio sources do not match the current visual story.")
                 }
                 const result = await host.saveProject(config)
@@ -249,10 +285,16 @@ export default function QuietCarouselTracer() {
                 const restored = parseQuietCarouselHostProject(candidate.config)
                 await hydrateHostMedia(restored)
                 await hydrateHostAudio(restored.audio)
-                const restoredWaveforms = Object.fromEntries(await Promise.all((restored.audio?.sources ?? []).filter((source) => source.role !== "source-video" && source.url).map(async (source) => {
+                const restoredTimeline = visualTimelineForConfig(restored)
+                if (restored.audio) {
+                    const restoredAudio = compileAudioTimeline(restored.audio, { duration: millisecondsTime(restoredTimeline.durationMs) })
+                    if (restoredAudio.issues.length) throw new Error("Opened audio does not match the visual story.")
+                }
+                const restoredWaveforms: Record<string, Array<{ minimum: number; maximum: number; rms: number }>> = {}
+                for (const source of (restored.audio?.sources ?? []).filter((candidate) => candidate.role !== "source-video" && candidate.url)) {
                     const waveform = await readHostWaveform(host, source.url!, Math.min(48, source.sampleFrames))
-                    return [source.id, waveform.buckets] as const
-                })))
+                    restoredWaveforms[source.id] = waveform.buckets
+                }
                 await host.acceptProjectOpen(operationId)
                 setConfig(restored)
                 setWaveforms(restoredWaveforms)
@@ -329,6 +371,7 @@ export default function QuietCarouselTracer() {
     const addAudio = async (role: "presenter" | "soundtrack") => {
         if (!host || audioBusy) return
         setAudioBusy(true)
+        const revision = audioRevisionRef.current
         let pickedURL = ""
         try {
             const placementMs = role === "presenter" ? Math.min(Math.round(timeMs), Math.max(0, timeline.durationMs - 1)) : 0
@@ -347,11 +390,11 @@ export default function QuietCarouselTracer() {
             const stamp = `${role}-${Date.now().toString(36)}`
             const sourceId = `${stamp}-source`
             const laneId = `${stamp}-lane`
-            const storyTime = rational(timeline.durationMs, 1000)
+            const storyTime = millisecondsTime(timeline.durationMs)
             const sourceTime = rational(picked.sampleFrames, picked.sampleRate)
             const sourceDurationMs = picked.sampleFrames * 1000 / picked.sampleRate
             const remainingMs = timeline.durationMs - placementMs
-            const duration = role === "soundtrack" ? storyTime : sourceDurationMs >= remainingMs ? rational(remainingMs, 1000) : sourceTime
+            const duration = role === "soundtrack" ? storyTime : sourceDurationMs >= remainingMs ? millisecondsTime(remainingMs) : sourceTime
             const retainedSources = currentAudio.sources.filter((source) => source.role !== role)
             const retainedLanes = currentAudio.lanes.filter((lane) => lane.role !== role)
             const source = { id: sourceId, name: picked.name, role, url: picked.url, sampleRate: picked.sampleRate, channels: picked.channels, sampleFrames: picked.sampleFrames }
@@ -363,7 +406,7 @@ export default function QuietCarouselTracer() {
                 muted: false,
                 solo: false,
                 clips: [{
-                    id: `${stamp}-clip`, sourceId, timelineStart: rational(placementMs, 1000), sourceIn: { numerator: 0, denominator: 1 },
+                    id: `${stamp}-clip`, sourceId, timelineStart: millisecondsTime(placementMs), sourceIn: { numerator: 0, denominator: 1 },
                     sourceSpan: sourceTime, duration, loop: role === "soundtrack", gain: 1, muted: false,
                     fadeIn: { numerator: 0, denominator: 1 }, fadeOut: { numerator: 0, denominator: 1 },
                 }],
@@ -388,9 +431,11 @@ export default function QuietCarouselTracer() {
             const provider = createHostPCMProvider(host, audio)
             await provider.read(sourceId, 0, Math.min(256, picked.sampleFrames))
             const waveform = await readHostWaveform(host, picked.url, Math.min(48, picked.sampleFrames))
+            if (revision !== audioRevisionRef.current) throw new Error("Project changed while audio was loading. Try again.")
             const replacedURLs = currentAudio.sources.filter((candidate) => candidate.role === role && candidate.url).map((candidate) => candidate.url!)
             setConfig((current) => ({ ...current, audio }))
-            setWaveforms((current) => ({ ...current, [sourceId]: waveform.buckets }))
+            const retainedIds = new Set(sources.map((candidate) => candidate.id))
+            setWaveforms((current) => ({ ...Object.fromEntries(Object.entries(current).filter(([id]) => retainedIds.has(id))), [sourceId]: waveform.buckets }))
             if (replacedURLs.length) await host.releaseMedia(replacedURLs).catch(() => undefined)
             pickedURL = ""
             setAudioDiagnostic(`${roleLabel(role)} decoded · ${picked.sampleRate} Hz · ${picked.channels === 1 ? "mono" : "stereo"}`)
@@ -411,7 +456,7 @@ export default function QuietCarouselTracer() {
 
     const updateAudioClipStart = (laneId: string, startMs: number) => {
         const bounded = Math.max(0, Math.min(Math.round(startMs), Math.max(0, timeline.durationMs - 1)))
-        setConfig((current) => ({ ...current, audio: { ...(current.audio ?? defaultAudioIntent()), lanes: (current.audio ?? defaultAudioIntent()).lanes.map((lane) => lane.id === laneId ? { ...lane, clips: lane.clips.map((clip, index) => index === 0 ? { ...clip, timelineStart: rational(bounded, 1000) } : clip) } : lane) } }))
+        setConfig((current) => ({ ...current, audio: { ...(current.audio ?? defaultAudioIntent()), lanes: (current.audio ?? defaultAudioIntent()).lanes.map((lane) => lane.id === laneId ? { ...lane, clips: lane.clips.map((clip, index) => index === 0 ? { ...clip, timelineStart: millisecondsTime(bounded) } : clip) } : lane) } }))
         setAudioDiagnostic("Audio placement changed · run Check mix")
         setAudioDiagnosticHash("")
     }
@@ -429,15 +474,19 @@ export default function QuietCarouselTracer() {
     const checkAudioMix = async () => {
         if (!host || !config.audio || audioBusy) return
         setAudioBusy(true)
+        const revision = audioRevisionRef.current
+        setPlaying(false)
+        const probeTime = timeMs
         try {
-            const storyTime = rational(timeline.durationMs, 1000)
+            const storyTime = millisecondsTime(timeline.durationMs)
             const plan = compileAudioTimeline(config.audio, { duration: storyTime })
             if (plan.issues.length) throw new Error("Audio sources do not match the Project mix format.")
-            const startFrame = Math.min(Math.floor(timeMs * plan.sampleRate / 1000), Math.max(0, plan.durationFrames - 1))
+            const startFrame = Math.min(Math.floor(probeTime * plan.sampleRate / 1000), Math.max(0, plan.durationFrames - 1))
             const frameCount = Math.min(plan.chunkFrames, plan.durationFrames - startFrame)
             const mixed = await mixAudioChunk(plan, createHostPCMProvider(host, config.audio), startFrame, frameCount)
             const bytes = mixed.interleaved.buffer.slice(mixed.interleaved.byteOffset, mixed.interleaved.byteOffset + mixed.interleaved.byteLength)
             const digest = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))).map((value) => value.toString(16).padStart(2, "0")).join("")
+            if (revision !== audioRevisionRef.current || Math.abs(timeRef.current - probeTime) > 0.001) throw new Error("Project or playhead changed during the PCM check.")
             setAudioDiagnosticHash(digest)
             setAudioDiagnostic(`Checked ${frameCount} frames · peak ${mixed.peak.toFixed(3)} · clipped ${mixed.clippedSamples}`)
         } catch (error) {
@@ -450,16 +499,24 @@ export default function QuietCarouselTracer() {
     const previewAudio = async () => {
         if (!host || !config.audio || audioBusy) return
         audioPreviewRef.current?.controller.abort()
-        audioPreviewRef.current?.source?.stop()
+        try { audioPreviewRef.current?.source?.stop() } catch { /* Preview already stopped. */ }
         void audioPreviewRef.current?.context.close()
         const controller = new AbortController()
         const context = new AudioContext({ sampleRate: config.audio.sampleRate })
+        if (context.sampleRate !== config.audio.sampleRate) {
+            void context.close()
+            setNotice(`Preview unavailable · audio device uses ${context.sampleRate} Hz, Project uses ${config.audio.sampleRate} Hz`)
+            return
+        }
+        const revision = audioRevisionRef.current
+        setPlaying(false)
+        const probeTime = timeMs
         audioPreviewRef.current = { controller, context }
         setAudioBusy(true)
         try {
-            const plan = compileAudioTimeline(config.audio, { duration: rational(timeline.durationMs, 1000) })
+            const plan = compileAudioTimeline(config.audio, { duration: millisecondsTime(timeline.durationMs) })
             if (plan.issues.length) throw new Error("Audio sources do not match the Project mix format.")
-            const startFrame = Math.min(Math.floor(timeMs * plan.sampleRate / 1000), Math.max(0, plan.durationFrames - 1))
+            const startFrame = Math.min(Math.floor(probeTime * plan.sampleRate / 1000), Math.max(0, plan.durationFrames - 1))
             const frameCount = Math.min(plan.sampleRate * 2, plan.durationFrames - startFrame)
             const buffer = context.createBuffer(plan.channels, frameCount, plan.sampleRate)
             const provider = createHostPCMProvider(host, config.audio)
@@ -477,10 +534,14 @@ export default function QuietCarouselTracer() {
             source.buffer = buffer
             source.connect(context.destination)
             audioPreviewRef.current = { controller, context, source }
-            source.onended = () => { if (audioPreviewRef.current?.source === source) audioPreviewRef.current = null; void context.close() }
+            source.onended = () => { if (audioPreviewRef.current?.source === source) audioPreviewRef.current = null; setPreviewing(false); void context.close() }
+            if (revision !== audioRevisionRef.current || Math.abs(timeRef.current - probeTime) > 0.001) throw new Error("Project or playhead changed during preview preparation.")
             source.start()
+            setPreviewing(true)
             setNotice(`Previewing ${(frameCount / plan.sampleRate).toFixed(1)} s from the playhead`)
         } catch (error) {
+            audioPreviewRef.current = null
+            setPreviewing(false)
             void context.close()
             setNotice(error instanceof Error ? `Preview unavailable · ${error.message}` : "Preview unavailable")
         } finally {
@@ -489,10 +550,12 @@ export default function QuietCarouselTracer() {
     }
 
     const cancelAudio = async () => {
+        audioRevisionRef.current += 1
         audioPreviewRef.current?.controller.abort()
-        audioPreviewRef.current?.source?.stop()
+        try { audioPreviewRef.current?.source?.stop() } catch { /* Preview already stopped. */ }
         void audioPreviewRef.current?.context.close()
         audioPreviewRef.current = null
+        setPreviewing(false)
         if (host) await host.cancelAudio().catch(() => undefined)
         setAudioBusy(false)
         setNotice("Audio work cancelled")
@@ -530,9 +593,9 @@ export default function QuietCarouselTracer() {
                 </div>
                 <div className="qc-project-actions" aria-label="Project actions">
                     <span role="status">{notice}</span>
-                    <button data-g02-action="fixture" type="button" onClick={() => void chooseMedia()}>{host ? "Add source frames" : "Import 8-frame fixture"}</button>
-                    <button data-g02-action="save" type="button" onClick={() => void save()}>Save</button>
-                    <button data-g02-action="reload" type="button" onClick={() => void reload()}>{host ? "Open" : "Reload"}</button>
+                    <button data-g02-action="fixture" type="button" disabled={audioBusy} onClick={() => void chooseMedia()}>{host ? "Add source frames" : "Import 8-frame fixture"}</button>
+                    <button data-g02-action="save" type="button" disabled={audioBusy} onClick={() => void save()}>Save</button>
+                    <button data-g02-action="reload" type="button" disabled={audioBusy} onClick={() => void reload()}>{host ? "Open" : "Reload"}</button>
                 </div>
             </header>
 
@@ -603,9 +666,9 @@ export default function QuietCarouselTracer() {
                         </div>
                     </div>
                     <div className="qc-transport">
-                        <button data-g02-action="play" type="button" onClick={() => setPlaying((value) => !value)}>{playing ? "Pause motion" : config.audio?.lanes.length ? "Play motion" : "Play"}</button>
-                        <button data-g02-action="restart" type="button" onClick={() => setTimeMs(0)}>Restart</button>
-                        <input data-g02-control="playhead" aria-label="Story playhead" type="range" min={0} max={timeline.durationMs} step={1} value={timeMs} onChange={(event) => { setPlaying(false); setTimeMs(Number(event.target.value)) }} />
+                        <button data-g02-action="play" type="button" disabled={audioBusy || previewing} onClick={() => setPlaying((value) => !value)}>{playing ? "Pause motion" : config.audio?.lanes.length ? "Play motion" : "Play"}</button>
+                        <button data-g02-action="restart" type="button" disabled={audioBusy || previewing} onClick={() => setTimeMs(0)}>Restart</button>
+                        <input data-g02-control="playhead" aria-label="Story playhead" disabled={audioBusy || previewing} type="range" min={0} max={timeline.durationMs} step={1} value={timeMs} onChange={(event) => { setPlaying(false); setTimeMs(Number(event.target.value)) }} />
                         <output>{formatDuration(timeMs)} / {formatDuration(timeline.durationMs)}</output>
                     </div>
                 </section>
@@ -668,34 +731,34 @@ export default function QuietCarouselTracer() {
                 </div>
                 <SegmentStrip config={config} timeMs={timeMs} durationMs={timeline.durationMs} />
                 <details className="qc-audio" data-g05-audio="timeline" data-g05-diagnostic-hash={audioDiagnosticHash}>
-                    <summary><span><span className="qc-eyebrow">Audio</span><strong>{config.audio?.lanes.length ? `${config.audio.lanes.length} authored lane${config.audio.lanes.length === 1 ? "" : "s"}` : "Optional · source sound is independent"}</strong></span><span>{audioDiagnostic}</span></summary>
+                    <summary><span><span className="qc-eyebrow">Audio</span><strong>{config.audio?.lanes.length ? `${config.audio.lanes.length} authored lane${config.audio.lanes.length === 1 ? "" : "s"}` : "Optional · source sound is independent"}</strong></span><span role="status" aria-live="polite">{audioDiagnostic}</span></summary>
                     <div className="qc-audio-body">
                         <div className="qc-audio-actions">
                             <button data-g05-action="presenter" type="button" disabled={!host || audioBusy} onClick={() => void addAudio("presenter")}>Add Presenter</button>
                             <button data-g05-action="soundtrack" type="button" disabled={!host || audioBusy} onClick={() => void addAudio("soundtrack")}>Add Soundtrack</button>
                             <button data-g05-action="check-mix" type="button" disabled={!host || audioBusy || !config.audio?.lanes.length} onClick={() => void checkAudioMix()}>Check mix</button>
                             <button data-g05-action="preview" type="button" disabled={!host || audioBusy || !config.audio?.lanes.length} onClick={() => void previewAudio()}>Preview 2 s</button>
-                            {audioBusy ? <button data-g05-action="cancel" type="button" onClick={() => void cancelAudio()}>Cancel audio</button> : null}
+                            {audioBusy || previewing ? <button data-g05-action="cancel" type="button" onClick={() => void cancelAudio()}>{previewing ? "Stop preview" : "Cancel audio"}</button> : null}
                             <button data-g05-action="reset" type="button" disabled={audioBusy || !config.audio?.lanes.length} onClick={() => void resetAudio()}>Reset audio</button>
                         </div>
                         <div className="qc-audio-lanes">
                             {(config.audio?.lanes ?? []).map((lane) => {
                                 const source = config.audio?.sources.find((candidate) => candidate.id === lane.clips[0]?.sourceId)
                                 const waveform = source ? waveforms[source.id] : undefined
-                                return <article data-g05-lane={lane.role} key={lane.id}>
+                                return <article data-g05-lane={lane.role} data-g05-waveform-ready={Boolean(waveform)} data-g05-waveform-energy={(waveform ?? []).reduce((sum, bucket) => sum + bucket.rms, 0).toFixed(6)} key={lane.id}>
                                     <div><strong>{lane.name}</strong><span>{source ? `${source.sampleRate} Hz · ${source.channels === 1 ? "mono" : "stereo"}` : "Source unavailable"}</span></div>
                                     <div className="qc-waveform" aria-label={`${lane.name} waveform`}>{(waveform ?? Array.from({ length: 24 }, () => ({ rms: 0 }))).map((bucket, index) => <i key={index} style={{ height: `${Math.max(2, bucket.rms * 100)}%` }} />)}</div>
-                                    <label>Start <input data-g05-control={`${lane.role}-start`} type="number" min={0} max={Math.max(0, Math.floor(timeline.durationMs - 1))} step={10} value={Math.round(timeSeconds(lane.clips[0]?.timelineStart ?? { numerator: 0, denominator: 1 }) * 1000)} onChange={(event) => updateAudioClipStart(lane.id, Number(event.target.value))} /> ms</label>
-                                    <label>Gain <input data-g05-control={`${lane.role}-gain`} type="range" min={0} max={2} step={0.01} value={lane.gain} onChange={(event) => updateAudioLane(lane.id, { gain: Number(event.target.value) })} /></label>
-                                    <button data-g05-control={`${lane.role}-mute`} className={lane.muted ? "is-active" : ""} type="button" onClick={() => updateAudioLane(lane.id, { muted: !lane.muted })}>Mute</button>
-                                    <button data-g05-control={`${lane.role}-solo`} className={lane.solo ? "is-active" : ""} type="button" onClick={() => updateAudioLane(lane.id, { solo: !lane.solo })}>Solo</button>
+                                    <label>Start <input data-g05-control={`${lane.role}-start`} disabled={audioBusy} type="number" min={0} max={Math.max(0, Math.floor(timeline.durationMs - 1))} step={10} value={Math.round(timeSeconds(lane.clips[0]?.timelineStart ?? { numerator: 0, denominator: 1 }) * 1000)} onChange={(event) => updateAudioClipStart(lane.id, Number(event.target.value))} /> ms</label>
+                                    <label>Gain {lane.gain.toFixed(2)}<input data-g05-control={`${lane.role}-gain`} aria-valuetext={`${lane.gain.toFixed(2)} times`} disabled={audioBusy} type="range" min={0} max={2} step={0.01} value={lane.gain} onChange={(event) => updateAudioLane(lane.id, { gain: Number(event.target.value) })} /></label>
+                                    <button data-g05-control={`${lane.role}-mute`} aria-pressed={lane.muted} disabled={audioBusy} className={lane.muted ? "is-active" : ""} type="button" onClick={() => updateAudioLane(lane.id, { muted: !lane.muted })}>Mute</button>
+                                    <button data-g05-control={`${lane.role}-solo`} aria-pressed={lane.solo} disabled={audioBusy} className={lane.solo ? "is-active" : ""} type="button" onClick={() => updateAudioLane(lane.id, { solo: !lane.solo })}>Solo</button>
                                 </article>
                             })}
                         </div>
                         <div className="qc-audio-master">
-                            <label>Master <input data-g05-control="master-gain" type="range" min={0} max={2} step={0.01} value={config.audio?.master.gain ?? 1} onChange={(event) => setConfig((current) => ({ ...current, audio: { ...(current.audio ?? defaultAudioIntent()), master: { ...(current.audio ?? defaultAudioIntent()).master, gain: Number(event.target.value) } } }))} /></label>
-                            <button data-g05-control="master-mute" className={config.audio?.master.muted ? "is-active" : ""} type="button" onClick={() => setConfig((current) => ({ ...current, audio: { ...(current.audio ?? defaultAudioIntent()), master: { ...(current.audio ?? defaultAudioIntent()).master, muted: !(current.audio ?? defaultAudioIntent()).master.muted } } }))}>Master mute</button>
-                            <button data-g05-control="duck" className={config.audio?.ducking.enabled ? "is-active" : ""} disabled={!config.audio?.lanes.some((lane) => lane.role === "presenter") || !config.audio?.lanes.some((lane) => lane.role === "soundtrack")} type="button" onClick={() => setConfig((current) => ({ ...current, audio: { ...(current.audio ?? defaultAudioIntent()), ducking: { ...(current.audio ?? defaultAudioIntent()).ducking, enabled: !(current.audio ?? defaultAudioIntent()).ducking.enabled } } }))}>Presenter ducks music</button>
+                            <label>Master {(config.audio?.master.gain ?? 1).toFixed(2)}<input data-g05-control="master-gain" aria-valuetext={`${(config.audio?.master.gain ?? 1).toFixed(2)} times`} disabled={audioBusy} type="range" min={0} max={2} step={0.01} value={config.audio?.master.gain ?? 1} onChange={(event) => setConfig((current) => ({ ...current, audio: { ...(current.audio ?? defaultAudioIntent()), master: { ...(current.audio ?? defaultAudioIntent()).master, gain: Number(event.target.value) } } }))} /></label>
+                            <button data-g05-control="master-mute" aria-pressed={config.audio?.master.muted ?? false} disabled={audioBusy} className={config.audio?.master.muted ? "is-active" : ""} type="button" onClick={() => setConfig((current) => ({ ...current, audio: { ...(current.audio ?? defaultAudioIntent()), master: { ...(current.audio ?? defaultAudioIntent()).master, muted: !(current.audio ?? defaultAudioIntent()).master.muted } } }))}>Master mute</button>
+                            <button data-g05-control="duck" aria-pressed={config.audio?.ducking.enabled ?? false} className={config.audio?.ducking.enabled ? "is-active" : ""} disabled={audioBusy || !config.audio?.lanes.some((lane) => lane.role === "presenter") || !config.audio?.lanes.some((lane) => lane.role === "soundtrack")} type="button" onClick={() => setConfig((current) => ({ ...current, audio: { ...(current.audio ?? defaultAudioIntent()), ducking: { ...(current.audio ?? defaultAudioIntent()).ducking, enabled: !(current.audio ?? defaultAudioIntent()).ducking.enabled } } }))}>Presenter ducks music</button>
                         </div>
                     </div>
                 </details>

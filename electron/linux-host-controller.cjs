@@ -144,11 +144,31 @@ function createLinuxHostController(options) {
         }
     }
 
+    function notifyRevoked(grants) {
+        for (const grant of grants) {
+            try { options.onGrantRevoked?.(grant) } catch { /* Revocation remains authoritative. */ }
+        }
+    }
+
+    function revokeToken(token) {
+        const grant = registry.revoke(token)
+        if (grant) notifyRevoked([grant])
+    }
+
+    function revokeGeneration(targetGeneration) {
+        notifyRevoked(registry.revokeOwner(owner, targetGeneration))
+    }
+
+    function revokeAll() {
+        notifyRevoked(registry.revokeOwner(owner))
+    }
+
     function cleanupPending() {
         if (!pending) return
         const abandoned = pending
         pending = null
-        registry.revokeOwner(owner, abandoned.generation)
+        cancelAudioWork()
+        revokeGeneration(abandoned.generation)
         safeRemove(abandoned.resourceRoot)
     }
 
@@ -178,27 +198,31 @@ function createLinuxHostController(options) {
             case "media.choose":
                 return options.chooseMedia({ generation, grantMedia })
             case "media.release": {
-                for (const url of envelope.payload.urls) registry.revoke(tokenFromMediaURL(url))
+                cancelAudioWork()
+                for (const url of envelope.payload.urls) revokeToken(tokenFromMediaURL(url))
                 return { released: envelope.payload.urls.length }
             }
             case "audio.choose": {
                 const choiceGeneration = generation
-                const choice = await options.chooseAudio({
-                    role: envelope.payload.role,
-                    generation: choiceGeneration,
-                    grantMedia: (filePath, mime) => grantMedia(filePath, mime, choiceGeneration),
-                })
-                try {
-                    const safe = safeAudioChoice(choice, envelope.payload.role)
-                    if (generation !== choiceGeneration || state !== "ready") {
-                        if (safe?.url) registry.revoke(tokenFromMediaURL(safe.url))
-                        throw new HostPortError("conflict")
+                return withAudioSlot(async (signal) => {
+                    const choice = await options.chooseAudio({
+                        role: envelope.payload.role,
+                        generation: choiceGeneration,
+                        grantMedia: (filePath, mime) => grantMedia(filePath, mime, choiceGeneration),
+                        signal,
+                    })
+                    try {
+                        const safe = safeAudioChoice(choice, envelope.payload.role)
+                        if (generation !== choiceGeneration || state !== "ready") {
+                            if (safe?.url) revokeToken(tokenFromMediaURL(safe.url))
+                            throw new HostPortError("conflict")
+                        }
+                        return safe
+                    } catch (error) {
+                        if (choice?.url && typeof choice.url === "string" && GRANT_URL.test(choice.url)) revokeToken(tokenFromMediaURL(choice.url))
+                        throw error
                     }
-                    return safe
-                } catch (error) {
-                    if (choice?.url && typeof choice.url === "string" && GRANT_URL.test(choice.url)) registry.revoke(tokenFromMediaURL(choice.url))
-                    throw error
-                }
+                })
             }
             case "audio.decode":
                 return withAudioSlot(async (signal) => safeAudioDecode(await options.decodeAudio({ grant: mediaGrant(envelope.payload.url), startFrame: envelope.payload.startFrame, frameCount: envelope.payload.frameCount, signal }), envelope.payload))
@@ -222,19 +246,19 @@ function createLinuxHostController(options) {
                         grantMedia: (filePath, mime) => grantMedia(filePath, mime, candidateGeneration),
                     })
                     if (opening !== operation || controller.signal.aborted) {
-                        registry.revokeOwner(owner, candidateGeneration)
+                        revokeGeneration(candidateGeneration)
                         safeRemove(opened.resourceRoot)
                         return { cancelled: true }
                     }
                     if (opened.cancelled) {
-                        registry.revokeOwner(owner, candidateGeneration)
+                        revokeGeneration(candidateGeneration)
                         safeRemove(opened.resourceRoot)
                         state = "ready"
                         opening = null
                         return { cancelled: true }
                     }
                     if (opened.failure) {
-                        registry.revokeOwner(owner, candidateGeneration)
+                        revokeGeneration(candidateGeneration)
                         safeRemove(opened.resourceRoot)
                         state = "ready"
                         opening = null
@@ -245,7 +269,7 @@ function createLinuxHostController(options) {
                     opening = null
                     return { operationId, candidateGeneration, config: opened.config }
                 } catch (error) {
-                    registry.revokeOwner(owner, candidateGeneration)
+                    revokeGeneration(candidateGeneration)
                     if (opening === operation) {
                         state = "ready"
                         opening = null
@@ -258,20 +282,23 @@ function createLinuxHostController(options) {
                 if (!pending || pending.operationId !== envelope.payload.operationId) throw new HostPortError("conflict")
                 const previousGeneration = generation
                 const previousRoot = currentResourceRoot
+                cancelAudioWork()
                 if (previousRoot) removeResourceRoot(previousRoot)
                 generation = pending.generation
                 currentResourceRoot = pending.resourceRoot
                 pending = null
                 state = "ready"
-                registry.revokeOwner(owner, previousGeneration)
+                revokeGeneration(previousGeneration)
                 return { generation }
             }
             case "project.open.discard":
                 if (!pending || pending.operationId !== envelope.payload.operationId) throw new HostPortError("conflict")
+                cancelAudioWork()
                 cleanupPending()
                 state = "ready"
                 return { discarded: true }
             case "project.open.cancel":
+                cancelAudioWork()
                 opening?.controller.abort()
                 opening = null
                 cleanupPending()
@@ -319,7 +346,7 @@ function createLinuxHostController(options) {
         opening?.controller.abort()
         opening = null
         cleanupPending()
-        registry.revokeOwner(owner)
+        revokeAll()
         safeRemove(currentResourceRoot)
         currentResourceRoot = null
         state = "closed"

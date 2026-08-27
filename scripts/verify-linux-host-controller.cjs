@@ -154,6 +154,35 @@ async function run() {
     assert.equal((await secondAudio).error.code, "cancelled")
     bounded.dispose()
 
+    let chooseCall = 0
+    const revokedGrants = []
+    const selection = createLinuxHostController({
+        owner: "window-75", webContentsId: 75, identity: () => ({}), chooseMedia: async () => [], saveProject: async () => ({}), openProject: async () => ({ cancelled: true }),
+        chooseAudio: ({ role, grantMedia, signal }) => {
+            chooseCall += 1
+            if (chooseCall === 1) return { name: "presenter.wav", role, url: grantMedia(audioPath, "audio/wav").mediaURL, sampleRate: 48_000, channels: 1, sampleFrames: 4 }
+            return new Promise((_resolve, reject) => signal.addEventListener("abort", () => reject(new HostPortError("cancelled")), { once: true }))
+        },
+        decodeAudio: async () => ({}),
+        audioWaveform: ({ signal }) => new Promise((_resolve, reject) => signal.addEventListener("abort", () => reject(new HostPortError("cancelled")), { once: true })),
+        onGrantRevoked: (grant) => revokedGrants.push(grant.filePath),
+    })
+    const selectionFrame = { url: "gallery-app://app/index.html" }
+    const selectionEvent = { sender: { id: 75, mainFrame: selectionFrame }, senderFrame: selectionFrame }
+    const selectedAudio = await selection.handle(selectionEvent, { protocol: 1, requestId: "selection-one", operation: "audio.choose", generation: 1, payload: { role: "presenter" } })
+    const delayedWaveform = selection.handle(selectionEvent, { protocol: 1, requestId: "selection-waveform", operation: "audio.waveform", generation: 1, payload: { url: selectedAudio.value.url, buckets: 1 } })
+    await Promise.resolve()
+    const releasedSelection = await selection.handle(selectionEvent, { protocol: 1, requestId: "selection-release", operation: "media.release", generation: 1, payload: { urls: [selectedAudio.value.url] } })
+    assert.deepEqual(releasedSelection.value, { released: 1 })
+    assert.equal((await delayedWaveform).error.code, "cancelled")
+    assert.deepEqual(revokedGrants, [audioPath])
+    const delayedChoice = selection.handle(selectionEvent, { protocol: 1, requestId: "selection-two", operation: "audio.choose", generation: 1, payload: { role: "soundtrack" } })
+    await Promise.resolve()
+    const cancelledChoice = await selection.handle(selectionEvent, { protocol: 1, requestId: "selection-cancel", operation: "audio.cancel", generation: 1, payload: {} })
+    assert.deepEqual(cancelledChoice.value, { cancelled: 1 })
+    assert.equal((await delayedChoice).error.code, "cancelled")
+    selection.dispose()
+
     const finishDelayedOpens = []
     const raceRemoved = []
     const racy = createLinuxHostController({

@@ -12,6 +12,7 @@ export function createHostPCMProvider(host: GalleryHostPort, intent: AudioTimeli
     return {
         async read(sourceId, startFrame, frameCount, signal) {
             if (signal?.aborted) throw new DOMException("Audio decode cancelled.", "AbortError")
+            if (!Number.isSafeInteger(startFrame) || startFrame < 0 || !Number.isSafeInteger(frameCount) || frameCount < 1 || frameCount > 4096) invalidResponse("request is outside the bounded HostPort range.")
             if (active) throw new Error("Host audio decode concurrency exceeded.")
             const source = sources.get(sourceId)
             if (!source?.url) invalidResponse("source is unavailable.")

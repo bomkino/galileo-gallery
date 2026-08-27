@@ -32,6 +32,14 @@ async function runG05RendererSmoke(window, outputDirectory, mode) {
             input.dispatchEvent(new Event('change', { bubbles: true }))
         }
         const mode = ${JSON.stringify(mode)}
+        const pcmCheck = async (label) => {
+            await waitFor(() => required('[data-g05-audio="timeline"]').dataset.g05DiagnosticHash === '', label + ' invalidation')
+            click('[data-g05-action="check-mix"]')
+            const hash = await waitFor(() => /^[a-f0-9]{64}$/.test(required('[data-g05-audio="timeline"]').dataset.g05DiagnosticHash) && required('[data-g05-audio="timeline"]').dataset.g05DiagnosticHash, label + ' PCM hash')
+            return { hash, diagnostic: required('[data-g05-audio="timeline"] summary > span:last-child').textContent.trim() }
+        }
+        let matrix = null
+        let preview = null
         required('[data-g05-audio="timeline"]').open = true
         if (mode === 'save') {
             click('[data-g02-action="fixture"]')
@@ -42,10 +50,36 @@ async function runG05RendererSmoke(window, outputDirectory, mode) {
             await waitFor(() => document.querySelector('[data-g02-tracer="quiet-carousel-v1"]')?.dataset.timeMs === '1000', 'one-second audio placement')
             click('[data-g05-action="presenter"]')
             await waitFor(() => /Presenter added/.test(notice()), 'presenter verification')
+            matrix = {}
+            matrix.baseline = await pcmCheck('baseline')
             setRange('[data-g05-control="soundtrack-gain"]', 0.6)
+            matrix.gain = await pcmCheck('gain change')
+            setRange('[data-g05-control="soundtrack-gain"]', 1)
+            matrix.gainReset = await pcmCheck('gain reset')
+            click('[data-g05-control="presenter-mute"]')
+            matrix.presenterMuted = await pcmCheck('presenter mute')
+            click('[data-g05-control="presenter-mute"]')
+            matrix.presenterReset = await pcmCheck('presenter reset')
+            click('[data-g05-control="soundtrack-solo"]')
+            matrix.soundtrackSolo = await pcmCheck('soundtrack solo')
+            click('[data-g05-control="soundtrack-solo"]')
+            matrix.soloReset = await pcmCheck('solo reset')
+            click('[data-g05-control="master-mute"]')
+            matrix.masterMuted = await pcmCheck('master mute')
+            click('[data-g05-control="master-mute"]')
+            matrix.masterReset = await pcmCheck('master reset')
             click('[data-g05-control="duck"]')
-            click('[data-g05-action="check-mix"]')
-            await waitFor(() => /Checked \d+ frames/.test(required('[data-g05-audio="timeline"] summary > span:last-child').textContent), 'PCM mix diagnostic')
+            matrix.ducking = await pcmCheck('ducking')
+            setRange('[data-g05-control="soundtrack-gain"]', 0.6)
+            matrix.final = await pcmCheck('final authored mix')
+            click('[data-g05-action="preview"]')
+            const previewNotice = await waitFor(() => /^(Previewing|Preview unavailable)/.test(notice()) && notice(), 'preview scheduling result')
+            if (previewNotice.startsWith('Previewing')) {
+                await waitFor(() => document.querySelector('[data-g05-action="cancel"]'), 'preview stop action')
+                click('[data-g05-action="cancel"]')
+                await waitFor(() => /Audio work cancelled/.test(notice()), 'preview stop')
+                preview = { available: true, stopped: true }
+            } else preview = { available: false, reason: previewNotice }
             click('[data-g02-action="save"]')
             await waitFor(() => /Saved portable Project/.test(notice()), 'portable Project save')
         } else {
@@ -77,6 +111,10 @@ async function runG05RendererSmoke(window, outputDirectory, mode) {
             masterMuted: required('[data-g05-control="master-mute"]').classList.contains('is-active'),
             diagnostic: required('[data-g05-audio="timeline"] summary > span:last-child').textContent.trim(),
             diagnosticHash: required('[data-g05-audio="timeline"]').dataset.g05DiagnosticHash,
+            matrix,
+            preview,
+            waveformReady: Array.from(document.querySelectorAll('[data-g05-lane]')).every((lane) => lane.dataset.g05WaveformReady === 'true'),
+            waveformEnergy: Array.from(document.querySelectorAll('[data-g05-lane]')).reduce((sum, lane) => sum + Number(lane.dataset.g05WaveformEnergy || 0), 0),
             rawPathVisible: [${JSON.stringify(process.env.REEL_G05_PRESENTER_SOURCE ?? "__no-presenter__")}, ${JSON.stringify(process.env.REEL_G05_SOUNDTRACK_SOURCE ?? "__no-soundtrack__")}].some((value) => html.includes(value)),
             grantInDataset: Array.from(document.querySelectorAll('*')).some((node) => Object.values(node.dataset).some((value) => String(value).includes('reel-media://'))),
         }

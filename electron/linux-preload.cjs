@@ -27,12 +27,13 @@ function validateResponse(value, requestId, expectedGeneration, allowGenerationA
     if (!value || typeof value !== "object" || Array.isArray(value) || value.requestId !== requestId || !Number.isSafeInteger(value.generation)) {
         throw new Error("Host returned an invalid response.")
     }
-    if (allowGenerationAdvance ? value.generation <= expectedGeneration : value.generation !== expectedGeneration) throw new Error("Host returned an invalid response.")
     if (value.ok === true) {
+        if (allowGenerationAdvance ? value.generation <= expectedGeneration : value.generation !== expectedGeneration) throw new Error("Host returned an invalid response.")
         if (!ownExact(value, ["ok", "requestId", "generation", "value"])) throw new Error("Host returned an invalid response.")
         return deepFreeze(value)
     }
     if (value.ok === false && ownExact(value, ["ok", "requestId", "generation", "error"]) && ownExact(value.error, ["code", "diagnosticId"])) {
+        if (value.generation !== expectedGeneration) throw new Error("Host returned an invalid response.")
         return deepFreeze(value)
     }
     throw new Error("Host returned an invalid response.")
@@ -89,6 +90,11 @@ function audioWaveform(value, bucketCount) {
     return value
 }
 
+function cancelledAudio(value) {
+    if (!ownExact(value, ["cancelled"]) || !Number.isSafeInteger(value.cancelled) || value.cancelled < 0 || value.cancelled > 2) throw new Error("Host returned an invalid cancellation result.")
+    return value
+}
+
 const galleryHost = {
     platform: "linux",
     identity: async () => (await invoke("identity.read")).value,
@@ -97,7 +103,7 @@ const galleryHost = {
     chooseAudio: async (role) => audioChoice((await invoke("audio.choose", { role })).value, role),
     decodeAudio: async (url, startFrame, frameCount) => decodedAudio((await invoke("audio.decode", { url, startFrame, frameCount })).value, startFrame, frameCount),
     audioWaveform: async (url, buckets) => audioWaveform((await invoke("audio.waveform", { url, buckets })).value, buckets),
-    cancelAudio: async () => (await invoke("audio.cancel")).value,
+    cancelAudio: async () => cancelledAudio((await invoke("audio.cancel")).value),
     saveProject: async (config) => (await invoke("project.save", { config })).value,
     beginProjectOpen: async () => (await invoke("project.open.begin")).value,
     acceptProjectOpen: async (operationId) => {

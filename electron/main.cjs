@@ -32,7 +32,8 @@ const {
     openPortableProjectArchive,
     savePortableProjectArchive,
 } = require("./project-persistence.cjs")
-const { inspectAudioFile, inspectMediaFile, ProjectSchemaError } = require("./project-schema.cjs")
+const { inspectAudioFile, inspectMediaFile } = require("./project-schema.cjs")
+const { createAudioGrantStaging } = require("./audio-grant-staging.cjs")
 const {
     createAppProtocolHandler,
     installSessionSecurity,
@@ -41,7 +42,6 @@ const {
 const { createLinuxHostController } = require("./linux-host-controller.cjs")
 const { HostPortError } = require("./linux-host-port.cjs")
 let ffmpegStatic = null
-const audioWaveformCache = new Map()
 try {
     ffmpegStatic = require("ffmpeg-static")
 } catch {
@@ -118,6 +118,13 @@ function cleanupOpenedProjectResidue() {
             if (stat.isDirectory() && !stat.isSymbolicLink()) fs.rmSync(target, { recursive: true, force: true })
         } catch {}
     }
+}
+
+let audioGrantStaging = null
+
+function audioStaging() {
+    if (!audioGrantStaging) audioGrantStaging = createAudioGrantStaging({ root: path.join(app.getPath("userData"), "audio-grants"), inspect: inspectAudioFile })
+    return audioGrantStaging
 }
 
 function rendererURL(exportMode = false) {
@@ -307,7 +314,7 @@ async function chooseMediaForHost(grantMedia) {
     return selected
 }
 
-async function chooseAudioForHost(role, grantMedia) {
+async function chooseAudioForHost(role, grantMedia, signal) {
     const environmentKey = role === "presenter" ? "REEL_G05_PRESENTER_SOURCE" : "REEL_G05_SOUNDTRACK_SOURCE"
     let filePath = process.env[environmentKey] ? path.resolve(process.env[environmentKey]) : undefined
     if (!filePath) {
@@ -320,26 +327,22 @@ async function chooseAudioForHost(role, grantMedia) {
         if (result.canceled || !result.filePaths[0]) return null
         filePath = result.filePaths[0]
     }
-    let inspected
-    try {
-        inspected = await inspectAudioFile(filePath)
-    } catch (error) {
-        if (error instanceof ProjectSchemaError) {
-            if (error.code === "cancelled") throw new HostPortError("cancelled")
-            if (error.code === "media_missing") throw new HostPortError("not_found")
-            if (error.code === "media_signature_mismatch") throw new HostPortError("corrupt_input")
-        }
-        throw error
-    }
-    const granted = grantMedia(filePath, "audio/wav")
+    if (signal?.aborted) throw new HostPortError("cancelled")
+    const displayName = path.basename(filePath)
+    const staged = await audioStaging().stage(filePath, signal)
+    const granted = grantMedia(staged.filePath, "audio/wav")
     return {
-        name: path.basename(filePath),
+        name: displayName,
         role,
         url: granted.mediaURL,
-        sampleRate: inspected.sampleRate,
-        channels: inspected.channels,
-        sampleFrames: inspected.sampleFrames,
+        sampleRate: staged.inspection.sampleRate,
+        channels: staged.inspection.channels,
+        sampleFrames: staged.inspection.sampleFrames,
     }
+}
+
+function removeRevokedAudioGrant(grant) {
+    if (grant?.filePath) audioStaging().remove(grant.filePath)
 }
 
 function openedCanonicalWav(grant) {
@@ -398,9 +401,7 @@ async function waveformForHost({ grant, buckets, signal }) {
     const descriptor = openedCanonicalWav(grant)
     try {
         if (buckets > descriptor.sampleFrames) throw new HostPortError("invalid_request")
-        const cacheKey = `${grant.device}:${grant.inode}:${grant.bytes}:${grant.mtimeMs}:${buckets}:v1`
-        const cached = audioWaveformCache.get(cacheKey)
-        if (cached) return cached
+        const startedAt = Date.now()
         const minimum = new Float64Array(buckets).fill(1)
         const maximum = new Float64Array(buckets).fill(-1)
         const squares = new Float64Array(buckets)
@@ -409,6 +410,7 @@ async function waveformForHost({ grant, buckets, signal }) {
         let byteOffset = 0
         while (byteOffset < descriptor.sampleFrames * descriptor.channels * 2) {
             if (signal?.aborted) throw new HostPortError("cancelled")
+            if (Date.now() - startedAt > 15_000) throw new HostPortError("resource_limit")
             const length = Math.min(chunk.length, descriptor.sampleFrames * descriptor.channels * 2 - byteOffset)
             const read = fs.readSync(descriptor.handle, chunk, 0, length, 44 + byteOffset)
             if (read !== length) throw new HostPortError("verification_failed")
@@ -426,16 +428,14 @@ async function waveformForHost({ grant, buckets, signal }) {
             byteOffset += read
             await new Promise((resolve) => setImmediate(resolve))
         }
+        if (signal?.aborted) throw new HostPortError("cancelled")
         verifyGrantAfterRead(descriptor, grant)
-        const result = Object.freeze({
+        return Object.freeze({
             sampleRate: descriptor.sampleRate,
             channels: descriptor.channels,
             sampleFrames: descriptor.sampleFrames,
             buckets: Object.freeze(Array.from({ length: buckets }, (_, index) => Object.freeze({ minimum: minimum[index], maximum: maximum[index], rms: Math.sqrt(squares[index] / counts[index]) }))),
         })
-        audioWaveformCache.set(cacheKey, result)
-        if (audioWaveformCache.size > 32) audioWaveformCache.delete(audioWaveformCache.keys().next().value)
-        return result
     } finally {
         fs.closeSync(descriptor.handle)
     }
@@ -675,9 +675,10 @@ function createMainWindow() {
                 securityDecisions: { ...securityDecisions },
             }),
             chooseMedia: ({ grantMedia }) => chooseMediaForHost(grantMedia),
-            chooseAudio: ({ role, grantMedia }) => chooseAudioForHost(role, grantMedia),
+            chooseAudio: ({ role, grantMedia, signal }) => chooseAudioForHost(role, grantMedia, signal),
             decodeAudio: decodeAudioForHost,
             audioWaveform: waveformForHost,
+            onGrantRevoked: removeRevokedAudioGrant,
             saveProject: async ({ config, mediaPath }) => {
                 const saved = await savePortableProject(config, process.env.REEL_G03_PROJECT_PATH ? path.resolve(process.env.REEL_G03_PROJECT_PATH) : undefined, mediaPath)
                 return saved.cancelled ? { cancelled: true } : { savedAt: Date.now(), documentId: crypto.randomUUID() }
@@ -1105,7 +1106,10 @@ async function runExport(request, outputPath) {
 }
 
 app.whenReady().then(async () => {
-    if (linuxHostMode()) cleanupOpenedProjectResidue()
+    if (linuxHostMode()) {
+        cleanupOpenedProjectResidue()
+        audioStaging().cleanupResidue()
+    }
     if (process.platform === "darwin") {
         const iconPath = app.isPackaged
             ? path.join(process.resourcesPath, "icon.icns")

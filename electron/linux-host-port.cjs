@@ -113,13 +113,21 @@ function createGrantRegistry(options = {}) {
     }
 
     function revoke(token) {
-        if (typeof token === "string") grants.delete(token)
+        if (typeof token !== "string") return null
+        const grant = grants.get(token) ?? null
+        grants.delete(token)
+        return grant
     }
 
     function revokeOwner(owner, generation) {
+        const revoked = []
         for (const [token, grant] of grants) {
-            if (grant.owner === owner && (generation === undefined || grant.generation === generation)) grants.delete(token)
+            if (grant.owner === owner && (generation === undefined || grant.generation === generation)) {
+                grants.delete(token)
+                revoked.push(grant)
+            }
         }
+        return revoked
     }
 
     function parseRange(header, bytes) {
