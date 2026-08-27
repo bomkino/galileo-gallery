@@ -3,10 +3,26 @@ const fs = require("node:fs")
 const os = require("node:os")
 const path = require("node:path")
 const { createLinuxHostController } = require("../electron/linux-host-controller.cjs")
+const { HostPortError } = require("../electron/linux-host-port.cjs")
 
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "galileo-g03-controller-"))
 const mediaPath = path.join(temporary, "frame.png")
 fs.writeFileSync(mediaPath, "frame-bytes")
+const audioPath = path.join(temporary, "presenter.wav")
+const audioHeader = Buffer.alloc(44)
+audioHeader.write("RIFF", 0)
+audioHeader.writeUInt32LE(44, 4)
+audioHeader.write("WAVEfmt ", 8)
+audioHeader.writeUInt32LE(16, 16)
+audioHeader.writeUInt16LE(1, 20)
+audioHeader.writeUInt16LE(1, 22)
+audioHeader.writeUInt32LE(48_000, 24)
+audioHeader.writeUInt32LE(96_000, 28)
+audioHeader.writeUInt16LE(2, 32)
+audioHeader.writeUInt16LE(16, 34)
+audioHeader.write("data", 36)
+audioHeader.writeUInt32LE(8, 40)
+fs.writeFileSync(audioPath, Buffer.concat([audioHeader, Buffer.from([0, 0, 1, 0, 255, 255, 0, 0])]))
 const removed = []
 const mainFrame = { url: "gallery-app://app/index.html" }
 const sender = { id: 71, mainFrame }
@@ -18,12 +34,16 @@ const host = createLinuxHostController({
     webContentsId: 71,
     identity: () => ({ productId: "galileo-gallery", protocol: 1, platform: "linux" }),
     chooseMedia: ({ grantMedia }) => [grantMedia(mediaPath, "image/png")],
+    chooseAudio: ({ role, grantMedia }) => ({ name: "presenter.wav", role, url: grantMedia(audioPath, "audio/wav").mediaURL, sampleRate: 48_000, channels: 1, sampleFrames: 4 }),
+    decodeAudio: ({ startFrame, frameCount }) => ({ sampleRate: 48_000, channels: 1, startFrame, frameCount, samples: Array.from({ length: frameCount }, () => 0) }),
+    audioWaveform: ({ buckets }) => ({ sampleRate: 48_000, channels: 1, sampleFrames: 4, buckets: Array.from({ length: buckets }, () => ({ minimum: -0.5, maximum: 0.5, rms: 0.25 })) }),
     saveProject: ({ config, mediaPath: resolve }) => ({ itemCount: config.items.length, resolved: resolve(config.items[0].url) === mediaPath }),
     openProject: async ({ generation, grantMedia, signal }) => {
         openCount += 1
         if (signal.aborted) return { cancelled: true }
         const granted = grantMedia(mediaPath, "image/png")
-        return { config: { items: [{ url: granted.mediaURL }] }, resourceRoot: path.join(temporary, `opened-${generation}-${openCount}`) }
+        const audio = grantMedia(audioPath, "audio/wav")
+        return { config: { items: [{ url: granted.mediaURL }], audioURL: audio.mediaURL }, resourceRoot: path.join(temporary, `opened-${generation}-${openCount}`) }
     },
     removeResourceRoot: (value) => removed.push(value),
 })
@@ -42,6 +62,18 @@ async function run() {
     assert.equal(chosen.ok, true)
     assert.match(chosen.value[0].mediaURL, /^reel-media:\/\/grant\/[a-f0-9]{64}$/)
     assert.equal(JSON.stringify(chosen).includes(mediaPath), false)
+    const chosenAudio = await host.handle(event, envelope("audio.choose", { role: "presenter" }, 1, "request-audio-choose"))
+    assert.equal(chosenAudio.value.role, "presenter")
+    assert.match(chosenAudio.value.url, /^reel-media:\/\/grant\/[a-f0-9]{64}$/)
+    assert.equal(JSON.stringify(chosenAudio).includes(audioPath), false)
+    const decodedAudio = await host.handle(event, envelope("audio.decode", { url: chosenAudio.value.url, startFrame: 1, frameCount: 2 }, 1, "request-audio-decode"))
+    assert.deepEqual(decodedAudio.value, { sampleRate: 48_000, channels: 1, startFrame: 1, frameCount: 2, samples: [0, 0] })
+    assert.equal(JSON.stringify(decodedAudio).includes(audioPath), false)
+    const waveform = await host.handle(event, envelope("audio.waveform", { url: chosenAudio.value.url, buckets: 2 }, 1, "request-audio-waveform"))
+    assert.equal(waveform.value.buckets.length, 2)
+    assert.equal(JSON.stringify(waveform).includes(audioPath), false)
+    const oversizedDecode = await host.handle(event, envelope("audio.decode", { url: chosenAudio.value.url, startFrame: 0, frameCount: 4097 }, 1, "request-audio-oversized"))
+    assert.equal(oversizedDecode.error.code, "invalid_request")
     const saved = await host.handle(event, envelope("project.save", { config: { items: [{ url: chosen.value[0].mediaURL }] } }))
     assert.deepEqual(saved.value, { itemCount: 1, resolved: true })
 
@@ -60,6 +92,8 @@ async function run() {
     assert.throws(() => host.openMedia({ url: begun.value.config.items[0].url, range: undefined }), (error) => error.code === "grant_expired")
 
     const acceptedCandidate = await host.handle(event, envelope("project.open.begin"))
+    const pendingDecode = await host.handle(event, envelope("audio.decode", { url: acceptedCandidate.value.config.audioURL, startFrame: 0, frameCount: 1 }, 1, "request-pending-decode"))
+    assert.equal(pendingDecode.ok, true)
     const accepted = await host.handle(event, envelope("project.open.accept", { operationId: acceptedCandidate.value.operationId }))
     assert.equal(accepted.ok, true)
     assert.equal(accepted.generation, 3)
@@ -78,6 +112,48 @@ async function run() {
     host.dispose()
     assert.equal(host.snapshot().state, "closed")
 
+    const unsafe = createLinuxHostController({
+        owner: "window-73", webContentsId: 73, identity: () => ({}), chooseMedia: async () => [], saveProject: async () => ({}), openProject: async () => ({ cancelled: true }),
+        chooseAudio: ({ role, grantMedia }) => ({ name: "presenter.wav", role, url: grantMedia(audioPath, "audio/wav").mediaURL, sampleRate: 48_000, channels: 1, sampleFrames: 4 }),
+        decodeAudio: async ({ startFrame, frameCount }) => ({ sampleRate: 48_000, channels: 1, startFrame, frameCount, samples: [0], path: audioPath }),
+        audioWaveform: async () => ({ sampleRate: 48_000, channels: 1, sampleFrames: 4, buckets: [{ minimum: Number.NaN, maximum: 1, rms: 0.5 }] }),
+    })
+    const unsafeFrame = { url: "gallery-app://app/index.html" }
+    const unsafeEvent = { sender: { id: 73, mainFrame: unsafeFrame }, senderFrame: unsafeFrame }
+    const unsafeGrant = unsafe.grantMedia(audioPath, "audio/wav").mediaURL
+    const leakedDecode = await unsafe.handle(unsafeEvent, { protocol: 1, requestId: "unsafe-decode", operation: "audio.decode", generation: 1, payload: { url: unsafeGrant, startFrame: 0, frameCount: 1 } })
+    assert.equal(leakedDecode.error.code, "verification_failed")
+    assert.equal(JSON.stringify(leakedDecode).includes(audioPath), false)
+    const invalidWaveform = await unsafe.handle(unsafeEvent, { protocol: 1, requestId: "unsafe-waveform", operation: "audio.waveform", generation: 1, payload: { url: unsafeGrant, buckets: 1 } })
+    assert.equal(invalidWaveform.error.code, "verification_failed")
+    unsafe.dispose()
+
+    const finishAudio = []
+    const bounded = createLinuxHostController({
+        owner: "window-74", webContentsId: 74, identity: () => ({}), chooseMedia: async () => [], saveProject: async () => ({}), openProject: async () => ({ cancelled: true }),
+        chooseAudio: async () => null,
+        decodeAudio: ({ startFrame, frameCount, signal }) => new Promise((resolve, reject) => {
+            signal.addEventListener("abort", () => reject(new HostPortError("cancelled")), { once: true })
+            finishAudio.push(() => resolve({ sampleRate: 48_000, channels: 1, startFrame, frameCount, samples: [0] }))
+        }),
+        audioWaveform: async () => ({}),
+    })
+    const boundedFrame = { url: "gallery-app://app/index.html" }
+    const boundedEvent = { sender: { id: 74, mainFrame: boundedFrame }, senderFrame: boundedFrame }
+    const boundedGrant = bounded.grantMedia(audioPath, "audio/wav").mediaURL
+    const decodeEnvelope = (requestId) => ({ protocol: 1, requestId, operation: "audio.decode", generation: 1, payload: { url: boundedGrant, startFrame: 0, frameCount: 1 } })
+    const firstAudio = bounded.handle(boundedEvent, decodeEnvelope("bounded-one"))
+    const secondAudio = bounded.handle(boundedEvent, decodeEnvelope("bounded-two"))
+    await Promise.resolve()
+    const thirdAudio = await bounded.handle(boundedEvent, decodeEnvelope("bounded-three"))
+    assert.equal(thirdAudio.error.code, "resource_limit")
+    const cancelledAudio = await bounded.handle(boundedEvent, { protocol: 1, requestId: "bounded-cancel", operation: "audio.cancel", generation: 1, payload: {} })
+    assert.deepEqual(cancelledAudio.value, { cancelled: 2 })
+    finishAudio.splice(0).forEach((finish) => finish())
+    assert.equal((await firstAudio).error.code, "cancelled")
+    assert.equal((await secondAudio).error.code, "cancelled")
+    bounded.dispose()
+
     const finishDelayedOpens = []
     const raceRemoved = []
     const racy = createLinuxHostController({
@@ -85,6 +161,9 @@ async function run() {
         webContentsId: 72,
         identity: () => ({}),
         chooseMedia: async () => [],
+        chooseAudio: async () => null,
+        decodeAudio: async () => ({}),
+        audioWaveform: async () => ({}),
         saveProject: async () => ({}),
         openProject: ({ grantMedia, generation }) => new Promise((resolve) => {
             finishDelayedOpens.push(() => resolve({

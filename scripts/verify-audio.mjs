@@ -7,6 +7,7 @@ import {
 } from "../src/audio/audioTimeline.ts"
 import { AudioMixError, mixAudioChunk } from "../src/audio/audioMixer.ts"
 import { encodePcm16Wav, inspectPcm16Wav } from "../src/audio/audioWav.ts"
+import { createHostPCMProvider, readHostWaveform } from "../src/audio/hostPcmProvider.ts"
 
 const RATE = 48_000
 const gcd = (left, right) => {
@@ -242,4 +243,24 @@ const controller = new AbortController()
 controller.abort()
 await assert.rejects(() => mixAudioChunk(loudPlan, new FixtureProvider([loudA, loudB]), 0, 10, controller.signal), (error) => error instanceof AudioMixError && error.code === "cancelled")
 
-console.log("Verified: G05 rational sample clock, placement/slip/loop, fades/crossfade, mute/solo/master, deterministic ducking, clipping, chunk-invariant PCM, bounded reads, cancellation, and diagnostic WAV readback.")
+// The renderer adapter preserves opaque source identity, request bounds, response shape, and cancellation.
+const hostSource = source("host-source", new Float32Array([0.25, -0.5, 0.75, -1]))
+const hostIntent = plan([hostSource], [lane("host-lane", [clip("host-clip", "host-source", { sourceSpan: 4 })])], 4)
+hostIntent.sources.get("host-source").url = `reel-media://grant/${"a".repeat(64)}`
+const hostCalls = []
+const host = {
+    decodeAudio: async (url, startFrame, frameCount) => {
+        hostCalls.push({ url, startFrame, frameCount })
+        return { sampleRate: RATE, channels: 1, startFrame, frameCount, samples: Array.from(hostSource.frames.slice(startFrame, startFrame + frameCount)) }
+    },
+    audioWaveform: async () => ({ sampleRate: RATE, channels: 1, sampleFrames: 4, buckets: [{ minimum: -1, maximum: 0.75, rms: 0.7 }] }),
+}
+const hostProvider = createHostPCMProvider(host, { ...defaultAudioIntent(), sources: [hostIntent.sources.get("host-source")] })
+assert.deepEqual(await hostProvider.read("host-source", 1, 2), { sampleRate: RATE, channels: 1, frames: Float32Array.from([-0.5, 0.75]) })
+assert.deepEqual(hostCalls, [{ url: `reel-media://grant/${"a".repeat(64)}`, startFrame: 1, frameCount: 2 }])
+assert.equal((await readHostWaveform(host, `reel-media://grant/${"a".repeat(64)}`, 1)).sampleFrames, 4)
+const cancelledHostRead = new AbortController()
+cancelledHostRead.abort()
+await assert.rejects(() => hostProvider.read("host-source", 0, 1, cancelledHostRead.signal), (error) => error.name === "AbortError")
+
+console.log("Verified: G05 rational sample clock, placement/slip/loop, fades/crossfade, mute/solo/master, deterministic ducking, clipping, chunk-invariant PCM, bounded host reads, cancellation, and diagnostic WAV readback.")

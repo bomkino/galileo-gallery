@@ -26,6 +26,7 @@
     "verify:audio": "node --experimental-strip-types scripts/verify-audio.mjs",
     "verify:g02-renderer": "npm run build && npm run prepare:electron && REEL_USER_DATA_DIR=./artifacts/g02-runtime REEL_G02_RENDERER_OUTPUT=./artifacts/g02 electron . && node scripts/verify-g02-renderer-artifacts.cjs ./artifacts/g02",
     "verify:g03-renderer": "node scripts/verify-g03-renderer-artifacts.cjs ./artifacts/g03 ./artifacts/g03/round-trip.galileo",
+    "verify:g05-renderer": "node scripts/verify-g05-renderer-artifacts.cjs ./artifacts/g05 ./artifacts/g05/round-trip.galileo",
     "verify:linux-host-port": "node scripts/verify-linux-host-port.cjs",
     "verify:linux-host-controller": "node scripts/verify-linux-host-controller.cjs",
     "verify:linux-protocols": "node scripts/verify-linux-protocols.cjs",

@@ -26,6 +26,39 @@ function validOperationId(value) {
     return typeof value === "string" && /^[a-f0-9]{32}$/.test(value)
 }
 
+function finite(value, minimum, maximum) {
+    return typeof value === "number" && Number.isFinite(value) && value >= minimum && value <= maximum
+}
+
+function safeAudioChoice(value, expectedRole) {
+    if (value === null) return null
+    if (!ownExact(value, ["name", "role", "url", "sampleRate", "channels", "sampleFrames"])
+        || typeof value.name !== "string" || value.name.length < 1 || value.name.length > 512 || /[\\/\x00-\x1f]/.test(value.name)
+        || value.role !== expectedRole || typeof value.url !== "string" || !GRANT_URL.test(value.url)
+        || !Number.isSafeInteger(value.sampleRate) || value.sampleRate < 8_000 || value.sampleRate > 192_000
+        || ![1, 2].includes(value.channels) || !Number.isSafeInteger(value.sampleFrames) || value.sampleFrames < 1) throw new HostPortError("verification_failed")
+    return value
+}
+
+function safeAudioDecode(value, payload) {
+    if (!ownExact(value, ["sampleRate", "channels", "startFrame", "frameCount", "samples"])
+        || !Number.isSafeInteger(value.sampleRate) || value.sampleRate < 8_000 || value.sampleRate > 192_000 || ![1, 2].includes(value.channels)
+        || value.startFrame !== payload.startFrame || value.frameCount !== payload.frameCount || !Array.isArray(value.samples)
+        || value.samples.length !== value.frameCount * value.channels || value.samples.some((sample) => !finite(sample, -1, 1))) throw new HostPortError("verification_failed")
+    return value
+}
+
+function safeWaveform(value, payload) {
+    if (!ownExact(value, ["sampleRate", "channels", "sampleFrames", "buckets"])
+        || !Number.isSafeInteger(value.sampleRate) || value.sampleRate < 8_000 || value.sampleRate > 192_000 || ![1, 2].includes(value.channels)
+        || !Number.isSafeInteger(value.sampleFrames) || value.sampleFrames < 1 || !Array.isArray(value.buckets) || value.buckets.length !== payload.buckets
+        || value.buckets.some((bucket) => !ownExact(bucket, ["minimum", "maximum", "rms"])
+            || !finite(bucket.minimum, -1, 1) || !finite(bucket.maximum, -1, 1) || bucket.minimum > bucket.maximum || !finite(bucket.rms, 0, 1))) {
+        throw new HostPortError("verification_failed")
+    }
+    return value
+}
+
 function tokenFromMediaURL(value) {
     if (typeof value !== "string") throw new HostPortError("invalid_request")
     const match = GRANT_URL.exec(value)
@@ -45,6 +78,8 @@ function createLinuxHostController(options) {
     let pending = null
     let opening = null
     let nextGeneration = generation + 1
+    let activeAudioRequests = 0
+    const audioControllers = new Set()
 
     const operations = Object.freeze({
         "identity.read": { states: ["ready", "opening"], validate: (payload) => ownExact(payload, []) },
@@ -53,6 +88,24 @@ function createLinuxHostController(options) {
             states: ["ready"],
             validate: (payload) => ownExact(payload, ["urls"]) && Array.isArray(payload.urls) && payload.urls.length <= 512 && payload.urls.every((url) => typeof url === "string" && GRANT_URL.test(url)),
         },
+        "audio.choose": {
+            states: ["ready"],
+            validate: (payload) => ownExact(payload, ["role"]) && ["presenter", "soundtrack"].includes(payload.role),
+        },
+        "audio.decode": {
+            states: ["ready", "opening"],
+            validate: (payload) => ownExact(payload, ["url", "startFrame", "frameCount"])
+                && typeof payload.url === "string" && GRANT_URL.test(payload.url)
+                && Number.isSafeInteger(payload.startFrame) && payload.startFrame >= 0
+                && Number.isSafeInteger(payload.frameCount) && payload.frameCount >= 1 && payload.frameCount <= 4096,
+        },
+        "audio.waveform": {
+            states: ["ready", "opening"],
+            validate: (payload) => ownExact(payload, ["url", "buckets"])
+                && typeof payload.url === "string" && GRANT_URL.test(payload.url)
+                && Number.isSafeInteger(payload.buckets) && payload.buckets >= 1 && payload.buckets <= 1024,
+        },
+        "audio.cancel": { states: ["ready", "opening"], validate: (payload) => ownExact(payload, []) },
         "project.save": { states: ["ready"], validate: (payload) => ownExact(payload, ["config"]) && validConfig(payload.config) },
         "project.open.begin": { states: ["ready"], validate: (payload) => ownExact(payload, []) },
         "project.open.accept": { states: ["opening"], validate: (payload) => ownExact(payload, ["operationId"]) && validOperationId(payload.operationId) },
@@ -64,9 +117,22 @@ function createLinuxHostController(options) {
         return registry.create({ scope: "media", filePath, owner, generation: targetGeneration, mime })
     }
 
+    function mediaGrant(mediaURL) {
+        const token = tokenFromMediaURL(mediaURL)
+        const generations = pending ? [generation, pending.generation] : [generation]
+        let lastError
+        for (const candidate of generations) {
+            try {
+                return registry.resolve({ grant: token, scope: "media", owner, generation: candidate })
+            } catch (error) {
+                lastError = error
+            }
+        }
+        throw lastError ?? new HostPortError("grant_expired")
+    }
+
     function mediaPath(mediaURL) {
-        const grant = registry.resolve({ grant: tokenFromMediaURL(mediaURL), scope: "media", owner, generation })
-        return grant.filePath
+        return mediaGrant(mediaURL).filePath
     }
 
     function safeRemove(resourceRoot) {
@@ -86,6 +152,25 @@ function createLinuxHostController(options) {
         safeRemove(abandoned.resourceRoot)
     }
 
+    async function withAudioSlot(work) {
+        if (activeAudioRequests >= 2) throw new HostPortError("resource_limit")
+        activeAudioRequests += 1
+        const controller = new AbortController()
+        audioControllers.add(controller)
+        try {
+            return await work(controller.signal)
+        } finally {
+            audioControllers.delete(controller)
+            activeAudioRequests -= 1
+        }
+    }
+
+    function cancelAudioWork() {
+        const cancelled = audioControllers.size
+        for (const controller of audioControllers) controller.abort()
+        return cancelled
+    }
+
     async function dispatch(envelope) {
         switch (envelope.operation) {
             case "identity.read":
@@ -96,6 +181,31 @@ function createLinuxHostController(options) {
                 for (const url of envelope.payload.urls) registry.revoke(tokenFromMediaURL(url))
                 return { released: envelope.payload.urls.length }
             }
+            case "audio.choose": {
+                const choiceGeneration = generation
+                const choice = await options.chooseAudio({
+                    role: envelope.payload.role,
+                    generation: choiceGeneration,
+                    grantMedia: (filePath, mime) => grantMedia(filePath, mime, choiceGeneration),
+                })
+                try {
+                    const safe = safeAudioChoice(choice, envelope.payload.role)
+                    if (generation !== choiceGeneration || state !== "ready") {
+                        if (safe?.url) registry.revoke(tokenFromMediaURL(safe.url))
+                        throw new HostPortError("conflict")
+                    }
+                    return safe
+                } catch (error) {
+                    if (choice?.url && typeof choice.url === "string" && GRANT_URL.test(choice.url)) registry.revoke(tokenFromMediaURL(choice.url))
+                    throw error
+                }
+            }
+            case "audio.decode":
+                return withAudioSlot(async (signal) => safeAudioDecode(await options.decodeAudio({ grant: mediaGrant(envelope.payload.url), startFrame: envelope.payload.startFrame, frameCount: envelope.payload.frameCount, signal }), envelope.payload))
+            case "audio.waveform":
+                return withAudioSlot(async (signal) => safeWaveform(await options.audioWaveform({ grant: mediaGrant(envelope.payload.url), buckets: envelope.payload.buckets, signal }), envelope.payload))
+            case "audio.cancel":
+                return { cancelled: cancelAudioWork() }
             case "project.save":
                 return options.saveProject({ config: envelope.payload.config, mediaPath })
             case "project.open.begin": {
@@ -179,7 +289,9 @@ function createLinuxHostController(options) {
             limiter.check(owner)
             const envelope = validateEnvelope(value, { generation, state, maximumBytes: 512 * 1024, operations })
             requestId = envelope.requestId
+            const requestGeneration = generation
             const result = await dispatch(envelope)
+            if (envelope.operation.startsWith("audio.") && (state === "closed" || generation !== requestGeneration)) throw new HostPortError("conflict")
             return Object.freeze({ ok: true, requestId, generation, value: result })
         } catch (error) {
             options.onError?.(typeof value?.operation === "string" ? value.operation : "invalid", error)
@@ -203,6 +315,7 @@ function createLinuxHostController(options) {
     }
 
     function dispose() {
+        cancelAudioWork()
         opening?.controller.abort()
         opening = null
         cleanupPending()
@@ -213,6 +326,7 @@ function createLinuxHostController(options) {
     }
 
     function abandonPending() {
+        cancelAudioWork()
         opening?.controller.abort()
         opening = null
         cleanupPending()

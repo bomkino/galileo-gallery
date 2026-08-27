@@ -32,14 +32,16 @@ const {
     openPortableProjectArchive,
     savePortableProjectArchive,
 } = require("./project-persistence.cjs")
-const { inspectMediaFile } = require("./project-schema.cjs")
+const { inspectAudioFile, inspectMediaFile, ProjectSchemaError } = require("./project-schema.cjs")
 const {
     createAppProtocolHandler,
     installSessionSecurity,
     installWindowSecurity,
 } = require("./linux-protocols.cjs")
 const { createLinuxHostController } = require("./linux-host-controller.cjs")
+const { HostPortError } = require("./linux-host-port.cjs")
 let ffmpegStatic = null
+const audioWaveformCache = new Map()
 try {
     ffmpegStatic = require("ffmpeg-static")
 } catch {
@@ -87,7 +89,7 @@ function developmentRendererOrigin() {
 }
 
 function linuxHostMode() {
-    return process.platform === "linux" && (Boolean(process.env.REEL_G03_RENDERER_OUTPUT) || (app.isPackaged && packagedBuildIdentity().profile === "g03-linux-host-port"))
+    return process.platform === "linux" && (Boolean(process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT) || (app.isPackaged && packagedBuildIdentity().profile === "g03-linux-host-port"))
 }
 
 function packagedBuildIdentity() {
@@ -121,8 +123,8 @@ function cleanupOpenedProjectResidue() {
 function rendererURL(exportMode = false) {
     const query = new URLSearchParams()
     if (exportMode) query.set("export", "1")
-    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT) query.set("tracer", "quiet-carousel")
-    if (process.env.REEL_G03_RENDERER_OUTPUT) query.set("host", "linux")
+    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT) query.set("tracer", "quiet-carousel")
+    if (process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT) query.set("host", "linux")
     const suffix = query.size ? `?${query}` : ""
     const developmentOrigin = developmentRendererOrigin()
     if (developmentOrigin) {
@@ -303,6 +305,140 @@ async function chooseMediaForHost(grantMedia) {
         selected.push({ name: inspected.name, type: inspected.type, url: granted.mediaURL })
     }
     return selected
+}
+
+async function chooseAudioForHost(role, grantMedia) {
+    const environmentKey = role === "presenter" ? "REEL_G05_PRESENTER_SOURCE" : "REEL_G05_SOUNDTRACK_SOURCE"
+    let filePath = process.env[environmentKey] ? path.resolve(process.env[environmentKey]) : undefined
+    if (!filePath) {
+        const result = await dialog.showOpenDialog(mainWindow, {
+            title: role === "presenter" ? "Choose presenter audio" : "Choose soundtrack",
+            buttonLabel: role === "presenter" ? "Add Presenter" : "Add Soundtrack",
+            properties: ["openFile"],
+            filters: [{ name: "PCM16 WAV audio", extensions: ["wav"] }],
+        })
+        if (result.canceled || !result.filePaths[0]) return null
+        filePath = result.filePaths[0]
+    }
+    let inspected
+    try {
+        inspected = await inspectAudioFile(filePath)
+    } catch (error) {
+        if (error instanceof ProjectSchemaError) {
+            if (error.code === "cancelled") throw new HostPortError("cancelled")
+            if (error.code === "media_missing") throw new HostPortError("not_found")
+            if (error.code === "media_signature_mismatch") throw new HostPortError("corrupt_input")
+        }
+        throw error
+    }
+    const granted = grantMedia(filePath, "audio/wav")
+    return {
+        name: path.basename(filePath),
+        role,
+        url: granted.mediaURL,
+        sampleRate: inspected.sampleRate,
+        channels: inspected.channels,
+        sampleFrames: inspected.sampleFrames,
+    }
+}
+
+function openedCanonicalWav(grant) {
+    if (grant.mime !== "audio/wav") throw new HostPortError("invalid_request")
+    const handle = fs.openSync(grant.filePath, "r")
+    try {
+        const stat = fs.fstatSync(handle)
+        if (!stat.isFile() || stat.dev !== grant.device || stat.ino !== grant.inode || stat.size !== grant.bytes || stat.mtimeMs !== grant.mtimeMs) throw new HostPortError("verification_failed")
+        const header = Buffer.alloc(44)
+        if (fs.readSync(handle, header, 0, 44, 0) !== 44) throw new HostPortError("corrupt_input")
+        const channels = header.readUInt16LE(22)
+        const sampleRate = header.readUInt32LE(24)
+        const dataBytes = header.readUInt32LE(40)
+        if (header.subarray(0, 4).toString("ascii") !== "RIFF" || header.readUInt32LE(4) !== stat.size - 8
+            || header.subarray(8, 12).toString("ascii") !== "WAVE" || header.subarray(12, 16).toString("ascii") !== "fmt "
+            || header.readUInt32LE(16) !== 16 || header.readUInt16LE(20) !== 1 || ![1, 2].includes(channels)
+            || sampleRate < 8_000 || sampleRate > 192_000 || header.readUInt32LE(28) !== sampleRate * channels * 2
+            || header.readUInt16LE(32) !== channels * 2 || header.readUInt16LE(34) !== 16
+            || header.subarray(36, 40).toString("ascii") !== "data" || dataBytes !== stat.size - 44 || dataBytes === 0 || dataBytes % (channels * 2) !== 0) {
+            throw new HostPortError("corrupt_input")
+        }
+        return { handle, stat, channels, sampleRate, sampleFrames: dataBytes / (channels * 2) }
+    } catch (error) {
+        fs.closeSync(handle)
+        throw error
+    }
+}
+
+function verifyGrantAfterRead(descriptor, grant) {
+    const after = fs.fstatSync(descriptor.handle)
+    if (after.dev !== grant.device || after.ino !== grant.inode || after.size !== grant.bytes || after.mtimeMs !== grant.mtimeMs) throw new HostPortError("verification_failed")
+}
+
+function decodeAudioForHost({ grant, startFrame, frameCount, signal }) {
+    if (signal?.aborted) throw new HostPortError("cancelled")
+    const descriptor = openedCanonicalWav(grant)
+    try {
+        if (startFrame > descriptor.sampleFrames - frameCount) throw new HostPortError("invalid_request")
+        const bytes = Buffer.allocUnsafe(frameCount * descriptor.channels * 2)
+        if (fs.readSync(descriptor.handle, bytes, 0, bytes.length, 44 + startFrame * descriptor.channels * 2) !== bytes.length) throw new HostPortError("verification_failed")
+        if (signal?.aborted) throw new HostPortError("cancelled")
+        verifyGrantAfterRead(descriptor, grant)
+        const samples = Array.from({ length: frameCount * descriptor.channels }, (_, index) => {
+            const sample = bytes.readInt16LE(index * 2)
+            return sample / (sample < 0 ? 32768 : 32767)
+        })
+        return { sampleRate: descriptor.sampleRate, channels: descriptor.channels, startFrame, frameCount, samples }
+    } finally {
+        fs.closeSync(descriptor.handle)
+    }
+}
+
+async function waveformForHost({ grant, buckets, signal }) {
+    if (signal?.aborted) throw new HostPortError("cancelled")
+    if (grant.bytes > 64 * 1024 * 1024) throw new HostPortError("resource_limit")
+    const descriptor = openedCanonicalWav(grant)
+    try {
+        if (buckets > descriptor.sampleFrames) throw new HostPortError("invalid_request")
+        const cacheKey = `${grant.device}:${grant.inode}:${grant.bytes}:${grant.mtimeMs}:${buckets}:v1`
+        const cached = audioWaveformCache.get(cacheKey)
+        if (cached) return cached
+        const minimum = new Float64Array(buckets).fill(1)
+        const maximum = new Float64Array(buckets).fill(-1)
+        const squares = new Float64Array(buckets)
+        const counts = new Uint32Array(buckets)
+        const chunk = Buffer.allocUnsafe(64 * 1024)
+        let byteOffset = 0
+        while (byteOffset < descriptor.sampleFrames * descriptor.channels * 2) {
+            if (signal?.aborted) throw new HostPortError("cancelled")
+            const length = Math.min(chunk.length, descriptor.sampleFrames * descriptor.channels * 2 - byteOffset)
+            const read = fs.readSync(descriptor.handle, chunk, 0, length, 44 + byteOffset)
+            if (read !== length) throw new HostPortError("verification_failed")
+            for (let sampleIndex = 0; sampleIndex < read / 2; sampleIndex += 1) {
+                const absoluteSample = byteOffset / 2 + sampleIndex
+                const frame = Math.floor(absoluteSample / descriptor.channels)
+                const bucket = Math.min(buckets - 1, Math.floor(frame * buckets / descriptor.sampleFrames))
+                const pcm = chunk.readInt16LE(sampleIndex * 2)
+                const value = pcm / (pcm < 0 ? 32768 : 32767)
+                minimum[bucket] = Math.min(minimum[bucket], value)
+                maximum[bucket] = Math.max(maximum[bucket], value)
+                squares[bucket] += value * value
+                counts[bucket] += 1
+            }
+            byteOffset += read
+            await new Promise((resolve) => setImmediate(resolve))
+        }
+        verifyGrantAfterRead(descriptor, grant)
+        const result = Object.freeze({
+            sampleRate: descriptor.sampleRate,
+            channels: descriptor.channels,
+            sampleFrames: descriptor.sampleFrames,
+            buckets: Object.freeze(Array.from({ length: buckets }, (_, index) => Object.freeze({ minimum: minimum[index], maximum: maximum[index], rms: Math.sqrt(squares[index] / counts[index]) }))),
+        })
+        audioWaveformCache.set(cacheKey, result)
+        if (audioWaveformCache.size > 32) audioWaveformCache.delete(audioWaveformCache.keys().next().value)
+        return result
+    } finally {
+        fs.closeSync(descriptor.handle)
+    }
 }
 
 function droppedPathResult(filePath) {
@@ -539,6 +675,9 @@ function createMainWindow() {
                 securityDecisions: { ...securityDecisions },
             }),
             chooseMedia: ({ grantMedia }) => chooseMediaForHost(grantMedia),
+            chooseAudio: ({ role, grantMedia }) => chooseAudioForHost(role, grantMedia),
+            decodeAudio: decodeAudioForHost,
+            audioWaveform: waveformForHost,
             saveProject: async ({ config, mediaPath }) => {
                 const saved = await savePortableProject(config, process.env.REEL_G03_PROJECT_PATH ? path.resolve(process.env.REEL_G03_PROJECT_PATH) : undefined, mediaPath)
                 return saved.cancelled ? { cancelled: true } : { savedAt: Date.now(), documentId: crypto.randomUUID() }
@@ -557,10 +696,13 @@ function createMainWindow() {
     }
     installWindowSecurity(mainWindow, { developmentOrigin: developmentRendererOrigin(), onDecision: recordSecurityDecision })
     mainWindow.loadURL(rendererURL())
-    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT) {
+    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT) {
         mainWindow.webContents.once("did-finish-load", async () => {
             try {
-                if (process.env.REEL_G03_RENDERER_OUTPUT) {
+                if (process.env.REEL_G05_RENDERER_OUTPUT) {
+                    const { runG05RendererSmoke } = require("./g05-renderer-smoke.cjs")
+                    await runG05RendererSmoke(mainWindow, path.resolve(process.env.REEL_G05_RENDERER_OUTPUT), process.env.REEL_G05_RENDERER_MODE ?? "save")
+                } else if (process.env.REEL_G03_RENDERER_OUTPUT) {
                     const { runG03RendererSmoke } = require("./g03-renderer-smoke.cjs")
                     await runG03RendererSmoke(mainWindow, path.resolve(process.env.REEL_G03_RENDERER_OUTPUT), process.env.REEL_G03_RENDERER_MODE ?? "save")
                 } else {

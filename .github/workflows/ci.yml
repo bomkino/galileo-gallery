@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, codex/g02-quiet-carousel-tracer, codex/g03-linux-host-port]
+    branches: [main, codex/g02-quiet-carousel-tracer, codex/g03-linux-host-port, codex/g05-deterministic-audio]
   pull_request:
 
 permissions:
@@ -105,7 +105,7 @@ jobs:
           path: release/*.exe
 
   renderer-g02:
-    if: github.ref_name == 'main' || github.ref_name == 'codex/g02-quiet-carousel-tracer' || github.ref_name == 'codex/g03-linux-host-port' || github.event_name == 'pull_request'
+    if: github.ref_name == 'main' || github.ref_name == 'codex/g02-quiet-carousel-tracer' || github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -161,3 +161,37 @@ jobs:
         with:
           name: g03-linux-host-port-renderer-evidence
           path: artifacts/g03/
+      - name: Run the G05 deterministic audio save and reopen journey
+        if: github.ref_name == 'codex/g05-deterministic-audio'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/g05
+          source_sha="$GITHUB_SHA"
+          source_tree="$(git rev-parse HEAD^{tree})"
+          GALLERY_SOURCE_SHA="$source_sha" GALLERY_SOURCE_TREE="$source_tree" npm run package:linux:g03
+          sudo chown root:root release/g03/linux-unpacked/chrome-sandbox
+          sudo chmod 4755 release/g03/linux-unpacked/chrome-sandbox
+          executable="$PWD/release/g03/linux-unpacked/galileo-gallery"
+          fixtures="$(node scripts/create-g05-audio-fixtures.cjs artifacts/g05-fixtures)"
+          presenter="$(node -e 'process.stdout.write(JSON.parse(process.argv[1]).presenter)' "$fixtures")"
+          soundtrack="$(node -e 'process.stdout.write(JSON.parse(process.argv[1]).soundtrack)' "$fixtures")"
+          project="$PWD/artifacts/g05/round-trip.galileo"
+          user_data="$PWD/artifacts/g05-runtime"
+          for mode in save reopen; do
+            xvfb-run -a env \
+              REEL_USER_DATA_DIR="$user_data" \
+              REEL_G05_RENDERER_OUTPUT="$PWD/artifacts/g05" \
+              REEL_G05_RENDERER_MODE="$mode" \
+              REEL_G03_MEDIA_SOURCES="$PWD/build/icon.png" \
+              REEL_G03_PROJECT_PATH="$project" \
+              REEL_G05_PRESENTER_SOURCE="$presenter" \
+              REEL_G05_SOUNDTRACK_SOURCE="$soundtrack" \
+              "$executable"
+          done
+          G05_EXPECTED_SHA="$source_sha" G05_EXPECTED_TREE="$source_tree" npm run verify:g05-renderer
+      - uses: actions/upload-artifact@v6
+        if: github.ref_name == 'codex/g05-deterministic-audio'
+        with:
+          name: g05-deterministic-audio-renderer-evidence
+          path: artifacts/g05/
