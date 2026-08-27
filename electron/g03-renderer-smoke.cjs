@@ -52,16 +52,9 @@ async function runG03RendererSmoke(window, outputDirectory, mode) {
         document.body.append(download)
         download.click()
         download.remove()
-        const navigation = document.createElement('a')
-        navigation.href = 'https://attacker.example/navigation'
-        document.body.append(navigation)
-        navigation.click()
-        navigation.remove()
-        await wait(120)
-        const securedIdentity = await window.galleryHost.identity()
         return {
             mode,
-            identity: securedIdentity,
+            identity,
             notice: notice(),
             frameCount: Number(root.dataset.frameCount),
             canvas: root.dataset.canvas,
@@ -77,7 +70,12 @@ async function runG03RendererSmoke(window, outputDirectory, mode) {
             location: window.location.href,
         }
     })()`)
-    await wait(120)
+    // Trigger a renderer-originated top-level navigation separately so the
+    // will-navigate decision has completed before the receipt is sampled.
+    void window.webContents.executeJavaScript("window.location.assign('https://attacker.example/navigation')").catch(() => {})
+    await wait(240)
+    journey.identity = await window.webContents.executeJavaScript("window.galleryHost.identity()")
+    journey.location = await window.webContents.executeJavaScript("window.location.href")
     const image = await window.webContents.capturePage()
     const png = image.toPNG()
     const screenshot = path.join(outputDirectory, `g03-${mode}.png`)
