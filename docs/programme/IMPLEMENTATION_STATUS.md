@@ -52,7 +52,7 @@ G02 extends visual Timeline intent inside the still-unreleased v2 schema with an
 
 ## G02 — Quiet Carousel browser tracer
 
-State: **source tracer edited, causally tested, and Vite-built; renderer/motion/visual acceptance unrun**
+State: **engineering-complete in source and real Electron renderer CI; human visual/motion acceptance remains unclaimed**
 
 Implemented on reversible route `?tracer=quiet-carousel`:
 
@@ -67,7 +67,11 @@ Implemented on reversible route `?tracer=quiet-carousel`:
 
 Functional checks prove exact end/start state and epsilon continuity for 1, 2, 7, 8, and 127 frames; proportional preview/output-sized composition; control causality; source treatment state; bounded 256-frame observation; and automatic/fixed/directed literal examples.
 
-Not proved: running renderer UI, real decoded source RGB/alpha equality, clean captured alpha, real-speed clip, keyboard/accessibility journey, browser memory profile, or human visual/motion verdict. G02 therefore remains active and does not unblock G03/G04/G05.
+Real Electron `43.1.0` / Chromium `150.0.7871.47` CI now proves the running renderer journey on Ubuntu 24.04/Xvfb with Chromium sandboxing enabled: ordered source decode, 4:5 vertical/reverse recomposition, causal controls, automatic/fixed/directed Timeline modes, explicit save/reset/reload, scrub, 768 ms same-frame real-time motion, keyboard focus progression, and failed-media order preservation. Three captured PNGs and a machine receipt are held in GitHub Actions artifact `9634400798` with archive digest `sha256:87e11dffe8ed4fdb90c23d671eac01b184a7bec50133193e77e256d08cd9aa20`; the exact receipt is also committed as `G02_RENDERER_CI_RECEIPT.json`.
+
+The alpha packet contains 978,796 fully transparent pixels, 1,233 partial pixels, 163,011 opaque pixels, and zero non-zero RGB pixels under alpha zero. Source images decode at all eight declared ratios and retain opacity 1, filter none, normal blend, and selected cover fit.
+
+Not proved: a recorded real-time video clip, long-running browser heap profile, decoded pixel-for-pixel RGB comparison against external user media, exact Garuda behaviour, or a human visual/motion verdict. These remain downstream evidence/acceptance gates; they do not keep the completed G02 engineering boundary active.
 
 ## Known unsafe or unproved surfaces
 
@@ -78,4 +82,4 @@ Not proved: running renderer UI, real decoded source RGB/alpha equality, clean c
 - exact Garuda and Apple-Silicon target behaviour;
 - UI import capture and human interaction review; this runner forbids local sockets required by X11, Wayland, Xvfb, and Chromium renderer processes.
 
-Current frontier: run G02 at `?tracer=quiet-carousel` on a display-capable browser/Electron runner, capture source-fidelity and real-speed motion evidence, fix functional findings, and request separate human visual review. No later ticket is activated yet.
+Current frontier: **G03 Linux HostPort**. Replace reversible raw-path media authority and unvalidated IPC with opaque grants, a strict packaged origin, a narrow HostPort, and a sandboxed packaged-directory journey. G05 audio becomes ready after the G03 shared host boundary is stable. G04 remains deferred until G03 establishes the shared interface and a Mac runner is available.

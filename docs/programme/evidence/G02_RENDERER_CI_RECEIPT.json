@@ -1,0 +1,271 @@
+{
+  "schema": "galileo-gallery-g02-renderer-receipt-v1",
+  "capturedAt": "2026-08-27T05:27:21.088Z",
+  "platform": "linux",
+  "architecture": "x64",
+  "electron": "43.1.0",
+  "chromium": "150.0.7871.47",
+  "journey": {
+    "order": [
+      "quiet-frame-01",
+      "quiet-frame-02",
+      "quiet-frame-03",
+      "quiet-frame-04",
+      "quiet-frame-05",
+      "quiet-frame-06",
+      "quiet-frame-07",
+      "quiet-frame-08"
+    ],
+    "controlEffects": {
+      "beforeFrameSize": {
+        "width": 230.30224609375,
+        "height": 129.54229736328125,
+        "transform": "matrix(0.933638, 0, 0, 0.933638, 113.854, 378.537)"
+      },
+      "afterFrameSize": {
+        "width": 281.54638671875,
+        "height": 158.35629272460938,
+        "transform": "matrix(0.927331, 0, 0, 0.927331, 85.3903, 378.627)"
+      },
+      "beforeGap": {
+        "width": 281.54638671875,
+        "height": 158.35629272460938,
+        "transform": "matrix(0.927331, 0, 0, 0.927331, 85.3903, 378.627)"
+      },
+      "afterGap": {
+        "width": 275.51806640625,
+        "height": 154.9656982421875,
+        "transform": "matrix(0.907476, 0, 0, 0.907476, 85.3903, 429.317)"
+      },
+      "beforeDepth": {
+        "width": 275.51806640625,
+        "height": 154.9656982421875,
+        "transform": "matrix(0.907476, 0, 0, 0.907476, 85.3903, 429.317)"
+      },
+      "afterDepth": {
+        "width": 247.42684936523438,
+        "height": 139.1656494140625,
+        "transform": "matrix(0.814951, 0, 0, 0.814951, 85.3903, 429.317)"
+      }
+    },
+    "modes": [
+      {
+        "mode": "automatic",
+        "durationMs": 8000
+      },
+      {
+        "mode": "fixed-duration",
+        "durationMs": 14500
+      },
+      {
+        "mode": "directed",
+        "durationMs": 20000
+      }
+    ],
+    "storageBytes": 7209,
+    "reloaded": {
+      "g02Tracer": "quiet-carousel-v1",
+      "axis": "vertical",
+      "background": "transparent",
+      "canvas": "1080x1350",
+      "direction": "reverse",
+      "failedMedia": "0",
+      "fit": "cover",
+      "frameCount": "8",
+      "frameSize": "64",
+      "gap": "144",
+      "paceMs": "1000",
+      "depth": "24",
+      "playing": "false",
+      "timeMs": "0",
+      "timelineDurationMs": "20000",
+      "timelineMode": "directed"
+    },
+    "notice": "Reloaded exact browser Project",
+    "scrubbed": {
+      "g02Tracer": "quiet-carousel-v1",
+      "axis": "vertical",
+      "background": "transparent",
+      "canvas": "1080x1350",
+      "direction": "reverse",
+      "failedMedia": "0",
+      "fit": "cover",
+      "frameCount": "8",
+      "frameSize": "64",
+      "gap": "144",
+      "paceMs": "1000",
+      "depth": "24",
+      "playing": "false",
+      "timeMs": "7400",
+      "timelineDurationMs": "20000",
+      "timelineMode": "directed"
+    },
+    "beforeMotion": {
+      "frameId": "quiet-frame-01",
+      "timeMs": 7400,
+      "transform": "matrix(0.988775, 0, 0, 0.988775, 85.3903, 178.781)"
+    },
+    "afterMotion": {
+      "frameId": "quiet-frame-01",
+      "timeMs": 8168,
+      "transform": "matrix(0.787506, 0, 0, 0.787506, 85.3903, 464.35)"
+    },
+    "decodedSources": [
+      {
+        "id": "quiet-frame-01",
+        "naturalWidth": 1200,
+        "naturalHeight": 675,
+        "sourceRatio": 1.7777777777777777
+      },
+      {
+        "id": "quiet-frame-02",
+        "naturalWidth": 1200,
+        "naturalHeight": 900,
+        "sourceRatio": 1.3333333333333333
+      },
+      {
+        "id": "quiet-frame-03",
+        "naturalWidth": 1200,
+        "naturalHeight": 1200,
+        "sourceRatio": 1
+      },
+      {
+        "id": "quiet-frame-04",
+        "naturalWidth": 1200,
+        "naturalHeight": 1600,
+        "sourceRatio": 0.75
+      },
+      {
+        "id": "quiet-frame-05",
+        "naturalWidth": 1200,
+        "naturalHeight": 750,
+        "sourceRatio": 1.6
+      },
+      {
+        "id": "quiet-frame-06",
+        "naturalWidth": 1200,
+        "naturalHeight": 2133,
+        "sourceRatio": 0.5625879043600562
+      },
+      {
+        "id": "quiet-frame-07",
+        "naturalWidth": 1200,
+        "naturalHeight": 800,
+        "sourceRatio": 1.5
+      },
+      {
+        "id": "quiet-frame-08",
+        "naturalWidth": 1200,
+        "naturalHeight": 1500,
+        "sourceRatio": 0.8
+      }
+    ],
+    "sourceTreatment": {
+      "opacity": "1",
+      "filter": "none",
+      "mixBlendMode": "normal",
+      "objectFit": "cover"
+    },
+    "stage": {
+      "width": 474.390625,
+      "height": 557
+    },
+    "nodeCount": 155,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) galileo-gallery/1.0.0 Chrome/150.0.7871.47 Electron/43.1.0 Safari/537.36",
+    "failedMedia": 1
+  },
+  "keyboardFocus": [
+    {
+      "tag": "button",
+      "action": "fixture",
+      "control": "",
+      "frame": "",
+      "text": "Import 8-frame fixture"
+    },
+    {
+      "tag": "button",
+      "action": "save",
+      "control": "",
+      "frame": "",
+      "text": "Save"
+    },
+    {
+      "tag": "button",
+      "action": "reload",
+      "control": "",
+      "frame": "",
+      "text": "Reload"
+    },
+    {
+      "tag": "button",
+      "action": "",
+      "control": "",
+      "frame": "quiet-frame-01",
+      "text": "01Frame 01"
+    },
+    {
+      "tag": "button",
+      "action": "",
+      "control": "",
+      "frame": "quiet-frame-02",
+      "text": "02Frame 02"
+    },
+    {
+      "tag": "button",
+      "action": "",
+      "control": "",
+      "frame": "quiet-frame-03",
+      "text": "03Frame 03"
+    },
+    {
+      "tag": "button",
+      "action": "",
+      "control": "",
+      "frame": "quiet-frame-04",
+      "text": "04Frame 04"
+    },
+    {
+      "tag": "button",
+      "action": "",
+      "control": "",
+      "frame": "quiet-frame-05",
+      "text": "05Frame 05"
+    }
+  ],
+  "captures": {
+    "interface": {
+      "file": "quiet-carousel-ui.png",
+      "bytes": 209136,
+      "sha256": "2b774b7b023584597f59efab66bd921ce6289f0ea395e05c1ad47629ac8994fb",
+      "size": {
+        "width": 1280,
+        "height": 893
+      }
+    },
+    "alpha": {
+      "file": "quiet-carousel-alpha.png",
+      "bytes": 11897,
+      "sha256": "4eb4f3779da0725f36e257a20e3c3899e8767270de6c1611b84202b87bb207b6",
+      "size": {
+        "width": 1280,
+        "height": 893
+      },
+      "pixels": {
+        "transparent": 978796,
+        "contaminatedTransparent": 0,
+        "partial": 1233,
+        "opaque": 163011,
+        "total": 1143040
+      }
+    },
+    "failedMedia": {
+      "file": "quiet-carousel-failed-media.png",
+      "bytes": 211235,
+      "sha256": "7b63941fd9ea8c8504f9a34959a8530329c17624f00dfa713df4e2be1cc75886",
+      "size": {
+        "width": 1280,
+        "height": 893
+      }
+    }
+  }
+}

@@ -11,7 +11,7 @@ Ticket: G02 — Quiet Carousel browser tracer
 - Implementation commit: `f5b4a032e96e2f4f8587f477db95fa62b638589a`
 - Review-fix commit: `4ed383e1b5ebbdaff60a70c0f0615cabe443dde2`
 - Runtime: Ubuntu 24.04 x86-64; Node `v24.19.0`; npm `11.9.0`; Electron `43.1.0`
-- Highest state: **edited, causally tested, and Vite-built**. No renderer-window, package, app install, release, or human acceptance claim.
+- Highest state: **edited, causally tested, Vite-built, and real Electron-renderer CI tested**. No package, app install, release, Garuda claim, recorded motion clip, or human acceptance claim.
 
 Local and remote histories use different tree-equivalent commits from earlier
 GitHub connector writes. Starting local and remote trees were both
@@ -79,6 +79,33 @@ These failures do not invalidate pure evaluator evidence. They do prohibit UI,
 screenshot, real-speed, source-decode, alpha-artifact, accessibility, and human
 visual claims.
 
+The managed local runner remains unable to create display sockets. A display-capable GitHub Actions runner was therefore added as the real renderer evidence seam.
+
+### Passed CI renderer packet
+
+- Remote source commit: `a032c302fd98f9014d7ee0de4aa0f7eece1c2b36`.
+- Exact source tree: `deb16c06faa810b5d83b04c98dfc97386475f448`.
+- Workflow run: `33042521610`.
+- Renderer job: `98419097898` — pass in 27 seconds.
+- Source test matrix: macOS, Ubuntu, and Windows — all pass; Linux/macOS/Windows packaging jobs were skipped on the task-branch push.
+- Platform: Ubuntu 24.04 x86-64; Electron `43.1.0`; Chromium `150.0.7871.47`.
+- Chromium sandbox: enabled through the correctly owned/mode `4755` Electron sandbox helper; no `--no-sandbox` flag.
+- Artifact: `g02-quiet-carousel-renderer-evidence`, ID `9634400798`.
+- Artifact archive digest: `sha256:87e11dffe8ed4fdb90c23d671eac01b184a7bec50133193e77e256d08cd9aa20`.
+- Durable machine receipt: `G02_RENDERER_CI_RECEIPT.json`.
+
+The packet proves:
+
+- eight decoded SVG sources in exact order and at their eight declared ratios;
+- 4:5, vertical, reverse, cover, transparent state after explicit save, Reset, and Reload;
+- frame-size, gap, pace, and depth causally changing geometry or compiled duration;
+- automatic 8,000 ms, fixed 14,500 ms, and directed 20,000 ms modes after the deliberate 1,000 ms pace change;
+- exact 7,400 ms scrub state and 768 ms of real-time movement on the same source frame;
+- keyboard focus progression through Project actions and ordered Frames;
+- failed-media placeholder with all eight ordered identities retained;
+- interface, alpha, and failed-media PNG captures with verified SHA-256 hashes;
+- 978,796 alpha-zero pixels with zero non-zero RGB contamination, 1,233 partial-alpha pixels, and 163,011 opaque pixels.
+
 ## Fixed-point review
 
 ### Spec axis
@@ -89,9 +116,7 @@ boundary. It does not scaffold 28 Scenes, audio, HostPort, export, Interface
 Scale, MCP, native targets, or release work. Existing application/package paths
 remain intact.
 
-Deferred criteria: real application journey, decoded RGB/alpha comparison,
-real-speed motion, renderer resource observation, and human visual verdict.
-Because those criteria are material, G02 remains active.
+Deferred criteria: recorded real-time clip, pixel-for-pixel decoded comparison against external user media, long-running renderer heap observation, exact Garuda behaviour, and human visual verdict. These stay explicit downstream gates without expanding G02's bounded engineering boundary.
 
 ### Standards axis
 
@@ -115,16 +140,8 @@ Functional alpha output remains unclaimed until a real renderer capture runs.
 
 ## Frontier
 
-G02 remains active. Required next evidence:
+G02 engineering is closed. Human taste/real-time clip, exact Garuda, and longer resource observation remain unclaimed gates.
 
-1. open `?tracer=quiet-carousel` on a display-capable runner;
-2. import fixture, change ratios/directions/controls, switch all Timeline modes,
-   save/reload, scrub, and exercise failed media;
-3. capture identical-time source-fidelity stills, transparent alpha composites,
-   diagnostic frames, and 1x real-speed motion;
-4. observe browser resources for ordinary and bounded high-count fixtures;
-5. fix functional defects, rerun gates, then ask Manali/Jenai for separate visual
-   and motion verdict.
+G03 Linux HostPort is active next. It owns opaque grants, strict packaged origin, bounded request schemas, sender/origin/generation/state validation, and a sandboxed packaged-directory save/relaunch/open journey. G05 audio is dependency-ready after the shared G03 boundary stabilizes. G04 should reuse that boundary and remains Mac-runner-gated.
 
-G03, G04, and G05 remain blocked until this packet passes. No package, merge,
-release, publication, installation, signing, notarization, or acceptance occurred.
+No package, merge, release, publication, app installation, signing, notarization, Garuda acceptance, or human acceptance occurred.
