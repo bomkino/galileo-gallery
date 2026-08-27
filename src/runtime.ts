@@ -1,4 +1,5 @@
 import type { GalleryHostPort, ReelAPI, ReelConfig } from "./types"
+import { hydrateHostAudio, validateHostAudioIntent } from "./audio/audioHost"
 
 const unavailable = async () => {
     throw new Error("This action is available in the Galileo desktop app.")
@@ -34,7 +35,9 @@ function validateHostConfig(value: unknown): ReelConfig {
     if (!config.items.every((item) => item && typeof item.id === "string" && ["image", "video"].includes(item.type) && /^reel-media:\/\/grant\/[a-f0-9]{64}$/.test(item.url))) {
         throw new Error("Host media authority is invalid.")
     }
-    return config as ReelConfig
+    const normalized = config as ReelConfig
+    validateHostAudioIntent(normalized.audio, normalized.items)
+    return normalized
 }
 
 async function hydrateHostConfig(config: ReelConfig) {
@@ -59,6 +62,7 @@ async function hydrateHostConfig(config: ReelConfig) {
             media.decode().then(() => finish(), () => finish(new Error(`Could not hydrate ${item.name}.`)))
         }
     })))
+    await hydrateHostAudio(config.audio)
 }
 
 function hostBackedAPI(host: GalleryHostPort): ReelAPI {

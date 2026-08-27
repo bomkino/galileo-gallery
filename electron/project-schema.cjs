@@ -479,6 +479,7 @@ function validateAudio(audio, media) {
     if (!Array.isArray(audio.sources) || audio.sources.length > 512 || !Array.isArray(audio.lanes) || audio.lanes.length > 32) fail("audio_invalid", "Audio tables are invalid.")
     const mediaById = new Map(media.map((entry) => [entry.id, entry]))
     const sources = new Map()
+    const sourceVideoMediaIds = new Set()
     let assetIndex = 0
     for (const [index, source] of audio.sources.entries()) {
         const commonKeys = ["id", "name", "role", "sampleRate", "channels", "sampleFrames"]
@@ -495,6 +496,8 @@ function validateAudio(audio, media) {
         if (source.role === "source-video") {
             stringValue(source.mediaId, "audio_invalid", "Source-video media id", { pattern: /^[^/\\\u0000-\u001f]+$/, max: 200 })
             if (mediaById.get(source.mediaId)?.kind !== "video") fail("audio_invalid", "Source-video audio must reference an ordered video frame.")
+            if (sourceVideoMediaIds.has(source.mediaId)) fail("audio_invalid", "Each ordered video can own only one source-video audio identity.")
+            sourceVideoMediaIds.add(source.mediaId)
         } else {
             assetIndex += 1
             stringValue(source.signature, "audio_invalid", "Audio source signature", { values: ["wav-pcm16"] })
@@ -513,7 +516,7 @@ function validateAudio(audio, media) {
         stringValue(lane.id, "audio_invalid", "Audio lane id", { pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, max: 120 })
         if (laneIds.has(lane.id)) fail("audio_invalid", "Audio lane identities must be unique.")
         laneIds.add(lane.id)
-        stringValue(lane.name, "audio_invalid", "Audio lane name", { max: 200 })
+        stringValue(lane.name, "audio_invalid", "Audio lane name", { pattern: /^[^/\\\u0000-\u001f]+$/, max: 200 })
         stringValue(lane.role, "audio_invalid", "Audio lane role", { values: ["source-video", "presenter", "soundtrack"] })
         numberValue(lane.gain, "audio_invalid", "Audio lane gain", 0, 4)
         booleanValue(lane.muted, "audio_invalid", "Audio lane mute")

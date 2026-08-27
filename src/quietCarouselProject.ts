@@ -2,6 +2,7 @@ import { DEFAULT_SETTINGS } from "./defaults.ts"
 import { defaultCasinoTimeline, QUIET_CAROUSEL_ID, quietCarouselScene } from "./scenes/quietCarousel.ts"
 import type { MediaItem, ReelConfig, TimelineMode, VisualTimelineSegment } from "./types.ts"
 import { defaultAudioIntent } from "./audio/audioTimeline.ts"
+import { validateHostAudioIntent } from "./audio/audioHost.ts"
 
 const BROWSER_PROJECT_FORMAT = "galileo-gallery-browser-project"
 const BROWSER_PROJECT_VERSION = 1
@@ -142,7 +143,9 @@ function validateQuietCarouselConfig(config: Partial<ReelConfig>, media: (value:
             ? { kind: "transparent" }
             : { kind: "solid", color: config.settings.ground || "#11110f" },
     })
-    return config as ReelConfig
+    const normalized = { ...config, audio: config.audio ?? defaultAudioIntent() } as ReelConfig
+    validateHostAudioIntent(normalized.audio, normalized.items)
+    return normalized
 }
 
 export function serializeQuietCarouselBrowserProject(config: ReelConfig) {

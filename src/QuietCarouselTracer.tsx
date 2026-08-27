@@ -14,6 +14,7 @@ import {
     timelineIntentForMode,
 } from "./quietCarouselProject"
 import type { ReelConfig, ReelSettings, TimelineMode } from "./types"
+import { hydrateHostAudio } from "./audio/audioHost"
 import "./quietCarousel.css"
 
 const BROWSER_PROJECT_KEY = "galileo-gallery-g02-quiet-carousel-v1"
@@ -212,6 +213,7 @@ export default function QuietCarouselTracer() {
                 operationId = candidate.operationId
                 const restored = parseQuietCarouselHostProject(candidate.config)
                 await hydrateHostMedia(restored)
+                await hydrateHostAudio(restored.audio)
                 await host.acceptProjectOpen(operationId)
                 setConfig(restored)
                 setSelectedId(restored.items[0]?.id ?? "")

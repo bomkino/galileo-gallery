@@ -213,6 +213,19 @@ async function run() {
         }]
         sourceVideoManifest.audio.ducking = { ...sourceVideoManifest.audio.ducking, enabled: false, targetLaneIds: [] }
         assert.equal(validatePortableProject(sourceVideoManifest).audio.sources[0].mediaId, "frame-one")
+        const duplicateSourceVideo = structuredClone(sourceVideoManifest)
+        duplicateSourceVideo.audio.sources.push({ ...duplicateSourceVideo.audio.sources[0], id: "source-video-audio-duplicate" })
+        assert.throws(() => validatePortableProject(duplicateSourceVideo), (error) => error?.code === "audio_invalid")
+
+        await assert.rejects(
+            savePortableProjectArchive({
+                config: { ...config, items: Array.from({ length: 4_094 }, (_, index) => ({ ...config.items[0], id: `quota-${index}`, url: path.join(root, "never-read.png") })) },
+                outputPath: path.join(root, "too-many-authored-entries.galileo"),
+                tempRoot: root,
+                mediaPathFromURL: (url) => url,
+            }),
+            (error) => error?.code === "too_many_entries"
+        )
 
         const protectedDestination = path.join(root, "protected.galileo")
         fs.writeFileSync(protectedDestination, "known-prior-project-bytes")
@@ -242,6 +255,7 @@ async function run() {
             ["audio_invalid", (project) => ({ ...project, audio: { ...project.audio, sources: [{ id: "bad", name: "Bad", role: "soundtrack", archivePath: "../../bad.wav", bytes: 46, sha256: "a".repeat(64), signature: "wav-pcm16", sampleRate: 48000, channels: 2, sampleFrames: 1 }] } })],
             ["audio_invalid", (project) => ({ ...project, audio: { ...project.audio, ducking: { ...project.audio.ducking, amount: 2 } } })],
             ["audio_invalid", (project) => ({ ...project, audio: { ...project.audio, ducking: { ...project.audio.ducking, attack: { numerator: 2, denominator: 4 } } } })],
+            ["audio_invalid", (project) => ({ ...project, audio: { ...project.audio, lanes: [{ id: "private-lane", name: "/Users/alice/private.wav", role: "soundtrack", gain: 1, muted: false, solo: false, clips: [] }] } })],
         ]
         for (const [code, mutate] of cases) {
             const target = path.join(root, `${code}.galileo`)

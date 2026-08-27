@@ -164,6 +164,11 @@ async function savePortableProjectArchive(options) {
     const mediaFolder = path.join(projectFolder, "media")
     fs.mkdirSync(mediaFolder, { recursive: true, mode: 0o700 })
     try {
+        const configuredAudioSources = options.config.audio?.sources ?? []
+        if (!Array.isArray(configuredAudioSources) || configuredAudioSources.length > 512) throw new ProjectSchemaError("audio_invalid", "Audio source table is invalid.")
+        const externalAudio = configuredAudioSources.filter((source) => source.role !== "source-video")
+        const authoredEntryCount = 1 + options.config.items.length + externalAudio.length + 2 + (externalAudio.length ? 1 : 0)
+        if (authoredEntryCount > PROJECT_IMPORT_LIMITS.entryCount) throw new ProjectImportError("too_many_entries")
         const media = []
         for (let index = 0; index < options.config.items.length; index += 1) {
             const item = options.config.items[index]
@@ -180,9 +185,6 @@ async function savePortableProjectArchive(options) {
             media.push({ archivePath, ...copied })
         }
         const audioAssets = []
-        const configuredAudioSources = options.config.audio?.sources ?? []
-        if (!Array.isArray(configuredAudioSources) || configuredAudioSources.length > 512) throw new ProjectSchemaError("audio_invalid", "Audio source table is invalid.")
-        const externalAudio = configuredAudioSources.filter((source) => source.role !== "source-video")
         if (externalAudio.length) fs.mkdirSync(path.join(projectFolder, "audio"), { recursive: false, mode: 0o700 })
         for (let index = 0; index < externalAudio.length; index += 1) {
             const source = externalAudio[index]
@@ -200,7 +202,10 @@ async function savePortableProjectArchive(options) {
             audioAssets.push({ id: source.id, archivePath, bytes: copied.bytes, sha256: copied.sha256, signature: copied.signature })
         }
         const project = portableProjectFromConfig(options.config, media, audioAssets)
-        fs.writeFileSync(path.join(projectFolder, "project.json"), canonicalProjectJSON(project), { flag: "wx", mode: 0o600 })
+        const projectJSON = canonicalProjectJSON(project)
+        const authoredExpandedBytes = Buffer.byteLength(projectJSON) + media.reduce((total, entry) => total + entry.bytes, 0) + audioAssets.reduce((total, entry) => total + entry.bytes, 0)
+        if (authoredExpandedBytes > PROJECT_IMPORT_LIMITS.totalExpandedBytes) throw new ProjectImportError("expanded_size_exceeded")
+        fs.writeFileSync(path.join(projectFolder, "project.json"), projectJSON, { flag: "wx", mode: 0o600 })
         await writeFileSafely(options.outputPath, (stagedOutputPath) => {
             // AdmZip is confined to app-authored output. Untrusted input is streamed only by G01A/yauzl.
             const archive = new AdmZip()
