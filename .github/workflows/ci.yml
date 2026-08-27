@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, codex/g02-quiet-carousel-tracer]
+    branches: [main, codex/g02-quiet-carousel-tracer, codex/g03-linux-host-port]
   pull_request:
 
 permissions:
