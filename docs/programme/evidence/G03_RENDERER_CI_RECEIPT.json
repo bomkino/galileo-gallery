@@ -1,0 +1,61 @@
+{
+  "schema": "galileo-gallery-g03-ci-receipt-v1",
+  "repository": "bomkino/galileo-gallery",
+  "branch": "codex/g03-linux-host-port",
+  "sourceCommit": "e15ad65ae9b5c0a1460fc08ca48057ba2f196c15",
+  "sourceTree": "340b44e7bdcd2a0c88bdbdfb1166cdc4ab6c5d18",
+  "workflowRun": 33045232888,
+  "jobs": {
+    "ubuntuSource": { "id": 98427574137, "conclusion": "success" },
+    "windowsSource": { "id": 98427574250, "conclusion": "success" },
+    "macosSource": { "id": 98427574300, "conclusion": "success" },
+    "rendererAndPackagedDirectory": { "id": 98427574258, "conclusion": "success" }
+  },
+  "artifact": {
+    "id": 9635371682,
+    "name": "g03-linux-host-port-renderer-evidence",
+    "bytes": 1287034,
+    "sha256": "840e8a5e7f1ea34edcf07e1b534e301e961668f58dd40c29485970811beb5043"
+  },
+  "runtime": {
+    "platform": "linux",
+    "architecture": "x64",
+    "electron": "43.1.0",
+    "chromium": "150.0.7871.47",
+    "node": "24.18.0",
+    "sandbox": true
+  },
+  "journeys": [
+    {
+      "mode": "save",
+      "canvas": "1080x1920",
+      "axis": "vertical",
+      "frames": 1,
+      "screenshot": "g03-save.png",
+      "screenshotSha256": "5f43e9dee5bdd6baf598a4ddc4104cf07ea2649c15e142bf912378a340f0bfb0"
+    },
+    {
+      "mode": "reopen",
+      "canvas": "1080x1920",
+      "axis": "vertical",
+      "frames": 1,
+      "screenshot": "g03-reopen.png",
+      "screenshotSha256": "3e505a2aaea1ef27efeed18a09d0582d014a746c7e0ffb48cb697e7f77480249"
+    }
+  ],
+  "claims": {
+    "opaqueGrantURLs": true,
+    "rawPathsAbsent": true,
+    "nodeGlobalsAbsent": true,
+    "popupDenied": true,
+    "navigationDenied": true,
+    "permissionDenied": true,
+    "downloadDenied": true,
+    "remoteRequestDenied": true,
+    "portableSaveQuitRelaunchOpen": true,
+    "exactGaruda": false,
+    "installer": false,
+    "released": false,
+    "humanAccepted": false
+  }
+}

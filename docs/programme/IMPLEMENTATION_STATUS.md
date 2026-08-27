@@ -4,7 +4,7 @@ Updated: 27 August 2026
 
 Repository start: `bomkino/galileo-gallery@2762043bb733aa28a6c63fe26564504b9f257564`
 
-Task branch: `codex/g02-quiet-carousel-tracer`
+Task branch: `codex/g03-linux-host-port`
 
 ## G01A — safe archive import boundary
 
@@ -31,7 +31,7 @@ The full development-tool dependency audit still reports nine high-severity advi
 
 ## G01B — clean Project schema
 
-State: **owned domain boundary source- and Electron-main-process tested; renderer UI observation deferred**
+State: **owned domain boundary source-, Electron-main-process-, and packaged-renderer-tested through G03; human acceptance remains unclaimed**
 
 Protected now:
 
@@ -46,7 +46,7 @@ Protected now:
 
 Source checks cover save/open/reopen canonical equality, ordered hashes, privacy exclusions, semantic failure matrix, cancellation before staging and during media promotion, staging cleanup, and prior destination/Project preservation. After explicit user approval, the package-lock-pinned Electron `43.1.0` development binary was installed and its real main-process save/open/reopen smoke passed with two ordered media files.
 
-Xvfb and Xauth were later installed after direct continuation approval. Xvfb still cannot start because this managed runner denies local socket creation (`Cannot establish any listening sockets`); Chromium's headless Ozone path also terminates under the same kernel restriction. This target-runner observation remains deferred. It no longer freezes source work downstream of the stable G01B domain boundary.
+Xvfb and Xauth were later installed after direct continuation approval. This managed local runner still denies display socket creation, but the display-capable GitHub runner now proves the packaged G03 renderer save, quit, relaunch, open, hydration, and Project-state round trip.
 
 G02 extends visual Timeline intent inside the still-unreleased v2 schema with an explicit fixed duration and bounded directed cycle/hold segments. Automatic/fixed/directed mode and segment identity now survive browser and portable Project round trips.
 
@@ -73,13 +73,27 @@ The alpha packet contains 978,796 fully transparent pixels, 1,233 partial pixels
 
 Not proved: a recorded real-time video clip, long-running browser heap profile, decoded pixel-for-pixel RGB comparison against external user media, exact Garuda behaviour, or a human visual/motion verdict. These remain downstream evidence/acceptance gates; they do not keep the completed G02 engineering boundary active.
 
+## G03 — Linux HostPort security boundary
+
+State: **engineering-complete in source and a sandboxed packaged-directory Electron journey; exact Garuda and human acceptance remain unclaimed**
+
+Implemented and proved:
+
+- strict packaged `gallery-app://app` origin, isolated session, containment, CSP, MIME, and navigation/network/permission/download denial;
+- one frozen versioned `galleryHost` preload boundary with strict envelopes and main-derived owner identity;
+- 256-bit opaque owner/generation/scope/expiry grants with verified bounded ranges, suffix ranges, streaming, concurrency, revocation, and cleanup;
+- two-phase Project open with candidate hydration before acceptance and prior-Project preservation on cancel or failure;
+- cleanup across retry, replacement, reload, navigation, render failure, startup residue, and window disposal;
+- exact embedded package/source identity and a separate hardened G03 package profile;
+- real packaged Linux x64 import, save, quit, relaunch, reopen, fresh-grant, vertical-canvas, Scene, and Timeline journey with Chromium sandbox enabled.
+
+CI run `33045232888` passed source tests on Ubuntu, macOS, and Windows plus packaged renderer job `98427574258`. Artifact `9635371682` has archive digest `sha256:840e8a5e7f1ea34edcf07e1b534e301e961668f58dd40c29485970811beb5043`; the durable receipt is `G03_RENDERER_CI_RECEIPT.json`.
+
 ## Known unsafe or unproved surfaces
 
-- current reversible path-encoded media URLs and broad media protocol authority;
-- IPC sender/origin/generation/runtime-schema hardening outside import calls;
-- decoded video/proxy/export cache budgets and eviction;
-- packaged Electron security and lifecycle;
+- legacy non-G03 package paths still exist and are not release candidates;
+- decoded video/audio/proxy/export cache budgets and eviction beyond G03 media reads;
 - exact Garuda and Apple-Silicon target behaviour;
-- UI import capture and human interaction review; this runner forbids local sockets required by X11, Wayland, Xvfb, and Chromium renderer processes.
+- human interaction, visual, motion, and audio acceptance.
 
-Current frontier: **G03 Linux HostPort**. Replace reversible raw-path media authority and unvalidated IPC with opaque grants, a strict packaged origin, a narrow HostPort, and a sandboxed packaged-directory journey. G05 audio becomes ready after the G03 shared host boundary is stable. G04 remains deferred until G03 establishes the shared interface and a Mac runner is available.
+Current frontier: **G05 deterministic audio**. Build the rational story-clock compiler, bounded PCM mixer, portable audio identity, opaque decode/waveform host operations, collapsed contextual lanes, and causal save/reopen/preview evidence. Final mux/output remains G06. G04 remains deferred until an Apple-Silicon runner is available.
