@@ -4,7 +4,7 @@ Updated: 27 August 2026
 
 Repository start: `bomkino/galileo-gallery@2762043bb733aa28a6c63fe26564504b9f257564`
 
-Task branch: `codex/g05-deterministic-audio`
+Task branch: `codex/g06-verified-png-export`
 
 ## G01A — safe archive import boundary
 
@@ -105,6 +105,22 @@ Implemented and proved:
 
 CI run `33055407716` passed source tests on Ubuntu, macOS, and Windows plus packaged renderer job `98460833564`. Artifact `9639381800` has archive digest `sha256:2ee786bc36b5dffe0e7c482399737190596d8a380dfc6fe58893f3fab30572a2`; the durable summary is `G05_RENDERER_CI_RECEIPT.json`.
 
+## G06A — verified PNG Frames export
+
+State: **engineering-complete in source and sandboxed packaged Electron CI; H.264/AAC, native alpha codecs, exact Garuda, and human acceptance remain unclaimed**
+
+Implemented and proved:
+
+- one immutable one-shot export snapshot with exactly `round(duration × fps)` frames evaluated at `n / fps`;
+- explicit PNG Frames alpha intent and honest no-audio consequence without changing Project audio intent;
+- one-shot opaque destination grants, held parent authority, private bounded source-video frame caches, and hardened held-FD FFmpeg decoding;
+- complete PNG CRC/inflate/dimension/alpha/byte/hash verification plus a path-free manifest before transactional publication;
+- prior destination preservation, early/mid-render cancellation, live semantic progress, cleanup, and one renderer-owned active job;
+- production Quiet Carousel renderer with image-decode readiness and source-video story-clock preview/scrub/export parity;
+- platform-correct Windows ACL handling while retaining POSIX owner/mode checks on Linux and macOS.
+
+CI run `33058623839` passed source tests on Ubuntu, macOS, and Windows plus packaged renderer job `98471574527`. Artifact `9640730478` has archive digest `sha256:378c78b6cf663f1b9ec93feb8c4959485b21f34b29bd995b908ab73589d20076` and contains 43 independently verified `64×64` RGBA frames at 24 fps, the manifest, success screenshot, and causal cancellation receipt.
+
 ## Known unsafe or unproved surfaces
 
 - legacy non-G03 package paths still exist and are not release candidates;
@@ -112,4 +128,4 @@ CI run `33055407716` passed source tests on Ubuntu, macOS, and Windows plus pack
 - exact Garuda and Apple-Silicon target behaviour;
 - human interaction, visual, motion, and audio acceptance.
 
-Current frontier: **G06 verified export**, with the platform-neutral G08 Interface Scale core proceeding in an isolated parallel worktree. G06 owns immutable jobs, PNG Frames, H.264/AAC mux, verification, cancellation, and destination preservation. G08 integration follows G06 serially because both touch the tracer/HostPort shell. G04 remains deferred until an Apple-Silicon runner is available.
+Current frontier: **G06B verified opaque H.264/AAC export**. G06A PNG Frames and the isolated G08 Interface Scale core are green. G08 UI/HostPort integration follows G06B serially because both touch the tracer/HostPort shell. G04 remains deferred until an Apple-Silicon runner is available.
