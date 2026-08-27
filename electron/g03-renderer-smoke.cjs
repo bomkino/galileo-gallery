@@ -33,6 +33,10 @@ async function runG03RendererSmoke(window, outputDirectory, mode) {
             await waitFor(() => /source frame/.test(notice()), 'opaque media import')
             click('[data-g02-ratio="vertical"]')
             click('[data-g02-axis="vertical"]')
+            await waitFor(() => {
+                const root = document.querySelector('[data-g02-tracer="quiet-carousel-v1"]')
+                return root?.dataset.canvas === '1080x1920' && root?.dataset.axis === 'vertical'
+            }, 'vertical Project state commit')
             click('[data-g02-action="save"]')
             await waitFor(() => /Saved portable Project/.test(notice()), 'portable Project save')
         } else {
