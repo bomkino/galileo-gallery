@@ -148,14 +148,90 @@ function inspectMediaFile(filePath, signal) {
     })
 }
 
+function inspectAudioFile(filePath, signal) {
+    if (signal?.aborted) fail("cancelled", "Project opening cancelled.")
+    let stat
+    try {
+        stat = fs.statSync(filePath)
+    } catch (error) {
+        if (error?.code === "ENOENT") fail("media_missing", "A declared audio source is missing.")
+        throw error
+    }
+    if (!stat.isFile() || stat.size < 46 || stat.size > 4_000_000_000) fail("media_signature_mismatch", "An audio source is not a supported PCM WAV file.")
+    const handle = fs.openSync(filePath, "r")
+    const header = Buffer.alloc(44)
+    try {
+        if (fs.readSync(handle, header, 0, header.length, 0) !== header.length) fail("media_signature_mismatch", "An audio source header is incomplete.")
+    } finally {
+        fs.closeSync(handle)
+    }
+    const channels = header.readUInt16LE(22)
+    const sampleRate = header.readUInt32LE(24)
+    const dataBytes = header.readUInt32LE(40)
+    if (header.subarray(0, 4).toString("ascii") !== "RIFF"
+        || header.readUInt32LE(4) !== stat.size - 8
+        || header.subarray(8, 12).toString("ascii") !== "WAVE"
+        || header.subarray(12, 16).toString("ascii") !== "fmt "
+        || header.readUInt32LE(16) !== 16
+        || header.readUInt16LE(20) !== 1
+        || ![1, 2].includes(channels)
+        || sampleRate < 8_000 || sampleRate > 192_000
+        || header.readUInt32LE(28) !== sampleRate * channels * 2
+        || header.readUInt16LE(32) !== channels * 2
+        || header.readUInt16LE(34) !== 16
+        || header.subarray(36, 40).toString("ascii") !== "data"
+        || dataBytes !== stat.size - 44
+        || dataBytes % (channels * 2) !== 0
+        || dataBytes === 0) {
+        fail("media_signature_mismatch", "An audio source is not a canonical PCM16 WAV file.")
+    }
+    const hash = crypto.createHash("sha256")
+    const input = fs.createReadStream(filePath, { signal })
+    return new Promise((resolve, reject) => {
+        input.on("data", (chunk) => hash.update(chunk))
+        input.once("error", (error) => reject(error?.name === "AbortError" ? new ProjectSchemaError("cancelled", "Project opening cancelled.") : error))
+        input.once("end", () => resolve({
+            bytes: stat.size,
+            sha256: hash.digest("hex"),
+            signature: "wav-pcm16",
+            sampleRate,
+            channels,
+            sampleFrames: dataBytes / (channels * 2),
+        }))
+    })
+}
+
 function settingsSubset(settings, keys) {
     return Object.fromEntries(keys.map((key) => [key, settings[key]]))
 }
 
-function portableProjectFromConfig(config, media) {
+function defaultAudioIntent() {
+    return {
+        id: "gallery-audio-intent",
+        version: 1,
+        sourceVideo: "per-media",
+        sampleRate: 48_000,
+        channels: 2,
+        sources: [],
+        lanes: [],
+        ducking: {
+            enabled: false,
+            triggerLaneId: "presenter",
+            targetLaneIds: [],
+            amount: 0.5,
+            attack: { numerator: 1, denominator: 20 },
+            release: { numerator: 1, denominator: 5 },
+        },
+        master: { gain: 1, muted: false },
+    }
+}
+
+function portableProjectFromConfig(config, media, audioAssets = []) {
     if (!isRecord(config) || !Array.isArray(config.items) || !isRecord(config.settings) || media.length !== config.items.length) {
         fail("manifest_invalid", "The current Project cannot be serialized safely.")
     }
+    const audio = config.audio ?? defaultAudioIntent()
+    const assetsById = new Map(audioAssets.map((entry) => [entry.id, entry]))
     const project = {
         format: PROJECT_FORMAT,
         product: PRODUCT_ID,
@@ -197,11 +273,60 @@ function portableProjectFromConfig(config, media) {
             ...settingsSubset(config.settings, TIMELINE_KEYS.filter((key) => !["mode", "fixedDurationMs", "segments"].includes(key))),
         },
         audio: {
-            id: "gallery-audio-intent",
-            version: 1,
-            sourceVideo: "per-media",
-            lanes: [],
-            master: { gain: 1, muted: false },
+            id: audio.id,
+            version: audio.version,
+            sourceVideo: audio.sourceVideo,
+            sampleRate: audio.sampleRate,
+            channels: audio.channels,
+            sources: audio.sources.map((source) => source.role === "source-video"
+                ? {
+                    id: source.id,
+                    name: source.name ?? source.id,
+                    role: source.role,
+                    mediaId: source.mediaId,
+                    sampleRate: source.sampleRate,
+                    channels: source.channels,
+                    sampleFrames: source.sampleFrames,
+                }
+                : {
+                    id: source.id,
+                    name: source.name ?? source.id,
+                    role: source.role,
+                    ...(assetsById.get(source.id) ?? {}),
+                    sampleRate: source.sampleRate,
+                    channels: source.channels,
+                    sampleFrames: source.sampleFrames,
+                }),
+            lanes: audio.lanes.map((lane) => ({
+                id: lane.id,
+                name: lane.name,
+                role: lane.role,
+                gain: lane.gain,
+                muted: lane.muted,
+                solo: lane.solo,
+                clips: lane.clips.map((clip) => ({
+                    id: clip.id,
+                    sourceId: clip.sourceId,
+                    timelineStart: clip.timelineStart,
+                    sourceIn: clip.sourceIn,
+                    sourceSpan: clip.sourceSpan,
+                    duration: clip.duration,
+                    loop: clip.loop,
+                    gain: clip.gain,
+                    muted: clip.muted,
+                    fadeIn: clip.fadeIn,
+                    fadeOut: clip.fadeOut,
+                })),
+            })),
+            ducking: {
+                enabled: audio.ducking.enabled,
+                triggerLaneId: audio.ducking.triggerLaneId,
+                targetLaneIds: audio.ducking.targetLaneIds,
+                amount: audio.ducking.amount,
+                attack: audio.ducking.attack,
+                release: audio.ducking.release,
+            },
+            master: { gain: audio.master.gain, muted: audio.master.muted },
         },
         exportIntent: { quality: config.settings.exportQuality },
     }
@@ -324,10 +449,112 @@ function validateTimeline(timeline) {
     }
 }
 
-function validateAudio(audio) {
-    exactKeys(audio, ["id", "version", "sourceVideo", "lanes", "master"], "audio_invalid", "Audio intent")
-    if (audio.id !== "gallery-audio-intent" || audio.version !== 1 || audio.sourceVideo !== "per-media" || !Array.isArray(audio.lanes) || audio.lanes.length !== 0) {
-        fail("audio_invalid", "Audio intent identity is invalid.")
+function greatestCommonDivisor(left, right) {
+    let a = Math.abs(left)
+    let b = Math.abs(right)
+    while (b) [a, b] = [b, a % b]
+    return a
+}
+
+function rationalValue(value, label) {
+    exactKeys(value, ["numerator", "denominator"], "audio_invalid", label)
+    numberValue(value.numerator, "audio_invalid", `${label} numerator`, 0, Number.MAX_SAFE_INTEGER, true)
+    numberValue(value.denominator, "audio_invalid", `${label} denominator`, 1, 1_000_000, true)
+    if (greatestCommonDivisor(value.numerator, value.denominator) !== 1) fail("audio_invalid", `${label} must be reduced.`)
+    if (BigInt(value.numerator) > BigInt(24 * 60 * 60) * BigInt(value.denominator)) fail("audio_invalid", `${label} exceeds the supported duration.`)
+    return value
+}
+
+function rationalFrames(value, sampleRate) {
+    const numerator = BigInt(value.numerator) * BigInt(sampleRate)
+    const denominator = BigInt(value.denominator)
+    return Number((numerator * 2n + denominator) / (denominator * 2n))
+}
+
+function validateAudio(audio, media) {
+    exactKeys(audio, ["id", "version", "sourceVideo", "sampleRate", "channels", "sources", "lanes", "ducking", "master"], "audio_invalid", "Audio intent")
+    if (audio.id !== "gallery-audio-intent" || audio.version !== 1 || audio.sourceVideo !== "per-media") fail("audio_invalid", "Audio intent identity is invalid.")
+    numberValue(audio.sampleRate, "audio_invalid", "Audio sample rate", 8_000, 192_000, true)
+    numberValue(audio.channels, "audio_invalid", "Audio channels", 1, 2, true)
+    if (!Array.isArray(audio.sources) || audio.sources.length > 512 || !Array.isArray(audio.lanes) || audio.lanes.length > 32) fail("audio_invalid", "Audio tables are invalid.")
+    const mediaById = new Map(media.map((entry) => [entry.id, entry]))
+    const sources = new Map()
+    let assetIndex = 0
+    for (const [index, source] of audio.sources.entries()) {
+        const commonKeys = ["id", "name", "role", "sampleRate", "channels", "sampleFrames"]
+        const keys = source.role === "source-video" ? [...commonKeys, "mediaId"] : [...commonKeys, "archivePath", "bytes", "sha256", "signature"]
+        exactKeys(source, keys, "audio_invalid", `Audio source ${index + 1}`)
+        stringValue(source.id, "audio_invalid", "Audio source id", { pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, max: 120 })
+        if (sources.has(source.id)) fail("audio_invalid", "Audio source identities must be unique.")
+        stringValue(source.name, "audio_invalid", "Audio source name", { pattern: /^[^/\\\u0000-\u001f]+$/, max: 512 })
+        stringValue(source.role, "audio_invalid", "Audio source role", { values: ["source-video", "presenter", "soundtrack"] })
+        numberValue(source.sampleRate, "audio_invalid", "Audio source sample rate", 8_000, 192_000, true)
+        if (source.sampleRate !== audio.sampleRate) fail("audio_invalid", "Audio source and master sample rates disagree.")
+        numberValue(source.channels, "audio_invalid", "Audio source channels", 1, 2, true)
+        numberValue(source.sampleFrames, "audio_invalid", "Audio source frames", 1, source.sampleRate * 24 * 60 * 60, true)
+        if (source.role === "source-video") {
+            stringValue(source.mediaId, "audio_invalid", "Source-video media id", { pattern: /^[^/\\\u0000-\u001f]+$/, max: 200 })
+            if (mediaById.get(source.mediaId)?.kind !== "video") fail("audio_invalid", "Source-video audio must reference an ordered video frame.")
+        } else {
+            assetIndex += 1
+            stringValue(source.signature, "audio_invalid", "Audio source signature", { values: ["wav-pcm16"] })
+            stringValue(source.sha256, "audio_invalid", "Audio source hash", { pattern: /^[a-f0-9]{64}$/ })
+            const expectedPath = `project/audio/${String(assetIndex).padStart(4, "0")}-${source.sha256.slice(0, 16)}.wav`
+            if (source.archivePath !== expectedPath) fail("audio_invalid", "Audio archive path is invalid.")
+            numberValue(source.bytes, "audio_invalid", "Audio source bytes", 46, 4_000_000_000, true)
+        }
+        sources.set(source.id, source)
+    }
+    const laneIds = new Set()
+    const clipIds = new Set()
+    let clipCount = 0
+    for (const [laneIndex, lane] of audio.lanes.entries()) {
+        exactKeys(lane, ["id", "name", "role", "gain", "muted", "solo", "clips"], "audio_invalid", `Audio lane ${laneIndex + 1}`)
+        stringValue(lane.id, "audio_invalid", "Audio lane id", { pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, max: 120 })
+        if (laneIds.has(lane.id)) fail("audio_invalid", "Audio lane identities must be unique.")
+        laneIds.add(lane.id)
+        stringValue(lane.name, "audio_invalid", "Audio lane name", { max: 200 })
+        stringValue(lane.role, "audio_invalid", "Audio lane role", { values: ["source-video", "presenter", "soundtrack"] })
+        numberValue(lane.gain, "audio_invalid", "Audio lane gain", 0, 4)
+        booleanValue(lane.muted, "audio_invalid", "Audio lane mute")
+        booleanValue(lane.solo, "audio_invalid", "Audio lane solo")
+        if (!Array.isArray(lane.clips)) fail("audio_invalid", "Audio clip table is invalid.")
+        clipCount += lane.clips.length
+        if (clipCount > 4096) fail("audio_invalid", "Audio clip table is too large.")
+        for (const [clipIndex, clip] of lane.clips.entries()) {
+            exactKeys(clip, ["id", "sourceId", "timelineStart", "sourceIn", "sourceSpan", "duration", "loop", "gain", "muted", "fadeIn", "fadeOut"], "audio_invalid", `Audio clip ${clipIndex + 1}`)
+            stringValue(clip.id, "audio_invalid", "Audio clip id", { pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, max: 120 })
+            if (clipIds.has(clip.id)) fail("audio_invalid", "Audio clip identities must be unique.")
+            clipIds.add(clip.id)
+            stringValue(clip.sourceId, "audio_invalid", "Audio clip source", { pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, max: 120 })
+            const source = sources.get(clip.sourceId)
+            if (!source || source.role !== lane.role) fail("audio_invalid", "Audio clip source and lane role disagree.")
+            for (const key of ["timelineStart", "sourceIn", "sourceSpan", "duration", "fadeIn", "fadeOut"]) rationalValue(clip[key], `Audio clip ${key}`)
+            const sourceIn = rationalFrames(clip.sourceIn, source.sampleRate)
+            const sourceSpan = rationalFrames(clip.sourceSpan, source.sampleRate)
+            const duration = rationalFrames(clip.duration, audio.sampleRate)
+            const timelineStart = rationalFrames(clip.timelineStart, audio.sampleRate)
+            const fadeIn = rationalFrames(clip.fadeIn, audio.sampleRate)
+            const fadeOut = rationalFrames(clip.fadeOut, audio.sampleRate)
+            if (sourceSpan < 1 || duration < 1 || timelineStart + duration > audio.sampleRate * 24 * 60 * 60 || sourceIn + sourceSpan > source.sampleFrames || (!clip.loop && duration > sourceSpan) || fadeIn + fadeOut > duration) {
+                fail("audio_invalid", "Audio clip spans or fades are invalid.")
+            }
+            booleanValue(clip.loop, "audio_invalid", "Audio clip loop")
+            numberValue(clip.gain, "audio_invalid", "Audio clip gain", 0, 4)
+            booleanValue(clip.muted, "audio_invalid", "Audio clip mute")
+        }
+    }
+    exactKeys(audio.ducking, ["enabled", "triggerLaneId", "targetLaneIds", "amount", "attack", "release"], "audio_invalid", "Audio ducking")
+    booleanValue(audio.ducking.enabled, "audio_invalid", "Audio ducking enabled")
+    stringValue(audio.ducking.triggerLaneId, "audio_invalid", "Audio ducking trigger", { pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, max: 120 })
+    if (!Array.isArray(audio.ducking.targetLaneIds) || audio.ducking.targetLaneIds.length > 32 || new Set(audio.ducking.targetLaneIds).size !== audio.ducking.targetLaneIds.length) fail("audio_invalid", "Audio ducking targets are invalid.")
+    for (const target of audio.ducking.targetLaneIds) stringValue(target, "audio_invalid", "Audio ducking target", { pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, max: 120 })
+    numberValue(audio.ducking.amount, "audio_invalid", "Audio ducking amount", 0, 1)
+    rationalValue(audio.ducking.attack, "Audio ducking attack")
+    rationalValue(audio.ducking.release, "Audio ducking release")
+    if (audio.ducking.enabled) {
+        const trigger = audio.lanes.find((lane) => lane.id === audio.ducking.triggerLaneId)
+        if (trigger?.role !== "presenter" || audio.ducking.targetLaneIds.some((id) => id === trigger.id || !laneIds.has(id))) fail("audio_invalid", "Audio ducking lanes are invalid.")
     }
     exactKeys(audio.master, ["gain", "muted"], "audio_invalid", "Audio master")
     numberValue(audio.master.gain, "audio_invalid", "Audio master gain", 0, 4)
@@ -349,13 +576,13 @@ function validatePortableProject(input) {
     validateScene(input.scene)
     validateLook(input.look)
     validateTimeline(input.timeline)
-    validateAudio(input.audio)
+    validateAudio(input.audio, input.media)
     exactKeys(input.exportIntent, ["quality"], "manifest_invalid", "Export intent")
     stringValue(input.exportIntent.quality, "manifest_invalid", "Export quality", { values: ["master", "high", "optimized"] })
     return input
 }
 
-function configFromPortableProject(project, urls) {
+function configFromPortableProject(project, urls, audioURLs = {}) {
     if (urls.length !== project.media.length) fail("manifest_invalid", "The hydrated media table is incomplete.")
     return {
         schemaVersion: PROJECT_SCHEMA_VERSION,
@@ -383,6 +610,27 @@ function configFromPortableProject(project, urls) {
         timelineMode: project.timeline.mode,
         timelineFixedDurationMs: project.timeline.fixedDurationMs,
         timelineSegments: project.timeline.segments,
+        audio: {
+            id: project.audio.id,
+            version: project.audio.version,
+            sourceVideo: project.audio.sourceVideo,
+            sampleRate: project.audio.sampleRate,
+            channels: project.audio.channels,
+            sources: project.audio.sources.map((source) => ({
+                id: source.id,
+                name: source.name,
+                role: source.role,
+                ...(source.role === "source-video"
+                    ? { mediaId: source.mediaId, url: urls[project.media.findIndex((entry) => entry.id === source.mediaId)] }
+                    : { url: audioURLs[source.id] }),
+                sampleRate: source.sampleRate,
+                channels: source.channels,
+                sampleFrames: source.sampleFrames,
+            })),
+            lanes: project.audio.lanes,
+            ducking: project.audio.ducking,
+            master: project.audio.master,
+        },
     }
 }
 
@@ -394,6 +642,8 @@ module.exports = {
     ProjectSchemaError,
     canonicalProjectJSON,
     configFromPortableProject,
+    defaultAudioIntent,
+    inspectAudioFile,
     inspectMediaFile,
     portableProjectFromConfig,
     signatureForBytes,

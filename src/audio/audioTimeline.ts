@@ -4,7 +4,10 @@ export type AudioLaneRole = "source-video" | "presenter" | "soundtrack"
 
 export type AudioSourceIntent = {
     id: string
+    name?: string
     role: AudioLaneRole
+    mediaId?: string
+    url?: string
     sampleRate: number
     channels: 1 | 2
     sampleFrames: number
@@ -220,7 +223,7 @@ export function compileAudioTimeline(
             const fadeInFrames = rationalTimeToFrames(clip.fadeIn, sampleRate, "clip fade in")
             const fadeOutFrames = rationalTimeToFrames(clip.fadeOut, sampleRate, "clip fade out")
             if (timelineStartFrame >= storyDurationFrames) fail("clip is outside the story.")
-            if (sourceSpanFrames < 1 || clipDurationFrames < 1 || fadeInFrames > clipDurationFrames || fadeOutFrames > clipDurationFrames) fail("clip spans or fades are invalid.")
+            if (sourceSpanFrames < 1 || clipDurationFrames < 1 || fadeInFrames + fadeOutFrames > clipDurationFrames) fail("clip spans or fades are invalid.")
             const source = sources.get(clip.sourceId)
             if (!source) issues.push({ code: "source-missing", laneId: lane.id, clipId: clip.id, sourceId: clip.sourceId })
             else {

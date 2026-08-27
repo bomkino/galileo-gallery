@@ -13,6 +13,7 @@ const {
     ProjectSchemaError,
     canonicalProjectJSON,
     configFromPortableProject,
+    inspectAudioFile,
     inspectMediaFile,
     portableProjectFromConfig,
     validatePortableProject,
@@ -57,8 +58,9 @@ function readManifest(contentsRoot) {
 function validateEntrySet(entries, project) {
     const actualFiles = new Set(entries.filter((entry) => !entry.directory).map((entry) => entry.normalized))
     const actualDirectories = new Set(entries.filter((entry) => entry.directory).map((entry) => entry.normalized))
-    const expectedFiles = new Set(["project/project.json", ...project.media.map((entry) => entry.archivePath)])
-    const allowedDirectories = new Set(["project", "project/media"])
+    const audioAssets = project.audio.sources.filter((entry) => entry.role !== "source-video")
+    const expectedFiles = new Set(["project/project.json", ...project.media.map((entry) => entry.archivePath), ...audioAssets.map((entry) => entry.archivePath)])
+    const allowedDirectories = new Set(["project", "project/media", ...(audioAssets.length ? ["project/audio"] : [])])
     for (const expected of expectedFiles) {
         if (!actualFiles.has(expected)) throw new ProjectImportError(expected === "project/project.json" ? "manifest_missing" : "media_missing")
     }
@@ -88,6 +90,26 @@ async function verifyMedia(contentsRoot, media, signal) {
     }
 }
 
+async function verifyAudio(contentsRoot, sources, signal) {
+    for (const entry of sources.filter((source) => source.role !== "source-video")) {
+        checkpoint(signal)
+        const target = containedFile(contentsRoot, entry.archivePath)
+        let inspected
+        try {
+            inspected = await inspectAudioFile(target, signal)
+        } catch (error) {
+            if (error instanceof ProjectSchemaError) throw importError(error)
+            if (error?.code === "ENOENT") throw new ProjectImportError("media_missing", { cause: error })
+            throw error
+        }
+        if (inspected.signature !== entry.signature) throw new ProjectImportError("media_signature_mismatch")
+        if (inspected.bytes !== entry.bytes || inspected.sha256 !== entry.sha256) throw new ProjectImportError("media_hash_mismatch")
+        if (inspected.sampleRate !== entry.sampleRate || inspected.channels !== entry.channels || inspected.sampleFrames !== entry.sampleFrames) {
+            throw new ProjectImportError("media_signature_mismatch")
+        }
+    }
+}
+
 async function copyValidatedMedia(contentsRoot, project, openedProjectsRoot, mediaURLFromPath, signal) {
     fs.mkdirSync(openedProjectsRoot, { recursive: true, mode: 0o700 })
     const openedRootStat = fs.lstatSync(openedProjectsRoot)
@@ -111,8 +133,25 @@ async function copyValidatedMedia(contentsRoot, project, openedProjectsRoot, med
             }
             urls.push(mediaURLFromPath(destination))
         }
+        const audioURLs = Object.create(null)
+        for (const entry of project.audio.sources.filter((source) => source.role !== "source-video")) {
+            checkpoint(signal)
+            const source = containedFile(contentsRoot, entry.archivePath)
+            const destination = path.join(projectRoot, path.basename(entry.archivePath))
+            await pipeline(
+                fs.createReadStream(source),
+                fs.createWriteStream(destination, { flags: "wx", mode: 0o600 }),
+                { signal }
+            )
+            const copied = await inspectAudioFile(destination, signal)
+            if (copied.bytes !== entry.bytes || copied.sha256 !== entry.sha256 || copied.signature !== entry.signature
+                || copied.sampleRate !== entry.sampleRate || copied.channels !== entry.channels || copied.sampleFrames !== entry.sampleFrames) {
+                throw new ProjectImportError("media_hash_mismatch")
+            }
+            audioURLs[entry.id] = mediaURLFromPath(destination)
+        }
         checkpoint(signal)
-        return { projectRoot, urls }
+        return { projectRoot, urls, audioURLs }
     } catch (error) {
         fs.rmSync(projectRoot, { recursive: true, force: true })
         throw error
@@ -140,7 +179,27 @@ async function savePortableProjectArchive(options) {
             const copied = await inspectMediaFile(destination)
             media.push({ archivePath, ...copied })
         }
-        const project = portableProjectFromConfig(options.config, media)
+        const audioAssets = []
+        const configuredAudioSources = options.config.audio?.sources ?? []
+        if (!Array.isArray(configuredAudioSources) || configuredAudioSources.length > 512) throw new ProjectSchemaError("audio_invalid", "Audio source table is invalid.")
+        const externalAudio = configuredAudioSources.filter((source) => source.role !== "source-video")
+        if (externalAudio.length) fs.mkdirSync(path.join(projectFolder, "audio"), { recursive: false, mode: 0o700 })
+        for (let index = 0; index < externalAudio.length; index += 1) {
+            const source = externalAudio[index]
+            const sourcePath = options.mediaPathFromURL(source.url)
+            const inspected = await inspectAudioFile(sourcePath)
+            if (inspected.sampleRate !== source.sampleRate || inspected.channels !== source.channels || inspected.sampleFrames !== source.sampleFrames) {
+                throw new ProjectSchemaError("audio_invalid", "Audio source identity and decoded format disagree.")
+            }
+            const fileName = `${String(index + 1).padStart(4, "0")}-${inspected.sha256.slice(0, 16)}.wav`
+            const archivePath = `project/audio/${fileName}`
+            const destination = path.join(projectFolder, "audio", fileName)
+            fs.copyFileSync(sourcePath, destination, fs.constants.COPYFILE_EXCL)
+            const copied = await inspectAudioFile(destination)
+            if (copied.sha256 !== inspected.sha256 || copied.bytes !== inspected.bytes) throw new ProjectSchemaError("media_hash_mismatch", "Audio source changed while saving.")
+            audioAssets.push({ id: source.id, archivePath, bytes: copied.bytes, sha256: copied.sha256, signature: copied.signature })
+        }
+        const project = portableProjectFromConfig(options.config, media, audioAssets)
         fs.writeFileSync(path.join(projectFolder, "project.json"), canonicalProjectJSON(project), { flag: "wx", mode: 0o600 })
         await writeFileSafely(options.outputPath, (stagedOutputPath) => {
             // AdmZip is confined to app-authored output. Untrusted input is streamed only by G01A/yauzl.
@@ -172,6 +231,7 @@ async function openPortableProjectArchive(options) {
             }
             validateEntrySet(entries, project)
             await verifyMedia(contentsRoot, project.media, options.signal)
+            await verifyAudio(contentsRoot, project.audio.sources, options.signal)
             const committed = await copyValidatedMedia(
                 contentsRoot,
                 project,
@@ -181,7 +241,7 @@ async function openPortableProjectArchive(options) {
             )
             try {
                 return {
-                    config: configFromPortableProject(project, committed.urls),
+                    config: configFromPortableProject(project, committed.urls, committed.audioURLs),
                     project,
                     resourceRoot: committed.projectRoot,
                     sourcePath: options.sourcePath,

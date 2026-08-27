@@ -104,6 +104,54 @@ export type ReelConfig = {
     timelineMode?: TimelineMode
     timelineFixedDurationMs?: number
     timelineSegments?: VisualTimelineSegment[]
+    audio?: AudioTimelineIntent
+}
+
+export type PortableGalleryAudioSource =
+    | {
+        id: string
+        name: string
+        role: "source-video"
+        mediaId: string
+        sampleRate: number
+        channels: 1 | 2
+        sampleFrames: number
+    }
+    | {
+        id: string
+        name: string
+        role: "presenter" | "soundtrack"
+        archivePath: string
+        bytes: number
+        sha256: string
+        signature: "wav-pcm16"
+        sampleRate: number
+        channels: 1 | 2
+        sampleFrames: number
+    }
+
+export type PortableGalleryAudioClip = {
+    id: string
+    sourceId: string
+    timelineStart: RationalTime
+    sourceIn: RationalTime
+    sourceSpan: RationalTime
+    duration: RationalTime
+    loop: boolean
+    gain: number
+    muted: boolean
+    fadeIn: RationalTime
+    fadeOut: RationalTime
+}
+
+export type PortableGalleryAudioLane = {
+    id: string
+    name: string
+    role: "source-video" | "presenter" | "soundtrack"
+    gain: number
+    muted: boolean
+    solo: boolean
+    clips: PortableGalleryAudioClip[]
 }
 
 export type PortableGalleryMedia = {
@@ -164,7 +212,24 @@ export type PortableGalleryProjectV2 = {
     scene: { id: string; version: 1; parameters: PortableGallerySceneParameters }
     look: { id: string; version: 1; parameters: PortableGalleryLookParameters }
     timeline: PortableGalleryTimeline
-    audio: { id: "gallery-audio-intent"; version: 1; sourceVideo: "per-media"; lanes: []; master: { gain: number; muted: boolean } }
+    audio: {
+        id: "gallery-audio-intent"
+        version: 1
+        sourceVideo: "per-media"
+        sampleRate: number
+        channels: 1 | 2
+        sources: PortableGalleryAudioSource[]
+        lanes: PortableGalleryAudioLane[]
+        ducking: {
+            enabled: boolean
+            triggerLaneId: string
+            targetLaneIds: string[]
+            amount: number
+            attack: RationalTime
+            release: RationalTime
+        }
+        master: { gain: number; muted: boolean }
+    }
     exportIntent: { quality: ExportQuality }
 }
 
@@ -286,3 +351,4 @@ declare global {
         galleryHost?: GalleryHostPort
     }
 }
+import type { AudioTimelineIntent, RationalTime } from "./audio/audioTimeline.ts"

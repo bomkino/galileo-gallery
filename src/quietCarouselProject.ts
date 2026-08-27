@@ -1,6 +1,7 @@
 import { DEFAULT_SETTINGS } from "./defaults.ts"
 import { defaultCasinoTimeline, QUIET_CAROUSEL_ID, quietCarouselScene } from "./scenes/quietCarousel.ts"
 import type { MediaItem, ReelConfig, TimelineMode, VisualTimelineSegment } from "./types.ts"
+import { defaultAudioIntent } from "./audio/audioTimeline.ts"
 
 const BROWSER_PROJECT_FORMAT = "galileo-gallery-browser-project"
 const BROWSER_PROJECT_VERSION = 1
@@ -39,6 +40,7 @@ export function createQuietCarouselProject(items = quietCarouselFixtureItems()):
         timelineMode: "automatic",
         timelineFixedDurationMs: 0,
         timelineSegments: [],
+        audio: defaultAudioIntent(),
         settings: {
             ...DEFAULT_SETTINGS,
             canvasPreset: "fullHD",

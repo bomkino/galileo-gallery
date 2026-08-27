@@ -273,6 +273,7 @@ function mimeForPath(filePath) {
         ".png": "image/png",
         ".webm": "video/webm",
         ".webp": "image/webp",
+        ".wav": "audio/wav",
     })[path.extname(filePath).toLowerCase()] ?? "application/octet-stream"
 }
 
