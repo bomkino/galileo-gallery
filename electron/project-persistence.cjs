@@ -23,6 +23,16 @@ function checkpoint(signal) {
     if (signal?.aborted) throw new ProjectImportError("cancelled")
 }
 
+function containAuthoredCompressionRatios(archive, maximumRatio) {
+    for (const entry of archive.getEntries()) {
+        if (entry.isDirectory || entry.header.size === 0) continue
+        const compressedBytes = Math.max(1, entry.getCompressedData().length)
+        if (entry.header.size > compressedBytes * maximumRatio) {
+            entry.header.method = 0
+        }
+    }
+}
+
 function importError(error) {
     if (error instanceof ProjectImportError) return error
     if (error instanceof ProjectSchemaError) return new ProjectImportError(error.code, { cause: error })
@@ -159,6 +169,7 @@ async function copyValidatedMedia(contentsRoot, project, openedProjectsRoot, med
 }
 
 async function savePortableProjectArchive(options) {
+    const limits = Object.freeze({ ...PROJECT_IMPORT_LIMITS, ...(options.limits ?? {}) })
     const temporary = fs.mkdtempSync(path.join(options.tempRoot, "galileo-gallery-save-"))
     const projectFolder = path.join(temporary, "project")
     const mediaFolder = path.join(projectFolder, "media")
@@ -168,12 +179,13 @@ async function savePortableProjectArchive(options) {
         if (!Array.isArray(configuredAudioSources) || configuredAudioSources.length > 512) throw new ProjectSchemaError("audio_invalid", "Audio source table is invalid.")
         const externalAudio = configuredAudioSources.filter((source) => source.role !== "source-video")
         const authoredEntryCount = 1 + options.config.items.length + externalAudio.length + 2 + (externalAudio.length ? 1 : 0)
-        if (authoredEntryCount > PROJECT_IMPORT_LIMITS.entryCount) throw new ProjectImportError("too_many_entries")
+        if (authoredEntryCount > limits.entryCount) throw new ProjectImportError("too_many_entries")
         const media = []
         for (let index = 0; index < options.config.items.length; index += 1) {
             const item = options.config.items[index]
             const source = options.mediaPathFromURL(item.url)
             const sourceInspection = await inspectMediaFile(source)
+            if (sourceInspection.bytes > limits.individualExpandedBytes) throw new ProjectImportError("entry_too_large")
             const provisionalName = `${String(index + 1).padStart(4, "0")}-${sourceInspection.sha256.slice(0, 16)}`
             const extension = {
                 png: ".png", jpeg: ".jpg", gif: ".gif", webp: ".webp", avif: ".avif", webm: ".webm", "iso-media": ".mp4",
@@ -190,6 +202,7 @@ async function savePortableProjectArchive(options) {
             const source = externalAudio[index]
             const sourcePath = options.mediaPathFromURL(source.url)
             const inspected = await inspectAudioFile(sourcePath)
+            if (inspected.bytes > limits.individualExpandedBytes) throw new ProjectImportError("entry_too_large")
             if (inspected.sampleRate !== source.sampleRate || inspected.channels !== source.channels || inspected.sampleFrames !== source.sampleFrames) {
                 throw new ProjectSchemaError("audio_invalid", "Audio source identity and decoded format disagree.")
             }
@@ -203,14 +216,17 @@ async function savePortableProjectArchive(options) {
         }
         const project = portableProjectFromConfig(options.config, media, audioAssets)
         const projectJSON = canonicalProjectJSON(project)
+        if (Buffer.byteLength(projectJSON) > limits.manifestBytes) throw new ProjectImportError("entry_too_large")
         const authoredExpandedBytes = Buffer.byteLength(projectJSON) + media.reduce((total, entry) => total + entry.bytes, 0) + audioAssets.reduce((total, entry) => total + entry.bytes, 0)
-        if (authoredExpandedBytes > PROJECT_IMPORT_LIMITS.totalExpandedBytes) throw new ProjectImportError("expanded_size_exceeded")
+        if (authoredExpandedBytes > limits.totalExpandedBytes) throw new ProjectImportError("expanded_size_exceeded")
         fs.writeFileSync(path.join(projectFolder, "project.json"), projectJSON, { flag: "wx", mode: 0o600 })
         await writeFileSafely(options.outputPath, (stagedOutputPath) => {
             // AdmZip is confined to app-authored output. Untrusted input is streamed only by G01A/yauzl.
             const archive = new AdmZip()
             archive.addLocalFolder(projectFolder, "project")
+            containAuthoredCompressionRatios(archive, Math.min(limits.aggregateCompressionRatio, limits.individualCompressionRatio))
             archive.writeZip(stagedOutputPath)
+            if (fs.statSync(stagedOutputPath).size > limits.archiveBytes) throw new ProjectImportError("archive_too_large")
         })
         return { outputPath: options.outputPath, project }
     } catch (error) {

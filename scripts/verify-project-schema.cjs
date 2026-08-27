@@ -25,14 +25,15 @@ function rewriteArchive(source, destination, changeManifest, changeEntries = () 
     const next = new AdmZip()
     for (const entry of original.getEntries()) {
         if (entry.isDirectory || entry.entryName === "project/project.json") continue
-        next.addFile(entry.entryName, entry.getData())
+        const copied = next.addFile(entry.entryName, entry.getData())
+        if (entry.header.method === 0) copied.header.method = 0
     }
     next.addFile("project/project.json", Buffer.from(canonicalProjectJSON(manifest)))
     changeEntries(next, manifest)
     next.writeZip(destination)
 }
 
-function writePcm16Wav(filePath, sampleFrames, channels = 2, sampleRate = 48_000) {
+function writePcm16Wav(filePath, sampleFrames, channels = 2, sampleRate = 48_000, noise = true) {
     const dataBytes = sampleFrames * channels * 2
     const bytes = Buffer.alloc(44 + dataBytes)
     bytes.write("RIFF", 0, "ascii")
@@ -47,10 +48,12 @@ function writePcm16Wav(filePath, sampleFrames, channels = 2, sampleRate = 48_000
     bytes.writeUInt16LE(16, 34)
     bytes.write("data", 36, "ascii")
     bytes.writeUInt32LE(dataBytes, 40)
-    let state = 0x12345678
-    for (let sample = 0; sample < sampleFrames * channels; sample += 1) {
-        state = (Math.imul(state, 1_664_525) + 1_013_904_223) >>> 0
-        bytes.writeInt16LE((state & 0xffff) - 0x8000, 44 + sample * 2)
+    if (noise) {
+        let state = 0x12345678
+        for (let sample = 0; sample < sampleFrames * channels; sample += 1) {
+            state = (Math.imul(state, 1_664_525) + 1_013_904_223) >>> 0
+            bytes.writeInt16LE((state & 0xffff) - 0x8000, 44 + sample * 2)
+        }
     }
     fs.writeFileSync(filePath, bytes)
     return filePath
@@ -169,7 +172,7 @@ async function run() {
         assert.equal(canonicalProjectJSON(reopenedSave.project), canonicalProjectJSON(manifest))
 
         const presenterPath = writePcm16Wav(path.join(root, "private-presenter.wav"), 4_800)
-        const soundtrackPath = writePcm16Wav(path.join(root, "private-soundtrack.wav"), 9_600)
+        const soundtrackPath = writePcm16Wav(path.join(root, "private-soundtrack.wav"), 9_600, 2, 48_000, false)
         const audioConfig = { ...config, audio: audioFixture(presenterPath, soundtrackPath) }
         const audioProjectPath = path.join(root, "audio-round-trip.galileo")
         const audioSaved = await savePortableProjectArchive({ config: audioConfig, outputPath: audioProjectPath, tempRoot: root, mediaPathFromURL: (url) => url })
@@ -180,6 +183,10 @@ async function run() {
         ])
         assert.equal(canonicalProjectJSON(audioSaved.project).includes(presenterPath), false)
         assert.equal(canonicalProjectJSON(audioSaved.project).includes(soundtrackPath), false)
+        const authoredAudioArchive = new AdmZip(audioProjectPath)
+        const storedSoundtrack = authoredAudioArchive.getEntry(audioSaved.project.audio.sources[1].archivePath)
+        assert.equal(storedSoundtrack.header.method, 0)
+        assert.equal(storedSoundtrack.header.compressedSize, storedSoundtrack.header.size)
         const audioOpened = await openPortableProjectArchive({
             sourcePath: audioProjectPath,
             stagingParent: roots.staging,
@@ -195,6 +202,42 @@ async function run() {
         const audioReopenedPath = path.join(root, "audio-reopened.galileo")
         const audioReopened = await savePortableProjectArchive({ config: audioOpened.config, outputPath: audioReopenedPath, tempRoot: root, mediaPathFromURL: (url) => url })
         assert.equal(canonicalProjectJSON(audioReopened.project), canonicalProjectJSON(audioSaved.project))
+
+        const quotaDestination = path.join(root, "quota-protected.galileo")
+        fs.writeFileSync(quotaDestination, "known-prior-project-bytes")
+        await assert.rejects(
+            savePortableProjectArchive({
+                config,
+                outputPath: quotaDestination,
+                tempRoot: root,
+                mediaPathFromURL: (url) => url,
+                limits: { individualExpandedBytes: fs.statSync(mediaPaths[0]).size - 1 },
+            }),
+            (error) => error?.code === "entry_too_large"
+        )
+        assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
+        await assert.rejects(
+            savePortableProjectArchive({
+                config,
+                outputPath: quotaDestination,
+                tempRoot: root,
+                mediaPathFromURL: (url) => url,
+                limits: { manifestBytes: 10 },
+            }),
+            (error) => error?.code === "entry_too_large"
+        )
+        assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
+        await assert.rejects(
+            savePortableProjectArchive({
+                config,
+                outputPath: quotaDestination,
+                tempRoot: root,
+                mediaPathFromURL: (url) => url,
+                limits: { archiveBytes: 64 },
+            }),
+            (error) => error?.code === "archive_too_large"
+        )
+        assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
 
         const sourceVideoManifest = structuredClone(manifest)
         sourceVideoManifest.media[0] = {
