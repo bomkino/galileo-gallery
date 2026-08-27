@@ -19,11 +19,12 @@
   "scripts": {
     "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
     "build": "tsc --noEmit && vite build",
-    "test": "npm run build && node scripts/verify-source.cjs && node scripts/verify-story-timing.cjs && node scripts/verify-file-operations.cjs && node scripts/verify-project-import.cjs && node scripts/verify-project-schema.cjs && node --experimental-strip-types scripts/verify-project-open.mjs && node --experimental-strip-types scripts/verify-quiet-carousel.mjs",
+    "test": "npm run build && node scripts/verify-source.cjs && node scripts/verify-story-timing.cjs && node scripts/verify-file-operations.cjs && node scripts/verify-project-import.cjs && node scripts/verify-project-schema.cjs && node --experimental-strip-types scripts/verify-project-open.mjs && node --experimental-strip-types scripts/verify-quiet-carousel.mjs && node scripts/verify-linux-host-port.cjs",
     "verify:source": "node scripts/verify-source.cjs",
     "verify:electron-project": "npm run build && node scripts/verify-electron-project-runtime.cjs",
     "verify:quiet-carousel": "node --experimental-strip-types scripts/verify-quiet-carousel.mjs",
     "verify:g02-renderer": "npm run build && npm run prepare:electron && REEL_USER_DATA_DIR=./artifacts/g02-runtime REEL_G02_RENDERER_OUTPUT=./artifacts/g02 electron . && node scripts/verify-g02-renderer-artifacts.cjs ./artifacts/g02",
+    "verify:linux-host-port": "node scripts/verify-linux-host-port.cjs",
     "start": "npm run build && electron .",
     "prepare:electron": "install-electron",
     "prepare:ffmpeg": "node scripts/prepare-ffmpeg.cjs",
