@@ -8,6 +8,10 @@ async function runG05RendererSmoke(window, outputDirectory, mode) {
     fs.mkdirSync(outputDirectory, { recursive: true })
     const journey = await window.webContents.executeJavaScript(`(async () => {
         const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))
+        const settle = async () => {
+            await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+            await wait(30)
+        }
         const required = (selector) => {
             const node = document.querySelector(selector)
             if (!node) throw new Error('Missing G05 selector: ' + selector)
@@ -19,21 +23,23 @@ async function runG05RendererSmoke(window, outputDirectory, mode) {
                 if (value) return value
                 await wait(50)
             }
-            throw new Error('Timed out waiting for ' + label + '; notice: ' + (document.querySelector('[role="status"]')?.textContent?.trim() ?? 'missing'))
+            throw new Error('Timed out waiting for ' + label + '; notice: ' + (document.querySelector('[role="status"]')?.textContent?.trim() ?? 'missing') + '; audio: ' + (document.querySelector('[data-g05-audio="timeline"] summary > span:last-child')?.textContent?.trim() ?? 'missing'))
         }
         await waitFor(() => document.querySelector('[data-g02-tracer="quiet-carousel-v1"]'), 'Quiet Carousel')
         if (!window.galleryHost) throw new Error('Gallery HostPort missing.')
         const notice = () => required('[role="status"]').textContent.trim()
         const click = (selector) => required(selector).click()
-        const setRange = (selector, value) => {
+        const setRange = async (selector, value) => {
             const input = required(selector)
             Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, String(value))
             input.dispatchEvent(new Event('input', { bubbles: true }))
             input.dispatchEvent(new Event('change', { bubbles: true }))
+            await settle()
         }
         const mode = ${JSON.stringify(mode)}
         const pcmCheck = async (label) => {
             await waitFor(() => required('[data-g05-audio="timeline"]').dataset.g05DiagnosticHash === '', label + ' invalidation')
+            await waitFor(() => !required('[data-g05-action="check-mix"]').disabled, label + ' mix action')
             click('[data-g05-action="check-mix"]')
             const hash = await waitFor(() => /^[a-f0-9]{64}$/.test(required('[data-g05-audio="timeline"]').dataset.g05DiagnosticHash) && required('[data-g05-audio="timeline"]').dataset.g05DiagnosticHash, label + ' PCM hash')
             return { hash, diagnostic: required('[data-g05-audio="timeline"] summary > span:last-child').textContent.trim() }
@@ -54,15 +60,15 @@ async function runG05RendererSmoke(window, outputDirectory, mode) {
             await waitFor(() => /source frame/.test(notice()), 'media import')
             click('[data-g05-action="soundtrack"]')
             await waitFor(() => /Soundtrack added/.test(notice()), 'soundtrack verification')
-            setRange('[data-g02-control="playhead"]', 1000)
+            await setRange('[data-g02-control="playhead"]', 1000)
             await waitFor(() => document.querySelector('[data-g02-tracer="quiet-carousel-v1"]')?.dataset.timeMs === '1000', 'one-second audio placement')
             click('[data-g05-action="presenter"]')
             await waitFor(() => /Presenter added/.test(notice()), 'presenter verification')
             matrix = {}
             matrix.baseline = await pcmCheck('baseline')
-            setRange('[data-g05-control="soundtrack-gain"]', 0.6)
+            await setRange('[data-g05-control="soundtrack-gain"]', 0.6)
             matrix.gain = await pcmCheck('gain change')
-            setRange('[data-g05-control="soundtrack-gain"]', 1)
+            await setRange('[data-g05-control="soundtrack-gain"]', 1)
             matrix.gainReset = await pcmCheck('gain reset')
             click('[data-g05-control="presenter-mute"]')
             matrix.presenterMuted = await pcmCheck('presenter mute')
@@ -78,7 +84,7 @@ async function runG05RendererSmoke(window, outputDirectory, mode) {
             matrix.masterReset = await pcmCheck('master reset')
             click('[data-g05-control="duck"]')
             matrix.ducking = await pcmCheck('ducking')
-            setRange('[data-g05-control="soundtrack-gain"]', 0.6)
+            await setRange('[data-g05-control="soundtrack-gain"]', 0.6)
             matrix.final = await pcmCheck('final authored mix')
             click('[data-g05-action="preview"]')
             const previewNotice = await waitFor(() => /^(Previewing|Preview unavailable)/.test(notice()) && notice(), 'preview scheduling result')
@@ -94,10 +100,16 @@ async function runG05RendererSmoke(window, outputDirectory, mode) {
             click('[data-g02-action="reload"]')
             await waitFor(() => /Opened portable Project/.test(notice()), 'portable Project reopen')
             await waitFor(() => document.querySelectorAll('.qc-waveform i').length >= 96, 'waveform regeneration')
-            setRange('[data-g02-control="playhead"]', 1000)
+            await setRange('[data-g02-control="playhead"]', 1000)
             await waitFor(() => document.querySelector('[data-g02-tracer="quiet-carousel-v1"]')?.dataset.timeMs === '1000', 'reopened one-second probe')
+            await waitFor(() => !required('[data-g05-action="check-mix"]').disabled, 'reopened mix action')
+            const priorDiagnostic = required('[data-g05-audio="timeline"] summary > span:last-child').textContent.trim()
             click('[data-g05-action="check-mix"]')
-            await waitFor(() => /Checked \d+ frames/.test(required('[data-g05-audio="timeline"] summary > span:last-child').textContent), 'reopened PCM mix diagnostic')
+            const reopenedDiagnostic = await waitFor(() => {
+                const current = required('[data-g05-audio="timeline"] summary > span:last-child').textContent.trim()
+                return current !== priorDiagnostic && current
+            }, 'reopened PCM mix diagnostic')
+            if (!/Checked \d+ frames/.test(reopenedDiagnostic)) throw new Error('Reopened PCM mix failed: ' + reopenedDiagnostic)
         }
         const root = required('[data-g02-tracer="quiet-carousel-v1"]')
         const lanes = Array.from(document.querySelectorAll('[data-g05-lane]')).map((lane) => ({
