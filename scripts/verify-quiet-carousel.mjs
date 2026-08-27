@@ -7,6 +7,7 @@ import {
     evaluateQuietCarousel,
     evaluateQuietTimeline,
     quietCarouselScene,
+    sourceVideoTimeSeconds,
 } from "../src/scenes/quietCarousel.ts"
 import {
     createQuietCarouselProject,
@@ -38,6 +39,9 @@ const automatic = compileQuietTimeline({
 assert.equal(automatic.durationMs, 6400)
 assert.equal(automatic.frameCount, 192)
 assert.equal(automatic.cycleCount, 1)
+assert.equal(sourceVideoTimeSeconds(2250, 2, true), 0.25)
+assert.equal(sourceVideoTimeSeconds(2250, 2, false), 2)
+assert.equal(sourceVideoTimeSeconds(-100, 2, true), 0)
 
 const evaluate = (items, timeline, timeMs, overrides = {}, stage = { width: 1600, height: 900 }) => evaluateQuietCarousel({
     items,

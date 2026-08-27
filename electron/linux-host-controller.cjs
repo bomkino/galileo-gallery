@@ -8,6 +8,14 @@ const {
     validateEnvelope,
     validateSender,
 } = require("./linux-host-port.cjs")
+const {
+    DESTINATION_GRANT,
+    PNG_FRAMES_MIME,
+    SNAPSHOT_ID,
+    createPngFramesSnapshot,
+    pngFramesCapabilities,
+    pngFramesPreflight,
+} = require("./png-export-contract.cjs")
 
 const GRANT_URL = /^reel-media:\/\/grant\/([a-f0-9]{64})$/
 const MAX_PREPARED_VIDEO_AUDIO_FRAMES = 256 * 1024 * 1024 / 4
@@ -67,6 +75,15 @@ function safeWaveform(value, payload) {
     return value
 }
 
+function safePngExportResult(value, snapshot) {
+    if (!ownExact(value, ["format", "frameCount", "width", "height", "alpha", "audio", "manifestSha256"])
+        || value.format !== "png-frames" || value.frameCount !== snapshot.frameCount || value.width !== snapshot.width || value.height !== snapshot.height
+        || value.alpha !== snapshot.alpha || value.audio !== "none" || typeof value.manifestSha256 !== "string" || !/^[a-f0-9]{64}$/.test(value.manifestSha256)) {
+        throw new HostPortError("verification_failed")
+    }
+    return value
+}
+
 function tokenFromMediaURL(value) {
     if (typeof value !== "string") throw new HostPortError("invalid_request")
     const match = GRANT_URL.exec(value)
@@ -88,6 +105,9 @@ function createLinuxHostController(options) {
     let nextGeneration = generation + 1
     let activeAudioRequests = 0
     const audioControllers = new Set()
+    let exportSnapshot = null
+    let exportController = null
+    let exportDestinationToken = null
 
     const operations = Object.freeze({
         "identity.read": { states: ["ready", "opening"], validate: (payload) => ownExact(payload, []) },
@@ -119,6 +139,20 @@ function createLinuxHostController(options) {
                 && Number.isSafeInteger(payload.buckets) && payload.buckets >= 1 && payload.buckets <= 1024,
         },
         "audio.cancel": { states: ["ready", "opening"], validate: (payload) => ownExact(payload, []) },
+        "export.capabilities": { states: ["ready"], validate: (payload) => ownExact(payload, []) },
+        "export.png.preflight": { states: ["ready"], validate: (payload) => ownExact(payload, ["intent"]) },
+        "export.destination.choose": {
+            states: ["ready"],
+            validate: (payload) => ownExact(payload, ["suggestedName"]) && typeof payload.suggestedName === "string"
+                && payload.suggestedName.length >= 1 && payload.suggestedName.length <= 120 && !/[\\/\x00-\x1f]/.test(payload.suggestedName),
+        },
+        "export.png.start": {
+            states: ["ready"],
+            validate: (payload) => ownExact(payload, ["snapshotId", "destinationGrant"])
+                && typeof payload.snapshotId === "string" && SNAPSHOT_ID.test(payload.snapshotId)
+                && typeof payload.destinationGrant === "string" && DESTINATION_GRANT.test(payload.destinationGrant),
+        },
+        "export.cancel": { states: ["ready", "opening"], validate: (payload) => ownExact(payload, []) },
         "project.save": { states: ["ready"], validate: (payload) => ownExact(payload, ["config"]) && validConfig(payload.config) },
         "project.open.begin": { states: ["ready"], validate: (payload) => ownExact(payload, []) },
         "project.open.accept": { states: ["opening"], validate: (payload) => ownExact(payload, ["operationId"]) && validOperationId(payload.operationId) },
@@ -128,6 +162,10 @@ function createLinuxHostController(options) {
 
     function grantMedia(filePath, mime, targetGeneration = generation) {
         return registry.create({ scope: "media", filePath, owner, generation: targetGeneration, mime })
+    }
+
+    function grantDestination(filePath) {
+        return registry.createDestination({ scope: "destination", filePath, owner, generation, mime: PNG_FRAMES_MIME })
     }
 
     function mediaGrant(mediaURL) {
@@ -146,6 +184,19 @@ function createLinuxHostController(options) {
 
     function mediaPath(mediaURL) {
         return mediaGrant(mediaURL).filePath
+    }
+
+    function openExportMedia(mediaURL) {
+        const grant = mediaGrant(mediaURL)
+        const handle = fs.openSync(grant.filePath, "r")
+        try {
+            const stats = fs.fstatSync(handle)
+            if (!stats.isFile() || stats.dev !== grant.device || stats.ino !== grant.inode || stats.size !== grant.bytes || stats.mtimeMs !== grant.mtimeMs) throw new HostPortError("verification_failed")
+            return Object.freeze({ handle, device: stats.dev, inode: stats.ino, size: stats.size, mtimeMs: stats.mtimeMs, mime: grant.mime })
+        } catch (error) {
+            fs.closeSync(handle)
+            throw error
+        }
     }
 
     function safeRemove(resourceRoot) {
@@ -204,6 +255,21 @@ function createLinuxHostController(options) {
         return cancelled
     }
 
+    function cancelExportWork() {
+        if (!exportController) return false
+        exportController.abort()
+        return true
+    }
+
+
+    function clearPreparedExport() {
+        const hadPrepared = Boolean(exportSnapshot || exportDestinationToken)
+        exportSnapshot = null
+        if (exportDestinationToken) registry.revoke(exportDestinationToken)
+        exportDestinationToken = null
+        return hadPrepared
+    }
+
     async function dispatch(envelope) {
         switch (envelope.operation) {
             case "identity.read":
@@ -245,6 +311,60 @@ function createLinuxHostController(options) {
                 return withAudioSlot(async (signal) => safeWaveform(await options.audioWaveform({ grant: mediaGrant(envelope.payload.url), buckets: envelope.payload.buckets, signal }), envelope.payload))
             case "audio.cancel":
                 return { cancelled: cancelAudioWork() }
+            case "export.capabilities":
+                return pngFramesCapabilities()
+            case "export.png.preflight": {
+                if (exportController) throw new HostPortError("conflict")
+                clearPreparedExport()
+                exportSnapshot = createPngFramesSnapshot(envelope.payload.intent)
+                return pngFramesPreflight(exportSnapshot)
+            }
+            case "export.destination.choose": {
+                if (!exportSnapshot || exportController) throw new HostPortError("conflict")
+                const choiceSnapshot = exportSnapshot
+                const choice = await options.chooseExportDestination({ suggestedName: envelope.payload.suggestedName })
+                if (exportSnapshot !== choiceSnapshot || exportController) throw new HostPortError("conflict")
+                if (!choice) return { cancelled: true }
+                if (exportDestinationToken) registry.revoke(exportDestinationToken)
+                const destination = grantDestination(choice)
+                exportDestinationToken = destination.grant
+                return { cancelled: false, destinationGrant: destination.grant }
+            }
+            case "export.png.start": {
+                if (exportController || !exportSnapshot || exportSnapshot.snapshotId !== envelope.payload.snapshotId || exportDestinationToken !== envelope.payload.destinationGrant) throw new HostPortError("conflict")
+                const destination = registry.resolve({ grant: envelope.payload.destinationGrant, scope: "destination", owner, generation })
+                const snapshot = exportSnapshot
+                exportSnapshot = null
+                const controller = new AbortController()
+                const exportMediaTokens = []
+                exportController = controller
+                try {
+                    const result = await options.runPngFramesExport({
+                        snapshot,
+                        destination: destination.filePath,
+                        destinationAuthority: { parentDevice: destination.parentDevice, parentInode: destination.parentInode },
+                        signal: controller.signal,
+                        mediaPath,
+                        openExportMedia,
+                        grantExportMedia: (filePath, mime) => {
+                            const granted = grantMedia(filePath, mime)
+                            exportMediaTokens.push(granted.grant)
+                            return granted.mediaURL
+                        },
+                    })
+                    return safePngExportResult(result, snapshot)
+                } finally {
+                    for (const token of exportMediaTokens) revokeToken(token)
+                    registry.revoke(envelope.payload.destinationGrant)
+                    exportDestinationToken = null
+                    if (exportController === controller) exportController = null
+                }
+            }
+            case "export.cancel": {
+                const active = cancelExportWork()
+                const prepared = clearPreparedExport()
+                return { cancelled: active || prepared }
+            }
             case "project.save":
                 return options.saveProject({ config: envelope.payload.config, mediaPath })
             case "project.open.begin": {
@@ -298,6 +418,8 @@ function createLinuxHostController(options) {
                 const previousGeneration = generation
                 const previousRoot = currentResourceRoot
                 cancelAudioWork()
+                cancelExportWork()
+                clearPreparedExport()
                 if (previousRoot) removeResourceRoot(previousRoot)
                 generation = pending.generation
                 currentResourceRoot = pending.resourceRoot
@@ -358,6 +480,8 @@ function createLinuxHostController(options) {
 
     function dispose() {
         cancelAudioWork()
+        cancelExportWork()
+        clearPreparedExport()
         opening?.controller.abort()
         opening = null
         cleanupPending()
@@ -369,6 +493,8 @@ function createLinuxHostController(options) {
 
     function abandonPending() {
         cancelAudioWork()
+        cancelExportWork()
+        clearPreparedExport()
         opening?.controller.abort()
         opening = null
         cleanupPending()

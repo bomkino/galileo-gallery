@@ -1,6 +1,6 @@
 export type MediaKind = "image" | "video"
 export type MotionPreset = "cut" | "magnetic" | "velvet" | "dream" | "custom"
-export type ExportFormat = "mp4" | "premiere" | "webm" | "webm-small"
+export type ExportFormat = "png-frames" | "mp4" | "premiere" | "webm" | "webm-small"
 export type ExportQuality = "master" | "high" | "optimized"
 export type PosterFrame = "first" | "last" | "none"
 export type CanvasPreset = "fullHD" | "fourK" | "square" | "portrait" | "vertical" | "presentation" | "cinema" | "custom"
@@ -339,6 +339,12 @@ export interface GalleryHostPort {
     decodeAudio(url: string, startFrame: number, frameCount: number): Promise<{ sampleRate: number; channels: 1 | 2; startFrame: number; frameCount: number; samples: number[] }>
     audioWaveform(url: string, buckets: number): Promise<{ sampleRate: number; channels: 1 | 2; sampleFrames: number; buckets: Array<{ minimum: number; maximum: number; rms: number }> }>
     cancelAudio(): Promise<{ cancelled: number }>
+    exportCapabilities(): Promise<{ version: 1; formats: Array<{ id: "png-frames"; available: true; alpha: true; audio: false; consequence: string }> }>
+    preflightPngFrames(intent: { config: ReelConfig; width: number; height: number; fps: number; durationMs: number; transparent: boolean }): Promise<{ snapshotId: string; format: "png-frames"; width: number; height: number; fps: number; durationMs: number; frameCount: number; alpha: boolean; audio: "none"; consequence: string }>
+    choosePngFramesDestination(suggestedName: string): Promise<{ cancelled: true } | { cancelled: false; destinationGrant: string }>
+    startPngFramesExport(snapshotId: string, destinationGrant: string): Promise<{ format: "png-frames"; frameCount: number; width: number; height: number; alpha: boolean; audio: "none"; manifestSha256: string }>
+    cancelExport(): Promise<{ cancelled: boolean }>
+    onExportProgress(callback: (progress: ExportProgress) => void): () => void
     saveProject(config: ReelConfig): Promise<{ cancelled?: boolean; savedAt?: number; documentId?: string }>
     beginProjectOpen(): Promise<
         | { cancelled: true }

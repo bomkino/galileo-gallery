@@ -103,6 +103,67 @@ function cancelledAudio(value) {
     return value
 }
 
+function pngCapabilities(value) {
+    if (!ownExact(value, ["version", "formats"]) || value.version !== 1 || !Array.isArray(value.formats) || value.formats.length !== 1) throw new Error("Host returned invalid export capabilities.")
+    const format = value.formats[0]
+    if (!ownExact(format, ["id", "available", "alpha", "audio", "consequence"]) || format.id !== "png-frames"
+        || format.available !== true || format.alpha !== true || format.audio !== false || typeof format.consequence !== "string" || format.consequence.length > 512) {
+        throw new Error("Host returned invalid export capabilities.")
+    }
+    return value
+}
+
+function pngPreflight(value) {
+    if (!ownExact(value, ["snapshotId", "format", "width", "height", "fps", "durationMs", "frameCount", "alpha", "audio", "consequence"])
+        || typeof value.snapshotId !== "string" || !/^[a-f0-9]{32}$/.test(value.snapshotId) || value.format !== "png-frames"
+        || !Number.isSafeInteger(value.width) || !Number.isSafeInteger(value.height) || !Number.isSafeInteger(value.fps)
+        || typeof value.durationMs !== "number" || !Number.isFinite(value.durationMs) || !Number.isSafeInteger(value.frameCount) || value.frameCount < 1
+        || typeof value.alpha !== "boolean" || value.audio !== "none" || typeof value.consequence !== "string" || value.consequence.length > 512) {
+        throw new Error("Host returned invalid PNG Frames preflight.")
+    }
+    return value
+}
+
+function pngDestination(value) {
+    if (ownExact(value, ["cancelled"]) && value.cancelled === true) return value
+    if (!ownExact(value, ["cancelled", "destinationGrant"]) || value.cancelled !== false || typeof value.destinationGrant !== "string" || !/^[a-f0-9]{64}$/.test(value.destinationGrant)) {
+        throw new Error("Host returned an invalid export destination.")
+    }
+    return value
+}
+
+function pngResult(value) {
+    if (!ownExact(value, ["format", "frameCount", "width", "height", "alpha", "audio", "manifestSha256"])
+        || value.format !== "png-frames" || !Number.isSafeInteger(value.frameCount) || value.frameCount < 1
+        || !Number.isSafeInteger(value.width) || !Number.isSafeInteger(value.height) || typeof value.alpha !== "boolean" || value.audio !== "none"
+        || typeof value.manifestSha256 !== "string" || !/^[a-f0-9]{64}$/.test(value.manifestSha256)) throw new Error("Host returned an invalid PNG Frames result.")
+    return value
+}
+
+function cancelledExport(value) {
+    if (!ownExact(value, ["cancelled"]) || typeof value.cancelled !== "boolean") throw new Error("Host returned an invalid export cancellation result.")
+    return value
+}
+
+function exportProgress(value) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return null
+    const allowed = new Set(["exportId", "phase", "progress", "frame", "totalFrames", "message"])
+    if (Object.keys(value).some((key) => !allowed.has(key)) || typeof value.exportId !== "string" || !/^png-[a-f0-9]{24}$/.test(value.exportId)
+        || !["preparing", "rendering", "done", "cancelled", "error"].includes(value.phase)
+        || !finite(value.progress, 0, 1)
+        || (value.frame !== undefined && (!Number.isSafeInteger(value.frame) || value.frame < 0))
+        || (value.totalFrames !== undefined && (!Number.isSafeInteger(value.totalFrames) || value.totalFrames < 1))
+        || (value.message !== undefined && (typeof value.message !== "string" || value.message.length > 512))) return null
+    return deepFreeze({
+        exportId: value.exportId,
+        phase: value.phase,
+        progress: value.progress,
+        ...(value.frame !== undefined ? { frame: value.frame } : {}),
+        ...(value.totalFrames !== undefined ? { totalFrames: value.totalFrames } : {}),
+        ...(value.message !== undefined ? { message: value.message } : {}),
+    })
+}
+
 const galleryHost = {
     platform: "linux",
     identity: async () => (await invoke("identity.read")).value,
@@ -113,6 +174,20 @@ const galleryHost = {
     decodeAudio: async (url, startFrame, frameCount) => decodedAudio((await invoke("audio.decode", { url, startFrame, frameCount })).value, startFrame, frameCount),
     audioWaveform: async (url, buckets) => audioWaveform((await invoke("audio.waveform", { url, buckets })).value, buckets),
     cancelAudio: async () => cancelledAudio((await invoke("audio.cancel")).value),
+    exportCapabilities: async () => pngCapabilities((await invoke("export.capabilities")).value),
+    preflightPngFrames: async (intent) => pngPreflight((await invoke("export.png.preflight", { intent })).value),
+    choosePngFramesDestination: async (suggestedName) => pngDestination((await invoke("export.destination.choose", { suggestedName })).value),
+    startPngFramesExport: async (snapshotId, destinationGrant) => pngResult((await invoke("export.png.start", { snapshotId, destinationGrant })).value),
+    cancelExport: async () => cancelledExport((await invoke("export.cancel")).value),
+    onExportProgress: (callback) => {
+        if (typeof callback !== "function") throw new Error("Export progress callback is invalid.")
+        const listener = (_event, value) => {
+            const safe = exportProgress(value)
+            if (safe) callback(safe)
+        }
+        ipcRenderer.on("export:progress", listener)
+        return () => ipcRenderer.removeListener("export:progress", listener)
+    },
     saveProject: async (config) => (await invoke("project.save", { config })).value,
     beginProjectOpen: async () => (await invoke("project.open.begin")).value,
     acceptProjectOpen: async (operationId) => {

@@ -80,6 +80,12 @@ export type QuietCarouselEvaluationInput = {
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 const positiveModulo = (value: number, divisor: number) => ((value % divisor) + divisor) % divisor
 
+export function sourceVideoTimeSeconds(timeMs: number, durationSeconds: number, loop: boolean) {
+    if (!Number.isFinite(timeMs) || !Number.isFinite(durationSeconds) || durationSeconds <= 0) return 0
+    const seconds = Math.max(0, timeMs / 1000)
+    return loop ? positiveModulo(seconds, durationSeconds) : Math.min(seconds, durationSeconds)
+}
+
 function boundedNumber(value: number, fallback: number, min: number, max: number) {
     return Number.isFinite(value) ? clamp(value, min, max) : fallback
 }

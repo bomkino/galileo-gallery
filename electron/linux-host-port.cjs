@@ -101,6 +101,42 @@ function createGrantRegistry(options = {}) {
         })
     }
 
+    function createDestination(input) {
+        if (!ownExact(input, ["scope", "filePath", "owner", "generation", "mime"]) || input.scope !== "destination") fail("invalid_request")
+        if (typeof input.filePath !== "string" || !path.isAbsolute(input.filePath)) fail("invalid_request")
+        if (typeof input.owner !== "string" || !REQUEST_ID.test(input.owner) || !safeInteger(input.generation, 1, Number.MAX_SAFE_INTEGER)) fail("invalid_request")
+        if (input.mime !== "application/vnd.galileo.png-frames-directory") fail("invalid_request")
+        pruneExpired()
+        if (grants.size >= maximumGrants) fail("resource_limit")
+        const target = path.resolve(input.filePath)
+        const parentPath = path.dirname(target)
+        const parent = fs.lstatSync(parentPath)
+        if (!parent.isDirectory() || parent.isSymbolicLink() || path.basename(target) !== path.basename(input.filePath)) fail("invalid_request")
+        let token
+        for (let attempt = 0; attempt < 8; attempt += 1) {
+            const candidate = randomBytes(32).toString("hex")
+            if (TOKEN.test(candidate) && !grants.has(candidate)) {
+                token = candidate
+                break
+            }
+        }
+        if (!token) fail("internal_error")
+        grants.set(token, Object.freeze({
+            token,
+            scope: "destination",
+            filePath: target,
+            parentPath,
+            parentDevice: parent.dev,
+            parentInode: parent.ino,
+            owner: input.owner,
+            generation: input.generation,
+            mime: input.mime,
+            bytes: 0,
+            expiresAt: clock() + lifetimeMs,
+        }))
+        return Object.freeze({ grant: token, scope: "destination", mime: input.mime })
+    }
+
     function resolve(input) {
         if (!ownExact(input, ["grant", "scope", "owner", "generation"]) || typeof input.grant !== "string" || !TOKEN.test(input.grant)) fail("grant_expired")
         const grant = grants.get(input.grant)
@@ -109,6 +145,10 @@ function createGrantRegistry(options = {}) {
             fail("grant_expired")
         }
         if (grant.scope !== input.scope || grant.owner !== input.owner || grant.generation !== input.generation) fail("permission_denied")
+        if (grant.scope === "destination") {
+            const parent = fs.lstatSync(grant.parentPath)
+            if (!parent.isDirectory() || parent.isSymbolicLink() || parent.dev !== grant.parentDevice || parent.ino !== grant.parentInode) fail("verification_failed")
+        }
         return grant
     }
 
@@ -216,7 +256,7 @@ function createGrantRegistry(options = {}) {
         return Object.freeze({ active: grants.size, openStreams, byScope: Object.freeze(byScope) })
     }
 
-    return Object.freeze({ create, openRead, read, resolve, revoke, revokeOwner, snapshot })
+    return Object.freeze({ create, createDestination, openRead, read, resolve, revoke, revokeOwner, snapshot })
 }
 
 function createRequestLimiter(options = {}) {

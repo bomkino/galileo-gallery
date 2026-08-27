@@ -119,7 +119,24 @@ try {
     assert.throws(() => streamingRegistry.openRead({ grant: large.grant, owner: "window-large", generation: 1, range: undefined }), (error) => error.code === "resource_limit")
     largeStream.stream.destroy()
 
-    console.log("Verified: G03 opaque scoped grants, bounded verified reads, expiry/revocation/generation, strict envelopes and sender/origin checks, and path/token redaction.")
+    const destinationParent = path.join(temporary, "exports")
+    fs.mkdirSync(destinationParent)
+    const destinationRegistry = createGrantRegistry({ randomBytes: () => Buffer.alloc(32, 11) })
+    const destination = destinationRegistry.createDestination({
+        scope: "destination",
+        filePath: path.join(destinationParent, "Gallery PNG Frames"),
+        owner: "window-export",
+        generation: 1,
+        mime: "application/vnd.galileo.png-frames-directory",
+    })
+    assert.equal(destination.mediaURL, undefined)
+    assert.equal(JSON.stringify(destination).includes(destinationParent), false)
+    assert.equal(destinationRegistry.resolve({ grant: destination.grant, scope: "destination", owner: "window-export", generation: 1 }).filePath, path.join(destinationParent, "Gallery PNG Frames"))
+    fs.renameSync(destinationParent, `${destinationParent}-moved`)
+    fs.mkdirSync(destinationParent)
+    assert.throws(() => destinationRegistry.resolve({ grant: destination.grant, scope: "destination", owner: "window-export", generation: 1 }), (error) => error.code === "verification_failed")
+
+    console.log("Verified: G03/G06 opaque scoped media and destination grants, bounded verified reads, parent identity, expiry/revocation/generation, strict envelopes and sender/origin checks, and path/token redaction.")
 } finally {
     fs.rmSync(temporary, { recursive: true, force: true })
 }

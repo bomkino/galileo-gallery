@@ -3,6 +3,7 @@ import { createPortal } from "react-dom"
 import OpeningReel from "./OpeningReel"
 import ExpertControls, { type ExpertPreset, type ExpertTab } from "./ExpertControls"
 import GalleryRenderer from "./GalleryRenderer"
+import QuietCarouselRenderer, { quietCarouselTimeline } from "./scenes/QuietCarouselRenderer"
 import StyleGallery from "./StyleGallery"
 import { ensureReelAPI } from "./runtime"
 import { projectConfigAfterOpen, projectOpenNotice } from "./projectOpen"
@@ -26,6 +27,7 @@ import type {
 
 const Reel = OpeningReel as React.ComponentType<Record<string, unknown>>
 const reelAPI = ensureReelAPI()
+const usesLinuxHostPort = reelAPI.platform === "linux" && Boolean(window.galleryHost)
 
 const LOCAL_PROJECT_KEY = "galileo-gallery-project-v1"
 const LOCAL_SAVED_AT_KEY = "galileo-gallery-saved-at-v1"
@@ -94,6 +96,7 @@ function savedTimeLabel(savedAt: number | null) {
 }
 
 function exportButtonLabel(format: ExportFormat) {
+    if (format === "png-frames") return "verified PNG Frames"
     if (format === "premiere") return "Premiere MOV"
     if (format === "mp4") return "MP4"
     return "WebM"
@@ -370,7 +373,7 @@ function exportCycleClock(request: ExportRequest, timeMs: number) {
 }
 
 async function waitForExportFrameImages() {
-    const images = Array.from(document.querySelectorAll<HTMLImageElement>("img.orl-export-frame, img.galileo-media"))
+    const images = Array.from(document.querySelectorAll<HTMLImageElement>("img.orl-export-frame, img.galileo-media, .qc-export-stage img"))
     await Promise.all(images.map(async (image) => {
         await image.decode()
         if (!image.complete || image.naturalWidth < 1 || image.naturalHeight < 1) {
@@ -442,7 +445,9 @@ function ExportView() {
     const pose = (clock.timeMs / Math.max(1, clock.durationMs)) * 100
     return (
         <div className={`export-canvas ${payload.request.config.settings.backgroundStyle === "transparent" ? "is-transparent" : ""}`}>
-            {payload.request.config.styleId === "opening-reel" ? (
+            {payload.request.config.styleId === "quiet-carousel" ? (
+                <QuietCarouselRenderer config={payload.request.config} timeMs={clock.timeMs} fps={payload.request.fps} exportFrames={frameOverrides} />
+            ) : payload.request.config.styleId === "opening-reel" ? (
                 <Reel {...exportProps} canvasPose={pose} canvasTimeMs={clock.timeMs} staticPose exportFrames={frameOverrides} />
             ) : (
                 <GalleryRenderer
@@ -529,7 +534,7 @@ function AppView() {
     const [inspector, setInspector] = React.useState<InspectorTab>("design")
     const [expertTab, setExpertTab] = React.useState<ExpertTab>("slides")
     const [fps, setFps] = React.useState(30)
-    const [format, setFormat] = React.useState<ExportFormat>("mp4")
+    const [format, setFormat] = React.useState<ExportFormat>(usesLinuxHostPort ? "png-frames" : "mp4")
     const [posterFrame, setPosterFrame] = React.useState<PosterFrame>("first")
     const [reelKey, setReelKey] = React.useState(0)
     const [startedAt, setStartedAt] = React.useState(() => performance.now())
@@ -563,7 +568,8 @@ function AppView() {
         () => studioTimeline(config, output.width, output.height),
         [config, output.width, output.height]
     )
-    const duration = timeline.durationMs
+    const quietTimeline = React.useMemo(() => quietCarouselTimeline(config, fps), [config, fps])
+    const duration = config.styleId === "quiet-carousel" ? quietTimeline.durationMs : timeline.durationMs
     const repeatCount = clamp(Math.round(config.settings.repeatCount), 2, 20)
     const finalCycleDuration = React.useMemo(
         () => config.settings.playKind === "repeat"
@@ -980,11 +986,13 @@ function AppView() {
     }
 
     const exportReel = async () => {
+        if (isExporting) return
         setLastExport(null)
         setLastPoster(null)
         setInspector("export")
+        setProgress({ exportId: "png-pending", phase: "preparing", progress: 0, message: "Creating an immutable export snapshot…" })
         try {
-            await reelAPI.exportReel({
+            const result = await reelAPI.exportReel({
                 config,
                 width: output.width,
                 height: output.height,
@@ -996,6 +1004,7 @@ function AppView() {
                 posterFrame,
                 quality: config.settings.exportQuality,
             })
+            if (result.cancelled) setProgress({ exportId: "png-cancelled", phase: "cancelled", progress: 0, message: "Export cancelled." })
         } catch (error) {
             setProgress({
                 exportId: "failed",
@@ -1244,7 +1253,9 @@ function AppView() {
                 </div>
                 <div className={`stage-shell ${config.settings.backgroundStyle === "transparent" ? "is-transparent" : ""}`} style={{ ...previewStyle, aspectRatio: `${output.width} / ${output.height}` }}>
                     <div className="stage" key={reelKey} onClick={!isOpeningReel ? transportAction : undefined}>
-                        {isOpeningReel ? (
+                        {config.styleId === "quiet-carousel" ? (
+                            <QuietCarouselRenderer config={config} timeMs={previewPose * activeCycleDuration} fps={fps} />
+                        ) : isOpeningReel ? (
                             <Reel {...liveReelProps} staticPose={isStaticPreview} onPlaybackStart={handlePlaybackStart} />
                         ) : (
                             <GalleryRenderer config={config} timeMs={previewPose * activeCycleDuration} durationMs={activeCycleDuration} terminal={terminalCycle} />
@@ -1430,13 +1441,15 @@ function AppView() {
                         <section className="control-section">
                             <span className="field-label">Format</span>
                             <div className="format-cards">
-                                {([
+                                {(usesLinuxHostPort ? [
+                                    ["png-frames", "PNG Frames", "Verified sequence · straight alpha"],
+                                ] : [
                                     ["mp4", "MP4", "H.264 · universal"],
                                     ["premiere", "Premiere", "ProRes · professional editing"],
                                     ["webm", "WebM", "VP9 · pristine"],
                                     ["webm-small", "WebM Small", "VP9 · web-ready"],
                                 ] as Array<[ExportFormat, string, string]>).map(([value, title, detail]) => (
-                                    <button type="button" disabled={config.settings.backgroundStyle === "transparent" && value === "mp4"} className={format === value ? "is-active" : ""} onClick={() => setFormat(value)} key={value}>
+                                    <button type="button" disabled={config.settings.backgroundStyle === "transparent" && value === "mp4"} className={format === value ? "is-active" : ""} onClick={() => setFormat(value as ExportFormat)} key={value}>
                                         <span>{title}</span><small>{detail}</small>
                                         {format === value ? <Icon name="check" /> : null}
                                     </button>
@@ -1445,6 +1458,7 @@ function AppView() {
                             {format === "premiere" ? (
                                 <p className="preset-note">{config.settings.backgroundStyle === "transparent" ? "Transparency uses ProRes 4444. Master uses ProRes 4444 XQ for compositing." : "Optimized: ProRes 422 LT. High: ProRes 422. Master: ProRes 422 HQ."}</p>
                             ) : null}
+                            {format === "png-frames" ? <p className="preset-note">PNG Frames preserve straight alpha when requested and never contain audio. Project audio stays unchanged.</p> : null}
                             {config.settings.backgroundStyle === "transparent" ? <p className="preset-note">Transparent export: Premiere or WebM. Social platforms flatten transparency; use this for compositing.</p> : null}
                         </section>
                         <section className="control-section compact-controls">
@@ -1480,7 +1494,7 @@ function AppView() {
                                     onChange={(value) => setFps(Number(value))}
                                 />
                             </div>
-                            <div>
+                            {format !== "png-frames" ? <div>
                                 <span className="field-label">Poster JPG</span>
                                 <Segment
                                     value={posterFrame}
@@ -1491,11 +1505,11 @@ function AppView() {
                                     ]}
                                     onChange={setPosterFrame}
                                 />
-                            </div>
+                            </div> : null}
                         </section>
                         <section className="export-summary">
                             <div><span>Runtime</span><strong>{formatDuration(playbackDuration)}</strong></div>
-                            <div><span>Frames</span><strong>{Math.ceil((playbackDuration / 1000) * fps).toLocaleString()}</strong></div>
+                            <div><span>Frames</span><strong>{Math.max(1, Math.round((playbackDuration / 1000) * fps)).toLocaleString()}</strong></div>
                             <div><span>Quality</span><strong>{config.settings.exportQuality === "master" ? "Master" : config.settings.exportQuality === "high" ? "High" : "Optimized"}</strong></div>
                         </section>
 
@@ -1506,11 +1520,11 @@ function AppView() {
                                 <p>{progress?.message ?? (progress?.phase === "preparing" ? "Preparing media…" : progress?.phase === "encoding" ? "Finishing the file…" : `Drawing frame ${progress?.frame ?? 0} of ${progress?.totalFrames ?? 0}`)}</p>
                                 <button type="button" onClick={() => reelAPI.cancelExport()}>Cancel</button>
                             </div>
-                        ) : lastExport ? (
+                        ) : progress?.phase === "done" ? (
                             <div className="export-success">
                                 <span><Icon name="check" /></span>
-                                <div><strong>Reel exported</strong><small>{lastExport.split("/").pop()}{lastPoster ? " + poster JPG" : ""}</small></div>
-                                <button type="button" onClick={() => reelAPI.revealFile(lastExport)}><Icon name="folder" /></button>
+                                <div><strong>{format === "png-frames" ? "PNG Frames verified" : "Reel exported"}</strong><small>{lastExport ? `${lastExport.split("/").pop()}${lastPoster ? " + poster JPG" : ""}` : "Destination preserved and committed"}</small></div>
+                                {lastExport ? <button type="button" onClick={() => reelAPI.revealFile(lastExport)}><Icon name="folder" /></button> : <span />}
                             </div>
                         ) : null}
 

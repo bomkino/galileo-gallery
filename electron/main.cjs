@@ -35,6 +35,9 @@ const {
 const { inspectAudioFile, inspectMediaFile } = require("./project-schema.cjs")
 const { createAudioGrantStaging } = require("./audio-grant-staging.cjs")
 const { createLinuxVideoAudioRuntime } = require("./linux-video-audio-runtime.cjs")
+const { createPngFramesRuntime } = require("./png-frames-runtime.cjs")
+const { cleanupG06PrivateFrameCache, createG06PrivateFrameCache } = require("./g06-private-frame-cache.cjs")
+const { runG06FFmpeg } = require("./g06-ffmpeg-runner.cjs")
 const {
     createAppProtocolHandler,
     installSessionSecurity,
@@ -90,7 +93,7 @@ function developmentRendererOrigin() {
 }
 
 function linuxHostMode() {
-    return process.platform === "linux" && (Boolean(process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT) || (app.isPackaged && packagedBuildIdentity().profile === "g03-linux-host-port"))
+    return process.platform === "linux" && (Boolean(process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT) || (app.isPackaged && packagedBuildIdentity().profile === "g03-linux-host-port"))
 }
 
 function packagedBuildIdentity() {
@@ -123,6 +126,7 @@ function cleanupOpenedProjectResidue() {
 
 let audioGrantStaging = null
 let videoAudioRuntime = null
+let pngFramesRuntime = null
 
 function audioStaging() {
     if (!audioGrantStaging) audioGrantStaging = createAudioGrantStaging({ root: path.join(app.getPath("userData"), "audio-grants"), inspect: inspectAudioFile })
@@ -137,11 +141,16 @@ function videoAudio() {
     return videoAudioRuntime
 }
 
+function pngFrames() {
+    if (!pngFramesRuntime) pngFramesRuntime = createPngFramesRuntime()
+    return pngFramesRuntime
+}
+
 function rendererURL(exportMode = false) {
     const query = new URLSearchParams()
     if (exportMode) query.set("export", "1")
     if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT) query.set("tracer", "quiet-carousel")
-    if (process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT) query.set("host", "linux")
+    if (process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT) query.set("host", "linux")
     const suffix = query.size ? `?${query}` : ""
     const developmentOrigin = developmentRendererOrigin()
     if (developmentOrigin) {
@@ -473,9 +482,9 @@ function mediaURLToPath(mediaURL) {
     return Buffer.from(url.pathname.replace(/^\//, ""), "base64url").toString()
 }
 
-function runFFmpeg(args, exportState) {
+function runFFmpeg(args, exportState, options = {}) {
     return new Promise((resolve, reject) => {
-        const child = spawn(ffmpegPath(), args, { stdio: ["ignore", "ignore", "pipe"] })
+        const child = spawn(ffmpegPath(), args, { stdio: options.inputFd === undefined ? ["ignore", "ignore", "pipe"] : ["ignore", "ignore", "pipe", options.inputFd] })
         if (exportState) exportState.process = child
         let errorText = ""
         child.stderr.on("data", (chunk) => {
@@ -518,6 +527,8 @@ async function createVideoProxy(mediaURL) {
 
 const EXPORT_FRAME_CACHE_LIMIT = 12 * 1024 * 1024 * 1024
 const EXPORT_FRAME_CACHE_TARGET = 6 * 1024 * 1024 * 1024
+const G06_MAX_DECODED_VIDEO_BYTES = 2 * 1024 * 1024 * 1024
+const G06_DECODE_RESERVE_BYTES = 1024 * 1024 * 1024
 
 function folderBytes(folder) {
     if (!fs.existsSync(folder)) return 0
@@ -550,8 +561,8 @@ function pruneExportFrameCache() {
     }
 }
 
-async function prepareExportVideoFrames(request, exportState) {
-    pruneExportFrameCache()
+async function prepareExportVideoFrames(request, exportState, resolveMediaPath = mediaURLToPath, frameURLFromPath = (filePath) => fileToMedia(filePath).url, openMediaSource, privateCacheRoot) {
+    if (!privateCacheRoot) pruneExportFrameCache()
     const result = {}
     const decoded = new Map()
     const videoItems = request.config.items.filter((item) => item.type === "video")
@@ -565,29 +576,34 @@ async function prepareExportVideoFrames(request, exportState) {
             progress: videoItems.length ? prepared / videoItems.length : 1,
             message: `Preparing video ${prepared + 1} of ${videoItems.length} · ${item.name}`,
         })
-        const source = mediaURLToPath(item.url)
-        const stat = fs.statSync(source)
+        const opened = openMediaSource?.(item.url)
+        const source = opened ? "/proc/self/fd/3" : resolveMediaPath(item.url)
+        const stat = opened ?? fs.statSync(source)
+        try {
         const decodeDurationMs = Math.min(
             request.durationMs,
             Math.max(request.cycleDurationMs || request.durationMs, request.finalCycleDurationMs || 0)
         )
-        const estimatedBytes = request.width * request.height * 4 * request.fps * (decodeDurationMs / 1000) * 0.12
-        const cacheRoot = path.join(app.getPath("userData"), "export-video-frames")
+        const decodeFrames = Math.max(1, Math.round(request.fps * decodeDurationMs / 1000))
+        const estimatedBytes = opened
+            ? decodeFrames * (request.width * request.height * 4 + request.height + 1024 * 1024)
+            : request.width * request.height * 4 * request.fps * (decodeDurationMs / 1000) * 0.12
+        const cacheRoot = privateCacheRoot ?? path.join(app.getPath("userData"), "export-video-frames")
         fs.mkdirSync(cacheRoot, { recursive: true })
         if (typeof fs.statfsSync === "function") {
             const disk = fs.statfsSync(cacheRoot)
             const freeBytes = Number(disk.bavail) * Number(disk.bsize)
-            if (estimatedBytes > freeBytes * 0.75) {
+            if (opened ? estimatedBytes > G06_MAX_DECODED_VIDEO_BYTES || estimatedBytes + G06_DECODE_RESERVE_BYTES > freeBytes : estimatedBytes > freeBytes * 0.75) {
                 throw new Error(`Not enough free space to prepare ${item.name}. Need roughly ${Math.ceil(estimatedBytes / 1073741824)} GB.`)
             }
         }
         const extension = request.quality === "optimized" ? "jpg" : "png"
         const key = crypto
             .createHash("sha1")
-            .update(`${source}:${stat.mtimeMs}:${stat.size}:${request.fps}:${request.width}x${request.height}:${decodeDurationMs}:${request.quality}:frames-v2`)
+            .update(`${opened ? `${opened.device}:${opened.inode}` : source}:${stat.mtimeMs}:${stat.size}:${request.fps}:${request.width}x${request.height}:${decodeDurationMs}:${request.quality}:frames-v2`)
             .digest("hex")
         if (!decoded.has(key)) {
-            const folder = path.join(app.getPath("userData"), "export-video-frames", key)
+            const folder = privateCacheRoot ? path.join(privateCacheRoot, key) : path.join(cacheRoot, key)
             const marker = path.join(folder, "complete.json")
             let frames = []
             if (fs.existsSync(marker)) {
@@ -610,9 +626,9 @@ async function prepareExportVideoFrames(request, exportState) {
                     ? ["-c:v", "png", "-compression_level", "3"]
                     : ["-q:v", "2"]
                 try {
-                    await runFFmpeg([
-                        "-hide_banner",
-                        "-loglevel", "error",
+                    const decodeArgs = [
+                        "-protocol_whitelist", "file,pipe",
+                        ...(opened?.mime === "video/webm" ? ["-f", "matroska,webm"] : opened ? ["-f", "mov", "-enable_drefs", "0", "-use_absolute_path", "0"] : []),
                         "-i", source,
                         "-t", String(decodeDurationMs / 1000),
                         "-an",
@@ -620,7 +636,15 @@ async function prepareExportVideoFrames(request, exportState) {
                         ...codec,
                         "-start_number", "0",
                         "-y", outputPattern,
-                    ], exportState)
+                    ]
+                    if (opened) await runG06FFmpeg({
+                        ffmpegPath: ffmpegPath(),
+                        inputFd: opened.handle,
+                        signal: exportState.signal,
+                        onChild: (child) => { exportState.process = child },
+                        args: decodeArgs,
+                    })
+                    else await runFFmpeg(decodeArgs, exportState)
                 } catch (error) {
                     fs.rmSync(folder, { recursive: true, force: true })
                     throw error
@@ -632,7 +656,7 @@ async function prepareExportVideoFrames(request, exportState) {
                 if (frames.length === 0) throw new Error(`Could not decode video frames: ${item.name}`)
                 fs.writeFileSync(marker, JSON.stringify({ frames: frames.length, fps: request.fps }))
             }
-            decoded.set(key, { fps: request.fps, frames: frames.map((frame) => fileToMedia(frame).url) })
+            decoded.set(key, { fps: request.fps, frames: frames.map(frameURLFromPath) })
         }
         result[index] = decoded.get(key)
         prepared += 1
@@ -642,8 +666,139 @@ async function prepareExportVideoFrames(request, exportState) {
             progress: prepared / videoItems.length,
             message: prepared === videoItems.length ? "Video frames ready." : `Prepared ${prepared} of ${videoItems.length} videos.`,
         })
+        } finally {
+            if (opened) fs.closeSync(opened.handle)
+        }
     }
     return result
+}
+
+async function choosePngFramesDestination(suggestedName) {
+    if (process.env.REEL_G06_PNG_DESTINATION) return path.resolve(process.env.REEL_G06_PNG_DESTINATION)
+    const result = await dialog.showOpenDialog(mainWindow, {
+        title: "Choose a folder for PNG Frames",
+        buttonLabel: "Choose Export Folder",
+        defaultPath: safeExportFolder(),
+        properties: ["openDirectory", "createDirectory"],
+    })
+    if (result.canceled || !result.filePaths[0]) return null
+    return path.join(result.filePaths[0], suggestedName)
+}
+
+async function createHostPngFrameRenderer({ snapshot, signal, mediaPath, openExportMedia, grantExportMedia, state }) {
+    const scaleFactor = screen.getPrimaryDisplay().scaleFactor || 1
+    const request = {
+        config: snapshot.config,
+        width: snapshot.width,
+        height: snapshot.height,
+        fps: snapshot.fps,
+        durationMs: snapshot.durationMs,
+        format: "png-frames",
+        posterFrame: "none",
+        quality: "master",
+    }
+    const exportWindow = new BrowserWindow({
+        width: Math.max(1, Math.round(snapshot.width / scaleFactor)),
+        height: Math.max(1, Math.round(snapshot.height / scaleFactor)),
+        useContentSize: true,
+        show: false,
+        frame: false,
+        resizable: false,
+        backgroundColor: snapshot.alpha ? "#00000000" : "#141312",
+        transparent: snapshot.alpha,
+        paintWhenInitiallyHidden: true,
+        webPreferences: {
+            preload: path.join(__dirname, "linux-export-preload.cjs"),
+            contextIsolation: true,
+            nodeIntegration: false,
+            sandbox: true,
+            partition: G03_SESSION_PARTITION,
+            backgroundThrottling: false,
+            offscreen: false,
+            zoomFactor: 1 / scaleFactor,
+        },
+    })
+    installWindowSecurity(exportWindow, { developmentOrigin: developmentRendererOrigin(), onDecision: recordSecurityDecision })
+    state.window = exportWindow
+    const abort = () => {
+        state.cancelled = true
+        state.process?.kill("SIGKILL")
+    }
+    signal.addEventListener("abort", abort, { once: true })
+    let privateCache = null
+    try {
+        const privateCacheParent = path.join(app.getPath("userData"), "g06-export-video-frames")
+        privateCache = createG06PrivateFrameCache(privateCacheParent)
+        const videoFrames = await prepareExportVideoFrames(
+            request,
+            state,
+            mediaPath,
+            (framePath) => grantExportMedia(framePath, mimeForPath(framePath)),
+            openExportMedia,
+            privateCache.root
+        )
+        if (signal.aborted) throw new HostPortError("cancelled")
+        await exportWindow.loadURL(rendererURL(true))
+        const ready = onceIPC(
+            "export:ready",
+            (payload, event) => event.sender.id === exportWindow.webContents.id && exactExportReady(payload, state.exportId),
+            30_000,
+            state
+        )
+        exportWindow.webContents.send("export:init", { exportId: state.exportId, request, videoFrames })
+        await ready
+        return {
+            async renderFrame({ frameIndex, timeMs }) {
+                if (signal.aborted || exportWindow.isDestroyed()) throw new HostPortError("cancelled")
+                const frameId = `${state.exportId}-${frameIndex}`
+                const frameReady = onceIPC(
+                    "export:frame-ready",
+                    (payload, event) => event.sender.id === exportWindow.webContents.id && exactExportFrameReady(payload, state.exportId, frameId),
+                    30_000,
+                    state
+                )
+                exportWindow.webContents.send("export:set-frame", { exportId: state.exportId, frameId, timeMs })
+                await frameReady
+                if (signal.aborted) throw new HostPortError("cancelled")
+                const image = await exportWindow.webContents.capturePage()
+                const size = image.getSize()
+                if (size.width !== snapshot.width || size.height !== snapshot.height) throw new HostPortError("verification_failed")
+                return image.toPNG()
+            },
+            close() {
+                signal.removeEventListener("abort", abort)
+                if (!exportWindow.isDestroyed()) exportWindow.destroy()
+                privateCache?.dispose()
+            },
+        }
+    } catch (error) {
+        signal.removeEventListener("abort", abort)
+        if (!exportWindow.isDestroyed()) exportWindow.destroy()
+        privateCache?.dispose()
+        if (signal.aborted) throw new HostPortError("cancelled")
+        throw error
+    }
+}
+
+async function runHostPngFramesExport({ snapshot, destination, destinationAuthority, signal, mediaPath, openExportMedia, grantExportMedia }) {
+    if (activeExport) throw new HostPortError("conflict")
+    const state = { exportId: `png-${crypto.randomBytes(12).toString("hex")}`, cancelled: false, process: null, window: null, signal }
+    activeExport = state
+    let renderer
+    try {
+        renderer = await createHostPngFrameRenderer({ snapshot, signal, mediaPath, openExportMedia, grantExportMedia, state })
+        return await pngFrames().run({
+            snapshot,
+            destination,
+            destinationAuthority,
+            signal,
+            renderFrame: renderer.renderFrame,
+            onProgress: (progress) => report({ exportId: state.exportId, ...progress, message: progress.phase === "done" ? "PNG Frames verified." : undefined }),
+        })
+    } finally {
+        renderer?.close()
+        if (activeExport === state) activeExport = null
+    }
 }
 
 function createMainWindow() {
@@ -696,6 +851,8 @@ function createMainWindow() {
             prepareVideoAudio: prepareVideoAudioForHost,
             decodeAudio: decodeAudioForHost,
             audioWaveform: waveformForHost,
+            chooseExportDestination: ({ suggestedName }) => choosePngFramesDestination(suggestedName),
+            runPngFramesExport: runHostPngFramesExport,
             onGrantRevoked: removeRevokedAudioGrant,
             saveProject: async ({ config, mediaPath }) => {
                 const saved = await savePortableProject(config, process.env.REEL_G03_PROJECT_PATH ? path.resolve(process.env.REEL_G03_PROJECT_PATH) : undefined, mediaPath)
@@ -715,10 +872,13 @@ function createMainWindow() {
     }
     installWindowSecurity(mainWindow, { developmentOrigin: developmentRendererOrigin(), onDecision: recordSecurityDecision })
     mainWindow.loadURL(rendererURL())
-    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT) {
+    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT) {
         mainWindow.webContents.once("did-finish-load", async () => {
             try {
-                if (process.env.REEL_G05_RENDERER_OUTPUT) {
+                if (process.env.REEL_G06_RENDERER_OUTPUT) {
+                    const { runG06RendererSmoke } = require("./g06-renderer-smoke.cjs")
+                    await runG06RendererSmoke(mainWindow, path.resolve(process.env.REEL_G06_RENDERER_OUTPUT), process.env.REEL_G06_RENDERER_MODE ?? "success")
+                } else if (process.env.REEL_G05_RENDERER_OUTPUT) {
                     const { runG05RendererSmoke } = require("./g05-renderer-smoke.cjs")
                     await runG05RendererSmoke(mainWindow, path.resolve(process.env.REEL_G05_RENDERER_OUTPUT), process.env.REEL_G05_RENDERER_MODE ?? "save")
                 } else if (process.env.REEL_G03_RENDERER_OUTPUT) {
@@ -828,6 +988,7 @@ function createMainWindow() {
         }
         videoAudioRuntime?.dispose()
         videoAudioRuntime = null
+        pngFramesRuntime = null
         mainWindow = null
     })
 }
@@ -851,14 +1012,25 @@ function onceIPC(channel, predicate, timeoutMs = 30000, exportState) {
                 reject(new Error("Export cancelled."))
             }, 100)
         }
-        const listener = (_event, payload) => {
-            if (!predicate(payload)) return
+        const listener = (event, payload) => {
+            if (!predicate(payload, event)) return
             cleanup()
             if (payload.error) reject(new Error(payload.error))
             else resolve(payload)
         }
         ipcMain.on(channel, listener)
     })
+}
+
+function exactExportReady(payload, exportId) {
+    return payload && typeof payload === "object" && !Array.isArray(payload)
+        && Object.keys(payload).length === 1 && payload.exportId === exportId
+}
+
+function exactExportFrameReady(payload, exportId, frameId) {
+    if (!payload || typeof payload !== "object" || Array.isArray(payload) || payload.exportId !== exportId || payload.frameId !== frameId) return false
+    const keys = Object.keys(payload).sort().join(",")
+    return keys === "exportId,frameId" || (keys === "error,exportId,frameId" && payload.error === "frame_failed")
 }
 
 function writeBuffer(stream, buffer) {
@@ -1129,6 +1301,11 @@ app.whenReady().then(async () => {
     if (linuxHostMode()) {
         cleanupOpenedProjectResidue()
         audioStaging().cleanupResidue()
+        try {
+            cleanupG06PrivateFrameCache(path.join(app.getPath("userData"), "g06-export-video-frames"))
+        } catch {
+            recordSecurityDecision("g06-private-cache-cleanup-refused")
+        }
     }
     if (process.platform === "darwin") {
         const iconPath = app.isPackaged

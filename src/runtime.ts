@@ -1,5 +1,5 @@
-import type { GalleryHostPort, ReelAPI, ReelConfig } from "./types"
-import { hydrateHostAudio, validateHostAudioIntent } from "./audio/audioHost"
+import type { GalleryHostPort, ReelAPI, ReelConfig } from "./types.ts"
+import { hydrateHostAudio, validateHostAudioIntent } from "./audio/audioHost.ts"
 
 const unavailable = async () => {
     throw new Error("This action is available in the Galileo desktop app.")
@@ -65,7 +65,9 @@ async function hydrateHostConfig(config: ReelConfig) {
     await hydrateHostAudio(config.audio)
 }
 
-function hostBackedAPI(host: GalleryHostPort): ReelAPI {
+export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
+    let exportOwned = false
+    let exportCancelled = false
     return {
         ...browserAPI,
         platform: host.platform,
@@ -85,9 +87,52 @@ function hostBackedAPI(host: GalleryHostPort): ReelAPI {
             }
         },
         cancelProjectOpen: () => host.cancelProjectOpen(),
+        exportReel: async (request) => {
+            if (exportOwned) throw new Error("An export is already running.")
+            if (request.format !== "png-frames") throw new Error("This Linux host slice currently supports verified PNG Frames only.")
+            exportOwned = true
+            exportCancelled = false
+            try {
+                const capabilities = await host.exportCapabilities()
+                const capability = capabilities.formats.find((candidate) => candidate.id === "png-frames")
+                if (!capability?.available) throw new Error("PNG Frames are unavailable on this host.")
+                if (exportCancelled) return { cancelled: true }
+                const preflight = await host.preflightPngFrames({
+                    config: request.config,
+                    width: request.width,
+                    height: request.height,
+                    fps: request.fps,
+                    durationMs: request.durationMs,
+                    transparent: request.config.settings.backgroundStyle === "transparent",
+                })
+                if (exportCancelled) {
+                    await host.cancelExport()
+                    return { cancelled: true }
+                }
+                const date = new Date().toISOString().slice(0, 10)
+                const destination = await host.choosePngFramesDestination(`Galileo Gallery ${date} PNG Frames`)
+                if (destination.cancelled || exportCancelled) {
+                    await host.cancelExport()
+                    return { cancelled: true }
+                }
+                await host.startPngFramesExport(preflight.snapshotId, destination.destinationGrant)
+                return {}
+            } catch (error) {
+                const code = error && typeof error === "object" && "code" in error ? (error as { code?: unknown }).code : undefined
+                if (exportCancelled || code === "cancelled") return { cancelled: true }
+                throw error
+            } finally {
+                exportOwned = false
+            }
+        },
+        cancelExport: async () => {
+            exportCancelled = true
+            await host.cancelExport()
+        },
+        onExportProgress: (callback) => host.onExportProgress(callback),
     }
 }
 
 export function ensureReelAPI(): ReelAPI {
-    return window.reelAPI ?? (window.galleryHost ? hostBackedAPI(window.galleryHost) : browserAPI)
+    return window.reelAPI ?? (window.galleryHost ? createHostBackedAPI(window.galleryHost) : browserAPI)
 }
