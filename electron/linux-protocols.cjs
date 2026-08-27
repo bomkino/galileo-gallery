@@ -161,7 +161,17 @@ function installWindowSecurity(window, options = {}) {
             event.preventDefault()
         }
     })
-    window.webContents.on("will-frame-navigate", (event) => { options.onDecision?.("frame-navigation-denied"); event.preventDefault() })
+    window.webContents.on("will-frame-navigate", (event, targetURL, _isInPlace, isMainFrame) => {
+        if (isMainFrame) {
+            if (!isAllowedNavigation(targetURL, options)) {
+                options.onDecision?.("navigation-denied")
+                event.preventDefault()
+            }
+            return
+        }
+        options.onDecision?.("frame-navigation-denied")
+        event.preventDefault()
+    })
     window.webContents.on("will-redirect", (event) => { options.onDecision?.("redirect-denied"); event.preventDefault() })
     window.webContents.on("will-attach-webview", (event) => { options.onDecision?.("webview-denied"); event.preventDefault() })
 }

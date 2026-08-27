@@ -62,16 +62,28 @@ try {
         setWindowOpenHandler(handler) { this.openHandler = handler },
         on(name, handler) { listeners[name] = handler },
     }
-    installWindowSecurity({ webContents })
+    const decisions = []
+    installWindowSecurity({ webContents }, { onDecision: (decision) => decisions.push(decision) })
     assert.deepEqual(webContents.openHandler({ url: "https://attacker.example" }), { action: "deny" })
-    for (const [name, target] of [["will-navigate", "https://attacker.example"], ["will-frame-navigate", undefined], ["will-redirect", undefined], ["will-attach-webview", undefined]]) {
+    for (const [name, target] of [["will-navigate", "https://attacker.example"], ["will-redirect", undefined], ["will-attach-webview", undefined]]) {
         let prevented = false
         listeners[name]({ preventDefault: () => { prevented = true } }, target)
         assert.equal(prevented, true)
     }
+    let mainFramePrevented = false
+    listeners["will-frame-navigate"]({ preventDefault: () => { mainFramePrevented = true } }, "https://attacker.example", false, true)
+    assert.equal(mainFramePrevented, true)
+    assert(decisions.includes("navigation-denied"))
+    let childFramePrevented = false
+    listeners["will-frame-navigate"]({ preventDefault: () => { childFramePrevented = true } }, "gallery-app://app/index.html", false, false)
+    assert.equal(childFramePrevented, true)
+    assert(decisions.includes("frame-navigation-denied"))
     let trustedPrevented = false
     listeners["will-navigate"]({ preventDefault: () => { trustedPrevented = true } }, "gallery-app://app/index.html")
     assert.equal(trustedPrevented, false)
+    let trustedMainFramePrevented = false
+    listeners["will-frame-navigate"]({ preventDefault: () => { trustedMainFramePrevented = true } }, "gallery-app://app/index.html", false, true)
+    assert.equal(trustedMainFramePrevented, false)
 
     const sessionListeners = {}
     const session = {
