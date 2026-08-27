@@ -10,7 +10,6 @@
     "url": "https://github.com/bomkino/galileo-gallery.git"
   },
   "allowScripts": {
-    "electron@43.1.0": true,
     "electron-winstaller@5.4.0": true,
     "ffmpeg-static@5.3.0": true
   },
@@ -24,8 +23,9 @@
     "verify:source": "node scripts/verify-source.cjs",
     "verify:electron-project": "npm run build && node scripts/verify-electron-project-runtime.cjs",
     "verify:quiet-carousel": "node --experimental-strip-types scripts/verify-quiet-carousel.mjs",
-    "verify:g02-renderer": "npm run build && REEL_USER_DATA_DIR=./artifacts/g02-runtime REEL_G02_RENDERER_OUTPUT=./artifacts/g02 electron . && node scripts/verify-g02-renderer-artifacts.cjs ./artifacts/g02",
+    "verify:g02-renderer": "npm run build && npm run prepare:electron && REEL_USER_DATA_DIR=./artifacts/g02-runtime REEL_G02_RENDERER_OUTPUT=./artifacts/g02 electron . && node scripts/verify-g02-renderer-artifacts.cjs ./artifacts/g02",
     "start": "npm run build && electron .",
+    "prepare:electron": "install-electron",
     "prepare:ffmpeg": "node scripts/prepare-ffmpeg.cjs",
     "package:mac": "npm run prepare:ffmpeg && npm run build && electron-builder --mac dir --publish never",
     "package:windows": "npm run prepare:ffmpeg && npm run build && electron-builder --win portable --x64 --publish never",
