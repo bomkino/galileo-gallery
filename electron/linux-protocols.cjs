@@ -143,6 +143,7 @@ function isAllowedRequest(targetURL, options = {}) {
     }
     if (parseTrustedAppURL(targetURL)) return true
     if (url.protocol === "reel-media:") {
+        if (options.allowLegacyMedia && url.hostname === "file" && /^\/[A-Za-z0-9_-]+$/.test(url.pathname)) return true
         return url.hostname === "grant" && /^\/[a-f0-9]{64}$/.test(url.pathname) && !url.search && !url.hash
     }
     if (["data:", "blob:"].includes(url.protocol)) return true
@@ -150,21 +151,29 @@ function isAllowedRequest(targetURL, options = {}) {
 }
 
 function installWindowSecurity(window, options = {}) {
-    window.webContents.setWindowOpenHandler(() => ({ action: "deny" }))
-    window.webContents.on("will-navigate", (event, targetURL) => {
-        if (!isAllowedNavigation(targetURL, options)) event.preventDefault()
+    window.webContents.setWindowOpenHandler(() => {
+        options.onDecision?.("popup-denied")
+        return { action: "deny" }
     })
-    window.webContents.on("will-frame-navigate", (event) => event.preventDefault())
-    window.webContents.on("will-redirect", (event) => event.preventDefault())
-    window.webContents.on("will-attach-webview", (event) => event.preventDefault())
+    window.webContents.on("will-navigate", (event, targetURL) => {
+        if (!isAllowedNavigation(targetURL, options)) {
+            options.onDecision?.("navigation-denied")
+            event.preventDefault()
+        }
+    })
+    window.webContents.on("will-frame-navigate", (event) => { options.onDecision?.("frame-navigation-denied"); event.preventDefault() })
+    window.webContents.on("will-redirect", (event) => { options.onDecision?.("redirect-denied"); event.preventDefault() })
+    window.webContents.on("will-attach-webview", (event) => { options.onDecision?.("webview-denied"); event.preventDefault() })
 }
 
 function installSessionSecurity(session, options = {}) {
-    session.setPermissionCheckHandler(() => false)
-    session.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false))
-    session.on("will-download", (event) => event.preventDefault())
+    session.setPermissionCheckHandler(() => { options.onDecision?.("permission-denied"); return false })
+    session.setPermissionRequestHandler((_webContents, _permission, callback) => { options.onDecision?.("permission-denied"); callback(false) })
+    session.on("will-download", (event) => { options.onDecision?.("download-denied"); event.preventDefault() })
     session.webRequest.onBeforeRequest((details, callback) => {
-        callback({ cancel: !isAllowedRequest(details.url, options) })
+        const cancel = !isAllowedRequest(details.url, options)
+        if (cancel) options.onDecision?.("request-denied")
+        callback({ cancel })
     })
 }
 

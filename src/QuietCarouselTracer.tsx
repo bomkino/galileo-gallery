@@ -8,6 +8,7 @@ import {
 import {
     createQuietCarouselProject,
     parseQuietCarouselBrowserProject,
+    parseQuietCarouselHostProject,
     quietCarouselFixtureItems,
     serializeQuietCarouselBrowserProject,
     timelineIntentForMode,
@@ -36,6 +37,28 @@ function storedProject() {
 function formatDuration(value: number) {
     const seconds = Math.round(value / 100) / 10
     return `${seconds.toFixed(seconds % 1 === 0 ? 0 : 1)} s`
+}
+
+async function hydrateHostMedia(config: ReelConfig) {
+    await Promise.all(config.items.map((item) => new Promise<void>((resolve, reject) => {
+        const media = item.type === "video" ? document.createElement("video") : new Image()
+        const timeout = window.setTimeout(() => reject(new Error(`Timed out hydrating ${item.name}.`)), 15_000)
+        const cleanup = () => {
+            window.clearTimeout(timeout)
+            media.removeAttribute("src")
+            if (media instanceof HTMLMediaElement) media.load()
+        }
+        if (media instanceof HTMLVideoElement) {
+            media.preload = "metadata"
+            media.onloadedmetadata = () => { cleanup(); resolve() }
+            media.onerror = () => { cleanup(); reject(new Error(`Could not hydrate ${item.name}.`)) }
+            media.src = item.url
+            media.load()
+        } else {
+            media.src = item.url
+            media.decode().then(() => { cleanup(); resolve() }, () => { cleanup(); reject(new Error(`Could not hydrate ${item.name}.`)) })
+        }
+    })))
 }
 
 function useStageSize(ref: React.RefObject<HTMLDivElement | null>) {
@@ -98,6 +121,7 @@ function SegmentStrip({ config, timeMs, durationMs }: { config: ReelConfig; time
 }
 
 export default function QuietCarouselTracer() {
+    const host = new URLSearchParams(window.location.search).get("host") === "linux" ? window.galleryHost : undefined
     const [config, setConfig] = React.useState<ReelConfig>(storedProject)
     const [selectedId, setSelectedId] = React.useState(config.items[0]?.id ?? "")
     const [playing, setPlaying] = React.useState(() => !window.matchMedia("(prefers-reduced-motion: reduce)").matches)
@@ -154,7 +178,16 @@ export default function QuietCarouselTracer() {
         setTimeMs(0)
     }
 
-    const save = () => {
+    const save = async () => {
+        if (host) {
+            try {
+                const result = await host.saveProject(config)
+                setNotice(result.cancelled ? "Save cancelled · Project unchanged" : "Saved portable Project · media included")
+            } catch (error) {
+                setNotice(error instanceof Error ? `Save failed · ${error.message}` : "Save failed")
+            }
+            return
+        }
         try {
             localStorage.setItem(BROWSER_PROJECT_KEY, serializeQuietCarouselBrowserProject(config))
             setNotice("Saved in browser · exact Scene and Timeline intent")
@@ -163,7 +196,33 @@ export default function QuietCarouselTracer() {
         }
     }
 
-    const reload = () => {
+    const reload = async () => {
+        if (host) {
+            let operationId = ""
+            try {
+                const candidate = await host.beginProjectOpen()
+                if ("cancelled" in candidate) {
+                    setNotice("Open cancelled · Project unchanged")
+                    return
+                }
+                if ("failure" in candidate) {
+                    setNotice(candidate.failure.message)
+                    return
+                }
+                operationId = candidate.operationId
+                const restored = parseQuietCarouselHostProject(candidate.config)
+                await hydrateHostMedia(restored)
+                await host.acceptProjectOpen(operationId)
+                setConfig(restored)
+                setSelectedId(restored.items[0]?.id ?? "")
+                setTimeMs(0)
+                setNotice("Opened portable Project · Scene and Timeline verified")
+            } catch (error) {
+                if (operationId) await host.discardProjectOpen(operationId).catch(() => undefined)
+                setNotice(error instanceof Error ? `Open failed · ${error.message}` : "Open failed · Project unchanged")
+            }
+            return
+        }
         try {
             const stored = localStorage.getItem(BROWSER_PROJECT_KEY)
             if (!stored) throw new Error("No browser Project saved.")
@@ -191,6 +250,37 @@ export default function QuietCarouselTracer() {
         setFailedMedia(new Set())
         setTimeMs(0)
         setNotice("Eight synthetic frames imported · order preserved")
+    }
+
+    const chooseMedia = async () => {
+        if (!host) {
+            replaceWithFixture()
+            return
+        }
+        try {
+            const picked = await host.chooseMedia()
+            if (!picked.length) {
+                setNotice("Import cancelled · Project unchanged")
+                return
+            }
+            const previousURLs = config.items.map((item) => item.url).filter((url) => url.startsWith("reel-media://grant/"))
+            const importStamp = Date.now().toString(36)
+            const imported = createQuietCarouselProject(picked.map((item, index) => ({
+                ...item,
+                id: `host-media-${importStamp}-${index + 1}`,
+                ratio: 1,
+                spotlight: index < 2,
+                muted: false,
+            })))
+            setConfig(imported)
+            setSelectedId(imported.items[0]?.id ?? "")
+            setFailedMedia(new Set())
+            setTimeMs(0)
+            if (previousURLs.length) await host.releaseMedia(previousURLs).catch(() => undefined)
+            setNotice(`${picked.length} source frame${picked.length === 1 ? "" : "s"} imported · order preserved`)
+        } catch (error) {
+            setNotice(error instanceof Error ? `Import failed · ${error.message}` : "Import failed · Project unchanged")
+        }
     }
 
     const canvasRatio = config.settings.canvasWidth / config.settings.canvasHeight
@@ -223,9 +313,9 @@ export default function QuietCarouselTracer() {
                 </div>
                 <div className="qc-project-actions" aria-label="Project actions">
                     <span role="status">{notice}</span>
-                    <button data-g02-action="fixture" type="button" onClick={replaceWithFixture}>Import 8-frame fixture</button>
-                    <button data-g02-action="save" type="button" onClick={save}>Save</button>
-                    <button data-g02-action="reload" type="button" onClick={reload}>Reload</button>
+                    <button data-g02-action="fixture" type="button" onClick={() => void chooseMedia()}>{host ? "Add source frames" : "Import 8-frame fixture"}</button>
+                    <button data-g02-action="save" type="button" onClick={() => void save()}>Save</button>
+                    <button data-g02-action="reload" type="button" onClick={() => void reload()}>{host ? "Open" : "Reload"}</button>
                 </div>
             </header>
 

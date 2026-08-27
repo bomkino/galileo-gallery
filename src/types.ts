@@ -264,8 +264,25 @@ export interface ReelAPI {
     exportReady(exportId: string): void
 }
 
+export interface GalleryHostPort {
+    platform: "linux"
+    identity(): Promise<Record<string, unknown>>
+    chooseMedia(): Promise<SelectedMedia[]>
+    releaseMedia(urls: string[]): Promise<{ released: number }>
+    saveProject(config: ReelConfig): Promise<{ cancelled?: boolean; savedAt?: number; documentId?: string }>
+    beginProjectOpen(): Promise<
+        | { cancelled: true }
+        | { failure: { code: ProjectImportFailureCode; message: string } }
+        | { operationId: string; candidateGeneration: number; config: ReelConfig }
+    >
+    acceptProjectOpen(operationId: string): Promise<{ generation: number }>
+    discardProjectOpen(operationId: string): Promise<{ discarded: boolean }>
+    cancelProjectOpen(): Promise<{ cancelled: boolean }>
+}
+
 declare global {
     interface Window {
         reelAPI: ReelAPI
+        galleryHost?: GalleryHostPort
     }
 }

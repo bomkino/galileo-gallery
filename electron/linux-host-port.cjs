@@ -65,6 +65,7 @@ function createGrantRegistry(options = {}) {
         if (grants.size >= maximumGrants) fail("resource_limit")
         const stats = fs.statSync(input.filePath)
         if (!stats.isFile()) fail("invalid_request")
+        if (stats.size < 1) fail("invalid_request")
         if (stats.size > maximumResourceBytes) fail("resource_limit")
         let token
         for (let attempt = 0; attempt < 8; attempt += 1) {
@@ -119,10 +120,16 @@ function createGrantRegistry(options = {}) {
     }
 
     function parseRange(header, bytes) {
-        if (header === undefined) return { start: 0, end: Math.min(bytes, maximumReadBytes) - 1, partial: bytes > maximumReadBytes }
+        if (header === undefined) return { start: 0, end: bytes - 1, partial: false }
         if (typeof header !== "string" || header.length > 120) fail("invalid_request")
-        const match = /^bytes=(\d+)-(\d*)$/.exec(header)
+        const match = /^bytes=(\d*)-(\d*)$/.exec(header)
         if (!match) fail("invalid_request")
+        if (!match[1] && !match[2]) fail("invalid_request")
+        if (!match[1]) {
+            const suffix = Number(match[2])
+            if (!safeInteger(suffix, 1, Math.min(bytes, maximumReadBytes))) fail("resource_limit")
+            return { start: bytes - suffix, end: bytes - 1, partial: true }
+        }
         const start = Number(match[1])
         const requestedEnd = match[2] ? Number(match[2]) : Math.min(bytes - 1, start + maximumReadBytes - 1)
         if (!safeInteger(start, 0, bytes - 1) || !safeInteger(requestedEnd, start, bytes - 1)) fail("invalid_request")
@@ -139,6 +146,7 @@ function createGrantRegistry(options = {}) {
             if (!stats.isFile() || stats.dev !== grant.device || stats.ino !== grant.inode || stats.size !== grant.bytes || stats.mtimeMs !== grant.mtimeMs) fail("verification_failed")
             const range = parseRange(input.range, stats.size)
             const length = range.end - range.start + 1
+            if (length > maximumReadBytes) fail("resource_limit")
             const body = Buffer.allocUnsafe(length)
             const readBytes = fs.readSync(handle, body, 0, length, range.start)
             if (readBytes !== length) fail("verification_failed")
@@ -159,6 +167,33 @@ function createGrantRegistry(options = {}) {
         }
     }
 
+    function openRead(input) {
+        if (!ownExact(input, ["grant", "owner", "generation", "range"])) fail("invalid_request")
+        const grant = resolve({ grant: input.grant, scope: "media", owner: input.owner, generation: input.generation })
+        const handle = fs.openSync(grant.filePath, "r")
+        try {
+            const stats = fs.fstatSync(handle)
+            if (!stats.isFile() || stats.dev !== grant.device || stats.ino !== grant.inode || stats.size !== grant.bytes || stats.mtimeMs !== grant.mtimeMs) fail("verification_failed")
+            const range = parseRange(input.range, stats.size)
+            const length = range.end - range.start + 1
+            const stream = fs.createReadStream(grant.filePath, { fd: handle, autoClose: true, start: range.start, end: range.end })
+            return {
+                status: range.partial ? 206 : 200,
+                stream,
+                headers: Object.freeze({
+                    "content-type": grant.mime,
+                    "content-length": String(length),
+                    "accept-ranges": "bytes",
+                    "cache-control": "no-store",
+                    ...(range.partial ? { "content-range": `bytes ${range.start}-${range.end}/${stats.size}` } : {}),
+                }),
+            }
+        } catch (error) {
+            fs.closeSync(handle)
+            throw error
+        }
+    }
+
     function snapshot() {
         pruneExpired()
         const byScope = { media: 0, document: 0, destination: 0 }
@@ -166,7 +201,7 @@ function createGrantRegistry(options = {}) {
         return Object.freeze({ active: grants.size, byScope: Object.freeze(byScope) })
     }
 
-    return Object.freeze({ create, read, resolve, revoke, revokeOwner, snapshot })
+    return Object.freeze({ create, openRead, read, resolve, revoke, revokeOwner, snapshot })
 }
 
 function createRequestLimiter(options = {}) {

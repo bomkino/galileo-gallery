@@ -126,3 +126,38 @@ jobs:
         with:
           name: g02-quiet-carousel-renderer-evidence
           path: artifacts/g02/
+      - name: Run the G03 HostPort save and relaunch journey
+        if: github.ref_name == 'codex/g03-linux-host-port' || github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/g03
+          source_sha="$GITHUB_SHA"
+          source_tree="$(git rev-parse HEAD^{tree})"
+          GALLERY_SOURCE_SHA="$source_sha" GALLERY_SOURCE_TREE="$source_tree" npm run package:linux:g03
+          sudo chown root:root release/g03/linux-unpacked/chrome-sandbox
+          sudo chmod 4755 release/g03/linux-unpacked/chrome-sandbox
+          executable="$PWD/release/g03/linux-unpacked/galileo-gallery"
+          test -x "$executable"
+          source_media="$PWD/build/icon.png"
+          project="$PWD/artifacts/g03/round-trip.galileo"
+          user_data="$PWD/artifacts/g03-runtime"
+          xvfb-run -a env \
+            REEL_USER_DATA_DIR="$user_data" \
+            REEL_G03_RENDERER_OUTPUT="$PWD/artifacts/g03" \
+            REEL_G03_RENDERER_MODE=save \
+            REEL_G03_MEDIA_SOURCES="$source_media" \
+            REEL_G03_PROJECT_PATH="$project" \
+            "$executable"
+          xvfb-run -a env \
+            REEL_USER_DATA_DIR="$user_data" \
+            REEL_G03_RENDERER_OUTPUT="$PWD/artifacts/g03" \
+            REEL_G03_RENDERER_MODE=reopen \
+            REEL_G03_PROJECT_PATH="$project" \
+            "$executable"
+          G03_EXPECTED_SHA="$source_sha" G03_EXPECTED_TREE="$source_tree" npm run verify:g03-renderer
+      - uses: actions/upload-artifact@v6
+        if: github.ref_name == 'codex/g03-linux-host-port' || github.event_name == 'pull_request'
+        with:
+          name: g03-linux-host-port-renderer-evidence
+          path: artifacts/g03/

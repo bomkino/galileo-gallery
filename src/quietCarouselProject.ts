@@ -104,17 +104,19 @@ function isFixtureMedia(value: unknown): value is MediaItem {
         && typeof item.spotlight === "boolean" && typeof item.muted === "boolean"
 }
 
-export function serializeQuietCarouselBrowserProject(config: ReelConfig) {
-    return JSON.stringify({ format: BROWSER_PROJECT_FORMAT, version: BROWSER_PROJECT_VERSION, config })
+function isHostMedia(value: unknown): value is MediaItem {
+    if (!value || typeof value !== "object") return false
+    const item = value as Record<string, unknown>
+    return typeof item.id === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.id) && item.id.length <= 120
+        && typeof item.name === "string" && item.name.length > 0 && item.name.length <= 512
+        && ["image", "video"].includes(String(item.type))
+        && typeof item.url === "string" && /^reel-media:\/\/grant\/[a-f0-9]{64}$/.test(item.url)
+        && typeof item.ratio === "number" && Number.isFinite(item.ratio) && item.ratio >= 0.05 && item.ratio <= 20
+        && typeof item.spotlight === "boolean" && typeof item.muted === "boolean"
 }
 
-export function parseQuietCarouselBrowserProject(text: string): ReelConfig {
-    const parsed = JSON.parse(text) as { format?: unknown; version?: unknown; config?: Partial<ReelConfig> }
-    if (parsed.format !== BROWSER_PROJECT_FORMAT || parsed.version !== BROWSER_PROJECT_VERSION || !parsed.config) {
-        throw new Error("Browser Project identity is invalid.")
-    }
-    const config = parsed.config
-    if (config.styleId !== QUIET_CAROUSEL_ID || !Array.isArray(config.items) || config.items.length < 1 || config.items.length > 256 || !config.items.every(isFixtureMedia) || !config.settings) {
+function validateQuietCarouselConfig(config: Partial<ReelConfig>, media: (value: unknown) => value is MediaItem): ReelConfig {
+    if (config.styleId !== QUIET_CAROUSEL_ID || !Array.isArray(config.items) || config.items.length < 1 || config.items.length > 256 || !config.items.every(media) || !config.settings) {
         throw new Error("Quiet Carousel Project is invalid.")
     }
     if (new Set(config.items.map((item) => item.id)).size !== config.items.length) throw new Error("Frame identities must be unique.")
@@ -139,4 +141,21 @@ export function parseQuietCarouselBrowserProject(text: string): ReelConfig {
             : { kind: "solid", color: config.settings.ground || "#11110f" },
     })
     return config as ReelConfig
+}
+
+export function serializeQuietCarouselBrowserProject(config: ReelConfig) {
+    return JSON.stringify({ format: BROWSER_PROJECT_FORMAT, version: BROWSER_PROJECT_VERSION, config })
+}
+
+export function parseQuietCarouselBrowserProject(text: string): ReelConfig {
+    const parsed = JSON.parse(text) as { format?: unknown; version?: unknown; config?: Partial<ReelConfig> }
+    if (parsed.format !== BROWSER_PROJECT_FORMAT || parsed.version !== BROWSER_PROJECT_VERSION || !parsed.config) {
+        throw new Error("Browser Project identity is invalid.")
+    }
+    return validateQuietCarouselConfig(parsed.config, isFixtureMedia)
+}
+
+export function parseQuietCarouselHostProject(value: unknown): ReelConfig {
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Host Project is invalid.")
+    return validateQuietCarouselConfig(value as Partial<ReelConfig>, isHostMedia)
 }

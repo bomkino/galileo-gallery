@@ -14,6 +14,7 @@ const { spawn } = require("node:child_process")
 const crypto = require("node:crypto")
 const fs = require("node:fs")
 const path = require("node:path")
+const { Readable } = require("node:stream")
 const { pathToFileURL } = require("node:url")
 const {
     inspectDroppedPath,
@@ -31,11 +32,13 @@ const {
     openPortableProjectArchive,
     savePortableProjectArchive,
 } = require("./project-persistence.cjs")
+const { inspectMediaFile } = require("./project-schema.cjs")
 const {
     createAppProtocolHandler,
     installSessionSecurity,
     installWindowSecurity,
 } = require("./linux-protocols.cjs")
+const { createLinuxHostController } = require("./linux-host-controller.cjs")
 let ffmpegStatic = null
 try {
     ffmpegStatic = require("ffmpeg-static")
@@ -70,15 +73,35 @@ if (process.env.REEL_USER_DATA_DIR) app.setPath("userData", path.resolve(process
 let mainWindow = null
 let activeExport = null
 let activeProjectImport = null
+const linuxHostControllers = new Map()
+const securityDecisions = Object.create(null)
+const G03_SESSION_PARTITION = "persist:galileo-gallery-g03"
+
+function recordSecurityDecision(name) {
+    securityDecisions[name] = (securityDecisions[name] ?? 0) + 1
+}
 
 function developmentRendererOrigin() {
     return app.isPackaged ? undefined : process.env.VITE_DEV_SERVER_URL
 }
 
+function linuxHostMode() {
+    return process.platform === "linux" && (app.isPackaged || Boolean(process.env.REEL_G03_RENDERER_OUTPUT))
+}
+
+function packagedBuildIdentity() {
+    try {
+        return JSON.parse(fs.readFileSync(path.join(__dirname, "../dist/build-identity.json"), "utf8"))
+    } catch {
+        return { productId: "galileo-gallery", sourceSha: "unavailable", sourceTree: "unavailable", buildId: "development" }
+    }
+}
+
 function rendererURL(exportMode = false) {
     const query = new URLSearchParams()
     if (exportMode) query.set("export", "1")
-    if (process.env.REEL_G02_RENDERER_OUTPUT) query.set("tracer", "quiet-carousel")
+    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT) query.set("tracer", "quiet-carousel")
+    if (process.env.REEL_G03_RENDERER_OUTPUT) query.set("host", "linux")
     const suffix = query.size ? `?${query}` : ""
     const developmentOrigin = developmentRendererOrigin()
     if (developmentOrigin) {
@@ -126,7 +149,7 @@ function safeProjectFolder() {
     return process.cwd()
 }
 
-async function savePortableProject(config, forcedOutputPath) {
+async function savePortableProject(config, forcedOutputPath, resolveMediaPath = mediaURLToPath) {
     let outputPath = forcedOutputPath
     if (!outputPath) {
         const result = await dialog.showSaveDialog(mainWindow, {
@@ -142,11 +165,11 @@ async function savePortableProject(config, forcedOutputPath) {
         config,
         outputPath,
         tempRoot: app.getPath("temp"),
-        mediaPathFromURL: mediaURLToPath,
+        mediaPathFromURL: resolveMediaPath,
     })
 }
 
-async function openPortableProject(forcedSource, signal) {
+async function openPortableProject(forcedSource, signal, mediaURLFromPath = (filePath) => fileToMedia(filePath).url) {
     let source = forcedSource
     if (!source) {
         const result = await dialog.showOpenDialog(mainWindow, {
@@ -163,10 +186,10 @@ async function openPortableProject(forcedSource, signal) {
             sourcePath: source,
             stagingParent: path.join(app.getPath("userData"), "project-import-staging"),
             openedProjectsRoot: path.join(app.getPath("userData"), "opened-project-media"),
-            mediaURLFromPath: (filePath) => fileToMedia(filePath).url,
+            mediaURLFromPath,
             signal,
         })
-        return { config: opened.config }
+        return { config: opened.config, resourceRoot: opened.resourceRoot }
     } catch (error) {
         const failure = publicProjectImportFailure(error)
         return failure.code === "cancelled" ? { cancelled: true } : { failure }
@@ -215,6 +238,49 @@ function fileToMedia(filePath) {
         type: mediaKindForPath(filePath) ?? "image",
         url: `reel-media://file/${token}`,
     }
+}
+
+function mimeForPath(filePath) {
+    return ({
+        ".avif": "image/avif",
+        ".gif": "image/gif",
+        ".jpeg": "image/jpeg",
+        ".jpg": "image/jpeg",
+        ".m4v": "video/mp4",
+        ".mov": "video/quicktime",
+        ".mp4": "video/mp4",
+        ".png": "image/png",
+        ".webm": "video/webm",
+        ".webp": "image/webp",
+    })[path.extname(filePath).toLowerCase()] ?? "application/octet-stream"
+}
+
+async function chooseMediaForHost(grantMedia) {
+    let filePaths
+    if (process.env.REEL_G03_MEDIA_SOURCES) {
+        filePaths = process.env.REEL_G03_MEDIA_SOURCES.split(path.delimiter).filter(Boolean).map((value) => path.resolve(value))
+    } else {
+        const result = await dialog.showOpenDialog(mainWindow, {
+            title: "Choose photos and videos",
+            buttonLabel: "Add Frames",
+            properties: ["openFile", "multiSelections"],
+            filters: [{
+                name: "Images & silent video",
+                extensions: ["jpg", "jpeg", "png", "webp", "gif", "avif", "mp4", "webm", "mov", "m4v"],
+            }],
+        })
+        if (result.canceled) return []
+        filePaths = result.filePaths
+    }
+    const selected = []
+    for (const filePath of filePaths) {
+        const inspected = inspectDroppedPath(filePath)
+        if (!inspected.accepted) continue
+        await inspectMediaFile(filePath)
+        const granted = grantMedia(filePath, mimeForPath(filePath))
+        selected.push({ name: inspected.name, type: inspected.type, url: granted.mediaURL })
+    }
+    return selected
 }
 
 function droppedPathResult(filePath) {
@@ -420,10 +486,11 @@ function createMainWindow() {
         title: "Galileo Gallery",
         icon: bundledIcon,
         webPreferences: {
-            preload: path.join(__dirname, "preload.cjs"),
+            preload: path.join(__dirname, linuxHostMode() ? "linux-preload.cjs" : "preload.cjs"),
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: true,
+            ...(linuxHostMode() ? { partition: G03_SESSION_PARTITION } : {}),
             zoomFactor: process.platform === "darwin" ? 1.08 : 1,
         },
     }
@@ -435,13 +502,45 @@ function createMainWindow() {
         })
     }
     mainWindow = new BrowserWindow(windowOptions)
-    installWindowSecurity(mainWindow, { developmentOrigin: developmentRendererOrigin() })
+    if (linuxHostMode()) {
+        const webContentsId = mainWindow.webContents.id
+        const host = createLinuxHostController({
+            owner: `window-${webContentsId}`,
+            webContentsId,
+            identity: () => ({
+                ...packagedBuildIdentity(),
+                protocol: 1,
+                projectSchemaRange: { minimum: 2, maximum: 2 },
+                platform: process.platform,
+                runtime: { electron: process.versions.electron, chromium: process.versions.chrome, node: process.versions.node },
+                packaged: app.isPackaged,
+                securityDecisions: { ...securityDecisions },
+            }),
+            chooseMedia: ({ grantMedia }) => chooseMediaForHost(grantMedia),
+            saveProject: async ({ config, mediaPath }) => {
+                const saved = await savePortableProject(config, process.env.REEL_G03_PROJECT_PATH ? path.resolve(process.env.REEL_G03_PROJECT_PATH) : undefined, mediaPath)
+                return saved.cancelled ? { cancelled: true } : { savedAt: Date.now(), documentId: crypto.randomUUID() }
+            },
+            openProject: ({ signal, grantMedia }) => openPortableProject(
+                process.env.REEL_G03_PROJECT_PATH ? path.resolve(process.env.REEL_G03_PROJECT_PATH) : undefined,
+                signal,
+                (filePath) => grantMedia(filePath, mimeForPath(filePath)).mediaURL
+            ),
+        })
+        linuxHostControllers.set(webContentsId, host)
+    }
+    installWindowSecurity(mainWindow, { developmentOrigin: developmentRendererOrigin(), onDecision: recordSecurityDecision })
     mainWindow.loadURL(rendererURL())
-    if (process.env.REEL_G02_RENDERER_OUTPUT) {
+    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT) {
         mainWindow.webContents.once("did-finish-load", async () => {
             try {
-                const { runG02RendererSmoke } = require("./g02-renderer-smoke.cjs")
-                await runG02RendererSmoke(mainWindow, path.resolve(process.env.REEL_G02_RENDERER_OUTPUT))
+                if (process.env.REEL_G03_RENDERER_OUTPUT) {
+                    const { runG03RendererSmoke } = require("./g03-renderer-smoke.cjs")
+                    await runG03RendererSmoke(mainWindow, path.resolve(process.env.REEL_G03_RENDERER_OUTPUT), process.env.REEL_G03_RENDERER_MODE ?? "save")
+                } else {
+                    const { runG02RendererSmoke } = require("./g02-renderer-smoke.cjs")
+                    await runG02RendererSmoke(mainWindow, path.resolve(process.env.REEL_G02_RENDERER_OUTPUT))
+                }
                 app.exit(0)
             } catch (error) {
                 console.error(error)
@@ -536,6 +635,10 @@ function createMainWindow() {
         }
     })
     mainWindow.on("closed", () => {
+        for (const [webContentsId, host] of linuxHostControllers) {
+            host.dispose()
+            linuxHostControllers.delete(webContentsId)
+        }
         mainWindow = null
     })
 }
@@ -716,16 +819,17 @@ async function runExport(request, outputPath) {
         transparent,
         paintWhenInitiallyHidden: true,
         webPreferences: {
-            preload: path.join(__dirname, "preload.cjs"),
+            preload: path.join(__dirname, linuxHostMode() ? "linux-export-preload.cjs" : "preload.cjs"),
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: true,
+            ...(linuxHostMode() ? { partition: G03_SESSION_PARTITION } : {}),
             backgroundThrottling: false,
             offscreen: false,
             zoomFactor: 1 / scaleFactor,
         },
     })
-    installWindowSecurity(exportWindow, { developmentOrigin: developmentRendererOrigin() })
+    installWindowSecurity(exportWindow, { developmentOrigin: developmentRendererOrigin(), onDecision: recordSecurityDecision })
     state.window = exportWindow
 
     try {
@@ -841,9 +945,19 @@ app.whenReady().then(async () => {
         if (!icon.isEmpty()) app.dock.setIcon(icon)
     }
     const developmentOrigin = developmentRendererOrigin()
-    protocol.handle("gallery-app", createAppProtocolHandler(path.join(__dirname, "../dist")))
-    installSessionSecurity(session.defaultSession, { developmentOrigin })
-    protocol.handle("reel-media", (request) => {
+    const rendererSession = linuxHostMode() ? session.fromPartition(G03_SESSION_PARTITION) : session.defaultSession
+    rendererSession.protocol.handle("gallery-app", createAppProtocolHandler(path.join(__dirname, "../dist")))
+    installSessionSecurity(rendererSession, { developmentOrigin, allowLegacyMedia: !linuxHostMode(), onDecision: recordSecurityDecision })
+    rendererSession.protocol.handle("reel-media", (request) => {
+        if (linuxHostMode()) {
+            for (const host of linuxHostControllers.values()) {
+                try {
+                    const opened = host.openMedia({ url: request.url, range: request.headers.get("range") ?? undefined })
+                    return new Response(Readable.toWeb(opened.stream), { status: opened.status, headers: opened.headers })
+                } catch {}
+            }
+            return new Response("Media not found", { status: 404 })
+        }
         try {
             const url = new URL(request.url)
             const token = url.pathname.replace(/^\//, "")
@@ -852,6 +966,17 @@ app.whenReady().then(async () => {
         } catch {
             return new Response("Media not found", { status: 404 })
         }
+    })
+
+    ipcMain.handle("gallery-host:request", (event, envelope) => {
+        const host = linuxHostControllers.get(event.sender.id)
+        if (!host) return { ok: false, requestId: envelope?.requestId ?? "invalid-request", generation: 1, error: { code: "host_unavailable", diagnosticId: crypto.randomBytes(8).toString("hex") } }
+        return host.handle(event, envelope)
+    })
+    ipcMain.handle("gallery-host:bootstrap", (event) => {
+        const host = linuxHostControllers.get(event.sender.id)
+        if (!host) throw new Error("Host unavailable.")
+        return host.bootstrap(event)
     })
 
     ipcMain.handle("media:pick", async () => {

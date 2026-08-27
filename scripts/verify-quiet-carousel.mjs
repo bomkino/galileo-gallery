@@ -11,6 +11,7 @@ import {
 import {
     createQuietCarouselProject,
     parseQuietCarouselBrowserProject,
+    parseQuietCarouselHostProject,
     serializeQuietCarouselBrowserProject,
     timelineIntentForMode,
 } from "../src/quietCarouselProject.ts"
@@ -174,5 +175,8 @@ const restored = configFromPortableProject(portable, directedConfig.items.map((i
 assert.deepEqual(restored.timelineSegments, directedConfig.timelineSegments)
 assert.equal(restored.timelineMode, "directed")
 assert.deepEqual(restored.items.map((item) => item.id), directedConfig.items.map((item) => item.id))
+const hostRestored = configFromPortableProject(portable, directedConfig.items.map((_item, index) => `reel-media://grant/${String(index + 1).padStart(64, "0")}`))
+assert.deepEqual(parseQuietCarouselHostProject(hostRestored), hostRestored)
+assert.throws(() => parseQuietCarouselHostProject({ ...hostRestored, items: [{ ...hostRestored.items[0], url: "reel-media://file/exposed" }] }), /invalid/)
 
 console.log("Verified: G02 Quiet Carousel defaults, source boundary, seam continuity, axis/ratio recomposition, control causality, finite automatic/fixed/directed Timeline, bounded frame count, and browser/portable round trip.")

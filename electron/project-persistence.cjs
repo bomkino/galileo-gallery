@@ -183,6 +183,7 @@ async function openPortableProjectArchive(options) {
                 return {
                     config: configFromPortableProject(project, committed.urls),
                     project,
+                    resourceRoot: committed.projectRoot,
                     sourcePath: options.sourcePath,
                 }
             } catch (error) {
