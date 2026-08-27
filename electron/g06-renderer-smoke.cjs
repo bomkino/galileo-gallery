@@ -66,13 +66,47 @@ async function runG06RendererSmoke(window, evidenceRoot, mode) {
     fs.mkdirSync(evidenceRoot, { recursive: true })
     const destination = path.resolve(process.env.REEL_G06_PNG_DESTINATION)
     await prepareStudio(window)
+    if (mode === "cancel") {
+        await window.webContents.executeJavaScript(`(() => {
+            window.__g06ObservedExportProgress = []
+            window.galleryHost.onExportProgress((progress) => {
+                window.__g06ObservedExportProgress.push({
+                    exportId: progress.exportId,
+                    phase: progress.phase,
+                    frame: progress.frame ?? null,
+                    totalFrames: progress.totalFrames ?? null,
+                })
+            })
+        })()`)
+    }
     await clickText(window, ".export-button", "Export verified PNG Frames")
     await until(window, `Boolean(document.querySelector('.export-progress'))`)
     if (mode === "cancel") {
+        await until(window, `window.__g06ObservedExportProgress.some((progress) => progress.phase === 'rendering' && progress.frame >= 1)`)
         await clickText(window, ".export-progress button", "Cancel")
-        await until(window, `document.body.textContent.includes('Export cancelled.')`)
+        await until(window, `document.querySelector('.export-cancelled[role="status"][data-export-phase="cancelled"]')?.textContent.trim() === 'Export cancelled.'`)
         if (fs.readFileSync(path.join(destination, "prior.txt"), "utf8") !== "preserve-me") throw new Error("G06 real cancellation changed the prior destination.")
-        fs.writeFileSync(path.join(evidenceRoot, "cancel.json"), `${JSON.stringify({ mode, priorPreserved: true }, null, 2)}\n`)
+        if (fs.readdirSync(destination).join("\n") !== "prior.txt") throw new Error("G06 real cancellation left output inside the prior destination.")
+        const transactionResidue = fs.readdirSync(path.dirname(destination)).filter((name) => /^\.gallery-png-(?:stage|backup)-[a-f0-9]{32}$/.test(name))
+        if (transactionResidue.length) throw new Error("G06 real cancellation left transactional residue.")
+        const outcome = await window.webContents.executeJavaScript(`(() => ({
+            terminalPhase: document.querySelector('.export-cancelled')?.dataset.exportPhase,
+            status: document.querySelector('.export-cancelled')?.textContent.trim(),
+            progress: window.__g06ObservedExportProgress,
+        }))()`)
+        if (outcome.terminalPhase !== "cancelled" || outcome.status !== "Export cancelled."
+            || !outcome.progress.some((progress) => progress.phase === "rendering" && progress.frame >= 1)) {
+            throw new Error("G06 real cancellation did not cross the active public export seam before reaching its terminal state.")
+        }
+        fs.writeFileSync(path.join(evidenceRoot, "cancel.json"), `${JSON.stringify({
+            mode,
+            priorPreserved: true,
+            destinationEntries: ["prior.txt"],
+            transactionResidue,
+            terminalPhase: outcome.terminalPhase,
+            status: outcome.status,
+            observedProgress: outcome.progress,
+        }, null, 2)}\n`)
         return
     }
     await until(window, `document.querySelector('.export-success strong')?.textContent.includes('PNG Frames verified')`, 120_000)

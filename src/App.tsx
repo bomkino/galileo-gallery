@@ -1514,6 +1514,9 @@ function AppView() {
                         </section>
 
                         {progress?.phase === "error" ? <p className="export-error">{progress.message}</p> : null}
+                        {progress?.phase === "cancelled" ? (
+                            <p className="export-cancelled" role="status" data-export-phase="cancelled">{progress.message ?? "Export cancelled."}</p>
+                        ) : null}
                         {isExporting ? (
                             <div className={`export-progress ${progress?.phase === "preparing" ? "is-preparing" : ""}`}>
                                 <div><span style={{ transform: `scaleX(${progress?.progress ?? 0})` }} /></div>
