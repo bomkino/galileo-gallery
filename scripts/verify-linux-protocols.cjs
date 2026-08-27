@@ -31,8 +31,8 @@ try {
         "gallery-app://app:44/index.html",
     ]) assert.equal(parseTrustedAppURL(hostile), null)
 
-    assert.equal(resolveAppResource(dist, "gallery-app://app/"), path.join(dist, "index.html"))
-    assert.equal(resolveAppResource(dist, "gallery-app://app/assets/app.js?cache=1"), path.join(dist, "assets", "app.js"))
+    assert.equal(resolveAppResource(dist, "gallery-app://app/"), fs.realpathSync(path.join(dist, "index.html")))
+    assert.equal(resolveAppResource(dist, "gallery-app://app/assets/app.js?cache=1"), fs.realpathSync(path.join(dist, "assets", "app.js")))
     for (const hostile of [
         "gallery-app://app/../secret.txt",
         "gallery-app://app/%2e%2e/secret.txt",

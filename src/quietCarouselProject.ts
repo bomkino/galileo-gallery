@@ -37,7 +37,7 @@ export function createQuietCarouselProject(items = quietCarouselFixtureItems()):
         styleId: QUIET_CAROUSEL_ID,
         items,
         timelineMode: "automatic",
-        timelineFixedDurationMs: 12000,
+        timelineFixedDurationMs: 0,
         timelineSegments: [],
         settings: {
             ...DEFAULT_SETTINGS,

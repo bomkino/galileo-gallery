@@ -182,6 +182,7 @@ function createLinuxHostController(options) {
             const result = await dispatch(envelope)
             return Object.freeze({ ok: true, requestId, generation, value: result })
         } catch (error) {
+            options.onError?.(typeof value?.operation === "string" ? value.operation : "invalid", error)
             const failure = publicFailure(error)
             return Object.freeze({ ...failure, requestId, generation })
         }

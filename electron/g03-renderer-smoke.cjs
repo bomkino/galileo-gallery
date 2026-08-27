@@ -20,7 +20,7 @@ async function runG03RendererSmoke(window, outputDirectory, mode) {
                 if (value) return value
                 await wait(50)
             }
-            throw new Error('Timed out waiting for ' + label)
+            throw new Error('Timed out waiting for ' + label + '; current notice: ' + (document.querySelector('[role="status"]')?.textContent?.trim() ?? 'missing'))
         }
         await waitFor(() => document.querySelector('[data-g02-tracer="quiet-carousel-v1"]'), 'Quiet Carousel')
         const notice = () => required('[role="status"]').textContent.trim()
