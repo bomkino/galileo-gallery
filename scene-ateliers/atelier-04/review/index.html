@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <title>Atelier 04 — Spatial Objects Review</title>
+  <link rel="stylesheet" href="./review.css">
+</head>
+<body>
+  <a class="skip-link" href="#stage">Skip to Scene stage</a>
+  <main class="app" data-review-app>
+    <header class="masthead">
+      <div><p class="eyebrow">Galileo Gallery · pre-G11 atelier</p><h1>Spatial Objects</h1></div>
+      <p class="status" role="status" aria-live="polite" data-status>Human verdict pending</p>
+    </header>
+    <nav class="scene-tabs" aria-label="Scene candidates" data-scene-tabs></nav>
+    <section class="workspace">
+      <aside class="rail" aria-label="Review controls">
+        <section class="panel"><p class="eyebrow">Candidate</p><div class="heading"><h2 data-scene-name></h2><span data-scene-count></span></div><p class="motion" data-motion-sentence></p><dl><div><dt>Canonical</dt><dd data-canonical-renderer></dd></div><div><dt>Comparison</dt><dd data-comparison-renderer></dd></div><div><dt>Status</dt><dd data-scene-status></dd></div></dl></section>
+        <section class="panel"><div class="heading"><h2>Story time</h2><output for="story-time" data-time-output>00:00.000</output></div><input id="story-time" data-story-time type="range" min="0" max="10000" value="0" step="1"><div class="buttons"><button type="button" data-action="previous" aria-label="Previous Scene">←</button><button type="button" class="primary" data-action="play" aria-pressed="false">Play</button><button type="button" data-action="next" aria-label="Next Scene">→</button><button type="button" data-action="reset">Reset</button></div><label class="toggle"><input type="checkbox" data-reduced-motion> Reduced-motion review</label></section>
+        <section class="panel"><h2>View</h2><div class="segmented" role="group" aria-label="Renderer view"><button type="button" data-view="canonical" aria-pressed="true">Canonical</button><button type="button" data-view="comparison" aria-pressed="false">WebGL probe</button><button type="button" data-view="split" aria-pressed="false">Split</button></div><p class="microcopy" data-view-note></p></section>
+        <section class="panel"><h2>Review note</h2><label class="sr-only" for="review-note">Review note</label><textarea id="review-note" data-review-note rows="6" placeholder="Identity, pace, readability, physical continuity, source respect…"></textarea><div class="buttons"><button type="button" data-action="copy-note">Copy</button><button type="button" data-action="export-notes">Export JSON</button><button type="button" data-action="clear-note">Clear</button></div></section>
+      </aside>
+      <section class="stage-shell" id="stage" aria-label="Scene stage"><header class="stage-toolbar"><div><strong data-stage-label>Canonical candidate</strong><small data-stage-detail></small></div><button type="button" data-action="focus-stage">Focus stage</button></header><div class="stage-grid" data-stage-grid><iframe data-canonical-frame title="Canonical Scene candidate"></iframe><iframe data-comparison-frame title="WebGL comparison probe" hidden></iframe><div class="fallback" data-stage-fallback hidden><strong>No WebGL comparison for this Scene.</strong><span>The DOM/CSS candidate remains the deliberate renderer choice.</span></div></div></section>
+    </section>
+    <footer><p><strong>Keyboard:</strong> 1–5 Scene · J/K previous/next · Space play/pause · ←/→ scrub · R reset.</p><p>Automated evidence proves mechanics. It does not mint taste approval.</p></footer>
+  </main>
+  <script type="module" src="./review.js"></script>
+</body>
+</html>
