@@ -1,10 +1,10 @@
 # Implementation status
 
-Updated: 27 August 2026
+Updated: 28 August 2026
 
 Repository start: `bomkino/galileo-gallery@2762043bb733aa28a6c63fe26564504b9f257564`
 
-Task branch: `codex/g05-deterministic-audio`
+Task branch: `codex/g08-interface-polish`
 
 ## G01A — safe archive import boundary
 
@@ -105,6 +105,24 @@ Implemented and proved:
 
 CI run `33055407716` passed source tests on Ubuntu, macOS, and Windows plus packaged renderer job `98460833564`. Artifact `9639381800` has archive digest `sha256:2ee786bc36b5dffe0e7c482399737190596d8a380dfc6fe58893f3fab30572a2`; the durable summary is `G05_RENDERER_CI_RECEIPT.json`.
 
+## G08 — Interface Scale and presentation polish
+
+State: **visible main-studio integration is source-tested; real renderer CI, G06 reconciliation, packaged targets, and human acceptance remain open**
+
+Implemented on isolated branch `codex/g08-interface-polish`:
+
+- the existing 75%–200% local-only Interface Scale core now drives the visible presentation surface;
+- exact 5% controls, Reset, and Figma-like `Ctrl/Cmd` keyboard shortcuts are wired without entering Project, evaluator, audio, or export truth;
+- the main studio and scene catalogue use a spacious editorial-brutalist system with hard rules, flat paper fields, a dark artwork stage, larger typography and icons, and 44px-or-larger primary targets;
+- the catalogue retains the honest 17-scene / 29-registered-world boundary and does not claim human scene completion;
+- a pitch.dog-family frame/orbit icon now covers browser, Linux, Windows, and macOS asset surfaces;
+- a branch-only real Electron renderer journey captures 100% and 150% layouts and checks physical target scaling, visible focus, local persistence, Reset, and preview metadata/canvas-ratio invariance.
+
+Local full source tests and the production renderer build pass. The real Electron capture is pending
+the branch CI runner because this managed local container denies Chromium's required process socket.
+G08 is not complete until that evidence is reconciled and the presentation layer is integrated with
+the post-G06 tracer/HostPort shell, then reviewed on exact Mac and Garuda candidates.
+
 ## Known unsafe or unproved surfaces
 
 - legacy non-G03 package paths still exist and are not release candidates;
@@ -112,4 +130,4 @@ CI run `33055407716` passed source tests on Ubuntu, macOS, and Windows plus pack
 - exact Garuda and Apple-Silicon target behaviour;
 - human interaction, visual, motion, and audio acceptance.
 
-Current frontier: **G06 verified export**, with the platform-neutral G08 Interface Scale core proceeding in an isolated parallel worktree. G06 owns immutable jobs, PNG Frames, H.264/AAC mux, verification, cancellation, and destination preservation. G08 integration follows G06 serially because both touch the tracer/HostPort shell. G04 remains deferred until an Apple-Silicon runner is available.
+Current frontier: **G06 verified export**, with the G08 main-studio presentation candidate proceeding on an isolated branch and awaiting real renderer CI. G06 owns immutable jobs, PNG Frames, H.264/AAC mux, verification, cancellation, and destination preservation. G08 tracer/HostPort reconciliation follows G06 serially because those branches touch the same shell. G04 remains deferred until an Apple-Silicon runner is available.
