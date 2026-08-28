@@ -1,0 +1,37 @@
+{
+  "scene": { "id": "before-after-slider", "candidateVersion": 1 },
+  "capabilities": {
+    "requiredRoles": ["before", "after"],
+    "minimumItems": 2,
+    "maximumEvaluatedItems": 2,
+    "extraItems": "preserved-with-explicit-consequence",
+    "canvasRatios": ["16:9", "9:16", "1:1", "4:5"],
+    "timelineModes": ["automatic", "fixed-duration", "directed"],
+    "dividerOrientations": ["vertical", "horizontal"],
+    "direction": true,
+    "reducedMotion": true,
+    "sourceVideo": "story-time-sampled-per-side",
+    "transparentOutput": false,
+    "failedMedia": "role-preserving-placeholder",
+    "audioAuthority": "project-service-only"
+  },
+  "defaults": {
+    "orientation": "vertical",
+    "startSide": "before",
+    "travelMs": 1200,
+    "holdMs": 650,
+    "fit": "contain",
+    "labels": true,
+    "dividerWidth": 2
+  },
+  "controls": [
+    { "id": "orientation", "label": "Divider", "kind": "choice", "values": ["vertical", "horizontal"], "default": "vertical", "causes": ["clipAxis", "handleAxis"], "resettable": true },
+    { "id": "start-side", "label": "Starts with", "kind": "choice", "values": ["before", "after"], "default": "before", "causes": ["phaseDirection", "visibleRoleAtStart"], "resettable": true },
+    { "id": "endpoint-hold", "label": "Endpoint hold", "kind": "range", "minimum": 200, "maximum": 2400, "step": 50, "unit": "ms", "default": 650, "causes": ["holdDuration", "totalDuration"], "resettable": true },
+    { "id": "divider-width", "label": "Divider width", "kind": "range", "minimum": 1, "maximum": 8, "step": 1, "unit": "px at 1080", "default": 2, "causes": ["dividerGeometry"], "resettable": true },
+    { "id": "fit", "label": "Source fit", "kind": "choice", "values": ["contain", "cover"], "default": "contain", "causes": ["beforeObjectFit", "afterObjectFit"], "resettable": true, "warning": "Cover may crop and can weaken comparison validity." },
+    { "id": "labels", "label": "Labels", "kind": "boolean", "default": true, "causes": ["labelVisibility", "accessibleDescription"], "resettable": true }
+  ],
+  "forbiddenControls": ["source-opacity", "crossfade", "auto-register", "auto-crop", "source-filter", "source-grade", "source-sharpen", "source-blur"],
+  "roundTrip": "exact-json-value-round-trip-required"
+}
