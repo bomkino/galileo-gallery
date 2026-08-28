@@ -1,0 +1,39 @@
+{
+  "scene": { "id": "light-table", "candidateVersion": 1 },
+  "capabilities": {
+    "minimumItems": 1,
+    "recommendedItems": 6,
+    "maximumVisibleItems": 24,
+    "canvasRatios": ["16:9", "9:16", "1:1", "4:5"],
+    "timelineModes": ["automatic", "fixed-duration", "directed"],
+    "direction": true,
+    "reducedMotion": true,
+    "sourceVideo": "story-time-sampled",
+    "transparentSource": true,
+    "transparentOutput": "conditional-on-shared-look",
+    "captions": true,
+    "failedMedia": "stable-placeholder",
+    "audioAuthority": "project-service-only"
+  },
+  "defaults": {
+    "density": "comfortable",
+    "inspectionScale": 1.08,
+    "travelMs": 700,
+    "holdMs": 900,
+    "direction": "forward",
+    "fit": "contain",
+    "background": "table-neutral",
+    "captions": "active-only"
+  },
+  "controls": [
+    { "id": "density", "label": "Table density", "kind": "choice", "values": ["comfortable", "compact"], "default": "comfortable", "causes": ["rows", "columns", "cellBounds"], "resettable": true },
+    { "id": "inspection-scale", "label": "Inspection lift", "kind": "range", "minimum": 1, "maximum": 1.14, "step": 0.01, "default": 1.08, "causes": ["activeScale", "activeZ"], "resettable": true },
+    { "id": "inspection-hold", "label": "Inspection hold", "kind": "range", "minimum": 400, "maximum": 2400, "step": 50, "unit": "ms", "default": 900, "causes": ["segmentDuration", "totalDuration"], "resettable": true },
+    { "id": "direction", "label": "Review direction", "kind": "choice", "values": ["forward", "reverse"], "default": "forward", "causes": ["visitOrder", "velocitySign"], "resettable": true },
+    { "id": "fit", "label": "Frame fit", "kind": "choice", "values": ["contain", "cover"], "default": "contain", "causes": ["sourceObjectFit"], "resettable": true, "warning": "Cover may crop source artwork." },
+    { "id": "background", "label": "Table", "kind": "choice", "values": ["table-neutral", "solid", "transparent"], "default": "table-neutral", "causes": ["worldBackground"], "resettable": true },
+    { "id": "captions", "label": "Captions", "kind": "choice", "values": ["off", "active-only", "all"], "default": "active-only", "causes": ["captionVisibility", "captionLayout"], "resettable": true }
+  ],
+  "forbiddenControls": ["randomize", "drag-throw", "per-item-rotation", "source-glow", "source-grain", "source-tint"],
+  "roundTrip": "exact-json-value-round-trip-required"
+}
