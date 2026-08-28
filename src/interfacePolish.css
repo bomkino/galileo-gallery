@@ -84,7 +84,7 @@
 .platform-linux .titlebar { padding-left: 24px; }
 
 .brand-lockup { gap: 13px; min-width: 0; }
-.brand-lockup img { width: 44px; height: 44px; border-radius: 8px; box-shadow: none; }
+.brand-lockup .galileo-app-icon.compact { width: 44px; height: 44px; border-radius: 8px; box-shadow: none; }
 .brand-lockup div { min-width: 0; gap: 3px; }
 .brand-lockup strong { font-size: 15px; font-weight: 720; letter-spacing: -.025em; }
 .brand-lockup span { overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
