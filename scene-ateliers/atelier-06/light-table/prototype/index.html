@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Light Table — isolated candidate</title>
+<style>
+:root{font-family:ui-sans-serif,system-ui,sans-serif;color-scheme:dark;background:#151512;color:#f7f3e8}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;grid-template-rows:auto 1fr;background:#151512}.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:16px 20px;border-bottom:1px solid #ffffff1f}.toolbar button,.toolbar select,.toolbar input{min-height:44px;border:1px solid #ffffff35;border-radius:12px;background:#24231f;color:inherit;padding:0 14px;font:inherit}.toolbar label{display:flex;gap:8px;align-items:center}.toolbar output{font-variant-numeric:tabular-nums}.stage-wrap{padding:24px;min-height:0}.stage{position:relative;overflow:hidden;width:100%;height:100%;min-height:520px;border-radius:24px;background:radial-gradient(circle at 50% 45%,#f5dba026,#8375500b 38%,#05050500 70%),#22211d;box-shadow:inset 0 0 0 1px #fff2}.cell{position:absolute;display:grid;place-items:center;overflow:hidden;background:#0b0b0a;box-shadow:0 8px 24px #0006;will-change:transform}.cell img{display:block;width:100%;height:100%;object-fit:contain;filter:none;opacity:1;mix-blend-mode:normal}.cell .failed{display:grid;place-items:center;width:100%;height:100%;padding:18px;text-align:center;background:#171713;color:#e5ddc9}.loupe{position:absolute;pointer-events:none;border:2px solid #f3d994;border-radius:8px;box-shadow:0 0 0 8px #f3d99412,0 18px 42px #0008;transform-origin:center;will-change:transform}.meta{position:absolute;left:18px;bottom:16px;padding:8px 10px;border-radius:9px;background:#111e;font-size:13px}.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(prefers-reduced-motion:reduce){.cell,.loupe{will-change:auto}}
+</style>
+</head>
+<body>
+<header class="toolbar" aria-label="Light Table controls">
+<button id="play" type="button">Pause</button>
+<label>Mode <select id="mode"><option>automatic</option><option>fixed-duration</option><option>directed</option></select></label>
+<label>Direction <select id="direction"><option>forward</option><option>reverse</option></select></label>
+<label>Items <input id="count" type="range" min="1" max="24" value="6"><output id="countOut">6</output></label>
+<label>Duration <output id="duration">—</output></label>
+<button id="reset" type="button">Reset</button>
+</header>
+<main class="stage-wrap"><section id="stage" class="stage" tabindex="0" aria-label="Light Table preview"><div id="loupe" class="loupe" aria-hidden="true"></div><div id="meta" class="meta"></div></section></main>
+<p id="status" class="sr-only" aria-live="polite"></p>
+<script type="module">
+import {compileLightTableTimeline,evaluateLightTable} from './core.mjs'
+const stage=document.querySelector('#stage'),loupe=document.querySelector('#loupe'),meta=document.querySelector('#meta'),status=document.querySelector('#status')
+const play=document.querySelector('#play'),mode=document.querySelector('#mode'),direction=document.querySelector('#direction'),count=document.querySelector('#count'),countOut=document.querySelector('#countOut'),durationOut=document.querySelector('#duration'),reset=document.querySelector('#reset')
+let playing=true,storyTime=0,last=performance.now(),raf=0,cells=new Map(),resize=new ResizeObserver(()=>render())
+resize.observe(stage)
+const ratios=[16/9,4/5,1,9/16,3/2,4/3]
+function fixture(n){return Array.from({length:n},(_,i)=>({id:`frame-${String(i+1).padStart(2,'0')}`,ratio:ratios[i%ratios.length],failed:i===Math.min(9,n-1)&&n>10,caption:i%2?`Frame ${i+1}`:''}))}
+function timeline(){return compileLightTableTimeline({mode:mode.value,itemCount:Number(count.value),parameters:{direction:direction.value},fixedDurationMs:12000})}
+function ensureNodes(items){const keep=new Set(items.slice(0,24).map(x=>x.id));for(const [id,node] of cells){if(!keep.has(id)){node.remove();cells.delete(id)}}for(const item of items.slice(0,24)){if(cells.has(item.id))continue;const node=document.createElement('article');node.className='cell';node.dataset.id=item.id;node.innerHTML=item.failed?`<div class="failed">Missing media<br>${item.id}</div>`:`<img alt="" src="data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='800' height='500'><rect width='100%' height='100%' fill='hsl(${cells.size*47%360} 42% 31%)'/><text x='42' y='450' fill='white' font-family='system-ui' font-size='48'>${item.id}</text></svg>`)}">`;stage.insertBefore(node,loupe);cells.set(item.id,node)}}
+function render(){const items=fixture(Number(count.value)),t=timeline(),r=stage.getBoundingClientRect();ensureNodes(items);const state=evaluateLightTable({items,timeline:t,timeMs:storyTime,stageWidth:r.width,stageHeight:r.height,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});for(const cell of state.cells){const node=cells.get(cell.id);node.style.width=`${cell.width}px`;node.style.height=`${cell.height}px`;node.style.transform=`translate3d(${cell.x}px,${cell.y}px,0)`}if(state.loupe){loupe.style.width=`${state.loupe.width}px`;loupe.style.height=`${state.loupe.height}px`;loupe.style.transform=`translate3d(${state.loupe.x}px,${state.loupe.y}px,0)`}durationOut.value=`${(t.durationMs/1000).toFixed(2)} s`;meta.textContent=`${state.segmentId} · frame ${state.activeIndex+1}/${items.length}${state.overflow?` · ${state.overflow} windowed`:''}`}
+function tick(now){if(playing)storyTime+=now-last;last=now;render();raf=requestAnimationFrame(tick)}
+function announce(text){status.textContent='';requestAnimationFrame(()=>status.textContent=text)}
+play.onclick=()=>{playing=!playing;play.textContent=playing?'Pause':'Play';announce(playing?'Playback started':'Playback paused')}
+for(const input of [mode,direction,count])input.oninput=()=>{countOut.value=count.value;storyTime=0;render();announce(`${mode.value}, ${direction.value}, ${count.value} items`)}
+reset.onclick=()=>{mode.value='automatic';direction.value='forward';count.value='6';countOut.value='6';storyTime=0;playing=true;play.textContent='Pause';render();announce('Light Table reset')}
+stage.onkeydown=e=>{const t=timeline(),step=t.durationMs/Number(count.value);if(e.code==='Space'){e.preventDefault();play.click()}else if(['ArrowRight','ArrowDown'].includes(e.key)){e.preventDefault();storyTime+=step;render()}else if(['ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();storyTime-=step;render()}else if(e.key==='Home'){e.preventDefault();storyTime=0;render()}else if(e.key==='End'){e.preventDefault();storyTime=t.durationMs-1;render()}}
+addEventListener('pagehide',()=>{cancelAnimationFrame(raf);resize.disconnect();for(const node of cells.values())node.remove();cells.clear()},{once:true})
+raf=requestAnimationFrame(tick)
+</script>
+</body>
+</html>
