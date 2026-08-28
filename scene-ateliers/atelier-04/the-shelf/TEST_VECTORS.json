@@ -1,0 +1,18 @@
+{
+  "format": "galileo-scene-test-vectors",
+  "version": 1,
+  "sceneId": "the-shelf",
+  "canonicalParameters": {"shelfHeight":0.69,"editionHeight":0.42,"gap":40,"perspectiveDeg":18,"paceMs":820,"spotlightLift":0.11,"spotlightStraighten":1,"captionSpace":0.08,"direction":"forward","fit":"contain","background":"solid"},
+  "vectors": [
+    {"id":"one-item-still","items":1,"ratios":[1.7778],"canvas":[1920,1080],"timesMs":[0,1000,5000],"assert":["stable baseline","natural width","no fake traversal"]},
+    {"id":"two-item-spacing","items":2,"ratios":[0.5625,1.7778],"canvas":[1080,1920],"timesMs":[0,820,1640],"assert":["no collision","stable order","bounded perspective"]},
+    {"id":"mixed-12-natural-widths","items":12,"ratios":[1.7778,0.5625,1,0.8,1.5,0.6667],"canvas":[1920,1080],"sampleEveryMs":5,"assert":["ratio-derived widths","stable baseline","offstage recycling only"]},
+    {"id":"spotlight-continuity","items":12,"spotlightIndex":7,"samplePhaseBoundaries":true,"epsilonMs":0.001,"assert":["same selected ID","continuous lift, yaw, and scale","exact shelf rejoin"]},
+    {"id":"spotlight-finale-handoff","items":12,"spotlightIndex":7,"assert":["Finale starts from exact Spotlight terminal state","no focus drop","no neighbouring lift","no vertical reversal","no snap"]},
+    {"id":"bounded-127","items":127,"canvas":[1080,1350],"timesMs":[0,25000,75000,104140],"assert":["127 identities retained","bounded DOM window","offstage seams","finite geometry"]},
+    {"id":"reverse","items":24,"canvas":[1080,1080],"direction":"reverse","timesMs":[0,9999,19999],"assert":["inverse path","same spacing","same offstage seam"]},
+    {"id":"reduced-motion","items":12,"reducedMotion":true,"timesMs":[0,3999,4000,5499,5500],"assert":["stable tableau","discrete focus","caption announcement"]},
+    {"id":"alpha-failure-caption-video","items":12,"background":"transparent","failedIndices":[4],"videoIndices":[2,9],"captions":true,"assert":["zero RGB beneath alpha zero","placeholder width retained","captions bounded","video time supplied by Product"]},
+    {"id":"source-clean","assert":["opacity one","normal blend","filter none","no paper or light treatment over artwork"]}
+  ]
+}
