@@ -1,0 +1,34 @@
+{
+  "scene": "light-table",
+  "canonicalStage": { "width": 1920, "height": 1080 },
+  "defaults": { "travelMs": 700, "holdMs": 900, "inspectionScale": 1.08, "direction": "forward", "fit": "contain" },
+  "vectors": [
+    { "id": "one-start", "items": 1, "mode": "automatic", "timeMs": 0, "expect": { "visible": 1, "activeIndex": 0, "finite": true, "collisions": 0 } },
+    { "id": "two-middle", "items": 2, "mode": "automatic", "timeMs": 1600, "expect": { "visible": 2, "activeIndex": 1, "stableOrder": true } },
+    { "id": "six-phase-boundary", "items": 6, "mode": "automatic", "timeMs": 9600, "expect": { "seamEqualToStart": true } },
+    { "id": "twenty-four-dense", "items": 24, "mode": "automatic", "timeMs": 18850, "canvas": "16:9", "expect": { "visible": 24, "collisions": 0, "insideSafeArea": true } },
+    { "id": "portrait-recompose", "items": 6, "mode": "automatic", "timeMs": 3200, "stage": { "width": 1080, "height": 1920 }, "expect": { "maximumColumns": 2, "stableOrder": true } },
+    { "id": "square-recompose", "items": 6, "mode": "automatic", "timeMs": 3200, "stage": { "width": 1080, "height": 1080 }, "expect": { "stableOrder": true, "finite": true } },
+    { "id": "fixed-exact", "items": 6, "mode": "fixed-duration", "fixedDurationMs": 12345, "timeMs": 12345, "expect": { "durationMs": 12345, "seamEqualToStart": true } },
+    { "id": "directed-distinct", "items": 6, "mode": "directed", "timeMs": 4800, "expect": { "segmentId": "fast-scan-1", "notEqualAutomaticAtSameTime": true } },
+    { "id": "reverse-path", "items": 6, "mode": "automatic", "direction": "reverse", "timeMs": 2400, "expect": { "velocitySign": -1, "sameGeometryAsForwardMirror": true } },
+    { "id": "reduced-motion", "items": 6, "mode": "automatic", "reducedMotion": true, "timesMs": [0, 1, 9600], "expect": { "allStatesEqual": true, "activeIndex": 2 } },
+    { "id": "missing-third", "items": 6, "failedIndices": [2], "mode": "automatic", "timeMs": 4000, "expect": { "visible": 6, "identityAt2": "item-03", "placeholderAt2": true } },
+    { "id": "video-story-time", "items": 6, "videoIndices": [1], "mode": "automatic", "timeMs": 7250, "videoDurationMs": 2000, "expect": { "videoTimeMs": 1250 } },
+    { "id": "empty-caption-no-dead-phase", "items": 1, "captions": [""], "mode": "automatic", "expect": { "captionDurationMs": 0 } },
+    { "id": "invalid-nan", "items": 6, "parameters": { "holdMs": "NaN" }, "expectError": "finite-number-required" },
+    { "id": "invalid-infinity", "items": 6, "parameters": { "inspectionScale": "Infinity" }, "expectError": "finite-number-required" },
+    { "id": "invalid-ratio", "items": 1, "ratios": [0], "expectError": "ratio-out-of-range" },
+    { "id": "remount", "items": 6, "mounts": 3, "expect": { "animationFramesAfterDispose": 0, "duplicateKeyboardResponses": 0, "firstFramesEqual": true } }
+  ],
+  "mutationSensitivity": [
+    "source-filter-added",
+    "directed-equals-automatic",
+    "reverse-velocity-not-negated",
+    "empty-caption-reserves-hold",
+    "reduced-motion-seam-jump",
+    "unstable-node-identity",
+    "non-finite-input-accepted",
+    "return-path-position-drift"
+  ]
+}
