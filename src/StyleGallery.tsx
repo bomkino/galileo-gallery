@@ -2,6 +2,7 @@ import * as React from "react"
 import GalleryRenderer from "./GalleryRenderer"
 import { GALLERY_STYLES, galleryScene, galleryStyle, type SceneDefinition, type StyleCategory, type StyleDefinition } from "./styleRegistry"
 import { styleProfile, styleSettings } from "./styleProfiles"
+import { InterfaceScaleControl } from "./presentation/InterfaceScaleSurface"
 
 type Props = {
     currentStyleId: string
@@ -33,13 +34,16 @@ export default function StyleGallery({ currentStyleId, onChoose, onClose }: Prop
     return (
         <div className="style-gallery-shell">
             <header className="style-gallery-header">
-                <img className="galileo-app-icon" src="./icon.svg" alt="" aria-hidden="true" />
+                <img className="galileo-app-icon" src="./icon.png" alt="" aria-hidden="true" />
                 <div>
                     <span className="eyebrow">Galileo Gallery</span>
                     <h1>Choose a motion world.</h1>
-                    <p>{GALLERY_STYLES.length} motion scenes · 29 source-faithful presets.</p>
+                    <p>{GALLERY_STYLES.length} scene studies · 29 registered motion worlds.</p>
                 </div>
-                {onClose ? <button type="button" className="button quiet" onClick={onClose}>Back to studio</button> : null}
+                <div className="style-gallery-actions">
+                    <InterfaceScaleControl />
+                    {onClose ? <button type="button" className="button quiet" onClick={onClose}>Back to studio</button> : null}
+                </div>
             </header>
             <div className="style-gallery-tools">
                 <div className="style-category-pills">

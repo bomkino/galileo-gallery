@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, codex/g02-quiet-carousel-tracer, codex/g03-linux-host-port, codex/g05-deterministic-audio, codex/g08-interface-scale-core]
+    branches: [main, codex/g02-quiet-carousel-tracer, codex/g03-linux-host-port, codex/g05-deterministic-audio, codex/g08-interface-scale-core, codex/g08-interface-polish]
   pull_request:
 
 permissions:
@@ -196,3 +196,31 @@ jobs:
         with:
           name: g05-deterministic-audio-renderer-evidence
           path: artifacts/g05/
+
+  renderer-g08:
+    if: github.ref_name == 'codex/g08-interface-polish' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run prepare:electron
+      - name: Configure Electron sandbox helper
+        run: |
+          sudo chown root:root node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+      - name: Run the Gallery interface and scale journey
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_sha="$GITHUB_SHA"
+          source_tree="$(git rev-parse HEAD^{tree})"
+          GALLERY_SOURCE_SHA="$source_sha" GALLERY_SOURCE_TREE="$source_tree" xvfb-run -a npm run verify:g08-renderer
+      - uses: actions/upload-artifact@v6
+        with:
+          name: g08-interface-renderer-evidence
+          path: artifacts/g08/
