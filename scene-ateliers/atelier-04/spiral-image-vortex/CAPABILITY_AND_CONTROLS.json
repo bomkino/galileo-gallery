@@ -1,0 +1,26 @@
+{
+  "format": "galileo-scene-capability",
+  "version": 1,
+  "sceneId": "spiral-image-vortex",
+  "capabilities": {
+    "automatic": true,
+    "fixedDuration": true,
+    "directed": true,
+    "reverse": true,
+    "reducedMotion": true,
+    "transparentBackground": true,
+    "sourceVideo": true,
+    "cameraOrbit": false,
+    "webglComparison": true
+  },
+  "controls": [
+    {"id":"radius","label":"Helix radius","kind":"range","min":1.4,"max":4.2,"step":0.05,"defaultValue":2.3,"resetBehavior":"restore default","observable":"changes front/back spatial separation"},
+    {"id":"pitch","label":"Helix pitch","kind":"range","min":3.8,"max":9.2,"step":0.1,"defaultValue":6.2,"resetBehavior":"restore default","observable":"changes vertical distance per loop and offstage wrap margin"},
+    {"id":"turns","label":"Visible turns","kind":"range","min":1.5,"max":4.5,"step":0.05,"defaultValue":2.75,"resetBehavior":"restore default","observable":"changes path density without changing order"},
+    {"id":"pace-ms","label":"Cycle duration","kind":"range","min":3500,"max":30000,"step":50,"defaultValue":10000,"resetBehavior":"restore default","observable":"changes story-time rate only"},
+    {"id":"plane-scale","label":"Frame scale","kind":"range","min":0.45,"max":1.4,"step":0.01,"defaultValue":0.9,"resetBehavior":"restore default","observable":"changes readable plane size and occlusion"},
+    {"id":"direction","label":"Direction","kind":"segmented","options":["forward","reverse"],"defaultValue":"forward","resetBehavior":"restore forward","observable":"samples the exact inverse path"},
+    {"id":"fit","label":"Frame fit","kind":"segmented","options":["contain","cover"],"defaultValue":"contain","resetBehavior":"restore contain","observable":"changes source fit only"},
+    {"id":"background","label":"Background","kind":"segmented","options":["solid","transparent"],"defaultValue":"solid","resetBehavior":"restore solid","observable":"changes world inclusion without touching artwork"}
+  ]
+}
