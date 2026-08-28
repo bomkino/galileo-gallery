@@ -1,0 +1,16 @@
+{
+  "format":"galileo-scene-test-vectors",
+  "version":1,
+  "sceneId":"zoetrope",
+  "canonicalParameters":{"radius":3.1,"gateHoldMs":700,"advanceMs":420,"perspective":0.55,"direction":"forward","fit":"contain","background":"solid"},
+  "vectors":[
+    {"id":"one-item-hold","items":1,"canvas":[1920,1080],"timesMs":[0,1000,5000],"assert":["same source identity","finite transform","zero angular travel"]},
+    {"id":"two-item-boundary","items":2,"canvas":[1080,1920],"timesMs":[1119.999,1120,1120.001],"assert":["epsilon continuity","stable opposite gate","no rear selection"]},
+    {"id":"ordinary-ten-cycle","items":10,"canvas":[1920,1080],"timesMs":[0,420,1120,11199.999,11200],"assert":["advance then exact hold","loop closure","order preserved"]},
+    {"id":"reverse-mixed-ratios","items":12,"canvas":[1080,1350],"direction":"reverse","ratios":[1.7778,0.5625,1,0.8],"assert":["same inverse path","source ratio preserved","normal blend"]},
+    {"id":"bounded-many","items":64,"canvas":[1080,1080],"timesMs":[0,25000,71680],"assert":["bounded visible window","all identities retained","finite geometry"]},
+    {"id":"reduced-motion","items":10,"canvas":[1920,1080],"reducedMotion":true,"timesMs":[0,699,700,1119,1120],"assert":["stable holds","discrete boundary change","no partial rotation"]},
+    {"id":"transparent-alpha","items":10,"canvas":[1920,1080],"background":"transparent","assert":["zero RGB beneath alpha zero","no apparatus world","soft edges preserved"]},
+    {"id":"failed-and-video","items":10,"failedIndices":[2,7],"videoIndices":[1,5],"assert":["stable slots","order unchanged","video time supplied by Product"]}
+  ]
+}
