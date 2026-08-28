@@ -1,0 +1,22 @@
+{
+  "scene": "before-after-slider",
+  "status": "mechanical-evidence-only-human-verdict-pending",
+  "prototype": ["../prototype/index.html", "../prototype/core.mjs", "../prototype/verify.mjs"],
+  "captures": [
+    { "path": "canonical.svg", "kind": "deterministic-vector-still", "fixture": "related-pair", "canvas": "16:9", "timeMs": 1575 },
+    { "path": "story-states.svg", "kind": "state-sequence", "fixture": "related-pair", "states": ["start-hold", "outward", "end-hold", "return", "seam"] }
+  ],
+  "requiredRuntimeRecapture": ["real-speed-browser-clip", "vertical-divider-16x9", "horizontal-divider-9x16", "mismatched-ratio-contain", "failed-before", "failed-after", "source-video-both-sides", "reduced-motion-half-split"],
+  "assertions": {
+    "semanticRolesStable": true,
+    "oneSourceNeverDuplicated": true,
+    "fixedDurationExact": true,
+    "directedDistinct": true,
+    "returnPathContinuous": true,
+    "loopSeamExact": true,
+    "sourceOpacity": 1,
+    "sourceFilter": "none",
+    "opaqueOutputOnly": true,
+    "humanTasteApproved": false
+  }
+}
