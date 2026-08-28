@@ -1,0 +1,37 @@
+{
+  "scene": "slide-anatomy-object",
+  "mode": "flat-source",
+  "canonicalStage": { "width": 1920, "height": 1080 },
+  "defaults": { "separation": 0.14, "viewAngleDeg": 7, "openMs": 900, "holdMs": 1400, "closeMs": 900, "fit": "contain" },
+  "vectors": [
+    { "id": "no-source", "items": 0, "expectError": "source-required" },
+    { "id": "ambiguous-many", "items": 2, "selected": null, "expectError": "source-selection-required" },
+    { "id": "closed-start", "items": 1, "apparatus": ["matte", "source", "guides", "caption"], "timeMs": 0, "expect": { "state": "closed", "openness": 0, "planeCrossings": 0 } },
+    { "id": "opening", "items": 1, "apparatus": ["matte", "source", "guides", "caption"], "timeMs": 450, "expect": { "state": "opening", "opennessGreaterThan": 0, "opennessLessThan": 1 } },
+    { "id": "open-hold", "items": 1, "apparatus": ["matte", "source", "guides", "caption"], "timeMs": 1300, "expect": { "state": "open", "openness": 1, "velocity": 0 } },
+    { "id": "closing", "items": 1, "apparatus": ["matte", "source", "guides", "caption"], "timeMs": 2750, "expect": { "state": "closing", "velocityLessThan": 0 } },
+    { "id": "seam", "items": 1, "apparatus": ["matte", "source", "guides", "caption"], "time": "duration", "expect": { "stateEqualToStart": true } },
+    { "id": "source-only-contracts-duration", "items": 1, "apparatus": ["source"], "caption": "", "guides": false, "expect": { "planes": 1, "captionPhaseMs": 0, "guidePhaseMs": 0, "durationLessThanCanonical": true } },
+    { "id": "empty-caption-no-dead-phase", "items": 1, "apparatus": ["matte", "source", "guides"], "caption": "", "expect": { "captionPlane": false, "captionPhaseMs": 0 } },
+    { "id": "fixed-exact", "items": 1, "mode": "fixed-duration", "fixedDurationMs": 6800, "expect": { "durationMs": 6800, "seamEqualToStart": true } },
+    { "id": "directed-distinct", "items": 1, "mode": "directed", "timeMs": 1600, "expect": { "notEqualAutomaticAtSameTime": true } },
+    { "id": "reverse", "items": 1, "direction": "reverse", "timeMs": 0, "expect": { "state": "open", "openness": 1, "planeOrderStable": true } },
+    { "id": "portrait", "items": 1, "stage": { "width": 1080, "height": 1920 }, "timeMs": 900, "expect": { "insideSafeArea": true, "planeCrossings": 0, "sourceReadable": true } },
+    { "id": "failed-source", "items": 1, "failed": true, "expect": { "sourceIdentityStable": true, "placeholderPlane": true } },
+    { "id": "transparent-alpha", "items": 1, "transparent": true, "expect": { "alphaZeroRgb": 0, "sourceFilter": "none" } },
+    { "id": "video-story-time", "items": 1, "kind": "video", "timeMs": 7250, "videoDurationMs": 2000, "expect": { "videoTimeMs": 1250 } },
+    { "id": "reduced-motion", "items": 1, "reducedMotion": true, "timesMs": [0, 1, 3200], "expect": { "allStatesEqual": true, "state": "open" } },
+    { "id": "invalid-nan", "parameters": { "separation": "NaN" }, "expectError": "finite-number-required" },
+    { "id": "remount", "mounts": 3, "expect": { "animationFramesAfterDispose": 0, "duplicateKeyboardResponses": 0, "firstFramesEqual": true } }
+  ],
+  "mutationSensitivity": [
+    "semantic-layer-inferred",
+    "source-filter-added",
+    "closing-path-differs",
+    "empty-caption-reserves-time",
+    "directed-equals-automatic",
+    "plane-order-crosses",
+    "reduced-motion-seam-jump",
+    "unstable-source-node-identity"
+  ]
+}
