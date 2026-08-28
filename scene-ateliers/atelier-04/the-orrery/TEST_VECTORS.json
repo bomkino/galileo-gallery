@@ -1,0 +1,19 @@
+{
+  "format": "galileo-scene-test-vectors",
+  "version": 1,
+  "sceneId": "the-orrery",
+  "gate": {"status":"preflight-only","blockedBy":"G10A","plannedTicket":"G10B"},
+  "canonicalParameters": {"rings":3,"ringTurns":[1,-2,3],"ringSpread":1,"ringTilt":8,"primaryScale":1.55,"exchangeMs":900,"primaryHoldMs":1600,"durationMs":10000,"fit":"contain","background":"solid"},
+  "vectors": [
+    {"id":"one-primary","items":1,"canvas":[1920,1080],"timesMs":[0,2500,5000,10000],"assert":["same primary identity","zero phantom satellites","finite still transform"]},
+    {"id":"two-body-exchange","items":2,"canvas":[1080,1920],"timesMs":[4999.999,5000,5000.001],"assert":["reciprocal continuous exchange","incoming becomes primary","outgoing rejoins ring"]},
+    {"id":"ordinary-18-all-boundaries","items":18,"canvas":[1920,1080],"sampleExchangeBoundaries":true,"epsilonMs":0.001,"assert":["every identity primary once","continuous position","continuous scale","stable IDs"]},
+    {"id":"topological-loop","items":18,"canvas":[1080,1350],"timesMs":[0,0.001,9999.999,10000],"assert":["integer ring closure","primary closure","epsilon seam continuity"]},
+    {"id":"bounded-72","items":72,"canvas":[1080,1080],"timesMs":[0,3333,6666,9999],"assert":["bounded resources","finite matrices","stable ring membership"]},
+    {"id":"reverse","items":18,"canvas":[1920,1080],"direction":"reverse","timesMs":[0,2777.777,5555.555,9999.999,10000],"assert":["inverse rings","inverse primary order","same topological closure"]},
+    {"id":"reduced-motion","items":18,"reducedMotion":true,"timesMs":[1999,2000,2001,3999,4000],"assert":["stable system holds","discrete identity exchange","no orbital drift"]},
+    {"id":"alpha-failure-video","items":18,"background":"transparent","failedIndices":[4,13],"videoIndices":[2,11],"assert":["zero RGB beneath alpha zero","ring identity retained","video time supplied by Product"]},
+    {"id":"renderer-parity","items":18,"canvas":[1920,1080],"timesMs":[0,1375,5000,8625,10000],"assert":["DOM and WebGL consume same primary/ring state","fixed camera","source RGB unchanged"]},
+    {"id":"gate-discipline","assert":["preflight-only","blocked by G10A","no Product implementation claim","human verdict pending"]}
+  ]
+}
