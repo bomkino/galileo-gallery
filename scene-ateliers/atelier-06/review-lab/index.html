@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atelier 06 — Editorial Builds review lab</title>
+<style>
+:root{font-family:ui-sans-serif,system-ui,sans-serif;color-scheme:dark;background:#11110f;color:#f6f0e4;--panel:#1d1c18;--line:#ffffff24;--muted:#aaa397}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#11110f}.shell{min-height:100vh;display:grid;grid-template-rows:auto 1fr}.topbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);background:#151411}.brand{margin-right:auto}.brand strong{display:block;font-size:18px}.brand span{display:block;margin-top:3px;color:var(--muted);font-size:13px}.topbar button,.topbar select{min-height:44px;border:1px solid #ffffff35;border-radius:12px;background:#25241f;color:inherit;padding:0 14px;font:inherit}.topbar button:focus-visible,.topbar select:focus-visible{outline:3px solid #f2d18d;outline-offset:3px}.body{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;padding:24px;min-height:0}.viewport{display:grid;place-items:center;min-height:620px;border-radius:24px;background:#080807;overflow:auto;padding:28px}.frame-wrap{position:relative;width:min(100%,1280px);aspect-ratio:16/9;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#151515;box-shadow:0 28px 80px #0009}.frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#111}.sidebar{align-self:start;border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:20px}.status{display:inline-flex;min-height:32px;align-items:center;padding:0 10px;border-radius:999px;background:#5a2e25;color:#ffe6d8;font-size:12px;font-weight:750;letter-spacing:.04em}.sidebar h1{margin:18px 0 8px;font-size:25px;line-height:1.08}.sidebar p{margin:0 0 18px;color:#d0cabf;line-height:1.5}.facts{display:grid;gap:12px;margin:20px 0}.fact{padding:12px 13px;border-radius:12px;background:#11110f}.fact span{display:block;color:var(--muted);font-size:12px}.fact strong{display:block;margin-top:4px;font-size:14px}.questions{margin:0;padding-left:20px;color:#ddd7cb}.questions li{margin:0 0 10px;line-height:1.4}.hint{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;line-height:1.5}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}@media(max-width:1000px){.body{grid-template-columns:1fr}.sidebar{order:-1}.viewport{min-height:520px}}@media(max-width:640px){.body{padding:14px;gap:14px}.viewport{padding:10px;min-height:420px}.topbar{padding:12px}.frame-wrap{border-radius:14px}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand"><strong>Atelier 06 · Editorial Builds</strong><span>Human review laboratory · no Product integration</span></div>
+    <label>Scene
+      <select id="scene">
+        <option value="light-table">Light Table</option>
+        <option value="before-after-slider">Before / After</option>
+        <option value="slide-anatomy-object">Slide Anatomy</option>
+        <option value="the-build">The Build</option>
+      </select>
+    </label>
+    <label>Canvas
+      <select id="ratio">
+        <option value="16/9">16:9</option>
+        <option value="9/16">9:16</option>
+        <option value="1/1">1:1</option>
+        <option value="4/5">4:5</option>
+      </select>
+    </label>
+    <button id="reload" type="button">Reset study</button>
+  </header>
+  <main class="body">
+    <section class="viewport" aria-label="Scene review viewport">
+      <div id="frameWrap" class="frame-wrap"><iframe id="frame" title="Light Table isolated study" src="../light-table/prototype/index.html"></iframe></div>
+    </section>
+    <aside class="sidebar" aria-labelledby="reviewTitle">
+      <span class="status">VERDICT PENDING</span>
+      <h1 id="reviewTitle">Light Table</h1>
+      <p id="summary">A settled editorial matrix with one deterministic inspection loupe. Not a draggable mood board.</p>
+      <div class="facts">
+        <div class="fact"><span>Canonical input</span><strong id="input">1–24 frames · default 6</strong></div>
+        <div class="fact"><span>Clean boundary</span><strong id="clean">Light behind media; source untouched</strong></div>
+        <div class="fact"><span>Review block</span><strong id="block">Human identity, pace, density, source respect</strong></div>
+      </div>
+      <ol id="questions" class="questions"></ol>
+      <div class="hint">Review at real speed. Use the study’s own keyboard controls. Canvas changes here resize the entire isolated study; they do not rewrite its Project canvas setting.</div>
+    </aside>
+  </main>
+</div>
+<p id="live" class="sr" aria-live="polite"></p>
+<script>
+const scenes={
+  'light-table':{title:'Light Table',path:'../light-table/prototype/index.html',summary:'A settled editorial matrix with one deterministic inspection loupe. Not a draggable mood board.',input:'1–24 frames · default 6',clean:'Light behind media; source untouched',block:'Human identity, pace, density, source respect',questions:['Does it read as an editorial light table, not a glowing grid?','Is the active lift clear without dimming neighbours?','Do one, two, and twenty-four item states remain intentional?']},
+  'before-after-slider':{title:'Before / After',path:'../before-after-slider/prototype/index-final.html',summary:'Two explicit semantic roles on one stable plane with a continuous reversible divider.',input:'Exactly Before + After',clean:'Contain default; no grading or inferred crop',block:'Human pace, endpoint holds, label/default verdict',questions:['Is the difference readable throughout the sweep?','Does reversal feel physically continuous?','Are one-source and extra-source failures honest and clear?']},
+  'slide-anatomy-object':{title:'Slide Anatomy',path:'../slide-anatomy-object/prototype/index.html',summary:'A flat-source presentation cutaway. Only Project-known apparatus separates.',input:'One source · explicit apparatus only',clean:'Source remains one indivisible plane',block:'Authored-layer contract does not exist',questions:['Does this explain structure without implying semantic source layers?','Does the close exactly retrace the open path?','Is the flat-source limitation impossible to misunderstand?']},
+  'the-build':{title:'The Build',path:'../the-build/prototype/index.html',summary:'A G10C preflight for rhythm, lanes, finale, and contract pressure—not authored process.',input:'One source · Project-known preflight stages',clean:'No cursor, stamp, palette, wireframe, or inferred process',block:'AT06-CONTRACT-AUTHORED-STAGES',questions:['Does the preflight feel purposeful without fabricating authorship?','Are 11.6 s and the 7.9 s floor defensible?','Is the final source given an uninterrupted, earned finale?']}
+}
+const scene=document.querySelector('#scene'),ratio=document.querySelector('#ratio'),frame=document.querySelector('#frame'),wrap=document.querySelector('#frameWrap'),reload=document.querySelector('#reload'),live=document.querySelector('#live')
+function announce(message){live.textContent='';requestAnimationFrame(()=>live.textContent=message)}
+function renderScene(){const value=scenes[scene.value];frame.src=value.path;frame.title=`${value.title} isolated study`;document.querySelector('#reviewTitle').textContent=value.title;document.querySelector('#summary').textContent=value.summary;document.querySelector('#input').textContent=value.input;document.querySelector('#clean').textContent=value.clean;document.querySelector('#block').textContent=value.block;document.querySelector('#questions').replaceChildren(...value.questions.map(text=>{const li=document.createElement('li');li.textContent=text;return li}));announce(`${value.title} loaded for review`)}
+function renderRatio(){wrap.style.aspectRatio=ratio.value;const portrait=ratio.value==='9/16'||ratio.value==='4/5';wrap.style.maxWidth=portrait?'720px':'1280px';announce(`Review canvas set to ${ratio.options[ratio.selectedIndex].text}`)}
+scene.addEventListener('change',renderScene);ratio.addEventListener('change',renderRatio);reload.addEventListener('click',()=>{const source=frame.src;frame.src='about:blank';requestAnimationFrame(()=>{frame.src=source;announce('Study reset')})});
+renderScene();renderRatio();
+</script>
+</body>
+</html>
