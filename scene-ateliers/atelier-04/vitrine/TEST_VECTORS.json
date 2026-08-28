@@ -1,0 +1,18 @@
+{
+  "format": "galileo-scene-test-vectors",
+  "version": 1,
+  "sceneId": "vitrine",
+  "canonicalParameters": {"holdMs":1400,"exchangeMs":760,"approachDistance":0.22,"primaryScale":0.62,"exchangeAxis":"horizontal","direction":"forward","fit":"contain","background":"solid"},
+  "vectors": [
+    {"id":"one-item-true-still","items":1,"canvas":[1920,1080],"timesMs":[0,1000,5000,10000],"assert":["same transform","zero velocity","same source identity"]},
+    {"id":"two-item-core","items":2,"canvas":[1920,1080],"timesMs":[0,1399.999,1400,1400.001,2159.999,2160],"assert":["exact still hold","continuous reciprocal exchange","incoming equals primary at handoff"]},
+    {"id":"portrait-vertical-path","items":6,"canvas":[1080,1920],"exchangeAxis":"vertical","timesMs":[0,1760,4320,8640],"assert":["primary remains generous","vertical path stays in chamber","order preserved"]},
+    {"id":"ordinary-12-full-loop","items":12,"canvas":[1080,1350],"sampleEveryMs":5,"assert":["every identity held once","no crossfade","exact loop seam"]},
+    {"id":"bounded-24","items":24,"canvas":[1080,1080],"timesMs":[0,10000,30000,51840],"assert":["at most bounded live media","stable queue IDs","finite transforms"]},
+    {"id":"reverse","items":8,"canvas":[1920,1080],"direction":"reverse","timesMs":[0,2159.999,2160,17280],"assert":["inverse order","inverse paths","same seam"]},
+    {"id":"spotlight-target","items":12,"spotlightIndex":9,"assert":["target changes only through complete exchanges","no snap","selected hold exact"]},
+    {"id":"reduced-motion","items":6,"reducedMotion":true,"timesMs":[1399,1400,1401,2159,2160],"assert":["long stable hold","discrete boundary replacement","no fade or travel"]},
+    {"id":"alpha-failure-video","items":8,"background":"transparent","failedIndices":[3],"videoIndices":[1,6],"assert":["zero RGB beneath alpha zero","failed identity retained","video time supplied by Product"]},
+    {"id":"source-clean","assert":["opacity one","normal blend","filter none","no glass sheen","no simulated light"]}
+  ]
+}
