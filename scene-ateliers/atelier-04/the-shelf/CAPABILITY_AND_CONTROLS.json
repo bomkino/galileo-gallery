@@ -1,0 +1,19 @@
+{
+  "format": "galileo-scene-capability",
+  "version": 1,
+  "sceneId": "the-shelf",
+  "capabilities": {"automatic":true,"fixedDuration":true,"directed":true,"reverse":true,"reducedMotion":true,"transparentBackground":true,"sourceVideo":true,"cameraOrbit":false,"webglComparison":false,"captions":true},
+  "controls": [
+    {"id":"shelf-height","label":"Shelf baseline","kind":"range","min":0.55,"max":0.82,"step":0.01,"defaultValue":0.69,"resetBehavior":"restore default","observable":"changes vertical baseline while preserving caption and lift space"},
+    {"id":"edition-height","label":"Edition height","kind":"range","min":0.24,"max":0.62,"step":0.01,"defaultValue":0.42,"resetBehavior":"restore default","observable":"changes common height; natural width remains ratio-derived"},
+    {"id":"gap","label":"Edition gap","kind":"range","min":8,"max":180,"step":1,"defaultValue":40,"resetBehavior":"restore default","observable":"changes baseline spacing without collisions"},
+    {"id":"perspective-deg","label":"Shelf perspective","kind":"range","min":0,"max":32,"step":1,"defaultValue":18,"resetBehavior":"restore default","observable":"changes geometric yaw through the reading zone only"},
+    {"id":"pace-ms","label":"Traversal pace","kind":"range","min":240,"max":2400,"step":20,"defaultValue":820,"resetBehavior":"restore default","observable":"changes shelf travel rate"},
+    {"id":"spotlight-lift","label":"Spotlight lift","kind":"range","min":0.04,"max":0.24,"step":0.01,"defaultValue":0.11,"resetBehavior":"restore default","observable":"changes focused edition vertical lift"},
+    {"id":"spotlight-straighten","label":"Spotlight straighten","kind":"range","min":0,"max":1,"step":0.01,"defaultValue":1,"resetBehavior":"restore default","observable":"changes how fully the focused edition faces camera"},
+    {"id":"caption-space","label":"Caption space","kind":"range","min":0,"max":0.18,"step":0.01,"defaultValue":0.08,"resetBehavior":"restore default","observable":"reserves readable caption area without moving baseline unpredictably"},
+    {"id":"direction","label":"Direction","kind":"segmented","options":["forward","reverse"],"defaultValue":"forward","resetBehavior":"restore forward","observable":"samples the same shelf path in reverse order"},
+    {"id":"fit","label":"Frame fit","kind":"segmented","options":["contain","cover"],"defaultValue":"contain","resetBehavior":"restore contain","observable":"changes source fit only"},
+    {"id":"background","label":"Background","kind":"segmented","options":["solid","transparent"],"defaultValue":"solid","resetBehavior":"restore solid","observable":"changes world inclusion without touching artwork"}
+  ]
+}
