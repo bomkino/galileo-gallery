@@ -1,0 +1,41 @@
+{
+  "scene": { "id": "the-build", "candidateVersion": 1, "status": "g10c-preflight", "mode": "flat-source-preflight" },
+  "capabilities": {
+    "minimumItems": 1,
+    "maximumEvaluatedItems": 1,
+    "extraItems": "preserved-selection-required",
+    "preflightStages": ["world", "matte", "guides-caption", "source", "finale"],
+    "authoredStages": "blocked-pending-AT06-CONTRACT-AUTHORED-STAGES",
+    "semanticSourceLayers": false,
+    "canvasRatios": ["16:9", "9:16", "1:1", "4:5"],
+    "timelineModes": ["automatic", "fixed-duration", "directed"],
+    "direction": true,
+    "reducedMotion": true,
+    "sourceVideo": "story-time-sampled-intact-plane",
+    "transparentSource": true,
+    "transparentOutput": "conditional-on-shared-look",
+    "failedMedia": "stable-source-stage-placeholder",
+    "audioAuthority": "project-service-only"
+  },
+  "defaults": {
+    "durationMs": 11600,
+    "readableFloorMs": 7900,
+    "finaleHoldMs": 2600,
+    "presentationScale": 1,
+    "direction": "forward",
+    "fit": "contain",
+    "labels": true,
+    "background": "solid-neutral"
+  },
+  "controls": [
+    { "id": "stage-pace", "label": "Stage pace", "kind": "range", "minimum": 0.75, "maximum": 1.5, "step": 0.05, "default": 1, "causes": ["arrivalDurations", "settleDurations", "totalDuration", "readableFloor"], "resettable": true },
+    { "id": "finale-hold", "label": "Finale hold", "kind": "range", "minimum": 1200, "maximum": 5000, "step": 100, "unit": "ms", "default": 2600, "causes": ["finaleDuration", "totalDuration", "readableFloor"], "resettable": true },
+    { "id": "presentation-scale", "label": "Final scale", "kind": "range", "minimum": 0.86, "maximum": 1.08, "step": 0.01, "default": 1, "causes": ["sourceScale", "stageSafeArea"], "resettable": true },
+    { "id": "direction", "label": "Phrase direction", "kind": "choice", "values": ["forward", "reverse"], "default": "forward", "causes": ["pathDirection", "velocitySign"], "resettable": true },
+    { "id": "fit", "label": "Source fit", "kind": "choice", "values": ["contain", "cover"], "default": "contain", "causes": ["sourceObjectFit"], "resettable": true, "warning": "Cover may crop source artwork." },
+    { "id": "labels", "label": "Stage ledger", "kind": "boolean", "default": true, "causes": ["stageLabelVisibility", "reviewComprehension"], "resettable": true },
+    { "id": "background", "label": "World background", "kind": "choice", "values": ["solid-neutral", "transparent"], "default": "solid-neutral", "causes": ["worldBackground"], "resettable": true }
+  ],
+  "forbiddenControls": ["invent-stage", "randomize", "palette", "type-trials", "approval-stamp", "cursor", "wireframe", "infer-layers", "source-filter", "source-shadow", "source-glow", "source-grain"],
+  "roundTrip": "exact-json-value-round-trip-required"
+}
