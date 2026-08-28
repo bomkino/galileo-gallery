@@ -1,0 +1,25 @@
+{
+  "scene": "the-build",
+  "status": "g10c-preflight-mechanical-evidence-only-human-verdict-pending",
+  "mode": "flat-source-preflight",
+  "prototype": ["../prototype/index.html", "../prototype/core.mjs", "../prototype/verify.mjs"],
+  "captures": [
+    { "path": "canonical.svg", "kind": "deterministic-vector-still", "fixture": "canonical-five-stage-preflight", "canvas": "16:9", "timeMs": 9700, "state": "finale" },
+    { "path": "story-states.svg", "kind": "state-sequence", "fixture": "canonical-five-stage-preflight", "stages": ["world", "matte", "guides-caption", "source", "finale"] }
+  ],
+  "requiredRuntimeRecapture": ["real-speed-11.6s-browser-clip", "fixed-14.321s-exact", "duration-below-floor-rejection", "lean-three-stage-phrase", "9x16-finale", "failed-source", "transparent-alpha-composites", "source-video", "reverse", "reduced-motion-static-ledger"],
+  "assertions": {
+    "productionG10CComplete": false,
+    "authoredStagesAvailable": false,
+    "fabricatedProcessElements": 0,
+    "semanticSourceLayersInferred": false,
+    "canonicalDurationMs": 11600,
+    "canonicalReadableFloorMs": 7900,
+    "fixedDurationExact": true,
+    "directedDistinct": true,
+    "loopSeamExact": true,
+    "sourceOpacity": 1,
+    "sourceFilter": "none",
+    "humanTasteApproved": false
+  }
+}
