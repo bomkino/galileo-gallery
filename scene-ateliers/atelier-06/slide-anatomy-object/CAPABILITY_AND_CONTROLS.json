@@ -1,0 +1,44 @@
+{
+  "scene": { "id": "slide-anatomy-object", "candidateVersion": 1, "mode": "flat-source" },
+  "capabilities": {
+    "minimumItems": 1,
+    "maximumEvaluatedItems": 1,
+    "extraItems": "preserved-selection-required",
+    "apparatusPlanes": ["world-backing", "matte", "source", "guides", "caption"],
+    "semanticSourceLayers": false,
+    "authoredLayers": "blocked-pending-versioned-project-contract",
+    "canvasRatios": ["16:9", "9:16", "1:1", "4:5"],
+    "timelineModes": ["automatic", "fixed-duration", "directed"],
+    "direction": true,
+    "reducedMotion": true,
+    "sourceVideo": "story-time-sampled-single-plane",
+    "transparentSource": true,
+    "transparentOutput": "conditional-on-shared-look",
+    "failedMedia": "stable-source-plane-placeholder",
+    "audioAuthority": "project-service-only"
+  },
+  "defaults": {
+    "separation": 0.14,
+    "viewAngleDeg": 7,
+    "openMs": 900,
+    "holdMs": 1400,
+    "closeMs": 900,
+    "direction": "forward",
+    "fit": "contain",
+    "labels": true,
+    "showGuides": true,
+    "background": "transparent"
+  },
+  "controls": [
+    { "id": "separation", "label": "Separation", "kind": "range", "minimum": 0.04, "maximum": 0.22, "step": 0.01, "default": 0.14, "causes": ["planeOffsets", "leaderLengths"], "resettable": true },
+    { "id": "view-angle", "label": "Viewing angle", "kind": "range", "minimum": 0, "maximum": 12, "step": 1, "unit": "deg", "default": 7, "causes": ["cameraRotation", "planeForeshortening"], "resettable": true },
+    { "id": "open-hold", "label": "Open hold", "kind": "range", "minimum": 600, "maximum": 4000, "step": 50, "unit": "ms", "default": 1400, "causes": ["holdDuration", "totalDuration"], "resettable": true },
+    { "id": "direction", "label": "Phrase direction", "kind": "choice", "values": ["forward", "reverse"], "default": "forward", "causes": ["phaseOrder", "velocitySign"], "resettable": true },
+    { "id": "fit", "label": "Source fit", "kind": "choice", "values": ["contain", "cover"], "default": "contain", "causes": ["sourceObjectFit"], "resettable": true, "warning": "Cover may crop source artwork." },
+    { "id": "labels", "label": "Apparatus labels", "kind": "boolean", "default": true, "causes": ["labelVisibility", "reviewReadability"], "resettable": true },
+    { "id": "show-guides", "label": "Project guides", "kind": "boolean", "default": true, "availableWhen": "project-guides-exist", "causes": ["guidePlanePresence", "phraseDuration"], "resettable": true },
+    { "id": "background", "label": "World background", "kind": "choice", "values": ["transparent", "solid"], "default": "transparent", "causes": ["worldBackground"], "resettable": true }
+  ],
+  "forbiddenControls": ["layer-count", "infer-layers", "random-spread", "per-plane-material", "source-shadow", "source-glow", "source-tint", "source-grain"],
+  "roundTrip": "exact-json-value-round-trip-required"
+}
