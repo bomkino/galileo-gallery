@@ -1,0 +1,13 @@
+{
+  "format": "galileo-atelier-interaction-ownership",
+  "version": 1,
+  "updated": "2026-08-28",
+  "operations": [
+    {"id":"story-time-scrub","owner":"timeline","surface":"review-transport","transient":"input","commit":"change","alternativeRejected":"Canvas drag would collide with authored spatial motion."},
+    {"id":"playback","owner":"timeline","surface":"review-transport","transient":null,"commit":"button activation","alternativeRejected":"Scene canvas does not own global playback."},
+    {"id":"scene-selection","owner":"catalogue-review","surface":"scene-tabs","transient":null,"commit":"button activation","alternativeRejected":"Spatial picking would privilege renderer implementation over catalogue identity."},
+    {"id":"parameter-edit","owner":"inspector","surface":"Scene controls","transient":"pointer drag","commit":"pointer release or keyboard change","alternativeRejected":"Generic canvas handles would duplicate Inspector causality."},
+    {"id":"viewport-pan-zoom","owner":"review-shell","surface":"stage viewport","transient":"pointer or wheel gesture","commit":"gesture end or idle","alternativeRejected":"The fixed authored Scene camera remains Scene truth."},
+    {"id":"renderer-comparison","owner":"review-shell","surface":"View segmented control","transient":null,"commit":"button activation","alternativeRejected":"A comparison renderer cannot silently replace the canonical candidate."}
+  ]
+}
