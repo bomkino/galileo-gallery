@@ -1,0 +1,35 @@
+{
+  "scene": "before-after-slider",
+  "canonicalStage": { "width": 1920, "height": 1080 },
+  "defaults": { "orientation": "vertical", "startSide": "before", "travelMs": 1200, "holdMs": 650, "fit": "contain", "labels": true },
+  "vectors": [
+    { "id": "no-input", "items": [], "expectError": "insufficient-input" },
+    { "id": "one-input", "items": ["before"], "expectError": "insufficient-input" },
+    { "id": "ambiguous-three", "items": ["a", "b", "c"], "rolesAssigned": false, "expectError": "ambiguous-extra-input" },
+    { "id": "start-before", "items": ["before", "after"], "mode": "automatic", "timeMs": 0, "expect": { "reveal": 0, "velocity": 0 } },
+    { "id": "first-travel", "items": ["before", "after"], "mode": "automatic", "timeMs": 1250, "expect": { "revealGreaterThan": 0, "revealLessThan": 1 } },
+    { "id": "end-hold", "items": ["before", "after"], "mode": "automatic", "timeMs": 1900, "expect": { "reveal": 1, "velocity": 0 } },
+    { "id": "return-travel", "items": ["before", "after"], "mode": "automatic", "timeMs": 2600, "expect": { "revealGreaterThan": 0, "revealLessThan": 1, "velocityLessThan": 0 } },
+    { "id": "seam", "items": ["before", "after"], "mode": "automatic", "time": "duration", "expect": { "reveal": 0, "stateEqualToStart": true } },
+    { "id": "fixed-exact", "items": ["before", "after"], "mode": "fixed-duration", "fixedDurationMs": 7300, "expect": { "durationMs": 7300 } },
+    { "id": "directed-distinct", "items": ["before", "after"], "mode": "directed", "timeMs": 2400, "expect": { "notEqualAutomaticAtSameTime": true } },
+    { "id": "start-after", "items": ["before", "after"], "startSide": "after", "timeMs": 0, "expect": { "reveal": 1, "rolesUnchanged": true } },
+    { "id": "horizontal", "items": ["before", "after"], "orientation": "horizontal", "timeMs": 1500, "expect": { "clipAxis": "block" } },
+    { "id": "reduced-motion", "items": ["before", "after"], "reducedMotion": true, "timesMs": [0, 1, 3700], "expect": { "allReveal": 0.5 } },
+    { "id": "failed-before", "items": ["before", "after"], "failedRoles": ["before"], "expect": { "beforeIdentity": "before", "beforePlaceholder": true, "afterIdentity": "after" } },
+    { "id": "video-sides", "items": ["before", "after"], "videoRoles": ["before", "after"], "timeMs": 7250, "durationMs": [2000, 3000], "expect": { "beforeTimeMs": 1250, "afterTimeMs": 1250 } },
+    { "id": "invalid-nan", "parameters": { "travelMs": "NaN" }, "expectError": "finite-number-required" },
+    { "id": "invalid-fixed-floor", "mode": "fixed-duration", "fixedDurationMs": 300, "expectError": "duration-too-short" },
+    { "id": "remount", "mounts": 3, "expect": { "mediaElements": 2, "animationFramesAfterDispose": 0, "duplicateKeyboardResponses": 0, "firstFramesEqual": true } }
+  ],
+  "mutationSensitivity": [
+    "source-filter-added",
+    "directed-equals-automatic",
+    "return-velocity-positive",
+    "seam-resets-from-one-to-zero",
+    "single-source-duplicated",
+    "semantic-roles-swapped-by-reverse",
+    "reduced-motion-not-half-split",
+    "unstable-media-node-identity"
+  ]
+}
