@@ -1,0 +1,15 @@
+{
+  "format": "galileo-scene-capability",
+  "version": 1,
+  "sceneId": "zoetrope",
+  "capabilities": {"automatic":true,"fixedDuration":true,"directed":true,"reverse":true,"reducedMotion":true,"transparentBackground":true,"sourceVideo":true,"cameraOrbit":false},
+  "controls": [
+    {"id":"radius","label":"Cylinder radius","kind":"range","min":1.6,"max":4.8,"step":0.05,"defaultValue":3.1,"resetBehavior":"restore default","observable":"changes cylinder curvature and frame spacing"},
+    {"id":"gate-hold-ms","label":"Gate hold","kind":"range","min":250,"max":1800,"step":10,"defaultValue":700,"resetBehavior":"restore default","observable":"changes readable still duration without changing order"},
+    {"id":"advance-ms","label":"Advance","kind":"range","min":160,"max":900,"step":10,"defaultValue":420,"resetBehavior":"restore default","observable":"changes ratchet speed and acceleration profile"},
+    {"id":"perspective","label":"Depth perspective","kind":"range","min":0,"max":1,"step":0.01,"defaultValue":0.55,"resetBehavior":"restore default","observable":"changes geometric depth only; artwork pixels remain unchanged"},
+    {"id":"direction","label":"Direction","kind":"segmented","options":["forward","reverse"],"defaultValue":"forward","resetBehavior":"restore forward","observable":"reverses the same physical path and media order"},
+    {"id":"fit","label":"Frame fit","kind":"segmented","options":["contain","cover"],"defaultValue":"contain","resetBehavior":"restore contain","observable":"changes per-frame source fit without changing canvas ratio"},
+    {"id":"background","label":"Background","kind":"segmented","options":["solid","transparent"],"defaultValue":"solid","resetBehavior":"restore solid","observable":"changes world inclusion without touching artwork"}
+  ]
+}
