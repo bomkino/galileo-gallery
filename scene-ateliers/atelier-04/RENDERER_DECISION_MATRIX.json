@@ -1,0 +1,43 @@
+{
+  "format": "galileo-renderer-decision-matrix",
+  "version": 1,
+  "updated": "2026-08-28",
+  "scenes": [
+    {
+      "sceneId": "zoetrope",
+      "canonical": "dom-css-3d",
+      "comparison": null,
+      "decision": "retain",
+      "reasons": ["stable gate semantics", "reduced-motion readability", "moderate bounded item count", "native accessibility"]
+    },
+    {
+      "sceneId": "spiral-image-vortex",
+      "canonical": "dom-css-3d",
+      "comparison": "raw-webgl2-instanced-atlas",
+      "decision": "compare",
+      "promotionRequirements": ["human identity verdict", "real imported-media RGB/alpha evidence", "preview-scrub-export parity", "context-loss fallback", "bounded GPU memory"]
+    },
+    {
+      "sceneId": "the-orrery",
+      "canonical": "dom-css-3d",
+      "comparison": "raw-webgl2-instanced-atlas",
+      "decision": "preflight-only",
+      "blockedBy": "G10A",
+      "promotionRequirements": ["G10A closure", "G10B charter activation", "human identity verdict", "export parity"]
+    },
+    {
+      "sceneId": "vitrine",
+      "canonical": "dom",
+      "comparison": null,
+      "decision": "retain",
+      "reasons": ["long still holds", "two-object exchange", "crisp imported artwork", "native accessibility"]
+    },
+    {
+      "sceneId": "the-shelf",
+      "canonical": "dom-css-3d",
+      "comparison": null,
+      "decision": "retain",
+      "reasons": ["natural media widths", "captions and focus", "stable baseline", "windowing is sufficient for many-item pressure"]
+    }
+  ]
+}
