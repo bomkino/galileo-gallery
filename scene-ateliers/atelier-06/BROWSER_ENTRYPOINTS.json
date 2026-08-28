@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "entrypoints": {
+    "light-table": "light-table/prototype/index.html",
+    "before-after-slider": "before-after-slider/prototype/index-final.html",
+    "slide-anatomy-object": "slide-anatomy-object/prototype/index.html",
+    "the-build": "the-build/prototype/index.html"
+  },
+  "notes": {
+    "before-after-slider/prototype/index.html": "Retained as the failing gauntlet specimen that exposed ambiguous keyboard-step syntax; it is not canonical.",
+    "canonicalRule": "Use only the paths listed in entrypoints for browser execution and capture."
+  }
+}
