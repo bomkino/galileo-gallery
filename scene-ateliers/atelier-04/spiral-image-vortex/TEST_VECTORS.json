@@ -1,0 +1,17 @@
+{
+  "format": "galileo-scene-test-vectors",
+  "version": 1,
+  "sceneId": "spiral-image-vortex",
+  "canonicalParameters": {"radius":2.3,"pitch":6.2,"turns":2.75,"durationMs":10000,"planeScale":0.9,"direction":"forward","fit":"contain","background":"solid"},
+  "vectors": [
+    {"id":"one-item","items":1,"canvas":[1920,1080],"timesMs":[0,2500,5000,7500,10000],"assert":["stable identity","bounded breath","exact loop"]},
+    {"id":"two-item-crossing","items":2,"canvas":[1080,1920],"timesMs":[0,2499.999,2500,2500.001],"assert":["natural front/back crossing","no collision","finite matrices"]},
+    {"id":"ordinary-24-dense","items":24,"canvas":[1920,1080],"sampleEveryMs":5,"assert":["deterministic","no visible teleport","all wraps fully offstage"]},
+    {"id":"bounded-96","items":96,"canvas":[1080,1350],"timesMs":[0,3333,6666,9999],"assert":["bounded renderer resources","stable IDs","finite geometry"]},
+    {"id":"reverse","items":24,"canvas":[1080,1080],"direction":"reverse","timesMs":[0,1,9999,10000],"assert":["inverse path","same seam","same order"]},
+    {"id":"spotlight-front","items":24,"spotlightIndex":7,"timesMs":[0,799.999,800,800.001,1800,2600],"assert":["actual front passage selected","no rear selection","finite settle and release"]},
+    {"id":"reduced-motion","items":24,"reducedMotion":true,"timesMs":[1001,1100,1249,1250,1251],"assert":["stable tableau hold","discrete boundary","no continuous drift"]},
+    {"id":"alpha-and-failure","items":24,"background":"transparent","failedIndices":[3,19],"assert":["zero RGB beneath alpha zero","failed slots retained","source RGB unchanged"]},
+    {"id":"renderer-parity","items":24,"canvas":[1920,1080],"timesMs":[0,1375,5000,8625,10000],"assert":["DOM and WebGL consume equivalent semantic state","fixed camera","no quality reduction"]}
+  ]
+}
