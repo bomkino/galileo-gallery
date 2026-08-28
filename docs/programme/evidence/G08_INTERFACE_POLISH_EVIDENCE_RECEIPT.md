@@ -2,7 +2,7 @@
 
 Date: 28 August 2026
 
-State: **source-tested candidate; real Electron renderer evidence is pending branch CI; not packaged, released, or human-accepted**
+State: **source- and real Electron-renderer-tested candidate; not packaged, released, or human-accepted**
 
 ## Identity
 
@@ -11,7 +11,16 @@ State: **source-tested candidate; real Electron renderer evidence is pending bra
 - Start commit: `a2e36b538d267dd86e769dcb0a7016ba30faff8a`
 - Implementation commit: `7f8586f029eadb332f64047502dfda16ec7b2139`
 - Implementation tree: `c70332fee40282338ca05e73a7bf5c1210dc75f8`
+- Reviewed local UI commit: `a3dec1e45524c0302dcf2f488089783b3af9595a`
+- Reviewed remote UI commit: `78d7abe24f78797be7db7b56b59b3faccb5214c6`
+- Exact shared reviewed UI tree: `531ff49267c6477dfa5074f687f84c6fedd20585`
+- CI run: `33131526879`
+- Renderer job: `98721922823`
+- Evidence artifact: `9670432623`, `sha256:6d52a9be09c44f69e67d81b47f0e96abc309f7335d2d45866afaa3ff52d4d6b9`
 - Base: published `codex/g08-interface-scale-core`
+
+Local and remote commit identities differ because Git transport had no writable credential and the
+reviewed trees were published through the connected GitHub API. Their reviewed UI trees are exact.
 
 ## Delivered boundary
 
@@ -72,11 +81,15 @@ contains 256, 128, 64, 48, 32, and 16px representations.
 - `node --check electron/main.cjs`: pass.
 - cached `npm audit --omit=dev --offline`: zero known vulnerabilities in the available audit cache.
 - no `transition: all` in `src/`.
+- CI source suites: pass on macOS, Ubuntu, and Windows.
+- CI real Electron renderer journey: pass on Ubuntu 24.04/Xvfb with Chromium sandboxing enabled.
 
 One Spec/Standards fixed-point review found and closed three material defects before the
 implementation commit: the smoke selected a scene ID absent from this base, the default 100% choice
 had not yet been made persistent before comparison, and several compact controls remained below the
-44px target. The final source rereview found no blocker, high, or medium defect in this bounded slice.
+44px target. Actual screenshot review then found one specificity defect that held the title-bar icon
+to the prior 31px size; the reviewed candidate corrects it to 44px. Final rereview found no blocker,
+high, or medium defect in this bounded slice.
 
 ## Visual evidence state
 
@@ -84,8 +97,16 @@ had not yet been made persistent before comparison, and several compact controls
 - Production renderer build: pass.
 - Local native Electron capture: unrun because this managed container denies Chromium's required
   process socket before a window is created.
-- Branch CI renderer capture: pending push/run; workflow emits three PNGs and a source-bound JSON
-  receipt in artifact `g08-interface-renderer-evidence`.
+- Branch CI renderer capture: pass. The source-bound artifact contains:
+  - catalogue at 100%: `sha256:3b14565e4b14d32d37f5c03a4640772f6641f036700df93963cae3c09a45ed10`;
+  - studio at 100%: `sha256:86dfd40cdcb81765fde3f208e1519db0e6c594c0965e8bf02810bce9ecc6b9d8`;
+  - studio at 150%: `sha256:708662610293de419c00dde3475a374a1f0b55af2007766dce79443df600ad6c`.
+- Actual computed primary target heights were 44–48px at 100% and 66–72px at 150%; focus outline
+  was a visible 2px solid rule; persisted scale was exact; Reset returned to 100%.
+- Preview metadata and Timeline max were byte-identical at 100% and 150%. Canvas ratios were
+  `1.7778251145` and `1.7779074989`, inside the smoke's `0.002` tolerance.
+- Manual screenshot review accepted the bounded layout for this engineering checkpoint after the
+  title-bar icon correction; this is not human or final Product visual acceptance.
 
 No automated check is treated as a taste verdict. Native macOS/Garuda screenshots, real pointer and
 keyboard interaction, 75%/100%/150%/200% human review, and final visual acceptance remain unclaimed.

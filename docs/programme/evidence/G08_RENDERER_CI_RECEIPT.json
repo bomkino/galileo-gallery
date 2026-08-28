@@ -1,0 +1,82 @@
+{
+  "task": "G08 interface presentation smoke",
+  "source": {
+    "sha": "78d7abe24f78797be7db7b56b59b3faccb5214c6",
+    "tree": "531ff49267c6477dfa5074f687f84c6fedd20585"
+  },
+  "captures": {
+    "catalogue": {
+      "file": "gallery-catalogue-100.png",
+      "bytes": 157021,
+      "sha256": "3b14565e4b14d32d37f5c03a4640772f6641f036700df93963cae3c09a45ed10",
+      "size": { "width": 1280, "height": 893 }
+    },
+    "studio100": {
+      "file": "gallery-studio-100.png",
+      "bytes": 90689,
+      "sha256": "86dfd40cdcb81765fde3f208e1519db0e6c594c0965e8bf02810bce9ecc6b9d8",
+      "size": { "width": 1280, "height": 893 }
+    },
+    "studio150": {
+      "file": "gallery-studio-150.png",
+      "bytes": 134810,
+      "sha256": "708662610293de419c00dde3475a374a1f0b55af2007766dce79443df600ad6c",
+      "size": { "width": 1280, "height": 893 }
+    }
+  },
+  "metrics": {
+    "at100": {
+      "interfaceScale": 100,
+      "surfaceTransform": "matrix(1, 0, 0, 1, 0, 0)",
+      "targets": {
+        "primary": { "width": 92, "height": 44 },
+        "icon": { "width": 46, "height": 46 },
+        "addMedia": { "width": 248, "height": 48 },
+        "segment": { "width": 100.65625, "height": 44 },
+        "scaleButton": { "width": 44, "height": 44 }
+      },
+      "focus": { "outlineStyle": "solid", "outlineWidth": "2px" },
+      "preview": {
+        "metadata": "Preview1920 × 1080 · 30 fps",
+        "ratio": 1.7778251144956865,
+        "timelineMax": "1"
+      },
+      "manifest": {
+        "format": "galileo-gallery-local-presentation",
+        "product": "galileo-gallery",
+        "schemaVersion": 1,
+        "interfaceScale": 100
+      }
+    },
+    "at150": {
+      "interfaceScale": 150,
+      "surfaceTransform": "matrix(1.5, 0, 0, 1.5, 0, 0)",
+      "targets": {
+        "primary": { "width": 138, "height": 66 },
+        "icon": { "width": 69, "height": 69 },
+        "addMedia": { "width": 258, "height": 72 },
+        "segment": { "width": 111, "height": 66 },
+        "scaleButton": { "width": 66, "height": 66 }
+      },
+      "focus": { "outlineStyle": "solid", "outlineWidth": "2px" },
+      "preview": {
+        "metadata": "Preview1920 × 1080 · 30 fps",
+        "ratio": 1.7779074988774135,
+        "timelineMax": "1"
+      },
+      "manifest": {
+        "format": "galileo-gallery-local-presentation",
+        "product": "galileo-gallery",
+        "schemaVersion": 1,
+        "interfaceScale": 150
+      }
+    }
+  },
+  "resetScale": 100,
+  "github": {
+    "runId": 33131526879,
+    "rendererJobId": 98721922823,
+    "artifactId": 9670432623,
+    "artifactDigest": "sha256:6d52a9be09c44f69e67d81b47f0e96abc309f7335d2d45866afaa3ff52d4d6b9"
+  }
+}
