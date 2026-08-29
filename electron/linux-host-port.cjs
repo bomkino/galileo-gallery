@@ -105,13 +105,20 @@ function createGrantRegistry(options = {}) {
         if (!ownExact(input, ["scope", "filePath", "owner", "generation", "mime"]) || input.scope !== "destination") fail("invalid_request")
         if (typeof input.filePath !== "string" || !path.isAbsolute(input.filePath)) fail("invalid_request")
         if (typeof input.owner !== "string" || !REQUEST_ID.test(input.owner) || !safeInteger(input.generation, 1, Number.MAX_SAFE_INTEGER)) fail("invalid_request")
-        if (input.mime !== "application/vnd.galileo.png-frames-directory") fail("invalid_request")
+        if (!["application/vnd.galileo.png-frames-directory", "video/mp4"].includes(input.mime)) fail("invalid_request")
         pruneExpired()
         if (grants.size >= maximumGrants) fail("resource_limit")
         const target = path.resolve(input.filePath)
         const parentPath = path.dirname(target)
         const parent = fs.lstatSync(parentPath)
         if (!parent.isDirectory() || parent.isSymbolicLink() || path.basename(target) !== path.basename(input.filePath)) fail("invalid_request")
+        let targetStat = null
+        try { targetStat = fs.lstatSync(target) } catch (error) {
+            if (error?.code !== "ENOENT") throw error
+        }
+        const targetKind = input.mime === "video/mp4" ? "file" : "directory"
+        if (targetStat && (targetStat.isSymbolicLink() || (targetKind === "file" ? !targetStat.isFile() : !targetStat.isDirectory()))) fail("conflict")
+        if (input.mime === "video/mp4" && targetStat) fail("conflict")
         let token
         for (let attempt = 0; attempt < 8; attempt += 1) {
             const candidate = randomBytes(32).toString("hex")
@@ -128,6 +135,13 @@ function createGrantRegistry(options = {}) {
             parentPath,
             parentDevice: parent.dev,
             parentInode: parent.ino,
+            targetKind,
+            targetExists: Boolean(targetStat),
+            targetDevice: targetStat?.dev ?? null,
+            targetInode: targetStat?.ino ?? null,
+            targetBytes: targetStat?.size ?? null,
+            targetMtimeMs: targetStat?.mtimeMs ?? null,
+            targetCtimeMs: targetStat?.ctimeMs ?? null,
             owner: input.owner,
             generation: input.generation,
             mime: input.mime,
@@ -148,6 +162,15 @@ function createGrantRegistry(options = {}) {
         if (grant.scope === "destination") {
             const parent = fs.lstatSync(grant.parentPath)
             if (!parent.isDirectory() || parent.isSymbolicLink() || parent.dev !== grant.parentDevice || parent.ino !== grant.parentInode) fail("verification_failed")
+            let target = null
+            try { target = fs.lstatSync(grant.filePath) } catch (error) {
+                if (error?.code !== "ENOENT") throw error
+            }
+            if (grant.targetExists !== Boolean(target)) fail("conflict")
+            if (target && (target.isSymbolicLink()
+                || (grant.targetKind === "file" ? !target.isFile() : !target.isDirectory())
+                || target.dev !== grant.targetDevice || target.ino !== grant.targetInode || target.size !== grant.targetBytes
+                || target.mtimeMs !== grant.targetMtimeMs || target.ctimeMs !== grant.targetCtimeMs)) fail("conflict")
         }
         return grant
     }

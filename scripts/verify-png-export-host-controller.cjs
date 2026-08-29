@@ -90,7 +90,7 @@ function envelope(operation, payload = {}) {
 async function preflight(url) {
     return host.handle(event, envelope("export.png.preflight", { intent: {
         config: { schemaVersion: 2, styleId: "quiet-carousel", items: [{ id: "one", name: "Source", type: "image", url, ratio: 1, spotlight: false, muted: false }], settings: { backgroundStyle: "transparent" } },
-        width: 64, height: 64, fps: 10, durationMs: 150, transparent: true,
+        width: 64, height: 64, fps: 10, durationMs: 150, cycleDurationMs: 100, finalCycleDurationMs: 50, transparent: true,
     } }))
 }
 

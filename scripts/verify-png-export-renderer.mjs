@@ -21,6 +21,7 @@ function baseHost(overrides = {}) {
         choosePngFramesDestination: async () => ({ cancelled: false, destinationGrant: "2".repeat(64) }),
         startPngFramesExport: async () => ({ format: "png-frames", frameCount: 2, width: 64, height: 64, alpha: true, audio: "none", manifestSha256: "3".repeat(64) }),
         cancelExport: async () => ({ cancelled: true }),
+        cancelAudio: async () => ({ cancelled: 0 }),
         onExportProgress: () => () => {},
         ...overrides,
     }

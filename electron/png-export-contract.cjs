@@ -43,10 +43,12 @@ function validateQuietCarouselConfig(config) {
 }
 
 function createPngFramesSnapshot(intent, randomBytes = crypto.randomBytes) {
-    if (!ownExact(intent, ["config", "width", "height", "fps", "durationMs", "transparent"])) throw new HostPortError("invalid_request")
+    if (!ownExact(intent, ["config", "width", "height", "fps", "durationMs", "cycleDurationMs", "finalCycleDurationMs", "transparent"])) throw new HostPortError("invalid_request")
     validateQuietCarouselConfig(intent.config)
     if (!integer(intent.width, 64, 7680) || !integer(intent.height, 64, 7680) || !integer(intent.fps, 1, 120)
         || typeof intent.durationMs !== "number" || !Number.isFinite(intent.durationMs) || intent.durationMs < 1 || intent.durationMs > 24 * 60 * 60 * 1000
+        || typeof intent.cycleDurationMs !== "number" || !Number.isFinite(intent.cycleDurationMs) || intent.cycleDurationMs < 1 || intent.cycleDurationMs > intent.durationMs
+        || typeof intent.finalCycleDurationMs !== "number" || !Number.isFinite(intent.finalCycleDurationMs) || intent.finalCycleDurationMs < 1 || intent.finalCycleDurationMs > intent.durationMs
         || typeof intent.transparent !== "boolean") throw new HostPortError("invalid_request")
     if (intent.transparent !== (intent.config.settings.backgroundStyle === "transparent")) throw new HostPortError("invalid_request")
     const frameCount = Math.max(1, Math.round(intent.durationMs * intent.fps / 1000))
@@ -67,6 +69,8 @@ function createPngFramesSnapshot(intent, randomBytes = crypto.randomBytes) {
         height: intent.height,
         fps: intent.fps,
         durationMs: intent.durationMs,
+        cycleDurationMs: intent.cycleDurationMs,
+        finalCycleDurationMs: intent.finalCycleDurationMs,
         frameCount,
         alpha: intent.transparent,
         audio: "none",

@@ -136,7 +136,23 @@ try {
     fs.mkdirSync(destinationParent)
     assert.throws(() => destinationRegistry.resolve({ grant: destination.grant, scope: "destination", owner: "window-export", generation: 1 }), (error) => error.code === "verification_failed")
 
-    console.log("Verified: G03/G06 opaque scoped media and destination grants, bounded verified reads, parent identity, expiry/revocation/generation, strict envelopes and sender/origin checks, and path/token redaction.")
+    const targetParent = path.join(temporary, "target-authority")
+    fs.mkdirSync(targetParent)
+    const targetRegistry = createGrantRegistry()
+    const absentTarget = path.join(targetParent, "absent.mp4")
+    const absentGrant = targetRegistry.createDestination({ scope: "destination", filePath: absentTarget, owner: "window-target", generation: 1, mime: "video/mp4" })
+    fs.writeFileSync(absentTarget, "arrived later")
+    assert.throws(() => targetRegistry.resolve({ grant: absentGrant.grant, scope: "destination", owner: "window-target", generation: 1 }), (error) => error.code === "conflict")
+    targetRegistry.revoke(absentGrant.grant)
+    const existingTarget = path.join(targetParent, "existing.mp4")
+    fs.writeFileSync(existingTarget, "authorized")
+    assert.throws(
+        () => targetRegistry.createDestination({ scope: "destination", filePath: existingTarget, owner: "window-target", generation: 1, mime: "video/mp4" }),
+        (error) => error.code === "conflict",
+    )
+    assert.equal(fs.readFileSync(existingTarget, "utf8"), "authorized", "verified MP4 grants must refuse overwrite before allocating authority")
+
+    console.log("Verified: G03/G06 opaque scoped media and destination grants, bounded verified reads, parent/target identity, expiry/revocation/generation, strict envelopes and sender/origin checks, and path/token redaction.")
 } finally {
     fs.rmSync(temporary, { recursive: true, force: true })
 }

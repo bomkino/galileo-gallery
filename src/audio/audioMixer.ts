@@ -69,7 +69,7 @@ async function mixClip(
         checkCancelled(signal)
         const clipOffset = cursor - clip.timelineStartFrame
         const spanOffset = clip.loop ? clipOffset % clip.sourceSpanFrames : clipOffset
-        const runFrames = Math.min(overlapEnd - cursor, clip.sourceSpanFrames - spanOffset)
+        const runFrames = Math.min(overlapEnd - cursor, clip.sourceSpanFrames - spanOffset, 4_096)
         const decoded = await provider.read(clip.sourceId, clip.sourceInFrame + spanOffset, runFrames, signal)
         checkCancelled(signal)
         if (decoded.sampleRate !== source.sampleRate || decoded.channels !== source.channels || decoded.frames.length !== runFrames * source.channels) {

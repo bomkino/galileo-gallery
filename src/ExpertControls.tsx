@@ -237,7 +237,7 @@ export default function ExpertControls(props: Props) {
                     <ControlGroup eyebrow="Video" title="Playback">
                         <Toggle label="Autoplay clips" detail="Muted playback inside moving frames." checked={settings.autoplayVideos} onChange={(value) => props.onSetting("autoplayVideos", value)} />
                         <Toggle label="Loop source clips" detail="Repeat clips shorter than the gallery film." checked={settings.loopVideos} onChange={(value) => props.onSetting("loopVideos", value)} />
-                        <p className="expert-help">Gallery films are silent. Export decodes original video frame by frame at normal source speed.</p>
+                        <p className="expert-help">Verified Linux MP4 preserves authored source-video, presenter, and soundtrack audio against the same story clock. Legacy native exporters remain silent.</p>
                     </ControlGroup>
                 </div>
             ) : null}

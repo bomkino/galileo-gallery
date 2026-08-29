@@ -16,6 +16,18 @@ const {
     pngFramesCapabilities,
     pngFramesPreflight,
 } = require("./png-export-contract.cjs")
+const {
+    MAX_CHUNK_BASE64,
+} = require("./h264-audio-stage.cjs")
+const {
+    H264_DESTINATION_GRANT,
+    H264_MIME,
+    H264_SNAPSHOT_ID,
+    MAX_AUDIO_DECODE_REQUESTS,
+    createH264Snapshot,
+    h264Capability,
+    h264Preflight,
+} = require("./h264-export-contract.cjs")
 
 const GRANT_URL = /^reel-media:\/\/grant\/([a-f0-9]{64})$/
 const MAX_PREPARED_VIDEO_AUDIO_FRAMES = 256 * 1024 * 1024 / 4
@@ -25,6 +37,61 @@ function ownExact(value, keys) {
     const actual = Object.keys(value).sort()
     const expected = [...keys].sort()
     return actual.length === expected.length && actual.every((key, index) => key === expected[index])
+}
+
+function cheapEnvelopePayload(value, generation) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return false
+    const required = new Set(["protocol", "requestId", "operation", "generation", "payload"])
+    let count = 0
+    for (const key in value) {
+        if (!Object.prototype.hasOwnProperty.call(value, key)) continue
+        count += 1
+        if (count > 5 || !required.has(key)) return false
+        required.delete(key)
+    }
+    if (count !== 5 || required.size !== 0 || value.protocol !== 1 || value.generation !== generation
+        || typeof value.requestId !== "string" || !/^[a-z0-9][a-z0-9-]{0,119}$/.test(value.requestId)
+        || !value.payload || typeof value.payload !== "object" || Array.isArray(value.payload)) return null
+    return value.payload
+}
+
+function cheapExactControlEnvelope(value, generation) {
+    const payload = cheapEnvelopePayload(value, generation)
+    if (!payload) return false
+    for (const key in payload) if (Object.prototype.hasOwnProperty.call(payload, key)) return false
+    return true
+}
+
+function cheapExactAudioDecodeEnvelope(value, generation) {
+    const payload = cheapEnvelopePayload(value, generation)
+    if (!payload) return false
+    const required = new Set(["url", "startFrame", "frameCount"])
+    let count = 0
+    for (const key in payload) {
+        if (!Object.prototype.hasOwnProperty.call(payload, key)) continue
+        count += 1
+        if (count > 3 || !required.has(key)) return false
+        required.delete(key)
+    }
+    return count === 3 && required.size === 0 && typeof payload.url === "string" && payload.url.length === "reel-media://grant/".length + 64 && GRANT_URL.test(payload.url)
+        && Number.isSafeInteger(payload.startFrame) && payload.startFrame >= 0
+        && Number.isSafeInteger(payload.frameCount) && payload.frameCount >= 1 && payload.frameCount <= 4_096
+}
+
+function cheapExactH264AudioAppendEnvelope(value, generation) {
+    const payload = cheapEnvelopePayload(value, generation)
+    if (!payload) return false
+    const required = new Set(["snapshotId", "startFrame", "pcm16Base64"])
+    let count = 0
+    for (const key in payload) {
+        if (!Object.prototype.hasOwnProperty.call(payload, key)) continue
+        count += 1
+        if (count > 3 || !required.has(key)) return false
+        required.delete(key)
+    }
+    return count === 3 && required.size === 0 && typeof payload.snapshotId === "string" && H264_SNAPSHOT_ID.test(payload.snapshotId)
+        && Number.isSafeInteger(payload.startFrame) && payload.startFrame >= 0
+        && typeof payload.pcm16Base64 === "string" && payload.pcm16Base64.length >= 4 && payload.pcm16Base64.length <= MAX_CHUNK_BASE64
 }
 
 function validConfig(value) {
@@ -84,6 +151,17 @@ function safePngExportResult(value, snapshot) {
     return value
 }
 
+function safeH264ExportResult(value, snapshot) {
+    if (!ownExact(value, ["format", "frameCount", "width", "height", "alpha", "audio", "audioFrameCount", "bytes", "sha256", "videoDecodeSha256", "audioDecodeSha256"])
+        || value.format !== "mp4-h264-aac" || value.frameCount !== snapshot.frameCount || value.width !== snapshot.width || value.height !== snapshot.height
+        || value.alpha !== false || value.audio !== "aac-48khz-stereo" || value.audioFrameCount !== snapshot.audioFrameCount
+        || !Number.isSafeInteger(value.bytes) || value.bytes < 128
+        || [value.sha256, value.videoDecodeSha256, value.audioDecodeSha256].some((hash) => typeof hash !== "string" || !/^[a-f0-9]{64}$/.test(hash))) {
+        throw new HostPortError("verification_failed")
+    }
+    return value
+}
+
 function tokenFromMediaURL(value) {
     if (typeof value !== "string") throw new HostPortError("invalid_request")
     const match = GRANT_URL.exec(value)
@@ -96,6 +174,17 @@ function createLinuxHostController(options) {
     const webContentsId = options.webContentsId
     const registry = options.registry ?? createGrantRegistry()
     const limiter = options.limiter ?? createRequestLimiter()
+    const ingressLimiter = options.ingressLimiter ?? createRequestLimiter({ maximumRequests: 512 })
+    const exportIngressLimiter = options.exportIngressLimiter ?? createRequestLimiter({ maximumRequests: 2_048 })
+    const exportLimiter = options.exportLimiter ?? createRequestLimiter({ maximumRequests: 2_048 })
+    const controlIngressLimiter = options.controlIngressLimiter ?? createRequestLimiter({ maximumRequests: 512 })
+    const controlLimiters = Object.freeze({
+        "audio.cancel": createRequestLimiter({ maximumRequests: 60 }),
+        "export.cancel": createRequestLimiter({ maximumRequests: 60 }),
+        "project.open.cancel": createRequestLimiter({ maximumRequests: 60 }),
+    })
+    const h264Available = options.h264Available ?? true
+    if (typeof h264Available !== "boolean") throw new HostPortError("invalid_request")
     const removeResourceRoot = options.removeResourceRoot ?? ((resourceRoot) => fs.rmSync(resourceRoot, { recursive: true, force: true }))
     let generation = options.generation ?? 1
     let state = "ready"
@@ -108,6 +197,11 @@ function createLinuxHostController(options) {
     let exportSnapshot = null
     let exportController = null
     let exportDestinationToken = null
+    let exportAudioStage = null
+    let exportAudioResult = null
+    let exportDecodedAudioFrames = 0
+    let exportDecodedAudioRequests = 0
+    let exportAudioAppendRequests = 0
 
     const operations = Object.freeze({
         "identity.read": { states: ["ready", "opening"], validate: (payload) => ownExact(payload, []) },
@@ -141,6 +235,18 @@ function createLinuxHostController(options) {
         "audio.cancel": { states: ["ready", "opening"], validate: (payload) => ownExact(payload, []) },
         "export.capabilities": { states: ["ready"], validate: (payload) => ownExact(payload, []) },
         "export.png.preflight": { states: ["ready"], validate: (payload) => ownExact(payload, ["intent"]) },
+        "export.h264.preflight": { states: ["ready"], validate: (payload) => ownExact(payload, ["intent"]) },
+        "export.h264.audio.append": {
+            states: ["ready"],
+            validate: (payload) => ownExact(payload, ["snapshotId", "startFrame", "pcm16Base64"])
+                && typeof payload.snapshotId === "string" && H264_SNAPSHOT_ID.test(payload.snapshotId)
+                && Number.isSafeInteger(payload.startFrame) && payload.startFrame >= 0
+                && typeof payload.pcm16Base64 === "string" && payload.pcm16Base64.length >= 4 && payload.pcm16Base64.length <= MAX_CHUNK_BASE64,
+        },
+        "export.h264.audio.finish": {
+            states: ["ready"],
+            validate: (payload) => ownExact(payload, ["snapshotId"]) && typeof payload.snapshotId === "string" && H264_SNAPSHOT_ID.test(payload.snapshotId),
+        },
         "export.destination.choose": {
             states: ["ready"],
             validate: (payload) => ownExact(payload, ["suggestedName"]) && typeof payload.suggestedName === "string"
@@ -151,6 +257,17 @@ function createLinuxHostController(options) {
             validate: (payload) => ownExact(payload, ["snapshotId", "destinationGrant"])
                 && typeof payload.snapshotId === "string" && SNAPSHOT_ID.test(payload.snapshotId)
                 && typeof payload.destinationGrant === "string" && DESTINATION_GRANT.test(payload.destinationGrant),
+        },
+        "export.h264.destination.choose": {
+            states: ["ready"],
+            validate: (payload) => ownExact(payload, ["suggestedName"]) && typeof payload.suggestedName === "string"
+                && payload.suggestedName.length >= 1 && payload.suggestedName.length <= 120 && !/[\\/\x00-\x1f]/.test(payload.suggestedName),
+        },
+        "export.h264.start": {
+            states: ["ready"],
+            validate: (payload) => ownExact(payload, ["snapshotId", "destinationGrant"])
+                && typeof payload.snapshotId === "string" && H264_SNAPSHOT_ID.test(payload.snapshotId)
+                && typeof payload.destinationGrant === "string" && H264_DESTINATION_GRANT.test(payload.destinationGrant),
         },
         "export.cancel": { states: ["ready", "opening"], validate: (payload) => ownExact(payload, []) },
         "project.save": { states: ["ready"], validate: (payload) => ownExact(payload, ["config"]) && validConfig(payload.config) },
@@ -164,8 +281,8 @@ function createLinuxHostController(options) {
         return registry.create({ scope: "media", filePath, owner, generation: targetGeneration, mime })
     }
 
-    function grantDestination(filePath) {
-        return registry.createDestination({ scope: "destination", filePath, owner, generation, mime: PNG_FRAMES_MIME })
+    function grantDestination(filePath, mime = PNG_FRAMES_MIME) {
+        return registry.createDestination({ scope: "destination", filePath, owner, generation, mime })
     }
 
     function mediaGrant(mediaURL) {
@@ -263,10 +380,16 @@ function createLinuxHostController(options) {
 
 
     function clearPreparedExport() {
-        const hadPrepared = Boolean(exportSnapshot || exportDestinationToken)
+        const hadPrepared = Boolean(exportSnapshot || exportDestinationToken || exportAudioStage || exportAudioResult)
         exportSnapshot = null
         if (exportDestinationToken) registry.revoke(exportDestinationToken)
         exportDestinationToken = null
+        try { exportAudioStage?.dispose() } catch (error) { options.onError?.("export.cleanup", error) }
+        exportAudioStage = null
+        exportAudioResult = null
+        exportDecodedAudioFrames = 0
+        exportDecodedAudioRequests = 0
+        exportAudioAppendRequests = 0
         return hadPrepared
     }
 
@@ -304,6 +427,13 @@ function createLinuxHostController(options) {
                 })
             }
             case "audio.decode":
+                if (exportSnapshot?.format === "mp4-h264-aac") {
+                    const maximumExportDecodeFrames = exportSnapshot.audioFrameCount * 64
+                    if (exportDecodedAudioFrames + envelope.payload.frameCount > maximumExportDecodeFrames) throw new HostPortError("resource_limit")
+                    if (exportDecodedAudioRequests + 1 > exportSnapshot.maximumAudioDecodeRequests) throw new HostPortError("resource_limit")
+                    exportDecodedAudioFrames += envelope.payload.frameCount
+                    exportDecodedAudioRequests += 1
+                }
                 return withAudioSlot(async (signal) => safeAudioDecode(await options.decodeAudio({ grant: mediaGrant(envelope.payload.url), startFrame: envelope.payload.startFrame, frameCount: envelope.payload.frameCount, signal }), envelope.payload))
             case "audio.video.prepare":
                 return withAudioSlot(async (signal) => safePreparedVideoAudio(await options.prepareVideoAudio({ grant: mediaGrant(envelope.payload.url), durationUs: envelope.payload.durationUs, signal })))
@@ -312,13 +442,39 @@ function createLinuxHostController(options) {
             case "audio.cancel":
                 return { cancelled: cancelAudioWork() }
             case "export.capabilities":
-                return pngFramesCapabilities()
+                return Object.freeze({ version: 1, formats: Object.freeze([...pngFramesCapabilities().formats, h264Capability(h264Available)]) })
             case "export.png.preflight": {
                 if (exportController) throw new HostPortError("conflict")
                 clearPreparedExport()
                 exportSnapshot = createPngFramesSnapshot(envelope.payload.intent)
                 return pngFramesPreflight(exportSnapshot)
             }
+            case "export.h264.preflight": {
+                if (exportController) throw new HostPortError("conflict")
+                if (!h264Available) throw new HostPortError("unsupported_capability")
+                clearPreparedExport()
+                const preparedSnapshot = createH264Snapshot(envelope.payload.intent)
+                const preparedAudioStage = options.createH264AudioStage({ snapshot: preparedSnapshot })
+                exportSnapshot = preparedSnapshot
+                exportAudioStage = preparedAudioStage
+                return h264Preflight(exportSnapshot)
+            }
+            case "export.h264.audio.append":
+                if (!exportSnapshot || exportSnapshot.format !== "mp4-h264-aac" || !exportAudioStage || exportAudioResult || exportController) throw new HostPortError("conflict")
+                exportAudioAppendRequests += 1
+                if (exportAudioAppendRequests > Math.ceil(exportSnapshot.audioFrameCount / 65_536) + 1) throw new HostPortError("resource_limit")
+                return exportAudioStage.append(envelope.payload)
+            case "export.h264.audio.finish":
+                if (!exportSnapshot || exportSnapshot.format !== "mp4-h264-aac" || !exportAudioStage || exportAudioResult || exportController) throw new HostPortError("conflict")
+                exportAudioResult = exportAudioStage.finish(envelope.payload)
+                return Object.freeze({
+                    snapshotId: exportAudioResult.snapshotId,
+                    sampleRate: exportAudioResult.sampleRate,
+                    channels: exportAudioResult.channels,
+                    sampleFrames: exportAudioResult.sampleFrames,
+                    bytes: exportAudioResult.bytes,
+                    sha256: exportAudioResult.sha256,
+                })
             case "export.destination.choose": {
                 if (!exportSnapshot || exportController) throw new HostPortError("conflict")
                 const choiceSnapshot = exportSnapshot
@@ -327,6 +483,17 @@ function createLinuxHostController(options) {
                 if (!choice) return { cancelled: true }
                 if (exportDestinationToken) registry.revoke(exportDestinationToken)
                 const destination = grantDestination(choice)
+                exportDestinationToken = destination.grant
+                return { cancelled: false, destinationGrant: destination.grant }
+            }
+            case "export.h264.destination.choose": {
+                if (!exportSnapshot || exportSnapshot.format !== "mp4-h264-aac" || !exportAudioResult || exportController) throw new HostPortError("conflict")
+                const choiceSnapshot = exportSnapshot
+                const choice = await options.chooseH264Destination({ suggestedName: envelope.payload.suggestedName })
+                if (exportSnapshot !== choiceSnapshot || exportController) throw new HostPortError("conflict")
+                if (!choice) return { cancelled: true }
+                if (exportDestinationToken) registry.revoke(exportDestinationToken)
+                const destination = grantDestination(choice, H264_MIME)
                 exportDestinationToken = destination.grant
                 return { cancelled: false, destinationGrant: destination.grant }
             }
@@ -342,7 +509,17 @@ function createLinuxHostController(options) {
                     const result = await options.runPngFramesExport({
                         snapshot,
                         destination: destination.filePath,
-                        destinationAuthority: { parentDevice: destination.parentDevice, parentInode: destination.parentInode },
+                        destinationAuthority: {
+                            parentDevice: destination.parentDevice,
+                            parentInode: destination.parentInode,
+                            targetKind: destination.targetKind,
+                            targetExists: destination.targetExists,
+                            targetDevice: destination.targetDevice,
+                            targetInode: destination.targetInode,
+                            targetBytes: destination.targetBytes,
+                            targetMtimeMs: destination.targetMtimeMs,
+                            targetCtimeMs: destination.targetCtimeMs,
+                        },
                         signal: controller.signal,
                         mediaPath,
                         openExportMedia,
@@ -360,7 +537,56 @@ function createLinuxHostController(options) {
                     if (exportController === controller) exportController = null
                 }
             }
+            case "export.h264.start": {
+                if (exportController || !exportSnapshot || exportSnapshot.format !== "mp4-h264-aac" || exportSnapshot.snapshotId !== envelope.payload.snapshotId
+                    || exportDestinationToken !== envelope.payload.destinationGrant || !exportAudioStage || !exportAudioResult) throw new HostPortError("conflict")
+                const destination = registry.resolve({ grant: envelope.payload.destinationGrant, scope: "destination", owner, generation })
+                if (destination.mime !== H264_MIME) throw new HostPortError("conflict")
+                const snapshot = exportSnapshot
+                const audioStage = exportAudioStage
+                const audio = exportAudioResult
+                exportSnapshot = null
+                exportAudioStage = null
+                exportAudioResult = null
+                const controller = new AbortController()
+                const exportMediaTokens = []
+                exportController = controller
+                try {
+                    const result = await options.runH264Export({
+                        snapshot,
+                        destination: destination.filePath,
+                        destinationAuthority: {
+                            parentDevice: destination.parentDevice,
+                            parentInode: destination.parentInode,
+                            targetKind: destination.targetKind,
+                            targetExists: destination.targetExists,
+                            targetDevice: destination.targetDevice,
+                            targetInode: destination.targetInode,
+                            targetBytes: destination.targetBytes,
+                            targetMtimeMs: destination.targetMtimeMs,
+                            targetCtimeMs: destination.targetCtimeMs,
+                        },
+                        audio,
+                        signal: controller.signal,
+                        mediaPath,
+                        openExportMedia,
+                        grantExportMedia: (filePath, mime) => {
+                            const granted = grantMedia(filePath, mime)
+                            exportMediaTokens.push(granted.grant)
+                            return granted.mediaURL
+                        },
+                    })
+                    return safeH264ExportResult(result, snapshot)
+                } finally {
+                    try { audioStage.dispose() } catch (error) { options.onError?.("export.cleanup", error) }
+                    for (const token of exportMediaTokens) revokeToken(token)
+                    registry.revoke(envelope.payload.destinationGrant)
+                    exportDestinationToken = null
+                    if (exportController === controller) exportController = null
+                }
+            }
             case "export.cancel": {
+                cancelAudioWork()
                 const active = cancelExportWork()
                 const prepared = clearPreparedExport()
                 return { cancelled: active || prepared }
@@ -368,6 +594,7 @@ function createLinuxHostController(options) {
             case "project.save":
                 return options.saveProject({ config: envelope.payload.config, mediaPath })
             case "project.open.begin": {
+                if (exportSnapshot || exportController || exportAudioStage || exportAudioResult) throw new HostPortError("conflict")
                 state = "opening"
                 const controller = new AbortController()
                 const candidateGeneration = nextGeneration
@@ -450,8 +677,29 @@ function createLinuxHostController(options) {
         let requestId = typeof value?.requestId === "string" ? value.requestId : "invalid-request"
         try {
             validateSender(event, { webContentsId })
-            limiter.check(owner)
-            const envelope = validateEnvelope(value, { generation, state, maximumBytes: 512 * 1024, operations })
+            const namedControlOperation = typeof value?.operation === "string"
+                && ["audio.cancel", "export.cancel", "project.open.cancel"].includes(value.operation)
+            const rawControlOperation = namedControlOperation && cheapExactControlEnvelope(value, generation)
+            const rawExportOperation = exportSnapshot?.format === "mp4-h264-aac" && (
+                (value?.operation === "audio.decode" && cheapExactAudioDecodeEnvelope(value, generation))
+                || (value?.operation === "export.h264.audio.append" && cheapExactH264AudioAppendEnvelope(value, generation))
+            )
+            if (!rawControlOperation) (rawExportOperation ? exportIngressLimiter : ingressLimiter).check(owner)
+            let envelope
+            try {
+                envelope = validateEnvelope(value, { generation, state, maximumBytes: 512 * 1024, operations })
+            } catch (error) {
+                if (namedControlOperation) controlIngressLimiter.check(owner)
+                limiter.check(owner)
+                throw error
+            }
+            const controlOperation = ["audio.cancel", "export.cancel", "project.open.cancel"].includes(envelope.operation)
+            const exportOperation = exportSnapshot?.format === "mp4-h264-aac"
+                && ["audio.decode", "export.h264.audio.append"].includes(envelope.operation)
+            if (controlOperation) {
+                controlLimiters[envelope.operation].check(owner)
+            } else if (exportOperation) exportLimiter.check(owner)
+            else limiter.check(owner)
             requestId = envelope.requestId
             const requestGeneration = generation
             const result = await dispatch(envelope)

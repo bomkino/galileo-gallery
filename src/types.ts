@@ -259,7 +259,7 @@ export type ExportVideoFrameSet = {
 
 export type ExportProgress = {
     exportId: string
-    phase: "preparing" | "rendering" | "encoding" | "done" | "cancelled" | "error"
+    phase: "preparing" | "rendering" | "encoding" | "verifying" | "done" | "cancelled" | "error"
     progress: number
     frame?: number
     totalFrames?: number
@@ -339,10 +339,18 @@ export interface GalleryHostPort {
     decodeAudio(url: string, startFrame: number, frameCount: number): Promise<{ sampleRate: number; channels: 1 | 2; startFrame: number; frameCount: number; samples: number[] }>
     audioWaveform(url: string, buckets: number): Promise<{ sampleRate: number; channels: 1 | 2; sampleFrames: number; buckets: Array<{ minimum: number; maximum: number; rms: number }> }>
     cancelAudio(): Promise<{ cancelled: number }>
-    exportCapabilities(): Promise<{ version: 1; formats: Array<{ id: "png-frames"; available: true; alpha: true; audio: false; consequence: string }> }>
-    preflightPngFrames(intent: { config: ReelConfig; width: number; height: number; fps: number; durationMs: number; transparent: boolean }): Promise<{ snapshotId: string; format: "png-frames"; width: number; height: number; fps: number; durationMs: number; frameCount: number; alpha: boolean; audio: "none"; consequence: string }>
+    exportCapabilities(): Promise<{ version: 1; formats: Array<
+        | { id: "png-frames"; available: true; alpha: true; audio: false; consequence: string }
+        | { id: "mp4-h264-aac"; available: boolean; alpha: false; audio: true; sceneIds: ["quiet-carousel"]; consequence: string }
+    > }>
+    preflightPngFrames(intent: { config: ReelConfig; width: number; height: number; fps: number; durationMs: number; cycleDurationMs: number; finalCycleDurationMs: number; transparent: boolean }): Promise<{ snapshotId: string; format: "png-frames"; width: number; height: number; fps: number; durationMs: number; frameCount: number; alpha: boolean; audio: "none"; consequence: string }>
     choosePngFramesDestination(suggestedName: string): Promise<{ cancelled: true } | { cancelled: false; destinationGrant: string }>
     startPngFramesExport(snapshotId: string, destinationGrant: string): Promise<{ format: "png-frames"; frameCount: number; width: number; height: number; alpha: boolean; audio: "none"; manifestSha256: string }>
+    preflightH264(intent: { config: ReelConfig; width: number; height: number; fps: number; durationMs: number; cycleDurationMs: number; finalCycleDurationMs: number; quality: ExportQuality }): Promise<{ snapshotId: string; format: "mp4-h264-aac"; width: number; height: number; fps: number; durationMs: number; frameCount: number; alpha: false; audio: "aac-48khz-stereo"; audioFrameCount: number; consequence: string }>
+    appendH264Audio(snapshotId: string, startFrame: number, pcm16Base64: string): Promise<{ acceptedFrames: number; nextFrame: number }>
+    finishH264Audio(snapshotId: string): Promise<{ snapshotId: string; sampleRate: 48000; channels: 2; sampleFrames: number; bytes: number; sha256: string }>
+    chooseH264Destination(suggestedName: string): Promise<{ cancelled: true } | { cancelled: false; destinationGrant: string }>
+    startH264Export(snapshotId: string, destinationGrant: string): Promise<{ format: "mp4-h264-aac"; frameCount: number; width: number; height: number; alpha: false; audio: "aac-48khz-stereo"; audioFrameCount: number; bytes: number; sha256: string; videoDecodeSha256: string; audioDecodeSha256: string }>
     cancelExport(): Promise<{ cancelled: boolean }>
     onExportProgress(callback: (progress: ExportProgress) => void): () => void
     saveProject(config: ReelConfig): Promise<{ cancelled?: boolean; savedAt?: number; documentId?: string }>

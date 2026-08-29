@@ -1,7 +1,8 @@
 const crypto = require("node:crypto")
 const fs = require("node:fs")
 const path = require("node:path")
-const { nativeImage } = require("electron")
+const { spawnSync } = require("node:child_process")
+const { app, nativeImage } = require("electron")
 const { inspectPng } = require("./png-frames-runtime.cjs")
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -27,19 +28,19 @@ async function clickText(window, selector, text) {
     if (!clicked) throw new Error(`G06 renderer smoke could not click ${text}.`)
 }
 
-async function prepareStudio(window) {
+async function prepareStudio(window, backgroundStyle) {
     await until(window, `Boolean(document.querySelector('.style-gallery-shell'))`)
     await clickText(window, "button", "Back to studio")
     await until(window, `Boolean(document.querySelector('.app-shell'))`)
     await clickText(window, "button", "Open project")
     await until(window, `document.querySelectorAll('.media-row').length === 1 && !document.body.textContent.includes('Opening project…')`)
     const selected = await window.webContents.executeJavaScript(`(() => {
-        const button = [...document.querySelectorAll('.background-style-grid button')].find((candidate) => candidate.textContent.trim().toLowerCase() === 'transparent')
+        const button = [...document.querySelectorAll('.background-style-grid button')].find((candidate) => candidate.textContent.trim().toLowerCase() === ${JSON.stringify(backgroundStyle)})
         if (!button) return false
         button.click()
         return true
     })()`)
-    if (!selected) throw new Error("G06 renderer smoke could not select transparency.")
+    if (!selected) throw new Error(`G06 renderer smoke could not select ${backgroundStyle}.`)
     await clickText(window, ".inspector-top button", "Export")
     await until(window, `Boolean(document.querySelector('.export-panel'))`)
     await window.webContents.executeJavaScript(`(() => {
@@ -64,9 +65,17 @@ async function prepareStudio(window) {
 
 async function runG06RendererSmoke(window, evidenceRoot, mode) {
     fs.mkdirSync(evidenceRoot, { recursive: true })
-    const destination = path.resolve(process.env.REEL_G06_PNG_DESTINATION)
-    await prepareStudio(window)
-    if (mode === "cancel") {
+    const h264 = mode.startsWith("h264-")
+    const cancel = mode.endsWith("cancel")
+    const destinationValue = h264 ? process.env.REEL_G06_H264_DESTINATION : process.env.REEL_G06_PNG_DESTINATION
+    if (!destinationValue) throw new Error(`G06 renderer smoke is missing its ${h264 ? "H.264" : "PNG Frames"} destination.`)
+    const destination = path.resolve(destinationValue)
+    await prepareStudio(window, h264 ? "solid" : "transparent")
+    if (h264) {
+        await clickText(window, ".format-cards button", "MP4")
+        await until(window, `document.querySelector('.format-cards button.is-active')?.textContent.includes('MP4')`)
+    }
+    if (cancel || h264) {
         await window.webContents.executeJavaScript(`(() => {
             window.__g06ObservedExportProgress = []
             window.galleryHost.onExportProgress((progress) => {
@@ -79,16 +88,24 @@ async function runG06RendererSmoke(window, evidenceRoot, mode) {
             })
         })()`)
     }
-    await clickText(window, ".export-button", "Export verified PNG Frames")
+    await clickText(window, ".export-button", h264 ? "Export MP4" : "Export verified PNG Frames")
     await until(window, `Boolean(document.querySelector('.export-progress'))`)
-    if (mode === "cancel") {
+    if (cancel) {
         await until(window, `window.__g06ObservedExportProgress.some((progress) => progress.phase === 'rendering' && progress.frame >= 1)`)
         await clickText(window, ".export-progress button", "Cancel")
         await until(window, `document.querySelector('.export-cancelled[role="status"][data-export-phase="cancelled"]')?.textContent.trim() === 'Export cancelled.'`)
-        if (fs.readFileSync(path.join(destination, "prior.txt"), "utf8") !== "preserve-me") throw new Error("G06 real cancellation changed the prior destination.")
-        if (fs.readdirSync(destination).join("\n") !== "prior.txt") throw new Error("G06 real cancellation left output inside the prior destination.")
-        const transactionResidue = fs.readdirSync(path.dirname(destination)).filter((name) => /^\.gallery-png-(?:stage|backup)-[a-f0-9]{32}$/.test(name))
+        if (h264) {
+            if (fs.existsSync(destination)) throw new Error("G06B real cancellation published an MP4 destination.")
+        } else {
+            if (fs.readFileSync(path.join(destination, "prior.txt"), "utf8") !== "preserve-me") throw new Error("G06 real cancellation changed the prior destination.")
+            if (fs.readdirSync(destination).join("\n") !== "prior.txt") throw new Error("G06 real cancellation left output inside the prior destination.")
+        }
+        const transactionPattern = h264 ? /^\.gallery-h264-(?:stage|backup)-[a-f0-9]{32}\.mp4$/ : /^\.gallery-png-(?:stage|backup)-[a-f0-9]{32}$/
+        const transactionResidue = fs.readdirSync(path.dirname(destination)).filter((name) => transactionPattern.test(name))
         if (transactionResidue.length) throw new Error("G06 real cancellation left transactional residue.")
+        const audioRoot = path.join(app.getPath("userData"), "h264-audio-staging")
+        const audioResidue = h264 && fs.existsSync(audioRoot) ? fs.readdirSync(audioRoot).filter((name) => /^audio-[a-f0-9]{32}$/.test(name)) : []
+        if (audioResidue.length) throw new Error("G06B real cancellation left private PCM residue.")
         const outcome = await window.webContents.executeJavaScript(`(() => ({
             terminalPhase: document.querySelector('.export-cancelled')?.dataset.exportPhase,
             status: document.querySelector('.export-cancelled')?.textContent.trim(),
@@ -100,11 +117,55 @@ async function runG06RendererSmoke(window, evidenceRoot, mode) {
         }
         fs.writeFileSync(path.join(evidenceRoot, "cancel.json"), `${JSON.stringify({
             mode,
-            priorPreserved: true,
-            destinationEntries: ["prior.txt"],
+            priorPreserved: h264 ? null : true,
+            destinationAbsent: h264,
+            destinationEntries: h264 ? [] : ["prior.txt"],
             transactionResidue,
+            audioResidue,
             terminalPhase: outcome.terminalPhase,
             status: outcome.status,
+            observedProgress: outcome.progress,
+        }, null, 2)}\n`)
+        return
+    }
+    if (h264) {
+        await until(window, `document.querySelector('.export-success strong')?.textContent.includes('H.264/AAC verified')`, 120_000)
+        const outcome = await window.webContents.executeJavaScript(`(() => ({
+            status: document.querySelector('.export-success strong')?.textContent.trim(),
+            progress: window.__g06ObservedExportProgress,
+        }))()`)
+        for (const phase of ["rendering", "encoding", "verifying", "done"]) {
+            if (!outcome.progress.some((entry) => entry.phase === phase)) throw new Error(`G06B real renderer did not expose the ${phase} phase.`)
+        }
+        const stat = fs.lstatSync(destination)
+        if (!stat.isFile() || stat.isSymbolicLink() || stat.size < 128) throw new Error("G06B real renderer did not publish a regular MP4.")
+        const ffmpeg = app.isPackaged ? path.join(process.resourcesPath, "ffmpeg", process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg") : require("ffmpeg-static")
+        const decoded = spawnSync(ffmpeg, ["-hide_banner", "-loglevel", "error", "-nostdin", "-i", destination, "-map", "0:a:0", "-ar", "48000", "-ac", "2", "-f", "s16le", "pipe:1"], { encoding: null, maxBuffer: 64 * 1024 * 1024, timeout: 30_000 })
+        if (decoded.status !== 0 || !Buffer.isBuffer(decoded.stdout) || decoded.stdout.length < 4 || decoded.stdout.length % 4) throw new Error("G06B real renderer audio readback failed.")
+        let audioPeak = 0
+        for (let offset = 0; offset < decoded.stdout.length; offset += 2) audioPeak = Math.max(audioPeak, Math.abs(decoded.stdout.readInt16LE(offset)))
+        if (audioPeak < 1_000) throw new Error("G06B real renderer did not preserve the authored non-silent mix.")
+        const decodedVideo = spawnSync(ffmpeg, ["-hide_banner", "-loglevel", "error", "-nostdin", "-i", destination, "-map", "0:v:0", "-frames:v", "1", "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1"], { encoding: null, maxBuffer: 64 * 64 * 3 + 1_024, timeout: 30_000 })
+        if (decodedVideo.status !== 0 || !Buffer.isBuffer(decodedVideo.stdout) || decodedVideo.stdout.length !== 64 * 64 * 3) throw new Error("G06B real renderer video readback failed.")
+        let decodedArtworkPixels = 0
+        for (let offset = 0; offset < decodedVideo.stdout.length; offset += 3) {
+            const red = decodedVideo.stdout[offset]
+            const green = decodedVideo.stdout[offset + 1]
+            const blue = decodedVideo.stdout[offset + 2]
+            if (Math.max(red, green, blue) - Math.min(red, green, blue) > 12) decodedArtworkPixels += 1
+        }
+        if (decodedArtworkPixels < 16) throw new Error("G06B real renderer did not preserve source-artwork pixels in decoded video.")
+        const screenshot = await window.webContents.capturePage()
+        fs.writeFileSync(path.join(evidenceRoot, "success.png"), screenshot.toPNG())
+        fs.writeFileSync(path.join(evidenceRoot, "success.json"), `${JSON.stringify({
+            mode,
+            status: outcome.status,
+            bytes: stat.size,
+            sha256: crypto.createHash("sha256").update(fs.readFileSync(destination)).digest("hex"),
+            decodedAudioBytes: decoded.stdout.length,
+            decodedAudioPeak: audioPeak,
+            decodedVideoBytes: decodedVideo.stdout.length,
+            decodedArtworkPixels,
             observedProgress: outcome.progress,
         }, null, 2)}\n`)
         return

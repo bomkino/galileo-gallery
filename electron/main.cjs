@@ -36,6 +36,8 @@ const { inspectAudioFile, inspectMediaFile } = require("./project-schema.cjs")
 const { createAudioGrantStaging } = require("./audio-grant-staging.cjs")
 const { createLinuxVideoAudioRuntime } = require("./linux-video-audio-runtime.cjs")
 const { createPngFramesRuntime } = require("./png-frames-runtime.cjs")
+const { createH264ExportRuntime } = require("./h264-export-runtime.cjs")
+const { cleanupH264AudioResidue, createH264AudioStage } = require("./h264-audio-stage.cjs")
 const { cleanupG06PrivateFrameCache, createG06PrivateFrameCache } = require("./g06-private-frame-cache.cjs")
 const { runG06FFmpeg } = require("./g06-ffmpeg-runner.cjs")
 const {
@@ -127,6 +129,7 @@ function cleanupOpenedProjectResidue() {
 let audioGrantStaging = null
 let videoAudioRuntime = null
 let pngFramesRuntime = null
+let h264ExportRuntime = null
 
 function audioStaging() {
     if (!audioGrantStaging) audioGrantStaging = createAudioGrantStaging({ root: path.join(app.getPath("userData"), "audio-grants"), inspect: inspectAudioFile })
@@ -144,6 +147,15 @@ function videoAudio() {
 function pngFrames() {
     if (!pngFramesRuntime) pngFramesRuntime = createPngFramesRuntime()
     return pngFramesRuntime
+}
+
+function h264Export() {
+    if (!h264ExportRuntime) h264ExportRuntime = createH264ExportRuntime({ ffmpegPath: ffmpegPath() })
+    return h264ExportRuntime
+}
+
+function h264AudioRoot() {
+    return path.join(app.getPath("userData"), "h264-audio-staging")
 }
 
 function rendererURL(exportMode = false) {
@@ -170,6 +182,18 @@ function ffmpegPath() {
     }
     if (ffmpegStatic && fs.existsSync(ffmpegStatic)) return ffmpegStatic
     throw new Error(`Bundled FFmpeg is missing for ${process.platform}-${process.arch}.`)
+}
+
+function h264HostAvailable() {
+    try {
+        const executable = ffmpegPath()
+        const stat = fs.lstatSync(executable)
+        if (!stat.isFile() || stat.isSymbolicLink()) return false
+        fs.accessSync(executable, fs.constants.R_OK | fs.constants.X_OK)
+        return true
+    } catch {
+        return false
+    }
 }
 
 function recoveryPath() {
@@ -685,6 +709,18 @@ async function choosePngFramesDestination(suggestedName) {
     return path.join(result.filePaths[0], suggestedName)
 }
 
+async function chooseH264Destination(suggestedName) {
+    if (process.env.REEL_G06_H264_DESTINATION) return path.resolve(process.env.REEL_G06_H264_DESTINATION)
+    const result = await dialog.showSaveDialog(mainWindow, {
+        title: "Export verified H.264/AAC MP4",
+        buttonLabel: "Export MP4",
+        defaultPath: path.join(safeExportFolder(), suggestedName),
+        filters: [{ name: "MP4 video", extensions: ["mp4"] }],
+    })
+    if (result.canceled || !result.filePath) return null
+    return result.filePath.toLowerCase().endsWith(".mp4") ? result.filePath : `${result.filePath}.mp4`
+}
+
 async function createHostPngFrameRenderer({ snapshot, signal, mediaPath, openExportMedia, grantExportMedia, state }) {
     const scaleFactor = screen.getPrimaryDisplay().scaleFactor || 1
     const request = {
@@ -693,7 +729,9 @@ async function createHostPngFrameRenderer({ snapshot, signal, mediaPath, openExp
         height: snapshot.height,
         fps: snapshot.fps,
         durationMs: snapshot.durationMs,
-        format: "png-frames",
+        cycleDurationMs: snapshot.cycleDurationMs,
+        finalCycleDurationMs: snapshot.finalCycleDurationMs,
+        format: snapshot.format === "mp4-h264-aac" ? "mp4" : "png-frames",
         posterFrame: "none",
         quality: "master",
     }
@@ -743,24 +781,27 @@ async function createHostPngFrameRenderer({ snapshot, signal, mediaPath, openExp
             "export:ready",
             (payload, event) => event.sender.id === exportWindow.webContents.id && exactExportReady(payload, state.exportId),
             30_000,
-            state
+            state,
+            signal
         )
         exportWindow.webContents.send("export:init", { exportId: state.exportId, request, videoFrames })
         await ready
         return {
-            async renderFrame({ frameIndex, timeMs }) {
-                if (signal.aborted || exportWindow.isDestroyed()) throw new HostPortError("cancelled")
+            async renderFrame({ frameIndex, timeMs, signal: producerSignal }) {
+                const frameSignal = producerSignal ?? signal
+                if (frameSignal.aborted || exportWindow.isDestroyed()) throw new HostPortError(signal.aborted ? "cancelled" : "verification_failed")
                 const frameId = `${state.exportId}-${frameIndex}`
                 const frameReady = onceIPC(
                     "export:frame-ready",
                     (payload, event) => event.sender.id === exportWindow.webContents.id && exactExportFrameReady(payload, state.exportId, frameId),
                     30_000,
-                    state
+                    state,
+                    frameSignal
                 )
                 exportWindow.webContents.send("export:set-frame", { exportId: state.exportId, frameId, timeMs })
                 await frameReady
-                if (signal.aborted) throw new HostPortError("cancelled")
-                const image = await exportWindow.webContents.capturePage()
+                if (frameSignal.aborted) throw new HostPortError(signal.aborted ? "cancelled" : "verification_failed")
+                const image = await abortable(exportWindow.webContents.capturePage(), frameSignal, signal)
                 const size = image.getSize()
                 if (size.width !== snapshot.width || size.height !== snapshot.height) throw new HostPortError("verification_failed")
                 return image.toPNG()
@@ -794,6 +835,28 @@ async function runHostPngFramesExport({ snapshot, destination, destinationAuthor
             signal,
             renderFrame: renderer.renderFrame,
             onProgress: (progress) => report({ exportId: state.exportId, ...progress, message: progress.phase === "done" ? "PNG Frames verified." : undefined }),
+        })
+    } finally {
+        renderer?.close()
+        if (activeExport === state) activeExport = null
+    }
+}
+
+async function runHostH264Export({ snapshot, destination, destinationAuthority, audio, signal, mediaPath, openExportMedia, grantExportMedia }) {
+    if (activeExport) throw new HostPortError("conflict")
+    const state = { exportId: `h264-${crypto.randomBytes(12).toString("hex")}`, cancelled: false, process: null, window: null, signal }
+    activeExport = state
+    let renderer
+    try {
+        renderer = await createHostPngFrameRenderer({ snapshot, signal, mediaPath, openExportMedia, grantExportMedia, state })
+        return await h264Export().run({
+            snapshot,
+            destination,
+            destinationAuthority,
+            audio,
+            signal,
+            renderFrame: renderer.renderFrame,
+            onProgress: (progress) => report({ exportId: state.exportId, ...progress, message: progress.phase === "done" ? "H.264/AAC verified." : undefined }),
         })
     } finally {
         renderer?.close()
@@ -837,6 +900,7 @@ function createMainWindow() {
         const host = createLinuxHostController({
             owner: `window-${webContentsId}`,
             webContentsId,
+            h264Available: h264HostAvailable(),
             identity: () => ({
                 ...packagedBuildIdentity(),
                 protocol: 1,
@@ -853,6 +917,9 @@ function createMainWindow() {
             audioWaveform: waveformForHost,
             chooseExportDestination: ({ suggestedName }) => choosePngFramesDestination(suggestedName),
             runPngFramesExport: runHostPngFramesExport,
+            createH264AudioStage: ({ snapshot }) => createH264AudioStage({ root: h264AudioRoot(), snapshot }),
+            chooseH264Destination: ({ suggestedName }) => chooseH264Destination(suggestedName),
+            runH264Export: runHostH264Export,
             onGrantRevoked: removeRevokedAudioGrant,
             saveProject: async ({ config, mediaPath }) => {
                 const saved = await savePortableProject(config, process.env.REEL_G03_PROJECT_PATH ? path.resolve(process.env.REEL_G03_PROJECT_PATH) : undefined, mediaPath)
@@ -989,19 +1056,39 @@ function createMainWindow() {
         videoAudioRuntime?.dispose()
         videoAudioRuntime = null
         pngFramesRuntime = null
+        h264ExportRuntime = null
         mainWindow = null
     })
 }
 
-function onceIPC(channel, predicate, timeoutMs = 30000, exportState) {
+function abortable(work, signal, cancellationSignal = signal) {
+    if (!signal) return work
+    if (signal.aborted) return Promise.reject(new HostPortError(cancellationSignal?.aborted ? "cancelled" : "verification_failed"))
+    return new Promise((resolve, reject) => {
+        const cleanup = () => signal.removeEventListener("abort", abort)
+        const abort = () => { cleanup(); reject(new HostPortError(cancellationSignal?.aborted ? "cancelled" : "verification_failed")) }
+        signal.addEventListener("abort", abort, { once: true })
+        Promise.resolve(work).then((value) => { cleanup(); resolve(value) }, (error) => { cleanup(); reject(error) })
+    })
+}
+
+function onceIPC(channel, predicate, timeoutMs = 30000, exportState, signal) {
     return new Promise((resolve, reject) => {
         let cancelCheck = null
-        const cleanup = () => {
-            clearTimeout(timeout)
-            if (cancelCheck) clearInterval(cancelCheck)
-            ipcMain.removeListener(channel, listener)
+        let timeout = null
+        let listener = null
+        const abort = () => {
+            cleanup()
+            reject(new HostPortError(exportState?.signal?.aborted ? "cancelled" : "verification_failed"))
         }
-        const timeout = setTimeout(() => {
+        const cleanup = () => {
+            if (timeout) clearTimeout(timeout)
+            if (cancelCheck) clearInterval(cancelCheck)
+            signal?.removeEventListener("abort", abort)
+            if (listener) ipcMain.removeListener(channel, listener)
+        }
+        if (signal?.aborted) { reject(new HostPortError(exportState?.signal?.aborted ? "cancelled" : "verification_failed")); return }
+        timeout = setTimeout(() => {
             cleanup()
             reject(new Error(`Timed out waiting for ${channel}.`))
         }, timeoutMs)
@@ -1012,13 +1099,14 @@ function onceIPC(channel, predicate, timeoutMs = 30000, exportState) {
                 reject(new Error("Export cancelled."))
             }, 100)
         }
-        const listener = (event, payload) => {
+        listener = (event, payload) => {
             if (!predicate(payload, event)) return
             cleanup()
             if (payload.error) reject(new Error(payload.error))
             else resolve(payload)
         }
         ipcMain.on(channel, listener)
+        signal?.addEventListener("abort", abort, { once: true })
     })
 }
 
@@ -1299,8 +1387,9 @@ async function runExport(request, outputPath) {
 
 app.whenReady().then(async () => {
     if (linuxHostMode()) {
-        cleanupOpenedProjectResidue()
-        audioStaging().cleanupResidue()
+        try { cleanupOpenedProjectResidue() } catch { recordSecurityDecision("opened-project-cleanup-refused") }
+        try { audioStaging().cleanupResidue() } catch { recordSecurityDecision("audio-staging-cleanup-refused") }
+        try { cleanupH264AudioResidue(h264AudioRoot()) } catch { recordSecurityDecision("h264-audio-cleanup-refused") }
         try {
             cleanupG06PrivateFrameCache(path.join(app.getPath("userData"), "g06-export-video-frames"))
         } catch {

@@ -77,7 +77,7 @@ Package on the target operating system. Each packaging command prepares that pla
 
 Videos are decoded by bundled FFmpeg into bounded, cycle-local frame caches at the export frame rate and canvas size. A hidden renderer receives exact global times, chooses deterministic source frames at normal speed, renders the selected scene pose, and streams captured frames to the encoder. Final export does not depend on browser video seeking.
 
-Opaque masters use ProRes 422 HQ. Transparent masters use ProRes 4444 XQ. Opaque video carries explicit BT.709 tags; alpha-capable exports preserve transparency. Outputs are intentionally silent.
+Opaque masters use ProRes 422 HQ. Transparent masters use ProRes 4444 XQ. Opaque video carries explicit BT.709 tags; alpha-capable exports preserve transparency. The verified Linux MP4 path carries the authored deterministic AAC mix.
 
 ## Design principles
 

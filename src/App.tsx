@@ -6,6 +6,8 @@ import GalleryRenderer from "./GalleryRenderer"
 import QuietCarouselRenderer, { quietCarouselTimeline } from "./scenes/QuietCarouselRenderer"
 import StyleGallery from "./StyleGallery"
 import { ensureReelAPI } from "./runtime"
+import { exportCycleClock } from "./exportClock"
+import { defaultAudioIntent } from "./audio/audioTimeline"
 import { projectConfigAfterOpen, projectOpenNotice } from "./projectOpen"
 import { styleProfile, styleSettings } from "./styleProfiles"
 import { placeholderItems, studioTimeline } from "./timeline"
@@ -50,6 +52,7 @@ function normalizeConfig(value: Partial<ReelConfig> | null | undefined): ReelCon
         timelineMode: value?.timelineMode ?? "automatic",
         timelineFixedDurationMs: value?.timelineFixedDurationMs ?? 0,
         timelineSegments: value?.timelineSegments ?? [],
+        audio: value?.audio ?? defaultAudioIntent(),
     }
 }
 
@@ -359,19 +362,6 @@ function nextPaint() {
     return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
 }
 
-function exportCycleClock(request: ExportRequest, timeMs: number) {
-    const cycleDuration = request.cycleDurationMs ?? request.durationMs
-    const repeats = Math.max(1, Math.round(request.config.settings.repeatCount))
-    if (request.config.settings.playKind === "repeat" && request.finalCycleDurationMs) {
-        const finalStart = cycleDuration * Math.max(0, repeats - 1)
-        if (timeMs >= finalStart) return { timeMs: Math.max(0, timeMs - finalStart), durationMs: request.finalCycleDurationMs, terminal: true }
-    }
-    if (request.config.settings.playKind === "once") {
-        return { timeMs: Math.min(timeMs, cycleDuration), durationMs: cycleDuration, terminal: true }
-    }
-    return { timeMs: timeMs % Math.max(1, cycleDuration), durationMs: cycleDuration, terminal: false }
-}
-
 async function waitForExportFrameImages() {
     const images = Array.from(document.querySelectorAll<HTMLImageElement>("img.orl-export-frame, img.galileo-media, .qc-export-stage img"))
     await Promise.all(images.map(async (image) => {
@@ -544,6 +534,7 @@ function AppView() {
     const [progress, setProgress] = React.useState<ExportProgress | null>(null)
     const [lastExport, setLastExport] = React.useState<string | null>(null)
     const [lastPoster, setLastPoster] = React.useState<string | null>(null)
+    const [lastExportFormat, setLastExportFormat] = React.useState<ExportFormat | null>(null)
     const [dragIndex, setDragIndex] = React.useState<number | null>(null)
     const [isDropping, setDropping] = React.useState(false)
     const [selectedItemId, setSelectedItemId] = React.useState<string | null>(config.items[0]?.id ?? null)
@@ -570,10 +561,12 @@ function AppView() {
     )
     const quietTimeline = React.useMemo(() => quietCarouselTimeline(config, fps), [config, fps])
     const duration = config.styleId === "quiet-carousel" ? quietTimeline.durationMs : timeline.durationMs
-    const repeatCount = clamp(Math.round(config.settings.repeatCount), 2, 20)
+    const repeatCount = clamp(Math.round(config.settings.repeatCount), 1, 1000)
     const finalCycleDuration = React.useMemo(
         () => config.settings.playKind === "repeat"
-            ? studioTimeline({ ...config, settings: { ...config.settings, playKind: "once" } }, output.width, output.height).durationMs
+            ? config.styleId === "quiet-carousel"
+                ? duration
+                : studioTimeline({ ...config, settings: { ...config.settings, playKind: "once" } }, output.width, output.height).durationMs
             : duration,
         [config, duration, output.height, output.width]
     )
@@ -585,6 +578,8 @@ function AppView() {
     const liveSlides = React.useMemo(() => sourceItems(config.items), [config.items])
     const activeStyle = galleryStyle(config.styleId)
     const activeScene = galleryScene(config.styleId)
+    const verifiedH264Scene = usesLinuxHostPort && config.styleId === "quiet-carousel"
+    const verifiedH264Audio = !config.audio || (config.audio.sampleRate === 48_000 && config.audio.channels === 2)
     const activeVariants = sceneVariants(config.styleId)
     const activeProfile = styleProfile(config.styleId)
     const isOpeningReel = activeStyle.id === "opening-reel"
@@ -603,7 +598,7 @@ function AppView() {
         () => ({ width: `min(100%, calc((100vh - 210px) * ${previewRatio}))` }),
         [previewRatio]
     )
-    const isExporting = progress && ["preparing", "rendering", "encoding"].includes(progress.phase)
+    const isExporting = progress && ["preparing", "rendering", "encoding", "verifying"].includes(progress.phase)
     const restart = React.useCallback(() => {
         setReelKey((key) => key + 1)
         setStartedAt(performance.now())
@@ -688,10 +683,10 @@ function AppView() {
     }, [config])
 
     React.useEffect(() => {
-        if (config.settings.backgroundStyle === "transparent" && format === "mp4") {
-            setFormat("webm")
+        if (format === "mp4" && ((usesLinuxHostPort && (!verifiedH264Scene || !verifiedH264Audio)) || config.settings.backgroundStyle === "transparent")) {
+            setFormat(usesLinuxHostPort ? "png-frames" : "webm")
         }
-    }, [config.settings.backgroundStyle, format])
+    }, [config.settings.backgroundStyle, format, usesLinuxHostPort, verifiedH264Audio, verifiedH264Scene])
 
     React.useEffect(() => {
         const missing = config.items.filter((item) => {
@@ -987,20 +982,26 @@ function AppView() {
 
     const exportReel = async () => {
         if (isExporting) return
+        const requestedFormat = format
+        if (usesLinuxHostPort && requestedFormat === "mp4" && (!verifiedH264Scene || !verifiedH264Audio)) {
+            setProgress({ exportId: "failed", phase: "error", progress: 0, message: !verifiedH264Scene ? "Verified H.264/AAC currently supports Quiet Carousel only. Choose PNG Frames for this Scene." : "Verified H.264/AAC requires a 48 kHz stereo Project audio master. Choose PNG Frames or update Project audio." })
+            return
+        }
         setLastExport(null)
         setLastPoster(null)
+        setLastExportFormat(requestedFormat)
         setInspector("export")
         setProgress({ exportId: "png-pending", phase: "preparing", progress: 0, message: "Creating an immutable export snapshot…" })
         try {
             const result = await reelAPI.exportReel({
-                config,
+                config: { ...config, settings: { ...config.settings, repeatCount } },
                 width: output.width,
                 height: output.height,
                 fps,
                 durationMs: playbackDuration,
                 cycleDurationMs: duration,
                 finalCycleDurationMs: finalCycleDuration,
-                format,
+                format: requestedFormat,
                 posterFrame,
                 quality: config.settings.exportQuality,
             })
@@ -1145,7 +1146,7 @@ function AppView() {
                     <details className="project-menu">
                         <summary className="button quiet"><Icon name="folder" /> Project</summary>
                         <div>
-                            <button type="button" disabled={projectOpening} onClick={(event) => { void openProject(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Open project</button>
+                            <button type="button" disabled={projectOpening || Boolean(isExporting)} onClick={(event) => { void openProject(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Open project</button>
                             <button type="button" onClick={(event) => { void saveProject(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Save project <small>media + progress</small></button>
                             <span />
                             <button type="button" onClick={(event) => { void openTemplate(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Apply template</button>
@@ -1364,7 +1365,7 @@ function AppView() {
                                 options={[{ value: "once", label: "Once" }, { value: "repeat", label: "Loop ×" }, { value: "loop", label: "Forever" }]}
                                 onChange={(value) => updateSettings("playKind", value)}
                             />
-                            {config.settings.playKind === "repeat" ? <RangeControl label="Loop count" value={config.settings.repeatCount} min={2} max={20} suffix="×" onChange={(value) => updateSettings("repeatCount", Math.round(value))} /> : null}
+                            {config.settings.playKind === "repeat" ? <RangeControl label="Loop count" value={config.settings.repeatCount} min={1} max={1000} suffix="×" onChange={(value) => updateSettings("repeatCount", Math.round(value))} /> : null}
                             {activeProfile.axisControl ? <div className="playback-direction">
                                 <span>Axis</span>
                                 <Segment value={config.settings.axis} options={[{ value: "horizontal", label: "Horizontal" }, { value: "vertical", label: "Vertical" }]} onChange={(value) => updateSettings("axis", value)} />
@@ -1435,7 +1436,7 @@ function AppView() {
                             <div>
                                 <span className="eyebrow">Frame-perfect video</span>
                                 <h3>Make the gallery film</h3>
-                                <p>Original videos are decoded by FFmpeg and rendered silently, frame by frame.</p>
+                                <p>{usesLinuxHostPort ? "Original media and authored audio follow one deterministic story clock." : "This legacy exporter renders original media without Project audio."}</p>
                             </div>
                         </section>
                         <section className="control-section">
@@ -1443,13 +1444,14 @@ function AppView() {
                             <div className="format-cards">
                                 {(usesLinuxHostPort ? [
                                     ["png-frames", "PNG Frames", "Verified sequence · straight alpha"],
+                                    ["mp4", "MP4", !verifiedH264Scene ? "Quiet Carousel only · use PNG Frames" : !verifiedH264Audio ? "Needs 48 kHz stereo audio · use PNG Frames" : "Verified H.264 · AAC · opaque"],
                                 ] : [
                                     ["mp4", "MP4", "H.264 · universal"],
                                     ["premiere", "Premiere", "ProRes · professional editing"],
                                     ["webm", "WebM", "VP9 · pristine"],
                                     ["webm-small", "WebM Small", "VP9 · web-ready"],
                                 ] as Array<[ExportFormat, string, string]>).map(([value, title, detail]) => (
-                                    <button type="button" disabled={config.settings.backgroundStyle === "transparent" && value === "mp4"} className={format === value ? "is-active" : ""} onClick={() => setFormat(value as ExportFormat)} key={value}>
+                                    <button type="button" disabled={Boolean(isExporting) || (value === "mp4" && ((usesLinuxHostPort && (!verifiedH264Scene || !verifiedH264Audio)) || config.settings.backgroundStyle === "transparent"))} className={format === value ? "is-active" : ""} onClick={() => setFormat(value as ExportFormat)} key={value}>
                                         <span>{title}</span><small>{detail}</small>
                                         {format === value ? <Icon name="check" /> : null}
                                     </button>
@@ -1459,7 +1461,8 @@ function AppView() {
                                 <p className="preset-note">{config.settings.backgroundStyle === "transparent" ? "Transparency uses ProRes 4444. Master uses ProRes 4444 XQ for compositing." : "Optimized: ProRes 422 LT. High: ProRes 422. Master: ProRes 422 HQ."}</p>
                             ) : null}
                             {format === "png-frames" ? <p className="preset-note">PNG Frames preserve straight alpha when requested and never contain audio. Project audio stays unchanged.</p> : null}
-                            {config.settings.backgroundStyle === "transparent" ? <p className="preset-note">Transparent export: Premiere or WebM. Social platforms flatten transparency; use this for compositing.</p> : null}
+                            {usesLinuxHostPort && format === "mp4" ? <p className="preset-note">H.264/AAC is a verified opaque BT.709 MP4 with the authored mix when the Project audio master is 48 kHz stereo.</p> : null}
+                            {config.settings.backgroundStyle === "transparent" ? <p className="preset-note">{usesLinuxHostPort ? "Transparent export uses verified PNG Frames. MP4 remains opaque." : "Transparent export: Premiere or WebM. Social platforms flatten transparency; use this for compositing."}</p> : null}
                         </section>
                         <section className="control-section compact-controls">
                             <label>
@@ -1494,7 +1497,7 @@ function AppView() {
                                     onChange={(value) => setFps(Number(value))}
                                 />
                             </div>
-                            {format !== "png-frames" ? <div>
+                            {!usesLinuxHostPort && format !== "png-frames" ? <div>
                                 <span className="field-label">Poster JPG</span>
                                 <Segment
                                     value={posterFrame}
@@ -1520,18 +1523,23 @@ function AppView() {
                         {isExporting ? (
                             <div className={`export-progress ${progress?.phase === "preparing" ? "is-preparing" : ""}`}>
                                 <div><span style={{ transform: `scaleX(${progress?.progress ?? 0})` }} /></div>
-                                <p>{progress?.message ?? (progress?.phase === "preparing" ? "Preparing media…" : progress?.phase === "encoding" ? "Finishing the file…" : `Drawing frame ${progress?.frame ?? 0} of ${progress?.totalFrames ?? 0}`)}</p>
-                                <button type="button" onClick={() => reelAPI.cancelExport()}>Cancel</button>
+                                <p>{progress?.message ?? (progress?.phase === "preparing" ? "Preparing media…" : progress?.phase === "encoding" ? "Encoding H.264 and AAC…" : progress?.phase === "verifying" ? "Decoding and verifying the finished file…" : `Drawing frame ${progress?.frame ?? 0} of ${progress?.totalFrames ?? 0}`)}</p>
+                                <button type="button" onClick={() => void reelAPI.cancelExport().catch((error) => setProgress({
+                                    exportId: "cancel-failed",
+                                    phase: "error",
+                                    progress: 0,
+                                    message: error instanceof Error ? `Could not cancel export: ${error.message}` : "Could not cancel export.",
+                                }))}>Cancel</button>
                             </div>
                         ) : progress?.phase === "done" ? (
                             <div className="export-success">
                                 <span><Icon name="check" /></span>
-                                <div><strong>{format === "png-frames" ? "PNG Frames verified" : "Reel exported"}</strong><small>{lastExport ? `${lastExport.split("/").pop()}${lastPoster ? " + poster JPG" : ""}` : "Destination preserved and committed"}</small></div>
+                                <div><strong>{lastExportFormat === "png-frames" ? "PNG Frames verified" : usesLinuxHostPort ? "H.264/AAC verified" : "Reel exported"}</strong><small>{lastExport ? `${lastExport.split("/").pop()}${lastPoster ? " + poster JPG" : ""}` : "Destination verified, preserved, and committed"}</small></div>
                                 {lastExport ? <button type="button" onClick={() => reelAPI.revealFile(lastExport)}><Icon name="folder" /></button> : <span />}
                             </div>
                         ) : null}
 
-                        <button className="export-button" type="button" disabled={!!isExporting} onClick={exportReel}>
+                        <button className="export-button" type="button" disabled={!!isExporting || (usesLinuxHostPort && format === "mp4" && (!verifiedH264Scene || !verifiedH264Audio || config.settings.backgroundStyle === "transparent"))} onClick={exportReel}>
                             {isExporting ? "Exporting…" : `Export ${exportButtonLabel(format)}`}
                             <Icon name="film" />
                         </button>

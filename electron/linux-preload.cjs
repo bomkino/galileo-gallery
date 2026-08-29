@@ -103,11 +103,15 @@ function cancelledAudio(value) {
     return value
 }
 
-function pngCapabilities(value) {
-    if (!ownExact(value, ["version", "formats"]) || value.version !== 1 || !Array.isArray(value.formats) || value.formats.length !== 1) throw new Error("Host returned invalid export capabilities.")
-    const format = value.formats[0]
-    if (!ownExact(format, ["id", "available", "alpha", "audio", "consequence"]) || format.id !== "png-frames"
-        || format.available !== true || format.alpha !== true || format.audio !== false || typeof format.consequence !== "string" || format.consequence.length > 512) {
+function exportCapabilities(value) {
+    if (!ownExact(value, ["version", "formats"]) || value.version !== 1 || !Array.isArray(value.formats) || value.formats.length !== 2) throw new Error("Host returned invalid export capabilities.")
+    const [png, h264] = value.formats
+    if (!ownExact(png, ["id", "available", "alpha", "audio", "consequence"]) || png.id !== "png-frames"
+        || png.available !== true || png.alpha !== true || png.audio !== false || typeof png.consequence !== "string" || png.consequence.length < 1 || png.consequence.length > 512
+        || !ownExact(h264, ["id", "available", "alpha", "audio", "sceneIds", "consequence"]) || h264.id !== "mp4-h264-aac"
+        || typeof h264.available !== "boolean" || h264.alpha !== false || h264.audio !== true
+        || !Array.isArray(h264.sceneIds) || h264.sceneIds.length !== 1 || h264.sceneIds[0] !== "quiet-carousel"
+        || typeof h264.consequence !== "string" || h264.consequence.length < 1 || h264.consequence.length > 512) {
         throw new Error("Host returned invalid export capabilities.")
     }
     return value
@@ -140,6 +144,43 @@ function pngResult(value) {
     return value
 }
 
+function h264Preflight(value) {
+    if (!ownExact(value, ["snapshotId", "format", "width", "height", "fps", "durationMs", "frameCount", "alpha", "audio", "audioFrameCount", "consequence"])
+        || typeof value.snapshotId !== "string" || !/^[a-f0-9]{32}$/.test(value.snapshotId) || value.format !== "mp4-h264-aac"
+        || !Number.isSafeInteger(value.width) || value.width < 64 || value.width > 7680 || value.width % 2
+        || !Number.isSafeInteger(value.height) || value.height < 64 || value.height > 7680 || value.height % 2
+        || !Number.isSafeInteger(value.fps) || ![24, 25, 30, 48, 50, 60].includes(value.fps)
+        || typeof value.durationMs !== "number" || !Number.isFinite(value.durationMs) || !Number.isSafeInteger(value.frameCount) || value.frameCount < 1
+        || value.alpha !== false || value.audio !== "aac-48khz-stereo" || !Number.isSafeInteger(value.audioFrameCount) || value.audioFrameCount < 1
+        || typeof value.consequence !== "string" || value.consequence.length > 512) throw new Error("Host returned invalid H.264/AAC preflight.")
+    return value
+}
+
+function h264AudioAppend(value) {
+    if (!ownExact(value, ["acceptedFrames", "nextFrame"]) || !Number.isSafeInteger(value.acceptedFrames) || value.acceptedFrames < 1 || value.acceptedFrames > 65_536
+        || !Number.isSafeInteger(value.nextFrame) || value.nextFrame < value.acceptedFrames) throw new Error("Host returned invalid H.264 audio staging progress.")
+    return value
+}
+
+function h264AudioFinished(value) {
+    if (!ownExact(value, ["snapshotId", "sampleRate", "channels", "sampleFrames", "bytes", "sha256"])
+        || typeof value.snapshotId !== "string" || !/^[a-f0-9]{32}$/.test(value.snapshotId) || value.sampleRate !== 48_000 || value.channels !== 2
+        || !Number.isSafeInteger(value.sampleFrames) || value.sampleFrames < 1 || value.bytes !== value.sampleFrames * 4
+        || typeof value.sha256 !== "string" || !/^[a-f0-9]{64}$/.test(value.sha256)) throw new Error("Host returned invalid H.264 audio staging receipt.")
+    return value
+}
+
+function h264Result(value) {
+    if (!ownExact(value, ["format", "frameCount", "width", "height", "alpha", "audio", "audioFrameCount", "bytes", "sha256", "videoDecodeSha256", "audioDecodeSha256"])
+        || value.format !== "mp4-h264-aac" || !Number.isSafeInteger(value.frameCount) || value.frameCount < 1
+        || !Number.isSafeInteger(value.width) || !Number.isSafeInteger(value.height) || value.alpha !== false || value.audio !== "aac-48khz-stereo"
+        || !Number.isSafeInteger(value.audioFrameCount) || value.audioFrameCount < 1 || !Number.isSafeInteger(value.bytes) || value.bytes < 128
+        || [value.sha256, value.videoDecodeSha256, value.audioDecodeSha256].some((hash) => typeof hash !== "string" || !/^[a-f0-9]{64}$/.test(hash))) {
+        throw new Error("Host returned an invalid H.264/AAC result.")
+    }
+    return value
+}
+
 function cancelledExport(value) {
     if (!ownExact(value, ["cancelled"]) || typeof value.cancelled !== "boolean") throw new Error("Host returned an invalid export cancellation result.")
     return value
@@ -148,8 +189,8 @@ function cancelledExport(value) {
 function exportProgress(value) {
     if (!value || typeof value !== "object" || Array.isArray(value)) return null
     const allowed = new Set(["exportId", "phase", "progress", "frame", "totalFrames", "message"])
-    if (Object.keys(value).some((key) => !allowed.has(key)) || typeof value.exportId !== "string" || !/^png-[a-f0-9]{24}$/.test(value.exportId)
-        || !["preparing", "rendering", "done", "cancelled", "error"].includes(value.phase)
+    if (Object.keys(value).some((key) => !allowed.has(key)) || typeof value.exportId !== "string" || !/^(?:png|h264)-[a-f0-9]{24}$/.test(value.exportId)
+        || !["preparing", "rendering", "encoding", "verifying", "done", "cancelled", "error"].includes(value.phase)
         || !finite(value.progress, 0, 1)
         || (value.frame !== undefined && (!Number.isSafeInteger(value.frame) || value.frame < 0))
         || (value.totalFrames !== undefined && (!Number.isSafeInteger(value.totalFrames) || value.totalFrames < 1))
@@ -174,10 +215,15 @@ const galleryHost = {
     decodeAudio: async (url, startFrame, frameCount) => decodedAudio((await invoke("audio.decode", { url, startFrame, frameCount })).value, startFrame, frameCount),
     audioWaveform: async (url, buckets) => audioWaveform((await invoke("audio.waveform", { url, buckets })).value, buckets),
     cancelAudio: async () => cancelledAudio((await invoke("audio.cancel")).value),
-    exportCapabilities: async () => pngCapabilities((await invoke("export.capabilities")).value),
+    exportCapabilities: async () => exportCapabilities((await invoke("export.capabilities")).value),
     preflightPngFrames: async (intent) => pngPreflight((await invoke("export.png.preflight", { intent })).value),
     choosePngFramesDestination: async (suggestedName) => pngDestination((await invoke("export.destination.choose", { suggestedName })).value),
     startPngFramesExport: async (snapshotId, destinationGrant) => pngResult((await invoke("export.png.start", { snapshotId, destinationGrant })).value),
+    preflightH264: async (intent) => h264Preflight((await invoke("export.h264.preflight", { intent })).value),
+    appendH264Audio: async (snapshotId, startFrame, pcm16Base64) => h264AudioAppend((await invoke("export.h264.audio.append", { snapshotId, startFrame, pcm16Base64 })).value),
+    finishH264Audio: async (snapshotId) => h264AudioFinished((await invoke("export.h264.audio.finish", { snapshotId })).value),
+    chooseH264Destination: async (suggestedName) => pngDestination((await invoke("export.h264.destination.choose", { suggestedName })).value),
+    startH264Export: async (snapshotId, destinationGrant) => h264Result((await invoke("export.h264.start", { snapshotId, destinationGrant })).value),
     cancelExport: async () => cancelledExport((await invoke("export.cancel")).value),
     onExportProgress: (callback) => {
         if (typeof callback !== "function") throw new Error("Export progress callback is invalid.")

@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, codex/g02-quiet-carousel-tracer, codex/g03-linux-host-port, codex/g05-deterministic-audio, codex/g06-verified-png-export]
+    branches: [main, codex/g02-quiet-carousel-tracer, codex/g03-linux-host-port, codex/g05-deterministic-audio, codex/g06-verified-png-export, codex/g06b-verified-h264-aac]
   pull_request:
 
 permissions:
@@ -105,7 +105,7 @@ jobs:
           path: release/*.exe
 
   renderer-g02:
-    if: github.ref_name == 'main' || github.ref_name == 'codex/g02-quiet-carousel-tracer' || github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.ref_name == 'codex/g06-verified-png-export' || github.event_name == 'pull_request'
+    if: github.ref_name == 'main' || github.ref_name == 'codex/g02-quiet-carousel-tracer' || github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -127,7 +127,7 @@ jobs:
           name: g02-quiet-carousel-renderer-evidence
           path: artifacts/g02/
       - name: Run the G03 HostPort save and relaunch journey
-        if: github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.ref_name == 'codex/g06-verified-png-export' || github.event_name == 'pull_request'
+        if: github.ref_name == 'main' || github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac' || github.event_name == 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -158,12 +158,12 @@ jobs:
             "$executable"
           G03_EXPECTED_SHA="$source_sha" G03_EXPECTED_TREE="$source_tree" npm run verify:g03-renderer
       - uses: actions/upload-artifact@v6
-        if: github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.ref_name == 'codex/g06-verified-png-export' || github.event_name == 'pull_request'
+        if: github.ref_name == 'main' || github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac' || github.event_name == 'pull_request'
         with:
           name: g03-linux-host-port-renderer-evidence
           path: artifacts/g03/
-      - name: Run the G06 verified PNG Frames success and cancellation journeys
-        if: github.ref_name == 'codex/g06-verified-png-export'
+      - name: Run the G06 verified PNG and H.264 success and cancellation journeys
+        if: github.ref_name == 'main' || github.event_name == 'pull_request' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac'
         shell: bash
         run: |
           set -euo pipefail
@@ -173,7 +173,9 @@ jobs:
           cancelled="$PWD/artifacts/g06/png-cancelled"
           mkdir -p "$PWD/artifacts/g06" "$cancelled"
           printf 'preserve-me' > "$cancelled/prior.txt"
-          node scripts/create-g06-smoke-project.cjs "$project" "$PWD/build/icon.png"
+          fixtures="$(node scripts/create-g05-audio-fixtures.cjs "$PWD/artifacts/g06-fixtures")"
+          presenter="$(node -e 'process.stdout.write(JSON.parse(process.argv[1]).presenter)' "$fixtures")"
+          node scripts/create-g06-smoke-project.cjs "$project" "$PWD/build/icon.png" "$presenter"
           xvfb-run -a env \
             REEL_USER_DATA_DIR="$PWD/artifacts/g06-runtime-success" \
             REEL_G06_RENDERER_OUTPUT="$PWD/artifacts/g06/evidence-success" \
@@ -188,10 +190,29 @@ jobs:
             REEL_G03_PROJECT_PATH="$project" \
             "$executable"
           test "$(cat "$cancelled/prior.txt")" = preserve-me
+          if test "$GITHUB_REF_NAME" = codex/g06b-verified-h264-aac || test "$GITHUB_REF_NAME" = main || test "$GITHUB_EVENT_NAME" = pull_request; then
+            h264_success="$PWD/artifacts/g06/h264-success.mp4"
+            h264_cancelled="$PWD/artifacts/g06/h264-cancelled.mp4"
+            xvfb-run -a env \
+              REEL_USER_DATA_DIR="$PWD/artifacts/g06-runtime-h264-success" \
+              REEL_G06_RENDERER_OUTPUT="$PWD/artifacts/g06/evidence-h264-success" \
+              REEL_G06_RENDERER_MODE=h264-success \
+              REEL_G06_H264_DESTINATION="$h264_success" \
+              REEL_G03_PROJECT_PATH="$project" \
+              "$executable"
+            xvfb-run -a env \
+              REEL_USER_DATA_DIR="$PWD/artifacts/g06-runtime-h264-cancel" \
+              REEL_G06_RENDERER_OUTPUT="$PWD/artifacts/g06/evidence-h264-cancel" \
+              REEL_G06_RENDERER_MODE=h264-cancel \
+              REEL_G06_H264_DESTINATION="$h264_cancelled" \
+              REEL_G03_PROJECT_PATH="$project" \
+              "$executable"
+            test ! -e "$h264_cancelled"
+          fi
       - uses: actions/upload-artifact@v6
-        if: github.ref_name == 'codex/g06-verified-png-export'
+        if: github.ref_name == 'main' || github.event_name == 'pull_request' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac'
         with:
-          name: g06-verified-png-renderer-evidence
+          name: g06-verified-export-renderer-evidence
           path: artifacts/g06/
       - name: Run the G05 deterministic audio save and reopen journey
         if: github.ref_name == 'codex/g05-deterministic-audio'

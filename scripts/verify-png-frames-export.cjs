@@ -68,12 +68,16 @@ const intent = {
     height: 64,
     fps: 10,
     durationMs: 150,
+    cycleDurationMs: 100,
+    finalCycleDurationMs: 50,
     transparent: true,
 }
 
 async function run() {
     const snapshot = createPngFramesSnapshot(intent, () => Buffer.alloc(16, 7))
     assert.equal(snapshot.frameCount, 2, "frame plan must use round(duration * fps)")
+    assert.equal(snapshot.cycleDurationMs, 100)
+    assert.equal(snapshot.finalCycleDurationMs, 50)
     assert.equal(Object.isFrozen(snapshot.config.items[0]), true)
     intent.config.items[0].id = "mutated-after-preflight"
     assert.equal(snapshot.config.items[0].id, "frame-1", "preflight must retain an immutable clone")
