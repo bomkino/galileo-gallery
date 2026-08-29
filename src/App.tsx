@@ -12,6 +12,7 @@ import { projectConfigAfterOpen, projectOpenNotice } from "./projectOpen"
 import { styleProfile, styleSettings } from "./styleProfiles"
 import { placeholderItems, studioTimeline } from "./timeline"
 import { GALLERY_STYLES, galleryScene, galleryStyle, sceneVariants, type StyleDefinition } from "./styleRegistry"
+import { InterfaceScaleControl, InterfaceScaleSurface } from "./presentation/InterfaceScaleSurface"
 import type {
     ExportFormat,
     ExportProgress,
@@ -1130,7 +1131,7 @@ function AppView() {
         >
             <header className="titlebar">
                 <div className="brand-lockup">
-                    <img className="galileo-app-icon compact" src="./icon.svg" alt="" aria-hidden="true" />
+                    <img className="galileo-app-icon compact" src="./icon.png" alt="" aria-hidden="true" />
                     <div>
                         <strong>Galileo Gallery</strong>
                         <span>{activeScene.name} · {activeStyle.presetName} · {config.items.length || activeProfile.recommendedItems} frames · {formatDuration(playbackDuration)}</span>
@@ -1140,6 +1141,7 @@ function AppView() {
                     <i />{saveNotice ?? savedTimeLabel(lastSavedAt)}
                 </div>
                 <div className="title-actions">
+                    <InterfaceScaleControl />
                     <button className="button quiet" type="button" onClick={() => setShowStyleGallery(true)}>
                         <Icon name="spark" /> Styles
                     </button>
@@ -1558,7 +1560,7 @@ function AppView() {
                     <div className="launch-object" aria-hidden="true">
                         <span className="launch-frame launch-frame-back" />
                         <span className="launch-frame launch-frame-middle" />
-                        <img src="./icon.svg" alt="" />
+                        <img src="./icon.png" alt="" />
                         <span className="launch-glint" />
                     </div>
                     <div className="launch-copy">
@@ -1574,5 +1576,5 @@ function AppView() {
 
 export default function App() {
     const isExport = new URLSearchParams(window.location.search).has("export")
-    return isExport ? <ExportView /> : <AppView />
+    return isExport ? <ExportView /> : <InterfaceScaleSurface><AppView /></InterfaceScaleSurface>
 }

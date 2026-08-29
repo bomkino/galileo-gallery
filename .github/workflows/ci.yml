@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, codex/g02-quiet-carousel-tracer, codex/g03-linux-host-port, codex/g05-deterministic-audio, codex/g06-verified-png-export, codex/g06b-verified-h264-aac]
+    branches: [main, codex/g02-quiet-carousel-tracer, codex/g03-linux-host-port, codex/g05-deterministic-audio, codex/g06-verified-png-export, codex/g06b-verified-h264-aac, codex/g08-interface-scale-core, codex/g08-interface-polish, codex/g08-interface-scale-ui]
   pull_request:
 
 permissions:
@@ -105,7 +105,7 @@ jobs:
           path: release/*.exe
 
   renderer-g02:
-    if: github.ref_name == 'main' || github.ref_name == 'codex/g02-quiet-carousel-tracer' || github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac' || github.event_name == 'pull_request'
+    if: github.ref_name == 'main' || github.ref_name == 'codex/g02-quiet-carousel-tracer' || github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac' || github.ref_name == 'codex/g08-interface-scale-ui' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -127,7 +127,7 @@ jobs:
           name: g02-quiet-carousel-renderer-evidence
           path: artifacts/g02/
       - name: Run the G03 HostPort save and relaunch journey
-        if: github.ref_name == 'main' || github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac' || github.event_name == 'pull_request'
+        if: github.ref_name == 'main' || github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac' || github.ref_name == 'codex/g08-interface-scale-ui' || github.event_name == 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -158,12 +158,12 @@ jobs:
             "$executable"
           G03_EXPECTED_SHA="$source_sha" G03_EXPECTED_TREE="$source_tree" npm run verify:g03-renderer
       - uses: actions/upload-artifact@v6
-        if: github.ref_name == 'main' || github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac' || github.event_name == 'pull_request'
+        if: github.ref_name == 'main' || github.ref_name == 'codex/g03-linux-host-port' || github.ref_name == 'codex/g05-deterministic-audio' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac' || github.ref_name == 'codex/g08-interface-scale-ui' || github.event_name == 'pull_request'
         with:
           name: g03-linux-host-port-renderer-evidence
           path: artifacts/g03/
       - name: Run the G06 verified PNG and H.264 success and cancellation journeys
-        if: github.ref_name == 'main' || github.event_name == 'pull_request' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac'
+        if: github.ref_name == 'main' || github.event_name == 'pull_request' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac' || github.ref_name == 'codex/g08-interface-scale-ui'
         shell: bash
         run: |
           set -euo pipefail
@@ -190,7 +190,7 @@ jobs:
             REEL_G03_PROJECT_PATH="$project" \
             "$executable"
           test "$(cat "$cancelled/prior.txt")" = preserve-me
-          if test "$GITHUB_REF_NAME" = codex/g06b-verified-h264-aac || test "$GITHUB_REF_NAME" = main || test "$GITHUB_EVENT_NAME" = pull_request; then
+          if test "$GITHUB_REF_NAME" = codex/g06b-verified-h264-aac || test "$GITHUB_REF_NAME" = codex/g08-interface-scale-ui || test "$GITHUB_REF_NAME" = main || test "$GITHUB_EVENT_NAME" = pull_request; then
             h264_success="$PWD/artifacts/g06/h264-success.mp4"
             h264_cancelled="$PWD/artifacts/g06/h264-cancelled.mp4"
             xvfb-run -a env \
@@ -210,7 +210,7 @@ jobs:
             test ! -e "$h264_cancelled"
           fi
       - uses: actions/upload-artifact@v6
-        if: github.ref_name == 'main' || github.event_name == 'pull_request' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac'
+        if: github.ref_name == 'main' || github.event_name == 'pull_request' || github.ref_name == 'codex/g06-verified-png-export' || github.ref_name == 'codex/g06b-verified-h264-aac' || github.ref_name == 'codex/g08-interface-scale-ui'
         with:
           name: g06-verified-export-renderer-evidence
           path: artifacts/g06/
@@ -248,3 +248,31 @@ jobs:
         with:
           name: g05-deterministic-audio-renderer-evidence
           path: artifacts/g05/
+
+  renderer-g08:
+    if: github.ref_name == 'codex/g08-interface-polish' || github.ref_name == 'codex/g08-interface-scale-ui' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run prepare:electron
+      - name: Configure Electron sandbox helper
+        run: |
+          sudo chown root:root node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+      - name: Run the Gallery interface and scale journey
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_sha="$GITHUB_SHA"
+          source_tree="$(git rev-parse HEAD^{tree})"
+          GALLERY_SOURCE_SHA="$source_sha" GALLERY_SOURCE_TREE="$source_tree" xvfb-run -a npm run verify:g08-renderer
+      - uses: actions/upload-artifact@v6
+        with:
+          name: g08-interface-renderer-evidence
+          path: artifacts/g08/

@@ -4,6 +4,7 @@ import App from "./App"
 import QuietCarouselTracer from "./QuietCarouselTracer"
 import { ensureReelAPI } from "./runtime"
 import "./styles.css"
+import "./interfacePolish.css"
 
 ensureReelAPI()
 
