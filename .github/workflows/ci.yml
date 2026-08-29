@@ -250,7 +250,7 @@ jobs:
           path: artifacts/g05/
 
   renderer-g08:
-    if: github.ref_name == 'codex/g08-interface-polish' || github.ref_name == 'codex/g08-interface-scale-ui' || github.event_name == 'pull_request'
+    if: github.ref_name == 'main' || github.ref_name == 'codex/g08-interface-polish' || github.ref_name == 'codex/g08-interface-scale-ui' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

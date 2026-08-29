@@ -96,7 +96,7 @@ function readLocalProject() {
 
 function savedTimeLabel(savedAt: number | null) {
     if (!savedAt) return "Autosave on"
-    return `Saved ${new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(savedAt)}`
+    return "Saved locally"
 }
 
 function exportButtonLabel(format: ExportFormat) {

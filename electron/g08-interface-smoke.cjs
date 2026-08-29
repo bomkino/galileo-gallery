@@ -22,7 +22,11 @@ async function settleRenderer(window) {
     await window.webContents.executeJavaScript(`(async () => {
         await document.fonts.ready
         await Promise.all(Array.from(document.images).map(async (image) => {
-            try { await image.decode() } catch {}
+            try {
+                await image.decode()
+            } catch (error) {
+                throw new Error('Interface image decode failed: ' + (image.currentSrc || image.src) + ' · ' + error)
+            }
             if (!image.complete || image.naturalWidth < 1 || image.naturalHeight < 1) {
                 throw new Error('Interface image did not decode: ' + (image.currentSrc || image.src))
             }
@@ -116,6 +120,13 @@ async function readMetrics(window) {
         const scaleRoot = document.querySelector('[data-interface-scale]')
         const shell = document.querySelector('.app-shell')
         const stage = rect('.stage')
+        const stageShellElement = document.querySelector('.stage-shell')
+        const stageShell = rect('.stage-shell')
+        const declaredAspect = getComputedStyle(stageShellElement).aspectRatio
+        const aspectParts = declaredAspect.split('/').map(Number)
+        const declaredRatio = aspectParts.length === 2 && aspectParts.every(Number.isFinite)
+            ? aspectParts[0] / aspectParts[1]
+            : Number.NaN
         const focusTarget = document.querySelector('.title-actions .button.primary')
         focusTarget.focus()
         const focusStyle = getComputedStyle(focusTarget)
@@ -137,11 +148,17 @@ async function readMetrics(window) {
                 addMedia: rect('.add-media'),
                 segment: rect('.inspector-top .segment button'),
                 scaleButton: rect('.interface-scale-control button'),
+                format: rect('.format-cards button'),
+                export: rect('.export-button'),
+                timeline: rect('.timeline'),
             },
             focus: { outlineStyle: focusStyle.outlineStyle, outlineWidth: focusStyle.outlineWidth },
             preview: {
                 metadata: document.querySelector('.stage-meta').textContent.replace(/\\s+/g, ' ').trim(),
-                ratio: stage.width / stage.height,
+                planeRatio: stage.width / stage.height,
+                shellRatio: stageShell.width / stageShell.height,
+                declaredAspect,
+                declaredRatio,
                 timelineMax: document.querySelector('.timeline').max,
                 timelineValue: Number(document.querySelector('.timeline').value),
                 timeLabel: document.querySelector('.transport time').textContent.replace(/\\s+/g, ' ').trim(),
@@ -196,7 +213,11 @@ function assertInvariant(metrics) {
             || JSON.stringify(value.exportFormats) !== JSON.stringify(baseline.exportFormats)) {
             throw new Error(`${key} changed Project, Timeline, audio, or export-facing truth.`)
         }
-        if (Math.abs(value.preview.ratio - baseline.preview.ratio) > 0.002) throw new Error(`${key} changed the preview canvas ratio.`)
+        if (!Number.isFinite(value.preview.declaredRatio)
+            || Math.abs(value.preview.declaredRatio - baseline.preview.declaredRatio) > Number.EPSILON
+            || Math.abs(value.preview.planeRatio - value.preview.declaredRatio) > 0.01) {
+            throw new Error(`${key} changed or distorted the preview canvas ratio.`)
+        }
         if (value.shell.scrollWidth > value.shell.clientWidth + 1) throw new Error(`${key} has horizontally clipped studio content.`)
         const physicalTargetFloor = value.interfaceScale < 100 ? 44 : 44 * value.interfaceScale / 100
         if (Object.values(value.targets).some((target) => target.height + 0.2 < physicalTargetFloor)) {
@@ -262,6 +283,15 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
             metrics[key] = await readMetrics(window)
             captures[key] = await capture(window, outputDirectory, `gallery-studio-${key}`)
             reachability[key] = await verifyBottomReachability(window)
+            fs.writeFileSync(path.join(outputDirectory, "renderer-progress.json"), JSON.stringify({
+                source: {
+                    sha: process.env.GALLERY_SOURCE_SHA ?? null,
+                    tree: process.env.GALLERY_SOURCE_TREE ?? null,
+                },
+                captures,
+                metrics,
+                reachability,
+            }, null, 2) + "\n")
         }
     }
     assertInvariant(metrics)
