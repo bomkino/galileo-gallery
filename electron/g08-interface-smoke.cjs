@@ -179,6 +179,58 @@ async function readMetrics(window) {
     })()`)
 }
 
+async function readCatalogueMetrics(window) {
+    return window.webContents.executeJavaScript(`(() => {
+        const rect = (selector) => {
+            const element = document.querySelector(selector)
+            if (!element) throw new Error('Missing catalogue element: ' + selector)
+            const box = element.getBoundingClientRect()
+            return { left: box.left, top: box.top, right: box.right, bottom: box.bottom, width: box.width, height: box.height }
+        }
+        const scaleRoot = document.querySelector('[data-interface-scale]')
+        const shell = document.querySelector('.style-gallery-shell')
+        return {
+            viewport: { width: innerWidth, height: innerHeight },
+            interfaceScale: Number(scaleRoot.dataset.interfaceScale),
+            scaleLabel: document.querySelector('.interface-scale-value').textContent.trim(),
+            shell: {
+                clientWidth: shell.clientWidth,
+                scrollWidth: shell.scrollWidth,
+                clientHeight: shell.clientHeight,
+                scrollHeight: shell.scrollHeight,
+            },
+            targets: {
+                scaleButton: rect('.interface-scale-control button'),
+                category: rect('.style-category-pills button'),
+                search: rect('.style-search input'),
+                scene: rect('.style-card'),
+            },
+        }
+    })()`)
+}
+
+async function scrollCatalogueToBottom(window) {
+    const result = await window.webContents.executeJavaScript(`(async () => {
+        const shell = document.querySelector('.style-gallery-shell')
+        const cards = Array.from(document.querySelectorAll('.style-card'))
+        shell.scrollTop = shell.scrollHeight
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        const box = cards.at(-1).getBoundingClientRect()
+        return {
+            reachable: box.bottom > 0 && box.top < innerHeight && box.left >= -1 && box.right <= innerWidth + 1,
+            lastScene: { left: box.left, top: box.top, right: box.right, bottom: box.bottom },
+        }
+    })()`)
+    if (!result.reachable) throw new Error('The final Scene card is clipped or unreachable at this Interface Scale.')
+    await settleRenderer(window)
+    return result
+}
+
+async function resetCatalogueScroll(window) {
+    await window.webContents.executeJavaScript(`document.querySelector('.style-gallery-shell').scrollTop = 0`)
+    await settleRenderer(window)
+}
+
 async function verifyBottomReachability(window) {
     const result = await window.webContents.executeJavaScript(`(async () => {
         const shell = document.querySelector('.app-shell')
@@ -215,7 +267,8 @@ function assertInvariant(metrics) {
         }
         if (!Number.isFinite(value.preview.declaredRatio)
             || Math.abs(value.preview.declaredRatio - baseline.preview.declaredRatio) > Number.EPSILON
-            || Math.abs(value.preview.planeRatio - value.preview.declaredRatio) > 0.01) {
+            || Math.abs(value.preview.shellRatio - value.preview.declaredRatio) > 0.002
+            || Math.abs(value.preview.planeRatio - value.preview.declaredRatio) > 0.002) {
             throw new Error(`${key} changed or distorted the preview canvas ratio.`)
         }
         if (value.shell.scrollWidth > value.shell.clientWidth + 1) throw new Error(`${key} has horizontally clipped studio content.`)
@@ -253,6 +306,27 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
     await waitFor(window, `document.querySelector('.interface-scale-value')?.textContent?.trim() === '130%'`, "real StorageEvent scale update")
     await setScale(window, 100)
 
+    const catalogueMetrics = {}
+    const catalogueReachability = {}
+    await resize(window, 1080, 700)
+    for (const scale of [75, 200]) {
+        await setScale(window, scale)
+        const key = `minimum-${scale}`
+        catalogueMetrics[key] = await readCatalogueMetrics(window)
+        const value = catalogueMetrics[key]
+        const physicalTargetFloor = scale < 100 ? 44 : 44 * scale / 100
+        if (value.shell.scrollWidth > value.shell.clientWidth + 1) throw new Error(`${key} has horizontally clipped catalogue content.`)
+        if (Object.values(value.targets).some((target) => target.height + 0.2 < physicalTargetFloor)) {
+            throw new Error(`${key} has a catalogue target below its ${physicalTargetFloor}px physical floor.`)
+        }
+        captures[`catalogue-${key}-top`] = await capture(window, outputDirectory, `gallery-catalogue-${key}-top`)
+        catalogueReachability[key] = await scrollCatalogueToBottom(window)
+        captures[`catalogue-${key}-bottom`] = await capture(window, outputDirectory, `gallery-catalogue-${key}-bottom`)
+        await resetCatalogueScroll(window)
+    }
+
+    await resize(window, 1280, 900)
+    await setScale(window, 100)
     await window.webContents.executeJavaScript(`document.querySelector('button[data-style-id="opening-reel"]')?.click()`)
     await waitFor(window, `document.querySelector('.app-shell') && document.querySelector('.stage-shell')`, "Gallery studio")
     await waitFor(window, `!document.querySelector('.launch-screen')`, "launch transition", 15_000)
@@ -289,6 +363,8 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
                     tree: process.env.GALLERY_SOURCE_TREE ?? null,
                 },
                 captures,
+                catalogueMetrics,
+                catalogueReachability,
                 metrics,
                 reachability,
             }, null, 2) + "\n")
@@ -306,6 +382,8 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
         },
         host,
         captures,
+        catalogueMetrics,
+        catalogueReachability,
         metrics,
         reachability,
         resetScale: Number(await window.webContents.executeJavaScript(`document.querySelector('[data-interface-scale]').dataset.interfaceScale`)),
