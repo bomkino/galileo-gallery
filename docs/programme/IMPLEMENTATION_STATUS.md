@@ -4,7 +4,7 @@ Updated: 29 August 2026
 
 Repository start: `bomkino/galileo-gallery@2762043bb733aa28a6c63fe26564504b9f257564`
 
-Task branch: `codex/g06b-verified-h264-aac`
+Task branch: `codex/g08-interface-scale-ui`
 
 ## G01A — safe archive import boundary
 
@@ -137,6 +137,28 @@ Implemented and proved:
 
 CI run `33279747975` passed source tests on Ubuntu, macOS, and Windows plus packaged renderer job `99172780527`. Artifact `9722631997` has archive digest `sha256:b73fd01dc40d030560a66b79688ff760bd1aaf8d327e97bb1f50886b223a2e71` and contains the verified MP4, success screenshot/receipt, and zero-residue cancellation receipt. The exact implementation tree is `8290216b3e32a95864959f993c60b429d9f3d2c3`.
 
+## G08 — Interface Scale and editorial editor UI
+
+State: **engineering-complete in source and real Electron renderer CI; packaging, installation, target-platform, and human acceptance remain unclaimed**
+
+Implemented and proved:
+
+- 75%–200% local semantic Interface Scale in 5% steps, with visible control, keyboard shortcuts,
+  deterministic versioned local persistence, real cross-context update handling, and reset to 100%;
+- strict separation from Project, Scene, Timeline, Look, audio, evaluator, export, and HostPort truth;
+- a bold editorial-brutalist catalogue/editor surface with the powder-blue/coral/ink icon identity,
+  generous spacing, larger icons, and a physical 44px target floor including 75%;
+- scrollable one-column high-scale layouts with no horizontal clipping or sticky-chrome obstruction;
+- exact preview shell/artwork-plane ratios, deterministic pose/capture barriers, decoded-image proof,
+  fresh runtime state, keyboard focus, endpoint catalogue reachability, and unobscured preview/export;
+- current Linux HostPort capability readback and honest Opening Reel H.264/AAC lockout while the same
+  CI run retains the real Quiet Carousel renderer/export journey.
+
+Final CI run `33281906705` passed Ubuntu, macOS, Windows, G02 renderer, and G08 renderer jobs. Artifact
+`9723232099` has archive digest `sha256:aa7989d4f278aadb157216f7e183483a80fc180248a6a07097fa51209edd9ddc`
+and contains 21 screenshots plus progress and final machine receipts. Exact reviewed tree:
+`99fc1f3ddf623ede05651e314dc49847f7f74e97`.
+
 ## Known unsafe or unproved surfaces
 
 - legacy non-G03 package paths still exist and are not release candidates;
@@ -144,4 +166,8 @@ CI run `33279747975` passed source tests on Ubuntu, macOS, and Windows plus pack
 - exact Garuda and Apple-Silicon target behaviour;
 - human interaction, visual, motion, and audio acceptance.
 
-Current frontier: **G08 Interface Scale and editor UI/HostPort integration**. G06B is engineering-closed. Existing isolated G08 core and interface-polish branches must be reconciled against this exact tree before any UI claim. G04 remains deferred until an Apple-Silicon runner is available.
+Current frontier: **serial Scene catalogue integration from completed atelier branches**. The repaired
+handoff is validated evidence input only: 29 candidates, 139 controls, no Product integration, and 43
+pending human decisions. Quiet Carousel remains the only individually authored end-to-end verified
+Product Scene. One catalogue owner may reconcile at most three disjoint Scene implementations at a
+time. G04 remains deferred until an Apple-Silicon runner is available.
