@@ -1,10 +1,10 @@
 # Implementation status
 
-Updated: 27 August 2026
+Updated: 29 August 2026
 
 Repository start: `bomkino/galileo-gallery@2762043bb733aa28a6c63fe26564504b9f257564`
 
-Task branch: `codex/g06-verified-png-export`
+Task branch: `codex/g06b-verified-h264-aac`
 
 ## G01A — safe archive import boundary
 
@@ -121,6 +121,22 @@ Implemented and proved:
 
 CI run `33058623839` passed source tests on Ubuntu, macOS, and Windows plus packaged renderer job `98471574527`. Artifact `9640730478` has archive digest `sha256:378c78b6cf663f1b9ec93feb8c4959485b21f34b29bd995b908ab73589d20076` and contains 43 independently verified `64×64` RGBA frames at 24 fps, the manifest, success screenshot, and causal cancellation receipt.
 
+## G06B — verified opaque H.264/AAC export
+
+State: **engineering-complete in source and sandboxed packaged Electron CI; exact Garuda, native Mac, and human acceptance remain unclaimed**
+
+Implemented and proved:
+
+- immutable Quiet Carousel-only opaque MP4 snapshots with exact once/repeat/loop cycle and finale clocks;
+- deterministic bounded 48 kHz stereo PCM staging and the full authored Project mix;
+- H.264 High progressive yuv420p8, BT.709 limited range, canonical two-second sync cadence, fast start, and AAC-LC;
+- bounded hierarchical MP4 validation plus full video/audio decode and independent reference-audio comparison;
+- one-shot path-free HostPort operations, rate and byte quotas, saturation-safe cancellation, and process reaping;
+- exclusive owner-only no-overwrite staging, atomic hard-link publication, destination-race preservation, and residue cleanup;
+- real packaged-renderer success and cancellation journeys with causal progress, source-artwork pixel readback, and non-silent audio readback.
+
+CI run `33279747975` passed source tests on Ubuntu, macOS, and Windows plus packaged renderer job `99172780527`. Artifact `9722631997` has archive digest `sha256:b73fd01dc40d030560a66b79688ff760bd1aaf8d327e97bb1f50886b223a2e71` and contains the verified MP4, success screenshot/receipt, and zero-residue cancellation receipt. The exact implementation tree is `8290216b3e32a95864959f993c60b429d9f3d2c3`.
+
 ## Known unsafe or unproved surfaces
 
 - legacy non-G03 package paths still exist and are not release candidates;
@@ -128,4 +144,4 @@ CI run `33058623839` passed source tests on Ubuntu, macOS, and Windows plus pack
 - exact Garuda and Apple-Silicon target behaviour;
 - human interaction, visual, motion, and audio acceptance.
 
-Current frontier: **G06B verified opaque H.264/AAC export**. G06A PNG Frames and the isolated G08 Interface Scale core are green. G08 UI/HostPort integration follows G06B serially because both touch the tracer/HostPort shell. G04 remains deferred until an Apple-Silicon runner is available.
+Current frontier: **G08 Interface Scale and editor UI/HostPort integration**. G06B is engineering-closed. Existing isolated G08 core and interface-polish branches must be reconciled against this exact tree before any UI claim. G04 remains deferred until an Apple-Silicon runner is available.
