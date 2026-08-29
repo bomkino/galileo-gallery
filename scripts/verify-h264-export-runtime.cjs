@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict")
+const crypto = require("node:crypto")
 const fs = require("node:fs")
 const os = require("node:os")
 const path = require("node:path")
@@ -284,6 +285,22 @@ try {
         signal: new AbortController().signal, renderFrame: ({ frameIndex }) => rgbaPng(64, 64, frameIndex + 1),
     }), (error) => error instanceof HostPortError && error.code === "verification_failed")
     assert.equal(fs.readFileSync(postLinkSwapDestination, "utf8"), "external-after-link", "cleanup must preserve an external inode swapped in after publication")
+
+    const postCommitCancelDestination = path.join(temporary, "post-commit-cancel.mp4")
+    const postCommitCancelController = new AbortController()
+    const postCommitCancelRuntime = createH264ExportRuntime({
+        ffmpegPath, freeSpaceReserveBytes: 0, randomBytes: () => Buffer.alloc(16, 20),
+        link: (sourcePath, destinationPath) => {
+            fs.linkSync(sourcePath, destinationPath)
+            postCommitCancelController.abort()
+        },
+    })
+    const postCommitCancelResult = await postCommitCancelRuntime.run({
+        snapshot, destination: postCommitCancelDestination, destinationAuthority: destinationAuthority(postCommitCancelDestination, parent), audio,
+        signal: postCommitCancelController.signal, renderFrame: ({ frameIndex }) => rgbaPng(64, 64, frameIndex + 1),
+    })
+    assert.equal(postCommitCancelResult.sha256, crypto.createHash("sha256").update(fs.readFileSync(postCommitCancelDestination)).digest("hex"))
+    assert.equal(fs.statSync(postCommitCancelDestination).mode & 0o777, 0o600, "cancellation after the atomic commit point must finish as verified success")
 
     const audioHashCancelled = path.join(temporary, "audio-hash-cancelled.mp4")
     const audioHashController = new AbortController()

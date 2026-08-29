@@ -207,6 +207,25 @@ async function run() {
         "existing or raced MP4 destinations must receive a truthful no-overwrite instruction",
     )
 
+    let settledStartCalls = 0
+    let settledStartCleanupCalls = 0
+    const retryAfterSettledStartApi = createHostBackedAPI(baseHost({
+        startH264Export: async () => {
+            settledStartCalls += 1
+            if (settledStartCalls === 1) throw conflict
+            return baseHost().startH264Export()
+        },
+        cancelExport: async () => { settledStartCleanupCalls += 1; return { cancelled: false } },
+    }))
+    await assert.rejects(
+        retryAfterSettledStartApi.exportReel(request),
+        (error) => error?.code === "conflict" && error.message === "Choose a new filename; overwrite is not supported yet.",
+        "a host-side destination race after start must stay truthful",
+    )
+    assert.deepEqual(await retryAfterSettledStartApi.exportReel(request), {}, "a settled host start rejection must release renderer ownership for retry")
+    assert.equal(settledStartCalls, 2)
+    assert.equal(settledStartCleanupCalls, 1, "the settled failure must still request host cleanup once")
+
     let mismatchedPreflight = false
     const mismatchedAudioApi = createHostBackedAPI(baseHost({
         preflightH264: async () => { mismatchedPreflight = true; throw new Error("must not preflight") },

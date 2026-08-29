@@ -220,7 +220,7 @@ export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
                 if (request.format === "mp4") {
                     exportAudioController?.abort()
                     const cleanup = await Promise.allSettled([host.cancelAudio(), host.cancelExport()])
-                    if (cleanup[1].status === "fulfilled" && cleanup[1].value.cancelled) hostExportAllocated = false
+                    if (cleanup[1].status === "fulfilled") hostExportAllocated = false
                 }
                 if (exportCancelled || code === "cancelled") return { cancelled: true }
                 if (request.format === "mp4" && code === "conflict") {

@@ -439,6 +439,7 @@ function createH264ExportRuntime(options = {}) {
         if (!/^[a-f0-9]{32}$/.test(nonce)) throw new HostPortError("internal_error")
         const stage = path.join(parent, `.gallery-h264-stage-${nonce}.mp4`)
         let audioReference = null
+        let commitPointReached = false
         let promoted = false
         let audioHandle = null
         let audioReferenceSourceHandle = null
@@ -518,12 +519,13 @@ function createH264ExportRuntime(options = {}) {
                 if (error?.code === "EEXIST") throw new HostPortError("conflict")
                 throw new HostPortError("verification_failed")
             }
+            commitPointReached = true
             let publishedHandle = null
             try {
                 publishedHandle = fs.openSync(destination, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0))
                 const published = fs.fstatSync(publishedHandle)
                 if (!sameStageIdentity(published, inspected.identity, true) || (published.mode & 0o777) !== 0o600
-                    || await hashPublishedHandle(publishedHandle, inspected.identity, signal) !== inspected.sha256
+                    || await hashPublishedHandle(publishedHandle, inspected.identity) !== inspected.sha256
                     || !sameStageIdentity(fs.lstatSync(destination), inspected.identity, true)) throw new HostPortError("verification_failed")
             } finally {
                 if (publishedHandle !== null) fs.closeSync(publishedHandle)
@@ -549,7 +551,7 @@ function createH264ExportRuntime(options = {}) {
                 audioDecodeSha256: audioDecode.sha256,
             })
         } catch (error) {
-            if (signal?.aborted && !(error instanceof HostPortError && error.code === "cancelled")) throw cancelled()
+            if (!commitPointReached && signal?.aborted && !(error instanceof HostPortError && error.code === "cancelled")) throw cancelled()
             throw error
         } finally {
             if (audioHandle !== null) fs.closeSync(audioHandle)
