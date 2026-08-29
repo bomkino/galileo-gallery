@@ -292,16 +292,40 @@ try {
     await assert.rejects(inspectMp4File(offsetTrack, expected), (error) => error instanceof HostPortError && error.code === "verification_failed", "a delayed video edit must not impersonate the one-second Project clock")
 
     const irregularTrack = path.join(temporary, "irregular-cadence.mp4")
-    const irregularEncoded = spawnSync(ffmpegPath, [
-        "-hide_banner", "-loglevel", "error", "-nostdin", "-threads", "1",
-        "-f", "lavfi", "-i", "color=c=0x336699:s=64x64:r=24:d=1",
-        "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=1",
-        "-vf", "settb=expr=1/24000,setpts=N*1000-if(mod(N\\,2)\\,500\\,0)",
-        "-map", "0:v:0", "-map", "1:a:0", "-fps_mode", "passthrough", "-c:v", "libx264", "-threads:v", "1", "-pix_fmt", "yuv420p", "-bf", "0",
-        "-c:a", "aac", "-ar", "48000", "-ac", "2", "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709", "-color_range", "tv",
-        "-movflags", "+faststart", "-video_track_timescale", "24000", "-map_metadata", "-1", "-y", irregularTrack,
-    ], { encoding: "utf8", timeout: 30_000 })
-    assert.equal(irregularEncoded.status, 0, irregularEncoded.stderr)
+    const irregularTrackBytes = Buffer.from(bytes)
+    const videoTimingType = nthBoxType(irregularTrackBytes, "stts", 1)
+    const videoTable = nthBoxType(irregularTrackBytes, "stbl", 1)
+    const videoMediaInfo = nthBoxType(irregularTrackBytes, "minf", 1)
+    const videoMedia = nthBoxType(irregularTrackBytes, "mdia", 1)
+    const videoTrack = nthBoxType(irregularTrackBytes, "trak", 1)
+    const irregularMovie = nthBoxType(irregularTrackBytes, "moov", 1)
+    assert.ok(videoTimingType > 4 && irregularTrackBytes.readUInt32BE(videoTimingType + 8) === 1)
+    assert.equal(irregularTrackBytes.readUInt32BE(videoTimingType + 12), 24)
+    assert.equal(irregularTrackBytes.readUInt32BE(videoTimingType + 16), 1_000)
+    const timingInsertion = videoTimingType - 4 + irregularTrackBytes.readUInt32BE(videoTimingType - 4)
+    irregularTrackBytes.writeUInt32BE(2, videoTimingType + 8)
+    irregularTrackBytes.writeUInt32BE(12, videoTimingType + 12)
+    irregularTrackBytes.writeUInt32BE(999, videoTimingType + 16)
+    for (const typeOffset of [videoTimingType, videoTable, videoMediaInfo, videoMedia, videoTrack, irregularMovie]) {
+        assert.ok(typeOffset > 4 && typeOffset < timingInsertion)
+        irregularTrackBytes.writeUInt32BE(irregularTrackBytes.readUInt32BE(typeOffset - 4) + 8, typeOffset - 4)
+    }
+    const secondTimingRun = Buffer.alloc(8)
+    secondTimingRun.writeUInt32BE(12, 0)
+    secondTimingRun.writeUInt32BE(1_001, 4)
+    const irregularCadenceBytes = Buffer.concat([
+        irregularTrackBytes.subarray(0, timingInsertion),
+        secondTimingRun,
+        irregularTrackBytes.subarray(timingInsertion),
+    ])
+    let videoChunkTable = -1
+    while ((videoChunkTable = irregularCadenceBytes.indexOf(Buffer.from("stco"), videoChunkTable + 1)) >= 0) {
+        const count = irregularCadenceBytes.readUInt32BE(videoChunkTable + 8)
+        for (let index = 0; index < count; index += 1) {
+            irregularCadenceBytes.writeUInt32BE(irregularCadenceBytes.readUInt32BE(videoChunkTable + 12 + index * 4) + 8, videoChunkTable + 12 + index * 4)
+        }
+    }
+    fs.writeFileSync(irregularTrack, irregularCadenceBytes)
     await assert.rejects(inspectMp4File(irregularTrack, expected), (error) => error instanceof HostPortError && error.code === "verification_failed", "variable sample cadence must not impersonate CFR")
 
     const swappedSource = path.join(temporary, "swapped-source.mp4")
