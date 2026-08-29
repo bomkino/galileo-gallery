@@ -216,8 +216,13 @@ async function scrollCatalogueToBottom(window) {
         shell.scrollTop = shell.scrollHeight
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
         const box = cards.at(-1).getBoundingClientRect()
+        const visibleTop = Math.max(0, box.top)
+        const visibleBottom = Math.min(innerHeight, box.bottom)
+        const hit = document.elementFromPoint((box.left + box.right) / 2, (visibleTop + visibleBottom) / 2)
+        const unobscured = Boolean(hit && cards.at(-1).contains(hit))
         return {
-            reachable: box.bottom > 0 && box.top < innerHeight && box.left >= -1 && box.right <= innerWidth + 1,
+            reachable: box.bottom > 0 && box.top < innerHeight && box.left >= -1 && box.right <= innerWidth + 1 && unobscured,
+            unobscured,
             lastScene: { left: box.left, top: box.top, right: box.right, bottom: box.bottom },
         }
     })()`)
@@ -238,16 +243,54 @@ async function verifyBottomReachability(window) {
         shell.scrollTop = shell.scrollHeight
         inspector.scrollTop = inspector.scrollHeight
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-        const button = document.querySelector('.export-button').getBoundingClientRect()
-        const reachable = button.bottom > 0 && button.top < innerHeight && button.left >= -1 && button.right <= innerWidth + 1
-        const result = { reachable, button: { left: button.left, top: button.top, right: button.right, bottom: button.bottom } }
+        const buttonElement = document.querySelector('.export-button')
+        const button = buttonElement.getBoundingClientRect()
+        const hit = document.elementFromPoint((button.left + button.right) / 2, (button.top + button.bottom) / 2)
+        const unobscured = Boolean(hit && buttonElement.contains(hit))
+        const reachable = button.bottom > 0 && button.top < innerHeight && button.left >= -1 && button.right <= innerWidth + 1 && unobscured
+        const result = { reachable, unobscured, button: { left: button.left, top: button.top, right: button.right, bottom: button.bottom } }
         shell.scrollTop = 0
+        document.querySelector('.studio').scrollTop = 0
         inspector.scrollTop = 0
         return result
     })()`)
     if (!result.reachable) throw new Error("The export action is clipped or unreachable at this Interface Scale.")
     await settleRenderer(window)
     return result
+}
+
+async function scrollPreviewIntoView(window) {
+    const result = await window.webContents.executeJavaScript(`(async () => {
+        const stage = document.querySelector('.stage-shell')
+        stage.scrollIntoView({ block: 'center', inline: 'nearest' })
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        const box = stage.getBoundingClientRect()
+        const visibleTop = Math.max(0, box.top)
+        const visibleBottom = Math.min(innerHeight, box.bottom)
+        const visibleHeight = Math.max(0, visibleBottom - visibleTop)
+        const hit = document.elementFromPoint((box.left + box.right) / 2, (visibleTop + visibleBottom) / 2)
+        const unobscured = Boolean(hit && stage.contains(hit))
+        const requiredHeight = Math.min(box.height, innerHeight) * 0.8
+        return {
+            reachable: visibleHeight >= requiredHeight && box.left >= -1 && box.right <= innerWidth + 1 && unobscured,
+            unobscured,
+            visibleHeight,
+            requiredHeight,
+            stage: { left: box.left, top: box.top, right: box.right, bottom: box.bottom, width: box.width, height: box.height },
+        }
+    })()`)
+    if (!result.reachable) throw new Error('The preview canvas is clipped or obscured at this Interface Scale.')
+    await settleRenderer(window)
+    return result
+}
+
+async function resetStudioScroll(window) {
+    await window.webContents.executeJavaScript(`(() => {
+        document.querySelector('.app-shell').scrollTop = 0
+        document.querySelector('.studio').scrollTop = 0
+        document.querySelector('.inspector-scroll').scrollTop = 0
+    })()`)
+    await settleRenderer(window)
 }
 
 function assertInvariant(metrics) {
@@ -348,6 +391,7 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
 
     const metrics = {}
     const reachability = {}
+    const previewReachability = {}
     for (const [viewportName, width, height] of [["wide", 1280, 900], ["minimum", 1080, 700]]) {
         await resize(window, width, height)
         for (const scale of [75, 100, 150, 200]) {
@@ -357,6 +401,9 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
             metrics[key] = await readMetrics(window)
             captures[key] = await capture(window, outputDirectory, `gallery-studio-${key}`)
             reachability[key] = await verifyBottomReachability(window)
+            previewReachability[key] = await scrollPreviewIntoView(window)
+            captures[`preview-${key}`] = await capture(window, outputDirectory, `gallery-preview-${key}`)
+            await resetStudioScroll(window)
             fs.writeFileSync(path.join(outputDirectory, "renderer-progress.json"), JSON.stringify({
                 source: {
                     sha: process.env.GALLERY_SOURCE_SHA ?? null,
@@ -367,6 +414,7 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
                 catalogueReachability,
                 metrics,
                 reachability,
+                previewReachability,
             }, null, 2) + "\n")
         }
     }
@@ -386,6 +434,7 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
         catalogueReachability,
         metrics,
         reachability,
+        previewReachability,
         resetScale: Number(await window.webContents.executeJavaScript(`document.querySelector('[data-interface-scale]').dataset.interfaceScale`)),
     }
     fs.writeFileSync(path.join(outputDirectory, "renderer-receipt.json"), `${JSON.stringify(receipt, null, 2)}\n`)

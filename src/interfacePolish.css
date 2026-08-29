@@ -540,8 +540,8 @@
         background: var(--paper);
     }
     .titlebar {
-        position: sticky;
-        top: 0;
+        position: relative;
+        top: auto;
         grid-column: 1;
         grid-row: 1;
         display: grid;
@@ -586,6 +586,7 @@
 }
 
 @container (max-width: 620px) {
+    .style-gallery-tools { position: static; }
     .title-actions .interface-scale-control {
         grid-template-columns: var(--minimum-target) minmax(72px, 1fr) var(--minimum-target);
         width: 100%;
