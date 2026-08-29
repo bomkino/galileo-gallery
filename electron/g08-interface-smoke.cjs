@@ -53,6 +53,13 @@ async function setScale(window, target) {
         if (!group) throw new Error('Interface Scale control is missing.')
         const increase = group.querySelector('button:last-child')
         const decrease = group.querySelector('button:first-child')
+        const initial = Number(document.querySelector('[data-interface-scale]').dataset.interfaceScale)
+        if (initial === ${target} && !localStorage.getItem('${PRESENTATION_KEY}')) {
+            ;(${target} === 200 ? decrease : increase).click()
+            await new Promise((resolve) => requestAnimationFrame(resolve))
+            ;(${target} === 200 ? increase : decrease).click()
+            await new Promise((resolve) => requestAnimationFrame(resolve))
+        }
         for (let guard = 0; guard < 40; guard += 1) {
             const current = Number(document.querySelector('[data-interface-scale]').dataset.interfaceScale)
             if (current === ${target}) break
