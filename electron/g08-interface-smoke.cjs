@@ -232,8 +232,8 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
     await waitFor(window, `document.querySelector('.interface-scale-value')?.textContent?.trim() === '130%'`, "real StorageEvent scale update")
     await setScale(window, 100)
 
-    await window.webContents.executeJavaScript(`document.querySelector('button[data-style-id="quiet-carousel"]')?.click()`)
-    await waitFor(window, `document.querySelector('.app-shell') && document.querySelector('[data-quiet-carousel-renderer="v1"]')`, "Quiet Carousel studio")
+    await window.webContents.executeJavaScript(`document.querySelector('button[data-style-id="opening-reel"]')?.click()`)
+    await waitFor(window, `document.querySelector('.app-shell') && document.querySelector('.stage-shell')`, "Gallery studio")
     await waitFor(window, `!document.querySelector('.launch-screen')`, "launch transition", 15_000)
     await waitFor(window, `localStorage.getItem('${PROJECT_KEY}')`, "durable Project snapshot")
     await window.webContents.executeJavaScript(`document.querySelector('.title-actions .button.primary')?.click()`)
@@ -244,6 +244,10 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
     }))()`)
     if (host.identity.productId !== "galileo-gallery" || host.capabilities.formats.map((format) => format.id).join(",") !== "png-frames,mp4-h264-aac") {
         throw new Error("G08 did not exercise the current Linux HostPort and export capability seam.")
+    }
+    const formatTruth = await window.webContents.executeJavaScript(`Array.from(document.querySelectorAll('.format-cards button')).map((button) => ({ text: button.textContent.replace(/\\s+/g, ' ').trim(), disabled: button.disabled }))`)
+    if (formatTruth[0]?.disabled || !formatTruth[0]?.text.startsWith("PNG Frames") || !formatTruth[1]?.disabled || !formatTruth[1]?.text.includes("Quiet Carousel only")) {
+        throw new Error("G08 did not preserve the honest Scene-specific export capability boundary.")
     }
     await freezeStoryPose(window)
 
