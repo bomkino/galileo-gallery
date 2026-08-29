@@ -273,6 +273,7 @@ jobs:
           source_tree="$(git rev-parse HEAD^{tree})"
           GALLERY_SOURCE_SHA="$source_sha" GALLERY_SOURCE_TREE="$source_tree" xvfb-run -a npm run verify:g08-renderer
       - uses: actions/upload-artifact@v6
+        if: always()
         with:
           name: g08-interface-renderer-evidence
           path: artifacts/g08/

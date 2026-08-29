@@ -115,7 +115,7 @@ async function readMetrics(window) {
         }
         const scaleRoot = document.querySelector('[data-interface-scale]')
         const shell = document.querySelector('.app-shell')
-        const stage = rect('.stage-shell')
+        const stage = rect('.stage')
         const focusTarget = document.querySelector('.title-actions .button.primary')
         focusTarget.focus()
         const focusStyle = getComputedStyle(focusTarget)
