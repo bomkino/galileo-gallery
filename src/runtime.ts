@@ -3,6 +3,8 @@ import { hydrateHostAudio, validateHostAudioIntent } from "./audio/audioHost.ts"
 import { compileAudioTimeline, defaultAudioIntent, type RationalTime } from "./audio/audioTimeline.ts"
 import { mixAudioChunk } from "./audio/audioMixer.ts"
 import { createHostPCMProvider } from "./audio/hostPcmProvider.ts"
+import { supportsSceneVersion, supportsVerifiedPngFrames } from "./styleRegistry.ts"
+import { validateVitrineRuntimeConfig, VITRINE_MAX_ITEMS } from "./vitrineConfig.ts"
 
 const unavailable = async () => {
     throw new Error("This action is available in the Galileo desktop app.")
@@ -35,10 +37,15 @@ function validateHostConfig(value: unknown): ReelConfig {
     if (config.schemaVersion !== 2 || typeof config.styleId !== "string" || !config.settings || !Array.isArray(config.items) || config.items.length > 256) {
         throw new Error("Host Project is invalid.")
     }
+    if (!supportsSceneVersion(config.styleId, config.sceneVersion ?? 1)) throw new Error("Host Project Scene version is unsupported.")
     if (!config.items.every((item) => item && typeof item.id === "string" && ["image", "video"].includes(item.type) && /^reel-media:\/\/grant\/[a-f0-9]{64}$/.test(item.url))) {
         throw new Error("Host media authority is invalid.")
     }
     const normalized = config as ReelConfig
+    if (normalized.styleId === "vitrine" && normalized.sceneVersion === 2) {
+        if (normalized.items.length > VITRINE_MAX_ITEMS) throw new Error("Host Vitrine Project is invalid.")
+        try { validateVitrineRuntimeConfig(normalized) } catch { throw new Error("Host Vitrine Project is invalid.") }
+    }
     validateHostAudioIntent(normalized.audio, normalized.items)
     return normalized
 }
@@ -85,7 +92,12 @@ function pcm16Base64(interleaved: Float32Array) {
 }
 
 async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort) {
-    await Promise.all(config.items.map((item) => new Promise<void>((resolve, reject) => {
+    let cursor = 0
+    const hydrateOne = (item: ReelConfig["items"][number]) => new Promise<void>((resolve, reject) => {
+        if (config.styleId === "vitrine" && config.sceneVersion === 2 && item.type === "video") {
+            resolve()
+            return
+        }
         const media = item.type === "video" ? document.createElement("video") : new Image()
         const timeout = window.setTimeout(() => finish(new Error(`Timed out hydrating ${item.name}.`)), 15_000)
         const finish = (error?: Error) => {
@@ -105,7 +117,11 @@ async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort) {
             media.src = item.url
             media.decode().then(() => finish(), () => finish(new Error(`Could not hydrate ${item.name}.`)))
         }
-    })))
+    })
+    const workers = Array.from({ length: Math.min(2, config.items.length) }, async () => {
+        while (cursor < config.items.length) await hydrateOne(config.items[cursor++])
+    })
+    await Promise.all(workers)
     await hydrateHostAudio(config.audio)
     for (const source of config.audio?.sources ?? []) {
         if (source.role !== "source-video" || !source.url) continue
@@ -151,20 +167,33 @@ export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
                 const capability = capabilities.formats.find((candidate) => candidate.id === capabilityId)
                 if (!capability) throw new Error(`${request.format === "png-frames" ? "PNG Frames" : "H.264/AAC"} is unavailable on this host.`)
                 if (!capability.available) throw new Error(capability.consequence)
+                if (request.format === "png-frames" && (!supportsVerifiedPngFrames(request.config.styleId, request.config.sceneVersion ?? 1)
+                    || !("sceneVersions" in capability)
+                    || !capability.sceneVersions.some((scene) => scene.id === request.config.styleId && scene.versions.some((version) => version === (request.config.sceneVersion ?? 1))))) {
+                    throw new Error("Verified PNG Frames currently support Quiet Carousel v1 and Vitrine v2 only.")
+                }
                 if (request.format === "mp4" && (!("sceneIds" in capability) || !capability.sceneIds.includes(request.config.styleId as "quiet-carousel"))) {
                     throw new Error("Verified H.264/AAC currently supports Quiet Carousel only. Choose PNG Frames for this Scene.")
                 }
                 if (exportCancelled) return { cancelled: true }
                 const date = new Date().toISOString().slice(0, 10)
                 if (request.format === "png-frames") {
+                    const vitrineClock = request.config.styleId === "vitrine" && request.config.sceneVersion === 2
+                        ? validateVitrineRuntimeConfig(request.config)
+                        : null
+                    if (vitrineClock && (request.durationMs !== vitrineClock.durationMs
+                        || request.cycleDurationMs !== vitrineClock.cycleDurationMs
+                        || request.finalCycleDurationMs !== vitrineClock.finalCycleDurationMs)) {
+                        throw new Error("Vitrine export clocks do not match the immutable Project Timeline.")
+                    }
                     const preflight = await host.preflightPngFrames({
                         config: request.config,
                         width: request.width,
                         height: request.height,
                         fps: request.fps,
                         durationMs: request.durationMs,
-                        cycleDurationMs: request.cycleDurationMs ?? request.durationMs,
-                        finalCycleDurationMs: request.finalCycleDurationMs ?? request.cycleDurationMs ?? request.durationMs,
+                        cycleDurationMs: vitrineClock ? request.cycleDurationMs as number : request.cycleDurationMs ?? request.durationMs,
+                        finalCycleDurationMs: vitrineClock ? request.finalCycleDurationMs as number : request.finalCycleDurationMs ?? request.cycleDurationMs ?? request.durationMs,
                         transparent: request.config.settings.backgroundStyle === "transparent",
                     })
                     hostExportAllocated = true

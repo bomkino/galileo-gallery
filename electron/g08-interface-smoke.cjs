@@ -384,7 +384,7 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
         throw new Error("G08 did not exercise the current Linux HostPort and export capability seam.")
     }
     const formatTruth = await window.webContents.executeJavaScript(`Array.from(document.querySelectorAll('.format-cards button')).map((button) => ({ text: button.textContent.replace(/\\s+/g, ' ').trim(), disabled: button.disabled }))`)
-    if (formatTruth[0]?.disabled || !formatTruth[0]?.text.startsWith("PNG Frames") || !formatTruth[1]?.disabled || !formatTruth[1]?.text.includes("Quiet Carousel only")) {
+    if (!formatTruth[0]?.disabled || !formatTruth[0]?.text.includes("Quiet Carousel v1 or Vitrine v2 only") || !formatTruth[1]?.disabled || !formatTruth[1]?.text.includes("Quiet Carousel only")) {
         throw new Error("G08 did not preserve the honest Scene-specific export capability boundary.")
     }
     await freezeStoryPose(window)

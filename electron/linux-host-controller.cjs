@@ -32,6 +32,14 @@ const {
 const GRANT_URL = /^reel-media:\/\/grant\/([a-f0-9]{64})$/
 const MAX_PREPARED_VIDEO_AUDIO_FRAMES = 256 * 1024 * 1024 / 4
 
+function verifyOpenedMediaSource(opened) {
+    if (!opened || !Number.isSafeInteger(opened.handle)) throw new HostPortError("verification_failed")
+    const stats = fs.fstatSync(opened.handle)
+    if (!stats.isFile() || stats.dev !== opened.device || stats.ino !== opened.inode || stats.size !== opened.size
+        || stats.mtimeMs !== opened.mtimeMs || stats.ctimeMs !== opened.ctimeMs) throw new HostPortError("verification_failed")
+    return stats
+}
+
 function ownExact(value, keys) {
     if (!value || typeof value !== "object" || Array.isArray(value)) return false
     const actual = Object.keys(value).sort()
@@ -308,8 +316,11 @@ function createLinuxHostController(options) {
         const handle = fs.openSync(grant.filePath, "r")
         try {
             const stats = fs.fstatSync(handle)
-            if (!stats.isFile() || stats.dev !== grant.device || stats.ino !== grant.inode || stats.size !== grant.bytes || stats.mtimeMs !== grant.mtimeMs) throw new HostPortError("verification_failed")
-            return Object.freeze({ handle, device: stats.dev, inode: stats.ino, size: stats.size, mtimeMs: stats.mtimeMs, mime: grant.mime })
+            if (!stats.isFile() || stats.dev !== grant.device || stats.ino !== grant.inode || stats.size !== grant.bytes
+                || stats.mtimeMs !== grant.mtimeMs || stats.ctimeMs !== grant.ctimeMs) throw new HostPortError("verification_failed")
+            const opened = Object.freeze({ handle, device: stats.dev, inode: stats.ino, size: stats.size, mtimeMs: stats.mtimeMs, ctimeMs: stats.ctimeMs, mime: grant.mime })
+            verifyOpenedMediaSource(opened)
+            return opened
         } catch (error) {
             fs.closeSync(handle)
             throw error
@@ -757,4 +768,4 @@ function createLinuxHostController(options) {
     return Object.freeze({ abandonPending, bootstrap, dispose, grantMedia, handle, mediaPath, openMedia, snapshot: () => Object.freeze({ generation, state, pending: Boolean(pending) }) })
 }
 
-module.exports = { createLinuxHostController, tokenFromMediaURL }
+module.exports = { createLinuxHostController, tokenFromMediaURL, verifyOpenedMediaSource }

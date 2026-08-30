@@ -97,8 +97,7 @@ async function runG06RendererSmoke(window, evidenceRoot, mode) {
         if (h264) {
             if (fs.existsSync(destination)) throw new Error("G06B real cancellation published an MP4 destination.")
         } else {
-            if (fs.readFileSync(path.join(destination, "prior.txt"), "utf8") !== "preserve-me") throw new Error("G06 real cancellation changed the prior destination.")
-            if (fs.readdirSync(destination).join("\n") !== "prior.txt") throw new Error("G06 real cancellation left output inside the prior destination.")
+            if (fs.existsSync(destination)) throw new Error("G06 real cancellation retained an owned partial PNG destination.")
         }
         const transactionPattern = h264 ? /^\.gallery-h264-(?:stage|backup)-[a-f0-9]{32}\.mp4$/ : /^\.gallery-png-(?:stage|backup)-[a-f0-9]{32}$/
         const transactionResidue = fs.readdirSync(path.dirname(destination)).filter((name) => transactionPattern.test(name))
@@ -117,9 +116,9 @@ async function runG06RendererSmoke(window, evidenceRoot, mode) {
         }
         fs.writeFileSync(path.join(evidenceRoot, "cancel.json"), `${JSON.stringify({
             mode,
-            priorPreserved: h264 ? null : true,
-            destinationAbsent: h264,
-            destinationEntries: h264 ? [] : ["prior.txt"],
+            priorPreserved: null,
+            destinationAbsent: true,
+            destinationEntries: [],
             transactionResidue,
             audioResidue,
             terminalPhase: outcome.terminalPhase,

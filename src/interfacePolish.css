@@ -199,6 +199,7 @@
     border-radius: 4px;
     background: rgba(24, 25, 23, .03);
 }
+.media-select { grid-template-columns: 16px 64px minmax(0, 1fr); gap: 11px; }
 .media-row.is-selected { border: 2px solid var(--ink); background: #f7a18f; }
 .drag-handle { color: rgba(24, 25, 23, .3); }
 .media-thumb { width: 64px; height: 52px; border-radius: 2px; }

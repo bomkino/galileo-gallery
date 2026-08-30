@@ -2,7 +2,9 @@ import * as React from "react"
 import { createPortal } from "react-dom"
 import OpeningReel from "./OpeningReel"
 import ExpertControls, { type ExpertPreset, type ExpertTab } from "./ExpertControls"
-import GalleryRenderer from "./GalleryRenderer"
+import ProductSceneRenderer, { isAuthoredVitrine, productSceneDuration } from "./scenes/ProductSceneRenderer"
+import { minimumVitrineFixedDuration, VITRINE_MIN_EXCHANGE_MS, VITRINE_MIN_HOLD_MS, vitrineStoryTimeMs } from "./scenes/vitrine"
+import { assertVitrineV2Settings, exclusiveVitrineOpening, firstEligibleVitrineItem, isVitrineV2, reconcileVitrineConfig, VITRINE_MAX_DURATION_MS, VITRINE_MAX_ITEMS } from "./vitrineConfig"
 import QuietCarouselRenderer, { quietCarouselTimeline } from "./scenes/QuietCarouselRenderer"
 import StyleGallery from "./StyleGallery"
 import { ensureReelAPI } from "./runtime"
@@ -11,7 +13,7 @@ import { defaultAudioIntent } from "./audio/audioTimeline"
 import { projectConfigAfterOpen, projectOpenNotice } from "./projectOpen"
 import { styleProfile, styleSettings } from "./styleProfiles"
 import { placeholderItems, studioTimeline } from "./timeline"
-import { GALLERY_STYLES, galleryScene, galleryStyle, sceneVariants, type StyleDefinition } from "./styleRegistry"
+import { GALLERY_STYLES, galleryScene, galleryStyle, latestSceneVersion, sceneVariants, supportsSceneVersion, supportsVerifiedPngFrames, type StyleDefinition } from "./styleRegistry"
 import { InterfaceScaleControl, InterfaceScaleSurface } from "./presentation/InterfaceScaleSurface"
 import type {
     ExportFormat,
@@ -26,6 +28,7 @@ import type {
     ReelConfig,
     ReelSettings,
     SelectedMedia,
+    TimelineMode,
 } from "./types"
 
 const Reel = OpeningReel as React.ComponentType<Record<string, unknown>>
@@ -38,27 +41,34 @@ const RECOVERY_INTERVAL_MS = 2 * 60 * 1000
 
 function normalizeConfig(value: Partial<ReelConfig> | null | undefined): ReelConfig {
     const styleId = value?.styleId ?? "opening-reel"
-    return {
+    const sceneVersion = value?.sceneVersion ?? 1
+    if (!supportsSceneVersion(styleId, sceneVersion)) throw new Error(`Unsupported Gallery Scene version: ${styleId} v${sceneVersion}`)
+    const config = {
         schemaVersion: 2,
         styleId,
+        sceneVersion,
         items: Array.isArray(value?.items)
             ? value.items.map((item) => ({
                   ...item,
                   aspectMode: item.aspectMode ?? "auto",
                   ratioW: item.ratioW ?? 16,
                   ratioH: item.ratioH ?? 9,
+                  fit: item.fit ?? (styleId === "vitrine" && sceneVersion === 2 ? "contain" : value?.settings?.imageFit ?? "contain"),
+                  crop: item.crop ?? { x: 0, y: 0, width: 1, height: 1 },
+                  focal: item.focal ?? { x: 0.5, y: 0.5 },
               }))
             : [],
-        settings: { ...styleSettings(styleId), ...(value?.settings ?? {}) },
+        settings: { ...styleSettings(styleId, sceneVersion), ...(value?.settings ?? {}) },
         timelineMode: value?.timelineMode ?? "automatic",
         timelineFixedDurationMs: value?.timelineFixedDurationMs ?? 0,
         timelineSegments: value?.timelineSegments ?? [],
         audio: value?.audio ?? defaultAudioIntent(),
     }
+    return reconcileVitrineConfig(config)
 }
 
-function applyStyleDefaults(current: ReelSettings, styleId: string): ReelSettings {
-    const next = styleSettings(styleId)
+function applyStyleDefaults(current: ReelSettings, styleId: string, sceneVersion = 1): ReelSettings {
+    const next = styleSettings(styleId, sceneVersion)
     return {
         ...next,
         canvasPreset: current.canvasPreset,
@@ -124,6 +134,9 @@ const MOTION_BASES: Record<Exclude<MotionPreset, "custom">, Pick<ReelSettings, "
 }
 
 type InspectorTab = "design" | "expert" | "export"
+type VitrineUndoKey = "slideHeight" | "tilt" | "sway" | "transitionDirection" | "showHint"
+type VitrineUndoEntry = { key: VitrineUndoKey; value: ReelSettings[VitrineUndoKey] }
+const VITRINE_UNDO_KEYS = new Set<keyof ReelSettings>(["slideHeight", "tilt", "sway", "transitionDirection", "showHint"])
 
 function clamp(value: number, min: number, max: number) {
     return Math.min(max, Math.max(min, value))
@@ -237,16 +250,16 @@ function mediaRatio(media: SelectedMedia): Promise<number> {
     })
 }
 
-async function hydrateMedia(media: SelectedMedia[]): Promise<{ items: MediaItem[]; failures: string[] }> {
+async function hydrateMedia(media: SelectedMedia[], createVideoPreviews = true): Promise<{ items: MediaItem[]; failures: string[] }> {
     const results: Array<MediaItem | undefined> = Array(media.length)
     const failures: string[] = []
     let cursor = 0
-    const workers = Array.from({ length: Math.min(3, media.length) }, async () => {
+    const workers = Array.from({ length: Math.min(2, media.length) }, async () => {
         while (cursor < media.length) {
             const index = cursor++
             const item = media[index]
             try {
-                const previewUrl = item.type === "video"
+                const previewUrl = item.type === "video" && createVideoPreviews
                     ? await reelAPI.createVideoProxy(item.url)
                     : undefined
                 const ratio = await mediaRatio(previewUrl ? { ...item, url: previewUrl } : item)
@@ -257,6 +270,9 @@ async function hydrateMedia(media: SelectedMedia[]): Promise<{ items: MediaItem[
                     aspectMode: "auto" as const,
                     ratioW: 16,
                     ratioH: 9,
+                    fit: "contain" as const,
+                    crop: { x: 0, y: 0, width: 1, height: 1 },
+                    focal: { x: 0.5, y: 0.5 },
                     ...(previewUrl ? { previewUrl } : {}),
                     spotlight: false,
                     muted: false,
@@ -364,47 +380,77 @@ function nextPaint() {
 }
 
 async function waitForExportFrameImages() {
-    const images = Array.from(document.querySelectorAll<HTMLImageElement>("img.orl-export-frame, img.galileo-media, .qc-export-stage img"))
+    const images = Array.from(document.querySelectorAll<HTMLImageElement>("img.orl-export-frame, img.galileo-media, .qc-export-stage img, img.product-export-media"))
     await Promise.all(images.map(async (image) => {
-        await image.decode()
+        try {
+            await image.decode()
+        } catch {
+            await nextPaint()
+            if (!image.isConnected) return
+            throw new Error("Export video frame could not be decoded.")
+        }
         if (!image.complete || image.naturalWidth < 1 || image.naturalHeight < 1) {
             throw new Error("Export video frame could not be decoded.")
         }
     }))
+    for (let attempt = 0; attempt < 300; attempt += 1) {
+        await nextPaint()
+        if (document.querySelector('[data-media-failed="true"]')) throw new Error("Export source media could not be decoded.")
+        const videos = Array.from(document.querySelectorAll<HTMLVideoElement>('video.product-export-media'))
+        if (videos.every((video) => video.dataset.storyReady === "true" && !video.seeking)) return
+    }
+    throw new Error("Export source video did not reach the requested story frame.")
+}
+
+type ExportPayload = {
+    exportId: string
+    request: ExportRequest
+    videoFrames: Record<number, { fps: number; frames: string[] }>
+}
+
+function exportFrameOverrides(payload: ExportPayload, timeMs: number) {
+    const clock = exportCycleClock(payload.request, timeMs)
+    const sourceTimeMs = payload.request.config.styleId === "vitrine" && payload.request.config.sceneVersion === 2
+        ? vitrineStoryTimeMs(clock.timeMs, clock.durationMs, payload.request.config.settings.direction, clock.terminal)
+        : clock.timeMs
+    const nextFrames: Record<number, string> = {}
+    for (const [key, set] of Object.entries(payload.videoFrames)) {
+        if (!set.frames.length) continue
+        const sourceFrame = Math.floor((sourceTimeMs / 1000) * set.fps)
+        const frameIndex = payload.request.config.settings.loopVideos
+            ? sourceFrame % set.frames.length
+            : Math.min(sourceFrame, set.frames.length - 1)
+        nextFrames[Number(key)] = set.frames[frameIndex]
+    }
+    return nextFrames
 }
 
 function ExportView() {
-    const [payload, setPayload] = React.useState<{
-        exportId: string
-        request: ExportRequest
-        videoFrames: Record<number, { fps: number; frames: string[] }>
-    } | null>(null)
+    const [payload, setPayload] = React.useState<ExportPayload | null>(null)
     const [timeMs, setTimeMs] = React.useState(0)
     const [frameOverrides, setFrameOverrides] = React.useState<Record<number, string>>({})
     const exportProps = React.useMemo(() => payload ? reelProps(payload.request.config) : null, [payload])
 
-    React.useEffect(() => reelAPI.onExportInit(setPayload), [])
+    React.useEffect(() => reelAPI.onExportInit((nextPayload) => {
+        delete document.documentElement.dataset.exportFrameId
+        delete document.documentElement.dataset.exportTimeMs
+        setTimeMs(0)
+        setFrameOverrides(exportFrameOverrides(nextPayload, 0))
+        setPayload(nextPayload)
+    }), [])
     React.useEffect(
         () =>
             reelAPI.onExportFrame(async (frame) => {
+                delete document.documentElement.dataset.exportFrameId
+                delete document.documentElement.dataset.exportTimeMs
                 setTimeMs(frame.timeMs)
-                const nextFrames: Record<number, string> = {}
-                if (payload) {
-                    const clock = exportCycleClock(payload.request, frame.timeMs)
-                    for (const [key, set] of Object.entries(payload.videoFrames)) {
-                        if (!set.frames.length) continue
-                        const sourceFrame = Math.floor((clock.timeMs / 1000) * set.fps)
-                        const frameIndex = payload.request.config.settings.loopVideos
-                            ? sourceFrame % set.frames.length
-                            : Math.min(sourceFrame, set.frames.length - 1)
-                        nextFrames[Number(key)] = set.frames[frameIndex]
-                    }
-                }
-                setFrameOverrides(nextFrames)
+                setFrameOverrides(payload ? exportFrameOverrides(payload, frame.timeMs) : {})
                 await nextPaint()
                 await nextPaint()
                 await waitForExportFrameImages()
                 await nextPaint()
+                document.documentElement.dataset.exportFrameId = frame.frameId
+                document.documentElement.dataset.exportTimeMs = String(frame.timeMs)
             }),
         [payload]
     )
@@ -428,6 +474,8 @@ function ExportView() {
         return () => {
             cancelled = true
             delete document.documentElement.dataset.exportTransparent
+            delete document.documentElement.dataset.exportFrameId
+            delete document.documentElement.dataset.exportTimeMs
         }
     }, [payload])
 
@@ -441,12 +489,15 @@ function ExportView() {
             ) : payload.request.config.styleId === "opening-reel" ? (
                 <Reel {...exportProps} canvasPose={pose} canvasTimeMs={clock.timeMs} staticPose exportFrames={frameOverrides} />
             ) : (
-                <GalleryRenderer
+                <ProductSceneRenderer
                     config={payload.request.config}
                     timeMs={clock.timeMs}
                     durationMs={clock.durationMs}
+                    fps={payload.request.fps}
                     exportFrames={frameOverrides}
                     terminal={clock.terminal}
+                    reducedMotion={false}
+                    exportMode
                 />
             )}
         </div>
@@ -454,23 +505,42 @@ function ExportView() {
 }
 
 function Segment<T extends string>({
+    label,
     value,
     options,
     onChange,
 }: {
+    label?: string
     value: T
     options: Array<{ value: T; label: string }>
     onChange: (value: T) => void
 }) {
+    const moveFocus = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+        const backward = event.key === "ArrowLeft" || event.key === "ArrowUp"
+        const forward = event.key === "ArrowRight" || event.key === "ArrowDown"
+        if (!backward && !forward && event.key !== "Home" && event.key !== "End") return
+        event.preventDefault()
+        const nextIndex = event.key === "Home"
+            ? 0
+            : event.key === "End"
+                ? options.length - 1
+                : (index + (forward ? 1 : -1) + options.length) % options.length
+        const next = options[nextIndex]
+        onChange(next.value)
+        const buttons = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("button")
+        buttons?.[nextIndex]?.focus()
+    }
     return (
-        <div className="segment">
-            {options.map((option) => (
+        <div className="segment" role="group" aria-label={label}>
+            {options.map((option, index) => (
                 <button
                     key={option.value}
                     type="button"
                     className={value === option.value ? "is-active" : ""}
                     aria-pressed={value === option.value}
+                    tabIndex={value === option.value ? 0 : -1}
                     onClick={() => onChange(option.value)}
+                    onKeyDown={(event) => moveFocus(event, index)}
                 >
                     {option.label}
                 </button>
@@ -487,6 +557,8 @@ function RangeControl({
     step = 1,
     suffix,
     onChange,
+    onBegin,
+    onEnd,
 }: {
     label: string
     value: number
@@ -495,24 +567,40 @@ function RangeControl({
     step?: number
     suffix?: string
     onChange: (value: number) => void
+    onBegin?: () => void
+    onEnd?: () => void
 }) {
-    const progress = ((value - min) / (max - min)) * 100
+    const progress = clamp(((value - min) / Math.max(1, max - min)) * 100, 0, 100)
+    const shiftArrow = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (!event.shiftKey || !["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp"].includes(event.key)) return
+        event.preventDefault()
+        const direction = ["ArrowRight", "ArrowUp"].includes(event.key) ? 1 : -1
+        onChange(clamp(value + direction * step * 10, min, max))
+    }
     return (
         <div className="range-row">
             <span>{label}</span>
             <label className="range-value" aria-label={`${label} value`}>
-                <input type="number" min={min} max={max} step={step} value={value} onChange={(event) => {
+                <input type="number" min={min} max={max} step={step} value={value} onFocus={onBegin} onBlur={onEnd} onKeyDown={shiftArrow} onChange={(event) => {
                     if (Number.isFinite(event.target.valueAsNumber)) onChange(clamp(event.target.valueAsNumber, min, max))
                 }} />
                 {suffix ? <small>{suffix}</small> : null}
             </label>
             <input
+                aria-label={label}
                 type="range"
                 min={min}
                 max={max}
                 step={step}
                 value={value}
                 style={{ "--range-progress": `${progress}%` } as React.CSSProperties}
+                onPointerDown={onBegin}
+                onPointerUp={onEnd}
+                onPointerCancel={onEnd}
+                onLostPointerCapture={onEnd}
+                onBlur={onEnd}
+                onKeyDown={(event) => { onBegin?.(); shiftArrow(event) }}
+                onKeyUp={onEnd}
                 onChange={(event) => onChange(Number(event.target.value))}
             />
         </div>
@@ -539,6 +627,7 @@ function AppView() {
     const [dragIndex, setDragIndex] = React.useState<number | null>(null)
     const [isDropping, setDropping] = React.useState(false)
     const [selectedItemId, setSelectedItemId] = React.useState<string | null>(config.items[0]?.id ?? null)
+    const [inspectionItemId, setInspectionItemId] = React.useState<string | null>(null)
     const [freezePreview, setFreezePreview] = React.useState(false)
     const [isScrubbing, setIsScrubbing] = React.useState(false)
     const [scrubPaused, setScrubPaused] = React.useState(false)
@@ -550,10 +639,13 @@ function AppView() {
     const [saveNotice, setSaveNotice] = React.useState<string | null>(null)
     const [projectOpening, setProjectOpening] = React.useState(false)
     const [documentVisible, setDocumentVisible] = React.useState(() => document.visibilityState !== "hidden")
+    const [systemReducedMotion, setSystemReducedMotion] = React.useState(() => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false)
     const configRef = React.useRef(config)
     const hiddenAtRef = React.useRef<number | null>(null)
     const videoProxyJobs = React.useRef(new Set<string>())
     const playbackShapeRef = React.useRef("")
+    const vitrineUndoStackRef = React.useRef<VitrineUndoEntry[]>([])
+    const vitrineTransactionRef = React.useRef<VitrineUndoEntry | null>(null)
 
     const output = canvasOutput(config.settings)
     const timeline = React.useMemo(
@@ -561,20 +653,24 @@ function AppView() {
         [config, output.width, output.height]
     )
     const quietTimeline = React.useMemo(() => quietCarouselTimeline(config, fps), [config, fps])
-    const duration = config.styleId === "quiet-carousel" ? quietTimeline.durationMs : timeline.durationMs
+    const authoredSceneDuration = React.useMemo(() => productSceneDuration(config, fps), [config, fps])
+    const duration = config.styleId === "quiet-carousel" ? quietTimeline.durationMs : authoredSceneDuration ?? timeline.durationMs
     const repeatCount = clamp(Math.round(config.settings.repeatCount), 1, 1000)
     const finalCycleDuration = React.useMemo(
         () => config.settings.playKind === "repeat"
             ? config.styleId === "quiet-carousel"
                 ? duration
-                : studioTimeline({ ...config, settings: { ...config.settings, playKind: "once" } }, output.width, output.height).durationMs
+                : productSceneDuration({ ...config, settings: { ...config.settings, playKind: "once" } }, fps)
+                    ?? studioTimeline({ ...config, settings: { ...config.settings, playKind: "once" } }, output.width, output.height).durationMs
             : duration,
-        [config, duration, output.height, output.width]
+        [config, duration, fps, output.height, output.width]
     )
     const playbackDuration = config.settings.playKind === "repeat"
         ? duration * (repeatCount - 1) + finalCycleDuration
         : duration
-    const terminalCycle = config.settings.playKind === "once" || (config.settings.playKind === "repeat" && playIteration === repeatCount)
+    const terminalCycle = config.settings.playKind === "once"
+        || (isAuthoredVitrine(config) && config.settings.playKind === "repeat")
+        || (config.settings.playKind === "repeat" && playIteration === repeatCount)
     const activeCycleDuration = terminalCycle && config.settings.playKind === "repeat" ? finalCycleDuration : duration
     const liveSlides = React.useMemo(() => sourceItems(config.items), [config.items])
     const activeStyle = galleryStyle(config.styleId)
@@ -582,7 +678,18 @@ function AppView() {
     const verifiedH264Scene = usesLinuxHostPort && config.styleId === "quiet-carousel"
     const verifiedH264Audio = !config.audio || (config.audio.sampleRate === 48_000 && config.audio.channels === 2)
     const activeVariants = sceneVariants(config.styleId)
-    const activeProfile = styleProfile(config.styleId)
+    const activeProfile = styleProfile(config.styleId, config.sceneVersion ?? 1)
+    const authoredVitrine = isAuthoredVitrine(config)
+    const reducedVitrinePreview = authoredVitrine && systemReducedMotion
+    const verifiedPngScene = usesLinuxHostPort && supportsVerifiedPngFrames(config.styleId, config.sceneVersion ?? 1)
+    const directedPaceScale = authoredVitrine && config.timelineMode === "directed"
+        ? Math.max(1, ...(config.timelineSegments ?? []).filter((segment) => segment.kind === "cycle" && segment.durationMs === 0).map((segment) => segment.paceScale))
+        : 1
+    const vitrineHoldMinimum = VITRINE_MIN_HOLD_MS * directedPaceScale
+    const vitrineExchangeMinimum = VITRINE_MIN_EXCHANGE_MS * directedPaceScale
+    const vitrineFixedMinimum = authoredVitrine
+        ? minimumVitrineFixedDuration(Math.max(1, config.items.filter((item) => !item.muted).length), config.settings.holdMs, config.settings.paceMs)
+        : 1_000
     const isOpeningReel = activeStyle.id === "opening-reel"
     const directionLabels = activeProfile.axisControl
         ? config.settings.axis === "vertical" ? ["Up", "Down"] as const : ["Left", "Right"] as const
@@ -601,14 +708,60 @@ function AppView() {
     )
     const isExporting = progress && ["preparing", "rendering", "encoding", "verifying"].includes(progress.phase)
     const restart = React.useCallback(() => {
+        setInspectionItemId(null)
         setReelKey((key) => key + 1)
         setStartedAt(performance.now())
-        setPreviewStarted(!isOpeningReel && !freezePreview)
+        setPreviewStarted(!isOpeningReel && !freezePreview && !reducedVitrinePreview)
         setScrubPaused(false)
         setIsScrubbing(false)
         setPlayhead(0)
         setPlayIteration(1)
-    }, [isOpeningReel, freezePreview])
+    }, [isOpeningReel, freezePreview, reducedVitrinePreview])
+
+    const updateUndoDepth = React.useCallback(() => {
+        document.documentElement.dataset.vitrineUndoDepth = String(vitrineUndoStackRef.current.length)
+    }, [])
+    const clearVitrineUndo = React.useCallback(() => {
+        vitrineTransactionRef.current = null
+        vitrineUndoStackRef.current = []
+        updateUndoDepth()
+    }, [updateUndoDepth])
+    const beginVitrineSetting = React.useCallback((key: keyof ReelSettings) => {
+        if (!VITRINE_UNDO_KEYS.has(key) || !isVitrineV2(configRef.current) || vitrineTransactionRef.current) return
+        const undoKey = key as VitrineUndoKey
+        vitrineTransactionRef.current = { key: undoKey, value: configRef.current.settings[undoKey] }
+    }, [])
+    const endVitrineSetting = React.useCallback((key: keyof ReelSettings) => {
+        const transaction = vitrineTransactionRef.current
+        if (!transaction || transaction.key !== key) return
+        vitrineTransactionRef.current = null
+        if (transaction.value !== configRef.current.settings[key]) {
+            vitrineUndoStackRef.current.push(transaction)
+            if (vitrineUndoStackRef.current.length > 100) vitrineUndoStackRef.current.shift()
+            updateUndoDepth()
+        }
+    }, [updateUndoDepth])
+    const undoVitrineSetting = React.useCallback(() => {
+        vitrineTransactionRef.current = null
+        const previous = vitrineUndoStackRef.current.pop()
+        if (!previous) return false
+        if (!isVitrineV2(configRef.current)) {
+            clearVitrineUndo()
+            return false
+        }
+        const next = reconcileVitrineConfig({
+            ...configRef.current,
+            settings: { ...configRef.current.settings, [previous.key]: previous.value },
+        })
+        configRef.current = next
+        setConfig(next)
+        setSaveNotice("Vitrine control change undone.")
+        updateUndoDepth()
+        restart()
+        const groupLabel = previous.key === "transitionDirection" ? "Exchange direction" : previous.key === "showHint" ? "Placard" : null
+        if (groupLabel) requestAnimationFrame(() => document.querySelector<HTMLElement>(`.segment[aria-label="${groupLabel}"] button[aria-pressed="true"]`)?.focus())
+        return true
+    }, [clearVitrineUndo, restart, updateUndoDepth])
 
     const playbackShape = [
         config.settings.axis,
@@ -629,6 +782,7 @@ function AppView() {
     }, [playbackShape, restart])
 
     const handlePlaybackStart = React.useCallback(() => {
+        setInspectionItemId(null)
         setStartedAt(performance.now())
         setPreviewStarted(true)
         setScrubPaused(false)
@@ -637,6 +791,12 @@ function AppView() {
     }, [])
 
     const transportAction = React.useCallback(() => {
+        setInspectionItemId(null)
+        if (reducedVitrinePreview) {
+            setPreviewStarted(false)
+            setScrubPaused(true)
+            return
+        }
         if (!scrubPaused || isOpeningReel || playhead >= 0.999) {
             restart()
             return
@@ -644,9 +804,10 @@ function AppView() {
         setScrubPaused(false)
         setStartedAt(performance.now() - playhead * duration)
         setPreviewStarted(true)
-    }, [duration, isOpeningReel, playhead, restart, scrubPaused])
+    }, [duration, isOpeningReel, playhead, reducedVitrinePreview, restart, scrubPaused])
 
     const beginScrub = React.useCallback(() => {
+        setInspectionItemId(null)
         setIsScrubbing(true)
         setScrubPaused(true)
         setPreviewStarted(false)
@@ -659,6 +820,7 @@ function AppView() {
     }, [])
 
     const setScrubPosition = React.useCallback((value: number) => {
+        setInspectionItemId(null)
         setScrubPaused(true)
         setPreviewStarted(false)
         setPlayhead(clamp(value, 0, 1))
@@ -674,14 +836,22 @@ function AppView() {
             setScrubPaused(false)
             setReelKey((key) => key + 1)
             setStartedAt(performance.now())
-            setPreviewStarted(!isOpeningReel)
+            setPreviewStarted(!isOpeningReel && !reducedVitrinePreview)
             setPlayhead(0)
         }
-    }, [config.settings.canvasPose, isOpeningReel])
+    }, [config.settings.canvasPose, isOpeningReel, reducedVitrinePreview])
 
     React.useEffect(() => {
         configRef.current = config
     }, [config])
+
+    React.useEffect(() => {
+        const query = window.matchMedia?.("(prefers-reduced-motion: reduce)")
+        if (!query) return
+        const update = () => setSystemReducedMotion(query.matches)
+        query.addEventListener("change", update)
+        return () => query.removeEventListener("change", update)
+    }, [])
 
     React.useEffect(() => {
         if (format === "mp4" && ((usesLinuxHostPort && (!verifiedH264Scene || !verifiedH264Audio)) || config.settings.backgroundStyle === "transparent")) {
@@ -690,11 +860,13 @@ function AppView() {
     }, [config.settings.backgroundStyle, format, usesLinuxHostPort, verifiedH264Audio, verifiedH264Scene])
 
     React.useEffect(() => {
+        if (authoredVitrine) return
         const missing = config.items.filter((item) => {
             const jobKey = `${item.id}:${item.url}`
             return item.type === "video" && !item.previewUrl && !videoProxyJobs.current.has(jobKey)
         })
-        missing.forEach((item) => {
+        const availableWorkers = Math.max(0, 2 - videoProxyJobs.current.size)
+        missing.slice(0, availableWorkers).forEach((item) => {
             const jobKey = `${item.id}:${item.url}`
             videoProxyJobs.current.add(jobKey)
             setProcessingMedia((count) => count + 1)
@@ -716,7 +888,7 @@ function AppView() {
                     setProcessingMedia((count) => Math.max(0, count - 1))
                 })
         })
-    }, [config.items])
+    }, [authoredVitrine, config.items, playIteration, previewPose, processingMedia, showStyleGallery])
 
     React.useEffect(() => {
         if (!selectedItemId && config.items[0]) setSelectedItemId(config.items[0].id)
@@ -724,6 +896,10 @@ function AppView() {
             setSelectedItemId(config.items[0]?.id ?? null)
         }
     }, [config.items, selectedItemId])
+
+    React.useEffect(() => {
+        if (!authoredVitrine || (inspectionItemId && !config.items.some((item) => item.id === inspectionItemId))) setInspectionItemId(null)
+    }, [authoredVitrine, config.items, inspectionItemId])
 
     React.useEffect(() => {
         if (isStaticPreview) document.documentElement.dataset.reelStatic = "true"
@@ -740,6 +916,7 @@ function AppView() {
             .then((snapshot) => {
                 if (!alive || !snapshot) return
                 if (snapshot.savedAt > initialProject.current.savedAt) {
+                    clearVitrineUndo()
                     setConfig(normalizeConfig(snapshot.config))
                     setLastSavedAt(snapshot.savedAt)
                 }
@@ -753,7 +930,7 @@ function AppView() {
         return () => {
             alive = false
         }
-    }, [])
+    }, [clearVitrineUndo])
 
     React.useEffect(() => {
         if (!recoveryReady) return
@@ -836,7 +1013,7 @@ function AppView() {
 
     React.useEffect(() => {
         let raf = 0
-        if (!previewStarted) {
+        if (reducedVitrinePreview || !previewStarted) {
             if (!scrubPaused && !freezePreview && !isScrubbing) setPlayhead(0)
             return
         }
@@ -868,7 +1045,7 @@ function AppView() {
         }
         raf = requestAnimationFrame(tick)
         return () => cancelAnimationFrame(raf)
-    }, [startedAt, duration, finalCycleDuration, playbackDuration, repeatCount, reelKey, previewStarted, config.settings.playKind, documentVisible, freezePreview, isScrubbing, scrubPaused])
+    }, [startedAt, duration, finalCycleDuration, playbackDuration, repeatCount, reelKey, previewStarted, config.settings.playKind, documentVisible, freezePreview, isScrubbing, scrubPaused, reducedVitrinePreview])
 
     React.useEffect(
         () =>
@@ -883,6 +1060,12 @@ function AppView() {
     React.useEffect(() => {
         const onKey = (event: KeyboardEvent) => {
             const target = event.target as HTMLElement | null
+            const textEditing = Boolean(target && (target.tagName === "TEXTAREA" || target.isContentEditable
+                || (target.tagName === "INPUT" && (target as HTMLInputElement).type !== "range")))
+            if (!textEditing && (event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === "z" && undoVitrineSetting()) {
+                event.preventDefault()
+                return
+            }
             if (target && ["INPUT", "SELECT", "TEXTAREA", "BUTTON"].includes(target.tagName)) return
             if (event.code === "Space" || event.key.toLowerCase() === "r") {
                 event.preventDefault()
@@ -891,16 +1074,20 @@ function AppView() {
         }
         window.addEventListener("keydown", onKey)
         return () => window.removeEventListener("keydown", onKey)
-    }, [transportAction])
+    }, [transportAction, undoVitrineSetting])
 
     const addMedia = async (media?: SelectedMedia[]) => {
         const picked = media ?? (await reelAPI.pickMedia())
         if (!picked.length) return
+        if (isVitrineV2(configRef.current) && configRef.current.items.length + picked.length > VITRINE_MAX_ITEMS) {
+            setSaveNotice(`Vitrine supports at most ${VITRINE_MAX_ITEMS} ordered media items. Nothing was added.`)
+            return
+        }
         const videoCount = picked.filter((item) => item.type === "video").length
         if (videoCount) setProcessingMedia((count) => count + videoCount)
         try {
-            const hydrated = await hydrateMedia(picked)
-            if (hydrated.items.length) setConfig((current) => ({ ...current, items: [...current.items, ...hydrated.items] }))
+            const hydrated = await hydrateMedia(picked, !isVitrineV2(configRef.current))
+            if (hydrated.items.length) setConfig(reconcileVitrineConfig({ ...configRef.current, items: [...configRef.current.items, ...hydrated.items] }))
             if (hydrated.failures.length) setSaveNotice(`${hydrated.items.length} added · ${hydrated.failures.length} could not be prepared`)
             restart()
         } catch (error) {
@@ -910,10 +1097,25 @@ function AppView() {
         }
     }
 
+    const inspectLibraryItem = React.useCallback((id: string) => {
+        setSelectedItemId(id)
+        if (!authoredVitrine) return
+        setInspectionItemId(id)
+        setPreviewStarted(false)
+        setScrubPaused(true)
+        setIsScrubbing(false)
+    }, [authoredVitrine])
+
     const updateSettings = <K extends keyof ReelSettings>(key: K, value: ReelSettings[K]) => {
-        setConfig((current) => ({
-            ...current,
-            settings: (() => {
+        const before = configRef.current
+        const undoable = isVitrineV2(before) && VITRINE_UNDO_KEYS.has(key) && before.settings[key] !== value
+        if (undoable && !vitrineTransactionRef.current) {
+            vitrineUndoStackRef.current.push({ key: key as VitrineUndoKey, value: before.settings[key as VitrineUndoKey] })
+            if (vitrineUndoStackRef.current.length > 100) vitrineUndoStackRef.current.shift()
+            updateUndoDepth()
+        }
+        setConfig((current) => {
+            const settings = (() => {
                 if (key === "motionPreset") {
                     const preset = value as MotionPreset
                     return preset === "custom"
@@ -927,23 +1129,91 @@ function AppView() {
                     return { ...current.settings, ...base, [key]: value, motionPreset: "custom" as const }
                 }
                 return { ...current.settings, [key]: value }
-            })(),
-        }))
+            })()
+            let next = { ...current, settings }
+            if (isVitrineV2(current) && key === "spotlightsEnabled" && value === true && !current.items.some((item) => item.spotlight && !item.muted)) {
+                const opening = firstEligibleVitrineItem(current.items)
+                if (opening) next = { ...next, items: exclusiveVitrineOpening(current.items, opening.id) }
+            }
+            if (current.styleId === "vitrine" && current.sceneVersion === 2 && current.timelineMode === "fixed-duration" && ["holdMs", "paceMs"].includes(key)) {
+                next = {
+                    ...next,
+                    timelineFixedDurationMs: Math.max(current.timelineFixedDurationMs ?? 0, minimumVitrineFixedDuration(Math.max(1, current.items.filter((item) => !item.muted).length), settings.holdMs, settings.paceMs)),
+                }
+            }
+            const reconciled = reconcileVitrineConfig(next)
+            configRef.current = reconciled
+            return reconciled
+        })
+    }
+
+    const updateTimelineMode = (mode: TimelineMode) => {
+        setConfig((current) => {
+            const mediaCount = Math.max(1, current.items.filter((item) => !item.muted).length)
+            if (mode === "automatic") return reconcileVitrineConfig({ ...current, timelineMode: mode, timelineFixedDurationMs: 0, timelineSegments: [] })
+            if (mode === "fixed-duration") return reconcileVitrineConfig({
+                ...current,
+                timelineMode: mode,
+                timelineFixedDurationMs: Math.max(current.timelineFixedDurationMs ?? 0, mediaCount * (current.settings.holdMs + current.settings.paceMs), minimumVitrineFixedDuration(mediaCount, current.settings.holdMs, current.settings.paceMs)),
+                timelineSegments: [],
+            })
+            return reconcileVitrineConfig({
+                ...current,
+                timelineMode: mode,
+                timelineFixedDurationMs: 0,
+                settings: {
+                    ...current.settings,
+                    holdMs: Math.max(current.settings.holdMs, VITRINE_MIN_HOLD_MS * 2),
+                    paceMs: Math.max(current.settings.paceMs, VITRINE_MIN_EXCHANGE_MS * 2),
+                },
+                timelineSegments: [
+                    { id: "fast-opening", kind: "cycle", cycles: 2, paceScale: 2, durationMs: 0 },
+                    { id: "regular-middle", kind: "cycle", cycles: 1, paceScale: 1, durationMs: 0 },
+                    { id: "fast-finale", kind: "cycle", cycles: 1, paceScale: 2, durationMs: 0 },
+                ],
+            })
+        })
+        restart()
     }
 
     const setCanvasPreset = (preset: CanvasPreset) => {
-        setConfig((current) => ({
-            ...current,
-            settings: { ...current.settings, canvasPreset: preset },
-        }))
+        setConfig((current) => {
+            const dimensions = preset === "custom" ? null : CANVAS_PRESETS[preset]
+            return {
+                ...current,
+                settings: {
+                    ...current.settings,
+                    canvasPreset: preset,
+                    ...(dimensions ? { canvasWidth: dimensions.width, canvasHeight: dimensions.height } : {}),
+                },
+            }
+        })
         restart()
     }
 
     const updateItem = (id: string, patch: Partial<MediaItem>) => {
-        setConfig((current) => ({
-            ...current,
-            items: current.items.map((item) => (item.id === id ? { ...item, ...patch } : item)),
-        }))
+        const current = configRef.current
+        if (isVitrineV2(current) && patch.muted === true && current.items.filter((item) => !item.muted && item.id !== id).length === 0) {
+            setSaveNotice("Vitrine needs one eligible opening/finale object. This frame was kept in the story.")
+            return
+        }
+        setConfig((source) => {
+            if (!isVitrineV2(source)) return { ...source, items: source.items.map((item) => (item.id === id ? { ...item, ...patch } : item)) }
+            let items = source.items.map((item) => (item.id === id ? { ...item, ...patch } : item))
+            let settings = source.settings
+            if (patch.spotlight === true) {
+                items = exclusiveVitrineOpening(items, id)
+                settings = { ...settings, spotlightsEnabled: true }
+            } else if (patch.spotlight === false && source.items.find((item) => item.id === id)?.spotlight) {
+                items = exclusiveVitrineOpening(items, null)
+                settings = { ...settings, spotlightsEnabled: false }
+            } else if (patch.muted === true && source.items.find((item) => item.id === id)?.spotlight) {
+                const replacement = firstEligibleVitrineItem(items)
+                items = exclusiveVitrineOpening(items, replacement?.id ?? null)
+                settings = { ...settings, spotlightsEnabled: Boolean(replacement) }
+            }
+            return reconcileVitrineConfig({ ...source, settings, items })
+        })
     }
 
     const applyExpertPreset = (preset: ExpertPreset) => {
@@ -952,21 +1222,38 @@ function AppView() {
             velvet: { motionPreset: "velvet", paceMs: 300, holdMs: 1200, finaleGrowMs: 1000, finaleHoldMs: 3200, tilt: 8, sway: 55 },
             mixed: { ratioMode: "auto", imageFit: "contain", paddingUnit: "percent", paddingTop: 1.2, paddingRight: 1.2, paddingBottom: 1.2, paddingLeft: 1.2, gap: 36, slideHeight: 46 },
         }
-        setConfig((current) => ({
-            ...current,
-            settings: preset === "original"
-                ? applyStyleDefaults(current.settings, current.styleId)
-                : {
+        if (isVitrineV2(configRef.current)) clearVitrineUndo()
+        setConfig((current) => {
+            if (isVitrineV2(current)) return reconcileVitrineConfig({
+                ...current,
+                settings: applyStyleDefaults(current.settings, current.styleId, 2),
+                timelineMode: "automatic",
+                timelineFixedDurationMs: 0,
+                timelineSegments: [],
+            })
+            return {
+                ...current,
+                settings: preset === "original"
+                    ? applyStyleDefaults(current.settings, current.styleId, current.sceneVersion ?? 1)
+                    : {
                       ...current.settings,
                       ...(patches[preset].motionPreset && patches[preset].motionPreset !== "custom" ? MOTION_BASES[patches[preset].motionPreset] : {}),
                       ...patches[preset],
-                  },
-        }))
+                    },
+            }
+        })
         restart()
     }
 
     const removeItem = (id: string) => {
-        setConfig((current) => ({ ...current, items: current.items.filter((item) => item.id !== id) }))
+        setConfig((current) => {
+            let items = current.items.filter((item) => item.id !== id)
+            if (!isVitrineV2(current) || items.length === 0) return { ...current, items }
+            if (items.every((item) => item.muted)) items = items.map((item, index) => index === 0 ? { ...item, muted: false } : item)
+            const marker = items.find((item) => item.spotlight && !item.muted)
+            if (current.settings.spotlightsEnabled && !marker) items = exclusiveVitrineOpening(items, firstEligibleVitrineItem(items)?.id ?? null)
+            return reconcileVitrineConfig({ ...current, items })
+        })
         restart()
     }
 
@@ -984,6 +1271,10 @@ function AppView() {
     const exportReel = async () => {
         if (isExporting) return
         const requestedFormat = format
+        if (usesLinuxHostPort && requestedFormat === "png-frames" && !verifiedPngScene) {
+            setProgress({ exportId: "failed", phase: "error", progress: 0, message: "Verified PNG Frames currently support Quiet Carousel v1 and Vitrine v2 only." })
+            return
+        }
         if (usesLinuxHostPort && requestedFormat === "mp4" && (!verifiedH264Scene || !verifiedH264Audio)) {
             setProgress({ exportId: "failed", phase: "error", progress: 0, message: !verifiedH264Scene ? "Verified H.264/AAC currently supports Quiet Carousel only. Choose PNG Frames for this Scene." : "Verified H.264/AAC requires a 48 kHz stereo Project audio master. Choose PNG Frames or update Project audio." })
             return
@@ -1036,8 +1327,10 @@ function AppView() {
             setSaveNotice(projectOpenNotice(result))
             if (imported === configRef.current) return
             const next = normalizeConfig(imported)
+            clearVitrineUndo()
             setConfig(next)
             setSelectedItemId(next.items[0]?.id ?? null)
+            setInspectionItemId(null)
             restart()
         } catch (error) {
             setSaveNotice(error instanceof Error ? error.message : "Project open failed")
@@ -1063,10 +1356,11 @@ function AppView() {
         try {
             const result = await reelAPI.openTemplate()
             if (!result.settings) return
-            setConfig((current) => ({
-                ...current,
-                settings: { ...styleSettings(current.styleId), ...result.settings },
-            }))
+            const current = configRef.current
+            const settings = { ...styleSettings(current.styleId, current.sceneVersion ?? 1), ...result.settings }
+            if (isVitrineV2(current)) assertVitrineV2Settings(settings)
+            clearVitrineUndo()
+            setConfig(reconcileVitrineConfig({ ...current, settings }))
             setSaveNotice("Template applied")
             restart()
         } catch (error) {
@@ -1079,12 +1373,27 @@ function AppView() {
         : undefined
 
     const chooseStyle = (style: StyleDefinition) => {
-        setConfig((current) => ({
+        const current = configRef.current
+        const sceneVersion = latestSceneVersion(style.id)
+        if (style.id === "vitrine" && sceneVersion === 2 && current.items.length > VITRINE_MAX_ITEMS) {
+            setSaveNotice(`Vitrine supports at most ${VITRINE_MAX_ITEMS} ordered media items. Remove ${current.items.length - VITRINE_MAX_ITEMS} before choosing it.`)
+            return
+        }
+        const defaults = applyStyleDefaults(current.settings, style.id, sceneVersion)
+        const settings = style.id === "vitrine" && sceneVersion === 2
+            ? { ...defaults, axis: "horizontal" as const, backgroundStyle: defaults.backgroundStyle === "transparent" ? "transparent" as const : "solid" as const }
+            : defaults
+        const candidate = reconcileVitrineConfig({
             ...current,
             schemaVersion: 2,
             styleId: style.id,
-            settings: applyStyleDefaults(current.settings, style.id),
-        }))
+            sceneVersion,
+            settings,
+            ...(style.id === "vitrine" && sceneVersion === 2 ? { timelineMode: "automatic" as const, timelineFixedDurationMs: 0, timelineSegments: [] } : {}),
+        })
+        clearVitrineUndo()
+        setInspectionItemId(null)
+        setConfig(candidate)
         setShowStyleGallery(false)
         setReelKey((key) => key + 1)
         setStartedAt(performance.now())
@@ -1099,7 +1408,7 @@ function AppView() {
             <StyleGallery
                 currentStyleId={config.styleId}
                 onChoose={chooseStyle}
-                onClose={config.styleId ? () => chooseStyle(activeStyle) : undefined}
+                onClose={config.styleId ? () => setShowStyleGallery(false) : undefined}
             />
         )
     }
@@ -1193,7 +1502,6 @@ function AppView() {
                                     className={`media-row ${dragIndex === index ? "is-dragging" : ""} ${selectedItemId === item.id ? "is-selected" : ""}`}
                                     key={item.id}
                                     draggable
-                                    onClick={() => setSelectedItemId(item.id)}
                                     onDragStart={() => setDragIndex(index)}
                                     onDragEnd={() => setDragIndex(null)}
                                     onDragOver={(event) => event.preventDefault()}
@@ -1202,39 +1510,59 @@ function AppView() {
                                         setDragIndex(null)
                                     }}
                                 >
-                                    <span className="drag-handle"><Icon name="grip" /></span>
-                                    <div className="media-thumb">
-                                        {item.type === "video" ? (
-                                            <video src={item.previewUrl ?? item.url} muted autoPlay loop playsInline preload="auto" />
-                                        ) : (
-                                            <img src={item.url} alt="" />
-                                        )}
-                                        <span>{String(index + 1).padStart(2, "0")}</span>
-                                    </div>
-                                    <div className="media-copy">
-                                        <strong title={item.name}>{item.name}</strong>
-                                        <div>
-                                            {finaleId === item.id ? <span className="finale-pill">Finale</span> : null}
-                                            {item.muted ? <span>Beat skipped</span> : item.spotlight ? <span>Spotlight</span> : <span>{item.type}</span>}
+                                    <button
+                                        className="media-select"
+                                        type="button"
+                                        tabIndex={selectedItemId === item.id ? 0 : -1}
+                                        aria-label={`${item.name}, item ${index + 1} of ${config.items.length}`}
+                                        data-library-item={item.id}
+                                        onClick={() => inspectLibraryItem(item.id)}
+                                        onKeyDown={(event) => {
+                                            if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return
+                                            event.preventDefault()
+                                            const nextIndex = event.key === "Home" ? 0 : event.key === "End" ? config.items.length - 1
+                                                : (index + (["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1) + config.items.length) % config.items.length
+                                            const nextItem = config.items[nextIndex]
+                                            inspectLibraryItem(nextItem.id)
+                                            requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-library-item="${CSS.escape(nextItem.id)}"]`)?.focus())
+                                        }}
+                                    >
+                                        <span className="drag-handle"><Icon name="grip" /></span>
+                                        <div className="media-thumb">
+                                            {item.type === "video" && authoredVitrine ? (
+                                                <div className="deferred-video-thumbnail" aria-label="Video thumbnail deferred"><Icon name="film" size={20} /></div>
+                                            ) : item.type === "video" ? (
+                                                <video src={item.previewUrl ?? item.url} muted autoPlay loop playsInline preload="auto" />
+                                            ) : (
+                                                <img src={item.url} alt="" />
+                                            )}
+                                            <span>{String(index + 1).padStart(2, "0")}</span>
                                         </div>
-                                    </div>
+                                        <div className="media-copy">
+                                            <strong title={item.name}>{item.name}</strong>
+                                            <div>
+                                                {finaleId === item.id ? <span className="finale-pill">Finale</span> : null}
+                                                {item.muted ? <span>Beat skipped</span> : item.spotlight ? <span>{authoredVitrine ? "Opening" : "Spotlight"}</span> : <span>{item.type}</span>}
+                                            </div>
+                                        </div>
+                                    </button>
                                     <div className="media-actions">
-                                        {activeProfile.supportsSpotlight ? <Tooltip text={item.spotlight ? `Remove ${activeProfile.focusLabel.toLowerCase()}. Frame returns to normal flow.` : `${activeProfile.focusLabel}. Uses this motion world's ${activeProfile.focusBehavior} beat without leaving the canvas.`}><button
+                                        {activeProfile.supportsSpotlight && (!authoredVitrine || config.settings.playKind !== "loop") ? <Tooltip text={item.spotlight ? `Remove ${authoredVitrine ? "opening object" : activeProfile.focusLabel.toLowerCase()}. Frame returns to normal flow.` : authoredVitrine ? "Use as the finite presentation's opening object." : `${activeProfile.focusLabel}. Uses this motion world's ${activeProfile.focusBehavior} beat without leaving the canvas.`}><button
                                             type="button"
                                             className={item.spotlight ? "is-active" : ""}
-                                            aria-label={item.spotlight ? "Remove spotlight" : "Make spotlight"}
+                                            aria-label={item.spotlight ? `Remove ${authoredVitrine ? "opening object" : "spotlight"}` : `Make ${authoredVitrine ? "opening object" : "spotlight"}`}
                                             onClick={() => updateItem(item.id, { spotlight: !item.spotlight })}
                                         >
                                             <Icon name="spark" />
                                         </button></Tooltip> : null}
-                                        <Tooltip text="Skip story beat. Frame stays visible, but cannot Spotlight or become Finale."><button
+                                        {!authoredVitrine || config.settings.playKind !== "loop" ? <Tooltip text="Skip story beat. Frame stays in the Project, but cannot become the finite opening or finale."><button
                                             type="button"
                                             className={item.muted ? "is-active danger" : ""}
                                             aria-label={item.muted ? "Include as story beat" : "Skip as story beat"}
                                             onClick={() => updateItem(item.id, { muted: !item.muted })}
                                         >
                                             <Icon name="skip" />
-                                        </button></Tooltip>
+                                        </button></Tooltip> : null}
                                         <Tooltip text="Remove frame from this project."><button type="button" aria-label="Remove frame" onClick={() => removeItem(item.id)}>
                                             <Icon name="trash" />
                                         </button></Tooltip>
@@ -1261,7 +1589,7 @@ function AppView() {
                         ) : isOpeningReel ? (
                             <Reel {...liveReelProps} staticPose={isStaticPreview} onPlaybackStart={handlePlaybackStart} />
                         ) : (
-                            <GalleryRenderer config={config} timeMs={previewPose * activeCycleDuration} durationMs={activeCycleDuration} terminal={terminalCycle} />
+                            <ProductSceneRenderer config={config} timeMs={previewPose * activeCycleDuration} durationMs={activeCycleDuration} fps={fps} terminal={terminalCycle} reducedMotion={reducedVitrinePreview} inspectionItemId={inspectionItemId} />
                         )}
                     </div>
                     {processingMedia > 0 ? (
@@ -1343,7 +1671,7 @@ function AppView() {
                                 <span className="eyebrow">Rhythm</span>
                                 <h3>Motion feel</h3>
                             </div>
-                            <div className="motion-grid">
+                            {!authoredVitrine ? <div className="motion-grid">
                                 {(["cut", "magnetic", "velvet", "dream"] as MotionPreset[]).map((preset) => (
                                     <button
                                         type="button"
@@ -1354,8 +1682,11 @@ function AppView() {
                                         <i />{preset}
                                     </button>
                                 ))}
-                            </div>
-                            <RangeControl label={isOpeningReel ? "River pace" : "Motion pace"} value={config.settings.paceMs} min={60} max={8000} step={10} suffix="ms" onChange={(value) => updateSettings("paceMs", value)} />
+                            </div> : null}
+                            {authoredVitrine && config.settings.playKind === "once" ? <p className="preset-note">Finite entry, opening hold, selected finale exchange, finale hold, and exit use Vitrine's authored phrase.</p> : <>
+                                <RangeControl label={authoredVitrine ? "Loop exchange" : isOpeningReel ? "River pace" : "Motion pace"} value={config.settings.paceMs} min={authoredVitrine ? vitrineExchangeMinimum : 60} max={authoredVitrine ? 1800 : 8000} step={authoredVitrine ? 20 : 10} suffix="ms" onChange={(value) => updateSettings("paceMs", value)} />
+                                {authoredVitrine ? <RangeControl label="Loop readable hold" value={config.settings.holdMs} min={vitrineHoldMinimum} max={6000} step={10} suffix="ms" onChange={(value) => updateSettings("holdMs", value)} /> : null}
+                            </>}
                         </section>
                         <section className="control-section">
                             <div className="section-title">
@@ -1363,18 +1694,29 @@ function AppView() {
                                 <h3>End behavior</h3>
                             </div>
                             <Segment
+                                label="End behavior"
                                 value={config.settings.playKind}
                                 options={[{ value: "once", label: "Once" }, { value: "repeat", label: "Loop ×" }, { value: "loop", label: "Forever" }]}
                                 onChange={(value) => updateSettings("playKind", value)}
                             />
                             {config.settings.playKind === "repeat" ? <RangeControl label="Loop count" value={config.settings.repeatCount} min={1} max={1000} suffix="×" onChange={(value) => updateSettings("repeatCount", Math.round(value))} /> : null}
+                            {authoredVitrine ? <div className="playback-direction">
+                                <span>Timeline</span>
+                                <Segment label="Timeline mode" value={config.timelineMode ?? "automatic"} options={config.settings.playKind === "loop" ? [{ value: "automatic", label: "Auto" }, { value: "fixed-duration", label: "Fixed" }, { value: "directed", label: "Directed" }] : [{ value: "automatic", label: "Auto" }, { value: "fixed-duration", label: "Fixed" }]} onChange={updateTimelineMode} />
+                            </div> : null}
+                            {authoredVitrine && config.timelineMode === "fixed-duration" ? <RangeControl label="Exact duration" value={Math.max(config.timelineFixedDurationMs ?? 0, vitrineFixedMinimum)} min={vitrineFixedMinimum} max={VITRINE_MAX_DURATION_MS} step={100} suffix="ms" onChange={(value) => setConfig((current) => reconcileVitrineConfig({ ...current, timelineFixedDurationMs: value }))} /> : null}
+                            {authoredVitrine && config.timelineMode === "directed" ? <p className="preset-note">Fast ×2 → regular ×1 → fast ×1. Holds remain still; every exchange uses the same evaluator.</p> : null}
                             {activeProfile.axisControl ? <div className="playback-direction">
                                 <span>Axis</span>
                                 <Segment value={config.settings.axis} options={[{ value: "horizontal", label: "Horizontal" }, { value: "vertical", label: "Vertical" }]} onChange={(value) => updateSettings("axis", value)} />
                             </div> : null}
-                            {activeProfile.directional ? <div className="playback-direction">
+                            {activeProfile.directional && !authoredVitrine ? <div className="playback-direction">
                                 <span>Direction</span>
                                 <Segment value={config.settings.direction} options={[{ value: "forward", label: directionLabels[0] }, { value: "reverse", label: directionLabels[1] }]} onChange={(value) => updateSettings("direction", value)} />
+                            </div> : null}
+                            {authoredVitrine ? <div className="playback-direction">
+                                <span>Story order</span>
+                                <Segment value={config.settings.direction} options={[{ value: "forward", label: "Forward" }, { value: "reverse", label: "Reverse" }]} onChange={(value) => updateSettings("direction", value)} />
                             </div> : null}
                             <p className="preset-note">{config.settings.playKind === "loop" ? "Seamless website preview. Motion returns to its first pose." : config.settings.playKind === "repeat" ? `${repeatCount} complete showcase cycles.` : "One authored showcase cycle."}</p>
                         </section>
@@ -1383,34 +1725,47 @@ function AppView() {
                                 <span className="eyebrow">Story</span>
                                 <h3>Scale & presence</h3>
                             </div>
-                            {activeProfile.supportsSpotlight ? <Segment value={config.settings.spotlightsEnabled ? "on" : "off"} options={[{ value: "on", label: `${activeProfile.focusLabel} on` }, { value: "off", label: "Off" }]} onChange={(value) => updateSettings("spotlightsEnabled", value === "on")} /> : null}
-                            {activeProfile.supportsFinale ? <Segment value={config.settings.finaleEnabled ? "on" : "off"} options={[{ value: "on", label: "Final beat on" }, { value: "off", label: "Off" }]} onChange={(value) => updateSettings("finaleEnabled", value === "on")} /> : null}
-                            {activeProfile.supportsSpotlight && config.settings.spotlightsEnabled ? <RangeControl label={`${activeProfile.focusLabel} size`} value={config.settings.heroSize} min={24} max={80} suffix="%" onChange={(value) => updateSettings("heroSize", value)} /> : null}
-                            {activeProfile.supportsFinale && config.settings.finaleEnabled ? <RangeControl label="Final beat size" value={config.settings.finaleSize} min={30} max={84} suffix="%" onChange={(value) => updateSettings("finaleSize", value)} /> : null}
-                            <RangeControl label={isOpeningReel ? "Frame height" : "Frame size"} value={config.settings.slideHeight} min={15} max={100} suffix="%" onChange={(value) => updateSettings("slideHeight", value)} />
-                            <RangeControl label="Breathing room" value={config.settings.gap} min={0} max={240} suffix="px" onChange={(value) => updateSettings("gap", value)} />
-                            <Segment value={config.settings.cornerStyle} options={[{ value: "squircle", label: "Squircle" }, { value: "rounded", label: "Rounded" }]} onChange={(value) => updateSettings("cornerStyle", value)} />
-                            {config.settings.cornerStyle === "squircle" ? <RangeControl label="Corner smoothing" value={config.settings.cornerSmoothing} min={0} max={100} suffix="%" onChange={(value) => updateSettings("cornerSmoothing", value)} /> : null}
-                            <RangeControl label="Corner radius" value={config.settings.radius} min={0} max={96} suffix="px" onChange={(value) => updateSettings("radius", value)} />
+                            {authoredVitrine ? <>
+                                <RangeControl label="Presentation scale · height cap" value={config.settings.slideHeight} min={42} max={78} suffix="%" onBegin={() => beginVitrineSetting("slideHeight")} onEnd={() => endVitrineSetting("slideHeight")} onChange={(value) => updateSettings("slideHeight", value)} />
+                                <RangeControl label="Object turn" value={config.settings.tilt} min={0} max={9} step={0.25} suffix="°" onBegin={() => beginVitrineSetting("tilt")} onEnd={() => endVitrineSetting("tilt")} onChange={(value) => updateSettings("tilt", value)} />
+                                <RangeControl label="Transition depth" value={config.settings.sway} min={8} max={30} suffix="%" onBegin={() => beginVitrineSetting("sway")} onEnd={() => endVitrineSetting("sway")} onChange={(value) => updateSettings("sway", value)} />
+                                <div className="playback-direction"><span>Exchange direction</span><Segment label="Exchange direction" value={config.settings.transitionDirection} options={[{ value: "left", label: "Left" }, { value: "right", label: "Right" }]} onChange={(value) => updateSettings("transitionDirection", value)} /></div>
+                                {config.settings.playKind !== "loop" ? <>
+                                    <div className="playback-direction"><span>Opening object</span><Segment value={config.settings.spotlightsEnabled ? "marked" : "first"} options={[{ value: "marked", label: "Marked" }, { value: "first", label: "First" }]} onChange={(value) => updateSettings("spotlightsEnabled", value === "marked")} /></div>
+                                    <div className="playback-direction"><span>Finite finale</span><Segment value={config.settings.finaleEnabled ? "on" : "off"} options={[{ value: "on", label: "Last frame" }, { value: "off", label: "Same object" }]} onChange={(value) => updateSettings("finaleEnabled", value === "on")} /></div>
+                                </> : <p className="preset-note">Opening and finale choices are saved for Once/Repeat; Forever uses the ordered loop only.</p>}
+                                <div className="playback-direction"><span>Placard</span><Segment label="Placard" value={config.settings.showHint ? "on" : "off"} options={[{ value: "on", label: "Visible" }, { value: "off", label: "Clean" }]} onChange={(value) => updateSettings("showHint", value === "on")} /></div>
+                                <p className="preset-note">Artwork stays opacity 1, filter none, and normal blend through holds and exchanges.</p>
+                            </> : <>
+                                {activeProfile.supportsSpotlight ? <Segment value={config.settings.spotlightsEnabled ? "on" : "off"} options={[{ value: "on", label: `${activeProfile.focusLabel} on` }, { value: "off", label: "Off" }]} onChange={(value) => updateSettings("spotlightsEnabled", value === "on")} /> : null}
+                                {activeProfile.supportsFinale ? <Segment value={config.settings.finaleEnabled ? "on" : "off"} options={[{ value: "on", label: "Final beat on" }, { value: "off", label: "Off" }]} onChange={(value) => updateSettings("finaleEnabled", value === "on")} /> : null}
+                                {activeProfile.supportsSpotlight && config.settings.spotlightsEnabled ? <RangeControl label={`${activeProfile.focusLabel} size`} value={config.settings.heroSize} min={24} max={80} suffix="%" onChange={(value) => updateSettings("heroSize", value)} /> : null}
+                                {activeProfile.supportsFinale && config.settings.finaleEnabled ? <RangeControl label="Final beat size" value={config.settings.finaleSize} min={30} max={84} suffix="%" onChange={(value) => updateSettings("finaleSize", value)} /> : null}
+                                <RangeControl label={isOpeningReel ? "Frame height" : "Frame size"} value={config.settings.slideHeight} min={15} max={100} suffix="%" onChange={(value) => updateSettings("slideHeight", value)} />
+                                <RangeControl label="Breathing room" value={config.settings.gap} min={0} max={240} suffix="px" onChange={(value) => updateSettings("gap", value)} />
+                                <Segment value={config.settings.cornerStyle} options={[{ value: "squircle", label: "Squircle" }, { value: "rounded", label: "Rounded" }]} onChange={(value) => updateSettings("cornerStyle", value)} />
+                                {config.settings.cornerStyle === "squircle" ? <RangeControl label="Corner smoothing" value={config.settings.cornerSmoothing} min={0} max={100} suffix="%" onChange={(value) => updateSettings("cornerSmoothing", value)} /> : null}
+                                <RangeControl label="Corner radius" value={config.settings.radius} min={0} max={96} suffix="px" onChange={(value) => updateSettings("radius", value)} />
+                            </>}
                         </section>
                         <section className="control-section">
                             <div className="section-title">
                                 <span className="eyebrow">Atmosphere</span>
                                 <h3>Room tone</h3>
                             </div>
-                            <Segment
+                            {config.settings.backgroundStyle !== "transparent" ? <Segment
                                 value={config.settings.theme}
                                 options={[{ value: "dark", label: "Night" }, { value: "light", label: "Paper" }]}
                                 onChange={(value) => updateSettings("theme", value)}
-                            />
+                            /> : null}
                             <div className="background-style-grid">
-                                {(["solid", "gradient", "halo", "paper", "transparent"] as BackgroundStyle[]).map((style) => (
+                                {((authoredVitrine ? ["solid", "transparent"] : ["solid", "gradient", "halo", "paper", "transparent"]) as BackgroundStyle[]).map((style) => (
                                     <button type="button" className={config.settings.backgroundStyle === style ? "is-active" : ""} onClick={() => updateSettings("backgroundStyle", style)} key={style}>
                                         <i data-style={style} /><span>{style}</span>
                                     </button>
                                 ))}
                             </div>
-                            <RangeControl label="Grid ink" value={config.settings.gridStrength} min={0} max={20} step={0.5} suffix="%" onChange={(value) => updateSettings("gridStrength", value)} />
+                            {!authoredVitrine ? <RangeControl label="Grid ink" value={config.settings.gridStrength} min={0} max={20} step={0.5} suffix="%" onChange={(value) => updateSettings("gridStrength", value)} /> : <p className="preset-note">Solid room or clean transparency. Authored Looks arrive in G10D without touching artwork pixels.</p>}
                         </section>
                     </div>
                 ) : inspector === "expert" ? (
@@ -1423,12 +1778,17 @@ function AppView() {
                             selectedItemId={selectedItemId}
                             onSelectItem={setSelectedItemId}
                             onSetting={updateSettings}
+                            onSettingStart={beginVitrineSetting}
+                            onSettingEnd={endVitrineSetting}
                             onItem={updateItem}
                             onPreset={applyExpertPreset}
                             freezePreview={freezePreview}
                             onFreezePreview={handleFreezePreview}
                             isOpeningReel={isOpeningReel}
                             profile={activeProfile}
+                            isVitrineV2={authoredVitrine}
+                            vitrineHoldMinimum={vitrineHoldMinimum}
+                            vitrineExchangeMinimum={vitrineExchangeMinimum}
                         />
                     </div>
                 ) : (
@@ -1445,7 +1805,7 @@ function AppView() {
                             <span className="field-label">Format</span>
                             <div className="format-cards">
                                 {(usesLinuxHostPort ? [
-                                    ["png-frames", "PNG Frames", "Verified sequence · straight alpha"],
+                                    ["png-frames", "PNG Frames", verifiedPngScene ? "Verified sequence · straight alpha" : "Quiet Carousel v1 or Vitrine v2 only"],
                                     ["mp4", "MP4", !verifiedH264Scene ? "Quiet Carousel only · use PNG Frames" : !verifiedH264Audio ? "Needs 48 kHz stereo audio · use PNG Frames" : "Verified H.264 · AAC · opaque"],
                                 ] : [
                                     ["mp4", "MP4", "H.264 · universal"],
@@ -1453,7 +1813,7 @@ function AppView() {
                                     ["webm", "WebM", "VP9 · pristine"],
                                     ["webm-small", "WebM Small", "VP9 · web-ready"],
                                 ] as Array<[ExportFormat, string, string]>).map(([value, title, detail]) => (
-                                    <button type="button" disabled={Boolean(isExporting) || (value === "mp4" && ((usesLinuxHostPort && (!verifiedH264Scene || !verifiedH264Audio)) || config.settings.backgroundStyle === "transparent"))} className={format === value ? "is-active" : ""} onClick={() => setFormat(value as ExportFormat)} key={value}>
+                                    <button type="button" disabled={Boolean(isExporting) || (value === "png-frames" && usesLinuxHostPort && !verifiedPngScene) || (value === "mp4" && ((usesLinuxHostPort && (!verifiedH264Scene || !verifiedH264Audio)) || config.settings.backgroundStyle === "transparent"))} className={format === value ? "is-active" : ""} onClick={() => setFormat(value as ExportFormat)} key={value}>
                                         <span>{title}</span><small>{detail}</small>
                                         {format === value ? <Icon name="check" /> : null}
                                     </button>
@@ -1462,9 +1822,9 @@ function AppView() {
                             {format === "premiere" ? (
                                 <p className="preset-note">{config.settings.backgroundStyle === "transparent" ? "Transparency uses ProRes 4444. Master uses ProRes 4444 XQ for compositing." : "Optimized: ProRes 422 LT. High: ProRes 422. Master: ProRes 422 HQ."}</p>
                             ) : null}
-                            {format === "png-frames" ? <p className="preset-note">PNG Frames preserve straight alpha when requested and never contain audio. Project audio stays unchanged.</p> : null}
+                            {format === "png-frames" ? <p className="preset-note">{verifiedPngScene || !usesLinuxHostPort ? "PNG Frames preserve straight alpha when requested and never contain audio. Project audio stays unchanged." : "Choose Quiet Carousel v1 or Vitrine v2 for verified PNG Frames."}</p> : null}
                             {usesLinuxHostPort && format === "mp4" ? <p className="preset-note">H.264/AAC is a verified opaque BT.709 MP4 with the authored mix when the Project audio master is 48 kHz stereo.</p> : null}
-                            {config.settings.backgroundStyle === "transparent" ? <p className="preset-note">{usesLinuxHostPort ? "Transparent export uses verified PNG Frames. MP4 remains opaque." : "Transparent export: Premiere or WebM. Social platforms flatten transparency; use this for compositing."}</p> : null}
+                            {config.settings.backgroundStyle === "transparent" ? <p className="preset-note">{usesLinuxHostPort ? verifiedPngScene ? "Transparent export uses verified PNG Frames. MP4 remains opaque." : "This Scene has no verified transparent export yet." : "Transparent export: Premiere or WebM. Social platforms flatten transparency; use this for compositing."}</p> : null}
                         </section>
                         <section className="control-section compact-controls">
                             <label>
@@ -1478,8 +1838,8 @@ function AppView() {
                             </label>
                             {config.settings.canvasPreset === "custom" ? (
                                 <div className="canvas-dimensions">
-                                    <label><span>Width</span><input type="number" min="64" max="7680" step="2" value={config.settings.canvasWidth} onChange={(event) => updateSettings("canvasWidth", Number(event.target.value))} /></label>
-                                    <label><span>Height</span><input type="number" min="64" max="7680" step="2" value={config.settings.canvasHeight} onChange={(event) => updateSettings("canvasHeight", Number(event.target.value))} /></label>
+                                    <label><span>Width</span><input type="number" min="64" max="7680" step="2" value={config.settings.canvasWidth} onChange={(event) => updateSettings("canvasWidth", Math.round(Number(event.target.value) / 2) * 2)} /></label>
+                                    <label><span>Height</span><input type="number" min="64" max="7680" step="2" value={config.settings.canvasHeight} onChange={(event) => updateSettings("canvasHeight", Math.round(Number(event.target.value) / 2) * 2)} /></label>
                                 </div>
                             ) : null}
                             <div>
@@ -1541,7 +1901,7 @@ function AppView() {
                             </div>
                         ) : null}
 
-                        <button className="export-button" type="button" disabled={!!isExporting || (usesLinuxHostPort && format === "mp4" && (!verifiedH264Scene || !verifiedH264Audio || config.settings.backgroundStyle === "transparent"))} onClick={exportReel}>
+                        <button className="export-button" type="button" disabled={!!isExporting || (usesLinuxHostPort && format === "png-frames" && !verifiedPngScene) || (usesLinuxHostPort && format === "mp4" && (!verifiedH264Scene || !verifiedH264Audio || config.settings.backgroundStyle === "transparent"))} onClick={exportReel}>
                             {isExporting ? "Exporting…" : `Export ${exportButtonLabel(format)}`}
                             <Icon name="film" />
                         </button>

@@ -2,7 +2,7 @@ const assert = require("node:assert/strict")
 const fs = require("node:fs")
 const os = require("node:os")
 const path = require("node:path")
-const { createLinuxHostController } = require("../electron/linux-host-controller.cjs")
+const { createLinuxHostController, verifyOpenedMediaSource } = require("../electron/linux-host-controller.cjs")
 const { HostPortError } = require("../electron/linux-host-port.cjs")
 
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "galileo-g03-controller-"))
@@ -60,6 +60,19 @@ function envelope(operation, payload = {}, generation = host.snapshot().generati
 }
 
 async function run() {
+    const heldSource = path.join(temporary, "held-source.mov")
+    fs.writeFileSync(heldSource, "abcdefgh")
+    const heldHandle = fs.openSync(heldSource, "r")
+    try {
+        const heldStat = fs.fstatSync(heldHandle)
+        const identity = { handle: heldHandle, device: heldStat.dev, inode: heldStat.ino, size: heldStat.size, mtimeMs: heldStat.mtimeMs, ctimeMs: heldStat.ctimeMs }
+        assert.doesNotThrow(() => verifyOpenedMediaSource(identity))
+        await new Promise((resolve) => setTimeout(resolve, 5))
+        fs.writeFileSync(heldSource, "hgfedcba")
+        assert.throws(() => verifyOpenedMediaSource(identity), (error) => error.code === "verification_failed", "same-size in-place mutation must invalidate held export source identity")
+    } finally {
+        fs.closeSync(heldHandle)
+    }
     assert.deepEqual(host.bootstrap(event), { protocol: 1, generation: 1, state: "ready" })
     const identity = await host.handle(event, envelope("identity.read"))
     assert.deepEqual(identity.value, { productId: "galileo-gallery", protocol: 1, platform: "linux" })

@@ -45,7 +45,7 @@ function eventRawPhase(styleId: string, index: number, count: number, reverse: b
 }
 
 function storyEvents(config: ReelConfig): StoryEvent[] {
-    const profile = styleProfile(config.styleId)
+    const profile = styleProfile(config.styleId, config.sceneVersion ?? 1)
     const items = config.items
     if (!items.length) return []
     const settings = config.settings
@@ -83,7 +83,7 @@ function storyEvents(config: ReelConfig): StoryEvent[] {
 function terminalEvent(config: ReelConfig): StoryEvent {
     const items = config.items
     const index = sceneFinaleIndex(items)
-    const finale = styleProfile(config.styleId).supportsFinale && config.settings.finaleEnabled
+    const finale = styleProfile(config.styleId, config.sceneVersion ?? 1).supportsFinale && config.settings.finaleEnabled
     return {
         index,
         kind: "finale",

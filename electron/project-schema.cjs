@@ -6,6 +6,48 @@ const PROJECT_FORMAT = "galileo-gallery-project"
 const PRODUCT_ID = "galileo-gallery"
 const PROJECT_SCHEMA_VERSION = 2
 const ENGINE_VERSION = 1
+const CANVAS_PRESET_DIMENSIONS = Object.freeze({
+    fullHD: Object.freeze([1920, 1080]),
+    fourK: Object.freeze([3840, 2160]),
+    square: Object.freeze([1080, 1080]),
+    portrait: Object.freeze([1080, 1350]),
+    vertical: Object.freeze([1080, 1920]),
+    presentation: Object.freeze([1920, 1200]),
+    cinema: Object.freeze([2560, 1080]),
+})
+
+const SUPPORTED_SCENE_VERSIONS = Object.freeze({
+    "opening-reel": Object.freeze([1]),
+    "swipe-stack": Object.freeze([1]),
+    "the-stack": Object.freeze([1]),
+    "hero-deck-object": Object.freeze([1]),
+    "spiral-image-vortex": Object.freeze([1]),
+    vitrine: Object.freeze([1, 2]),
+    "filmstrip-river": Object.freeze([1]),
+    "wave-ticker": Object.freeze([1]),
+    "deck-contact-strip": Object.freeze([1]),
+    "contact-sheet": Object.freeze([1]),
+    "light-table": Object.freeze([1]),
+    "deck-river": Object.freeze([1]),
+    "deck-river-loader": Object.freeze([1]),
+    "orbit-ring": Object.freeze([1]),
+    "proximity-orbit": Object.freeze([1]),
+    "spin-image-orbit": Object.freeze([1]),
+    zoetrope: Object.freeze([1]),
+    "the-shelf": Object.freeze([1]),
+    "before-after-slider": Object.freeze([1]),
+    "slide-fan": Object.freeze([1]),
+    "dealers-fan": Object.freeze([1]),
+    "slide-anatomy-object": Object.freeze([1]),
+    "the-build": Object.freeze([1]),
+    "coverflow-gallery": Object.freeze([1]),
+    "drift-deck": Object.freeze([1]),
+    "image-scatter-gallery": Object.freeze([1]),
+    "the-orrery": Object.freeze([1]),
+    "the-hang": Object.freeze([1]),
+    "cms-slideshow": Object.freeze([1]),
+    "quiet-carousel": Object.freeze([1]),
+})
 
 const CANVAS_KEYS = [
     "canvasPreset", "canvasWidth", "canvasHeight", "ratioMode", "fixedRatio", "customRatioWidth", "customRatioHeight",
@@ -24,6 +66,13 @@ const TIMELINE_KEYS = [
     "mode", "fixedDurationMs", "segments", "playKind", "repeatCount", "axis", "direction", "startMode", "launchMs", "arrivalMs", "growMs",
     "exitMs", "paceMs", "leadInMs", "holdMs", "finaleGrowMs", "finaleHoldMs", "fadeMs",
 ]
+const VITRINE_V2_TIMELINE_KEYS = [...TIMELINE_KEYS, "transitionDirection"]
+const FRAME_KEYS = ["ratio", "aspectMode", "ratioW", "ratioH", "caption", "spotlight", "muted"]
+const FRAME_INTENT_KEYS = [...FRAME_KEYS, "fit", "crop", "focal"]
+
+function timelineKeysFor(sceneId, sceneVersion) {
+    return sceneId === "vitrine" && sceneVersion === 2 ? VITRINE_V2_TIMELINE_KEYS : TIMELINE_KEYS
+}
 
 class ProjectSchemaError extends Error {
     constructor(code, message) {
@@ -38,7 +87,9 @@ function fail(code, message) {
 }
 
 function isRecord(value) {
-    return value !== null && typeof value === "object" && !Array.isArray(value)
+    if (value === null || typeof value !== "object" || Array.isArray(value)) return false
+    const prototype = Object.getPrototypeOf(value)
+    return prototype === Object.prototype || prototype === null
 }
 
 function record(value, code, label) {
@@ -52,6 +103,13 @@ function exactKeys(value, keys, code, label) {
     if (actual.length !== expected.length || actual.some((key, index) => key !== expected[index])) {
         fail(code, `${label} has missing or unsupported fields.`)
     }
+}
+
+function hasExactKeys(value, keys) {
+    if (!isRecord(value)) return false
+    const actual = Object.keys(value).sort()
+    const expected = [...keys].sort()
+    return actual.length === expected.length && actual.every((key, index) => key === expected[index])
 }
 
 function stringValue(value, code, label, { values, pattern, max = 512, allowEmpty = false } = {}) {
@@ -250,6 +308,9 @@ function portableProjectFromConfig(config, media, audioAssets = []) {
                 aspectMode: item.aspectMode ?? "auto",
                 ratioW: item.ratioW ?? 16,
                 ratioH: item.ratioH ?? 9,
+                fit: item.fit ?? (config.styleId === "vitrine" && (config.sceneVersion ?? 1) === 2 ? "contain" : config.settings.imageFit),
+                crop: item.crop ?? { x: 0, y: 0, width: 1, height: 1 },
+                focal: item.focal ?? { x: 0.5, y: 0.5 },
                 caption: item.caption ?? "",
                 spotlight: item.spotlight,
                 muted: item.muted,
@@ -258,7 +319,7 @@ function portableProjectFromConfig(config, media, audioAssets = []) {
         canvas: settingsSubset(config.settings, CANVAS_KEYS),
         scene: {
             id: config.styleId,
-            version: 1,
+            version: config.sceneVersion ?? 1,
             parameters: settingsSubset(config.settings, SCENE_PARAMETER_KEYS),
         },
         look: {
@@ -270,7 +331,7 @@ function portableProjectFromConfig(config, media, audioAssets = []) {
             mode: config.timelineMode ?? "automatic",
             fixedDurationMs: config.timelineFixedDurationMs ?? 0,
             segments: config.timelineSegments ?? [],
-            ...settingsSubset(config.settings, TIMELINE_KEYS.filter((key) => !["mode", "fixedDurationMs", "segments"].includes(key))),
+            ...settingsSubset(config.settings, timelineKeysFor(config.styleId, config.sceneVersion ?? 1).filter((key) => !["mode", "fixedDurationMs", "segments"].includes(key))),
         },
         audio: {
             id: audio.id,
@@ -353,14 +414,30 @@ function validateMedia(media) {
         }
         archivePaths.add(entry.archivePath)
         numberValue(entry.bytes, "manifest_invalid", `media[${index}].bytes`, 1, Number.MAX_SAFE_INTEGER, true)
-        exactKeys(entry.frame, ["ratio", "aspectMode", "ratioW", "ratioH", "caption", "spotlight", "muted"], "manifest_invalid", `media[${index}].frame`)
-        numberValue(entry.frame.ratio, "manifest_invalid", "Frame ratio", 0.01, 100)
+        if (!hasExactKeys(entry.frame, FRAME_KEYS) && !hasExactKeys(entry.frame, FRAME_INTENT_KEYS)) {
+            fail("manifest_invalid", `media[${index}].frame has missing or unsupported fields.`)
+        }
+        numberValue(entry.frame.ratio, "manifest_invalid", "Frame ratio", 1 / 10_000, 10_000)
         stringValue(entry.frame.aspectMode, "manifest_invalid", "Frame aspect mode", { values: ["auto", "global", "custom"] })
         numberValue(entry.frame.ratioW, "manifest_invalid", "Frame ratio width", 1, 10000)
         numberValue(entry.frame.ratioH, "manifest_invalid", "Frame ratio height", 1, 10000)
         stringValue(entry.frame.caption, "manifest_invalid", "Frame caption", { allowEmpty: true, max: 4000 })
         booleanValue(entry.frame.spotlight, "manifest_invalid", "Frame spotlight")
         booleanValue(entry.frame.muted, "manifest_invalid", "Frame mute")
+        if (hasExactKeys(entry.frame, FRAME_INTENT_KEYS)) {
+            stringValue(entry.frame.fit, "manifest_invalid", "Frame fit", { values: ["contain", "cover"] })
+            exactKeys(entry.frame.crop, ["x", "y", "width", "height"], "manifest_invalid", "Frame crop")
+            numberValue(entry.frame.crop.x, "manifest_invalid", "Frame crop x", 0, 1)
+            numberValue(entry.frame.crop.y, "manifest_invalid", "Frame crop y", 0, 1)
+            numberValue(entry.frame.crop.width, "manifest_invalid", "Frame crop width", 1 / 10_000, 1)
+            numberValue(entry.frame.crop.height, "manifest_invalid", "Frame crop height", 1 / 10_000, 1)
+            if (entry.frame.crop.x + entry.frame.crop.width > 1 + 1e-12 || entry.frame.crop.y + entry.frame.crop.height > 1 + 1e-12) {
+                fail("manifest_invalid", "Frame crop exceeds source bounds.")
+            }
+            exactKeys(entry.frame.focal, ["x", "y"], "manifest_invalid", "Frame focal point")
+            numberValue(entry.frame.focal.x, "manifest_invalid", "Frame focal x", 0, 1)
+            numberValue(entry.frame.focal.y, "manifest_invalid", "Frame focal y", 0, 1)
+        }
         return entry
     })
 }
@@ -370,6 +447,11 @@ function validateCanvas(canvas) {
     stringValue(canvas.canvasPreset, "canvas_invalid", "Canvas preset", { values: ["fullHD", "fourK", "square", "portrait", "vertical", "presentation", "cinema", "custom"] })
     numberValue(canvas.canvasWidth, "canvas_invalid", "Canvas width", 64, 7680, true)
     numberValue(canvas.canvasHeight, "canvas_invalid", "Canvas height", 64, 7680, true)
+    if (canvas.canvasWidth % 2 !== 0 || canvas.canvasHeight % 2 !== 0) fail("canvas_invalid", "Canvas dimensions must be even pixels.")
+    const presetDimensions = CANVAS_PRESET_DIMENSIONS[canvas.canvasPreset]
+    if (presetDimensions && (canvas.canvasWidth !== presetDimensions[0] || canvas.canvasHeight !== presetDimensions[1])) {
+        fail("canvas_invalid", "Canvas preset dimensions do not match the named preset.")
+    }
     stringValue(canvas.ratioMode, "canvas_invalid", "Canvas ratio mode", { values: ["auto", "fixed"] })
     stringValue(canvas.fixedRatio, "canvas_invalid", "Fixed ratio", { values: ["sixteenNine", "wide2576", "custom"] })
     numberValue(canvas.customRatioWidth, "canvas_invalid", "Custom ratio width", 1, 10000)
@@ -381,7 +463,13 @@ function validateCanvas(canvas) {
 function validateScene(scene) {
     exactKeys(scene, ["id", "version", "parameters"], "scene_invalid", "Scene")
     stringValue(scene.id, "scene_invalid", "Scene id", { pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, max: 120 })
-    numberValue(scene.version, "scene_invalid", "Scene version", 1, 1, true)
+    numberValue(scene.version, "scene_invalid", "Scene version", 1, 1_000, true)
+    if (!Object.hasOwn(SUPPORTED_SCENE_VERSIONS, scene.id)) fail("scene_invalid", "This Project names an unsupported Gallery Scene.")
+    const supportedVersions = SUPPORTED_SCENE_VERSIONS[scene.id]
+    if (!supportedVersions.includes(scene.version)) {
+        if (scene.version > Math.max(...supportedVersions)) fail("future_version_unsupported", "This Scene version was created by a newer Gallery version and cannot be opened here.")
+        fail("scene_invalid", "This Gallery Scene version is unsupported.")
+    }
     exactKeys(scene.parameters, SCENE_PARAMETER_KEYS, "scene_invalid", "Scene parameters")
     stringValue(scene.parameters.imageFit, "scene_invalid", "Frame fit", { values: ["contain", "cover"] })
     stringValue(scene.parameters.motionPreset, "scene_invalid", "Motion preset", { values: ["cut", "magnetic", "velvet", "dream", "custom"] })
@@ -389,6 +477,11 @@ function validateScene(scene) {
     for (const key of ["autoplayVideos", "loopVideos", "spotlightsEnabled", "finaleEnabled", "showHint"]) booleanValue(scene.parameters[key], "scene_invalid", key)
     for (const key of SCENE_PARAMETER_KEYS.filter((key) => !["imageFit", "motionPreset", "cornerStyle", "autoplayVideos", "loopVideos", "spotlightsEnabled", "finaleEnabled", "showHint"].includes(key))) {
         numberValue(scene.parameters[key], "scene_invalid", key, key === "tilt" ? -360 : 0, 10000)
+    }
+    if (scene.id === "vitrine" && scene.version === 2) {
+        numberValue(scene.parameters.slideHeight, "scene_invalid", "Vitrine presentation scale", 42, 78)
+        numberValue(scene.parameters.tilt, "scene_invalid", "Vitrine object turn", 0, 9)
+        numberValue(scene.parameters.sway, "scene_invalid", "Vitrine transition depth", 8, 30)
     }
 }
 
@@ -398,8 +491,8 @@ function validateLook(look) {
     numberValue(look.version, "look_invalid", "Look version", 1, 1, true)
     exactKeys(look.parameters, LOOK_PARAMETER_KEYS, "look_invalid", "Look parameters")
     stringValue(look.parameters.theme, "look_invalid", "Look theme", { values: ["auto", "dark", "light"] })
-    stringValue(look.parameters.ground, "look_invalid", "Look ground", { allowEmpty: true, pattern: /^(?:#[0-9a-fA-F]{3,8})?$/, max: 9 })
-    stringValue(look.parameters.paper, "look_invalid", "Look paper", { allowEmpty: true, pattern: /^(?:#[0-9a-fA-F]{3,8})?$/, max: 9 })
+    stringValue(look.parameters.ground, "look_invalid", "Look ground", { allowEmpty: true, pattern: /^(?:#[0-9a-fA-F]{6})?$/, max: 7 })
+    stringValue(look.parameters.paper, "look_invalid", "Look paper", { allowEmpty: true, pattern: /^(?:#[0-9a-fA-F]{6})?$/, max: 7 })
     stringValue(look.parameters.backgroundStyle, "look_invalid", "Background style", { values: ["solid", "gradient", "halo", "paper", "transparent"] })
     if (look.id !== `gallery-look.${look.parameters.backgroundStyle}`) fail("look_invalid", "Look identity and parameters disagree.")
     stringValue(look.parameters.backgroundColor2, "look_invalid", "Background colour", { pattern: /^#[0-9a-fA-F]{6}$/ })
@@ -407,12 +500,17 @@ function validateLook(look) {
     numberValue(look.parameters.backgroundTexture, "look_invalid", "Background texture", 0, 100)
 }
 
-function validateTimeline(timeline) {
-    exactKeys(timeline, TIMELINE_KEYS, "timeline_invalid", "Timeline")
+function validateTimeline(timeline, scene) {
+    const timelineKeys = timelineKeysFor(scene.id, scene.version)
+    exactKeys(timeline, timelineKeys, "timeline_invalid", "Timeline")
     stringValue(timeline.mode, "timeline_invalid", "Timeline mode", { values: ["automatic", "fixed-duration", "directed"] })
     stringValue(timeline.playKind, "timeline_invalid", "Playback kind", { values: ["once", "repeat", "loop"] })
+    if (scene.id === "vitrine" && scene.version === 2 && timeline.playKind !== "loop" && timeline.mode === "directed") {
+        fail("timeline_invalid", "Finite Vitrine cannot carry directed segments; use Automatic or Fixed duration.")
+    }
     stringValue(timeline.axis, "timeline_invalid", "Timeline axis", { values: ["horizontal", "vertical"] })
     stringValue(timeline.direction, "timeline_invalid", "Timeline direction", { values: ["forward", "reverse"] })
+    if (scene.id === "vitrine" && scene.version === 2) stringValue(timeline.transitionDirection, "timeline_invalid", "Vitrine transition direction", { values: ["left", "right"] })
     stringValue(timeline.startMode, "timeline_invalid", "Timeline start mode", { values: ["auto", "click"] })
     numberValue(timeline.fixedDurationMs, "timeline_invalid", "Fixed duration", 0, 24 * 60 * 60 * 1000)
     if (!Array.isArray(timeline.segments) || timeline.segments.length > 64) {
@@ -444,9 +542,79 @@ function validateTimeline(timeline) {
         fail("timeline_invalid", "Directed Timeline needs explicit segments.")
     }
     numberValue(timeline.repeatCount, "timeline_invalid", "Repeat count", 1, 1000, true)
-    for (const key of TIMELINE_KEYS.filter((key) => !["mode", "fixedDurationMs", "segments", "playKind", "axis", "direction", "startMode", "repeatCount"].includes(key))) {
+    for (const key of timelineKeys.filter((key) => !["mode", "fixedDurationMs", "segments", "playKind", "axis", "direction", "transitionDirection", "startMode", "repeatCount"].includes(key))) {
         numberValue(timeline[key], "timeline_invalid", key, 0, 24 * 60 * 60 * 1000)
     }
+}
+
+function minimumVitrineFixedDuration(mediaCount, holdMs, exchangeMs) {
+    const count = Math.max(1, mediaCount)
+    const span = holdMs + exchangeMs
+    const computed = count * Math.max(600 * span / holdMs, 280 * span / exchangeMs)
+    const nearest = Math.round(computed)
+    return Math.abs(computed - nearest) <= 1e-9 ? nearest : Math.ceil(computed)
+}
+
+function validateVitrineV2Project(project) {
+    if (project.scene.id !== "vitrine" || project.scene.version !== 2) return
+    if (project.media.length < 1 || project.media.length > 127) fail("scene_invalid", "Vitrine supports 1 to 127 ordered media items.")
+    for (const entry of project.media) {
+        if (!hasExactKeys(entry.frame, FRAME_INTENT_KEYS)) fail("manifest_invalid", "Vitrine v2 requires explicit per-frame fit, crop, and focal intent.")
+        const frame = entry.frame
+        const cropped = frame.crop.x !== 0 || frame.crop.y !== 0 || frame.crop.width !== 1 || frame.crop.height !== 1
+        let effectiveRatio = frame.ratio
+        if (cropped) effectiveRatio *= frame.crop.width / frame.crop.height
+        else if (frame.aspectMode === "custom") effectiveRatio = frame.ratioW / frame.ratioH
+        else if (frame.aspectMode === "global" && project.canvas.ratioMode === "fixed") {
+            effectiveRatio = project.canvas.fixedRatio === "wide2576" ? 2576 / 1080
+                : project.canvas.fixedRatio === "custom" ? project.canvas.customRatioWidth / project.canvas.customRatioHeight : 16 / 9
+        }
+        if (!Number.isFinite(effectiveRatio) || effectiveRatio < 1 / 10_000 || effectiveRatio > 10_000) {
+            fail("manifest_invalid", "Vitrine effective frame ratio is outside the supported range.")
+        }
+    }
+    if (project.media.every((entry) => entry.frame.muted)) fail("scene_invalid", "Vitrine needs at least one eligible opening/finale object.")
+    const openingMarkers = project.media.filter((entry) => entry.frame.spotlight)
+    if (openingMarkers.length > 1) fail("scene_invalid", "Vitrine supports one opening object marker.")
+    if (openingMarkers.some((entry) => entry.frame.muted)
+        || (project.scene.parameters.spotlightsEnabled && openingMarkers.length !== 1)
+        || (!project.scene.parameters.spotlightsEnabled && openingMarkers.length !== 0)) {
+        fail("scene_invalid", "Vitrine opening-object intent is inconsistent.")
+    }
+    if (project.timeline.axis !== "horizontal") fail("timeline_invalid", "Vitrine uses a fixed horizontal object exchange.")
+    const holdMs = numberValue(project.timeline.holdMs, "timeline_invalid", "Vitrine readable hold", 600, 6_000)
+    const exchangeMs = numberValue(project.timeline.paceMs, "timeline_invalid", "Vitrine exchange duration", 280, 1_800)
+    if (!["solid", "transparent"].includes(project.look.parameters.backgroundStyle)) {
+        fail("look_invalid", "Vitrine v2 supports a solid room or clean transparency only.")
+    }
+    const eligibleCount = project.media.filter((entry) => !entry.frame.muted).length
+    const minimumCycleMs = minimumVitrineFixedDuration(eligibleCount, holdMs, exchangeMs)
+    let cycleDurationMs = eligibleCount * (holdMs + exchangeMs)
+    if (project.timeline.mode === "fixed-duration" && project.timeline.fixedDurationMs < minimumCycleMs) {
+        fail("timeline_invalid", `Vitrine fixed duration must be at least ${minimumCycleMs} ms for this media count.`)
+    }
+    if (project.timeline.mode === "fixed-duration") cycleDurationMs = project.timeline.fixedDurationMs
+    if (project.timeline.mode === "directed") {
+        const baseCycleMs = Math.max(1, eligibleCount) * (holdMs + exchangeMs)
+        let totalDurationMs = 0
+        for (const segment of project.timeline.segments) {
+            if (segment.kind === "hold") {
+                const durationMs = segment.durationMs > 0 ? segment.durationMs : holdMs
+                if (durationMs < 600) fail("timeline_invalid", "Vitrine directed holds must be at least 600 ms.")
+                totalDurationMs += durationMs
+                continue
+            }
+            const durationMs = segment.durationMs > 0 ? segment.durationMs : baseCycleMs * segment.cycles / segment.paceScale
+            if (durationMs / segment.cycles < minimumCycleMs) {
+                fail("timeline_invalid", `Vitrine directed cycles must be at least ${minimumCycleMs} ms each.`)
+            }
+            totalDurationMs += durationMs
+        }
+        if (totalDurationMs > 24 * 60 * 60 * 1000) fail("timeline_invalid", "Directed Timeline exceeds the supported duration.")
+        cycleDurationMs = totalDurationMs
+    }
+    const totalDurationMs = project.timeline.playKind === "repeat" ? cycleDurationMs * project.timeline.repeatCount : cycleDurationMs
+    if (totalDurationMs > 24 * 60 * 60 * 1000) fail("timeline_invalid", "Vitrine playback exceeds the supported duration.")
 }
 
 function greatestCommonDivisor(left, right) {
@@ -578,7 +746,8 @@ function validatePortableProject(input) {
     validateCanvas(input.canvas)
     validateScene(input.scene)
     validateLook(input.look)
-    validateTimeline(input.timeline)
+    validateTimeline(input.timeline, input.scene)
+    validateVitrineV2Project(input)
     validateAudio(input.audio, input.media)
     exactKeys(input.exportIntent, ["quality"], "manifest_invalid", "Export intent")
     stringValue(input.exportIntent.quality, "manifest_invalid", "Export quality", { values: ["master", "high", "optimized"] })
@@ -590,6 +759,7 @@ function configFromPortableProject(project, urls, audioURLs = {}) {
     return {
         schemaVersion: PROJECT_SCHEMA_VERSION,
         styleId: project.scene.id,
+        ...(project.scene.version === 1 ? {} : { sceneVersion: project.scene.version }),
         items: project.media.map((entry, index) => ({
             id: entry.id,
             name: entry.name,
@@ -599,6 +769,9 @@ function configFromPortableProject(project, urls, audioURLs = {}) {
             aspectMode: entry.frame.aspectMode,
             ratioW: entry.frame.ratioW,
             ratioH: entry.frame.ratioH,
+            fit: entry.frame.fit ?? (project.scene.id === "vitrine" && project.scene.version === 2 ? "contain" : project.scene.parameters.imageFit),
+            crop: entry.frame.crop ?? { x: 0, y: 0, width: 1, height: 1 },
+            focal: entry.frame.focal ?? { x: 0.5, y: 0.5 },
             ...(entry.frame.caption ? { caption: entry.frame.caption } : {}),
             spotlight: entry.frame.spotlight,
             muted: entry.frame.muted,
@@ -607,7 +780,8 @@ function configFromPortableProject(project, urls, audioURLs = {}) {
             ...project.canvas,
             ...project.scene.parameters,
             ...project.look.parameters,
-            ...Object.fromEntries(TIMELINE_KEYS.filter((key) => !["mode", "fixedDurationMs", "segments"].includes(key)).map((key) => [key, project.timeline[key]])),
+            transitionDirection: project.timeline.transitionDirection ?? "left",
+            ...Object.fromEntries(timelineKeysFor(project.scene.id, project.scene.version).filter((key) => !["mode", "fixedDurationMs", "segments"].includes(key)).map((key) => [key, project.timeline[key]])),
             exportQuality: project.exportIntent.quality,
         },
         timelineMode: project.timeline.mode,
@@ -642,6 +816,7 @@ module.exports = {
     PRODUCT_ID,
     PROJECT_FORMAT,
     PROJECT_SCHEMA_VERSION,
+    SUPPORTED_SCENE_VERSIONS,
     ProjectSchemaError,
     canonicalProjectJSON,
     configFromPortableProject,

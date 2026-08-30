@@ -252,6 +252,20 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .media-row:hover { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.055); }
 .media-row.is-selected { border-color: rgba(241,121,94,.22); background: rgba(241,121,94,.055); }
 .media-row.is-dragging { opacity: .35; transform: scale(.98); }
+.media-select {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 12px 50px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    text-align: left;
+}
+.media-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .drag-handle { color: rgba(255,255,255,.2); cursor: grab; }
 .media-thumb {
     position: relative;
@@ -263,6 +277,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.07);
 }
 .media-thumb img, .media-thumb video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.deferred-video-thumbnail {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    color: rgba(255,255,255,.54);
+    background: linear-gradient(145deg, #171513, #0c0b0a);
+}
 .media-thumb span {
     position: absolute;
     left: 4px;
@@ -654,6 +676,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 }
 .selected-media-card { display: grid; grid-template-columns: 58px minmax(0, 1fr); align-items: center; gap: 9px; margin-bottom: 8px; }
 .selected-media-card img, .selected-media-card video { width: 58px; height: 44px; object-fit: cover; border-radius: 7px; background: #111; box-shadow: inset 0 0 0 1px rgba(255,255,255,.07); }
+.selected-video-placeholder { display: grid; width: 58px; height: 44px; place-items: center; border-radius: 7px; color: rgba(255,255,255,.58); background: #111; box-shadow: inset 0 0 0 1px rgba(255,255,255,.07); font: 700 8px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; }
 .expert-help { margin: 9px 0 0; color: rgba(255,255,255,.28); font-size: 7px; line-height: 1.45; }
 .expert-error { margin: 8px 0 0; color: #ff8f86; font-size: 7px; line-height: 1.4; }
 .poster-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }

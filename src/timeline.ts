@@ -111,9 +111,9 @@ export function studioTimeline(
     }
 
     const settings = config.settings
-    const profile = styleProfile(config.styleId)
+    const profile = styleProfile(config.styleId, config.sceneVersion ?? 1)
     const visibleCount = config.items.length || profile.recommendedItems
-    const baseDuration = styleCycleDuration(config.styleId, visibleCount, settings)
+    const baseDuration = styleCycleDuration(config.styleId, visibleCount, settings, config.sceneVersion ?? 1)
     return { durationMs: sceneDurationMs(config, baseDuration, settings.playKind === "once") }
 }
 

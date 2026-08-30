@@ -35,7 +35,8 @@ function verifyGrantFile(grant) {
     try {
         handle = fs.openSync(grant.filePath, "r")
         const stat = fs.fstatSync(handle)
-        if (!stat.isFile() || stat.dev !== grant.device || stat.ino !== grant.inode || stat.size !== grant.bytes || stat.mtimeMs !== grant.mtimeMs) throw new HostPortError("verification_failed")
+        if (!stat.isFile() || stat.dev !== grant.device || stat.ino !== grant.inode || stat.size !== grant.bytes
+            || stat.mtimeMs !== grant.mtimeMs || stat.ctimeMs !== grant.ctimeMs) throw new HostPortError("verification_failed")
         return handle
     } catch (error) {
         if (handle !== null) fs.closeSync(handle)
@@ -165,14 +166,15 @@ function createLinuxVideoAudioRuntime(options) {
                 fs.fsyncSync(outputHandle)
             } finally { fs.closeSync(outputHandle) }
             const afterSource = fs.fstatSync(sourceHandle)
-            if (afterSource.dev !== grant.device || afterSource.ino !== grant.inode || afterSource.size !== grant.bytes || afterSource.mtimeMs !== grant.mtimeMs) throw new HostPortError("verification_failed")
+            if (afterSource.dev !== grant.device || afterSource.ino !== grant.inode || afterSource.size !== grant.bytes
+                || afterSource.mtimeMs !== grant.mtimeMs || afterSource.ctimeMs !== grant.ctimeMs) throw new HostPortError("verification_failed")
             const stat = fs.statSync(outputPath)
             if (entries.size >= maximumEntries || cachedBytes + stat.size > maximumTotalBytes) throw new HostPortError("resource_limit")
             const metadata = Object.freeze({ sampleRate: 48_000, channels: 2, sampleFrames: expectedFrames })
             entries.set(grant.token, Object.freeze({
                 metadata,
                 durationUs,
-                grant: Object.freeze({ token: grant.token, filePath: outputPath, mime: "audio/wav", bytes: stat.size, device: stat.dev, inode: stat.ino, mtimeMs: stat.mtimeMs }),
+                grant: Object.freeze({ token: grant.token, filePath: outputPath, mime: "audio/wav", bytes: stat.size, device: stat.dev, inode: stat.ino, mtimeMs: stat.mtimeMs, ctimeMs: stat.ctimeMs }),
                 entryRoot,
             }))
             return metadata

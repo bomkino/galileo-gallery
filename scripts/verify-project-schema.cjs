@@ -144,6 +144,7 @@ async function run() {
         assert.equal(manifest.timeline.mode, "automatic")
         assert.equal(manifest.timeline.fixedDurationMs, 0)
         assert.deepEqual(manifest.timeline.segments, [])
+        assert.equal(Object.hasOwn(manifest.timeline, "transitionDirection"), false, "v1 manifests must not adopt Vitrine v2 fields")
         assert.deepEqual(manifest.audio, config.audio)
 
         const portableText = canonicalProjectJSON(manifest)
@@ -170,6 +171,118 @@ async function run() {
             mediaPathFromURL: (url) => url,
         })
         assert.equal(canonicalProjectJSON(reopenedSave.project), canonicalProjectJSON(manifest))
+
+        const vitrineConfig = {
+            ...config,
+            styleId: "vitrine",
+            sceneVersion: 2,
+            items: config.items.map((item, index) => index === 0 ? {
+                ...item, spotlight: false, muted: false, aspectMode: "custom", ratioW: 16, ratioH: 9, fit: "cover",
+                crop: { x: 0, y: 0, width: 1, height: 1 }, focal: { x: 0.2, y: 0.3 },
+            } : {
+                ...item, spotlight: false, muted: false, aspectMode: "auto", ratioW: 9, ratioH: 16, fit: "contain",
+                crop: { x: 0, y: 0.25, width: 1, height: 0.5 }, focal: { x: 0.8, y: 0.7 },
+            }),
+            settings: { ...config.settings, axis: "horizontal", direction: "reverse", transitionDirection: "left", slideHeight: 62, tilt: 5, sway: 18, holdMs: 1_400, paceMs: 760, showHint: true },
+        }
+        const vitrinePath = path.join(root, "vitrine-v2.galileo")
+        const vitrineSaved = await savePortableProjectArchive({ config: vitrineConfig, outputPath: vitrinePath, tempRoot: root, mediaPathFromURL: (url) => url })
+        assert.deepEqual(vitrineSaved.project.scene, { id: "vitrine", version: 2, parameters: vitrineSaved.project.scene.parameters })
+        assert.equal(vitrineSaved.project.timeline.direction, "reverse")
+        assert.equal(vitrineSaved.project.timeline.transitionDirection, "left")
+        assert.deepEqual(vitrineSaved.project.media.map((entry) => entry.frame), vitrineConfig.items.map((item) => ({
+            ratio: item.ratio, aspectMode: item.aspectMode, ratioW: item.ratioW, ratioH: item.ratioH,
+            fit: item.fit, crop: item.crop, focal: item.focal, caption: item.caption ?? "", spotlight: item.spotlight, muted: item.muted,
+        })), "Vitrine v2 manifest must preserve distinct per-frame fit/crop/focal intent")
+        const vitrineOpened = await openPortableProjectArchive({ sourcePath: vitrinePath, stagingParent: roots.staging, openedProjectsRoot: roots.opened, mediaURLFromPath: (filePath) => filePath })
+        assert.equal(vitrineOpened.config.styleId, "vitrine")
+        assert.equal(vitrineOpened.config.sceneVersion, 2)
+        assert.equal(vitrineOpened.config.settings.slideHeight, 62)
+        assert.equal(vitrineOpened.config.settings.tilt, 5)
+        assert.equal(vitrineOpened.config.settings.sway, 18)
+        assert.equal(vitrineOpened.config.settings.direction, "reverse")
+        assert.equal(vitrineOpened.config.settings.transitionDirection, "left")
+        assert.deepEqual(vitrineOpened.config.items.map((item) => ({ fit: item.fit, crop: item.crop, focal: item.focal })), vitrineConfig.items.map((item) => ({ fit: item.fit, crop: item.crop, focal: item.focal })))
+        const vitrineReopenPath = path.join(root, "vitrine-v2-reopened.galileo")
+        const vitrineReopened = await savePortableProjectArchive({ config: vitrineOpened.config, outputPath: vitrineReopenPath, tempRoot: root, mediaPathFromURL: (url) => url })
+        assert.equal(canonicalProjectJSON(vitrineReopened.project), canonicalProjectJSON(vitrineSaved.project))
+
+        const legacyVitrine = structuredClone(vitrineSaved.project)
+        legacyVitrine.scene.version = 1
+        legacyVitrine.scene.parameters.slideHeight = 90
+        delete legacyVitrine.timeline.transitionDirection
+        for (const entry of legacyVitrine.media) {
+            delete entry.frame.fit
+            delete entry.frame.crop
+            delete entry.frame.focal
+        }
+        assert.equal(validatePortableProject(legacyVitrine).scene.version, 1, "legacy Vitrine v1 parameters retain their generic contract")
+        const legacyVitrinePath = path.join(root, "vitrine-v1.galileo")
+        const legacyVitrineSaved = await savePortableProjectArchive({ config: { ...vitrineConfig, sceneVersion: 1, settings: { ...vitrineConfig.settings, slideHeight: 90 } }, outputPath: legacyVitrinePath, tempRoot: root, mediaPathFromURL: (url) => url })
+        const legacyVitrineOpened = await openPortableProjectArchive({ sourcePath: legacyVitrinePath, stagingParent: roots.staging, openedProjectsRoot: roots.opened, mediaURLFromPath: (filePath) => filePath })
+        assert.equal(legacyVitrineOpened.config.sceneVersion, undefined)
+        assert.equal(legacyVitrineOpened.config.settings.slideHeight, 90)
+        assert.equal(legacyVitrineOpened.config.settings.transitionDirection, "left", "runtime-only legacy default must not alter its manifest")
+        assert.equal(Object.hasOwn(legacyVitrineSaved.project.timeline, "transitionDirection"), false)
+        const legacyVitrineReopened = await savePortableProjectArchive({ config: legacyVitrineOpened.config, outputPath: path.join(root, "vitrine-v1-reopened.galileo"), tempRoot: root, mediaPathFromURL: (url) => url })
+        assert.equal(canonicalProjectJSON(legacyVitrineReopened.project), canonicalProjectJSON(legacyVitrineSaved.project), "Vitrine v1 must reopen without adopting v2 semantics")
+        for (const [key, value] of [["slideHeight", 41], ["tilt", 10], ["sway", 31]]) {
+            const invalidVitrine = structuredClone(vitrineSaved.project)
+            invalidVitrine.scene.parameters[key] = value
+            assert.throws(() => validatePortableProject(invalidVitrine), (error) => error?.code === "scene_invalid")
+        }
+        const missingFrameIntent = structuredClone(vitrineSaved.project)
+        delete missingFrameIntent.media[0].frame.fit
+        delete missingFrameIntent.media[0].frame.crop
+        delete missingFrameIntent.media[0].frame.focal
+        assert.throws(() => validatePortableProject(missingFrameIntent), (error) => error?.code === "manifest_invalid")
+        for (const mutate of [
+            (frame) => { frame.fit = "stretch" },
+            (frame) => { frame.crop = { x: 0.5, y: 0, width: 0.6, height: 1 } },
+            (frame) => { frame.crop.width = 0.00009 },
+            (frame) => { frame.focal.x = 1.01 },
+            (frame) => { frame.ratio = 10_000; frame.crop = { x: 0, y: 0, width: 1, height: 0.0001 } },
+        ]) {
+            const invalidFrameIntent = structuredClone(vitrineSaved.project)
+            mutate(invalidFrameIntent.media[0].frame)
+            assert.throws(() => validatePortableProject(invalidFrameIntent), (error) => error?.code === "manifest_invalid")
+        }
+        for (const [ratioW, ratioH] of [[1, 10_000], [10_000, 1]]) {
+            const boundaryFrameIntent = structuredClone(vitrineSaved.project)
+            Object.assign(boundaryFrameIntent.media[0].frame, { aspectMode: "custom", ratioW, ratioH, crop: { x: 0, y: 0, width: 1, height: 1 } })
+            assert.equal(validatePortableProject(boundaryFrameIntent).media[0].frame.ratioW, ratioW)
+        }
+        for (const mutate of [
+            (project) => { project.timeline.paceMs = 279 },
+            (project) => { project.timeline.holdMs = 599 },
+            (project) => { project.look.id = "gallery-look.gradient"; project.look.parameters.backgroundStyle = "gradient" },
+            (project) => { project.timeline.mode = "fixed-duration"; project.timeline.fixedDurationMs = 999 },
+            (project) => { project.timeline.axis = "vertical" },
+            (project) => { project.timeline.direction = "left" },
+            (project) => { project.timeline.transitionDirection = "forward" },
+            (project) => { delete project.timeline.transitionDirection },
+            (project) => { project.media.forEach((entry) => { entry.frame.muted = true }) },
+            (project) => { project.media[0].frame.spotlight = true },
+            (project) => { project.scene.parameters.spotlightsEnabled = true },
+            (project) => { project.media[0].frame.spotlight = true; project.media[1].frame.spotlight = true },
+            (project) => { project.timeline.mode = "fixed-duration"; project.timeline.fixedDurationMs = 24 * 60 * 60 * 1_000; project.timeline.repeatCount = 2 },
+            (project) => { project.timeline.mode = "directed"; project.timeline.fixedDurationMs = 0; project.timeline.playKind = "loop"; project.timeline.segments = [
+                { id: "long-a", kind: "cycle", cycles: 1, paceScale: 1, durationMs: 50_000_000 },
+                { id: "long-b", kind: "cycle", cycles: 1, paceScale: 1, durationMs: 50_000_000 },
+            ] },
+        ]) {
+            const invalidVitrine = structuredClone(vitrineSaved.project)
+            mutate(invalidVitrine)
+            assert.throws(() => validatePortableProject(invalidVitrine), (error) => ["scene_invalid", "timeline_invalid", "look_invalid"].includes(error?.code))
+        }
+        const emptyVitrine = structuredClone(vitrineSaved.project)
+        emptyVitrine.media = []
+        assert.throws(() => validatePortableProject(emptyVitrine), (error) => error?.code === "scene_invalid")
+        const prototypeName = structuredClone(vitrineSaved.project)
+        prototypeName.scene.id = "constructor"
+        assert.throws(() => validatePortableProject(prototypeName), (error) => error?.code === "scene_invalid")
+        const customPrototype = Object.assign(Object.create({ inherited: true }), structuredClone(vitrineSaved.project))
+        assert.throws(() => validatePortableProject(customPrototype), (error) => error?.code === "manifest_invalid")
 
         const presenterPath = writePcm16Wav(path.join(root, "private-presenter.wav"), 4_800)
         const soundtrackPath = writePcm16Wav(path.join(root, "private-soundtrack.wav"), 9_600, 2, 48_000, false)
@@ -288,9 +401,14 @@ async function run() {
             ["wrong_product", (project) => ({ ...project, product: "pitchdog-drift" })],
             ["future_version_unsupported", (project) => ({ ...project, schemaVersion: 99 })],
             ["canvas_invalid", (project) => ({ ...project, canvas: { ...project.canvas, canvasWidth: 1 } })],
-            ["scene_invalid", (project) => ({ ...project, scene: { ...project.scene, version: 2 } })],
+            ["canvas_invalid", (project) => ({ ...project, canvas: { ...project.canvas, canvasPreset: "custom", canvasWidth: 97, canvasHeight: 65 } })],
+            ["canvas_invalid", (project) => ({ ...project, canvas: { ...project.canvas, canvasPreset: "fullHD", canvasWidth: 1919, canvasHeight: 1080 } })],
+            ["future_version_unsupported", (project) => ({ ...project, scene: { ...project.scene, version: 2 } })],
+            ["scene_invalid", (project) => ({ ...project, scene: { ...project.scene, id: "unknown-gallery-world" } })],
             ["look_invalid", (project) => ({ ...project, look: { ...project.look, id: "gallery-look.paper" } })],
             ["look_invalid", (project) => ({ ...project, look: { ...project.look, parameters: { ...project.look.parameters, ground: "/Users/alice/private" } } })],
+            ["look_invalid", (project) => ({ ...project, look: { ...project.look, parameters: { ...project.look.parameters, ground: "#fff" } } })],
+            ["look_invalid", (project) => ({ ...project, look: { ...project.look, parameters: { ...project.look.parameters, paper: "#12345678" } } })],
             ["timeline_invalid", (project) => ({ ...project, timeline: { ...project.timeline, mode: "mystery" } })],
             ["timeline_invalid", (project) => ({ ...project, timeline: { ...project.timeline, mode: "fixed-duration", fixedDurationMs: 0 } })],
             ["timeline_invalid", (project) => ({ ...project, timeline: { ...project.timeline, mode: "directed", segments: [{ id: "bad", kind: "cycle", cycles: 0, paceScale: 1, durationMs: 1000 }] } })],

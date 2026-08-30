@@ -1,6 +1,6 @@
 import * as React from "react"
-import GalleryRenderer from "./GalleryRenderer"
-import { GALLERY_STYLES, galleryScene, galleryStyle, type SceneDefinition, type StyleCategory, type StyleDefinition } from "./styleRegistry"
+import ProductSceneRenderer from "./scenes/ProductSceneRenderer"
+import { GALLERY_STYLES, galleryScene, galleryStyle, latestSceneVersion, type SceneDefinition, type StyleCategory, type StyleDefinition } from "./styleRegistry"
 import { styleProfile, styleSettings } from "./styleProfiles"
 import { InterfaceScaleControl } from "./presentation/InterfaceScaleSurface"
 
@@ -14,10 +14,11 @@ const CATEGORIES: Array<"All" | StyleCategory> = ["All", "Reels", "Carousels", "
 
 function Miniature({ scene }: { scene: SceneDefinition }) {
     const style = galleryStyle(scene.defaultStyleId)
-    const profile = styleProfile(style.id)
+    const version = latestSceneVersion(style.id)
+    const profile = styleProfile(style.id, version)
     return (
         <div className="style-miniature" aria-hidden="true" style={{ "--mini-accent": style.accent } as React.CSSProperties}>
-            <GalleryRenderer config={{ schemaVersion: 2, styleId: style.id, items: [], settings: styleSettings(style.id) }} timeMs={profile.cycleBaseMs * 0.31} durationMs={profile.cycleBaseMs} />
+            <ProductSceneRenderer config={{ schemaVersion: 2, styleId: style.id, sceneVersion: version, items: [], settings: styleSettings(style.id, version) }} timeMs={profile.cycleBaseMs * 0.31} durationMs={profile.cycleBaseMs} cataloguePreview />
             <b>{String(GALLERY_STYLES.indexOf(scene) + 1).padStart(2, "0")}</b>
         </div>
     )
@@ -63,7 +64,7 @@ export default function StyleGallery({ currentStyleId, onChoose, onClose }: Prop
                     return <button type="button" aria-label={`${scene.name}. ${scene.description}`} data-style-id={style.id} className={`style-card ${galleryScene(currentStyleId).id === scene.id ? "is-current" : ""}`} onClick={() => onChoose(style)} key={scene.id}>
                         <Miniature scene={scene} />
                         <span><strong>{scene.name}</strong><small>{presetCount > 1 ? `${presetCount} presets` : scene.category}</small></span>
-                        <p>{scene.description}<em>{styleProfile(style.id).bestFor}</em></p>
+                        <p>{scene.description}<em>{styleProfile(style.id, latestSceneVersion(style.id)).bestFor}</em></p>
                     </button>
                 })}
             </main>

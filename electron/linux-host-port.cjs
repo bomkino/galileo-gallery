@@ -1,6 +1,7 @@
 const crypto = require("node:crypto")
 const fs = require("node:fs")
 const path = require("node:path")
+const { Readable } = require("node:stream")
 
 const HOST_PROTOCOL_VERSION = 1
 const GRANT_SCOPES = new Set(["media", "document", "destination"])
@@ -50,9 +51,12 @@ function createGrantRegistry(options = {}) {
     const maximumReadBytes = options.maximumReadBytes ?? 8 * 1024 * 1024
     const maximumFullReadBytes = options.maximumFullReadBytes ?? 256 * 1024 * 1024
     const maximumOpenStreams = options.maximumOpenStreams ?? 16
+    const maximumOpenStreamBytes = options.maximumOpenStreamBytes ?? maximumFullReadBytes
+    const readFileChunk = options.readSync ?? fs.readSync
     const lifetimeMs = options.lifetimeMs ?? 12 * 60 * 60 * 1000
     const grants = new Map()
     let openStreams = 0
+    let openStreamBytes = 0
 
     function pruneExpired() {
         const current = clock()
@@ -90,6 +94,7 @@ function createGrantRegistry(options = {}) {
             device: stats.dev,
             inode: stats.ino,
             mtimeMs: stats.mtimeMs,
+            ctimeMs: stats.ctimeMs,
             expiresAt: clock() + lifetimeMs,
         }))
         return Object.freeze({
@@ -217,7 +222,7 @@ function createGrantRegistry(options = {}) {
         const handle = fs.openSync(grant.filePath, "r")
         try {
             const stats = fs.fstatSync(handle)
-            if (!stats.isFile() || stats.dev !== grant.device || stats.ino !== grant.inode || stats.size !== grant.bytes || stats.mtimeMs !== grant.mtimeMs) fail("verification_failed")
+            if (!sameMediaIdentity(stats, grant)) fail("verification_failed")
             const range = parseRange(input.range, stats.size)
             const length = range.end - range.start + 1
             if (length > maximumReadBytes) fail("resource_limit")
@@ -225,7 +230,7 @@ function createGrantRegistry(options = {}) {
             const readBytes = fs.readSync(handle, body, 0, length, range.start)
             if (readBytes !== length) fail("verification_failed")
             const after = fs.fstatSync(handle)
-            if (after.size !== grant.bytes || after.mtimeMs !== grant.mtimeMs) fail("verification_failed")
+            if (!sameMediaIdentity(after, grant)) fail("verification_failed")
             return {
                 status: range.partial ? 206 : 200,
                 body,
@@ -241,20 +246,44 @@ function createGrantRegistry(options = {}) {
         }
     }
 
+    function sameMediaIdentity(stats, grant) {
+        return stats.isFile() && stats.dev === grant.device && stats.ino === grant.inode
+            && stats.size === grant.bytes && stats.mtimeMs === grant.mtimeMs && stats.ctimeMs === grant.ctimeMs
+    }
+
     function openRead(input) {
         if (!ownExact(input, ["grant", "owner", "generation", "range"])) fail("invalid_request")
         const grant = resolve({ grant: input.grant, scope: "media", owner: input.owner, generation: input.generation })
-        const handle = fs.openSync(grant.filePath, "r")
+        let handle = fs.openSync(grant.filePath, "r")
         try {
             const stats = fs.fstatSync(handle)
-            if (!stats.isFile() || stats.dev !== grant.device || stats.ino !== grant.inode || stats.size !== grant.bytes || stats.mtimeMs !== grant.mtimeMs) fail("verification_failed")
+            if (!sameMediaIdentity(stats, grant)) fail("verification_failed")
             const range = parseRange(input.range, stats.size)
             if (!range.partial && stats.size > maximumFullReadBytes) fail("resource_limit")
             if (openStreams >= maximumOpenStreams) fail("resource_limit")
             const length = range.end - range.start + 1
-            const stream = fs.createReadStream(grant.filePath, { fd: handle, autoClose: true, start: range.start, end: range.end })
+            if (openStreamBytes + length > maximumOpenStreamBytes) fail("resource_limit")
+            const body = Buffer.allocUnsafe(length)
+            let offset = 0
+            while (offset < length) {
+                const chunk = Math.min(length - offset, 1024 * 1024)
+                const bytesRead = readFileChunk(handle, body, offset, chunk, range.start + offset)
+                if (!Number.isSafeInteger(bytesRead) || bytesRead < 1 || bytesRead > chunk) fail("verification_failed")
+                offset += bytesRead
+            }
+            if (!sameMediaIdentity(fs.fstatSync(handle), grant)) fail("verification_failed")
+            fs.closeSync(handle)
+            handle = null
+            const stream = Readable.from([body], { objectMode: false })
             openStreams += 1
-            stream.once("close", () => { openStreams = Math.max(0, openStreams - 1) })
+            openStreamBytes += length
+            let released = false
+            stream.once("close", () => {
+                if (released) return
+                released = true
+                openStreams = Math.max(0, openStreams - 1)
+                openStreamBytes = Math.max(0, openStreamBytes - length)
+            })
             return {
                 status: range.partial ? 206 : 200,
                 stream,
@@ -267,7 +296,9 @@ function createGrantRegistry(options = {}) {
                 }),
             }
         } catch (error) {
-            fs.closeSync(handle)
+            if (handle !== null) {
+                try { fs.closeSync(handle) } catch { /* Preserve original verification or resource error. */ }
+            }
             throw error
         }
     }

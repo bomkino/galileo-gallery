@@ -2,6 +2,7 @@ const assert = require("node:assert/strict")
 const fs = require("node:fs")
 const os = require("node:os")
 const path = require("node:path")
+const { once } = require("node:events")
 const {
     HostPortError,
     createGrantRegistry,
@@ -12,6 +13,7 @@ const {
     validateSender,
 } = require("../electron/linux-host-port.cjs")
 
+async function run() {
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "galileo-g03-host-port-"))
 try {
     const mediaPath = path.join(temporary, "private-user-frame.bin")
@@ -50,6 +52,23 @@ try {
     assert.throws(() => registry.read({ grant: media.grant, owner: "window-1", generation: 7, range: "bytes=0-1" }), (error) => error.code === "verification_failed")
     registry.revoke(media.grant)
     assert.throws(() => registry.resolve({ grant: media.grant, scope: "media", owner: "window-1", generation: 7 }), (error) => error.code === "grant_expired")
+
+    const restoredMtimePath = path.join(temporary, "same-size-restored-mtime.bin")
+    fs.writeFileSync(restoredMtimePath, Buffer.alloc(128, 3))
+    const restoredMtimeIdentity = fs.statSync(restoredMtimePath)
+    const restoredMtimeRegistry = createGrantRegistry()
+    const restoredMtimeGrant = restoredMtimeRegistry.create({ scope: "media", filePath: restoredMtimePath, owner: "window-restored", generation: 1, mime: "application/octet-stream" })
+    await new Promise((resolve) => setTimeout(resolve, 5))
+    fs.writeFileSync(restoredMtimePath, Buffer.alloc(128, 4))
+    fs.utimesSync(restoredMtimePath, restoredMtimeIdentity.atimeMs / 1000, restoredMtimeIdentity.mtimeMs / 1000)
+    const restoredMtimeAfter = fs.statSync(restoredMtimePath)
+    assert.equal(restoredMtimeAfter.mtimeMs, restoredMtimeIdentity.mtimeMs)
+    assert.notEqual(restoredMtimeAfter.ctimeMs, restoredMtimeIdentity.ctimeMs)
+    assert.throws(
+        () => restoredMtimeRegistry.read({ grant: restoredMtimeGrant.grant, owner: "window-restored", generation: 1, range: "bytes=0-7" }),
+        (error) => error.code === "verification_failed",
+        "same-size mutation with restored mtime must fail ctime-bound grant verification",
+    )
 
     fs.writeFileSync(mediaPath, "fresh")
     const expiring = registry.create({ scope: "media", filePath: mediaPath, owner: "window-1", generation: 8, mime: "image/png" })
@@ -117,7 +136,38 @@ try {
     assert.equal(largeStream.status, 200)
     assert.equal(largeStream.headers["content-length"], String(9 * 1024 * 1024))
     assert.throws(() => streamingRegistry.openRead({ grant: large.grant, owner: "window-large", generation: 1, range: undefined }), (error) => error.code === "resource_limit")
+    const largeClosed = once(largeStream.stream, "close")
     largeStream.stream.destroy()
+    await largeClosed
+    assert.equal(streamingRegistry.snapshot().openStreams, 0)
+
+    const midReadPath = path.join(temporary, "mid-read-mutation.bin")
+    fs.writeFileSync(midReadPath, Buffer.alloc(2 * 1024 * 1024, 5))
+    const midReadIdentity = fs.statSync(midReadPath)
+    await new Promise((resolve) => setTimeout(resolve, 5))
+    let mutateAfterFirstRead = true
+    const midReadRegistry = createGrantRegistry({
+        readSync: (...args) => {
+            const bytesRead = fs.readSync(...args)
+            if (mutateAfterFirstRead) {
+                mutateAfterFirstRead = false
+                const mutationHandle = fs.openSync(midReadPath, "r+")
+                try { fs.writeSync(mutationHandle, Buffer.alloc(4_096, 6), 0, 4_096, 1024 * 1024 + 4_096) } finally { fs.closeSync(mutationHandle) }
+                fs.utimesSync(midReadPath, midReadIdentity.atimeMs / 1000, midReadIdentity.mtimeMs / 1000)
+            }
+            return bytesRead
+        },
+    })
+    const midReadGrant = midReadRegistry.create({ scope: "media", filePath: midReadPath, owner: "window-mid-read", generation: 1, mime: "video/mp4" })
+    assert.throws(
+        () => midReadRegistry.openRead({ grant: midReadGrant.grant, owner: "window-mid-read", generation: 1, range: undefined }),
+        (error) => error.code === "verification_failed",
+        "mid-read same-inode mutation must fail before any response stream is returned",
+    )
+    const midReadAfter = fs.statSync(midReadPath)
+    assert.equal(midReadAfter.mtimeMs, midReadIdentity.mtimeMs)
+    assert.notEqual(midReadAfter.ctimeMs, midReadIdentity.ctimeMs)
+    assert.equal(midReadRegistry.snapshot().openStreams, 0)
 
     const destinationParent = path.join(temporary, "exports")
     fs.mkdirSync(destinationParent)
@@ -156,3 +206,9 @@ try {
 } finally {
     fs.rmSync(temporary, { recursive: true, force: true })
 }
+}
+
+run().catch((error) => {
+    console.error(error)
+    process.exitCode = 1
+})
