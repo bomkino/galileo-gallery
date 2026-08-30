@@ -949,7 +949,6 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
     const openNotice = await projectAction(window, "Open project", "Project opened")
     await until(window, "document.querySelectorAll('.media-row').length === 2 && document.querySelector('.vitrine-stage[data-scene-version=\"2\"]')", "opened Vitrine v2 Project")
     await until(window, "!document.querySelector('.launch-screen')", "launch transition", 15_000)
-    await settle(window)
     await scrub(window, 0.125)
     const decoderEvidence = await window.webContents.executeJavaScript(`({
         activePlanes: document.querySelectorAll('.vitrine-plane').length,
