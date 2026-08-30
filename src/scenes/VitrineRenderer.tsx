@@ -426,11 +426,21 @@ export function vitrineTimeline(config: ReelConfig, fps = 30, mediaCount = confi
 export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames, terminal = false, cataloguePreview = false, reducedMotion, exportMode = false, inspectionItemId = null }: Props) {
     const ref = React.useRef<HTMLDivElement>(null)
     const metricFrame = React.useRef<number | null>(null)
+    const metricRetries = React.useRef(0)
+    const metricSync = React.useRef<() => void>(() => {})
     const clearMetricReadiness = React.useCallback(() => {
         const element = ref.current
         if (!element) return
         delete element.dataset.vitrineShortEdge
         delete element.dataset.vitrineMetricCompensation
+    }, [])
+    const retryMetrics = React.useCallback(() => {
+        if (metricFrame.current !== null || metricRetries.current >= 8) return
+        metricRetries.current += 1
+        metricFrame.current = requestAnimationFrame(() => {
+            metricFrame.current = null
+            metricSync.current()
+        })
     }, [])
     const syncMetrics = React.useCallback(() => {
         const element = ref.current
@@ -440,6 +450,7 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
         const height = Number.parseFloat(style.height)
         if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) {
             clearMetricReadiness()
+            retryMetrics()
             return
         }
         const shortEdge = Math.min(width, height)
@@ -469,8 +480,10 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
         if (!expectsPlacard) {
             if (placard) {
                 clearMetricReadiness()
+                retryMetrics()
                 return
             }
+            metricRetries.current = 0
             element.dataset.vitrineMetricCompensation = "1"
             element.dataset.vitrineShortEdge = String(shortEdge)
             return
@@ -479,6 +492,7 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
         const caption = placard?.querySelector<HTMLElement>("strong") ?? null
         if (!placard || !placard.isConnected || !element.contains(placard) || !label || !caption) {
             clearMetricReadiness()
+            retryMetrics()
             return
         }
 
@@ -496,6 +510,7 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
         for (let pass = 0; pass < 2; pass += 1) {
             if (element !== ref.current || !element.isConnected || !placard.isConnected || !element.contains(placard)) {
                 clearMetricReadiness()
+                retryMetrics()
                 return
             }
             const actual = Number.parseFloat(getComputedStyle(placard).columnGap)
@@ -505,6 +520,7 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
             if (!Number.isFinite(correction) || correction < 0.25 || correction > 4
                 || !Number.isFinite(nextCompensation) || nextCompensation < 0.25 || nextCompensation > 4) {
                 clearMetricReadiness()
+                retryMetrics()
                 return
             }
             compensation = nextCompensation
@@ -514,19 +530,23 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
         if (element !== ref.current || !element.isConnected || !placard.isConnected || !element.contains(placard)
             || !Number.isFinite(verifiedGap) || Math.abs(verifiedGap - values.gap) > 0.001) {
             clearMetricReadiness()
+            retryMetrics()
             return
         }
+        metricRetries.current = 0
         element.dataset.vitrineMetricCompensation = String(compensation)
         element.dataset.vitrineShortEdge = String(shortEdge)
-    }, [clearMetricReadiness])
+    }, [clearMetricReadiness, retryMetrics])
+    metricSync.current = syncMetrics
     const scheduleMetrics = React.useCallback(() => {
         clearMetricReadiness()
+        metricRetries.current = 0
         if (metricFrame.current !== null) cancelAnimationFrame(metricFrame.current)
         metricFrame.current = requestAnimationFrame(() => {
             metricFrame.current = null
-            syncMetrics()
+            metricSync.current()
         })
-    }, [clearMetricReadiness, syncMetrics])
+    }, [clearMetricReadiness])
     const placardRef = React.useCallback((node: HTMLDivElement | null) => {
         clearMetricReadiness()
         if (!node) {
@@ -581,6 +601,7 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
                 cancelAnimationFrame(metricFrame.current)
                 metricFrame.current = null
             }
+            metricRetries.current = 0
             observer.disconnect()
             scaleObserver?.disconnect()
             clearMetricReadiness()
