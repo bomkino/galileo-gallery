@@ -6,9 +6,7 @@ const zlib = require("node:zlib")
 const { spawnSync } = require("node:child_process")
 const { BrowserWindow, ipcMain, session } = require("electron")
 const { inspectPng } = require("./png-frames-runtime.cjs")
-const evidenceFs = (() => {
-    try { return require("original-fs") } catch { return fs }
-})()
+const evidenceFs = process.versions.electron ? require("original-fs") : fs
 
 const PRESENTATION_KEY = "galileo-gallery:local-presentation:v1"
 const PROJECT_KEY = "galileo-gallery-project-v1"
