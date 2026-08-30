@@ -1,0 +1,11 @@
+{
+  "sceneId": "coverflow-gallery",
+  "status": "pass",
+  "artifact": "default-real-time.mp4",
+  "algorithm": "sha256",
+  "original": "416edf9b2012e995e8dc636f184d9009f799fad6fefe753ce5e07fc08eb7b60d",
+  "independentRerun": "416edf9b2012e995e8dc636f184d9009f799fad6fefe753ce5e07fc08eb7b60d",
+  "byteIdentical": true,
+  "generator": "export-clip-frames.mjs + render-clip.py",
+  "clock": "fixed-step evaluator samples"
+}

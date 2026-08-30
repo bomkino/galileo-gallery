@@ -1,0 +1,11 @@
+{
+  "sceneId": "swipe-stack",
+  "status": "pass",
+  "artifact": "default-real-time.mp4",
+  "algorithm": "sha256",
+  "original": "0239fef0721bec4ac4f2d710efc263ac41d1ea505e6de6c7fc19b90d0ffd573e",
+  "independentRerun": "0239fef0721bec4ac4f2d710efc263ac41d1ea505e6de6c7fc19b90d0ffd573e",
+  "byteIdentical": true,
+  "generator": "export-clip-frames.mjs + render-clip.py",
+  "clock": "fixed-step evaluator samples"
+}

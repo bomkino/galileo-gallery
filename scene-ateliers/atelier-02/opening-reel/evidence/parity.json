@@ -1,0 +1,10 @@
+{
+  "sceneId": "opening-reel",
+  "status": "pass",
+  "timeMs": 860,
+  "digests": {
+    "play": "221eff633323fed3ea7846a803d230316f54d4a3d02832f004209293f2a14fc0",
+    "scrub": "221eff633323fed3ea7846a803d230316f54d4a3d02832f004209293f2a14fc0",
+    "fixedStep": "221eff633323fed3ea7846a803d230316f54d4a3d02832f004209293f2a14fc0"
+  }
+}

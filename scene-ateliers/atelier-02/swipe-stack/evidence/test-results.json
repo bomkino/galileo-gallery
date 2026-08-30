@@ -1,0 +1,86 @@
+{
+  "sceneId": "swipe-stack",
+  "status": "pass",
+  "checks": [
+    {
+      "name": "fixture-counts",
+      "status": "pass"
+    },
+    {
+      "name": "timeline-modes-and-honest-minimum",
+      "status": "pass",
+      "durationsMs": {
+        "automatic": 16020,
+        "fixed-duration": 12860,
+        "directed": 6570
+      },
+      "minimumHonestDurationMs": 11860
+    },
+    {
+      "name": "deterministic-repeat",
+      "status": "pass",
+      "digest": "411daa337adc6c01ed49d81781cdfd269b1b567609e4d8c4f2fc955026aa70cf"
+    },
+    {
+      "name": "play-scrub-fixed-step-parity",
+      "status": "pass",
+      "play": "a3ad674f985c954d245d9e455f827e87e68d427fee3ce50a585e9ace52f0431f",
+      "scrub": "a3ad674f985c954d245d9e455f827e87e68d427fee3ce50a585e9ace52f0431f",
+      "fixedStep": "a3ad674f985c954d245d9e455f827e87e68d427fee3ce50a585e9ace52f0431f"
+    },
+    {
+      "name": "boundary-finite-source-clock-terminal",
+      "status": "pass",
+      "samples": 264
+    },
+    {
+      "name": "control-causality",
+      "status": "pass",
+      "frameScale": {
+        "defaultDigest": "411daa337adc6c01ed49d81781cdfd269b1b567609e4d8c4f2fc955026aa70cf",
+        "variantDigest": "2ca6b0ac943a8f5b2fd16cf11721098823560b272dfd8343cb3bd0e15ebde4d2",
+        "changed": true
+      },
+      "pileSpread": {
+        "defaultDigest": "411daa337adc6c01ed49d81781cdfd269b1b567609e4d8c4f2fc955026aa70cf",
+        "variantDigest": "2b1a1c91e32dd659e23d01bb7ae4ae30472af65da0ecf522e07fabd319e35137",
+        "changed": true
+      },
+      "visibleDepth": {
+        "defaultDigest": "411daa337adc6c01ed49d81781cdfd269b1b567609e4d8c4f2fc955026aa70cf",
+        "variantDigest": "d3c2421520fc900a6b3d7dff85aefc278bcd314c5555f8d11c3de4876b2ecc95",
+        "changed": true
+      },
+      "throwArc": {
+        "defaultDigest": "411daa337adc6c01ed49d81781cdfd269b1b567609e4d8c4f2fc955026aa70cf",
+        "variantDigest": "a0afe772883b9a695b47bba062104ff6f5d19581895616d19410349c9d935a62",
+        "changed": true
+      },
+      "settleCharacter": {
+        "defaultDigest": "411daa337adc6c01ed49d81781cdfd269b1b567609e4d8c4f2fc955026aa70cf",
+        "variantDigest": "f7b161aadd5402096fb4f66594387709fd0ca2f413a49065b03ad6ec77fa484b",
+        "changed": true
+      }
+    },
+    {
+      "name": "fixture-resource-bounds",
+      "status": "pass",
+      "visibleLimit": 9
+    },
+    {
+      "name": "reverse-evaluator",
+      "status": "pass"
+    },
+    {
+      "name": "invalid-input-rejection",
+      "status": "pass"
+    },
+    {
+      "name": "swipe-stack-signature",
+      "status": "pass",
+      "activeId": "media-01",
+      "inversePermutation": true
+    }
+  ],
+  "generatedAt": "deterministic-no-wall-clock"
+}

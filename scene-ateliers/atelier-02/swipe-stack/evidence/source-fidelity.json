@@ -1,0 +1,14 @@
+{
+  "sceneId": "swipe-stack",
+  "status": "pass",
+  "fit": "contain",
+  "artworkOpacity": 1,
+  "artworkFilter": "none",
+  "artworkBlend": "normal",
+  "sceneBackground": "none",
+  "sourceVideoClock": "sourceOffset + storyTime",
+  "lookEffectsApplied": [],
+  "frameIntentOwnedElsewhere": true,
+  "audioOwnedElsewhere": true,
+  "interfaceScaleAffectsTruth": false
+}

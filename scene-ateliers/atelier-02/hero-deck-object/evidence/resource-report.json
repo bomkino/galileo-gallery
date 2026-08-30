@@ -1,0 +1,11 @@
+{
+  "sceneId": "hero-deck-object",
+  "status": "pass",
+  "sampleCount": 482,
+  "maxEvaluatedCards": 24,
+  "maxVisibleCards": 7,
+  "maxOccludedCards": 0,
+  "uiAnimationHandles": 1,
+  "evaluatorTimers": 0,
+  "growingCollections": false
+}

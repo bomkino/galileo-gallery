@@ -1,0 +1,379 @@
+{
+  "schemaVersion": "1.1.0",
+  "sceneId": "hero-deck-object",
+  "sourceArchive": "GALILEO_ATELIER_02_DECKS_AND_STACKS_PARITY_HANDOFF_2026-08-28(1).zip",
+  "sourceEvaluatorSha256": "d442223f984a7cf87976e6151d119dc7eeab328001957798957e89eac5ecf68d",
+  "evidenceCount": 45,
+  "files": [
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/SHA256SUMS",
+      "sha256": "eba03bbcb9151c3c6b70af736a5c5fc2276c010143fbf0a7553005cb872d2c4d",
+      "byteSize": 3746,
+      "proofClass": "hash ledger",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-black.png",
+      "sha256": "0fa1879a9d5a7e376e8ddd4c307371853c0ba49c5ef6324e2280be10646c9e6b",
+      "byteSize": 25896,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-black.svg",
+      "sha256": "febd62a7de199d0e7543ef7b9de8f0935c8829cb4d506781861151146c2fdad6",
+      "byteSize": 4676,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-blue.png",
+      "sha256": "f5d4face3d3c2875e79d82b066196f3b487aa9c131d5acda95b003d4cd495531",
+      "byteSize": 26618,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-blue.svg",
+      "sha256": "3dd4317dac4b1d96da19df61c6d2240c64b42a3dc9c7829b416b4ca1b1a1d26a",
+      "byteSize": 4676,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-checker.png",
+      "sha256": "e080babc62f735ee445108582a7bd9fbab6e796709d0dc87f48a11668fd04ce2",
+      "byteSize": 29159,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-checker.svg",
+      "sha256": "2fe770dbdd9c30640fd66ed85ea4237c0bde7181546429e055dfdfb47f2819a2",
+      "byteSize": 4905,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-red.png",
+      "sha256": "5b489348f41db6c345fd5f2ec7022533cb73728286eeafebb03915b251acfb97",
+      "byteSize": 26374,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-red.svg",
+      "sha256": "dea7837b395df8aed74ceb478b935cc65b38319b562240171270acbea424cc2e",
+      "byteSize": 4676,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-scan.json",
+      "sha256": "97b8974693f40de765cfc1eea254ddeba1dedad0dec436450e1da57218b68a00",
+      "byteSize": 280,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-transparent.png",
+      "sha256": "1f8f7d61af4ee2004aa6f9ec22ec8b78b30f5ba33e53e241365812ed0198b501",
+      "byteSize": 31302,
+      "proofClass": "raw-alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-transparent.svg",
+      "sha256": "78c22bbe09ef45df349e42e5b8786457c373d42b79b5e67add22711d65815164",
+      "byteSize": 4603,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-white.png",
+      "sha256": "468d65845165805d61a822b2b73977c69e7d32121d2e0de70303855de6a18389",
+      "byteSize": 26528,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alpha-white.svg",
+      "sha256": "c4fcd3d7b58aa6f43a07851c78e711bf9d44206b6f407278c66b2ae7a9877ca4",
+      "byteSize": 4676,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alternate-extreme.png",
+      "sha256": "f8144b91e6b07c17c333760b849c12fc6ff2c36a68355e4aaa4c1db733db59ed",
+      "byteSize": 22083,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alternate-extreme.svg",
+      "sha256": "205faad51e6f55c975e1edba9b64d3da1337d63d777a7f93684a745e56812aeb",
+      "byteSize": 4766,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alternate-two.png",
+      "sha256": "1183bd3aabee00028340ded348ab813b26331381969a3e223908edc162ab6be8",
+      "byteSize": 17172,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alternate-two.svg",
+      "sha256": "324f9e631f80eb16e5e94179d68c25dd1c83d7fe12dd9d3c7d861a62d4cc873c",
+      "byteSize": 1639,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alternate-vertical.png",
+      "sha256": "70181fa826dfa592c38daef2ff6b1de17ea2148e9a67f57a795848fbc0869a31",
+      "byteSize": 24585,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/alternate-vertical.svg",
+      "sha256": "e7124b63854b114141c1bfedf738961d1eed9a46081f2126b33d8ec7ff0681c4",
+      "byteSize": 4895,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-characteristic.png",
+      "sha256": "91348fc6e82dc0f0700ca5ac96e23a66e9d72dfa01c1ab032cf079e569b57970",
+      "byteSize": 20898,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-characteristic.svg",
+      "sha256": "e88a3f5e85ce1284717356d4061c26f41e2a7ec42fc2213d4f52afcc9f1c4b19",
+      "byteSize": 4892,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-exit.png",
+      "sha256": "e6fddd97e820822d96ffad6c43dd3cd52e3362c8d98055ba464067274bb17597",
+      "byteSize": 12840,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-exit.svg",
+      "sha256": "532fa86d787ca36bcbe9f388eacd51403a8eb99dc7b9a555581c5739220cc437",
+      "byteSize": 4775,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-finale.png",
+      "sha256": "e088db12280255acf9d55901278b985f572a98950034ac31c222e96c4a604da9",
+      "byteSize": 22408,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-finale.svg",
+      "sha256": "a361e54afd4da85c21486e5cbb8e3e36dff5853f71cf6059f72e2ae1374490a1",
+      "byteSize": 4783,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-hold.png",
+      "sha256": "e088db12280255acf9d55901278b985f572a98950034ac31c222e96c4a604da9",
+      "byteSize": 22408,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-hold.svg",
+      "sha256": "a361e54afd4da85c21486e5cbb8e3e36dff5853f71cf6059f72e2ae1374490a1",
+      "byteSize": 4783,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-limitations.json",
+      "sha256": "a662a6e0249663c6fc3ab94003f5c82160072d3b9190e5ec585639852cbe0c5e",
+      "byteSize": 753,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-seam.png",
+      "sha256": "c6b6a0c4fa254bd609f2a880dac4827c56ca791f68fedee7e6f98e01c40a6c7e",
+      "byteSize": 2776,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-seam.svg",
+      "sha256": "5cb3eb44eee3e84ff119d4f333a1690f59485cebcbc09278653b4774c68ea4f2",
+      "byteSize": 2159,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-start.png",
+      "sha256": "68c6dbb5f2f6dfe025facb23a8b65e772e4ac6785e1fe899c4b9067f9da042f2",
+      "byteSize": 26553,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/capture-start.svg",
+      "sha256": "31b1d12a357291af7f01b606bb935a0fe52783fd5a8a3e6fe47ff0d33af911ec",
+      "byteSize": 4834,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/default-real-time.mp4",
+      "sha256": "43091c6277ad07de753d9365f5a96267ce84c99d6c3b38411569d57e6feea421",
+      "byteSize": 111820,
+      "proofClass": "real-speed encoded motion",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/motion-contact-sheet.png",
+      "sha256": "a4ac146276a00a826ff024f9f82559c038b1a453e6f730054f392cc801a2997b",
+      "byteSize": 21539,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/motion-contact-sheet.svg",
+      "sha256": "910b4a2a5fa99a3520f86ca6588e998aff3a0fd0161f794056a16fa930af06dc",
+      "byteSize": 17981,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/parity.json",
+      "sha256": "98a45831821929268525a88eabf6c909156f0938ee405764cfcf074e594c4e60",
+      "byteSize": 339,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/phase-contact-sheet.png",
+      "sha256": "696289b6b36cde4c4f67185b2c1246e2f7d43cce4ae9267b251319f1e041d79b",
+      "byteSize": 13572,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/phase-contact-sheet.svg",
+      "sha256": "a17e167c4d9c7b5a8b33411efcfe69a703ef0b9bbdd46aec31c74676955b290f",
+      "byteSize": 12589,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/reproducibility.json",
+      "sha256": "abcb6ff2d3bc06c9a7832d8f02105fd8040c1fd1328d28a552d0b0c72baf9fb8",
+      "byteSize": 418,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/resource-report.json",
+      "sha256": "60d7f045a6d96362893bbecff1ccf03dcec85ab34fea98e71293d05035c15dc5",
+      "byteSize": 236,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/silhouette.png",
+      "sha256": "3d228864d9cb51e793e80e99a41d32138ab87603cb0a5635f14fdb422788b19c",
+      "byteSize": 7364,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/silhouette.svg",
+      "sha256": "951a5f3c565cdd6ceefde4b9a106b0f625e45ab04da0218ef0e791d5932e4ea7",
+      "byteSize": 1723,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/source-fidelity.json",
+      "sha256": "1a48e7f4108d28d7974333a91988af29235339501c052670de1004a18330e02e",
+      "byteSize": 368,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-02/hero-deck-object/evidence/test-results.json",
+      "sha256": "09b773686fbbb2f20a0217c853db6596b511c263f9479b8d12f1bf79bfc50da5",
+      "byteSize": 2700,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    }
+  ],
+  "validationBindings": [
+    "07_VALIDATION/browser-receipts/hero-deck-object.json",
+    "07_VALIDATION/alpha-receipts/hero-deck-object.json",
+    "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "07_VALIDATION/resource-receipts/RESOURCE_LIFECYCLE_SUMMARY.json",
+    "07_VALIDATION/evidence-manifests/VIDEO_EVIDENCE_RECEIPT.json"
+  ],
+  "claimBoundary": "Evidence proves declared mechanics by proof class. Static images do not prove motion; encoded clips do not restore omitted raw frame ledgers; human verdict remains pending.",
+  "humanVerdict": "pending",
+  "productIntegration": "no"
+}

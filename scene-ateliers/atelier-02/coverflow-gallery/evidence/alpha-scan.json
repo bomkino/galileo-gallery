@@ -1,0 +1,11 @@
+{
+  "sceneId": "coverflow-gallery",
+  "status": "pass",
+  "width": 960,
+  "height": 540,
+  "alphaZeroPixels": 399939,
+  "partialAlphaPixels": 16792,
+  "opaquePixels": 101669,
+  "nonZeroRgbUnderAlphaZero": 0,
+  "method": "Pillow RGBA pixel scan of generated alpha-transparent.png"
+}

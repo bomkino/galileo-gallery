@@ -1,0 +1,11 @@
+{
+  "sceneId": "hero-deck-object",
+  "status": "pass",
+  "artifact": "default-real-time.mp4",
+  "algorithm": "sha256",
+  "original": "43091c6277ad07de753d9365f5a96267ce84c99d6c3b38411569d57e6feea421",
+  "independentRerun": "43091c6277ad07de753d9365f5a96267ce84c99d6c3b38411569d57e6feea421",
+  "byteIdentical": true,
+  "generator": "export-clip-frames.mjs + render-clip.py",
+  "clock": "fixed-step evaluator samples"
+}

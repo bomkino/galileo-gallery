@@ -1,0 +1,14 @@
+{
+  "sceneId": "opening-reel",
+  "browserCapture": {
+    "attempted": true,
+    "status": "timed-out-before-render-target",
+    "detail": "Headless Chromium/Electron attempt exceeded 120 seconds before a usable renderer capture; runner reported unavailable D-Bus/display/socket services and terminated its zygote.",
+    "claim": "unrun-browser-capture"
+  },
+  "evaluatorNativeCapture": "actual deterministic SVG poses from the Scene evaluator",
+  "rasterCapture": "actual PNGs generated from those SVG poses by rasterize-stills.py",
+  "videoCapture": "actual MP4 generated from fixed-step evaluator JSON by export-clip-frames.mjs and render-clip.py",
+  "generatedAt": "deterministic-no-wall-clock",
+  "tasteVerdict": "pending-human-review"
+}

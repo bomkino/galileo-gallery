@@ -1,0 +1,190 @@
+{
+  "schema": "galileo-scene-capability-candidate",
+  "schemaVersion": 1,
+  "status": "candidate-human-review-pending",
+  "scene": {
+    "id": "hero-deck-object",
+    "version": 1,
+    "displayName": "Hero Deck Object",
+    "motionSentence": "A stable physical rig holds one commanding hero while support planes yield and a deliberate handoff transfers authority to the next frame.",
+    "antiMotionSentence": "Never become a loose pile, coverflow rail, hover toy, glossy mockup, or generic active-index zoom."
+  },
+  "media": {
+    "minimumUsefulCount": 1,
+    "recommendedCount": 5,
+    "maximumCount": 24,
+    "zeroBehavior": {
+      "available": false,
+      "reason": "Scene requires at least one stable media identity."
+    },
+    "failedMedia": "retain identity, order, ratio box, and deterministic placeholder"
+  },
+  "capabilities": {
+    "canvas": [
+      "16:9",
+      "9:16",
+      "1:1",
+      "4:5",
+      "2576:1080"
+    ],
+    "orientation": {
+      "horizontal": true,
+      "verticalCanvas": true,
+      "verticalRail": null
+    },
+    "alpha": {
+      "transparentOutput": true,
+      "alphaZeroRgbMustBeZero": true,
+      "sceneBackground": "none"
+    },
+    "video": {
+      "supported": true,
+      "clock": "shared-product-story-time",
+      "sourceOffsetPreserved": true,
+      "poseHoldRemapsTime": false
+    },
+    "reverse": {
+      "supported": true,
+      "policy": "Supported as exact inverse authority transfer and support ordering."
+    },
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "reducedMotionChangesProjectTruth": false
+  },
+  "parameters": [
+    {
+      "id": "heroScale",
+      "label": "Hero scale",
+      "type": "number",
+      "min": 0.42,
+      "max": 0.78,
+      "step": 0.01,
+      "default": 0.62,
+      "reset": 0.62,
+      "unit": "stage cross-axis",
+      "output": "hero plane dimensions",
+      "invalid": "reject",
+      "declaredEvaluatorOutput": "hero plane dimensions",
+      "roundTripIdentity": true
+    },
+    {
+      "id": "supportSpread",
+      "label": "Support spread",
+      "type": "number",
+      "min": 0.08,
+      "max": 0.28,
+      "step": 0.01,
+      "default": 0.16,
+      "reset": 0.16,
+      "unit": "stage width",
+      "output": "support x/y offsets",
+      "invalid": "reject",
+      "declaredEvaluatorOutput": "support x/y offsets",
+      "roundTripIdentity": true
+    },
+    {
+      "id": "depth",
+      "label": "Depth",
+      "type": "number",
+      "min": 0.04,
+      "max": 0.22,
+      "step": 0.01,
+      "default": 0.12,
+      "reset": 0.12,
+      "unit": "projected scale falloff",
+      "output": "support/deep scale and z spacing",
+      "invalid": "reject",
+      "declaredEvaluatorOutput": "support/deep scale and z spacing",
+      "roundTripIdentity": true
+    },
+    {
+      "id": "restingYaw",
+      "label": "Resting yaw",
+      "type": "number",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "default": 4,
+      "reset": 4,
+      "unit": "degrees",
+      "output": "support projected width and rotation sign",
+      "invalid": "reject",
+      "declaredEvaluatorOutput": "support projected width and rotation sign",
+      "roundTripIdentity": true
+    },
+    {
+      "id": "handoffCharacter",
+      "label": "Handoff character",
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "default": 0.48,
+      "reset": 0.48,
+      "unit": "normalized",
+      "output": "authority-crossing path curvature and settle damping",
+      "invalid": "reject",
+      "declaredEvaluatorOutput": "authority-crossing path curvature and settle damping",
+      "roundTripIdentity": true
+    }
+  ],
+  "renderOutputs": {
+    "coordinateSpace": "normalized stage, converted to output pixels at evaluation",
+    "perItem": [
+      "stableId",
+      "sourceIndex",
+      "x",
+      "y",
+      "width",
+      "height",
+      "scale",
+      "rotation",
+      "projectedYaw",
+      "z",
+      "visible",
+      "occluded",
+      "opacity",
+      "filter",
+      "blend"
+    ],
+    "global": [
+      "phase",
+      "phaseProgress",
+      "storyTimeMs",
+      "sourceVideoTimeMs",
+      "permutationOrFocus",
+      "terminal",
+      "renderPolicy"
+    ]
+  },
+  "invalidInputBehavior": {
+    "nonFinite": "reject",
+    "outOfBounds": "reject",
+    "duplicateMediaId": "reject",
+    "unknownParameter": "reject",
+    "unsupportedCount": "truthful unavailable or reject before evaluation"
+  },
+  "projectRoundTrip": {
+    "sceneIdExact": true,
+    "sceneVersionExact": true,
+    "parameterKeysExact": true,
+    "parameterValuesExact": true,
+    "stableMediaOrderExact": true,
+    "hostPathsExcluded": true,
+    "interfaceScaleExcluded": true,
+    "transientInteractionExcluded": true
+  },
+  "explicitExclusions": [
+    "Look/background/material/light/grain/texture/vignette/shadow/radius",
+    "frame fit/crop/focal intent",
+    "audio gain/mute/solo/duck/mix",
+    "Interface Scale",
+    "codec/export destination/job state",
+    "raw gesture path/velocity",
+    "DOM/CSS transition state",
+    "historical implementation constants"
+  ]
+}

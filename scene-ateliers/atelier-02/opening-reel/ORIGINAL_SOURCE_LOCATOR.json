@@ -1,0 +1,9 @@
+{
+  "atelier": 2,
+  "archive": "GALILEO_ATELIER_02_DECKS_AND_STACKS_PARITY_HANDOFF_2026-08-28(1).zip",
+  "archiveSha256": "d6a802be4146772bef6bd6854d90c9499f99d74fe35b7ebdaac792064267347a",
+  "sourceRoot": "GALILEO_ATELIER_02_DECKS_AND_STACKS_PARITY_HANDOFF_2026-08-28/scene-ateliers/atelier-02/opening-reel",
+  "sourceRootFileCount": 64,
+  "charterSha256": "8daafc4c2c471ed50131b24d3b0ae08baad5f6d261da024889fa523927c59408",
+  "normalisation": "Original authored files copied. Original control JSON preserved. Canonical parity contracts added."
+}

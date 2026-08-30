@@ -1,0 +1,6215 @@
+{
+  "schema": "galileo-scene-test-vectors",
+  "schemaVersion": 1,
+  "sceneId": "swipe-stack",
+  "sceneVersion": 1,
+  "status": "generated-results-present",
+  "fps": 24,
+  "canonicalStages": [
+    {
+      "id": "16:9",
+      "width": 960,
+      "height": 540
+    },
+    {
+      "id": "9:16",
+      "width": 540,
+      "height": 960
+    },
+    {
+      "id": "1:1",
+      "width": 720,
+      "height": 720
+    },
+    {
+      "id": "4:5",
+      "width": 800,
+      "height": 1000
+    },
+    {
+      "id": "2576:1080",
+      "width": 1288,
+      "height": 540
+    }
+  ],
+  "fixtures": {
+    "ordinary-eight": [
+      {
+        "id": "media-01",
+        "ratio": 1.7777777777777777,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      },
+      {
+        "id": "media-02",
+        "ratio": 0.5625,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      },
+      {
+        "id": "media-03",
+        "ratio": 1,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      },
+      {
+        "id": "media-04",
+        "ratio": 0.8,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      },
+      {
+        "id": "media-05",
+        "ratio": 2.3851851851851853,
+        "kind": "video",
+        "sourceOffsetMs": 730,
+        "status": "ok"
+      },
+      {
+        "id": "media-06",
+        "ratio": 1.5,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      },
+      {
+        "id": "media-07",
+        "ratio": 0.6666666666666666,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      },
+      {
+        "id": "media-08",
+        "ratio": 1.25,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      }
+    ],
+    "one": [
+      "media-01"
+    ],
+    "two": [
+      "media-01",
+      "media-02"
+    ],
+    "recommendedCount": 5,
+    "awkwardSeven": 7,
+    "boundedMany": 24,
+    "transparentSoftEdge": "media-alpha",
+    "opaque": "media-01",
+    "failed": "media-failed"
+  },
+  "parameters": {
+    "frameScale": 0.5,
+    "pileSpread": 0.016,
+    "visibleDepth": 5,
+    "throwArc": 0.5,
+    "settleCharacter": 0.42
+  },
+  "modes": [
+    "automatic",
+    "fixed-duration",
+    "directed"
+  ],
+  "directions": [
+    "forward",
+    "reverse"
+  ],
+  "samples": [
+    {
+      "label": "00-entry:before-start",
+      "timeMs": 0,
+      "phase": "entry",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 730
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c7b6692cc42e62cab52ddb1d71ec9a7f11a7e025eda8d4d8c09d30cfacc86ad6"
+      }
+    },
+    {
+      "label": "00-entry:start",
+      "timeMs": 0,
+      "phase": "entry",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 730
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c7b6692cc42e62cab52ddb1d71ec9a7f11a7e025eda8d4d8c09d30cfacc86ad6"
+      }
+    },
+    {
+      "label": "00-entry:after-start",
+      "timeMs": 41.666667,
+      "phase": "entry",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 771.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f18699f2bcf9bc753c41b9e5680578801c6b7445794d16e7a2d71af630785f09"
+      }
+    },
+    {
+      "label": "00-entry:before-end",
+      "timeMs": 378.333333,
+      "phase": "entry",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1108.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "e7f546dca8e3fdc6bb2f4d4adf6c1813528c04ac009043a6be2d8a38555feeb8"
+      }
+    },
+    {
+      "label": "01-cycle:before-start",
+      "timeMs": 378.333333,
+      "phase": "entry",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1108.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "e7f546dca8e3fdc6bb2f4d4adf6c1813528c04ac009043a6be2d8a38555feeb8"
+      }
+    },
+    {
+      "label": "00-entry:end",
+      "timeMs": 420,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1150
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d7f21fd06fc443f09b44d00051809e02ae2e486f893f70919a841ad49eb97188"
+      }
+    },
+    {
+      "label": "01-cycle:start",
+      "timeMs": 420,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1150
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d7f21fd06fc443f09b44d00051809e02ae2e486f893f70919a841ad49eb97188"
+      }
+    },
+    {
+      "label": "00-entry:after-end",
+      "timeMs": 461.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1191.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "43f76a052d6596a9e2938b768037969ff4cd7424431cc517b642c25f20ce5ef4"
+      }
+    },
+    {
+      "label": "01-cycle:after-start",
+      "timeMs": 461.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1191.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "43f76a052d6596a9e2938b768037969ff4cd7424431cc517b642c25f20ce5ef4"
+      }
+    },
+    {
+      "label": "01-cycle:anticipation-end:before",
+      "timeMs": 498.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1228.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "da0b914ffb4426b7aa9e8c35ada8381afba5c7eb4aadfed53768c3975a44a933"
+      }
+    },
+    {
+      "label": "01-cycle:anticipation-end",
+      "timeMs": 540,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1270
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "cb276cfa2cfb8249dc90166c3276663fcef20e507bc4e6b70b2cd0743c6c8ead"
+      }
+    },
+    {
+      "label": "01-cycle:anticipation-end:after",
+      "timeMs": 581.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1311.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "bfc5a772cfe38bc01c8747c114b5181516ce1b3ce383decc66bda56a8ed9f221"
+      }
+    },
+    {
+      "label": "01-cycle:release-end:before",
+      "timeMs": 618.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1348.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "a2b8b097b3e06526b8c7dccda42103fa7ad96868cf13b318810ee1b80384d6fe"
+      }
+    },
+    {
+      "label": "01-cycle:release-end",
+      "timeMs": 660,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1390
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "221d69208bb39ed29a70cdf4ada311dab3344ba037caaaf9a0155b88d7357621"
+      }
+    },
+    {
+      "label": "01-cycle:release-end:after",
+      "timeMs": 701.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1431.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7c549a7a53a1f5c26945f19839c729cfa76bbe1ba0fc252f90e35410b4be99af"
+      }
+    },
+    {
+      "label": "01-cycle:front-flight-end:before",
+      "timeMs": 978.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1708.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "538e201c9841f467b8a96a38df789b498a56d20f1ea4083d73f77d56beb38543"
+      }
+    },
+    {
+      "label": "01-cycle:front-flight-end",
+      "timeMs": 1020,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1750
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "68b06660bc35c532181ac69643a325a9f865978b499cd282f9b83856f994fcd3"
+      }
+    },
+    {
+      "label": "01-cycle:front-flight-end:after",
+      "timeMs": 1061.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1791.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d54db41d5fbb4423fa8c48ac416d603895e5cc1aacf4cfaaa1fe2ba894824536"
+      }
+    },
+    {
+      "label": "01-cycle:occlusion-crossing:before",
+      "timeMs": 1158.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1888.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "86eae69a8828ea8f374b5331219d63d958490ccc2ecb167c6e7f33f667faf714"
+      }
+    },
+    {
+      "label": "01-cycle:occlusion-crossing",
+      "timeMs": 1200,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1930
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f597685d073c632de9e67e137573379acf3fa887a2315e112c851de534d10b0c"
+      }
+    },
+    {
+      "label": "01-cycle:occlusion-crossing:after",
+      "timeMs": 1241.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1971.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "dbd408d9462e6962f3f8e8f7172bc8c505866e30760f96ad115f1dc26bca931f"
+      }
+    },
+    {
+      "label": "01-cycle:deck-advance-end:before",
+      "timeMs": 1398.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2128.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "2abb76134fec925734d1cc3f652a15ce7409c5ff7034e191fcf6d7f60d0d881f"
+      }
+    },
+    {
+      "label": "01-cycle:deck-advance-end",
+      "timeMs": 1440,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2170
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7f0a3cccf79776a6434aac135f8b93b34a1137427912289321630cc7bcdb2561"
+      }
+    },
+    {
+      "label": "01-cycle:deck-advance-end:after",
+      "timeMs": 1481.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2211.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "71415fe0f248f4ce597894dd9963535026ebcfc57628e20bb932232fbf9afd54"
+      }
+    },
+    {
+      "label": "01-cycle:rear-tuck-end:before",
+      "timeMs": 1638.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2368.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "24c8d8318bcc0c5bde56379cde54125006a3458973bb9f7e3883f0259e71b361"
+      }
+    },
+    {
+      "label": "01-cycle:rear-tuck-end",
+      "timeMs": 1680,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2410
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "86ffe130556f8c005ba362729f40b10aa4f394d259bf0706a365dc9369fddc48"
+      }
+    },
+    {
+      "label": "01-cycle:rear-tuck-end:after",
+      "timeMs": 1721.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2451.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "1b85b2aa2c5a80f6573197367c314d1546081f16ba5869133614cb01e948cce8"
+      }
+    },
+    {
+      "label": "01-cycle:before-end",
+      "timeMs": 1878.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2608.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ddf73e97e8b3a526a09eb482a68b97e394783cf6260ad17d62bc80c7670166bf"
+      }
+    },
+    {
+      "label": "02-rest:before-start",
+      "timeMs": 1878.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2608.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ddf73e97e8b3a526a09eb482a68b97e394783cf6260ad17d62bc80c7670166bf"
+      }
+    },
+    {
+      "label": "01-cycle:end",
+      "timeMs": 1920,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2650
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "0d6c4ab7e64f9204f60b62e13a3f098e00e922850c54cd096a536622600e1cf4"
+      }
+    },
+    {
+      "label": "02-rest:start",
+      "timeMs": 1920,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2650
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "0d6c4ab7e64f9204f60b62e13a3f098e00e922850c54cd096a536622600e1cf4"
+      }
+    },
+    {
+      "label": "01-cycle:after-end",
+      "timeMs": 1961.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2691.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "81ab909127f071c3553776d38eac6baf1903fbb7e0cbe435804135b16b8364df"
+      }
+    },
+    {
+      "label": "02-rest:after-start",
+      "timeMs": 1961.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2691.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "81ab909127f071c3553776d38eac6baf1903fbb7e0cbe435804135b16b8364df"
+      }
+    },
+    {
+      "label": "02-rest:before-end",
+      "timeMs": 2178.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2908.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d749acee3ce6a52d86cbe619721e8a35d20c5e0f84ec91b582040f142e57fa07"
+      }
+    },
+    {
+      "label": "03-cycle:before-start",
+      "timeMs": 2178.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2908.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d749acee3ce6a52d86cbe619721e8a35d20c5e0f84ec91b582040f142e57fa07"
+      }
+    },
+    {
+      "label": "02-rest:end",
+      "timeMs": 2220,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2950
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6baf629bc9ce18c078c1ebffaa19001d883bc7be832a03bf09c35842dd3cd2b1"
+      }
+    },
+    {
+      "label": "03-cycle:start",
+      "timeMs": 2220,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2950
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6baf629bc9ce18c078c1ebffaa19001d883bc7be832a03bf09c35842dd3cd2b1"
+      }
+    },
+    {
+      "label": "02-rest:after-end",
+      "timeMs": 2261.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2991.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c0b01503cf549a4c9fbb208348bba06aa301595c510e51e55e2e883183e2011c"
+      }
+    },
+    {
+      "label": "03-cycle:after-start",
+      "timeMs": 2261.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2991.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c0b01503cf549a4c9fbb208348bba06aa301595c510e51e55e2e883183e2011c"
+      }
+    },
+    {
+      "label": "03-cycle:anticipation-end:before",
+      "timeMs": 2298.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3028.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "62a5e095109bea2da1eab4f6276049e6e8ece44c7e1c54424206332c627e47ba"
+      }
+    },
+    {
+      "label": "03-cycle:anticipation-end",
+      "timeMs": 2340,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3070
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "fbce14f15fc40f40a92fe574e2f53bc0139b758b30f1b3c5370288f81197e28f"
+      }
+    },
+    {
+      "label": "03-cycle:anticipation-end:after",
+      "timeMs": 2381.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3111.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "64d2cc611077450355ba544a3f5d5f9fc2b0b5863d6469829fd11660e3dd4ac0"
+      }
+    },
+    {
+      "label": "03-cycle:release-end:before",
+      "timeMs": 2418.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3148.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "3ec5becec3de7682be7b388f84b9db838086d65a3fb0fb988403d7800542d072"
+      }
+    },
+    {
+      "label": "03-cycle:release-end",
+      "timeMs": 2460,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3190
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "521e0442082e4864e80b81d50127711c2336c50dde91fddeccc291e02b773de0"
+      }
+    },
+    {
+      "label": "03-cycle:release-end:after",
+      "timeMs": 2501.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3231.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "2f9741066adbada5be4338634751cc64974bf48611bf2d85de96a91a6d12d501"
+      }
+    },
+    {
+      "label": "03-cycle:front-flight-end:before",
+      "timeMs": 2778.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3508.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "8f8f912f49852c4737251fa8ab2fe2b9e985a68545705955643f72f9354d2d7e"
+      }
+    },
+    {
+      "label": "03-cycle:front-flight-end",
+      "timeMs": 2820,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3550
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d0eb76fc6493731dac537bfaab4818003dbd5fd0cbd43a09b6fd27dc6e50651a"
+      }
+    },
+    {
+      "label": "03-cycle:front-flight-end:after",
+      "timeMs": 2861.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3591.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "da9d7cb606e41e203eaf74bc121a24d85166a3acdd98c0633cea053d961119a0"
+      }
+    },
+    {
+      "label": "03-cycle:occlusion-crossing:before",
+      "timeMs": 2958.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3688.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f35a85262084d5e33901155677323f85f2cc56f1cd43b22f98c26341f9cb9bb2"
+      }
+    },
+    {
+      "label": "03-cycle:occlusion-crossing",
+      "timeMs": 3000,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3730
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "76b5881c5837c2bbd82926fd69386d2af7fd2976303ada93b1794d102096346b"
+      }
+    },
+    {
+      "label": "03-cycle:occlusion-crossing:after",
+      "timeMs": 3041.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3771.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d859c81ac6f5c03007df8199dd1af296693fddd1385708d9e8f7a5900a271093"
+      }
+    },
+    {
+      "label": "03-cycle:deck-advance-end:before",
+      "timeMs": 3198.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3928.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9caa6fa6d6797da4bbce4f277d987983e8296eb6fdeea607a9f08401a61976ae"
+      }
+    },
+    {
+      "label": "03-cycle:deck-advance-end",
+      "timeMs": 3240,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3970
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "91034f01feea97424b7be8a7f68c55d0604137be8dca43b888a952affb0c96fe"
+      }
+    },
+    {
+      "label": "03-cycle:deck-advance-end:after",
+      "timeMs": 3281.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4011.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "a2c0b503492c5f4935855aa36a623030174cfc2c39b06e66e60988de735a0028"
+      }
+    },
+    {
+      "label": "03-cycle:rear-tuck-end:before",
+      "timeMs": 3438.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4168.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "3e0a70a00f06c7906f8294d93e27b605ccbb6632955de7a15b2e342a5f84a371"
+      }
+    },
+    {
+      "label": "03-cycle:rear-tuck-end",
+      "timeMs": 3480,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4210
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "fd089018a6d678e54c75c675dcb412855fe6097585cba118c0de643c70cffa0b"
+      }
+    },
+    {
+      "label": "03-cycle:rear-tuck-end:after",
+      "timeMs": 3521.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4251.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9f3f94c0436d4e3924afbe1a60e7a95917b93bd2b4189b592fae43f536129827"
+      }
+    },
+    {
+      "label": "03-cycle:before-end",
+      "timeMs": 3678.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4408.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "328bab4798d4c902a08967bcbe6e2681a9edbeb4910e56cde2fb2fb42923b79a"
+      }
+    },
+    {
+      "label": "04-rest:before-start",
+      "timeMs": 3678.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4408.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "328bab4798d4c902a08967bcbe6e2681a9edbeb4910e56cde2fb2fb42923b79a"
+      }
+    },
+    {
+      "label": "03-cycle:end",
+      "timeMs": 3720,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4450
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7e78f3d0158b0e18fdfaa69e5df07745d4791d4a2bc17b3771d49ba7a4ec59d9"
+      }
+    },
+    {
+      "label": "04-rest:start",
+      "timeMs": 3720,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4450
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7e78f3d0158b0e18fdfaa69e5df07745d4791d4a2bc17b3771d49ba7a4ec59d9"
+      }
+    },
+    {
+      "label": "03-cycle:after-end",
+      "timeMs": 3761.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4491.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "8e3f2c8a3af082a406ed595e849e10e4e6b526b1698b74653d71f04bf2ce7037"
+      }
+    },
+    {
+      "label": "04-rest:after-start",
+      "timeMs": 3761.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4491.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "8e3f2c8a3af082a406ed595e849e10e4e6b526b1698b74653d71f04bf2ce7037"
+      }
+    },
+    {
+      "label": "04-rest:before-end",
+      "timeMs": 3978.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4708.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7e4133552a0221895e7e81c5d81bf21be9a57919c77095f9d4db16828bd1c7dc"
+      }
+    },
+    {
+      "label": "05-cycle:before-start",
+      "timeMs": 3978.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4708.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7e4133552a0221895e7e81c5d81bf21be9a57919c77095f9d4db16828bd1c7dc"
+      }
+    },
+    {
+      "label": "04-rest:end",
+      "timeMs": 4020,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4750
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "3086f6f99efa47e0485cbdd3b1de816dafdcb1592d628aa325c8a9dbab64e9cd"
+      }
+    },
+    {
+      "label": "05-cycle:start",
+      "timeMs": 4020,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4750
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "3086f6f99efa47e0485cbdd3b1de816dafdcb1592d628aa325c8a9dbab64e9cd"
+      }
+    },
+    {
+      "label": "04-rest:after-end",
+      "timeMs": 4061.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4791.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c25206a4d14f67126e4329cd4de25df79786da825a5b44e23cb51b5c6bd149d1"
+      }
+    },
+    {
+      "label": "05-cycle:after-start",
+      "timeMs": 4061.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4791.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c25206a4d14f67126e4329cd4de25df79786da825a5b44e23cb51b5c6bd149d1"
+      }
+    },
+    {
+      "label": "05-cycle:anticipation-end:before",
+      "timeMs": 4098.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4828.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "fbd5bb2d7e6681cdb11a43f052024e33ef647ff014563e844e696a29b5daadd8"
+      }
+    },
+    {
+      "label": "05-cycle:anticipation-end",
+      "timeMs": 4140,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4870
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "a43e5693ae60b1bf83d99d03a2b285a4f90cad3d76e4bece6142d52bb7e55797"
+      }
+    },
+    {
+      "label": "05-cycle:anticipation-end:after",
+      "timeMs": 4181.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4911.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "53308089e39c7dfcaff4bf30dc8277fef4891f53a86447dc049004a48e5a04d9"
+      }
+    },
+    {
+      "label": "05-cycle:release-end:before",
+      "timeMs": 4218.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4948.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "5c985ae0d4f9823df8f3ec819aff960edf67fc0092f113227646a7b0f7ab8728"
+      }
+    },
+    {
+      "label": "05-cycle:release-end",
+      "timeMs": 4260,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4990
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b5afcfd985e4b233386aed5821761e14043e1856a4afe74c371e7ec0e822e6af"
+      }
+    },
+    {
+      "label": "05-cycle:release-end:after",
+      "timeMs": 4301.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5031.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "17e60d0482bd402e6a9d46ebbea7f0553f38be011929f4821611f00f5043f795"
+      }
+    },
+    {
+      "label": "05-cycle:front-flight-end:before",
+      "timeMs": 4578.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5308.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "dd38815cb7c510ccf00d92bb433e5a599e13c76c9ce6a2e62120760815972965"
+      }
+    },
+    {
+      "label": "05-cycle:front-flight-end",
+      "timeMs": 4620,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5350
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "4e09f95f75f04668146356d34e26160b5fe8d82b043c4a664d7d8ac55f9ab921"
+      }
+    },
+    {
+      "label": "05-cycle:front-flight-end:after",
+      "timeMs": 4661.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5391.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "e3586a89ee281115e360fa9d5a1608cd706b7e49794de8bc4873f4785bab3860"
+      }
+    },
+    {
+      "label": "05-cycle:occlusion-crossing:before",
+      "timeMs": 4758.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5488.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "71ac19f0f04b6eab9f3c78e60211e5bd5ef871ef27f4437da2378374ae167d1b"
+      }
+    },
+    {
+      "label": "05-cycle:occlusion-crossing",
+      "timeMs": 4800,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5530
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "bcf994a8903e937a795636b3a0e9cceed02efb2b3d45875e5b2ad32792ace7e6"
+      }
+    },
+    {
+      "label": "05-cycle:occlusion-crossing:after",
+      "timeMs": 4841.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5571.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "49595267cfccbfc9dc852b128c67a4a3b3c6c5f624d299f8a4a4b567fe86aefd"
+      }
+    },
+    {
+      "label": "05-cycle:deck-advance-end:before",
+      "timeMs": 4998.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5728.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "5fe0cad1f41105620a8eabbd15abe1452c58bfe26eb065c5b27b3db7f58e3538"
+      }
+    },
+    {
+      "label": "05-cycle:deck-advance-end",
+      "timeMs": 5040,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5770
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9fa0642cdd434cd660d66acaa578bed4c9e4546a65a939059a6b6b5187fe4151"
+      }
+    },
+    {
+      "label": "05-cycle:deck-advance-end:after",
+      "timeMs": 5081.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5811.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c2436e134b241c990eee414cfe95b343765feb2b939f714db93b1160e366c5a9"
+      }
+    },
+    {
+      "label": "05-cycle:rear-tuck-end:before",
+      "timeMs": 5238.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5968.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d6142f482f49f02ba1fabef87be3eae42569b5870d60a9a5a5212fd55c724861"
+      }
+    },
+    {
+      "label": "05-cycle:rear-tuck-end",
+      "timeMs": 5280,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6010
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "991927cac76eeea9d4167a83489b824be06f0c02bf233566120c30dfc72ae3d6"
+      }
+    },
+    {
+      "label": "05-cycle:rear-tuck-end:after",
+      "timeMs": 5321.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6051.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7251f9476507d6c1294b62576532716118cedc02bf594c6fcd9e002e6f91c73f"
+      }
+    },
+    {
+      "label": "05-cycle:before-end",
+      "timeMs": 5478.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6208.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6a6d4e33c023a11533911b78bde3f1c322b623830fa89fbacb30d04849ff5876"
+      }
+    },
+    {
+      "label": "06-rest:before-start",
+      "timeMs": 5478.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6208.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6a6d4e33c023a11533911b78bde3f1c322b623830fa89fbacb30d04849ff5876"
+      }
+    },
+    {
+      "label": "05-cycle:end",
+      "timeMs": 5520,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6250
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "0ba76686d23129fb981311ad8e0590cc36ef4f72cb8c9e57571042b71ba32a07"
+      }
+    },
+    {
+      "label": "06-rest:start",
+      "timeMs": 5520,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6250
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "0ba76686d23129fb981311ad8e0590cc36ef4f72cb8c9e57571042b71ba32a07"
+      }
+    },
+    {
+      "label": "05-cycle:after-end",
+      "timeMs": 5561.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6291.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "3d8815068946d85bb1f73cf51ee1b534fcda08f5614735456116f98bc57d87c0"
+      }
+    },
+    {
+      "label": "06-rest:after-start",
+      "timeMs": 5561.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6291.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "3d8815068946d85bb1f73cf51ee1b534fcda08f5614735456116f98bc57d87c0"
+      }
+    },
+    {
+      "label": "06-rest:before-end",
+      "timeMs": 5778.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6508.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "5aedce8413cc192c692138cc51e94da4e1e7c48d06d6bdefd814a556f92a49ee"
+      }
+    },
+    {
+      "label": "07-cycle:before-start",
+      "timeMs": 5778.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6508.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "5aedce8413cc192c692138cc51e94da4e1e7c48d06d6bdefd814a556f92a49ee"
+      }
+    },
+    {
+      "label": "06-rest:end",
+      "timeMs": 5820,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6550
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "769a24531508fe2382d78938e36d2fda5c03a869ff87bf4244a71a108ad53560"
+      }
+    },
+    {
+      "label": "07-cycle:start",
+      "timeMs": 5820,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6550
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "769a24531508fe2382d78938e36d2fda5c03a869ff87bf4244a71a108ad53560"
+      }
+    },
+    {
+      "label": "06-rest:after-end",
+      "timeMs": 5861.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6591.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9f48a534394cddaabe617c9100193a7b6bdd9d7876a52da683366b61ee7fa486"
+      }
+    },
+    {
+      "label": "07-cycle:after-start",
+      "timeMs": 5861.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6591.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9f48a534394cddaabe617c9100193a7b6bdd9d7876a52da683366b61ee7fa486"
+      }
+    },
+    {
+      "label": "07-cycle:anticipation-end:before",
+      "timeMs": 5898.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6628.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "0e7fb64141bd0f323f0d59e370b171ac08ad69c88d8ad8598394b4a77544c4a4"
+      }
+    },
+    {
+      "label": "07-cycle:anticipation-end",
+      "timeMs": 5940,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6670
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "36cb620190cf794a79d2f27d7adf28abbad59282e18fd04a3ea6a9f0d16780f8"
+      }
+    },
+    {
+      "label": "07-cycle:anticipation-end:after",
+      "timeMs": 5981.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6711.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c590a53e0a73e05f9bd2e0ef51e32f22d028547da3bbb209ee16e02ef1e43323"
+      }
+    },
+    {
+      "label": "07-cycle:release-end:before",
+      "timeMs": 6018.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6748.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "0d6e84f2f4b750dae9b0e68331edfec64c3e5f4152183b66d1301062f769e69a"
+      }
+    },
+    {
+      "label": "07-cycle:release-end",
+      "timeMs": 6060,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6790
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "82cc88335080740f4c5e8d46f83fae24d44bd7c3623ddd687a5cf0af9c9e0bdc"
+      }
+    },
+    {
+      "label": "07-cycle:release-end:after",
+      "timeMs": 6101.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6831.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "aaf559edc67ffaeeb60ee1962d80b0356a904f53b3222f87bd88133c52e0db41"
+      }
+    },
+    {
+      "label": "07-cycle:front-flight-end:before",
+      "timeMs": 6378.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7108.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c1595ff3744754db9f703149c1fcdfd7d0a2e06dcf6710d0b34241062e13567b"
+      }
+    },
+    {
+      "label": "07-cycle:front-flight-end",
+      "timeMs": 6420,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7150
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "71ea41b6fdefc2b737eb31a31c026ca3ec4864cdcfdb95fcec5aed230e65c2ec"
+      }
+    },
+    {
+      "label": "07-cycle:front-flight-end:after",
+      "timeMs": 6461.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7191.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "24132328c65ad720301dd58fb8629f48fe7253e487b3a0dfad27a5f84fac19c6"
+      }
+    },
+    {
+      "label": "07-cycle:occlusion-crossing:before",
+      "timeMs": 6558.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7288.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b7979600ace668ceec415b7ba5f3ffb9da8db10aaef8f268e9cde8c00eccaf4d"
+      }
+    },
+    {
+      "label": "07-cycle:occlusion-crossing",
+      "timeMs": 6600,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7330
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "862d52fd3755be872748d83cf87c9909919f0fde65238711f38ebf97be5e2b4b"
+      }
+    },
+    {
+      "label": "07-cycle:occlusion-crossing:after",
+      "timeMs": 6641.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7371.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "e95ee4a4e5aacd72d2b5f6ca61a7421e0df548f829e1ea316ce718824b4b76aa"
+      }
+    },
+    {
+      "label": "07-cycle:deck-advance-end:before",
+      "timeMs": 6798.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7528.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "fb18045620b777bd24a90f3b2b82ae5579b606116cf341459821ad97286eefcd"
+      }
+    },
+    {
+      "label": "07-cycle:deck-advance-end",
+      "timeMs": 6840,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7570
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "1e4d3806812b41fd7c71edd435521f3cdb7967e5abaa3a76ec69664d7bf653c7"
+      }
+    },
+    {
+      "label": "07-cycle:deck-advance-end:after",
+      "timeMs": 6881.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7611.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "fec6ea131356cbbb677100ec1b02754689a613939651ab2ed491ebdaf6188bf8"
+      }
+    },
+    {
+      "label": "07-cycle:rear-tuck-end:before",
+      "timeMs": 7038.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7768.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "622de2b6036efabb7d5fd58b395e1cfa68ad5275b10b9e4eae5b65bbf397a7b4"
+      }
+    },
+    {
+      "label": "07-cycle:rear-tuck-end",
+      "timeMs": 7080,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7810
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6fbc84c7925a4b778cc798b655b977db96505804ade4a77a169dd7f7fe637b6e"
+      }
+    },
+    {
+      "label": "07-cycle:rear-tuck-end:after",
+      "timeMs": 7121.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7851.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f829a16569cadc37edc4e41a21a32817099391dd0bd5607861f0558730521e41"
+      }
+    },
+    {
+      "label": "07-cycle:before-end",
+      "timeMs": 7278.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8008.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "cf308c38125d101851ac5748a64a23efcb340bccbdddaaeb341f1dcabb16cb93"
+      }
+    },
+    {
+      "label": "08-rest:before-start",
+      "timeMs": 7278.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8008.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "cf308c38125d101851ac5748a64a23efcb340bccbdddaaeb341f1dcabb16cb93"
+      }
+    },
+    {
+      "label": "07-cycle:end",
+      "timeMs": 7320,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8050
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b24d83db5018b4df17bcadff74497298a69916c45027a4f694ac316ae7701e82"
+      }
+    },
+    {
+      "label": "08-rest:start",
+      "timeMs": 7320,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8050
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b24d83db5018b4df17bcadff74497298a69916c45027a4f694ac316ae7701e82"
+      }
+    },
+    {
+      "label": "07-cycle:after-end",
+      "timeMs": 7361.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8091.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "34e540ee59b2c8551f5c31bbf2473a490ec01f52c76cab9a9a1f02f2b14a21be"
+      }
+    },
+    {
+      "label": "08-rest:after-start",
+      "timeMs": 7361.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8091.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "34e540ee59b2c8551f5c31bbf2473a490ec01f52c76cab9a9a1f02f2b14a21be"
+      }
+    },
+    {
+      "label": "08-rest:before-end",
+      "timeMs": 7578.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8308.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c653d4a45afe34ff9e76e3f3d375a921c16fae5b7f4f4359614988a1f314d8eb"
+      }
+    },
+    {
+      "label": "09-cycle:before-start",
+      "timeMs": 7578.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8308.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c653d4a45afe34ff9e76e3f3d375a921c16fae5b7f4f4359614988a1f314d8eb"
+      }
+    },
+    {
+      "label": "08-rest:end",
+      "timeMs": 7620,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8350
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d0e6e4da4d433cca2e4a7106b8de48e1cdd2a14bee9df5f214ad6082b902372c"
+      }
+    },
+    {
+      "label": "09-cycle:start",
+      "timeMs": 7620,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8350
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d0e6e4da4d433cca2e4a7106b8de48e1cdd2a14bee9df5f214ad6082b902372c"
+      }
+    },
+    {
+      "label": "08-rest:after-end",
+      "timeMs": 7661.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8391.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "cf2e27d9fca0fd513b872e1822eac9760cdd982686abdcc99cdb272f0eeca308"
+      }
+    },
+    {
+      "label": "09-cycle:after-start",
+      "timeMs": 7661.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8391.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "cf2e27d9fca0fd513b872e1822eac9760cdd982686abdcc99cdb272f0eeca308"
+      }
+    },
+    {
+      "label": "09-cycle:anticipation-end:before",
+      "timeMs": 7698.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8428.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "472592c36eb04888b885859c2e76de2537af275f215da6dad3375a798ab5edf4"
+      }
+    },
+    {
+      "label": "09-cycle:anticipation-end",
+      "timeMs": 7740,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8470
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "169e376addf8818b871b89d86c8f620430299feec41c4a4ebeccc256ee3ed676"
+      }
+    },
+    {
+      "label": "09-cycle:anticipation-end:after",
+      "timeMs": 7781.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8511.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7b50e0a4ad9e70e69ee1f58bf0b925756c98a03312f9a67f22c42f67ffaa848b"
+      }
+    },
+    {
+      "label": "09-cycle:release-end:before",
+      "timeMs": 7818.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8548.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "cd02a8b87516497bb8d6848cf1b41509e23a1d49e1be26650c2558f308ac8e58"
+      }
+    },
+    {
+      "label": "09-cycle:release-end",
+      "timeMs": 7860,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8590
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "0b2575609b5ac8a91f2eb18605b1ed1bbdd48b4ede023501dedfca529bc6a5c3"
+      }
+    },
+    {
+      "label": "09-cycle:release-end:after",
+      "timeMs": 7901.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8631.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "bd50e6952f87c39516497594accb681b608bd7fe70f80594d670f5c186222270"
+      }
+    },
+    {
+      "label": "09-cycle:front-flight-end:before",
+      "timeMs": 8178.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8908.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d4ed7d1b9e5c0943ed999ed0e99bb3b8bb97aca1faecdefd1096b8c431b8888a"
+      }
+    },
+    {
+      "label": "09-cycle:front-flight-end",
+      "timeMs": 8220,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8950
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "48e4a6fa2e68fcaf5365f3d436cf6c73a57211a34d209863ab9ba51d60584e84"
+      }
+    },
+    {
+      "label": "09-cycle:front-flight-end:after",
+      "timeMs": 8261.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8991.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f2a7d81839d4f2480fc819fbf50de19ebc62c5449bc45e4e636af1c1df3d0779"
+      }
+    },
+    {
+      "label": "09-cycle:occlusion-crossing:before",
+      "timeMs": 8358.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9088.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "448ec75db1b88af3d361141ac22dae766d85fb0dd34cd7c62d5e769822d3834a"
+      }
+    },
+    {
+      "label": "09-cycle:occlusion-crossing",
+      "timeMs": 8400,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9130
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9f9eb0f6370ec210f7295b932622c921c04164c89f5d742251884baeba210ec1"
+      }
+    },
+    {
+      "label": "09-cycle:occlusion-crossing:after",
+      "timeMs": 8441.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9171.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "158c8fd64e1898b975cd9113bc47e3577fbd49603ea841531aa362b2ba0ca065"
+      }
+    },
+    {
+      "label": "09-cycle:deck-advance-end:before",
+      "timeMs": 8598.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9328.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "24171b2f4733ef4ac80eca23248525b645353f2fa1bab8ad78378f18b319edcc"
+      }
+    },
+    {
+      "label": "09-cycle:deck-advance-end",
+      "timeMs": 8640,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9370
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "2d6ee446023aa6950861a3afce77415b8ff3f3251ecce6b616aaa77b6a3d6fb3"
+      }
+    },
+    {
+      "label": "09-cycle:deck-advance-end:after",
+      "timeMs": 8681.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9411.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d6320cfd43882cdffbd3e88e22f916f95cecfa61ce431f5be213b5465d0012b7"
+      }
+    },
+    {
+      "label": "09-cycle:rear-tuck-end:before",
+      "timeMs": 8838.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9568.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "8ded42efcbb452f19257f63306e867cda86de1736568f3eca55e09de85a25572"
+      }
+    },
+    {
+      "label": "09-cycle:rear-tuck-end",
+      "timeMs": 8880,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9610
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "888ad6ebf123f57bd4ccda175aa516820dbed29550ba142d9a9d918271caad12"
+      }
+    },
+    {
+      "label": "09-cycle:rear-tuck-end:after",
+      "timeMs": 8921.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9651.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6256eb3f4829036a7529a6a37089ff390bf2cbfed6e1083cc864b729396f4098"
+      }
+    },
+    {
+      "label": "09-cycle:before-end",
+      "timeMs": 9078.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9808.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d7d149b65681ead3877ac67ce2b685f279157abd1f632b91816002cc95493432"
+      }
+    },
+    {
+      "label": "10-rest:before-start",
+      "timeMs": 9078.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9808.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d7d149b65681ead3877ac67ce2b685f279157abd1f632b91816002cc95493432"
+      }
+    },
+    {
+      "label": "09-cycle:end",
+      "timeMs": 9120,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9850
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "05b4549615def4e905cff3a734e56b8087e48fc5bfe8e59cfdd108e1febfda56"
+      }
+    },
+    {
+      "label": "10-rest:start",
+      "timeMs": 9120,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9850
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "05b4549615def4e905cff3a734e56b8087e48fc5bfe8e59cfdd108e1febfda56"
+      }
+    },
+    {
+      "label": "09-cycle:after-end",
+      "timeMs": 9161.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9891.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f3fc619c028cab760e574892b41f70a7c036191feef48fb1361f597da186ed68"
+      }
+    },
+    {
+      "label": "10-rest:after-start",
+      "timeMs": 9161.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9891.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f3fc619c028cab760e574892b41f70a7c036191feef48fb1361f597da186ed68"
+      }
+    },
+    {
+      "label": "10-rest:before-end",
+      "timeMs": 9378.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10108.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "82e8f15b0f7fc2dc26733518a4745496c737d84bd529c19aa7a1d45395845f2f"
+      }
+    },
+    {
+      "label": "11-cycle:before-start",
+      "timeMs": 9378.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10108.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "82e8f15b0f7fc2dc26733518a4745496c737d84bd529c19aa7a1d45395845f2f"
+      }
+    },
+    {
+      "label": "10-rest:end",
+      "timeMs": 9420,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10150
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6ee7820f0cd07d9d3694dc58e0b22a9eb2f54f42502cdd8e8e8e752999cd5694"
+      }
+    },
+    {
+      "label": "11-cycle:start",
+      "timeMs": 9420,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10150
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6ee7820f0cd07d9d3694dc58e0b22a9eb2f54f42502cdd8e8e8e752999cd5694"
+      }
+    },
+    {
+      "label": "10-rest:after-end",
+      "timeMs": 9461.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10191.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "25ff1ffcc0ae201f990b2d5b163455f16fdfaab9edc2447714bc09608a2d1309"
+      }
+    },
+    {
+      "label": "11-cycle:after-start",
+      "timeMs": 9461.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10191.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "25ff1ffcc0ae201f990b2d5b163455f16fdfaab9edc2447714bc09608a2d1309"
+      }
+    },
+    {
+      "label": "11-cycle:anticipation-end:before",
+      "timeMs": 9498.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10228.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "97ec8c2039826313392108b10e3fc9dbefea3b7abc0b9ff1f33071a2b3b2ac16"
+      }
+    },
+    {
+      "label": "11-cycle:anticipation-end",
+      "timeMs": 9540,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10270
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "dd949b1674ca63f4000b8f38fe08d22fcc3969a19ec1b4b404e51a9f26ce70e6"
+      }
+    },
+    {
+      "label": "11-cycle:anticipation-end:after",
+      "timeMs": 9581.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10311.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "052e1d322f46d5134bb93d000ca359b67837bca79591798bf5fc9cd63f261242"
+      }
+    },
+    {
+      "label": "11-cycle:release-end:before",
+      "timeMs": 9618.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10348.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6682028665eeff5bf219625e6c80cad691fbe8ddf4edf2bea4bd0aedea989a75"
+      }
+    },
+    {
+      "label": "11-cycle:release-end",
+      "timeMs": 9660,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10390
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "41daabd7e0500bc9e0a2488c28c59761371c06d837700a2a80f85fed358bdad7"
+      }
+    },
+    {
+      "label": "11-cycle:release-end:after",
+      "timeMs": 9701.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10431.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "20807e3712ca8cfec0acc050c44189341be96e7b432ed824f39cea82a6f567f8"
+      }
+    },
+    {
+      "label": "11-cycle:front-flight-end:before",
+      "timeMs": 9978.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10708.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f7430ca1589674374cda34363f2063a576516296bb7fb3f7dae41585d864a900"
+      }
+    },
+    {
+      "label": "11-cycle:front-flight-end",
+      "timeMs": 10020,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10750
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "2ecf5434af504c6ae8134d329702c7ad4cf59ebab58acac6e7d3fddda19e6096"
+      }
+    },
+    {
+      "label": "11-cycle:front-flight-end:after",
+      "timeMs": 10061.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10791.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "3567ac4d9e2a5f9883957e3cbd5a385853852ab6298917fbb853b00d62aa1eb9"
+      }
+    },
+    {
+      "label": "11-cycle:occlusion-crossing:before",
+      "timeMs": 10158.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10888.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "38010731ea4b9bf2c10a3b19b347d22b6554359c5a01a5b35a088182adaf2afa"
+      }
+    },
+    {
+      "label": "11-cycle:occlusion-crossing",
+      "timeMs": 10200,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10930
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "07c1f10362e187c6285baa0bb9af852c74d76646cb04787c4a10a1073c6e8bf7"
+      }
+    },
+    {
+      "label": "11-cycle:occlusion-crossing:after",
+      "timeMs": 10241.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10971.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "3487ebcc8cba536594949731165b49a727cba017c28684041fa10b73b8088fa2"
+      }
+    },
+    {
+      "label": "11-cycle:deck-advance-end:before",
+      "timeMs": 10398.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11128.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "1e98be045bd87c5ecd7e9419f62fa99046e69a6d0bbd101ca44cf8bb26b32cfb"
+      }
+    },
+    {
+      "label": "11-cycle:deck-advance-end",
+      "timeMs": 10440,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11170
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "cee772a2f75293543f6b26633f9c0abe63082f723ed9a7b51c7a9d81c0609acd"
+      }
+    },
+    {
+      "label": "11-cycle:deck-advance-end:after",
+      "timeMs": 10481.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11211.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ab8fe9ae671807d99ff0f329290c45156747b342cc3a52e43b51d5ec8a4bfc39"
+      }
+    },
+    {
+      "label": "11-cycle:rear-tuck-end:before",
+      "timeMs": 10638.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11368.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "aa8fb2c2c9e209a8321051d47f32fd9455e047dbc2d3d0388082ed07eebaf3b8"
+      }
+    },
+    {
+      "label": "11-cycle:rear-tuck-end",
+      "timeMs": 10680,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11410
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "289c0b03ca89b100edc82606db67cd7425705c9a1d0877b05b3cfbfeb8811123"
+      }
+    },
+    {
+      "label": "11-cycle:rear-tuck-end:after",
+      "timeMs": 10721.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11451.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "cffd39af14f5cc42182294f135240cb619a87605d9f54a3005f92e7ea9257286"
+      }
+    },
+    {
+      "label": "11-cycle:before-end",
+      "timeMs": 10878.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11608.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "56855830a85b3c90e02aec6f2ad2069a2db7605580706d711f6503ee093b77f2"
+      }
+    },
+    {
+      "label": "12-rest:before-start",
+      "timeMs": 10878.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-06",
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11608.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "56855830a85b3c90e02aec6f2ad2069a2db7605580706d711f6503ee093b77f2"
+      }
+    },
+    {
+      "label": "11-cycle:end",
+      "timeMs": 10920,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11650
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "578af0af2a972269e02de47bf89c37859626e3871a1e3585f77c88a59504ecbe"
+      }
+    },
+    {
+      "label": "12-rest:start",
+      "timeMs": 10920,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11650
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "578af0af2a972269e02de47bf89c37859626e3871a1e3585f77c88a59504ecbe"
+      }
+    },
+    {
+      "label": "11-cycle:after-end",
+      "timeMs": 10961.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11691.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "49100632fafa2905c76f219c0f603090cfab4d77f6df7e38c6bc2f551fb6bdce"
+      }
+    },
+    {
+      "label": "12-rest:after-start",
+      "timeMs": 10961.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11691.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "49100632fafa2905c76f219c0f603090cfab4d77f6df7e38c6bc2f551fb6bdce"
+      }
+    },
+    {
+      "label": "12-rest:before-end",
+      "timeMs": 11178.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11908.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "3ec749c56e4f6a35f8219a63b557e3c1d7f3bc98e64b14f5592a86d8d6b22144"
+      }
+    },
+    {
+      "label": "13-cycle:before-start",
+      "timeMs": 11178.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11908.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "3ec749c56e4f6a35f8219a63b557e3c1d7f3bc98e64b14f5592a86d8d6b22144"
+      }
+    },
+    {
+      "label": "12-rest:end",
+      "timeMs": 11220,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11950
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "8c3dc6257f6412cb1c2918ad15a62f12cdd7b2b023a64a8508009fb93c3ba7a7"
+      }
+    },
+    {
+      "label": "13-cycle:start",
+      "timeMs": 11220,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11950
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "8c3dc6257f6412cb1c2918ad15a62f12cdd7b2b023a64a8508009fb93c3ba7a7"
+      }
+    },
+    {
+      "label": "12-rest:after-end",
+      "timeMs": 11261.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11991.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "5e57f9277ee91150aa637dda4120fc32527c7047026abd56be8f213de46e5c60"
+      }
+    },
+    {
+      "label": "13-cycle:after-start",
+      "timeMs": 11261.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 11991.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "5e57f9277ee91150aa637dda4120fc32527c7047026abd56be8f213de46e5c60"
+      }
+    },
+    {
+      "label": "13-cycle:anticipation-end:before",
+      "timeMs": 11298.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12028.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "cf4b3cce063f7aadbbc2b7c11d10515032fdbf4a16e27e165af5f6285d99108f"
+      }
+    },
+    {
+      "label": "13-cycle:anticipation-end",
+      "timeMs": 11340,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12070
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b1dbfe210a2d38d0e2746be2ef9df8eea5768591eab863fb23b1da6373c9615e"
+      }
+    },
+    {
+      "label": "13-cycle:anticipation-end:after",
+      "timeMs": 11381.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12111.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "0d20206ba1c234c3ad6a477cbfa18fa574e66f48289019fb9a7bc95dd1e55d79"
+      }
+    },
+    {
+      "label": "13-cycle:release-end:before",
+      "timeMs": 11418.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12148.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ee9eba54e36bb1f8c18889050a0512c6abd56e62f8c50cc207a66504234ae2e1"
+      }
+    },
+    {
+      "label": "13-cycle:release-end",
+      "timeMs": 11460,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12190
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "eb159a58a35346bff931a7d72cb5219e54b6c59f80723e7094f893ec4b468d70"
+      }
+    },
+    {
+      "label": "13-cycle:release-end:after",
+      "timeMs": 11501.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12231.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "39dfe4c10de06da4bf575cd9ea3018cb769a136ec0f3ec58bc641904a8f1067a"
+      }
+    },
+    {
+      "label": "13-cycle:front-flight-end:before",
+      "timeMs": 11778.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12508.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "982f72f9515178ca2feb829c3dbb369bdc88e2efcb5bd6e77c260bcc4389c78c"
+      }
+    },
+    {
+      "label": "13-cycle:front-flight-end",
+      "timeMs": 11820,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12550
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "96f7b8ff46c495eb32e4a5415f0fcfe639e27c017a027b0e18a29b3665d0ddca"
+      }
+    },
+    {
+      "label": "13-cycle:front-flight-end:after",
+      "timeMs": 11861.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12591.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7c41bf224a610fccdaad3e93378d0f13279b21a4b2314bdbc6a99a5f8655fda0"
+      }
+    },
+    {
+      "label": "13-cycle:occlusion-crossing:before",
+      "timeMs": 11958.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12688.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "57e770baf1989c7679d8d4e65481eec7da3b5e388ec5e8a4efa85a1cad8e5209"
+      }
+    },
+    {
+      "label": "13-cycle:occlusion-crossing",
+      "timeMs": 12000,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12730
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "59995b805ca31c8f3b31e69d6e48dd77f0fc1c31b765ab4fde1c24e34dce2ccc"
+      }
+    },
+    {
+      "label": "13-cycle:occlusion-crossing:after",
+      "timeMs": 12041.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12771.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d4bafd3ddfe1530dc6340e3b1ea90e71de6bbf272f0b72205105232ba7af2ec9"
+      }
+    },
+    {
+      "label": "13-cycle:deck-advance-end:before",
+      "timeMs": 12198.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12928.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "616ccfd6b0857fe9d5476954c5e45179c21b78bc3da324e1eeb788eb7e641dc5"
+      }
+    },
+    {
+      "label": "13-cycle:deck-advance-end",
+      "timeMs": 12240,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 12970
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "1aecdff123512a793c9811b81d9a2016083e6b44aacfeb121fe21734c0968533"
+      }
+    },
+    {
+      "label": "13-cycle:deck-advance-end:after",
+      "timeMs": 12281.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13011.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "806b6385446ac47d2bac112bba731bee93be458ca13f3431fd9c54adbb6f8bd5"
+      }
+    },
+    {
+      "label": "13-cycle:rear-tuck-end:before",
+      "timeMs": 12438.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13168.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f1a6a94c9e05598b37464dcbbb67d8abbf873bcac72b84c80deafd03cef6deb3"
+      }
+    },
+    {
+      "label": "13-cycle:rear-tuck-end",
+      "timeMs": 12480,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13210
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9699c1d4180f86be087e45a5cfcdce66a32e22d28e68c56b88e55a963f1b3972"
+      }
+    },
+    {
+      "label": "13-cycle:rear-tuck-end:after",
+      "timeMs": 12521.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13251.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "876a631271a21ef0379e155c111ac0f889ee8d853b9871099006f80c6356f298"
+      }
+    },
+    {
+      "label": "13-cycle:before-end",
+      "timeMs": 12678.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13408.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "56b97cb09ce5286386669fba5fdcbfffedb3601fed77948eae6c24083f4dfd8d"
+      }
+    },
+    {
+      "label": "14-rest:before-start",
+      "timeMs": 12678.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-07",
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13408.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "56b97cb09ce5286386669fba5fdcbfffedb3601fed77948eae6c24083f4dfd8d"
+      }
+    },
+    {
+      "label": "13-cycle:end",
+      "timeMs": 12720,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13450
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "bd33300a04050c83466dcdef709be569cc891794bd9fcef01815eebf4adc2209"
+      }
+    },
+    {
+      "label": "14-rest:start",
+      "timeMs": 12720,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13450
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "bd33300a04050c83466dcdef709be569cc891794bd9fcef01815eebf4adc2209"
+      }
+    },
+    {
+      "label": "13-cycle:after-end",
+      "timeMs": 12761.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13491.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f121db38c447c03ea528d1f692dab1ffa3fa9ee1654c3f095916f1ba0d2c6dbb"
+      }
+    },
+    {
+      "label": "14-rest:after-start",
+      "timeMs": 12761.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13491.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f121db38c447c03ea528d1f692dab1ffa3fa9ee1654c3f095916f1ba0d2c6dbb"
+      }
+    },
+    {
+      "label": "14-rest:before-end",
+      "timeMs": 12978.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13708.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "52e16900409241cf7e885616b2580bd703cbbe795e2e970ed2ef3658913cb606"
+      }
+    },
+    {
+      "label": "15-cycle:before-start",
+      "timeMs": 12978.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13708.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "52e16900409241cf7e885616b2580bd703cbbe795e2e970ed2ef3658913cb606"
+      }
+    },
+    {
+      "label": "14-rest:end",
+      "timeMs": 13020,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13750
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "83caf83972aaed8209580c5367b9ebc81d3fe70343069bd1ce2c570717777e45"
+      }
+    },
+    {
+      "label": "15-cycle:start",
+      "timeMs": 13020,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13750
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "83caf83972aaed8209580c5367b9ebc81d3fe70343069bd1ce2c570717777e45"
+      }
+    },
+    {
+      "label": "14-rest:after-end",
+      "timeMs": 13061.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13791.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d4146a53dd9bb90aaeca379a5b8df5c3a5a5cdb4742cf7ef50003d70eaba1edc"
+      }
+    },
+    {
+      "label": "15-cycle:after-start",
+      "timeMs": 13061.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13791.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d4146a53dd9bb90aaeca379a5b8df5c3a5a5cdb4742cf7ef50003d70eaba1edc"
+      }
+    },
+    {
+      "label": "15-cycle:anticipation-end:before",
+      "timeMs": 13098.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13828.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6aa32019dba7ec72695f0c8e0d4e6edcc4f0d4c6aa1970d0ac7bcd8df2153eef"
+      }
+    },
+    {
+      "label": "15-cycle:anticipation-end",
+      "timeMs": 13140,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13870
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "3c45604c8ab069e0bcef0d391f98079450ff44f7b12e1e9e5cbf9b7c740b5aaf"
+      }
+    },
+    {
+      "label": "15-cycle:anticipation-end:after",
+      "timeMs": 13181.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13911.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f2b6dd72be5387ce4ed81b45a4b043543cc187804688d80390db180555039f5d"
+      }
+    },
+    {
+      "label": "15-cycle:release-end:before",
+      "timeMs": 13218.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13948.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7bc9aedfdcf4e6c681b33f12ffd41ed5987afc9a141630adcf0e9960cab6828e"
+      }
+    },
+    {
+      "label": "15-cycle:release-end",
+      "timeMs": 13260,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 13990
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "3407d6fdf66411d4d41447e403efe56c698d215b60cb6581561390dfc796e8fc"
+      }
+    },
+    {
+      "label": "15-cycle:release-end:after",
+      "timeMs": 13301.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 14031.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ddc7898e8bbddf7debc5322d0d4f88911c99fcefa1a7f1b78e39093da7d87d68"
+      }
+    },
+    {
+      "label": "15-cycle:front-flight-end:before",
+      "timeMs": 13578.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 14308.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7d543bfeed89aae518979b370f98434221c6914328d632d38af4670415fc23b8"
+      }
+    },
+    {
+      "label": "15-cycle:front-flight-end",
+      "timeMs": 13620,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 14350
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "d56b2e5e49306bec242f847a999fb06caa1fe9e1f8908dcc3c77e41d78faeaa3"
+      }
+    },
+    {
+      "label": "15-cycle:front-flight-end:after",
+      "timeMs": 13661.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 14391.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "fc0cf815dcdf54b3e76638d9c5db4fef2ac17c95ff70c5d44d4803700f53ddb3"
+      }
+    },
+    {
+      "label": "15-cycle:occlusion-crossing:before",
+      "timeMs": 13758.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 14488.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "723ed31f675f109cc82e28934dad5105bd1872152f369afdb2b53aaf1b912c9e"
+      }
+    },
+    {
+      "label": "15-cycle:occlusion-crossing",
+      "timeMs": 13800,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 14530
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "a147e07f5b145760b77d21258bba9c587a2e3e988fde56d2b1b63155d038f4c2"
+      }
+    },
+    {
+      "label": "15-cycle:occlusion-crossing:after",
+      "timeMs": 13841.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 14571.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7df1624abd186bb81662969a69ec5daaf5b54302bd9d27055d458090dbc60f21"
+      }
+    },
+    {
+      "label": "15-cycle:deck-advance-end:before",
+      "timeMs": 13998.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 14728.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "4fa24663c0156f9d074fb7c05ed6e39d5a511f43134eb9a77867ac9323cb63d7"
+      }
+    },
+    {
+      "label": "15-cycle:deck-advance-end",
+      "timeMs": 14040,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 14770
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "2883105f2a006448e9d567ce67cee457ef6b1c13ebfab8c47318d7d3b139f8af"
+      }
+    },
+    {
+      "label": "15-cycle:deck-advance-end:after",
+      "timeMs": 14081.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 14811.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "4b826413a9e6c77b13e903471afa0bf93b1d79bee6690761563aeb24f9de456c"
+      }
+    },
+    {
+      "label": "15-cycle:rear-tuck-end:before",
+      "timeMs": 14238.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 14968.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "79a4fbb2d49bc5319350621371bc078d4467b04f2771b7d536da0a80af1d5fd6"
+      }
+    },
+    {
+      "label": "15-cycle:rear-tuck-end",
+      "timeMs": 14280,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15010
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "05b42f9443596c5a673d8e64b65131a1ef9ba3c13886da6832db582d721fee02"
+      }
+    },
+    {
+      "label": "15-cycle:rear-tuck-end:after",
+      "timeMs": 14321.666667,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15051.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "72bed950a6ffd69e201b6251d4474505626944b514091fab3f4fffc947a1415b"
+      }
+    },
+    {
+      "label": "15-cycle:before-end",
+      "timeMs": 14478.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15208.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "851c8d95509d4ce9802da8244faa2150e04a3e4b54e1cb244e39d2c42a5f922a"
+      }
+    },
+    {
+      "label": "16-rest:before-start",
+      "timeMs": 14478.333333,
+      "phase": "cycle",
+      "permutationOrFocus": [
+        "media-08",
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15208.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "851c8d95509d4ce9802da8244faa2150e04a3e4b54e1cb244e39d2c42a5f922a"
+      }
+    },
+    {
+      "label": "15-cycle:end",
+      "timeMs": 14520,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15250
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "5542fd2a29de710d734c5838d3a8f96a69d0f53b2544c9e3760ef286928c9bd0"
+      }
+    },
+    {
+      "label": "16-rest:start",
+      "timeMs": 14520,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15250
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "5542fd2a29de710d734c5838d3a8f96a69d0f53b2544c9e3760ef286928c9bd0"
+      }
+    },
+    {
+      "label": "15-cycle:after-end",
+      "timeMs": 14561.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15291.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "872fbb73c6db4284861a5c425a81b3699e07982105d84a59de381f2704e05fb7"
+      }
+    },
+    {
+      "label": "16-rest:after-start",
+      "timeMs": 14561.666667,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15291.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "872fbb73c6db4284861a5c425a81b3699e07982105d84a59de381f2704e05fb7"
+      }
+    },
+    {
+      "label": "16-rest:before-end",
+      "timeMs": 14778.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15508.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "47febd5f5015bff68705144453eb610978cf76cc2f5ffea466e9e358ffd4618e"
+      }
+    },
+    {
+      "label": "17-finale-hold:before-start",
+      "timeMs": 14778.333333,
+      "phase": "rest",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15508.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "47febd5f5015bff68705144453eb610978cf76cc2f5ffea466e9e358ffd4618e"
+      }
+    },
+    {
+      "label": "16-rest:end",
+      "timeMs": 14820,
+      "phase": "finale-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15550
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "48819e68fcc774b71474ae50073f0319c5abd0624c83ddc5299b26136af50bcb"
+      }
+    },
+    {
+      "label": "17-finale-hold:start",
+      "timeMs": 14820,
+      "phase": "finale-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15550
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "48819e68fcc774b71474ae50073f0319c5abd0624c83ddc5299b26136af50bcb"
+      }
+    },
+    {
+      "label": "16-rest:after-end",
+      "timeMs": 14861.666667,
+      "phase": "finale-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15591.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "35f30823c8c46e1c2a91b297f2d51aad978ac379cab0b1ad29fa487d99c90186"
+      }
+    },
+    {
+      "label": "17-finale-hold:after-start",
+      "timeMs": 14861.666667,
+      "phase": "finale-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 15591.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "35f30823c8c46e1c2a91b297f2d51aad978ac379cab0b1ad29fa487d99c90186"
+      }
+    },
+    {
+      "label": "17-finale-hold:before-end",
+      "timeMs": 15498.333333,
+      "phase": "finale-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16228.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "2f39c5dbc61096f6b36545083985262354da42bdb03b2bfc480aa90aae1d7cee"
+      }
+    },
+    {
+      "label": "18-exit:before-start",
+      "timeMs": 15498.333333,
+      "phase": "finale-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16228.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "2f39c5dbc61096f6b36545083985262354da42bdb03b2bfc480aa90aae1d7cee"
+      }
+    },
+    {
+      "label": "17-finale-hold:end",
+      "timeMs": 15540,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16270
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b3224cc1e081ca19b1122b28c8c286ad48aca39d4f3ed713f8ce9709010ec84b"
+      }
+    },
+    {
+      "label": "18-exit:start",
+      "timeMs": 15540,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16270
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b3224cc1e081ca19b1122b28c8c286ad48aca39d4f3ed713f8ce9709010ec84b"
+      }
+    },
+    {
+      "label": "17-finale-hold:after-end",
+      "timeMs": 15581.666667,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16311.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "55665f1442ccd7bae2e0883c435cb016c5dfeb9de92e79c2236ba900f5e494d3"
+      }
+    },
+    {
+      "label": "18-exit:after-start",
+      "timeMs": 15581.666667,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16311.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "55665f1442ccd7bae2e0883c435cb016c5dfeb9de92e79c2236ba900f5e494d3"
+      }
+    },
+    {
+      "label": "18-exit:before-end",
+      "timeMs": 15978.333333,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16708.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7ce45915883d2a1da5e3a5251448735e1aa2481dc01a51d3b13b67d11dac3f48"
+      }
+    },
+    {
+      "label": "terminal:before-end",
+      "timeMs": 15978.333333,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16708.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7ce45915883d2a1da5e3a5251448735e1aa2481dc01a51d3b13b67d11dac3f48"
+      }
+    },
+    {
+      "label": "terminal:before-start",
+      "timeMs": 15978.333333,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16708.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7ce45915883d2a1da5e3a5251448735e1aa2481dc01a51d3b13b67d11dac3f48"
+      }
+    },
+    {
+      "label": "18-exit:after-end",
+      "timeMs": 16020,
+      "phase": "terminal",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16750
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7bc28b8203f276449b4c660f128575f156494733c0c30d6e1a9b8aa256e728dd"
+      }
+    },
+    {
+      "label": "18-exit:end",
+      "timeMs": 16020,
+      "phase": "terminal",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16750
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7bc28b8203f276449b4c660f128575f156494733c0c30d6e1a9b8aa256e728dd"
+      }
+    },
+    {
+      "label": "terminal:after-end",
+      "timeMs": 16020,
+      "phase": "terminal",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16750
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7bc28b8203f276449b4c660f128575f156494733c0c30d6e1a9b8aa256e728dd"
+      }
+    },
+    {
+      "label": "terminal:after-start",
+      "timeMs": 16020,
+      "phase": "terminal",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16750
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7bc28b8203f276449b4c660f128575f156494733c0c30d6e1a9b8aa256e728dd"
+      }
+    },
+    {
+      "label": "terminal:end",
+      "timeMs": 16020,
+      "phase": "terminal",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16750
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7bc28b8203f276449b4c660f128575f156494733c0c30d6e1a9b8aa256e728dd"
+      }
+    },
+    {
+      "label": "terminal:start",
+      "timeMs": 16020,
+      "phase": "terminal",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 16750
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7bc28b8203f276449b4c660f128575f156494733c0c30d6e1a9b8aa256e728dd"
+      }
+    }
+  ],
+  "requiredInvariants": [
+    "all numeric pose outputs finite",
+    "stable IDs unique",
+    "artwork opacity 1",
+    "artwork filter none",
+    "artwork blend normal",
+    "source-video time equals source offset plus story time",
+    "visible mount count bounded",
+    "terminal sample explicit",
+    "play scrub fixed-step canonical outputs equal",
+    "alpha-zero RGB contamination count is zero"
+  ],
+  "digestPolicy": {
+    "algorithm": "sha256",
+    "canonicalization": "recursively sorted JSON without volatile fields",
+    "placeholderRule": "never invent; generator replaces samples with actual values"
+  }
+}

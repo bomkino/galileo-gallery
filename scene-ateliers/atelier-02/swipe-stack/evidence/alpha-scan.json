@@ -1,0 +1,11 @@
+{
+  "sceneId": "swipe-stack",
+  "status": "pass",
+  "width": 960,
+  "height": 540,
+  "alphaZeroPixels": 394790,
+  "partialAlphaPixels": 1059,
+  "opaquePixels": 122551,
+  "nonZeroRgbUnderAlphaZero": 0,
+  "method": "Pillow RGBA pixel scan of generated alpha-transparent.png"
+}

@@ -1,0 +1,10 @@
+{
+  "sceneId": "the-stack",
+  "status": "pass",
+  "timeMs": 1850,
+  "digests": {
+    "play": "5ad23f7dc981059e0e7c2b6822f42e6aa320c2333e5e51c6ef3df860345b112b",
+    "scrub": "5ad23f7dc981059e0e7c2b6822f42e6aa320c2333e5e51c6ef3df860345b112b",
+    "fixedStep": "5ad23f7dc981059e0e7c2b6822f42e6aa320c2333e5e51c6ef3df860345b112b"
+  }
+}

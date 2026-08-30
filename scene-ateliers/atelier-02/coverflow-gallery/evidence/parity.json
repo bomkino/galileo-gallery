@@ -1,0 +1,10 @@
+{
+  "sceneId": "coverflow-gallery",
+  "status": "pass",
+  "timeMs": 860,
+  "digests": {
+    "play": "4c9b8104e6ac9899bbc7a262cb76f50519027b62bfec4cfb5b5262b9c8e76e2f",
+    "scrub": "4c9b8104e6ac9899bbc7a262cb76f50519027b62bfec4cfb5b5262b9c8e76e2f",
+    "fixedStep": "4c9b8104e6ac9899bbc7a262cb76f50519027b62bfec4cfb5b5262b9c8e76e2f"
+  }
+}

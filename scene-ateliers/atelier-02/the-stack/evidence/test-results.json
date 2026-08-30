@@ -1,0 +1,87 @@
+{
+  "sceneId": "the-stack",
+  "status": "pass",
+  "checks": [
+    {
+      "name": "fixture-counts",
+      "status": "pass"
+    },
+    {
+      "name": "timeline-modes-and-honest-minimum",
+      "status": "pass",
+      "durationsMs": {
+        "automatic": 21450,
+        "fixed-duration": 16850,
+        "directed": 8250
+      },
+      "minimumHonestDurationMs": 15850
+    },
+    {
+      "name": "deterministic-repeat",
+      "status": "pass",
+      "digest": "f4dcaaa6e8de9464937184769300a823a531a8788ffaeed4c8eeb65a8ed44116"
+    },
+    {
+      "name": "play-scrub-fixed-step-parity",
+      "status": "pass",
+      "play": "5ad23f7dc981059e0e7c2b6822f42e6aa320c2333e5e51c6ef3df860345b112b",
+      "scrub": "5ad23f7dc981059e0e7c2b6822f42e6aa320c2333e5e51c6ef3df860345b112b",
+      "fixedStep": "5ad23f7dc981059e0e7c2b6822f42e6aa320c2333e5e51c6ef3df860345b112b"
+    },
+    {
+      "name": "boundary-finite-source-clock-terminal",
+      "status": "pass",
+      "samples": 192
+    },
+    {
+      "name": "control-causality",
+      "status": "pass",
+      "frameScale": {
+        "defaultDigest": "f4dcaaa6e8de9464937184769300a823a531a8788ffaeed4c8eeb65a8ed44116",
+        "variantDigest": "9adec8590a1a9047697a655ef3732c7dd3fc63e02874992cb8ab1b58d5eedc47",
+        "changed": true
+      },
+      "pileDepth": {
+        "defaultDigest": "f4dcaaa6e8de9464937184769300a823a531a8788ffaeed4c8eeb65a8ed44116",
+        "variantDigest": "824fe2b53c76cd9b399df627f5d305133c210f60d625045fc32874cda408bb84",
+        "changed": true
+      },
+      "restingLooseness": {
+        "defaultDigest": "f4dcaaa6e8de9464937184769300a823a531a8788ffaeed4c8eeb65a8ed44116",
+        "variantDigest": "ea3e7055699564d0568597d883a506898c90295801fbf84477dd642b0986729c",
+        "changed": true
+      },
+      "breathAmount": {
+        "defaultDigest": "f4dcaaa6e8de9464937184769300a823a531a8788ffaeed4c8eeb65a8ed44116",
+        "variantDigest": "c89952519a5e29e3b766c8e4f49bf40858c6e2dc481be0322ca9c5ff44fbeda1",
+        "changed": true
+      },
+      "advanceCharacter": {
+        "defaultDigest": "f4dcaaa6e8de9464937184769300a823a531a8788ffaeed4c8eeb65a8ed44116",
+        "variantDigest": "69bfb7c8ccb56a510c580b8deeabf96c1f3f4394fe179a5eb207113b4b8a774c",
+        "changed": true
+      }
+    },
+    {
+      "name": "fixture-resource-bounds",
+      "status": "pass",
+      "visibleLimit": 9
+    },
+    {
+      "name": "reverse-evaluator",
+      "status": "pass"
+    },
+    {
+      "name": "invalid-input-rejection",
+      "status": "pass"
+    },
+    {
+      "name": "calm-stack-signature",
+      "status": "pass",
+      "closedBreath": true,
+      "boundedDrift": true,
+      "inversePermutation": true
+    }
+  ],
+  "generatedAt": "deterministic-no-wall-clock"
+}

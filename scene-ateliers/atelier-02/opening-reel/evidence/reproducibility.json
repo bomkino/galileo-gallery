@@ -1,0 +1,11 @@
+{
+  "sceneId": "opening-reel",
+  "status": "pass",
+  "artifact": "default-real-time.mp4",
+  "algorithm": "sha256",
+  "original": "85bb02f7923a66a9c36d7c5237ec61dc04812a32cb279312b54d2cf249e2adbf",
+  "independentRerun": "85bb02f7923a66a9c36d7c5237ec61dc04812a32cb279312b54d2cf249e2adbf",
+  "byteIdentical": true,
+  "generator": "export-clip-frames.mjs + render-clip.py",
+  "clock": "fixed-step evaluator samples"
+}

@@ -1,0 +1,190 @@
+{
+  "schema": "galileo-scene-capability-candidate",
+  "schemaVersion": 1,
+  "status": "candidate-human-review-pending",
+  "scene": {
+    "id": "swipe-stack",
+    "version": 1,
+    "displayName": "Swipe Stack",
+    "motionSentence": "The top card receives a decisive impulse, leaves in front, crosses behind under full occlusion, every remaining card advances, and the same identity settles at the bottom.",
+    "antiMotionSentence": "Never disguise an array rotation with a crossfade, CSS transition, offscreen teleport, or generic index swap."
+  },
+  "media": {
+    "minimumUsefulCount": 1,
+    "recommendedCount": 5,
+    "maximumCount": 24,
+    "zeroBehavior": {
+      "available": false,
+      "reason": "Scene requires at least one stable media identity."
+    },
+    "failedMedia": "retain identity, order, ratio box, and deterministic placeholder"
+  },
+  "capabilities": {
+    "canvas": [
+      "16:9",
+      "9:16",
+      "1:1",
+      "4:5",
+      "2576:1080"
+    ],
+    "orientation": {
+      "horizontal": true,
+      "verticalCanvas": true,
+      "verticalRail": null
+    },
+    "alpha": {
+      "transparentOutput": true,
+      "alphaZeroRgbMustBeZero": true,
+      "sceneBackground": "none"
+    },
+    "video": {
+      "supported": true,
+      "clock": "shared-product-story-time",
+      "sourceOffsetPreserved": true,
+      "poseHoldRemapsTime": false
+    },
+    "reverse": {
+      "supported": true,
+      "policy": "Supported as the mathematical/physical inverse: inverse permutation, opposite throw, rear-to-front emergence, inverse deck retreat, and exact start pose."
+    },
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "reducedMotionChangesProjectTruth": false
+  },
+  "parameters": [
+    {
+      "id": "frameScale",
+      "label": "Frame scale",
+      "type": "number",
+      "min": 0.32,
+      "max": 0.68,
+      "step": 0.01,
+      "default": 0.5,
+      "reset": 0.5,
+      "unit": "stage cross-axis",
+      "output": "card dimensions and throw clearance",
+      "invalid": "reject",
+      "declaredEvaluatorOutput": "card dimensions and throw clearance",
+      "roundTripIdentity": true
+    },
+    {
+      "id": "pileSpread",
+      "label": "Pile spread",
+      "type": "number",
+      "min": 0.004,
+      "max": 0.035,
+      "step": 0.001,
+      "default": 0.016,
+      "reset": 0.016,
+      "unit": "stage width per slot",
+      "output": "resting x/y slot offsets",
+      "invalid": "reject",
+      "declaredEvaluatorOutput": "resting x/y slot offsets",
+      "roundTripIdentity": true
+    },
+    {
+      "id": "visibleDepth",
+      "label": "Visible depth",
+      "type": "integer",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 5,
+      "reset": 5,
+      "unit": "cards",
+      "output": "mounted resting slots and silhouette thickness",
+      "invalid": "reject",
+      "declaredEvaluatorOutput": "mounted resting slots and silhouette thickness",
+      "roundTripIdentity": true
+    },
+    {
+      "id": "throwArc",
+      "label": "Throw arc",
+      "type": "number",
+      "min": 0.28,
+      "max": 0.72,
+      "step": 0.01,
+      "default": 0.5,
+      "reset": 0.5,
+      "unit": "stage width",
+      "output": "front-flight apex, rotation, and crossing path",
+      "invalid": "reject",
+      "declaredEvaluatorOutput": "front-flight apex, rotation, and crossing path",
+      "roundTripIdentity": true
+    },
+    {
+      "id": "settleCharacter",
+      "label": "Settle character",
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "default": 0.42,
+      "reset": 0.42,
+      "unit": "normalized",
+      "output": "bounded overshoot/damping during settle only",
+      "invalid": "reject",
+      "declaredEvaluatorOutput": "bounded overshoot/damping during settle only",
+      "roundTripIdentity": true
+    }
+  ],
+  "renderOutputs": {
+    "coordinateSpace": "normalized stage, converted to output pixels at evaluation",
+    "perItem": [
+      "stableId",
+      "sourceIndex",
+      "x",
+      "y",
+      "width",
+      "height",
+      "scale",
+      "rotation",
+      "projectedYaw",
+      "z",
+      "visible",
+      "occluded",
+      "opacity",
+      "filter",
+      "blend"
+    ],
+    "global": [
+      "phase",
+      "phaseProgress",
+      "storyTimeMs",
+      "sourceVideoTimeMs",
+      "permutationOrFocus",
+      "terminal",
+      "renderPolicy"
+    ]
+  },
+  "invalidInputBehavior": {
+    "nonFinite": "reject",
+    "outOfBounds": "reject",
+    "duplicateMediaId": "reject",
+    "unknownParameter": "reject",
+    "unsupportedCount": "truthful unavailable or reject before evaluation"
+  },
+  "projectRoundTrip": {
+    "sceneIdExact": true,
+    "sceneVersionExact": true,
+    "parameterKeysExact": true,
+    "parameterValuesExact": true,
+    "stableMediaOrderExact": true,
+    "hostPathsExcluded": true,
+    "interfaceScaleExcluded": true,
+    "transientInteractionExcluded": true
+  },
+  "explicitExclusions": [
+    "Look/background/material/light/grain/texture/vignette/shadow/radius",
+    "frame fit/crop/focal intent",
+    "audio gain/mute/solo/duck/mix",
+    "Interface Scale",
+    "codec/export destination/job state",
+    "raw gesture path/velocity",
+    "DOM/CSS transition state",
+    "historical implementation constants"
+  ]
+}

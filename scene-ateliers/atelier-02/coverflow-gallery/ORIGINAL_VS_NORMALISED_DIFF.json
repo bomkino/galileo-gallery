@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "coverflow-gallery",
+  "originalArchive": "GALILEO_ATELIER_02_DECKS_AND_STACKS_PARITY_HANDOFF_2026-08-28(1).zip",
+  "preservedOriginalFiles": "all source-tree files byte-copied; see ORIGINAL_TO_FINAL_MAP.json",
+  "addedFiles": [
+    "SCENE_CONTRACT.json",
+    "CAPABILITY_AND_CONTROLS.json",
+    "ACCEPTANCE_MATRIX.json",
+    "RENDER_PLAN.json",
+    "WORKLOAD_ENVELOPE.json",
+    "INTERACTION_TRACES.json",
+    "ORIGINAL_SOURCE_LOCATOR.json",
+    "SCENE_RECEIPT.json",
+    "SCENE_RECEIPT.md",
+    "PARITY_NORMALISATION.md",
+    "EVIDENCE_BINDINGS.json",
+    "ORIGINAL_VS_NORMALISED_DIFF.json"
+  ],
+  "modifiedDerivedFiles": [
+    "CAPABILITY_AND_CONTROLS.json",
+    "SCENE_CONTRACT.json",
+    "ACCEPTANCE_MATRIX.json"
+  ],
+  "preservedOriginalControlContract": "ORIGINAL_CAPABILITY_AND_CONTROLS.json",
+  "controlCount": 5,
+  "controlAuthorityCorrections": [],
+  "evaluatorChanged": false,
+  "prototypeChoreographyChanged": false,
+  "sourceEvidenceChanged": false,
+  "productIntegration": "no",
+  "humanVerdict": "pending",
+  "parityEvidenceAdded": [],
+  "evidenceBindingUpdated": true
+}

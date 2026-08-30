@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-stack",
+  "sourceContractSha256": "d396a5907221c8eb27ae2fafb8da8429d23c5609698b660d70f0ce40ba1951ca",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.the-stack.framescale",
+      "sceneLocalId": "frameScale",
+      "parameter": "frameScale",
+      "owner": "Scene",
+      "label": "Frame scale",
+      "valueModel": "number",
+      "unit": "stage cross-axis",
+      "default": 0.52,
+      "range": {
+        "minimum": 0.34,
+        "maximum": 0.7,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.52,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-stack:frameScale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "proof dimensions and negative space",
+      "acceptanceRow": "control:scene.the-stack.framescale",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-stack.piledepth",
+      "sceneLocalId": "pileDepth",
+      "parameter": "pileDepth",
+      "owner": "Scene",
+      "label": "Pile depth",
+      "valueModel": "integer",
+      "unit": "cards",
+      "default": 6,
+      "range": {
+        "minimum": 2,
+        "maximum": 8,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 6,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-stack:pileDepth",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "visible subordinate slots",
+      "acceptanceRow": "control:scene.the-stack.piledepth",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-stack.restinglooseness",
+      "sceneLocalId": "restingLooseness",
+      "parameter": "restingLooseness",
+      "owner": "Scene",
+      "label": "Resting looseness",
+      "valueModel": "number",
+      "unit": "normalized",
+      "default": 0.34,
+      "range": {
+        "minimum": 0,
+        "maximum": 1,
+        "step": 0.05
+      },
+      "options": null,
+      "resetValue": 0.34,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-stack:restingLooseness",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "ID-seeded static x/y/rotation offsets",
+      "acceptanceRow": "control:scene.the-stack.restinglooseness",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-stack.breathamount",
+      "sceneLocalId": "breathAmount",
+      "parameter": "breathAmount",
+      "owner": "Scene",
+      "label": "Breath amount",
+      "valueModel": "number",
+      "unit": "normalized",
+      "default": 0.28,
+      "range": {
+        "minimum": 0,
+        "maximum": 1,
+        "step": 0.05
+      },
+      "options": null,
+      "resetValue": 0.28,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-stack:breathAmount",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "closed-loop sub-pixel lift/compression",
+      "acceptanceRow": "control:scene.the-stack.breathamount",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-stack.advancecharacter",
+      "sceneLocalId": "advanceCharacter",
+      "parameter": "advanceCharacter",
+      "owner": "Scene",
+      "label": "Advance character",
+      "valueModel": "number",
+      "unit": "normalized",
+      "default": 0.32,
+      "range": {
+        "minimum": 0,
+        "maximum": 1,
+        "step": 0.05
+      },
+      "options": null,
+      "resetValue": 0.32,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-stack:advanceCharacter",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "side corridor distance and acceleration curve within calm limits",
+      "acceptanceRow": "control:scene.the-stack.advancecharacter",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

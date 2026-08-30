@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "hero-deck-object",
+  "sourceContractSha256": "afe256934ea631af3d238b3b15201768a1b7cd452628321cb585e124da6ca17c",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.hero-deck-object.heroscale",
+      "sceneLocalId": "heroScale",
+      "parameter": "heroScale",
+      "owner": "Scene",
+      "label": "Hero scale",
+      "valueModel": "number",
+      "unit": "stage cross-axis",
+      "default": 0.62,
+      "range": {
+        "minimum": 0.42,
+        "maximum": 0.78,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.62,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "hero-deck-object:heroScale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "hero plane dimensions",
+      "acceptanceRow": "control:scene.hero-deck-object.heroscale",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.hero-deck-object.supportspread",
+      "sceneLocalId": "supportSpread",
+      "parameter": "supportSpread",
+      "owner": "Scene",
+      "label": "Support spread",
+      "valueModel": "number",
+      "unit": "stage width",
+      "default": 0.16,
+      "range": {
+        "minimum": 0.08,
+        "maximum": 0.28,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.16,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "hero-deck-object:supportSpread",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "support x/y offsets",
+      "acceptanceRow": "control:scene.hero-deck-object.supportspread",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.hero-deck-object.depth",
+      "sceneLocalId": "depth",
+      "parameter": "depth",
+      "owner": "Scene",
+      "label": "Depth",
+      "valueModel": "number",
+      "unit": "projected scale falloff",
+      "default": 0.12,
+      "range": {
+        "minimum": 0.04,
+        "maximum": 0.22,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.12,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "hero-deck-object:depth",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "support/deep scale and z spacing",
+      "acceptanceRow": "control:scene.hero-deck-object.depth",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.hero-deck-object.restingyaw",
+      "sceneLocalId": "restingYaw",
+      "parameter": "restingYaw",
+      "owner": "Scene",
+      "label": "Resting yaw",
+      "valueModel": "number",
+      "unit": "degrees",
+      "default": 4,
+      "range": {
+        "minimum": 0,
+        "maximum": 10,
+        "step": 0.5
+      },
+      "options": null,
+      "resetValue": 4,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "hero-deck-object:restingYaw",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "support projected width and rotation sign",
+      "acceptanceRow": "control:scene.hero-deck-object.restingyaw",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.hero-deck-object.handoffcharacter",
+      "sceneLocalId": "handoffCharacter",
+      "parameter": "handoffCharacter",
+      "owner": "Scene",
+      "label": "Handoff character",
+      "valueModel": "number",
+      "unit": "normalized",
+      "default": 0.48,
+      "range": {
+        "minimum": 0,
+        "maximum": 1,
+        "step": 0.05
+      },
+      "options": null,
+      "resetValue": 0.48,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "hero-deck-object:handoffCharacter",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "authority-crossing path curvature and settle damping",
+      "acceptanceRow": "control:scene.hero-deck-object.handoffcharacter",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

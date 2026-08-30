@@ -1,0 +1,29 @@
+import { SCENE_ID, SCENE_NAME, DEFAULT_PARAMETERS, CONTROL_DEFINITIONS, DEFAULT_STAGE, makeFixture, compileTimeline, evaluateScene, renderSceneSvg, evidenceTimes } from "./evaluator.mjs";
+
+const $ = (selector) => document.querySelector(selector);
+const state = { fixture:"ordinary-eight", mode:"automatic", direction:"forward", stage:{...DEFAULT_STAGE}, parameters:{...DEFAULT_PARAMETERS}, timeMs:0, playing:false, disposed:false, raf:0, lastNow:0, generation:1 };
+const stageEl=$("#stage"), timeEl=$("#time"), phaseEl=$("#phase"), sourceEl=$("#source-time"), statusEl=$("#status"), controlsEl=$("#scene-controls");
+
+function currentItems(){ return makeFixture(state.fixture); }
+function currentTimeline(){
+  const items=currentItems();
+  const automatic=compileTimeline({items,parameters:state.parameters,mode:"automatic",direction:state.direction});
+  const fixedDurationMs=Math.max(12000,automatic.minimumHonestDurationMs+1000);
+  return compileTimeline({items,parameters:state.parameters,mode:state.mode,direction:state.direction,fixedDurationMs});
+}
+function render(){
+ if(state.disposed){ stageEl.innerHTML="<p class='disposed'>Disposed. Remount to reconstruct from immutable input.</p>"; return; }
+ const timeline=currentTimeline(); stageEl.style.aspectRatio=`${state.stage.width} / ${state.stage.height}`; state.timeMs=Math.min(state.timeMs,timeline.durationMs); const frame=evaluateScene({items:currentItems(),parameters:state.parameters,timeline,storyTimeMs:state.timeMs,stage:state.stage});
+ stageEl.innerHTML=renderSceneSvg(frame,{matte:"#e9e7df"}); timeEl.max=String(timeline.durationMs); timeEl.value=String(state.timeMs); phaseEl.textContent=`${frame.phase} · ${Math.round(frame.phaseProgress*100)}% · ${Math.round(state.timeMs)} / ${Math.round(timeline.durationMs)} ms`;
+ const sources=Object.entries(frame.sourceVideoTimes); sourceEl.textContent=sources.length?sources.map(([id,t])=>`${id}: ${Math.round(t)} ms`).join(" · "):"no video fixture in this mode";
+ $("#generation").textContent=String(state.generation); $("#play").textContent=state.playing?"Pause":"Play";
+}
+function stop(){ state.playing=false; if(state.raf)cancelAnimationFrame(state.raf);state.raf=0;state.lastNow=0; }
+function tick(now){ if(!state.playing||state.disposed)return; if(!state.lastNow)state.lastNow=now;const delta=now-state.lastNow;state.lastNow=now;const timeline=currentTimeline();state.timeMs=Math.min(timeline.durationMs,state.timeMs+delta);render();if(state.timeMs>=timeline.durationMs){stop();statusEl.textContent="Terminal frame.";return;}state.raf=requestAnimationFrame(tick); }
+function play(){ if(state.disposed)return; if(matchMedia("(prefers-reduced-motion: reduce)").matches){const t=currentTimeline();state.timeMs=evidenceTimes(t).finale;render();statusEl.textContent="Reduced-motion presentation: authored finale still. Project truth unchanged.";return;}state.playing=!state.playing;if(state.playing){state.lastNow=0;state.raf=requestAnimationFrame(tick);statusEl.textContent="Playing.";}else{stop();statusEl.textContent="Paused.";}render(); }
+
+for(const control of CONTROL_DEFINITIONS){const wrap=document.createElement("label");wrap.textContent=control.label;const input=document.createElement("input");input.type="range";input.min=control.min;input.max=control.max;input.step=control.step;input.value=state.parameters[control.id];const out=document.createElement("output");out.textContent=input.value;input.addEventListener("input",()=>{state.parameters[control.id]=control.integer?Number.parseInt(input.value,10):Number(input.value);out.textContent=input.value;render();});wrap.append(input,out);controlsEl.append(wrap);}
+$("#fixture").addEventListener("change",e=>{state.fixture=e.target.value;state.timeMs=0;render();});$("#mode").addEventListener("change",e=>{state.mode=e.target.value;state.timeMs=0;render();});$("#direction").addEventListener("change",e=>{state.direction=e.target.value;state.timeMs=0;render();});$("#canvas").addEventListener("change",e=>{const[w,h]=e.target.value.split("x").map(Number);state.stage={width:w,height:h};render();});
+timeEl.addEventListener("input",()=>{stop();state.timeMs=Number(timeEl.value);render();statusEl.textContent="Exact-time scrub.";});$("#play").addEventListener("click",play);$("#restart").addEventListener("click",()=>{stop();state.timeMs=0;state.parameters={...DEFAULT_PARAMETERS};document.querySelectorAll("#scene-controls input").forEach((input,index)=>{input.value=String(DEFAULT_PARAMETERS[CONTROL_DEFINITIONS[index].id]);input.nextElementSibling.textContent=input.value;});render();statusEl.textContent="Restarted from defaults.";});$("#dispose").addEventListener("click",()=>{stop();state.disposed=true;render();statusEl.textContent="Disposed.";});$("#remount").addEventListener("click",()=>{stop();state.disposed=false;state.generation+=1;render();statusEl.textContent="Remounted from immutable input.";});$("#capture").addEventListener("click",()=>{const timeline=currentTimeline();const frame=evaluateScene({items:currentItems(),parameters:state.parameters,timeline,storyTimeMs:state.timeMs,stage:state.stage});const blob=new Blob([renderSceneSvg(frame,{matte:"#e9e7df"})],{type:"image/svg+xml"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${SCENE_ID}-${Math.round(state.timeMs)}ms.svg`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),0);statusEl.textContent="Reproducible SVG still captured.";});
+window.addEventListener("keydown",e=>{if(e.target.matches("input,select,button"))return;const step=1000/24;if(e.key===" "){e.preventDefault();play();}if(e.key==="Home"){state.timeMs=0;render();}if(e.key==="ArrowLeft"){stop();state.timeMs=Math.max(0,state.timeMs-step);render();}if(e.key==="ArrowRight"){stop();state.timeMs=Math.min(currentTimeline().durationMs,state.timeMs+step);render();}});
+window.addEventListener("beforeunload",stop);document.title=`Atelier prototype — ${SCENE_NAME}`;render();

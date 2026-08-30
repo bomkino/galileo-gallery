@@ -1,0 +1,14 @@
+{
+  "sceneId": "coverflow-gallery",
+  "browserCapture": {
+    "attempted": false,
+    "status": "not-repeated-after-identical-runner-failure",
+    "detail": "Opening Reel established the identical runner could not produce a renderer capture; this same check was not repeated for the remaining dependency-identical prototypes.",
+    "claim": "unrun-browser-capture"
+  },
+  "evaluatorNativeCapture": "actual deterministic SVG poses from the Scene evaluator",
+  "rasterCapture": "actual PNGs generated from those SVG poses by rasterize-stills.py",
+  "videoCapture": "actual MP4 generated from fixed-step evaluator JSON by export-clip-frames.mjs and render-clip.py",
+  "generatedAt": "deterministic-no-wall-clock",
+  "tasteVerdict": "pending-human-review"
+}

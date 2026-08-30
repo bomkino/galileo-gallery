@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "swipe-stack",
+  "sourceContractSha256": "8c66f4f1c6cf92bcbcc256bdbb19b8854d860772d4c2fb3cdbdcf49aeeaad776",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.swipe-stack.framescale",
+      "sceneLocalId": "frameScale",
+      "parameter": "frameScale",
+      "owner": "Scene",
+      "label": "Frame scale",
+      "valueModel": "number",
+      "unit": "stage cross-axis",
+      "default": 0.5,
+      "range": {
+        "minimum": 0.32,
+        "maximum": 0.68,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.5,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "swipe-stack:frameScale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "card dimensions and throw clearance",
+      "acceptanceRow": "control:scene.swipe-stack.framescale",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.swipe-stack.pilespread",
+      "sceneLocalId": "pileSpread",
+      "parameter": "pileSpread",
+      "owner": "Scene",
+      "label": "Pile spread",
+      "valueModel": "number",
+      "unit": "stage width per slot",
+      "default": 0.016,
+      "range": {
+        "minimum": 0.004,
+        "maximum": 0.035,
+        "step": 0.001
+      },
+      "options": null,
+      "resetValue": 0.016,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "swipe-stack:pileSpread",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "resting x/y slot offsets",
+      "acceptanceRow": "control:scene.swipe-stack.pilespread",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.swipe-stack.visibledepth",
+      "sceneLocalId": "visibleDepth",
+      "parameter": "visibleDepth",
+      "owner": "Scene",
+      "label": "Visible depth",
+      "valueModel": "integer",
+      "unit": "cards",
+      "default": 5,
+      "range": {
+        "minimum": 2,
+        "maximum": 8,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 5,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "swipe-stack:visibleDepth",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "mounted resting slots and silhouette thickness",
+      "acceptanceRow": "control:scene.swipe-stack.visibledepth",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.swipe-stack.throwarc",
+      "sceneLocalId": "throwArc",
+      "parameter": "throwArc",
+      "owner": "Scene",
+      "label": "Throw arc",
+      "valueModel": "number",
+      "unit": "stage width",
+      "default": 0.5,
+      "range": {
+        "minimum": 0.28,
+        "maximum": 0.72,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.5,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "swipe-stack:throwArc",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "front-flight apex, rotation, and crossing path",
+      "acceptanceRow": "control:scene.swipe-stack.throwarc",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.swipe-stack.settlecharacter",
+      "sceneLocalId": "settleCharacter",
+      "parameter": "settleCharacter",
+      "owner": "Scene",
+      "label": "Settle character",
+      "valueModel": "number",
+      "unit": "normalized",
+      "default": 0.42,
+      "range": {
+        "minimum": 0,
+        "maximum": 1,
+        "step": 0.05
+      },
+      "options": null,
+      "resetValue": 0.42,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "swipe-stack:settleCharacter",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "bounded overshoot/damping during settle only",
+      "acceptanceRow": "control:scene.swipe-stack.settlecharacter",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

@@ -1,0 +1,10 @@
+{
+  "sceneId": "swipe-stack",
+  "status": "pass",
+  "timeMs": 1170,
+  "digests": {
+    "play": "a3ad674f985c954d245d9e455f827e87e68d427fee3ce50a585e9ace52f0431f",
+    "scrub": "a3ad674f985c954d245d9e455f827e87e68d427fee3ce50a585e9ace52f0431f",
+    "fixedStep": "a3ad674f985c954d245d9e455f827e87e68d427fee3ce50a585e9ace52f0431f"
+  }
+}

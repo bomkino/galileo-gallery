@@ -1,0 +1,86 @@
+{
+  "sceneId": "hero-deck-object",
+  "status": "pass",
+  "checks": [
+    {
+      "name": "fixture-counts",
+      "status": "pass"
+    },
+    {
+      "name": "timeline-modes-and-honest-minimum",
+      "status": "pass",
+      "durationsMs": {
+        "automatic": 14900,
+        "fixed-duration": 12400,
+        "directed": 6800
+      },
+      "minimumHonestDurationMs": 11400
+    },
+    {
+      "name": "deterministic-repeat",
+      "status": "pass",
+      "digest": "772a2e1a2a152d211722392a282404771d263d836c173ee06b1cd32ba7832fc5"
+    },
+    {
+      "name": "play-scrub-fixed-step-parity",
+      "status": "pass",
+      "play": "c799bb9024d40ccd68d9abc73368e2de2f12261817ac6a6b323952fa4ee2e4f0",
+      "scrub": "c799bb9024d40ccd68d9abc73368e2de2f12261817ac6a6b323952fa4ee2e4f0",
+      "fixedStep": "c799bb9024d40ccd68d9abc73368e2de2f12261817ac6a6b323952fa4ee2e4f0"
+    },
+    {
+      "name": "boundary-finite-source-clock-terminal",
+      "status": "pass",
+      "samples": 192
+    },
+    {
+      "name": "control-causality",
+      "status": "pass",
+      "heroScale": {
+        "defaultDigest": "772a2e1a2a152d211722392a282404771d263d836c173ee06b1cd32ba7832fc5",
+        "variantDigest": "2f6eebb17d97b7eb739487bec753894d8d0b90560e88bb4cb8aff19817578ee2",
+        "changed": true
+      },
+      "supportSpread": {
+        "defaultDigest": "772a2e1a2a152d211722392a282404771d263d836c173ee06b1cd32ba7832fc5",
+        "variantDigest": "62ec3dc8d4f431e70d975466dbde13819224d0be7913ef1695f847ee1660c28f",
+        "changed": true
+      },
+      "depth": {
+        "defaultDigest": "772a2e1a2a152d211722392a282404771d263d836c173ee06b1cd32ba7832fc5",
+        "variantDigest": "09d32190b938d9f7afdfd81bec3b7fae348dd80b12ad51a1b323c462edfa2f5b",
+        "changed": true
+      },
+      "restingYaw": {
+        "defaultDigest": "772a2e1a2a152d211722392a282404771d263d836c173ee06b1cd32ba7832fc5",
+        "variantDigest": "40d1a165ff7c26f653cce1bf1525a5e5200b52f68c4fe678fd84c8bfa941f1ac",
+        "changed": true
+      },
+      "handoffCharacter": {
+        "defaultDigest": "772a2e1a2a152d211722392a282404771d263d836c173ee06b1cd32ba7832fc5",
+        "variantDigest": "c47c283a23f1e3f2ee3fa10e3fb4d93235171004ab220de676327d6bfb9d9c6d",
+        "changed": true
+      }
+    },
+    {
+      "name": "fixture-resource-bounds",
+      "status": "pass",
+      "visibleLimit": 7
+    },
+    {
+      "name": "reverse-evaluator",
+      "status": "pass"
+    },
+    {
+      "name": "invalid-input-rejection",
+      "status": "pass"
+    },
+    {
+      "name": "hero-deck-signature",
+      "status": "pass",
+      "singleAuthority": true,
+      "inverseSide": true
+    }
+  ],
+  "generatedAt": "deterministic-no-wall-clock"
+}

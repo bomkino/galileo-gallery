@@ -1,0 +1,11 @@
+{
+  "sceneId": "the-stack",
+  "status": "pass",
+  "artifact": "default-real-time.mp4",
+  "algorithm": "sha256",
+  "original": "9efca16ad09e049d8dc4824d759f3998a847b3d466a8f1cf4a91d9c87d4809ab",
+  "independentRerun": "9efca16ad09e049d8dc4824d759f3998a847b3d466a8f1cf4a91d9c87d4809ab",
+  "byteIdentical": true,
+  "generator": "export-clip-frames.mjs + render-clip.py",
+  "clock": "fixed-step evaluator samples"
+}

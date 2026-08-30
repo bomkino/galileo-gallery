@@ -1,0 +1,87 @@
+{
+  "sceneId": "coverflow-gallery",
+  "status": "pass",
+  "checks": [
+    {
+      "name": "fixture-counts",
+      "status": "pass"
+    },
+    {
+      "name": "timeline-modes-and-honest-minimum",
+      "status": "pass",
+      "durationsMs": {
+        "automatic": 12450,
+        "fixed-duration": 12000,
+        "directed": 6870
+      },
+      "minimumHonestDurationMs": 10770
+    },
+    {
+      "name": "deterministic-repeat",
+      "status": "pass",
+      "digest": "abe30086667751542932c5ade0b16531959efd12056f06663232eb8baab7b9af"
+    },
+    {
+      "name": "play-scrub-fixed-step-parity",
+      "status": "pass",
+      "play": "4c9b8104e6ac9899bbc7a262cb76f50519027b62bfec4cfb5b5262b9c8e76e2f",
+      "scrub": "4c9b8104e6ac9899bbc7a262cb76f50519027b62bfec4cfb5b5262b9c8e76e2f",
+      "fixedStep": "4c9b8104e6ac9899bbc7a262cb76f50519027b62bfec4cfb5b5262b9c8e76e2f"
+    },
+    {
+      "name": "boundary-finite-source-clock-terminal",
+      "status": "pass",
+      "samples": 150
+    },
+    {
+      "name": "control-causality",
+      "status": "pass",
+      "frameScale": {
+        "defaultDigest": "abe30086667751542932c5ade0b16531959efd12056f06663232eb8baab7b9af",
+        "variantDigest": "df76e4027108bcfb694178ee0268476b0e7fc46ca119e36755467967b1119165",
+        "changed": true
+      },
+      "gap": {
+        "defaultDigest": "abe30086667751542932c5ade0b16531959efd12056f06663232eb8baab7b9af",
+        "variantDigest": "397f3a25de78a7cb362abde8b0d5d4eb2158d8270943f9f90468dc4f9f13d8fe",
+        "changed": true
+      },
+      "sideDepth": {
+        "defaultDigest": "abe30086667751542932c5ade0b16531959efd12056f06663232eb8baab7b9af",
+        "variantDigest": "0b0fc8e796374a6407902c032a9d16f4d9082533ffb097a3870e29d1ae9e900c",
+        "changed": true
+      },
+      "sideYaw": {
+        "defaultDigest": "abe30086667751542932c5ade0b16531959efd12056f06663232eb8baab7b9af",
+        "variantDigest": "3a2732b744e41738e43f1696a0511fdbeb22c1df389a4d737c53ae8141b268bd",
+        "changed": true
+      },
+      "visibleRange": {
+        "defaultDigest": "abe30086667751542932c5ade0b16531959efd12056f06663232eb8baab7b9af",
+        "variantDigest": "3d0a191d32499b10fc14e77be2be3e86dc4f710d230cd8adf581b2038fcf6fe3",
+        "changed": true
+      }
+    },
+    {
+      "name": "fixture-resource-bounds",
+      "status": "pass",
+      "visibleLimit": 9
+    },
+    {
+      "name": "reverse-evaluator",
+      "status": "pass"
+    },
+    {
+      "name": "invalid-input-rejection",
+      "status": "pass"
+    },
+    {
+      "name": "coverflow-signature",
+      "status": "pass",
+      "exactFrontStop": true,
+      "twoItemPingPong": true,
+      "offstageWrap": true
+    }
+  ],
+  "generatedAt": "deterministic-no-wall-clock"
+}

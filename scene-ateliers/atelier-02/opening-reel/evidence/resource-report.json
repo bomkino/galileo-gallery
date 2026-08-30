@@ -1,0 +1,11 @@
+{
+  "sceneId": "opening-reel",
+  "status": "pass",
+  "sampleCount": 482,
+  "maxEvaluatedCards": 24,
+  "maxVisibleCards": 3,
+  "maxOccludedCards": 0,
+  "uiAnimationHandles": 1,
+  "evaluatorTimers": 0,
+  "growingCollections": false
+}

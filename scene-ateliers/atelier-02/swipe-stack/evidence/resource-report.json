@@ -1,0 +1,11 @@
+{
+  "sceneId": "swipe-stack",
+  "status": "pass",
+  "sampleCount": 482,
+  "maxEvaluatedCards": 5,
+  "maxVisibleCards": 5,
+  "maxOccludedCards": 1,
+  "uiAnimationHandles": 1,
+  "evaluatorTimers": 0,
+  "growingCollections": false
+}

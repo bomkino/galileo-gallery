@@ -1,0 +1,11 @@
+{
+  "sceneId": "opening-reel",
+  "status": "pass",
+  "width": 960,
+  "height": 540,
+  "alphaZeroPixels": 471117,
+  "partialAlphaPixels": 24991,
+  "opaquePixels": 22292,
+  "nonZeroRgbUnderAlphaZero": 0,
+  "method": "Pillow RGBA pixel scan of generated alpha-transparent.png"
+}

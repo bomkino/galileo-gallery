@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "coverflow-gallery",
+  "sourceContractSha256": "7537ba59131d121a9410f52354ed4dca421b3d1bafdef4d36e07859760e7be07",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.coverflow-gallery.framescale",
+      "sceneLocalId": "frameScale",
+      "parameter": "frameScale",
+      "owner": "Scene",
+      "label": "Frame scale",
+      "valueModel": "number",
+      "unit": "stage cross-axis",
+      "default": 0.56,
+      "range": {
+        "minimum": 0.34,
+        "maximum": 0.72,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.56,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "coverflow-gallery:frameScale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "front-plane dimensions",
+      "acceptanceRow": "control:scene.coverflow-gallery.framescale",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.coverflow-gallery.gap",
+      "sceneLocalId": "gap",
+      "parameter": "gap",
+      "owner": "Scene",
+      "label": "Gap",
+      "valueModel": "number",
+      "unit": "stage width",
+      "default": 0.2,
+      "range": {
+        "minimum": 0.08,
+        "maximum": 0.34,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.2,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "coverflow-gallery:gap",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "rail stop spacing",
+      "acceptanceRow": "control:scene.coverflow-gallery.gap",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.coverflow-gallery.sidedepth",
+      "sceneLocalId": "sideDepth",
+      "parameter": "sideDepth",
+      "owner": "Scene",
+      "label": "Side depth",
+      "valueModel": "number",
+      "unit": "scale falloff",
+      "default": 0.16,
+      "range": {
+        "minimum": 0.04,
+        "maximum": 0.3,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.16,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "coverflow-gallery:sideDepth",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "side scale and projected z",
+      "acceptanceRow": "control:scene.coverflow-gallery.sidedepth",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.coverflow-gallery.sideyaw",
+      "sceneLocalId": "sideYaw",
+      "parameter": "sideYaw",
+      "owner": "Scene",
+      "label": "Side yaw",
+      "valueModel": "number",
+      "unit": "degrees",
+      "default": 10,
+      "range": {
+        "minimum": 0,
+        "maximum": 22,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 10,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "coverflow-gallery:sideYaw",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "side projected width only",
+      "acceptanceRow": "control:scene.coverflow-gallery.sideyaw",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.coverflow-gallery.visiblerange",
+      "sceneLocalId": "visibleRange",
+      "parameter": "visibleRange",
+      "owner": "Scene",
+      "label": "Visible range",
+      "valueModel": "integer",
+      "unit": "items per side",
+      "default": 3,
+      "range": {
+        "minimum": 1,
+        "maximum": 4,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 3,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "coverflow-gallery:visibleRange",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "mounted side previews and edge disappearance",
+      "acceptanceRow": "control:scene.coverflow-gallery.visiblerange",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

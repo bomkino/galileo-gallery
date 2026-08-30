@@ -1,0 +1,11 @@
+{
+  "sceneId": "the-stack",
+  "status": "pass",
+  "sampleCount": 482,
+  "maxEvaluatedCards": 6,
+  "maxVisibleCards": 6,
+  "maxOccludedCards": 1,
+  "uiAnimationHandles": 1,
+  "evaluatorTimers": 0,
+  "growingCollections": false
+}

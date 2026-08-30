@@ -1,0 +1,11 @@
+{
+  "sceneId": "hero-deck-object",
+  "status": "pass",
+  "width": 960,
+  "height": 540,
+  "alphaZeroPixels": 294135,
+  "partialAlphaPixels": 2244,
+  "opaquePixels": 222021,
+  "nonZeroRgbUnderAlphaZero": 0,
+  "method": "Pillow RGBA pixel scan of generated alpha-transparent.png"
+}

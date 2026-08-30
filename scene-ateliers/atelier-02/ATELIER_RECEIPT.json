@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "atelier": 2,
+  "sourceArchive": "GALILEO_ATELIER_02_DECKS_AND_STACKS_PARITY_HANDOFF_2026-08-28(1).zip",
+  "sourceArchiveSha256": "d6a802be4146772bef6bd6854d90c9499f99d74fe35b7ebdaac792064267347a",
+  "sceneCount": 5,
+  "controlCount": 25,
+  "productIntegration": "no",
+  "humanAcceptance": "pending",
+  "originalReplayCommands": 5,
+  "originalReplayPassed": 5,
+  "browserJourneys": 5,
+  "browserPassed": 5,
+  "nativeControlBindings": 25
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "swipe-stack",
+  "displayName": "Swipe Stack",
+  "family": "decks-stacks",
+  "atelier": 2,
+  "candidateVersion": "parity-1",
+  "identity": {
+    "promise": "The top card receives a decisive impulse, leaves in front, crosses behind under full occlusion, every remaining card advances, and the same identity settles at the bottom.",
+    "antiMotion": "Never disguise an array rotation with a crossfade, CSS transition, offscreen teleport, or generic index swap.",
+    "topology": "resting deck; top card front-flight then hidden rear crossing and bottom settle",
+    "focusGrammar": "top-card authority transfers by occluded physical handoff",
+    "finaleGrammar": "new settled deck order after each throw"
+  },
+  "sourcePolicy": {
+    "minimum": 1,
+    "recommended": 5,
+    "maximum": 24,
+    "identityAndOrder": "must survive failure, replacement, reverse and recycling"
+  },
+  "canvasSupport": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:5"
+  ],
+  "orientation": "authored throw vector",
+  "timeline": "automatic, fixed-duration, directed; forward/reverse",
+  "alphaPolicy": "transparent output supported; raw alpha proof quality scored separately",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "aaf6b68b6fd6434c0759f75c5db5393055275372f89532e6f1403d0cf5d92fb6",
+    "rendererOwnsStoryClock": false
+  },
+  "prototypeEntrypoint": "prototype/index.html",
+  "controlsRef": "CAPABILITY_AND_CONTROLS.json",
+  "acceptanceRef": "ACCEPTANCE_MATRIX.json",
+  "programme": {
+    "state": "G10A pressure-scene preflight candidate; no Product implementation claim",
+    "pressureGate": "G10A",
+    "gateStatus": "blocked"
+  },
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/swipe-stack.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  }
+}

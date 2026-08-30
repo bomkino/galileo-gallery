@@ -1,0 +1,86 @@
+{
+  "sceneId": "opening-reel",
+  "status": "pass",
+  "checks": [
+    {
+      "name": "fixture-counts",
+      "status": "pass"
+    },
+    {
+      "name": "timeline-modes-and-honest-minimum",
+      "status": "pass",
+      "durationsMs": {
+        "automatic": 9530,
+        "fixed-duration": 12000,
+        "directed": 8330
+      },
+      "minimumHonestDurationMs": 7930
+    },
+    {
+      "name": "deterministic-repeat",
+      "status": "pass",
+      "digest": "6a2ab83f5fb14a9acb5d989b398083f4c4821c9cab2cdda77bbca8e468f2f9e4"
+    },
+    {
+      "name": "play-scrub-fixed-step-parity",
+      "status": "pass",
+      "play": "221eff633323fed3ea7846a803d230316f54d4a3d02832f004209293f2a14fc0",
+      "scrub": "221eff633323fed3ea7846a803d230316f54d4a3d02832f004209293f2a14fc0",
+      "fixedStep": "221eff633323fed3ea7846a803d230316f54d4a3d02832f004209293f2a14fc0"
+    },
+    {
+      "name": "boundary-finite-source-clock-terminal",
+      "status": "pass",
+      "samples": 108
+    },
+    {
+      "name": "control-causality",
+      "status": "pass",
+      "frameScale": {
+        "defaultDigest": "6a2ab83f5fb14a9acb5d989b398083f4c4821c9cab2cdda77bbca8e468f2f9e4",
+        "variantDigest": "48e77765d54d11d452493fa73cb875924eba076e68c4925a3415d50c42c20230",
+        "changed": true
+      },
+      "gap": {
+        "defaultDigest": "6a2ab83f5fb14a9acb5d989b398083f4c4821c9cab2cdda77bbca8e468f2f9e4",
+        "variantDigest": "2852b7c609ae366cacf307ccbeaaba5c701dbb897e5a76cbe0753ffc6941ccb2",
+        "changed": true
+      },
+      "travelCharacter": {
+        "defaultDigest": "6a2ab83f5fb14a9acb5d989b398083f4c4821c9cab2cdda77bbca8e468f2f9e4",
+        "variantDigest": "d5fc192e8cfdeb2e5d2cea89dda4d83e3db152ea6837ddd1178556bc4d35f953",
+        "changed": true
+      },
+      "spotlightScale": {
+        "defaultDigest": "6a2ab83f5fb14a9acb5d989b398083f4c4821c9cab2cdda77bbca8e468f2f9e4",
+        "variantDigest": "f276cda93b486d3e421669feee87df1ac63f36049a76412d439e9d26b5444033",
+        "changed": true
+      },
+      "finaleScale": {
+        "defaultDigest": "6a2ab83f5fb14a9acb5d989b398083f4c4821c9cab2cdda77bbca8e468f2f9e4",
+        "variantDigest": "3a30a8cfbdc49e172eb4d47194af3cfd673eeba7d6af2aa13b5bf0ca8200894f",
+        "changed": true
+      }
+    },
+    {
+      "name": "fixture-resource-bounds",
+      "status": "pass",
+      "visibleLimit": 9
+    },
+    {
+      "name": "reverse-evaluator",
+      "status": "pass"
+    },
+    {
+      "name": "invalid-input-rejection",
+      "status": "pass"
+    },
+    {
+      "name": "opening-reel-signature",
+      "status": "pass",
+      "directedTravelLegs": 4,
+      "finaleVisibleCards": 1
+    }
+  ],
+  "generatedAt": "deterministic-no-wall-clock"
+}

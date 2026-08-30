@@ -1,0 +1,10 @@
+{
+  "sceneId": "hero-deck-object",
+  "status": "pass",
+  "timeMs": 1550,
+  "digests": {
+    "play": "c799bb9024d40ccd68d9abc73368e2de2f12261817ac6a6b323952fa4ee2e4f0",
+    "scrub": "c799bb9024d40ccd68d9abc73368e2de2f12261817ac6a6b323952fa4ee2e4f0",
+    "fixedStep": "c799bb9024d40ccd68d9abc73368e2de2f12261817ac6a6b323952fa4ee2e4f0"
+  }
+}

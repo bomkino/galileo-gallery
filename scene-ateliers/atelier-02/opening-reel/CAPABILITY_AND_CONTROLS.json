@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "opening-reel",
+  "sourceContractSha256": "b56d0afd47cc3b8ede35a77826ce3e6a6877e26716d49d6d11de79b8291f1f64",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.opening-reel.framescale",
+      "sceneLocalId": "frameScale",
+      "parameter": "frameScale",
+      "owner": "Scene",
+      "label": "Frame scale",
+      "valueModel": "number",
+      "unit": "stage cross-axis",
+      "default": 0.46,
+      "range": {
+        "minimum": 0.28,
+        "maximum": 0.72,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.46,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "opening-reel:frameScale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "card width/height and visible context",
+      "acceptanceRow": "control:scene.opening-reel.framescale",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.opening-reel.gap",
+      "sceneLocalId": "gap",
+      "parameter": "gap",
+      "owner": "Scene",
+      "label": "Gap",
+      "valueModel": "number",
+      "unit": "stage width",
+      "default": 0.08,
+      "range": {
+        "minimum": 0.02,
+        "maximum": 0.18,
+        "step": 0.005
+      },
+      "options": null,
+      "resetValue": 0.08,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "opening-reel:gap",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "lane stride and Spotlight neighbour clearance",
+      "acceptanceRow": "control:scene.opening-reel.gap",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.opening-reel.travelcharacter",
+      "sceneLocalId": "travelCharacter",
+      "parameter": "travelCharacter",
+      "owner": "Scene",
+      "label": "Travel character",
+      "valueModel": "number",
+      "unit": "normalized",
+      "default": 0.45,
+      "range": {
+        "minimum": 0,
+        "maximum": 1,
+        "step": 0.05
+      },
+      "options": null,
+      "resetValue": 0.45,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "opening-reel:travelCharacter",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "launch/cruise/brake easing shape; never duration",
+      "acceptanceRow": "control:scene.opening-reel.travelcharacter",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.opening-reel.spotlightscale",
+      "sceneLocalId": "spotlightScale",
+      "parameter": "spotlightScale",
+      "owner": "Scene",
+      "label": "Spotlight scale",
+      "valueModel": "number",
+      "unit": "multiplier",
+      "default": 1.38,
+      "range": {
+        "minimum": 1.1,
+        "maximum": 1.65,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 1.38,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "opening-reel:spotlightScale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Spotlight frame scale and neighbour displacement",
+      "acceptanceRow": "control:scene.opening-reel.spotlightscale",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.opening-reel.finalescale",
+      "sceneLocalId": "finaleScale",
+      "parameter": "finaleScale",
+      "owner": "Scene",
+      "label": "Finale scale",
+      "valueModel": "number",
+      "unit": "multiplier",
+      "default": 1.62,
+      "range": {
+        "minimum": 1.15,
+        "maximum": 1.85,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 1.62,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "opening-reel:finaleScale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "finale frame scale and clearance trajectory",
+      "acceptanceRow": "control:scene.opening-reel.finalescale",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

@@ -1,0 +1,2627 @@
+{
+  "schema": "galileo-scene-test-vectors",
+  "schemaVersion": 1,
+  "sceneId": "opening-reel",
+  "sceneVersion": 1,
+  "status": "generated-results-present",
+  "fps": 24,
+  "canonicalStages": [
+    {
+      "id": "16:9",
+      "width": 960,
+      "height": 540
+    },
+    {
+      "id": "9:16",
+      "width": 540,
+      "height": 960
+    },
+    {
+      "id": "1:1",
+      "width": 720,
+      "height": 720
+    },
+    {
+      "id": "4:5",
+      "width": 800,
+      "height": 1000
+    },
+    {
+      "id": "2576:1080",
+      "width": 1288,
+      "height": 540
+    }
+  ],
+  "fixtures": {
+    "ordinary-eight": [
+      {
+        "id": "media-01",
+        "ratio": 1.7777777777777777,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      },
+      {
+        "id": "media-02",
+        "ratio": 0.5625,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      },
+      {
+        "id": "media-03",
+        "ratio": 1,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      },
+      {
+        "id": "media-04",
+        "ratio": 0.8,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      },
+      {
+        "id": "media-05",
+        "ratio": 2.3851851851851853,
+        "kind": "video",
+        "sourceOffsetMs": 730,
+        "status": "ok"
+      },
+      {
+        "id": "media-06",
+        "ratio": 1.5,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      },
+      {
+        "id": "media-07",
+        "ratio": 0.6666666666666666,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      },
+      {
+        "id": "media-08",
+        "ratio": 1.25,
+        "kind": "image",
+        "sourceOffsetMs": 0,
+        "status": "ok"
+      }
+    ],
+    "one": [
+      "media-01"
+    ],
+    "two": [
+      "media-01",
+      "media-02"
+    ],
+    "recommendedCount": 8,
+    "awkwardSeven": 7,
+    "boundedMany": 24,
+    "transparentSoftEdge": "media-alpha",
+    "opaque": "media-01",
+    "failed": "media-failed"
+  },
+  "parameters": {
+    "frameScale": 0.46,
+    "gap": 0.08,
+    "travelCharacter": 0.45,
+    "spotlightScale": 1.38,
+    "finaleScale": 1.62
+  },
+  "modes": [
+    "automatic",
+    "fixed-duration",
+    "directed"
+  ],
+  "directions": [
+    "forward",
+    "reverse"
+  ],
+  "samples": [
+    {
+      "label": "00-lead-in:before-start",
+      "timeMs": 0,
+      "phase": "lead-in",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 730
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b9a93162618e6724e5dcba78220bec4eb10dbab60af4c14511ec83b642e792b1"
+      }
+    },
+    {
+      "label": "00-lead-in:start",
+      "timeMs": 0,
+      "phase": "lead-in",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 730
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b9a93162618e6724e5dcba78220bec4eb10dbab60af4c14511ec83b642e792b1"
+      }
+    },
+    {
+      "label": "00-lead-in:after-start",
+      "timeMs": 41.666667,
+      "phase": "lead-in",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 771.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "2e4633603df95c7b19a6f12ade6a552be641d70b11809bfbcc352dd962f8a79c"
+      }
+    },
+    {
+      "label": "00-lead-in:before-end",
+      "timeMs": 408.333333,
+      "phase": "lead-in",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1138.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b319dc994107b6a4335536c5ad90b79740632d5aced25019b356c94cfc7487e7"
+      }
+    },
+    {
+      "label": "01-travel:before-start",
+      "timeMs": 408.333333,
+      "phase": "lead-in",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1138.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b319dc994107b6a4335536c5ad90b79740632d5aced25019b356c94cfc7487e7"
+      }
+    },
+    {
+      "label": "00-lead-in:end",
+      "timeMs": 450,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1180
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b252b0ffac8098368de540e26fe6198721194f200f7aa02a8e6fff176df9ba4b"
+      }
+    },
+    {
+      "label": "01-travel:start",
+      "timeMs": 450,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1180
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b252b0ffac8098368de540e26fe6198721194f200f7aa02a8e6fff176df9ba4b"
+      }
+    },
+    {
+      "label": "00-lead-in:after-end",
+      "timeMs": 491.666667,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1221.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9122e66766070c2229ad2b83e6ed0651d800882318defd94dfaa0e165d83438b"
+      }
+    },
+    {
+      "label": "01-travel:after-start",
+      "timeMs": 491.666667,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1221.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9122e66766070c2229ad2b83e6ed0651d800882318defd94dfaa0e165d83438b"
+      }
+    },
+    {
+      "label": "01-travel:before-end",
+      "timeMs": 1228.333333,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1958.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ef59151e6eee60c2ea82cbafc51f178959cebf50fb18a3b88db921d328e03e6c"
+      }
+    },
+    {
+      "label": "02-spotlight-grow:before-start",
+      "timeMs": 1228.333333,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 1958.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ef59151e6eee60c2ea82cbafc51f178959cebf50fb18a3b88db921d328e03e6c"
+      }
+    },
+    {
+      "label": "01-travel:end",
+      "timeMs": 1270,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2000
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9c425c4d109fa17f25cf57fb3ecc348a39d213a863a5ae8edbee79c4a53b9687"
+      }
+    },
+    {
+      "label": "02-spotlight-grow:start",
+      "timeMs": 1270,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2000
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9c425c4d109fa17f25cf57fb3ecc348a39d213a863a5ae8edbee79c4a53b9687"
+      }
+    },
+    {
+      "label": "01-travel:after-end",
+      "timeMs": 1311.666667,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2041.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "43b2f051ed8aa3bd8b1d0d1008ceef4016fd547a9c36de84f8634fd4ef7a5a8d"
+      }
+    },
+    {
+      "label": "02-spotlight-grow:after-start",
+      "timeMs": 1311.666667,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2041.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "43b2f051ed8aa3bd8b1d0d1008ceef4016fd547a9c36de84f8634fd4ef7a5a8d"
+      }
+    },
+    {
+      "label": "02-spotlight-grow:before-end",
+      "timeMs": 1568.333333,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2298.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "e0c1a1bfa2b9787a53da7bb8f766eb521418d6ac177639f1bf4b4922f96f1e64"
+      }
+    },
+    {
+      "label": "03-spotlight-hold:before-start",
+      "timeMs": 1568.333333,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2298.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "e0c1a1bfa2b9787a53da7bb8f766eb521418d6ac177639f1bf4b4922f96f1e64"
+      }
+    },
+    {
+      "label": "02-spotlight-grow:end",
+      "timeMs": 1610,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2340
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b6f169a9cf13eafb006f99c6f5a213ef89744e6679a56f8eb89b9df9668295ba"
+      }
+    },
+    {
+      "label": "03-spotlight-hold:start",
+      "timeMs": 1610,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2340
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b6f169a9cf13eafb006f99c6f5a213ef89744e6679a56f8eb89b9df9668295ba"
+      }
+    },
+    {
+      "label": "02-spotlight-grow:after-end",
+      "timeMs": 1651.666667,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2381.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "a775477d2b94241c86c549915a8cc7e0a4d6c9154eadddbd3754a0686e2cc518"
+      }
+    },
+    {
+      "label": "03-spotlight-hold:after-start",
+      "timeMs": 1651.666667,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2381.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "a775477d2b94241c86c549915a8cc7e0a4d6c9154eadddbd3754a0686e2cc518"
+      }
+    },
+    {
+      "label": "03-spotlight-hold:before-end",
+      "timeMs": 2188.333333,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2918.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f8d39aac00b229d90cd4c59dde01bd7fafd10a782da93560e2a94e496082186d"
+      }
+    },
+    {
+      "label": "04-spotlight-return:before-start",
+      "timeMs": 2188.333333,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2918.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f8d39aac00b229d90cd4c59dde01bd7fafd10a782da93560e2a94e496082186d"
+      }
+    },
+    {
+      "label": "03-spotlight-hold:end",
+      "timeMs": 2230,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2960
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "748ed069bbbd786fa96615c90d7d784e6ce0e29c05d05f4cb0608e8e48854166"
+      }
+    },
+    {
+      "label": "04-spotlight-return:start",
+      "timeMs": 2230,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 2960
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "748ed069bbbd786fa96615c90d7d784e6ce0e29c05d05f4cb0608e8e48854166"
+      }
+    },
+    {
+      "label": "03-spotlight-hold:after-end",
+      "timeMs": 2271.666667,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3001.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "abc7ac2f0132983306c6b4f2d213145a7149b84f8e9cac7e68ae38c63e31b1ce"
+      }
+    },
+    {
+      "label": "04-spotlight-return:after-start",
+      "timeMs": 2271.666667,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3001.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "abc7ac2f0132983306c6b4f2d213145a7149b84f8e9cac7e68ae38c63e31b1ce"
+      }
+    },
+    {
+      "label": "04-spotlight-return:before-end",
+      "timeMs": 2488.333333,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3218.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6114f92a42e8a34ac4ba37da5c42b543c19f96b52f0864d7067200adb6db8c76"
+      }
+    },
+    {
+      "label": "05-travel:before-start",
+      "timeMs": 2488.333333,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3218.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6114f92a42e8a34ac4ba37da5c42b543c19f96b52f0864d7067200adb6db8c76"
+      }
+    },
+    {
+      "label": "04-spotlight-return:end",
+      "timeMs": 2530,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3260
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "a793e730af8da77bad787bfaf51a50baafc8e3d8116e8b7bd7374ee34922280f"
+      }
+    },
+    {
+      "label": "05-travel:start",
+      "timeMs": 2530,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3260
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "a793e730af8da77bad787bfaf51a50baafc8e3d8116e8b7bd7374ee34922280f"
+      }
+    },
+    {
+      "label": "04-spotlight-return:after-end",
+      "timeMs": 2571.666667,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3301.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "82e2ca18388035093c977b9da1b4d631261fe702794a0c31abd5255a36081381"
+      }
+    },
+    {
+      "label": "05-travel:after-start",
+      "timeMs": 2571.666667,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 3301.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "82e2ca18388035093c977b9da1b4d631261fe702794a0c31abd5255a36081381"
+      }
+    },
+    {
+      "label": "05-travel:before-end",
+      "timeMs": 3308.333333,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4038.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ce92cd251369f975d0adfbf57dfbeb12089825c91b14f3eaa8bf72036bb0206e"
+      }
+    },
+    {
+      "label": "06-spotlight-grow:before-start",
+      "timeMs": 3308.333333,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4038.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ce92cd251369f975d0adfbf57dfbeb12089825c91b14f3eaa8bf72036bb0206e"
+      }
+    },
+    {
+      "label": "05-travel:end",
+      "timeMs": 3350,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4080
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7604e8148dd04c03f3d54c8f2ead94fb8a2fcbf32a5e7b6efd552d15de02857f"
+      }
+    },
+    {
+      "label": "06-spotlight-grow:start",
+      "timeMs": 3350,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4080
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7604e8148dd04c03f3d54c8f2ead94fb8a2fcbf32a5e7b6efd552d15de02857f"
+      }
+    },
+    {
+      "label": "05-travel:after-end",
+      "timeMs": 3391.666667,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4121.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c1a6e4db547b64a166f1bd5da67843f4e67a643c9f30a6c134fb60a66e073746"
+      }
+    },
+    {
+      "label": "06-spotlight-grow:after-start",
+      "timeMs": 3391.666667,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4121.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "c1a6e4db547b64a166f1bd5da67843f4e67a643c9f30a6c134fb60a66e073746"
+      }
+    },
+    {
+      "label": "06-spotlight-grow:before-end",
+      "timeMs": 3648.333333,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4378.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "73e5853783b0565128f1e759d4358dad4b5856d977847df5d2753990f988ea61"
+      }
+    },
+    {
+      "label": "07-spotlight-hold:before-start",
+      "timeMs": 3648.333333,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4378.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "73e5853783b0565128f1e759d4358dad4b5856d977847df5d2753990f988ea61"
+      }
+    },
+    {
+      "label": "06-spotlight-grow:end",
+      "timeMs": 3690,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4420
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f1c31f46b84508ec98b217a2be2df93c99a60039754d43a3fdc0cabc1778aba6"
+      }
+    },
+    {
+      "label": "07-spotlight-hold:start",
+      "timeMs": 3690,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4420
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "f1c31f46b84508ec98b217a2be2df93c99a60039754d43a3fdc0cabc1778aba6"
+      }
+    },
+    {
+      "label": "06-spotlight-grow:after-end",
+      "timeMs": 3731.666667,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4461.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "970f0aa8a61302af5d621997148e49e32997929719ffe590767839e930ab24e4"
+      }
+    },
+    {
+      "label": "07-spotlight-hold:after-start",
+      "timeMs": 3731.666667,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4461.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "970f0aa8a61302af5d621997148e49e32997929719ffe590767839e930ab24e4"
+      }
+    },
+    {
+      "label": "07-spotlight-hold:before-end",
+      "timeMs": 4268.333333,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4998.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "bad86e6042d0aa86f7b71d852bfd0bbec3488ee429473683711fab1ce8f10e46"
+      }
+    },
+    {
+      "label": "08-spotlight-return:before-start",
+      "timeMs": 4268.333333,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 4998.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "bad86e6042d0aa86f7b71d852bfd0bbec3488ee429473683711fab1ce8f10e46"
+      }
+    },
+    {
+      "label": "07-spotlight-hold:end",
+      "timeMs": 4310,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5040
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "5d06939dd496d57a856c068bf4d83212d4f48570830fa378b936faf4dc627120"
+      }
+    },
+    {
+      "label": "08-spotlight-return:start",
+      "timeMs": 4310,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5040
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "5d06939dd496d57a856c068bf4d83212d4f48570830fa378b936faf4dc627120"
+      }
+    },
+    {
+      "label": "07-spotlight-hold:after-end",
+      "timeMs": 4351.666667,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5081.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "60f76148be3306fd287911227578f7906559490227e8b2bc9f5c88a789b1301f"
+      }
+    },
+    {
+      "label": "08-spotlight-return:after-start",
+      "timeMs": 4351.666667,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5081.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "60f76148be3306fd287911227578f7906559490227e8b2bc9f5c88a789b1301f"
+      }
+    },
+    {
+      "label": "08-spotlight-return:before-end",
+      "timeMs": 4568.333333,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5298.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "170676006fa9a130189f5e22e09ae34b6899574f1a0173579d3e400dff004673"
+      }
+    },
+    {
+      "label": "09-travel:before-start",
+      "timeMs": 4568.333333,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5298.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "170676006fa9a130189f5e22e09ae34b6899574f1a0173579d3e400dff004673"
+      }
+    },
+    {
+      "label": "08-spotlight-return:end",
+      "timeMs": 4610,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5340
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "5879825bc445f5dca47978f0118998e081af8bd81f391a2da09d60373aead7c7"
+      }
+    },
+    {
+      "label": "09-travel:start",
+      "timeMs": 4610,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5340
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "5879825bc445f5dca47978f0118998e081af8bd81f391a2da09d60373aead7c7"
+      }
+    },
+    {
+      "label": "08-spotlight-return:after-end",
+      "timeMs": 4651.666667,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5381.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ce9cbc2d40cc21aa4222691bf705d86f63b83d7a744f08f8bea02bc1fb94a593"
+      }
+    },
+    {
+      "label": "09-travel:after-start",
+      "timeMs": 4651.666667,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 5381.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ce9cbc2d40cc21aa4222691bf705d86f63b83d7a744f08f8bea02bc1fb94a593"
+      }
+    },
+    {
+      "label": "09-travel:before-end",
+      "timeMs": 5388.333333,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6118.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7ddda38053920a284869412799d28c750873dc5df5be18ddaa09fb559cff3098"
+      }
+    },
+    {
+      "label": "10-spotlight-grow:before-start",
+      "timeMs": 5388.333333,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6118.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7ddda38053920a284869412799d28c750873dc5df5be18ddaa09fb559cff3098"
+      }
+    },
+    {
+      "label": "09-travel:end",
+      "timeMs": 5430,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6160
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "1ae75ba3af0df988f8fc40935bc90eee62e713874e0e434199576549d10f6d67"
+      }
+    },
+    {
+      "label": "10-spotlight-grow:start",
+      "timeMs": 5430,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6160
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "1ae75ba3af0df988f8fc40935bc90eee62e713874e0e434199576549d10f6d67"
+      }
+    },
+    {
+      "label": "09-travel:after-end",
+      "timeMs": 5471.666667,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6201.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "8b3420d78ed369649a7c917b3cb1c297608e09072b20807cdab219a343e6ecd0"
+      }
+    },
+    {
+      "label": "10-spotlight-grow:after-start",
+      "timeMs": 5471.666667,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6201.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "8b3420d78ed369649a7c917b3cb1c297608e09072b20807cdab219a343e6ecd0"
+      }
+    },
+    {
+      "label": "10-spotlight-grow:before-end",
+      "timeMs": 5728.333333,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6458.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "50cb7d0663094a97d3325be5b61a656702dce93767d056e8f7a8613e47e11c49"
+      }
+    },
+    {
+      "label": "11-spotlight-hold:before-start",
+      "timeMs": 5728.333333,
+      "phase": "spotlight-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6458.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "50cb7d0663094a97d3325be5b61a656702dce93767d056e8f7a8613e47e11c49"
+      }
+    },
+    {
+      "label": "10-spotlight-grow:end",
+      "timeMs": 5770,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6500
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "221460a26b9da5af52d494321cce18ec632f7749b17cd395202318bfbccdf2b6"
+      }
+    },
+    {
+      "label": "11-spotlight-hold:start",
+      "timeMs": 5770,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6500
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "221460a26b9da5af52d494321cce18ec632f7749b17cd395202318bfbccdf2b6"
+      }
+    },
+    {
+      "label": "10-spotlight-grow:after-end",
+      "timeMs": 5811.666667,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6541.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "2006fb181ba953e046ba7256d7ec97c916422e3d49397c9eef24487c31f152fe"
+      }
+    },
+    {
+      "label": "11-spotlight-hold:after-start",
+      "timeMs": 5811.666667,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 6541.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "2006fb181ba953e046ba7256d7ec97c916422e3d49397c9eef24487c31f152fe"
+      }
+    },
+    {
+      "label": "11-spotlight-hold:before-end",
+      "timeMs": 6348.333333,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7078.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "001e402884e016eab31a05c40cd61f0912d97d8dbfa0437898f7a8cdc32cf266"
+      }
+    },
+    {
+      "label": "12-spotlight-return:before-start",
+      "timeMs": 6348.333333,
+      "phase": "spotlight-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7078.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "001e402884e016eab31a05c40cd61f0912d97d8dbfa0437898f7a8cdc32cf266"
+      }
+    },
+    {
+      "label": "11-spotlight-hold:end",
+      "timeMs": 6390,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7120
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "765f6f574850a004ea4a9a4b83110669d4da856e78f97ee177b86d64c3553274"
+      }
+    },
+    {
+      "label": "12-spotlight-return:start",
+      "timeMs": 6390,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7120
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "765f6f574850a004ea4a9a4b83110669d4da856e78f97ee177b86d64c3553274"
+      }
+    },
+    {
+      "label": "11-spotlight-hold:after-end",
+      "timeMs": 6431.666667,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7161.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ef074104a3400e8d932761ea9a02c2a23907a3dc363f2b1f2711e8cd98fee89f"
+      }
+    },
+    {
+      "label": "12-spotlight-return:after-start",
+      "timeMs": 6431.666667,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7161.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "ef074104a3400e8d932761ea9a02c2a23907a3dc363f2b1f2711e8cd98fee89f"
+      }
+    },
+    {
+      "label": "12-spotlight-return:before-end",
+      "timeMs": 6648.333333,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7378.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6748bcd6561bd8e77871c764617e11d8cf28e6e8636051a3110f61be9e19db51"
+      }
+    },
+    {
+      "label": "13-travel:before-start",
+      "timeMs": 6648.333333,
+      "phase": "spotlight-return",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7378.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6748bcd6561bd8e77871c764617e11d8cf28e6e8636051a3110f61be9e19db51"
+      }
+    },
+    {
+      "label": "12-spotlight-return:end",
+      "timeMs": 6690,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7420
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "4955bb2ce11514ed84278058592a0fc9cc30c94ea2d6ff112f3fffe306c38bfc"
+      }
+    },
+    {
+      "label": "13-travel:start",
+      "timeMs": 6690,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7420
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "4955bb2ce11514ed84278058592a0fc9cc30c94ea2d6ff112f3fffe306c38bfc"
+      }
+    },
+    {
+      "label": "12-spotlight-return:after-end",
+      "timeMs": 6731.666667,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7461.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b57ceea9776df379cb2237a264fd36fb4d7062bf41efc1e77b8775f24e93a2e4"
+      }
+    },
+    {
+      "label": "13-travel:after-start",
+      "timeMs": 6731.666667,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 7461.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b57ceea9776df379cb2237a264fd36fb4d7062bf41efc1e77b8775f24e93a2e4"
+      }
+    },
+    {
+      "label": "13-travel:before-end",
+      "timeMs": 7468.333333,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8198.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "0ac7a96584a4291207ddefaf9b6ad11f55d9677dad86fdc4e9b426fd435031e5"
+      }
+    },
+    {
+      "label": "14-finale-grow:before-start",
+      "timeMs": 7468.333333,
+      "phase": "travel",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8198.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "0ac7a96584a4291207ddefaf9b6ad11f55d9677dad86fdc4e9b426fd435031e5"
+      }
+    },
+    {
+      "label": "13-travel:end",
+      "timeMs": 7510,
+      "phase": "finale-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8240
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9ef26c45a2512593c8ab88e9e716d39c6114a91375d1f2b82b3e15d5099afb74"
+      }
+    },
+    {
+      "label": "14-finale-grow:start",
+      "timeMs": 7510,
+      "phase": "finale-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8240
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "9ef26c45a2512593c8ab88e9e716d39c6114a91375d1f2b82b3e15d5099afb74"
+      }
+    },
+    {
+      "label": "13-travel:after-end",
+      "timeMs": 7551.666667,
+      "phase": "finale-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8281.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b2c479916e08ac089594947fbcd1536ea4cc9059a0d029ab848ea150ea8422f4"
+      }
+    },
+    {
+      "label": "14-finale-grow:after-start",
+      "timeMs": 7551.666667,
+      "phase": "finale-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8281.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "b2c479916e08ac089594947fbcd1536ea4cc9059a0d029ab848ea150ea8422f4"
+      }
+    },
+    {
+      "label": "14-finale-grow:before-end",
+      "timeMs": 7968.333333,
+      "phase": "finale-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8698.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "da1b881c4ced9e0d992ed360d0c835fac053798e9a117594cf2a2b8f32dc9ddd"
+      }
+    },
+    {
+      "label": "15-finale-hold:before-start",
+      "timeMs": 7968.333333,
+      "phase": "finale-grow",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8698.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "da1b881c4ced9e0d992ed360d0c835fac053798e9a117594cf2a2b8f32dc9ddd"
+      }
+    },
+    {
+      "label": "14-finale-grow:end",
+      "timeMs": 8010,
+      "phase": "finale-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8740
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "823183e11f786fae72ea84ba47936a77b2295fdf96ef5f2b0f44b527e8e7a3aa"
+      }
+    },
+    {
+      "label": "15-finale-hold:start",
+      "timeMs": 8010,
+      "phase": "finale-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8740
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "823183e11f786fae72ea84ba47936a77b2295fdf96ef5f2b0f44b527e8e7a3aa"
+      }
+    },
+    {
+      "label": "14-finale-grow:after-end",
+      "timeMs": 8051.666667,
+      "phase": "finale-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8781.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "cc183b8b806977678ea52601358c88f16225c81c0085fd30bac82b588417464f"
+      }
+    },
+    {
+      "label": "15-finale-hold:after-start",
+      "timeMs": 8051.666667,
+      "phase": "finale-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 8781.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "cc183b8b806977678ea52601358c88f16225c81c0085fd30bac82b588417464f"
+      }
+    },
+    {
+      "label": "15-finale-hold:before-end",
+      "timeMs": 8868.333333,
+      "phase": "finale-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9598.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "8ce06bb17c896b08ca30398d6fba6a7cb9bede893372065d51370f3f0b9f9123"
+      }
+    },
+    {
+      "label": "16-exit:before-start",
+      "timeMs": 8868.333333,
+      "phase": "finale-hold",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9598.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "8ce06bb17c896b08ca30398d6fba6a7cb9bede893372065d51370f3f0b9f9123"
+      }
+    },
+    {
+      "label": "15-finale-hold:end",
+      "timeMs": 8910,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9640
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7556c0fd8310f2b3c117dbe792e01509665eaba1c920e037d74616aa1b10f3e4"
+      }
+    },
+    {
+      "label": "16-exit:start",
+      "timeMs": 8910,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9640
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7556c0fd8310f2b3c117dbe792e01509665eaba1c920e037d74616aa1b10f3e4"
+      }
+    },
+    {
+      "label": "15-finale-hold:after-end",
+      "timeMs": 8951.666667,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9681.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6905484cff8f2b19e507a7a59455040ed9515ea81613219d34c211c7cd5b1e62"
+      }
+    },
+    {
+      "label": "16-exit:after-start",
+      "timeMs": 8951.666667,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 9681.666667
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "6905484cff8f2b19e507a7a59455040ed9515ea81613219d34c211c7cd5b1e62"
+      }
+    },
+    {
+      "label": "16-exit:before-end",
+      "timeMs": 9488.333333,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10218.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "57e06e6a6929f62ee2a734fc4aff825fcb53b598a1bfc8d876883c7c111dbbd2"
+      }
+    },
+    {
+      "label": "terminal:before-end",
+      "timeMs": 9488.333333,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10218.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "57e06e6a6929f62ee2a734fc4aff825fcb53b598a1bfc8d876883c7c111dbbd2"
+      }
+    },
+    {
+      "label": "terminal:before-start",
+      "timeMs": 9488.333333,
+      "phase": "exit",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10218.333333
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "57e06e6a6929f62ee2a734fc4aff825fcb53b598a1bfc8d876883c7c111dbbd2"
+      }
+    },
+    {
+      "label": "16-exit:after-end",
+      "timeMs": 9530,
+      "phase": "terminal",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10260
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7b0f50c62d239b8135162fa67602e98007982919a9aec9148cdddd2c710364e3"
+      }
+    },
+    {
+      "label": "16-exit:end",
+      "timeMs": 9530,
+      "phase": "terminal",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10260
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7b0f50c62d239b8135162fa67602e98007982919a9aec9148cdddd2c710364e3"
+      }
+    },
+    {
+      "label": "terminal:after-end",
+      "timeMs": 9530,
+      "phase": "terminal",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10260
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7b0f50c62d239b8135162fa67602e98007982919a9aec9148cdddd2c710364e3"
+      }
+    },
+    {
+      "label": "terminal:after-start",
+      "timeMs": 9530,
+      "phase": "terminal",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10260
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7b0f50c62d239b8135162fa67602e98007982919a9aec9148cdddd2c710364e3"
+      }
+    },
+    {
+      "label": "terminal:end",
+      "timeMs": 9530,
+      "phase": "terminal",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10260
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7b0f50c62d239b8135162fa67602e98007982919a9aec9148cdddd2c710364e3"
+      }
+    },
+    {
+      "label": "terminal:start",
+      "timeMs": 9530,
+      "phase": "terminal",
+      "permutationOrFocus": [
+        "media-01",
+        "media-02",
+        "media-03",
+        "media-04",
+        "media-05",
+        "media-06",
+        "media-07",
+        "media-08"
+      ],
+      "sourceVideoTimes": {
+        "media-05": 10260
+      },
+      "digest": {
+        "status": "actual",
+        "algorithm": "sha256",
+        "value": "7b0f50c62d239b8135162fa67602e98007982919a9aec9148cdddd2c710364e3"
+      }
+    }
+  ],
+  "requiredInvariants": [
+    "all numeric pose outputs finite",
+    "stable IDs unique",
+    "artwork opacity 1",
+    "artwork filter none",
+    "artwork blend normal",
+    "source-video time equals source offset plus story time",
+    "visible mount count bounded",
+    "terminal sample explicit",
+    "play scrub fixed-step canonical outputs equal",
+    "alpha-zero RGB contamination count is zero"
+  ],
+  "digestPolicy": {
+    "algorithm": "sha256",
+    "canonicalization": "recursively sorted JSON without volatile fields",
+    "placeholderRule": "never invent; generator replaces samples with actual values"
+  }
+}
