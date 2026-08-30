@@ -260,11 +260,26 @@ function writeFailureReceipt(evidenceRoot, receipt) {
 
 async function until(window, expression, label, timeoutMs = 30_000) {
     const deadline = Date.now() + timeoutMs
+    let lastDiagnostic = ""
     while (Date.now() < deadline) {
         if (await window.webContents.executeJavaScript(`Boolean(${expression})`)) return
+        if (label.includes("PNG Frames")) {
+            const diagnostic = await window.webContents.executeJavaScript(`JSON.stringify({
+                error: document.querySelector('.export-error')?.textContent.trim() ?? null,
+                progress: document.querySelector('.export-progress p')?.textContent.trim() ?? null,
+                button: document.querySelector('.export-button')?.textContent.replace(/\\s+/g, ' ').trim() ?? null,
+                success: document.querySelector('.export-success strong')?.textContent.trim() ?? null,
+            })`)
+            if (diagnostic !== lastDiagnostic) {
+                console.log(`[G11 ${label}] ${diagnostic}`)
+                lastDiagnostic = diagnostic
+            }
+            const parsed = JSON.parse(diagnostic)
+            if (parsed.error) throw new Error(`G11 ${label} failed: ${parsed.error}`)
+        }
         await wait(75)
     }
-    throw new Error(`G11 Vitrine smoke timed out waiting for ${label}.`)
+    throw new Error(`G11 Vitrine smoke timed out waiting for ${label}${lastDiagnostic ? `: ${lastDiagnostic}` : "."}`)
 }
 
 async function settle(window) {
