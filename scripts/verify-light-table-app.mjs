@@ -131,8 +131,8 @@ assert.equal(automatic.mode, "automatic")
 assert.equal(automatic.durationMs, 10_000)
 const fixed = lightTableTimelineFromConfig(config(6, { timelineMode: "fixed-duration", timelineFixedDurationMs: minimumLightTableDuration(6), timelineSegments: [] }), 30)
 assert.equal(fixed.durationMs, minimumLightTableDuration(6))
-const fractionalSecondFixed = lightTableTimelineFromConfig(config(6, { timelineMode: "fixed-duration", timelineFixedDurationMs: 12_345, timelineSegments: [] }), 30)
-assert.deepEqual([fractionalSecondFixed.durationMs, fractionalSecondFixed.frameCount], [12_345, 371])
+const fractionalSecondFixed = lightTableTimelineFromConfig(config(6, { timelineMode: "fixed-duration", timelineFixedDurationMs: 12_345.5, timelineSegments: [] }), 30)
+assert.deepEqual([fractionalSecondFixed.durationMs, fractionalSecondFixed.frameCount], [12_345.5, 371])
 const directedSegments = automatic.phases.map((phase) => ({
     id: phase.id,
     kind: phase.id === "final-inspection" ? "hold" : "cycle",
@@ -144,6 +144,7 @@ const directed = lightTableTimelineFromConfig(config(6, { timelineMode: "directe
 assert.equal(directed.mode, "directed")
 assert.ok(directed.durationMs <= LIGHT_TABLE_MAX_DURATION_MS)
 assert.deepEqual(directed.phases.map((phase) => [phase.id, phase.requestedPaceScale]), [["wake", 2], ["review", 1], ["final-inspection", 1], ["return", 2]])
+assert.deepEqual(directed.phases.map((phase) => phase.endMs - phase.startMs), directedSegments.map((segment) => segment.durationMs), "portable directed phase boundaries must drive evaluation exactly")
 
 const app = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8")
 const runtime = readFileSync(new URL("../src/productSceneRuntime.ts", import.meta.url), "utf8")
@@ -156,7 +157,7 @@ assert.match(app, /Light Table supports at most.*ordered media items\. Nothing w
 assert.match(app, /Light Table needs at least one ordered media item\. The last frame was kept\./)
 assert.match(app, /style\.id === "light-table" && sceneVersion === 2[\s\S]{0,1800}backgroundStyle: "solid" as const/)
 assert.match(app, /options=\{authoredShelf \|\| authoredLightTable \|\| config\.settings\.playKind === "loop"/)
-assert.match(app, /phase\.id === "wake" \|\| phase\.id === "return" \? 2 : 1/)
+assert.match(app, /timelineMode: "directed", timelineFixedDurationMs: 0, timelineSegments: \[\]/)
 assert.match(app, /Wake ×2 → review ×1 → final inspection hold → return ×2/)
 assert.match(app, /disabled=\{authoredLightTable && style === "transparent"\}/)
 assert.match(app, /Light Table v2 export is unavailable until its rendered output is verified\./)

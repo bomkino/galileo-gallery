@@ -3,6 +3,7 @@ import type { MediaItem, ReelConfig } from "../types"
 import {
     assertLightTableOpaqueIntent,
     lightTableParametersFromConfig,
+    lightTableOpaqueLookFromConfig,
     lightTableSourcesFromConfig,
     lightTableTimelineFromConfig,
     lightTableTimelineMediaCount,
@@ -11,17 +12,21 @@ import { evaluateLightTable, lightTableSourceTimeSeconds } from "./lightTable.ts
 import {
     LIGHT_TABLE_POSTER_MAX_BYTES,
     LIGHT_TABLE_POSTER_MAX_EDGE,
+    createLightTableMountCleanupGate,
     createLightTablePosterEncodeGate,
     createLightTableVideoTargetCoordinator,
     lightTablePresentedFrameAtOrBeforeTarget,
     lightTableSeekConverged,
+    lightTableUnavailableKeysForScope,
     lightTableVideoSeekTime,
+    recordLightTableUnavailableKey,
     retainedLightTablePoster,
     sampledLightTableSourceTimeMs,
     selectLightTableVideoOwnerIds,
     shouldReplaceLightTablePoster,
     type LightTablePosterEncodeGate,
     type LightTablePosterRecord as PosterRecord,
+    type LightTableUnavailableState,
     type LightTableVideoTargetRequest,
 } from "./lightTableVideoPolicy.ts"
 import {
@@ -368,16 +373,18 @@ function useReducedMotion(explicit: boolean | undefined, exportMode: boolean) {
 
 export default function LightTableRenderer({ config, timeMs, fps = 30, exportFrames, cataloguePreview = false, reducedMotion, exportMode = false, inspectionItemId = null, onInspectionItemChange }: Props) {
     assertLightTableOpaqueIntent(config.settings.backgroundStyle)
+    const opaqueLook = lightTableOpaqueLookFromConfig(config)
     const stageRef = React.useRef<HTMLDivElement>(null)
     const [size, setSize] = React.useState({ width: config.settings.canvasWidth, height: config.settings.canvasHeight })
     const [failedIds, setFailedIds] = React.useState<ReadonlySet<string>>(new Set())
     const [posters, setPosters] = React.useState<ReadonlyMap<string, PosterRecord>>(new Map())
-    const [unavailableKeys, setUnavailableKeys] = React.useState<ReadonlySet<string>>(new Set())
+    const [unavailableState, setUnavailableState] = React.useState<LightTableUnavailableState>(() => Object.freeze({ scope: "", keys: new Set<string>() }))
     const posterUrlsRef = React.useRef(new Set<string>())
     const pendingPosterRetirementsRef = React.useRef(new Set<string>())
     const [rovingIndex, setRovingIndex] = React.useState(0)
     const [localInspectionId, setLocalInspectionId] = React.useState<string | null>(null)
     const [encodeGate] = React.useState(() => createLightTablePosterEncodeGate())
+    const [mountCleanupGate] = React.useState(() => createLightTableMountCleanupGate())
     const prefersReducedMotion = useReducedMotion(reducedMotion, exportMode)
     const items = React.useMemo(() => config.items.length ? config.items : cataloguePreview ? placeholderItems() : [], [cataloguePreview, config.items])
     const sourceIdentity = React.useMemo(() => JSON.stringify(items.map((item) => [item.id, item.type, item.url, item.previewUrl ?? ""])), [items])
@@ -417,7 +424,6 @@ export default function LightTableRenderer({ config, timeMs, fps = 30, exportFra
 
     React.useEffect(() => {
         setFailedIds(new Set())
-        setUnavailableKeys(new Set())
         setPosters((current) => {
             let next: Map<string, PosterRecord> | null = null
             current.forEach((poster, id) => {
@@ -442,11 +448,14 @@ export default function LightTableRenderer({ config, timeMs, fps = 30, exportFra
             if (!connectedSources.has(url)) revokePoster(url)
         }
     })
-    React.useEffect(() => () => {
-        encodeGate.dispose()
-        for (const url of [...posterUrlsRef.current]) revokePoster(url)
-        pendingPosterRetirementsRef.current.clear()
-    }, [encodeGate, revokePoster])
+    React.useEffect(() => {
+        const mountGeneration = mountCleanupGate.begin()
+        return () => mountCleanupGate.defer(mountGeneration, () => {
+            encodeGate.dispose()
+            for (const url of [...posterUrlsRef.current]) revokePoster(url)
+            pendingPosterRetirementsRef.current.clear()
+        })
+    }, [encodeGate, mountCleanupGate, revokePoster])
 
     const parameters = React.useMemo(() => lightTableParametersFromConfig(workingConfig), [workingConfig])
     const timeline = React.useMemo(() => lightTableTimelineFromConfig(workingConfig, fps, lightTableTimelineMediaCount(items.length, cataloguePreview)), [cataloguePreview, fps, items.length, workingConfig])
@@ -470,7 +479,8 @@ export default function LightTableRenderer({ config, timeMs, fps = 30, exportFra
 
     const sampledSourceTimeMs = sampledLightTableSourceTimeMs(timeMs, fps)
     const targetKey = `${config.settings.loopVideos ? "loop" : "clamp"}:${Math.round(sampledSourceTimeMs * 1_000)}`
-    React.useEffect(() => setUnavailableKeys(new Set()), [sourceIdentity, targetKey])
+    const unavailableScope = `${sourceIdentity}\n${targetKey}`
+    const unavailableKeys = lightTableUnavailableKeysForScope(unavailableState, unavailableScope)
     const committedVideoOwnerIdsRef = React.useRef<ReadonlySet<string>>(new Set())
     const videoOwnerIds = React.useMemo(
         () => exportMode ? new Set<string>() : new Set(selectLightTableVideoOwnerIds(items, evaluated.focusId, targetKey, posters, failedIds, unavailableKeys, committedVideoOwnerIdsRef.current)),
@@ -539,9 +549,17 @@ export default function LightTableRenderer({ config, timeMs, fps = 30, exportFra
         data-underlight-placement={evaluated.render.underlightPlacement}
         data-video-source-owners={videoOwnerIds.size}
         data-reduced-motion={prefersReducedMotion ? "true" : "false"}
+        data-light-table-look={opaqueLook.style}
+        data-light-table-theme={opaqueLook.theme}
         role={exportMode ? undefined : "group"}
         aria-label={exportMode ? undefined : "Light Table review surface"}
-        style={{ "--light-table-surface": evaluated.render.background.color } as React.CSSProperties}
+        style={{
+            "--light-table-surface": opaqueLook.ground,
+            "--light-table-secondary": opaqueLook.secondary,
+            "--light-table-paper": opaqueLook.paper,
+            "--light-table-angle": `${opaqueLook.angle}deg`,
+            "--light-table-texture-alpha": opaqueLook.texture / 2_500,
+        } as React.CSSProperties}
     >
         <div
             className="light-table-underlight-layer"
@@ -631,7 +649,11 @@ export default function LightTableRenderer({ config, timeMs, fps = 30, exportFra
                                 encodeGate={encodeGate}
                                 onPoster={(poster) => publishPoster(plane.id, poster)}
                                 onFailure={() => markFailed(plane.id)}
-                                onUnavailable={(unavailableTargetKey) => setUnavailableKeys((current) => new Set(current).add(`${plane.id}:${source}:${unavailableTargetKey}`))}
+                                onUnavailable={(unavailableTargetKey) => setUnavailableState((current) => recordLightTableUnavailableKey(
+                                    current,
+                                    `${sourceIdentity}\n${unavailableTargetKey}`,
+                                    `${plane.id}:${source}:${unavailableTargetKey}`,
+                                ))}
                             />}
                     </div>
                 </figure>

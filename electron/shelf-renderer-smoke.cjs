@@ -266,8 +266,8 @@ async function decoderState(window) {
     return window.webContents.executeJavaScript("window.__shelfDecoderTracker.result()")
 }
 
-async function mediaSamples(window, diagnosticStage = "media.sample") {
-    const evidence = await executeShelfRendererProbe(window.webContents, diagnosticStage, `async () => {
+function shelfMediaSamplesProbeExpression() {
+    return `async () => {
         const sampleErrors = []
         const sample = (media, index, kind) => {
             if (!media || !media.isConnected) return null
@@ -296,7 +296,7 @@ async function mediaSamples(window, diagnosticStage = "media.sample") {
                 const rawName = String(error?.name ?? 'Error')
                 const name = /^[A-Za-z][A-Za-z0-9]{0,63}$/.test(rawName) ? rawName : 'Error'
                 const message = String(error?.message ?? error)
-                sampleErrors.push({ index, kind, name, category: classify(name, message), fingerprint: fingerprint(name + '\n' + message) })
+                sampleErrors.push({ index, kind, name, category: classify(name, message), fingerprint: fingerprint(name + String.fromCharCode(10) + message) })
                 return null
             }
         }
@@ -336,7 +336,11 @@ async function mediaSamples(window, diagnosticStage = "media.sample") {
                 phrase: stage.dataset.shelfPhrase,
             } : null,
         }
-    }`)
+    }`
+}
+
+async function mediaSamples(window, diagnosticStage = "media.sample") {
+    const evidence = await executeShelfRendererProbe(window.webContents, diagnosticStage, shelfMediaSamplesProbeExpression())
     if (!evidence || !Array.isArray(evidence.result) || evidence.result.length > 11 || !Array.isArray(evidence.sampleErrors)) throw new Error("Shelf media sample envelope is invalid.")
     for (const entry of evidence.result) {
         if (!entry || typeof entry.id !== "string") throw new Error("Shelf media sample entry is invalid.")
@@ -1105,4 +1109,4 @@ async function runShelfRendererSmoke(window, evidenceRoot, mode = process.env.RE
     }
 }
 
-module.exports = { runShelfRendererSmoke }
+module.exports = { runShelfRendererSmoke, shelfMediaSamplesProbeExpression }

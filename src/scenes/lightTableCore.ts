@@ -1,5 +1,5 @@
 export const LIGHT_TABLE_CORE_AUTHORITY_SHA256 = "58cb28c0a6d44b3334ef0c25bc02f902dd1383270fe194f4145f2f34c1eccbf8"
-export const LIGHT_TABLE_CORE_IMPLEMENTATION_SHA256 = "8fe4b48d150db186001b16b11ed8bf17cb2beca063cd52ec6448a5ad5ea583f3"
+export const LIGHT_TABLE_CORE_IMPLEMENTATION_SHA256 = "f10702b12e1f90ad4db655b33179ad04c3100bf08ec9d988e52f8d9b599bcfcc"
 
 const TAU = Math.PI * 2
 export const LIGHT_TABLE_CORE_MAX_VISIBLE = 24
@@ -184,6 +184,7 @@ export function automaticLightTableCoreDurationMs(count: unknown) {
 }
 
 type Blueprint = Omit<LightTableCoreSegment, "durationMs" | "achievedPaceScale" | "index" | "startMs" | "endMs" | "start" | "end">
+type DirectedDurationIntent = Readonly<{ id: LightTableCoreSegment["id"]; durationMs: number }>
 
 function timelineBlueprint(count: number, targetDurationMs: number, mode: LightTableCoreMode): Blueprint[] {
     const reviewMinimum = Math.max(1_600, Math.min(LIGHT_TABLE_CORE_MAX_VISIBLE, Math.max(1, count)) * 420)
@@ -199,7 +200,7 @@ function timelineBlueprint(count: number, targetDurationMs: number, mode: LightT
 
 function distributeDurations(targetDurationMs: number, blueprint: Blueprint[]) {
     const minimumTotal = blueprint.reduce((sum, segment) => sum + segment.min, 0)
-    const target = Math.max(minimumTotal, Math.round(targetDurationMs))
+    const target = Math.max(minimumTotal, targetDurationMs)
     const flexible = blueprint.map((segment) => Math.max(0, segment.preferred - segment.min))
     const flexibleTotal = flexible.reduce((sum, value) => sum + value, 0)
     const remaining = target - minimumTotal
@@ -216,17 +217,40 @@ function distributeDurations(targetDurationMs: number, blueprint: Blueprint[]) {
     })
 }
 
+function directedDurationsFromIntent(value: unknown, issues: LightTableCoreIssue[]): DirectedDurationIntent[] | null {
+    if (value === undefined || (Array.isArray(value) && value.length === 0)) return null
+    const ids: LightTableCoreSegment["id"][] = ["wake", "review", "final-inspection", "return"]
+    if (!Array.isArray(value) || value.length !== ids.length) {
+        issues.push({ code: "invalid-directed-segments" })
+        return null
+    }
+    const durations = value.map((candidate, index) => {
+        if (!candidate || typeof candidate !== "object") return null
+        const record = candidate as Record<string, unknown>
+        const durationMs = Number(record.durationMs)
+        if (record.id !== ids[index] || !Number.isFinite(durationMs) || durationMs <= 0) return null
+        return Object.freeze({ id: ids[index], durationMs })
+    })
+    if (durations.some((duration) => duration === null)) {
+        issues.push({ code: "invalid-directed-segments" })
+        return null
+    }
+    return durations as DirectedDurationIntent[]
+}
+
 export function compileLightTableCoreTimeline(
-    intent: { mode?: unknown; durationMs?: unknown } | null | undefined,
+    intent: { mode?: unknown; durationMs?: unknown; segments?: unknown } | null | undefined,
     count: unknown,
     controls?: Partial<LightTableCoreControls> | null,
 ): CompiledLightTableCoreTimeline {
     const normalizedCount = clamp(Math.round(finiteNumber(count, 1)), 1, LIGHT_TABLE_CORE_MAX_VISIBLE)
     const issues: LightTableCoreIssue[] = []
     const mode = normalizeMode(intent?.mode, issues)
+    const authoredDirected = mode === "directed" ? directedDurationsFromIntent(intent?.segments, issues) : null
     const automatic = automaticLightTableCoreDurationMs(normalizedCount)
     const minimum = minimumLightTableCoreDurationMs(normalizedCount)
-    const requestedRaw = intent && Object.prototype.hasOwnProperty.call(intent, "durationMs") ? Number(intent.durationMs) : automatic
+    const authoredDuration = authoredDirected?.reduce((sum, segment) => sum + segment.durationMs, 0)
+    const requestedRaw = authoredDuration ?? (intent && Object.prototype.hasOwnProperty.call(intent, "durationMs") ? Number(intent.durationMs) : automatic)
     let requested = Number.isFinite(requestedRaw) ? requestedRaw : automatic
 
     if (!Number.isFinite(requestedRaw) && mode !== "automatic") {
@@ -252,7 +276,25 @@ export function compileLightTableCoreTimeline(
     }
 
     const blueprint = timelineBlueprint(normalizedCount, Math.max(target, minimum), mode)
-    const withDuration = distributeDurations(mode === "automatic" ? automatic : target, blueprint)
+    const authoredDirectedIsExact = Boolean(authoredDirected)
+        && target === authoredDuration
+        && target <= LIGHT_TABLE_CORE_MAX_DURATION_MS
+        && authoredDirected!.every((segment, index) => segment.durationMs >= blueprint[index].min)
+    if (authoredDirected && !authoredDirectedIsExact && !issues.some((issue) => issue.code === "directed-duration-compromise")) {
+        issues.push({
+            code: "directed-duration-compromise",
+            requestedDurationMs: authoredDuration,
+            minimumDurationMs: minimum,
+            compiledDurationMs: target,
+        })
+    }
+    const withDuration = authoredDirectedIsExact
+        ? blueprint.map((segment, index) => ({
+            ...segment,
+            durationMs: authoredDirected![index].durationMs,
+            achievedPaceScale: segment.base / authoredDirected![index].durationMs,
+        }))
+        : distributeDurations(mode === "automatic" ? automatic : target, blueprint)
     const durationMs = withDuration.reduce((sum, segment) => sum + segment.durationMs, 0)
     let cursor = 0
     const segments = withDuration.map((segment, index): LightTableCoreSegment => {

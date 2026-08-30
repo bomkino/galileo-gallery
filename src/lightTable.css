@@ -1,5 +1,9 @@
 .light-table-stage {
     --light-table-surface: #e8e6de;
+    --light-table-secondary: #d3cabd;
+    --light-table-paper: #e8e6de;
+    --light-table-angle: 145deg;
+    --light-table-texture-alpha: 0;
     position: relative;
     width: 100%;
     height: 100%;
@@ -8,6 +12,21 @@
     isolation: isolate;
     background: var(--light-table-surface);
     color: #171816;
+}
+
+.light-table-stage[data-light-table-look="gradient"] {
+    background: linear-gradient(var(--light-table-angle), var(--light-table-surface), var(--light-table-secondary));
+}
+
+.light-table-stage[data-light-table-look="halo"] {
+    background: radial-gradient(circle at 50% 45%, var(--light-table-secondary) 0%, var(--light-table-surface) 68%);
+}
+
+.light-table-stage[data-light-table-look="paper"] {
+    background:
+        linear-gradient(rgba(23, 24, 22, var(--light-table-texture-alpha)) 1px, transparent 1px) 0 0 / 7px 7px,
+        linear-gradient(90deg, rgba(255, 255, 255, var(--light-table-texture-alpha)) 1px, transparent 1px) 0 0 / 11px 11px,
+        var(--light-table-paper);
 }
 
 .light-table-plane {

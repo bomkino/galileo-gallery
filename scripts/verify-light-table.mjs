@@ -33,10 +33,13 @@ import {
     LIGHT_TABLE_POSTER_MAX_BYTES,
     LIGHT_TABLE_POSTER_MAX_EDGE,
     createLightTablePosterEncodeGate,
+    createLightTableMountCleanupGate,
     createLightTableVideoTargetCoordinator,
     lightTablePresentedFrameAtOrBeforeTarget,
     lightTableSeekConverged,
+    lightTableUnavailableKeysForScope,
     lightTableVideoSeekTime,
+    recordLightTableUnavailableKey,
     matchingLightTablePoster,
     retainedLightTablePoster,
     sampledLightTableSourceTimeMs,
@@ -46,6 +49,7 @@ import {
 import {
     assertLightTableOpaqueIntent,
     lightTableParametersFromConfig,
+    lightTableOpaqueLookFromConfig,
     lightTableSourcesFromConfig,
     lightTableTimelineMediaCount,
     resolvedLightTableRatio,
@@ -62,7 +66,7 @@ import {
 } from "../src/scenes/lightTablePresentation.ts"
 
 const PINNED_CORE_AUTHORITY_SHA256 = "58cb28c0a6d44b3334ef0c25bc02f902dd1383270fe194f4145f2f34c1eccbf8"
-const PINNED_CORE_IMPLEMENTATION_SHA256 = "8fe4b48d150db186001b16b11ed8bf17cb2beca063cd52ec6448a5ad5ea583f3"
+const PINNED_CORE_IMPLEMENTATION_SHA256 = "f10702b12e1f90ad4db655b33179ad04c3100bf08ec9d988e52f8d9b599bcfcc"
 const { lightTableFrameCount: hostLightTableFrameCount } = createRequire(import.meta.url)("../electron/frame-count-policy.cjs")
 const VECTOR_IDS = [
     "seam-ordinary-six",
@@ -529,6 +533,19 @@ const normalized = withLightTableDefaults(sourceConfig)
 assert.deepEqual(sourceConfig, untouched, "default reconciliation must preserve prior Project state")
 assert.deepEqual(lightTableParametersFromConfig(normalized), lightTableScene.defaults())
 assert.equal(validateLightTableRuntimeConfig(sourceConfig).sources.length, 6)
+const opaqueLookConfigs = []
+for (const [backgroundStyle, ground, secondary, paper, angle, texture] of [
+    ["solid", "#e8e6de", "#4a2f2a", "#e8e6de", 145, 8],
+    ["gradient", "#d8e8f7", "#f36c54", "#d8e8f7", 37.5, 0],
+    ["halo", "#181917", "#fff1d9", "#181917", -45, 0],
+    ["paper", "#e8e6de", "#4a2f2a", "#f3eee3", 145, 64],
+]) {
+    const lookConfig = config(1, { settings: { backgroundStyle, ground, backgroundColor2: secondary, paper, backgroundAngle: angle, backgroundTexture: texture, theme: "light" } })
+    const look = lightTableOpaqueLookFromConfig(lookConfig)
+    assert.deepEqual(look, { style: backgroundStyle, ground, secondary, paper, angle, texture, theme: "light" })
+    assert.deepEqual(lightTableOpaqueLookFromConfig(validateLightTableRuntimeConfig(lookConfig).config), look, "save/open-normalized Look intent must remain render-identical")
+    opaqueLookConfigs.push(lookConfig)
+}
 assert.equal(lightTableTimelineMediaCount(0, false), 1)
 assert.equal(lightTableTimelineMediaCount(0, true), 6)
 assert.throws(() => validateLightTableRuntimeConfig(config(0)), /at least one source/)
@@ -543,9 +560,27 @@ assert.equal(fixedShort.durationMs, fixedShort.readableMinimumMs)
 assert.equal(fixedShort.issues[0].code, "duration-below-readable-minimum")
 const fixedLong = productTimeline(6, "forward", { mode: "fixed-duration", fixedDurationMs: 90_000 })
 assert.equal(fixedLong.durationMs, LIGHT_TABLE_MAX_DURATION_MS)
+for (const requestedDurationMs of [6_000.5, 12_345.5]) {
+    const fractional = productTimeline(6, "forward", { mode: "fixed-duration", fixedDurationMs: requestedDurationMs })
+    assert.equal(fractional.durationMs, requestedDurationMs, "accepted fractional fixed duration must remain exact")
+    assert.equal(fractional.phases.at(-1).endMs, requestedDurationMs)
+    assert.equal(fractional.frameCount, lightTableFrameCount(requestedDurationMs, 30))
+}
 const directed = productTimeline(6, "forward", { mode: "directed" })
 assert.deepEqual(directed.phases.map((phase) => phase.requestedPaceScale), [2, 1, 1, 2])
 assert.equal(directed.durationMs, 10_000)
+const exactDirectedSegments = [
+    { id: "wake", kind: "cycle", cycles: 1, paceScale: 2, durationMs: 20_000.5 },
+    { id: "review", kind: "cycle", cycles: 1, paceScale: 1, durationMs: 3_000.25 },
+    { id: "final-inspection", kind: "hold", cycles: 1, paceScale: 1, durationMs: 1_000.125 },
+    { id: "return", kind: "cycle", cycles: 1, paceScale: 2, durationMs: 1_000.125 },
+]
+const exactDirected = productTimeline(6, "forward", { mode: "directed", segments: exactDirectedSegments })
+assert.deepEqual(exactDirected.phases.map((phase) => phase.endMs - phase.startMs), exactDirectedSegments.map((segment) => segment.durationMs), "feasible authored phase boundaries must remain exact")
+assert.equal(exactDirected.durationMs, exactDirectedSegments.reduce((sum, segment) => sum + segment.durationMs, 0))
+assert.equal(exactDirected.issues.length, 0)
+const compromisedDirected = productTimeline(6, "forward", { mode: "directed", segments: exactDirectedSegments.map((segment, index) => ({ ...segment, durationMs: index === 1 ? 1_000 : segment.durationMs })) })
+assert(compromisedDirected.issues.some((issue) => issue.code === "directed-duration-compromise"), "a phase below its readable minimum must be surfaced, never silently rewritten")
 
 const hostile = compileLightTableCoreTimeline({ mode: "nonsense", durationMs: Number.NaN }, Number.NaN, { tableSpread: Number.NaN, overlap: Number.POSITIVE_INFINITY })
 assert.equal(hostile.mode, "automatic")
@@ -659,6 +694,39 @@ assert.equal(encodeGate.snapshot().active, 0)
 assert.equal(encodeGate.snapshot().queued, 0)
 encodeGate.dispose()
 
+const deferredCleanups = []
+const mountCleanupGate = createLightTableMountCleanupGate((task) => deferredCleanups.push(task))
+const strictModeEncodeGate = createLightTablePosterEncodeGate(1)
+let cleanupCount = 0
+const strictModeFirstMount = mountCleanupGate.begin()
+mountCleanupGate.defer(strictModeFirstMount, () => {
+    cleanupCount += 1
+    strictModeEncodeGate.dispose()
+})
+const strictModeSecondMount = mountCleanupGate.begin()
+deferredCleanups.shift()()
+assert.equal(cleanupCount, 0, "StrictMode's simulated cleanup must not retire state retained for its second setup")
+let strictModeRelease = null
+assert.notEqual(strictModeEncodeGate.schedule("strict-mode-video", (release) => strictModeRelease = release), null, "poster work must remain schedulable after StrictMode's second setup")
+strictModeRelease()
+mountCleanupGate.defer(strictModeSecondMount, () => {
+    cleanupCount += 1
+    strictModeEncodeGate.dispose()
+})
+deferredCleanups.shift()()
+assert.equal(cleanupCount, 1, "the final unmount must still release renderer-owned poster resources")
+assert.equal(strictModeEncodeGate.schedule("unmounted-video", () => {}), null, "poster work must remain closed after the real unmount")
+assert.deepEqual(mountCleanupGate.snapshot(), { generation: 2 })
+
+const noUnavailable = Object.freeze({ scope: "", keys: new Set() })
+const firstUnavailableScope = "source-a\nclamp:0"
+const firstUnavailable = recordLightTableUnavailableKey(noUnavailable, firstUnavailableScope, "video-a:source-a:clamp:0")
+assert.deepEqual([...lightTableUnavailableKeysForScope(firstUnavailable, firstUnavailableScope)], ["video-a:source-a:clamp:0"])
+const nextFrameUnavailable = lightTableUnavailableKeysForScope(firstUnavailable, "source-a\nclamp:33333")
+assert.equal(nextFrameUnavailable.size, 0, "a new sampled frame must project an empty unavailable set without an effect-driven state reset")
+assert.equal(nextFrameUnavailable, lightTableUnavailableKeysForScope(firstUnavailable, "source-a\nclamp:66667"), "frame changes with no failures must retain one stable empty identity")
+assert.equal(recordLightTableUnavailableKey(firstUnavailable, firstUnavailableScope, "video-a:source-a:clamp:0"), firstUnavailable, "duplicate decoder failures must not schedule a redundant state commit")
+
 const vite = await createServer({
     root: fileURLToPath(new URL("../", import.meta.url)),
     appType: "custom",
@@ -667,6 +735,11 @@ const vite = await createServer({
 })
 try {
     const { default: LightTableRenderer } = await vite.ssrLoadModule("/src/scenes/LightTableRenderer.tsx")
+    const opaqueLookMarkups = opaqueLookConfigs.map((lookConfig) => renderToStaticMarkup(React.createElement(LightTableRenderer, { config: lookConfig, timeMs: 0, fps: 30, reducedMotion: true })))
+    assert.equal(new Set(opaqueLookMarkups).size, 4, "all admitted opaque Look identities must produce distinct renderer state")
+    for (const [index, style] of ["solid", "gradient", "halo", "paper"].entries()) {
+        assert.match(opaqueLookMarkups[index], new RegExp(`data-light-table-look="${style}"`))
+    }
     const markup = renderToStaticMarkup(React.createElement(LightTableRenderer, {
         config: config(),
         timeMs: productTimeline().durationMs * 0.5,

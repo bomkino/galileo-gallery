@@ -1346,7 +1346,7 @@ function AppView() {
             })
         } else {
             const lightTableSegments = isLightTableV2(current)
-                ? lightTableTimelineFromConfig({ ...current, timelineMode: "automatic", timelineFixedDurationMs: 0, timelineSegments: [] }, fps, mediaCount).phases.map((phase) => ({
+                ? lightTableTimelineFromConfig({ ...current, timelineMode: "directed", timelineFixedDurationMs: 0, timelineSegments: [] }, fps, mediaCount).phases.map((phase) => ({
                     id: phase.id,
                     kind: phase.id === "final-inspection" ? "hold" as const : "cycle" as const,
                     cycles: 1,

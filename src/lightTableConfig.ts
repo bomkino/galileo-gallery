@@ -32,6 +32,16 @@ export type ValidatedLightTableRuntime = {
     sources: LightTableSource[]
 }
 
+export type LightTableOpaqueLook = Readonly<{
+    style: "solid" | "gradient" | "halo" | "paper"
+    ground: string
+    secondary: string
+    paper: string
+    angle: number
+    texture: number
+    theme: "auto" | "dark" | "light"
+}>
+
 function finiteInRange(value: number, minimum: number, maximum: number) {
     return Number.isFinite(value) && value >= minimum && value <= maximum
 }
@@ -45,9 +55,32 @@ export function lightTableTimelineMediaCount(itemCount: number, cataloguePreview
     return itemCount > 0 ? itemCount : cataloguePreview ? 6 : 1
 }
 
-export function assertLightTableOpaqueIntent(backgroundStyle: ReelSettings["backgroundStyle"]) {
+export function assertLightTableOpaqueIntent(backgroundStyle: ReelSettings["backgroundStyle"]): asserts backgroundStyle is LightTableOpaqueLook["style"] {
     if (backgroundStyle === "transparent") throw new Error(LIGHT_TABLE_TRANSPARENCY_REASON)
     if (!["solid", "gradient", "halo", "paper"].includes(backgroundStyle)) throw new Error("Light Table background intent is invalid.")
+}
+
+export function lightTableOpaqueLookFromConfig(config: Pick<ReelConfig, "settings">): LightTableOpaqueLook {
+    const settings = config.settings
+    const style = settings.backgroundStyle
+    assertLightTableOpaqueIntent(style)
+    const defaults = lightTableScene.defaults()
+    const ground = settings.ground || defaults.tableColor
+    const secondary = settings.backgroundColor2
+    const paper = settings.paper || ground
+    if (![ground, secondary, paper].every((colour) => /^#[0-9a-fA-F]{6}$/.test(colour))) throw new Error("Light Table Look colour intent is invalid.")
+    if (!Number.isFinite(settings.backgroundAngle) || settings.backgroundAngle < -3_600 || settings.backgroundAngle > 3_600) throw new Error("Light Table Look angle is invalid.")
+    if (!Number.isFinite(settings.backgroundTexture) || settings.backgroundTexture < 0 || settings.backgroundTexture > 100) throw new Error("Light Table Look texture is invalid.")
+    if (!["auto", "dark", "light"].includes(settings.theme)) throw new Error("Light Table Look theme is invalid.")
+    return Object.freeze({
+        style,
+        ground,
+        secondary,
+        paper,
+        angle: settings.backgroundAngle,
+        texture: settings.backgroundTexture,
+        theme: settings.theme,
+    })
 }
 
 function validatedCrop(item: MediaItem) {
@@ -149,6 +182,7 @@ export function withLightTableDefaults(config: ReelConfig): LightTableRuntimeCon
 export function validateLightTableRuntimeConfig(config: ReelConfig, fps = 30): ValidatedLightTableRuntime {
     if (!isLightTableV2(config)) throw new Error("Light Table v2 config identity is invalid.")
     assertLightTableOpaqueIntent(config.settings.backgroundStyle)
+    lightTableOpaqueLookFromConfig(config)
     if (config.items.length < 1) throw new Error("Light Table needs at least one source.")
     if (config.items.length > LIGHT_TABLE_MAX_ITEMS) throw new Error("Light Table shows up to 24 sources in v2. All Project media remain preserved.")
     if (!Number.isSafeInteger(config.settings.canvasWidth) || !Number.isSafeInteger(config.settings.canvasHeight)

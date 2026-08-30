@@ -171,10 +171,9 @@ function stableHash(value: unknown) {
     return (hash >>> 0).toString(16).padStart(8, "0")
 }
 
-function strictDirectedDuration(segments: VisualTimelineSegment[], automaticDuration: number) {
-    if (segments.length === 0) return automaticDuration
+function strictDirectedSegments(segments: VisualTimelineSegment[]) {
+    if (segments.length === 0) return []
     if (segments.length !== DIRECTED_IDS.length) throw new Error("Light Table directed Timeline needs exactly four authored phases.")
-    let total = 0
     segments.forEach((segment, index) => {
         const exactKeys = Object.keys(segment).sort().join(":") === ["cycles", "durationMs", "id", "kind", "paceScale"].sort().join(":")
         if (!exactKeys || segment.id !== DIRECTED_IDS[index] || segment.cycles !== 1
@@ -183,9 +182,8 @@ function strictDirectedDuration(segments: VisualTimelineSegment[], automaticDura
             || !Number.isFinite(segment.durationMs) || segment.durationMs <= 0 || segment.durationMs > LIGHT_TABLE_MAX_DURATION_MS) {
             throw new Error("A directed Light Table phase is invalid.")
         }
-        total += segment.durationMs
     })
-    return total
+    return segments.map((segment) => ({ id: segment.id as LightTablePhaseId, durationMs: segment.durationMs }))
 }
 
 export function automaticLightTableDuration(mediaCount: number) {
@@ -214,10 +212,16 @@ export function compileLightTableTimeline(intent: LightTableTimelineIntent): Com
         durationMs = intent.fixedDurationMs
     } else {
         if (intent.fixedDurationMs !== 0) throw new Error("Directed Light Table cannot contain fixed duration intent.")
-        durationMs = strictDirectedDuration(intent.segments, automaticDuration)
+        const authoredSegments = strictDirectedSegments(intent.segments)
+        durationMs = authoredSegments.length ? authoredSegments.reduce((sum, segment) => sum + segment.durationMs, 0) : automaticDuration
     }
 
-    const core = compileLightTableCoreTimeline({ mode: intent.mode, ...(durationMs === undefined ? {} : { durationMs }) }, intent.mediaCount)
+    const authoredSegments = intent.mode === "directed" ? strictDirectedSegments(intent.segments) : []
+    const core = compileLightTableCoreTimeline({
+        mode: intent.mode,
+        ...(durationMs === undefined ? {} : { durationMs }),
+        ...(authoredSegments.length ? { segments: authoredSegments } : {}),
+    }, intent.mediaCount)
     const phases = core.segments.map((segment) => ({
         id: segment.id,
         startMs: segment.startMs,

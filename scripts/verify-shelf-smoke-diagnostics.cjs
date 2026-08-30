@@ -9,6 +9,7 @@ const {
     transportDiagnostic,
     validShelfDiagnostic,
 } = require("../electron/shelf-smoke-diagnostics.cjs")
+const { shelfMediaSamplesProbeExpression } = require("../electron/shelf-renderer-smoke.cjs")
 
 async function run() {
     assert.deepEqual(shelfDiagnosticCheckpoint("poster.original.scrub-14", { journey: "original", step: 14, normalized: 14 / 64 }), {
@@ -37,6 +38,18 @@ async function run() {
     assert.match(caught.error.fingerprint, /^[a-f0-9]{8}$/)
     assert.equal(JSON.stringify(caught).includes("private"), false)
     assert.equal(validShelfDiagnostic(caught.error), true)
+
+    const exactPixelProbe = JSON.parse(await vm.runInNewContext(rendererProbeSource("poster.original.sample-0", shelfMediaSamplesProbeExpression()), {
+        document: { querySelectorAll: () => [], querySelector: () => null },
+        HTMLCanvasElement: class HTMLCanvasElement {},
+        HTMLImageElement: class HTMLImageElement {},
+        HTMLMediaElement: { HAVE_CURRENT_DATA: 2 },
+        HTMLVideoElement: class HTMLVideoElement {},
+    }))
+    assert.deepEqual(JSON.parse(JSON.stringify(exactPixelProbe)), {
+        ok: true,
+        value: { result: [], liveNodeCount: 0, sampleErrors: [], stage: null },
+    })
 
     const transient = JSON.parse(await vm.runInNewContext(rendererProbeSource("poster.original.sample-14", `async () => {
         const name = 'InvalidStateError'

@@ -61,6 +61,44 @@ export function createLightTablePosterEncodeGate(limit = LIGHT_TABLE_MAX_VIDEO_O
 
 export type LightTablePosterEncodeGate = ReturnType<typeof createLightTablePosterEncodeGate>
 
+export function createLightTableMountCleanupGate(schedule: (task: () => void) => void = queueMicrotask) {
+    let generation = 0
+    return {
+        begin() {
+            generation += 1
+            return generation
+        },
+        defer(mountGeneration: number, cleanup: () => void) {
+            schedule(() => {
+                if (generation === mountGeneration) cleanup()
+            })
+        },
+        snapshot() {
+            return { generation }
+        },
+    }
+}
+
+export type LightTableMountCleanupGate = ReturnType<typeof createLightTableMountCleanupGate>
+
+export type LightTableUnavailableState = Readonly<{
+    scope: string
+    keys: ReadonlySet<string>
+}>
+
+const EMPTY_LIGHT_TABLE_UNAVAILABLE_KEYS: ReadonlySet<string> = new Set()
+
+export function lightTableUnavailableKeysForScope(state: LightTableUnavailableState, scope: string) {
+    return state.scope === scope ? state.keys : EMPTY_LIGHT_TABLE_UNAVAILABLE_KEYS
+}
+
+export function recordLightTableUnavailableKey(state: LightTableUnavailableState, scope: string, key: string): LightTableUnavailableState {
+    if (!scope || !key) return state
+    const keys = lightTableUnavailableKeysForScope(state, scope)
+    if (state.scope === scope && keys.has(key)) return state
+    return Object.freeze({ scope, keys: new Set([...keys, key]) })
+}
+
 export type LightTablePosterRecord = {
     source: string
     targetKey: string
