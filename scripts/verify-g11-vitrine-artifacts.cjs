@@ -348,7 +348,7 @@ for (const [index, receipt] of receipts.entries()) {
         for (const key of ["left", "top", "width", "height"]) assert(Math.abs(sample.placardBox[key] - receipt.preview.exchange.placardBox[key]) <= 0.006)
     }
     const canvasResolutions = receipt.controls.canvasResolutions
-    assert.deepEqual(Object.keys(canvasResolutions), ["fixture", "maximum", "restored"])
+    assert.deepEqual(Object.keys(canvasResolutions), ["fixture", "maximum", "restored", "aspectRatios"])
     assert.deepEqual([canvasResolutions.fixture.stage.logicalWidth, canvasResolutions.fixture.stage.logicalHeight], [96, 64])
     assert.deepEqual([canvasResolutions.maximum.stage.logicalWidth, canvasResolutions.maximum.stage.logicalHeight], [7_680, 5_120])
     assert.deepEqual([canvasResolutions.restored.stage.logicalWidth, canvasResolutions.restored.stage.logicalHeight], [96, 64])
@@ -361,11 +361,48 @@ for (const [index, receipt] of receipts.entries()) {
         }
     }
     for (const sample of [canvasResolutions.maximum, canvasResolutions.restored]) {
+        assert.equal(sample.hash, canvasResolutions.fixture.hash)
         for (const key of ["left", "top", "width", "height"]) assert(Math.abs(sample.placardBox[key] - canvasResolutions.fixture.placardBox[key]) <= 0.006)
         for (const childKey of ["label", "caption"]) {
             for (const key of ["left", "top", "width", "height"]) assert(Math.abs(sample.placardChildren[childKey][key] - canvasResolutions.fixture.placardChildren[childKey][key]) <= 0.006)
         }
         for (const key of Object.keys(canvasResolutions.fixture.placardMetrics)) assert(Math.abs(sample.placardMetrics[key] - canvasResolutions.fixture.placardMetrics[key]) <= 0.0001)
+    }
+    const ratioSpecs = {
+        portrait: { small: [64, 96], large: [5_120, 7_680] },
+        "extreme-wide": { small: [3_840, 64], large: [7_680, 128] },
+        "extreme-tall": { small: [64, 3_840], large: [128, 7_680] },
+    }
+    assert.deepEqual(Object.keys(canvasResolutions.aspectRatios), Object.keys(ratioSpecs))
+    for (const [id, spec] of Object.entries(ratioSpecs)) {
+        const pair = canvasResolutions.aspectRatios[id]
+        assert.deepEqual([pair.small.stage.logicalWidth, pair.small.stage.logicalHeight], spec.small)
+        assert.deepEqual([pair.large.stage.logicalWidth, pair.large.stage.logicalHeight], spec.large)
+        assert.equal(pair.small.hash, pair.large.hash)
+        assert.equal(pair.small.placard, pair.large.placard)
+        for (const sample of [pair.small, pair.large]) {
+            assert(Math.abs(Math.min(sample.stage.designWidth, sample.stage.designHeight) - 640) <= 0.05)
+            assert(Math.abs(sample.stage.perspective / sample.stage.logicalWidth - 1.46) <= 0.0001)
+            for (const child of Object.values(sample.placardChildren)) {
+                assert(child.left >= sample.placardBox.left - 0.001 && child.top >= sample.placardBox.top - 0.001)
+                assert(child.left + child.width <= sample.placardBox.left + sample.placardBox.width + 0.001)
+                assert(child.top + child.height <= sample.placardBox.top + sample.placardBox.height + 0.001)
+            }
+        }
+        assert.equal(pair.small.planes.length, pair.large.planes.length)
+        for (let planeIndex = 0; planeIndex < pair.small.planes.length; planeIndex += 1) {
+            const left = pair.small.planes[planeIndex]
+            const right = pair.large.planes[planeIndex]
+            assert.deepEqual({ id: left.id, role: left.role, frameIntent: left.frameIntent, mediaGeometry: left.mediaGeometry },
+                { id: right.id, role: right.role, frameIntent: right.frameIntent, mediaGeometry: right.mediaGeometry })
+            for (const key of ["x", "y", "z", "width", "height", "scale", "rotateX", "rotateY"]) assert(Math.abs(left.normalizedPose[key] - right.normalizedPose[key]) <= 0.006)
+            for (const key of ["left", "top", "width", "height"]) assert(Math.abs(left.box[key] - right.box[key]) <= 0.006)
+        }
+        for (const key of ["left", "top", "width", "height"]) assert(Math.abs(pair.small.placardBox[key] - pair.large.placardBox[key]) <= 0.006)
+        for (const childKey of ["label", "caption"]) {
+            for (const key of ["left", "top", "width", "height"]) assert(Math.abs(pair.small.placardChildren[childKey][key] - pair.large.placardChildren[childKey][key]) <= 0.006)
+        }
+        for (const key of Object.keys(pair.small.placardMetrics)) assert(Math.abs(pair.small.placardMetrics[key] - pair.large.placardMetrics[key]) <= 0.0001)
     }
     assert.equal(receipt.controls.design.motionGrid, false)
     assert.equal(receipt.controls.design.backgroundGroup, "Room background")

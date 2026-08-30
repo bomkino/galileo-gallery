@@ -887,13 +887,15 @@ async function sourceVideoSeekBurstEvidence(window) {
 const sceneExpression = `(() => {
     const stage = document.querySelector('.vitrine-stage')
     const logical = stage?.querySelector('.vitrine-logical-stage')
-    if (!stage || !logical) throw new Error('Vitrine stage is missing.')
+    const design = logical?.querySelector('.vitrine-design-overlay')
+    if (!stage || !logical || !design) throw new Error('Vitrine stage is missing.')
     const stageBox = stage.getBoundingClientRect()
     const logicalWidth = Number(stage.dataset.logicalWidth)
     const logicalHeight = Number(stage.dataset.logicalHeight)
     const logicalStyle = getComputedStyle(logical)
-    const designWidth = parseFloat(logicalStyle.width)
-    const designHeight = parseFloat(logicalStyle.height)
+    const designStyle = getComputedStyle(design)
+    const designWidth = parseFloat(designStyle.width)
+    const designHeight = parseFloat(designStyle.height)
     const projectScale = logicalWidth / designWidth
     const minimumDesignDimension = Math.min(designWidth, designHeight)
     const normalizedBox = (element) => {
@@ -934,7 +936,8 @@ const sceneExpression = `(() => {
             logicalHeight,
             designWidth,
             designHeight,
-            perspective: parseFloat(logicalStyle.perspective) * projectScale,
+            projectScale,
+            perspective: parseFloat(logicalStyle.perspective),
         },
         planes: [...stage.querySelectorAll('.vitrine-plane')].map((plane) => {
             const media = plane.querySelector('.vitrine-media')
@@ -1173,7 +1176,14 @@ function inspectArtwork(destination, manifest) {
     const sourceTupleCounts = Object.fromEntries(tupleCounts)
     if (transparentPixels < 1 || partialAlphaPixels < 1 || opaquePixels < 64 || zeroAlphaRgbViolations !== 0
         || Object.values(paletteCounts).some((count) => count < 1) || Object.values(sourceTupleCounts).some((count) => count < 1)) {
-        throw new Error("G11 raw PNG alpha/source-pixel evidence failed.")
+        throw new Error(`G11 raw PNG alpha/source-pixel evidence failed: ${JSON.stringify({
+            transparentPixels,
+            partialAlphaPixels,
+            opaquePixels,
+            zeroAlphaRgbViolations,
+            paletteCounts,
+            sourceTupleCounts,
+        })}`)
     }
     return { transparentPixels, partialAlphaPixels, opaquePixels, zeroAlphaRgbViolations, paletteCounts, sourceTupleCounts }
 }
@@ -1728,7 +1738,49 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         || !placardChildrenContained(restoredCanvas)) {
         throw new Error("Vitrine Placard did not restore exact fixture-resolution geometry.")
     }
-    const canvasResolutionEvidence = { fixture: exchange, maximum: maximumCanvas, restored: restoredCanvas }
+    const aspectCanvasEvidence = {}
+    for (const ratioCase of [
+        { id: "portrait", small: [64, 96], large: [5_120, 7_680] },
+        { id: "extreme-wide", small: [3_840, 64], large: [7_680, 128] },
+        { id: "extreme-tall", small: [64, 3_840], large: [128, 7_680] },
+    ]) {
+        await setCanvasDimensions(window, ...ratioCase.small)
+        await scrub(window, 0.375)
+        const small = await readScene(window)
+        await setCanvasDimensions(window, ...ratioCase.large)
+        await scrub(window, 0.375)
+        const large = await readScene(window)
+        const expectedDimensions = [
+            [small.stage.logicalWidth, small.stage.logicalHeight],
+            [large.stage.logicalWidth, large.stage.logicalHeight],
+        ]
+        const checks = {
+            dimensions: JSON.stringify(expectedDimensions) === JSON.stringify([ratioCase.small, ratioCase.large]),
+            evaluatorHash: small.hash === large.hash,
+            planeParity: normalizedParity(small, large),
+            placardParity: normalizedPlacardParity(small, large),
+            smallContained: placardChildrenContained(small),
+            largeContained: placardChildrenContained(large),
+            shortEdge: [small, large].every((sample) => Math.abs(Math.min(sample.stage.designWidth, sample.stage.designHeight) - 640) <= 0.05),
+            perspective: [small, large].every((sample) => Math.abs(sample.stage.perspective / sample.stage.logicalWidth - 1.46) <= 0.0001),
+        }
+        if (Object.values(checks).some((passed) => !passed)) {
+            throw new Error(`Vitrine design space lost ${ratioCase.id} Project-canvas parity: ${JSON.stringify({
+                checks,
+                small: { stage: small.stage, hash: small.hash, placardBox: small.placardBox, placardChildren: small.placardChildren, placardMetrics: small.placardMetrics },
+                large: { stage: large.stage, hash: large.hash, placardBox: large.placardBox, placardChildren: large.placardChildren, placardMetrics: large.placardMetrics },
+            })}`)
+        }
+        aspectCanvasEvidence[ratioCase.id] = { small, large }
+    }
+    await setCanvasDimensions(window, 96, 64)
+    await scrub(window, 0.375)
+    const finalRestoredCanvas = await readScene(window)
+    if (finalRestoredCanvas.hash !== exchange.hash || !normalizedParity(exchange, finalRestoredCanvas)
+        || !normalizedPlacardParity(exchange, finalRestoredCanvas) || !placardChildrenContained(finalRestoredCanvas)) {
+        throw new Error("Vitrine did not restore fixture geometry after aspect-ratio proof.")
+    }
+    const canvasResolutionEvidence = { fixture: exchange, maximum: maximumCanvas, restored: finalRestoredCanvas, aspectRatios: aspectCanvasEvidence }
     await clickText(window, ".inspector-top button", "Look")
     const presentationFinal = await presentationState(window)
 
