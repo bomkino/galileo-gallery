@@ -243,7 +243,7 @@ async function run() {
             })),
         }
         const failureStart = videos.length
-        videoModes.push("error", "pending", "loaded")
+        videoModes.push("error", "loaded", "loaded")
         await assert.rejects(createHostBackedAPI(openHost("mixed", threeVideoConfig)).openProject(), /Could not hydrate Edition Video 0/)
         const failedWorkers = videos.slice(failureStart)
         assert.equal(failedWorkers.length, 2, "first worker failure must stop a third candidate grant from starting")

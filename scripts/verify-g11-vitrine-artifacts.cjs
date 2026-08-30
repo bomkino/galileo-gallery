@@ -85,6 +85,39 @@ function evidenceShape(value) {
     assert.match(value.sha256, /^[a-f0-9]{64}$/)
 }
 
+function exactTreeEvidence(directory) {
+    const resolved = path.resolve(directory)
+    if (!fs.existsSync(resolved)) return { exists: false, directories: 0, files: 0, bytes: 0, sha256: sha256(Buffer.alloc(0)) }
+    const rootStat = fs.lstatSync(resolved)
+    assert(rootStat.isDirectory() && !rootStat.isSymbolicLink())
+    assert.equal(fs.realpathSync.native(resolved), resolved)
+    const rows = []
+    let directories = 0
+    let files = 0
+    let bytes = 0
+    const walk = (current, relative) => {
+        for (const entry of fs.readdirSync(current, { withFileTypes: true }).sort((left, right) => left.name.localeCompare(right.name))) {
+            const target = path.join(current, entry.name)
+            const linked = fs.lstatSync(target)
+            assert.equal(linked.isSymbolicLink(), false)
+            const name = relative ? `${relative}/${entry.name}` : entry.name
+            if (linked.isDirectory()) {
+                directories += 1
+                rows.push(["directory", name, linked.mode & 0o7777])
+                walk(target, name)
+            } else {
+                assert(linked.isFile())
+                const file = stableRead(target, 4_000_000_000)
+                files += 1
+                bytes += file.bytes.length
+                rows.push(["file", name, file.bytes.length, sha256(file.bytes), linked.mode & 0o7777])
+            }
+        }
+    }
+    walk(resolved, "")
+    return { exists: true, directories, files, bytes, sha256: sha256(Buffer.from(JSON.stringify(rows))) }
+}
+
 const runs = [
     { id: "run-a", mode: "save", frameDirectory: "run-a-frames" },
     { id: "run-b", mode: "reopen", frameDirectory: "run-b-frames" },
@@ -95,6 +128,8 @@ const receiptFiles = runs.map((run) => boundedJSON(path.join(root, run.id, "rece
 const receipts = receiptFiles.map((entry) => entry.value)
 const manifestFiles = runs.map((run) => boundedJSON(path.join(root, run.frameDirectory, "manifest.json"), 5_000_000))
 const manifests = manifestFiles.map((entry) => entry.value)
+const corruptOpenReceipt = boundedJSON(path.join(root, "run-corrupt-open", "receipt.json"), 2_000_000).value
+const missingMediaReceipt = boundedJSON(path.join(root, "run-missing-media-export", "receipt.json"), 2_000_000).value
 assert.deepEqual(receipts.map((receipt) => receipt.mode), ["save", "reopen"])
 
 const expectedFrameIntents = [
@@ -106,6 +141,12 @@ const expectedFiles = new Set([
     "vitrine-v2.galileo",
     "sources/vitrine-square.png",
     "sources/vitrine-portrait.mp4",
+    "vitrine-corrupt.galileo",
+    "corrupt-sources/vitrine-square.png",
+    "corrupt-sources/vitrine-portrait.mp4",
+    "run-corrupt-open/receipt.json",
+    "run-missing-media-export/receipt.json",
+    "missing-media-destination/prior.txt",
     ...runs.flatMap((run) => [`${run.id}/receipt.json`, `${run.frameDirectory}/manifest.json`]),
 ])
 
@@ -170,6 +211,18 @@ for (const [index, receipt] of receipts.entries()) {
         receipt.preview.continuousVideoHandoff.presentedTimes.forEach((value, presentedIndex, values) => {
             assert(Number.isFinite(value) && (presentedIndex === 0 || value > values[presentedIndex - 1]))
         })
+        assert.equal(receipt.preview.continuousVideoHandoff.presentedFrames.length, receipt.preview.continuousVideoHandoff.presentedTimes.length)
+        for (const frame of receipt.preview.continuousVideoHandoff.presentedFrames) {
+            assert.equal(frame.seeking, false)
+            assert(frame.presented <= frame.target + 0.0001)
+            assert(frame.target - frame.presented < 1 / 12 + 0.0001)
+        }
+        assert.deepEqual(receipt.preview.sourceVideoSeekBurst.sequence, [0.43, 0.36, 0.44, 0.35, 0.42])
+        assert.equal(receipt.preview.sourceVideoSeekBurst.final.ready, "true")
+        assert.equal(receipt.preview.sourceVideoSeekBurst.final.seeking, false)
+        assert(Math.abs(receipt.preview.sourceVideoSeekBurst.final.target - 20 / 24) < 0.0001)
+        assert(receipt.preview.sourceVideoSeekBurst.final.presented <= receipt.preview.sourceVideoSeekBurst.final.target + 0.0001)
+        assert(receipt.preview.sourceVideoSeekBurst.final.target - receipt.preview.sourceVideoSeekBurst.final.presented < 1 / 12 + 0.0001)
         assert.equal(receipt.preview.reducedTransport, null)
         assert.equal(receipt.preview.semanticHandoff.semanticId, "vitrine-portrait")
         assert.equal(receipt.preview.semanticHandoff.status, "Showing Field portrait, item 2 of 2")
@@ -204,6 +257,7 @@ for (const [index, receipt] of receipts.entries()) {
         assert.equal(receipt.preview.reducedMotionExpected, true)
         assert.deepEqual(receipt.preview.reducedTransport, { before: 0.125, after: 0.125, paused: true })
         assert.equal(receipt.preview.continuousVideoHandoff, null)
+        assert.equal(receipt.preview.sourceVideoSeekBurst, null)
         assert.equal(receipt.preview.holdB.currentId, "vitrine-portrait")
         assert.equal(receipt.preview.holdB.planes[0].id, "vitrine-portrait")
         assert.equal(receipt.preview.holdB.planes[0].mediaTag, "VIDEO")
@@ -212,6 +266,15 @@ for (const [index, receipt] of receipts.entries()) {
         assert.equal(receipt.preview.terminalVideo, null)
         assert.equal(receipt.controls.causal, null)
         assert.equal(receipt.controls.interaction, null)
+    }
+    for (const scene of [receipt.preview.holdA, receipt.preview.exchange, receipt.preview.semanticHandoff, receipt.preview.holdB, receipt.preview.terminalVideo].filter(Boolean)) {
+        for (const plane of scene.planes.filter((candidate) => candidate.mediaTag === "VIDEO")) {
+            assert.equal(plane.storyReady, "true")
+            assert.equal(plane.storySeeking, false)
+            assert(Number.isFinite(plane.storyTargetTime) && Number.isFinite(plane.storyPresentedTime))
+            assert(plane.storyPresentedTime <= plane.storyTargetTime + 0.0001)
+            assert(plane.storyTargetTime - plane.storyPresentedTime < 1 / 12 + 0.0001)
+        }
     }
     assert.equal(receipt.controls.libraryKeyboard.next.selected, "vitrine-portrait")
     assert.equal(receipt.controls.libraryKeyboard.next.scene.inspectionId, "vitrine-portrait")
@@ -223,11 +286,30 @@ for (const [index, receipt] of receipts.entries()) {
     assert.equal(receipt.controls.libraryKeyboard.previous.scene.status, "Showing Signal square, item 1 of 2")
     assert.deepEqual(receipt.controls.libraryKeyboard.movedLater.order, ["vitrine-portrait", "vitrine-square"])
     assert.equal(receipt.controls.libraryKeyboard.movedLater.focused, "vitrine-square")
+    assert.deepEqual(receipt.controls.libraryKeyboard.movedProject.orderedMediaIds, ["vitrine-portrait", "vitrine-square"])
     assert.deepEqual(receipt.controls.libraryKeyboard.movedEarlier.order, ["vitrine-square", "vitrine-portrait"])
     assert.equal(receipt.controls.libraryKeyboard.movedEarlier.focused, "vitrine-square")
     assert.deepEqual(receipt.controls.libraryKeyboard.voiceOverChord, {
         order: ["vitrine-square", "vitrine-portrait"], focused: "vitrine-square", selected: "vitrine-square",
     })
+    assert.deepEqual(receipt.controls.libraryKeyboard.restoredProject.orderedMediaIds, ["vitrine-square", "vitrine-portrait"])
+    assert.equal(receipt.controls.libraryKeyboard.movedProject.grantCount, 2)
+    assert.equal(receipt.controls.libraryKeyboard.restoredProject.grantCount, 2)
+    if (run.mode === "save") {
+        assert.match(receipt.controls.libraryKeyboard.movedSaveNotice, /Project saved · media included/)
+        assert.match(receipt.controls.libraryKeyboard.movedReopenNotice, /Project opened/)
+        assert.deepEqual(receipt.controls.libraryKeyboard.movedReopened.project.orderedMediaIds, ["vitrine-portrait", "vitrine-square"])
+        assert.deepEqual(receipt.controls.libraryKeyboard.movedReopened.uiOrder, receipt.controls.libraryKeyboard.movedReopened.project.orderedMediaIds)
+        assert.equal(receipt.controls.libraryKeyboard.movedReopened.project.semanticSha256, receipt.controls.libraryKeyboard.movedProject.semanticSha256)
+        assert.equal(receipt.controls.libraryKeyboard.movedReopened.project.grantCount, 2)
+        assert.notEqual(receipt.controls.libraryKeyboard.movedReopened.project.grantDigest, receipt.controls.libraryKeyboard.movedProject.grantDigest)
+        assert.equal(receipt.controls.libraryKeyboard.restoredProject.grantDigest, receipt.controls.libraryKeyboard.movedReopened.project.grantDigest)
+    } else {
+        assert.equal(receipt.controls.libraryKeyboard.movedSaveNotice, null)
+        assert.equal(receipt.controls.libraryKeyboard.movedReopenNotice, null)
+        assert.equal(receipt.controls.libraryKeyboard.movedReopened, null)
+        assert.equal(receipt.controls.libraryKeyboard.restoredProject.grantDigest, receipt.controls.libraryKeyboard.movedProject.grantDigest)
+    }
     assert(receipt.controls.libraryKeyboard.retired.count >= 1)
     assert.equal(receipt.controls.libraryKeyboard.retired.allCleared, true)
     assert(receipt.controls.decoderEvidence.activePlanes <= 2)
@@ -246,6 +328,20 @@ for (const [index, receipt] of receipts.entries()) {
     assert.equal(receipt.controls.design.motionGrid, false)
     assert.equal(receipt.controls.design.backgroundGroup, "Room background")
     assert.deepEqual(receipt.controls.design.backgrounds, [{ label: "solid", pressed: "false" }, { label: "transparent", pressed: "true" }])
+    assert.deepEqual(receipt.controls.design.keyboard.solid, {
+        active: "solid",
+        focused: "solid",
+        projectBackground: "solid",
+        stageTransparent: false,
+        buttons: [{ label: "solid", pressed: "true" }, { label: "transparent", pressed: "false" }],
+    })
+    assert.deepEqual(receipt.controls.design.keyboard.restored, {
+        active: "transparent",
+        focused: "transparent",
+        projectBackground: "transparent",
+        stageTransparent: true,
+        buttons: [{ label: "solid", pressed: "false" }, { label: "transparent", pressed: "true" }],
+    })
     assert.deepEqual(receipt.controls.presets, ["Restore Defaults"])
     assert.equal(receipt.controls.blockedAlpha.disabled, false)
     assert.equal(receipt.controls.blockedAlpha.exportDisabled, false)
@@ -306,6 +402,9 @@ for (const [index, receipt] of receipts.entries()) {
         for (const plane of probe.planes.filter((candidate) => candidate.id === "vitrine-portrait")) {
             assert.equal(plane.mediaTag, "VIDEO")
             assert.equal(plane.storyReady, "true")
+            assert.equal(plane.storySeeking, false)
+            assert(plane.storyPresentedTime <= plane.storyTargetTime + 0.0001)
+            assert(plane.storyTargetTime - plane.storyPresentedTime < 1 / 12 + 0.0001)
         }
         assert.equal(probe.placard, null)
         assert.notEqual(probe.phrase, "reduced-motion-settled")
@@ -359,6 +458,87 @@ assert.equal(receipts[0].presentation.final.revision, receipts[1].presentation.i
 assert.equal(receipts[0].presentation.final.sha256, receipts[1].presentation.initial.sha256)
 assert.deepEqual(receipts[0].export.frameHashes, receipts[1].export.frameHashes, "normal and reduced-motion exports must have identical frame hashes")
 assert.equal(receipts[0].export.manifestSha256, receipts[1].export.manifestSha256)
+
+function verifyFailurePackage(receipt) {
+    assertNoPrivateEvidence(receipt)
+    assert.equal(receipt.package.productId, "galileo-gallery")
+    assert.equal(receipt.package.profile, "g03-linux-host-port")
+    assert.equal(receipt.package.packaged, true)
+    assert.equal(receipt.package.platform, "linux")
+    assert.equal(receipt.package.architecture, "x64")
+    assert.equal(receipt.package.sourceSha, receipts[0].package.sourceSha)
+    assert.equal(receipt.package.sourceTree, receipts[0].package.sourceTree)
+    assert.equal(receipt.package.buildId, receipts[0].package.buildId)
+    assert.deepEqual(receipt.package.runtime, receipts[0].package.runtime)
+    assert.deepEqual(receipt.package.rendererSecurity, receipts[0].package.rendererSecurity)
+    for (const key of ["sandboxHelper", "executable", "appAsar", "ffmpeg"]) {
+        evidenceShape(receipt.package[key])
+        assert.equal(receipt.package[key].sha256, receipts[0].package[key].sha256)
+        assert.equal(receipt.package[key].bytes, receipts[0].package[key].bytes)
+    }
+    assert.equal(receipt.package.sandboxHelper.uid, 0)
+    assert.equal(receipt.package.sandboxHelper.mode, 0o4755)
+}
+
+verifyFailurePackage(corruptOpenReceipt)
+verifyFailurePackage(missingMediaReceipt)
+assert.equal(corruptOpenReceipt.mode, "corrupt-open")
+assert.match(corruptOpenReceipt.journey.validOpenNotice, /Project opened/)
+assert.match(corruptOpenReceipt.journey.corruptOpenNotice, /Could not hydrate Vitrine Portrait\.mp4\./)
+const corruptProject = stableRead(path.join(root, "vitrine-corrupt.galileo"), 100_000_000).bytes
+assert.equal(corruptOpenReceipt.corruptArchive.bytes, corruptProject.length)
+assert.equal(corruptOpenReceipt.corruptArchive.sha256, sha256(corruptProject))
+assert.equal(corruptOpenReceipt.corruptArchive.signatureAccepted, true)
+assert.equal(corruptOpenReceipt.corruptArchive.browserAccepted, false)
+const corruptVideo = stableRead(path.join(root, "corrupt-sources", "vitrine-portrait.mp4"), 1_000_000).bytes
+assert.equal(corruptVideo.length, 128)
+assert.equal(corruptVideo.toString("ascii", 4, 8), "ftyp")
+assert.equal(corruptVideo.toString("ascii", 8, 12), "isom")
+assert(corruptOpenReceipt.chromium.createdVideos >= 1)
+assert.equal(corruptOpenReceipt.chromium.disconnectedLoadeddata, 0)
+assert.equal(corruptOpenReceipt.chromium.disconnectedErrors, 1)
+assert.equal(corruptOpenReceipt.priorProject.semanticSha256After, corruptOpenReceipt.priorProject.semanticSha256Before)
+assert.equal(corruptOpenReceipt.priorProject.grantDigestAfter, corruptOpenReceipt.priorProject.grantDigestBefore)
+assert.equal(corruptOpenReceipt.priorProject.documentSha256After, corruptOpenReceipt.priorProject.documentSha256Before)
+assert.equal(corruptOpenReceipt.containment.acceptedRootIdentityPreserved, true)
+assert.deepEqual(corruptOpenReceipt.containment.acceptedRootAfter, corruptOpenReceipt.containment.acceptedRootBefore)
+assert.equal(corruptOpenReceipt.containment.acceptedRootAfter.files, 2)
+for (const staging of [corruptOpenReceipt.containment.stagingBefore, corruptOpenReceipt.containment.stagingAfter]) {
+    assert.equal(staging.projectImport.directories, 0)
+    assert.equal(staging.projectImport.files, 0)
+    assert.equal(staging.privateFrames.directories, 0)
+    assert.equal(staging.privateFrames.files, 0)
+}
+
+assert.equal(missingMediaReceipt.mode, "missing-media-export")
+assert.match(missingMediaReceipt.journey.validOpenNotice, /Project opened/)
+assert.equal(missingMediaReceipt.project.semanticSha256After, missingMediaReceipt.project.semanticSha256Before)
+assert.equal(missingMediaReceipt.project.documentSha256After, missingMediaReceipt.project.documentSha256Before)
+assert.equal(missingMediaReceipt.removedMedia.exactAppOwnedRegularFile, true)
+assert.equal(missingMediaReceipt.removedMedia.absentBeforeExport, true)
+const validVideo = stableRead(path.join(root, "sources", "vitrine-portrait.mp4"), 100_000_000).bytes
+assert.equal(missingMediaReceipt.removedMedia.bytes, validVideo.length)
+assert.equal(missingMediaReceipt.removedMedia.sha256, sha256(validVideo))
+assert.equal(missingMediaReceipt.acceptedProject.rootIdentityPreserved, true)
+assert.equal(missingMediaReceipt.acceptedProject.beforeRemoval.files, 2)
+assert.equal(missingMediaReceipt.acceptedProject.afterRemoval.files, 1)
+assert.equal(missingMediaReceipt.acceptedProject.beforeRemoval.bytes, missingMediaReceipt.acceptedProject.afterRemoval.bytes + validVideo.length)
+assert.deepEqual(missingMediaReceipt.acceptedProject.afterFailure, missingMediaReceipt.acceptedProject.afterRemoval)
+assert.match(missingMediaReceipt.export.failureMessage, /^(?:internal_error|verification_failed)$/)
+assert.equal(missingMediaReceipt.export.readySignals, 0)
+assert.equal(missingMediaReceipt.export.frameReadySignals, 0)
+assert.equal(missingMediaReceipt.export.successVisible, false)
+assert.equal(missingMediaReceipt.destination.targetExistedBefore, false)
+assert.equal(missingMediaReceipt.destination.targetExistsAfter, false)
+assert.deepEqual(missingMediaReceipt.destination.after, missingMediaReceipt.destination.before)
+const sentinelTree = exactTreeEvidence(path.join(root, "missing-media-destination"))
+assert.deepEqual(missingMediaReceipt.destination.before, sentinelTree)
+assert.equal(fs.existsSync(path.join(root, "missing-media-destination", "attempted-frames")), false)
+assert.equal(stableRead(path.join(root, "missing-media-destination", "prior.txt"), 1_024).bytes.toString("utf8"), "preserve-g11-missing-media-sentinel\n")
+for (const staging of Object.values(missingMediaReceipt.cleanup)) {
+    assert.equal(staging.directories, 0)
+    assert.equal(staging.files, 0)
+}
 
 function artifactFiles(directory) {
     const found = []

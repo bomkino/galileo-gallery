@@ -2,8 +2,8 @@ const crypto = require("node:crypto")
 const fs = require("node:fs")
 const path = require("node:path")
 const { pipeline } = require("node:stream/promises")
-const AdmZip = require("adm-zip")
 const { writeFileSafely } = require("./file-operations.cjs")
+const { createStoredZipPlan, writeStoredZip } = require("./project-archive-writer.cjs")
 const {
     PROJECT_IMPORT_LIMITS,
     ProjectImportError,
@@ -24,14 +24,28 @@ function checkpoint(signal) {
     if (signal?.aborted) throw new ProjectImportError("cancelled")
 }
 
-function containAuthoredCompressionRatios(archive, maximumRatio) {
-    for (const entry of archive.getEntries()) {
-        if (entry.isDirectory || entry.header.size === 0) continue
-        const compressedBytes = Math.max(1, entry.getCompressedData().length)
-        if (entry.header.size > compressedBytes * maximumRatio) {
-            entry.header.method = 0
-        }
+function sourceIdentity(stat) {
+    return [stat.dev, stat.ino, stat.mode, stat.size, stat.mtimeMs, stat.ctimeMs]
+}
+
+function assertSourceUnchanged(source, expected) {
+    let current
+    try { current = fs.lstatSync(source) } catch { throw new ProjectSchemaError("media_hash_mismatch", "Media source changed while saving.") }
+    const expectedIdentity = sourceIdentity(expected)
+    if (!current.isFile() || current.isSymbolicLink()
+        || sourceIdentity(current).some((value, index) => value !== expectedIdentity[index])) {
+        throw new ProjectSchemaError("media_hash_mismatch", "Media source changed while saving.")
     }
+}
+
+function assertSaveSpace(tempRoot, outputPath, projectBytes, archiveBytes, limits) {
+    const outputParent = path.dirname(path.resolve(outputPath))
+    assertStagingSpace(tempRoot, projectBytes, limits)
+    const sameDevice = fs.statSync(tempRoot).dev === fs.statSync(outputParent).dev
+    const sameVolume = sameDevice && (process.platform !== "win32"
+        || path.parse(fs.realpathSync.native(tempRoot)).root.toLowerCase() === path.parse(fs.realpathSync.native(outputParent)).root.toLowerCase())
+    assertStagingSpace(outputParent, archiveBytes + (sameVolume ? projectBytes : 0), limits)
+    return outputParent
 }
 
 function importError(error) {
@@ -209,13 +223,14 @@ async function savePortableProjectArchive(options) {
             if (authoredExpandedBytes > limits.totalExpandedBytes) throw new ProjectImportError("expanded_size_exceeded")
             const sourceInspection = await inspectMediaFile(source)
             if (sourceInspection.bytes !== sourceStat.size) throw new ProjectSchemaError("media_hash_mismatch", "Media source changed while saving.")
+            assertSourceUnchanged(source, sourceStat)
             const provisionalName = `${String(index + 1).padStart(4, "0")}-${sourceInspection.sha256.slice(0, 16)}`
             const extension = {
                 png: ".png", jpeg: ".jpg", gif: ".gif", webp: ".webp", avif: ".avif", webm: ".webm", "iso-media": ".mp4",
             }[sourceInspection.signature]
             const archivePath = `project/media/${provisionalName}${extension}`
             media.push({ archivePath, ...sourceInspection })
-            mediaSources.push({ source, fileName: `${provisionalName}${extension}`, inspection: sourceInspection })
+            mediaSources.push({ source, sourceStat, fileName: `${provisionalName}${extension}`, inspection: sourceInspection })
         }
         const audioAssets = []
         const audioSources = []
@@ -230,13 +245,14 @@ async function savePortableProjectArchive(options) {
             if (authoredExpandedBytes > limits.totalExpandedBytes) throw new ProjectImportError("expanded_size_exceeded")
             const inspected = await inspectAudioFile(sourcePath)
             if (inspected.bytes !== sourceStat.size) throw new ProjectSchemaError("media_hash_mismatch", "Audio source changed while saving.")
+            assertSourceUnchanged(sourcePath, sourceStat)
             if (inspected.sampleRate !== source.sampleRate || inspected.channels !== source.channels || inspected.sampleFrames !== source.sampleFrames) {
                 throw new ProjectSchemaError("audio_invalid", "Audio source identity and decoded format disagree.")
             }
             const fileName = `${String(index + 1).padStart(4, "0")}-${inspected.sha256.slice(0, 16)}.wav`
             const archivePath = `project/audio/${fileName}`
             audioAssets.push({ id: source.id, archivePath, bytes: inspected.bytes, sha256: inspected.sha256, signature: inspected.signature })
-            audioSources.push({ source: sourcePath, fileName, inspection: inspected })
+            audioSources.push({ source: sourcePath, sourceStat, fileName, inspection: inspected })
         }
         const project = portableProjectFromConfig(options.config, media, audioAssets)
         const projectJSON = canonicalProjectJSON(project)
@@ -244,7 +260,24 @@ async function savePortableProjectArchive(options) {
         if (manifestBytes > limits.manifestBytes) throw new ProjectImportError("entry_too_large")
         authoredExpandedBytes += manifestBytes
         if (authoredExpandedBytes > limits.totalExpandedBytes) throw new ProjectImportError("expanded_size_exceeded")
-        assertStagingSpace(options.tempRoot, authoredExpandedBytes, limits)
+        const archivePlan = createStoredZipPlan([
+            { archivePath: "project/", directory: true },
+            { archivePath: "project/media/", directory: true },
+            ...mediaSources.map((entry, index) => ({
+                archivePath: media[index].archivePath,
+                bytes: entry.inspection.bytes,
+                sourceRelativePath: `media/${entry.fileName}`,
+            })),
+            ...(audioSources.length ? [{ archivePath: "project/audio/", directory: true }] : []),
+            ...audioSources.map((entry, index) => ({
+                archivePath: audioAssets[index].archivePath,
+                bytes: entry.inspection.bytes,
+                sourceRelativePath: `audio/${entry.fileName}`,
+            })),
+            { archivePath: "project/project.json", bytes: manifestBytes, sourceRelativePath: "project.json" },
+        ])
+        if (archivePlan.archiveBytes > limits.archiveBytes) throw new ProjectImportError("archive_too_large")
+        const outputParent = assertSaveSpace(options.tempRoot, options.outputPath, authoredExpandedBytes, archivePlan.archiveBytes, limits)
 
         temporary = fs.mkdtempSync(path.join(options.tempRoot, "galileo-gallery-save-"))
         const projectFolder = path.join(temporary, "project")
@@ -256,6 +289,7 @@ async function savePortableProjectArchive(options) {
                 fs.createReadStream(entry.source, { start: 0, end: entry.inspection.bytes - 1 }),
                 fs.createWriteStream(destination, { flags: "wx", mode: 0o600 })
             )
+            assertSourceUnchanged(entry.source, entry.sourceStat)
             const copied = await inspectMediaFile(destination)
             if (copied.bytes !== entry.inspection.bytes || copied.sha256 !== entry.inspection.sha256 || copied.signature !== entry.inspection.signature) {
                 throw new ProjectSchemaError("media_hash_mismatch", "Media source changed while saving.")
@@ -268,19 +302,18 @@ async function savePortableProjectArchive(options) {
                 fs.createReadStream(entry.source, { start: 0, end: entry.inspection.bytes - 1 }),
                 fs.createWriteStream(destination, { flags: "wx", mode: 0o600 })
             )
+            assertSourceUnchanged(entry.source, entry.sourceStat)
             const copied = await inspectAudioFile(destination)
             if (copied.bytes !== entry.inspection.bytes || copied.sha256 !== entry.inspection.sha256 || copied.signature !== entry.inspection.signature) {
                 throw new ProjectSchemaError("media_hash_mismatch", "Audio source changed while saving.")
             }
         }
         fs.writeFileSync(path.join(projectFolder, "project.json"), projectJSON, { flag: "wx", mode: 0o600 })
-        await writeFileSafely(options.outputPath, (stagedOutputPath) => {
-            // AdmZip is confined to app-authored output. Untrusted input is streamed only by G01A/yauzl.
-            const archive = new AdmZip()
-            archive.addLocalFolder(projectFolder, "project")
-            containAuthoredCompressionRatios(archive, Math.min(limits.aggregateCompressionRatio, limits.individualCompressionRatio))
-            archive.writeZip(stagedOutputPath)
-            if (fs.statSync(stagedOutputPath).size > limits.archiveBytes) throw new ProjectImportError("archive_too_large")
+        await writeFileSafely(options.outputPath, async (stagedOutputPath) => {
+            // The output sibling and the complete Project staging tree coexist at this peak.
+            assertStagingSpace(outputParent, archivePlan.archiveBytes, limits)
+            await writeStoredZip(stagedOutputPath, archivePlan, projectFolder)
+            if (fs.statSync(stagedOutputPath).size !== archivePlan.archiveBytes) throw new ProjectImportError("archive_too_large")
         })
         return { outputPath: options.outputPath, project }
     } catch (error) {

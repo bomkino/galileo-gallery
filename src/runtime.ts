@@ -117,6 +117,10 @@ async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort, sign
             finished = true
             window.clearTimeout(timeout)
             activeStops.delete(cancel)
+            if (error) {
+                if (firstFailure === null) firstFailure = error
+                stop()
+            }
             media.removeAttribute("src")
             if (media instanceof HTMLMediaElement) {
                 if (media instanceof HTMLVideoElement) {

@@ -4,6 +4,7 @@ const fs = require("node:fs")
 const os = require("node:os")
 const path = require("node:path")
 const AdmZip = require("adm-zip")
+const { createStoredZipPlan } = require("../electron/project-archive-writer.cjs")
 const {
     openPortableProjectArchive,
     savePortableProjectArchive,
@@ -120,10 +121,42 @@ async function expectFailure(code, archivePath, roots, priorProject) {
     assert.deepEqual(fs.existsSync(roots.staging) ? fs.readdirSync(roots.staging) : [], [], `${code} left staging residue`)
 }
 
+async function expectSaveFailureBeforeStaging(options, code, label) {
+    const originalMkdtemp = fs.mkdtempSync
+    const originalCreateWriteStream = fs.createWriteStream
+    let saveMkdtempCalls = 0
+    let stagingCopyCalls = 0
+    fs.mkdtempSync = (prefix, ...args) => {
+        if (String(prefix).includes("galileo-gallery-save-")) {
+            saveMkdtempCalls += 1
+            throw new Error(`${label} reached mkdtemp`)
+        }
+        return originalMkdtemp(prefix, ...args)
+    }
+    fs.createWriteStream = (target, ...args) => {
+        if (String(target).includes("galileo-gallery-save-")) stagingCopyCalls += 1
+        return originalCreateWriteStream(target, ...args)
+    }
+    try {
+        await assert.rejects(savePortableProjectArchive(options), (error) => error?.code === code)
+    } finally {
+        fs.mkdtempSync = originalMkdtemp
+        fs.createWriteStream = originalCreateWriteStream
+    }
+    assert.equal(saveMkdtempCalls, 0, `${label} must reject before mkdtemp`)
+    assert.equal(stagingCopyCalls, 0, `${label} must reject before copying into staging`)
+}
+
 async function run() {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "galileo-project-schema-"))
     const roots = { staging: path.join(root, "staging"), opened: path.join(root, "opened") }
     try {
+        const smallPlan = createStoredZipPlan([{ archivePath: "one.bin", bytes: 3, sourceRelativePath: "one.bin" }])
+        assert.equal(smallPlan.archiveBytes, 30 + 7 + 3 + 16 + 46 + 7 + 22, "stored ZIP planning must charge every local, descriptor, central, and end byte")
+        const zip64Plan = createStoredZipPlan([{ archivePath: "large.bin", bytes: 0xffffffff, sourceRelativePath: "large.bin" }])
+        assert.equal(zip64Plan.entries[0].sizeZip64, true)
+        assert.equal(zip64Plan.zip64End, true, "ZIP64-sized authored entries must also receive ZIP64 end records")
+
         const mediaPaths = writeMedia(root)
         const config = fixtureConfig(mediaPaths)
         const projectPath = path.join(root, "canonical.galileo")
@@ -133,6 +166,8 @@ async function run() {
             tempRoot: root,
             mediaPathFromURL: (url) => url,
         })
+        if (process.platform !== "win32") assert.equal(fs.statSync(projectPath).mode & 0o777, 0o600, "authored Project archives must remain private")
+        assert(new AdmZip(projectPath).getEntries().filter((entry) => !entry.isDirectory).every((entry) => entry.header.method === 0), "bounded authored entries must be stored without compression-ratio amplification")
         const manifest = archiveManifest(projectPath)
         assert.deepEqual(manifest, saved.project)
         assert.equal(canonicalProjectJSON(manifest), canonicalProjectJSON(validatePortableProject(structuredClone(manifest))))
@@ -295,6 +330,7 @@ async function run() {
         const customPrototype = Object.assign(Object.create({ inherited: true }), structuredClone(vitrineSaved.project))
         assert.throws(() => validatePortableProject(customPrototype), (error) => error?.code === "manifest_invalid")
 
+        const mediaBytes = mediaPaths.reduce((total, mediaPath) => total + fs.statSync(mediaPath).size, 0)
         const presenterPath = writePcm16Wav(path.join(root, "private-presenter.wav"), 4_800)
         const soundtrackPath = writePcm16Wav(path.join(root, "private-soundtrack.wav"), 9_600, 2, 48_000, false)
         const audioConfig = { ...config, audio: audioFixture(presenterPath, soundtrackPath) }
@@ -327,6 +363,18 @@ async function run() {
         const audioReopened = await savePortableProjectArchive({ config: audioOpened.config, outputPath: audioReopenedPath, tempRoot: root, mediaPathFromURL: (url) => url })
         assert.equal(canonicalProjectJSON(audioReopened.project), canonicalProjectJSON(audioSaved.project))
 
+        const audioQuotaDestination = path.join(root, "audio-quota-protected.galileo")
+        fs.writeFileSync(audioQuotaDestination, "known-prior-audio-project-bytes")
+        const audioBytes = fs.statSync(presenterPath).size + fs.statSync(soundtrackPath).size
+        await expectSaveFailureBeforeStaging({
+            config: audioConfig,
+            outputPath: audioQuotaDestination,
+            tempRoot: root,
+            mediaPathFromURL: (url) => url,
+            limits: { totalExpandedBytes: mediaBytes + audioBytes - 1 },
+        }, "expanded_size_exceeded", "audio aggregate charge")
+        assert.equal(fs.readFileSync(audioQuotaDestination, "utf8"), "known-prior-audio-project-bytes")
+
         const quotaDestination = path.join(root, "quota-protected.galileo")
         fs.writeFileSync(quotaDestination, "known-prior-project-bytes")
         await assert.rejects(
@@ -340,19 +388,65 @@ async function run() {
             (error) => error?.code === "entry_too_large"
         )
         assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
-        const mediaBytes = mediaPaths.reduce((total, mediaPath) => total + fs.statSync(mediaPath).size, 0)
-        const stagingBeforeAggregateRejection = fs.readdirSync(root).filter((entry) => entry.startsWith("galileo-gallery-save-"))
-        await assert.rejects(
-            savePortableProjectArchive({
+
+        const manifestBytes = Buffer.byteLength(canonicalProjectJSON(saved.project))
+        const canonicalArchiveBytes = fs.statSync(projectPath).size
+        const canonicalExpandedBytes = mediaBytes + manifestBytes
+        const diskReserveBytes = 73
+        const sharedAvailableBytes = diskReserveBytes
+            + Math.max(canonicalExpandedBytes, canonicalArchiveBytes)
+            + Math.floor(Math.min(canonicalExpandedBytes, canonicalArchiveBytes) / 2)
+        const originalStatfs = fs.statfsSync
+        fs.statfsSync = () => ({ bavail: sharedAvailableBytes, bsize: 1 })
+        try {
+            await expectSaveFailureBeforeStaging({
                 config,
                 outputPath: quotaDestination,
                 tempRoot: root,
                 mediaPathFromURL: (url) => url,
-                limits: { totalExpandedBytes: mediaBytes - 1 },
-            }),
-            (error) => error?.code === "expanded_size_exceeded"
-        )
-        assert.deepEqual(fs.readdirSync(root).filter((entry) => entry.startsWith("galileo-gallery-save-")), stagingBeforeAggregateRejection, "aggregate rejection must happen before staging")
+                limits: { freeSpaceReserveBytes: diskReserveBytes },
+            }, "insufficient_staging_space", "same-volume Project-plus-archive peak")
+        } finally {
+            fs.statfsSync = originalStatfs
+        }
+        assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
+
+        const outputVolume = path.join(root, "output-volume")
+        fs.mkdirSync(outputVolume)
+        const outputVolumeDestination = path.join(outputVolume, "output-volume-protected.galileo")
+        fs.writeFileSync(outputVolumeDestination, "known-prior-output-volume-project-bytes")
+        const originalStatSync = fs.statSync
+        fs.statSync = (target, ...args) => {
+            const stat = originalStatSync(target, ...args)
+            if (path.resolve(String(target)) !== path.resolve(outputVolume)) return stat
+            return Object.assign(Object.create(Object.getPrototypeOf(stat)), stat, { dev: stat.dev + 1 })
+        }
+        fs.statfsSync = (folder) => ({
+            bavail: path.resolve(String(folder)) === path.resolve(outputVolume)
+                ? diskReserveBytes + canonicalArchiveBytes - 1
+                : diskReserveBytes + canonicalExpandedBytes + canonicalArchiveBytes + 1_000,
+            bsize: 1,
+        })
+        try {
+            await expectSaveFailureBeforeStaging({
+                config,
+                outputPath: outputVolumeDestination,
+                tempRoot: root,
+                mediaPathFromURL: (url) => url,
+                limits: { freeSpaceReserveBytes: diskReserveBytes },
+            }, "insufficient_staging_space", "output-volume archive charge")
+        } finally {
+            fs.statSync = originalStatSync
+            fs.statfsSync = originalStatfs
+        }
+        assert.equal(fs.readFileSync(outputVolumeDestination, "utf8"), "known-prior-output-volume-project-bytes")
+        await expectSaveFailureBeforeStaging({
+            config,
+            outputPath: quotaDestination,
+            tempRoot: root,
+            mediaPathFromURL: (url) => url,
+            limits: { totalExpandedBytes: mediaBytes + manifestBytes - 1 },
+        }, "expanded_size_exceeded", "manifest aggregate charge")
         assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
         await assert.rejects(
             savePortableProjectArchive({
@@ -365,16 +459,13 @@ async function run() {
             (error) => error?.code === "entry_too_large"
         )
         assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
-        await assert.rejects(
-            savePortableProjectArchive({
-                config,
-                outputPath: quotaDestination,
-                tempRoot: root,
-                mediaPathFromURL: (url) => url,
-                limits: { archiveBytes: 64 },
-            }),
-            (error) => error?.code === "archive_too_large"
-        )
+        await expectSaveFailureBeforeStaging({
+            config,
+            outputPath: quotaDestination,
+            tempRoot: root,
+            mediaPathFromURL: (url) => url,
+            limits: { archiveBytes: 64 },
+        }, "archive_too_large", "exact authored archive charge")
         assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
 
         const sourceVideoManifest = structuredClone(manifest)
@@ -426,6 +517,55 @@ async function run() {
             (error) => error?.code === "media_missing"
         )
         assert.equal(fs.readFileSync(protectedDestination, "utf8"), "known-prior-project-bytes")
+
+        const mutableMedia = path.join(root, "mutable-between-inspection-and-copy.png")
+        fs.copyFileSync(mediaPaths[0], mutableMedia)
+        const mutationDestination = path.join(root, "mutation-protected.galileo")
+        fs.writeFileSync(mutationDestination, "known-prior-mutation-project-bytes")
+        const mutationConfig = {
+            ...config,
+            items: config.items.map((item, index) => index === 0 ? { ...item, url: mutableMedia } : item),
+        }
+        const originalMkdtemp = fs.mkdtempSync
+        let mutationInjected = false
+        fs.mkdtempSync = (prefix, ...args) => {
+            const staging = originalMkdtemp(prefix, ...args)
+            if (String(prefix).includes("galileo-gallery-save-")) {
+                const bytes = fs.readFileSync(mutableMedia)
+                bytes[bytes.length - 1] ^= 0xff
+                fs.writeFileSync(mutableMedia, bytes)
+                mutationInjected = true
+            }
+            return staging
+        }
+        try {
+            await assert.rejects(savePortableProjectArchive({
+                config: mutationConfig,
+                outputPath: mutationDestination,
+                tempRoot: root,
+                mediaPathFromURL: (url) => url,
+            }), (error) => error?.code === "media_hash_mismatch")
+        } finally {
+            fs.mkdtempSync = originalMkdtemp
+        }
+        assert.equal(mutationInjected, true, "mutation fixture must fire after inspection and immediately before staging copy")
+        assert.equal(fs.readFileSync(mutationDestination, "utf8"), "known-prior-mutation-project-bytes")
+        assert.deepEqual(fs.readdirSync(root).filter((entry) => entry.startsWith("galileo-gallery-save-")), [], "mutated save must leave no Project staging residue")
+        assert.equal(fs.readdirSync(root).some((entry) => entry.includes("mutation-protected") && entry !== "mutation-protected.galileo"), false, "mutated save must leave no output sibling residue")
+
+        const directoryDestination = path.join(root, "prior-directory.galileo")
+        fs.mkdirSync(directoryDestination)
+        const directoryChild = path.join(directoryDestination, "must-survive.txt")
+        fs.writeFileSync(directoryChild, "known-prior-directory-bytes")
+        await assert.rejects(savePortableProjectArchive({
+            config,
+            outputPath: directoryDestination,
+            tempRoot: root,
+            mediaPathFromURL: (url) => url,
+        }), (error) => error?.code === "internal_error")
+        assert.equal(fs.readFileSync(directoryChild, "utf8"), "known-prior-directory-bytes", "Project save must not replace or delete a directory destination")
+        assert.deepEqual(fs.readdirSync(root).filter((entry) => entry.startsWith("galileo-gallery-save-")), [])
+        assert.equal(fs.readdirSync(root).some((entry) => entry.includes("prior-directory") && entry !== "prior-directory.galileo"), false)
 
         const priorProject = Object.freeze({ identity: "known-prior-project", revision: 7 })
         const cases = [
@@ -549,7 +689,7 @@ async function run() {
         assert.deepEqual(fs.readdirSync(roots.opened).sort(), openedBeforeAudioCancel)
         assert.deepEqual(fs.readdirSync(roots.staging), [])
 
-        console.log("Verified: clean v2 Project schema, canonical visual/audio save/open/reopen, ordered hashes, three audio roles, privacy exclusions, typed failures, cancellation, and prior-state preservation.")
+        console.log("Verified: canonical visual/audio Project round-trips, bounded stored-ZIP output, causal quotas and mutation rollback, peak volume reserves, typed failures, and prior-state preservation.")
     } finally {
         fs.rmSync(root, { recursive: true, force: true })
     }

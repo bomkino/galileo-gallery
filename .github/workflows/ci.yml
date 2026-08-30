@@ -299,7 +299,7 @@ jobs:
           sudo chown root:root release/g03/linux-unpacked/chrome-sandbox
           sudo chmod 4755 release/g03/linux-unpacked/chrome-sandbox
           npm run verify:packaged-ffmpeg
-      - name: Run two real Vitrine preview and PNG journeys
+      - name: Run packaged Vitrine positive and failure journeys
         shell: bash
         run: |
           set -euo pipefail
@@ -338,9 +338,9 @@ jobs:
             "$executable"
           test ! -e "$cancelled"
       - uses: actions/upload-artifact@v6
-        if: success()
+        if: always()
         with:
-          name: g11-vitrine-renderer-evidence
+          name: g11-vitrine-positive-and-failure-evidence
           path: artifacts/g11/
           if-no-files-found: error
       - uses: actions/upload-artifact@v6

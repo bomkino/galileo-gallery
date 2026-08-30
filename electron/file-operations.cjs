@@ -16,15 +16,40 @@ function temporarySiblingPath(destination, label = "partial") {
 }
 
 function removeTemporary(target) {
-    if (target && fs.existsSync(target)) fs.rmSync(target, { force: true, recursive: true })
+    if (!target) return
+    try {
+        const stat = fs.lstatSync(target)
+        if (stat.isDirectory() && !stat.isSymbolicLink()) return
+        fs.unlinkSync(target)
+    } catch (error) {
+        if (error?.code !== "ENOENT") throw error
+    }
+}
+
+function replaceableDestination(destination) {
+    let stat
+    try {
+        stat = fs.lstatSync(destination)
+    } catch (error) {
+        if (error?.code === "ENOENT") return null
+        throw error
+    }
+    if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("Destination is not a replaceable regular file.")
+    return stat
+}
+
+function sameFileIdentity(left, right) {
+    return ["dev", "ino", "mode", "size"].every((key) => left[key] === right[key])
 }
 
 function replaceFile(temporary, destination) {
+    let destinationStat = replaceableDestination(destination)
     try {
         fs.renameSync(temporary, destination)
         return
     } catch (error) {
-        if (!fs.existsSync(destination)) throw error
+        destinationStat = replaceableDestination(destination)
+        if (!destinationStat) throw error
     }
 
     // Windows cannot rename over an existing file. Keep the old file recoverable
@@ -33,10 +58,10 @@ function replaceFile(temporary, destination) {
     let movedExisting = false
     let committed = false
     try {
-        if (fs.existsSync(destination)) {
-            fs.renameSync(destination, backup)
-            movedExisting = true
-        }
+        fs.renameSync(destination, backup)
+        movedExisting = true
+        const movedStat = replaceableDestination(backup)
+        if (!sameFileIdentity(destinationStat, movedStat)) throw new Error("Destination changed during replacement.")
         fs.renameSync(temporary, destination)
         committed = true
     } catch (error) {
@@ -50,6 +75,7 @@ function replaceFile(temporary, destination) {
 }
 
 async function writeFileSafely(destination, writer) {
+    replaceableDestination(destination)
     const temporary = temporarySiblingPath(destination)
     try {
         await writer(temporary)

@@ -1452,7 +1452,7 @@ function AppView() {
                 <div className="title-actions">
                     <InterfaceScaleControl />
                     <button className="button quiet" type="button" onClick={() => setShowStyleGallery(true)}>
-                        <Icon name="spark" /> Styles
+                        <Icon name="spark" /> Scenes
                     </button>
                     <details className="project-menu">
                         <summary className="button quiet"><Icon name="folder" /> Project</summary>
@@ -1481,8 +1481,8 @@ function AppView() {
             <aside className="library panel-material">
                 <div className="panel-heading">
                     <div>
-                        <span className="eyebrow">Sequence</span>
-                        <h2>Frames</h2>
+                        <span className="eyebrow">01 · Sequence</span>
+                        <h2>Slides</h2>
                     </div>
                     <button className="icon-button" type="button" aria-label="Add media" onClick={() => addMedia()}>
                         <Icon name="plus" />
@@ -1644,8 +1644,9 @@ function AppView() {
             <aside className="inspector panel-material">
                 <div className="inspector-top">
                     <Segment
+                        label="Slides, Look, Motion, Export workflow"
                         value={inspector}
-                        options={[{ value: "design", label: "Design" }, { value: "expert", label: "Expert" }, { value: "export", label: "Export" }]}
+                        options={[{ value: "design", label: "Look" }, { value: "expert", label: "Motion" }, { value: "export", label: "Export" }]}
                         onChange={setInspector}
                     />
                 </div>
@@ -1783,7 +1784,12 @@ function AppView() {
                         </section>
                     </div>
                 ) : inspector === "expert" ? (
-                    <div className="inspector-scroll expert-scroll">
+                    <div className="inspector-scroll expert-scroll motion-workspace">
+                        <header className="motion-workspace-intro">
+                            <span className="eyebrow">03 · Motion</span>
+                            <h3>Shape the movement.</h3>
+                            <p>Start broad, then tune only what the story needs.</p>
+                        </header>
                         <ExpertControls
                             tab={expertTab}
                             onTab={setExpertTab}

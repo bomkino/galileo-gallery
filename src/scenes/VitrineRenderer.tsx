@@ -67,18 +67,31 @@ function mediaStyle(item: MediaItem, fallbackFit: "contain" | "cover"): React.CS
     return { objectFit: item.fit ?? fallbackFit, objectPosition: `${focalX * 100}% ${focalY * 100}%` }
 }
 
+type VideoTarget = { source: string; target: number }
+
+type VideoSeekOperation = VideoTarget & { epoch: number }
+
+function sameVideoTarget(left: VideoTarget | null, right: VideoTarget | null) {
+    return Boolean(left && right && left.source === right.source && Math.abs(left.target - right.target) <= 0.0005)
+}
+
 function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source: string; timeMs: number; loop: boolean; fps: number; style: React.CSSProperties; onFailure: () => void }) {
     const ref = React.useRef<HTMLVideoElement>(null)
-    const revisionRef = React.useRef(0)
-    const targetRef = React.useRef(0)
+    const epochRef = React.useRef(0)
     const frameCallbackRef = React.useRef<number | null>(null)
     const animationFrameRef = React.useRef<number | null>(null)
+    const pumpFrameRef = React.useRef<number | null>(null)
     const [ready, setReady] = React.useState(false)
     const [hasPresented, setHasPresented] = React.useState(false)
     const [presentedTime, setPresentedTime] = React.useState<number | null>(null)
+    const [presentedTarget, setPresentedTarget] = React.useState<number | null>(null)
     const readyRef = React.useRef(false)
-    const desiredRef = React.useRef<{ source: string; target: number } | null>(null)
+    const loadedSourceRef = React.useRef<string | null>(null)
+    const desiredRef = React.useRef<VideoTarget | null>(null)
+    const activeRef = React.useRef<VideoSeekOperation | null>(null)
+    const confirmedRef = React.useRef<(VideoTarget & { mediaTime: number }) | null>(null)
     const seekCleanupRef = React.useRef<(() => void) | null>(null)
+    const pumpRef = React.useRef<() => void>(() => undefined)
     const sampledTimeMs = Math.floor(Math.max(0, timeMs) * fps / 1_000 + 1e-9) * 1_000 / fps
     const cancelFrameConfirmation = React.useCallback((video?: HTMLVideoElement | null) => {
         const frameVideo = video as (HTMLVideoElement & { cancelVideoFrameCallback?: (id: number) => void }) | null | undefined
@@ -87,89 +100,99 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         frameCallbackRef.current = null
         animationFrameRef.current = null
     }, [])
-    const seekToPresentedFrame = React.useCallback((video: HTMLVideoElement, revision: number, requestedSource: string, target: number) => {
-        const isCurrent = () => revision === revisionRef.current && desiredRef.current?.source === requestedSource
-            && Math.abs(targetRef.current - target) <= 0.0005 && Math.abs((desiredRef.current?.target ?? Number.NaN) - target) <= 0.0005
+    const schedulePump = React.useCallback(() => {
+        if (pumpFrameRef.current !== null) return
+        const frameId = requestAnimationFrame(() => {
+            if (pumpFrameRef.current === frameId) pumpFrameRef.current = null
+            pumpRef.current()
+        })
+        pumpFrameRef.current = frameId
+    }, [])
+    const seekToPresentedFrame = React.useCallback((video: HTMLVideoElement, operation: VideoSeekOperation) => {
+        const isCurrent = () => activeRef.current === operation && operation.epoch === epochRef.current
+            && loadedSourceRef.current === operation.source && ref.current === video
         if (!isCurrent()) return
         cancelFrameConfirmation(video)
         const frameVideo = video as HTMLVideoElement & {
             requestVideoFrameCallback?: (handler: (_now: number, metadata: { mediaTime: number }) => void) => number
         }
-        const targetTolerance = 1 / Math.max(1, fps)
+        const targetTolerance = Math.max(0.0005, 0.5 / Math.max(1, fps))
         let seekComplete = false
         let presentedMediaTime: number | null = null
-        const markReady = () => {
+        const finishPresentedFrame = () => {
             if (isCurrent() && seekComplete && !video.seeking && Number.isFinite(presentedMediaTime)
-                && Math.abs(video.currentTime - target) <= targetTolerance) {
+                && Math.abs(video.currentTime - operation.target) <= targetTolerance) {
                 video.pause()
-                readyRef.current = true
+                activeRef.current = null
+                confirmedRef.current = { source: operation.source, target: operation.target, mediaTime: presentedMediaTime as number }
                 setHasPresented(true)
                 setPresentedTime(presentedMediaTime)
-                setReady(true)
+                setPresentedTarget(operation.target)
+                const latest = desiredRef.current
+                const converged = sameVideoTarget(latest, operation)
+                readyRef.current = converged
+                setReady(converged)
+                if (!converged) schedulePump()
                 return true
             }
             return false
+        }
+        const schedulePaintFallback = () => {
+            const firstFrame = requestAnimationFrame(() => {
+                if (animationFrameRef.current !== firstFrame || !isCurrent()) return
+                const secondFrame = requestAnimationFrame(() => {
+                    if (animationFrameRef.current === secondFrame) animationFrameRef.current = null
+                    if (!isCurrent()) return
+                    presentedMediaTime = video.currentTime
+                    finishPresentedFrame()
+                })
+                animationFrameRef.current = secondFrame
+            })
+            animationFrameRef.current = firstFrame
+        }
+        const armFrameCallback = () => {
+            if (!isCurrent() || !frameVideo.requestVideoFrameCallback || frameCallbackRef.current !== null) return
+            const callbackId = frameVideo.requestVideoFrameCallback((_now, metadata) => {
+                if (frameCallbackRef.current === callbackId) frameCallbackRef.current = null
+                if (!isCurrent()) return
+                if (!seekComplete) return
+                if (Number.isFinite(metadata.mediaTime)) presentedMediaTime = metadata.mediaTime
+                finishPresentedFrame()
+            })
+            frameCallbackRef.current = callbackId
         }
         const onSeeked = () => {
             seekCleanupRef.current = null
             if (!isCurrent()) return
             seekComplete = true
             if (!frameVideo.requestVideoFrameCallback) {
-                const animationId = requestAnimationFrame(() => {
-                    if (animationFrameRef.current === animationId) animationFrameRef.current = null
-                    if (!isCurrent()) return
-                    presentedMediaTime = video.currentTime
-                    markReady()
-                })
-                animationFrameRef.current = animationId
+                schedulePaintFallback()
                 return
             }
-            markReady()
+            if (frameCallbackRef.current === null) armFrameCallback()
         }
         video.addEventListener("seeked", onSeeked, { once: true })
         seekCleanupRef.current = () => video.removeEventListener("seeked", onSeeked)
-        if (frameVideo.requestVideoFrameCallback) {
-            const callbackId = frameVideo.requestVideoFrameCallback((_now, metadata) => {
-                if (frameCallbackRef.current === callbackId) frameCallbackRef.current = null
-                if (!isCurrent()) return
-                if (Number.isFinite(metadata.mediaTime)) presentedMediaTime = metadata.mediaTime
-                markReady()
-            })
-            frameCallbackRef.current = callbackId
-        }
-        video.currentTime = target
-    }, [cancelFrameConfirmation, fps])
-    const sync = React.useCallback(() => {
-        const video = ref.current
-        if (!video) return
-        if (!Number.isFinite(video.duration) || video.duration <= 0) return
-        video.pause()
-        const requestedTarget = sourceVideoTimeSeconds(sampledTimeMs, video.duration, loop)
-        const target = !loop && requestedTarget >= video.duration
-            ? Math.max(0, video.duration - 1 / Math.max(1, fps))
-            : requestedTarget
-        const desired = desiredRef.current
-        if (desired?.source === source && Math.abs(desired.target - target) <= 0.0005
-            && (readyRef.current || frameCallbackRef.current !== null || animationFrameRef.current !== null || seekCleanupRef.current !== null)) return
-        seekCleanupRef.current?.()
-        seekCleanupRef.current = null
-        const revision = ++revisionRef.current
+        video.currentTime = operation.target
+        armFrameCallback()
+    }, [cancelFrameConfirmation, fps, schedulePump])
+    const startSeek = React.useCallback((video: HTMLVideoElement, request: VideoTarget) => {
+        if (activeRef.current || loadedSourceRef.current !== request.source || ref.current !== video) return
+        const operation = { ...request, epoch: epochRef.current }
+        activeRef.current = operation
         readyRef.current = false
         setReady(false)
-        setPresentedTime(null)
+        seekCleanupRef.current?.()
+        seekCleanupRef.current = null
         cancelFrameConfirmation(video)
-        desiredRef.current = { source, target }
-        targetRef.current = target
-        if (!video.seeking && Math.abs(video.currentTime - target) <= 0.0005) {
+        if (!video.seeking && Math.abs(video.currentTime - request.target) <= 0.0005) {
             const detourDistance = Math.min(video.duration / 2, Math.max(0.25, 2 / Math.max(1, fps)))
-            const detour = target + detourDistance < video.duration ? target + detourDistance : Math.max(0, target - detourDistance)
-            if (Math.abs(detour - target) > 0.0005) {
+            const detour = request.target + detourDistance < video.duration ? request.target + detourDistance : Math.max(0, request.target - detourDistance)
+            if (Math.abs(detour - request.target) > 0.0005) {
                 const onDetourSeeked = () => {
                     seekCleanupRef.current = null
-                    if (revision === revisionRef.current && desiredRef.current?.source === source
-                        && Math.abs((desiredRef.current?.target ?? Number.NaN) - target) <= 0.0005) {
-                        seekToPresentedFrame(video, revision, source, target)
-                    }
+                    if (activeRef.current === operation && operation.epoch === epochRef.current
+                        && loadedSourceRef.current === request.source && ref.current === video) seekToPresentedFrame(video, operation)
                 }
                 video.addEventListener("seeked", onDetourSeeked, { once: true })
                 seekCleanupRef.current = () => video.removeEventListener("seeked", onDetourSeeked)
@@ -177,26 +200,72 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
                 return
             }
         }
-        seekToPresentedFrame(video, revision, source, target)
-    }, [cancelFrameConfirmation, fps, loop, sampledTimeMs, seekToPresentedFrame, source])
+        seekToPresentedFrame(video, operation)
+    }, [cancelFrameConfirmation, fps, seekToPresentedFrame])
+    const pump = React.useCallback(() => {
+        const video = ref.current
+        if (!video) return
+        const desired = desiredRef.current
+        if (!desired || loadedSourceRef.current !== desired.source || activeRef.current) return
+        if (!Number.isFinite(video.duration) || video.duration <= 0) return
+        video.pause()
+        const confirmed = confirmedRef.current
+        const targetTolerance = Math.max(0.0005, 0.5 / Math.max(1, fps))
+        if (sameVideoTarget(confirmed, desired) && !video.seeking && Math.abs(video.currentTime - desired.target) <= targetTolerance) {
+            readyRef.current = true
+            setReady(true)
+            return
+        }
+        startSeek(video, desired)
+    }, [fps, startSeek])
+    pumpRef.current = pump
+    const sync = React.useCallback(() => {
+        const video = ref.current
+        if (!video || loadedSourceRef.current !== source) return
+        if (!Number.isFinite(video.duration) || video.duration <= 0) return
+        video.pause()
+        const requestedTarget = sourceVideoTimeSeconds(sampledTimeMs, video.duration, loop)
+        const target = !loop && requestedTarget >= video.duration
+            ? Math.max(0, video.duration - 1 / Math.max(1, fps))
+            : requestedTarget
+        const next = { source, target }
+        if (sameVideoTarget(desiredRef.current, next)
+            && (readyRef.current || activeRef.current !== null || pumpFrameRef.current !== null)) return
+        desiredRef.current = next
+        if (!sameVideoTarget(confirmedRef.current, next)) {
+            readyRef.current = false
+            setReady(false)
+        }
+        pump()
+    }, [fps, loop, pump, sampledTimeMs, source])
     React.useLayoutEffect(sync, [sync])
     React.useLayoutEffect(() => {
         const video = ref.current
         if (!video) return
+        epochRef.current += 1
+        loadedSourceRef.current = source
         readyRef.current = false
         desiredRef.current = null
+        activeRef.current = null
+        confirmedRef.current = null
         setReady(false)
         setHasPresented(false)
         setPresentedTime(null)
+        setPresentedTarget(null)
         video.src = source
         video.load()
         return () => {
-            revisionRef.current += 1
+            epochRef.current += 1
+            activeRef.current = null
+            loadedSourceRef.current = null
             readyRef.current = false
             desiredRef.current = null
+            confirmedRef.current = null
             seekCleanupRef.current?.()
             seekCleanupRef.current = null
             cancelFrameConfirmation(video)
+            if (pumpFrameRef.current !== null) cancelAnimationFrame(pumpFrameRef.current)
+            pumpFrameRef.current = null
             video.pause()
             video.removeAttribute("src")
             video.load()
@@ -207,6 +276,7 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         className="vitrine-media product-export-media"
         data-story-ready={ready ? "true" : "false"}
         data-story-presented-time={presentedTime ?? ""}
+        data-story-target-time={presentedTarget ?? ""}
         muted
         playsInline
         preload="auto"

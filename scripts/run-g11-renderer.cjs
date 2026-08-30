@@ -6,6 +6,7 @@ const { spawnSync, execFileSync } = require("node:child_process")
 
 const root = path.resolve(process.env.REEL_G11_ARTIFACTS || "artifacts/g11")
 const project = path.join(root, "vitrine-v2.galileo")
+const corruptProject = path.join(root, "vitrine-corrupt.galileo")
 const executable = path.resolve(process.env.REEL_G11_EXECUTABLE || "release/g03/linux-unpacked/galileo-gallery")
 function capturePathAuthority(resolved) {
     const rootPath = path.parse(resolved).root
@@ -82,10 +83,19 @@ function run(command, args, env = {}) {
 const fixture = spawnSync(process.execPath, ["scripts/create-g11-vitrine-smoke-project.cjs", project, path.join(root, "sources")], { cwd: path.resolve("."), encoding: "utf8" })
 if (fixture.error) throw fixture.error
 if (fixture.status !== 0) throw new Error(fixture.stderr || "Could not create G11 Vitrine fixture.")
+const corruptFixture = spawnSync(process.execPath, ["scripts/create-g11-vitrine-smoke-project.cjs", corruptProject, path.join(root, "corrupt-sources"), "--corrupt-video"], { cwd: path.resolve("."), encoding: "utf8" })
+if (corruptFixture.error) throw corruptFixture.error
+if (corruptFixture.status !== 0) throw new Error(corruptFixture.stderr || "Could not create corrupt G11 Vitrine fixture.")
 
 const sourceSha = process.env.GALLERY_SOURCE_SHA || execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim()
 const sourceTree = process.env.GALLERY_SOURCE_TREE || execFileSync("git", ["rev-parse", "HEAD^{tree}"], { encoding: "utf8" }).trim()
-const runtimeRoot = fs.mkdtempSync(path.join(os.tmpdir(), "galileo-g11-shared-"))
+const runtimeRoots = []
+const temporaryRuntime = (label) => {
+    const runtime = fs.mkdtempSync(path.join(os.tmpdir(), `galileo-g11-${label}-`))
+    runtimeRoots.push(runtime)
+    return runtime
+}
+const runtimeRoot = temporaryRuntime("shared")
 
 try {
     for (const [runId, mode] of [["run-a", "save"], ["run-b", "reopen"]]) {
@@ -103,6 +113,33 @@ try {
             G11_EXPECTED_FFMPEG_SHA: ffmpegIdentity.sha256,
         })
     }
+    run(executable, [], {
+        GALLERY_SOURCE_SHA: sourceSha,
+        GALLERY_SOURCE_TREE: sourceTree,
+        REEL_USER_DATA_DIR: temporaryRuntime("corrupt-open"),
+        REEL_G03_PROJECT_PATH: project,
+        REEL_G11_CORRUPT_PROJECT_PATH: corruptProject,
+        REEL_G11_RENDERER_OUTPUT: path.join(root, "run-corrupt-open"),
+        REEL_G11_RENDERER_MODE: "corrupt-open",
+        G11_EXPECTED_EXECUTABLE_SHA: executableSha,
+        G11_EXPECTED_APP_ASAR_SHA: appAsarSha,
+        G11_EXPECTED_FFMPEG_SHA: ffmpegIdentity.sha256,
+    })
+    const sentinelParent = path.join(root, "missing-media-destination")
+    fs.mkdirSync(sentinelParent, { recursive: false, mode: 0o700 })
+    fs.writeFileSync(path.join(sentinelParent, "prior.txt"), "preserve-g11-missing-media-sentinel\n", { flag: "wx", mode: 0o600 })
+    run(executable, [], {
+        GALLERY_SOURCE_SHA: sourceSha,
+        GALLERY_SOURCE_TREE: sourceTree,
+        REEL_USER_DATA_DIR: temporaryRuntime("missing-media"),
+        REEL_G03_PROJECT_PATH: project,
+        REEL_G11_RENDERER_OUTPUT: path.join(root, "run-missing-media-export"),
+        REEL_G11_RENDERER_MODE: "missing-media-export",
+        REEL_G11_PNG_DESTINATION: path.join(sentinelParent, "attempted-frames"),
+        G11_EXPECTED_EXECUTABLE_SHA: executableSha,
+        G11_EXPECTED_APP_ASAR_SHA: appAsarSha,
+        G11_EXPECTED_FFMPEG_SHA: ffmpegIdentity.sha256,
+    })
     run(process.execPath, ["scripts/verify-g11-vitrine-artifacts.cjs", root, project], {
         G11_EXPECTED_SHA: sourceSha,
         G11_EXPECTED_TREE: sourceTree,
@@ -111,5 +148,5 @@ try {
         G11_EXPECTED_FFMPEG_SHA: ffmpegIdentity.sha256,
     })
 } finally {
-    fs.rmSync(runtimeRoot, { recursive: true, force: true })
+    for (const runtime of runtimeRoots) fs.rmSync(runtime, { recursive: true, force: true })
 }

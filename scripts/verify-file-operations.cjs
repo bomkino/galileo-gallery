@@ -48,6 +48,38 @@ async function run() {
         assert.equal(fs.readFileSync(destination, "utf8"), "restorable")
         assert.deepEqual(fs.readdirSync(folder), ["existing.mp4"])
 
+        const directoryDestination = path.join(folder, "existing-project.galileo")
+        fs.mkdirSync(directoryDestination)
+        const directoryChild = path.join(directoryDestination, "must-survive.txt")
+        fs.writeFileSync(directoryChild, "preserved-directory-bytes")
+        await assert.rejects(
+            writeFileSafely(directoryDestination, (temporary) => fs.writeFileSync(temporary, "must-not-commit")),
+            /replaceable regular file/
+        )
+        assert.equal(fs.lstatSync(directoryDestination).isDirectory(), true)
+        assert.equal(fs.readFileSync(directoryChild, "utf8"), "preserved-directory-bytes")
+        assert.equal(fs.readdirSync(folder).some((name) => name.includes("existing-project") && name !== "existing-project.galileo"), false)
+
+        const symlinkTarget = path.join(folder, "symlink-target.galileo")
+        const symlinkDestination = path.join(folder, "symlink-destination.galileo")
+        fs.writeFileSync(symlinkTarget, "preserved-symlink-target-bytes")
+        let symlinkCreated = false
+        try {
+            fs.symlinkSync(symlinkTarget, symlinkDestination, "file")
+            symlinkCreated = true
+        } catch (error) {
+            if (!["EPERM", "EACCES", "ENOTSUP"].includes(error?.code)) throw error
+        }
+        if (symlinkCreated) {
+            await assert.rejects(
+                writeFileSafely(symlinkDestination, (temporary) => fs.writeFileSync(temporary, "must-not-follow")),
+                /replaceable regular file/
+            )
+            assert.equal(fs.lstatSync(symlinkDestination).isSymbolicLink(), true)
+            assert.equal(fs.readFileSync(symlinkTarget, "utf8"), "preserved-symlink-target-bytes")
+            assert.equal(fs.readdirSync(folder).some((name) => name.includes("symlink-destination") && name !== "symlink-destination.galileo"), false)
+        }
+
         const image = path.join(folder, "frame.JPG")
         const text = path.join(folder, "notes.txt")
         fs.writeFileSync(image, "image")
@@ -56,7 +88,7 @@ async function run() {
         assert.deepEqual(inspectDroppedPath(text), { accepted: false, name: "notes.txt", reason: "unsupported-type" })
         assert.deepEqual(inspectDroppedPath(folder), { accepted: false, name: path.basename(folder), reason: "not-a-file" })
 
-        console.log("Verified: safe replacement preserves existing files, cleans staging files, and validates dropped media.")
+        console.log("Verified: safe replacement preserves files/directories/symlinks, cleans staging files, and validates dropped media.")
     } finally {
         fs.rmSync(folder, { recursive: true, force: true })
     }

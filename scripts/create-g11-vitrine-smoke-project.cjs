@@ -59,18 +59,30 @@ function fixturePng(width, height, palette) {
 async function run() {
     const outputPath = path.resolve(process.argv[2])
     const fixtureRoot = path.resolve(process.argv[3] ?? path.join(path.dirname(outputPath), "sources"))
+    const corruptVideo = process.argv[4] === "--corrupt-video"
+    if (process.argv[4] && !corruptVideo) throw new Error("Unknown G11 fixture mode.")
     fs.mkdirSync(fixtureRoot, { recursive: true })
     const sourceA = path.join(fixtureRoot, "vitrine-square.png")
     const sourceB = path.join(fixtureRoot, "vitrine-portrait.mp4")
     fs.writeFileSync(sourceA, fixturePng(96, 96, [[239, 78, 74], [34, 89, 214]]))
-    const ffmpeg = require("ffmpeg-static")
-    const generated = spawnSync(ffmpeg, [
-        "-hide_banner", "-loglevel", "error",
-        "-f", "lavfi", "-i", "color=c=0x26b46f:s=80x100:r=12:d=2",
-        "-vf", "drawbox=x=mod(t*30\\,60):y=40:w=20:h=20:color=0xe6b02a:t=fill",
-        "-t", "2", "-r", "12", "-an", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "0", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", sourceB,
-    ], { encoding: "utf8" })
-    if (generated.error || generated.status !== 0) throw generated.error ?? new Error(generated.stderr || "Could not generate G11 source-video fixture.")
+    if (corruptVideo) {
+        const corruptBytes = Buffer.alloc(128, 0xa5)
+        corruptBytes.writeUInt32BE(24, 0)
+        corruptBytes.write("ftyp", 4, "ascii")
+        corruptBytes.write("isom", 8, "ascii")
+        corruptBytes.writeUInt32BE(0, 12)
+        corruptBytes.write("isomiso2", 16, "ascii")
+        fs.writeFileSync(sourceB, corruptBytes)
+    } else {
+        const ffmpeg = require("ffmpeg-static")
+        const generated = spawnSync(ffmpeg, [
+            "-hide_banner", "-loglevel", "error",
+            "-f", "lavfi", "-i", "color=c=0x26b46f:s=80x100:r=12:d=2",
+            "-vf", "drawbox=x=mod(t*30\\,60):y=40:w=20:h=20:color=0xe6b02a:t=fill",
+            "-t", "2", "-r", "12", "-an", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "0", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", sourceB,
+        ], { encoding: "utf8" })
+        if (generated.error || generated.status !== 0) throw generated.error ?? new Error(generated.stderr || "Could not generate G11 source-video fixture.")
+    }
     const urls = new Map([["fixture://vitrine-square", sourceA], ["fixture://vitrine-portrait", sourceB]])
     const config = {
         schemaVersion: 2,
@@ -125,7 +137,7 @@ async function run() {
         if (!source) throw new Error("Unexpected G11 fixture URL.")
         return source
     } })
-    process.stdout.write(`${JSON.stringify({ project: outputPath, sources: [sourceA, sourceB] })}\n`)
+    process.stdout.write(`${JSON.stringify({ project: outputPath, sources: [sourceA, sourceB], corruptVideo })}\n`)
 }
 
 run().catch((error) => { console.error(error); process.exitCode = 1 })

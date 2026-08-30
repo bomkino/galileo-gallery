@@ -198,9 +198,9 @@ export default function ExpertControls(props: Props) {
     return (
         <div className="expert-panel">
             <Presets onPreset={props.onPreset} defaultsOnly={props.isVitrineV2} />
-            <div className="expert-tabs" role="tablist" aria-label="Expert controls">
+            <div className="expert-tabs" role="group" aria-label="Motion fine controls">
                 {(["slides", "frame", "story", "timing", "look"] as ExpertTab[]).map((tab) => (
-                    <button type="button" role="tab" aria-selected={props.tab === tab} className={props.tab === tab ? "is-active" : ""} onClick={() => props.onTab(tab)} key={tab}>{tab}</button>
+                    <button type="button" aria-pressed={props.tab === tab} className={props.tab === tab ? "is-active" : ""} onClick={() => props.onTab(tab)} key={tab}>{tab}</button>
                 ))}
             </div>
 

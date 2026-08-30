@@ -4,7 +4,7 @@ const fs = require("node:fs")
 const path = require("node:path")
 const zlib = require("node:zlib")
 const { spawnSync } = require("node:child_process")
-const { BrowserWindow, ipcMain, session } = require("electron")
+const { app, BrowserWindow, ipcMain, session } = require("electron")
 const { inspectPng } = require("./png-frames-runtime.cjs")
 const evidenceFs = process.versions.electron ? require("original-fs") : fs
 
@@ -125,6 +125,139 @@ function assertNoPrivateEvidence(value) {
     })
 }
 
+function exactTreeEvidence(directory) {
+    const resolved = path.resolve(directory)
+    if (!evidenceFs.existsSync(resolved)) return { exists: false, directories: 0, files: 0, bytes: 0, sha256: sha256("") }
+    const rootStat = evidenceFs.lstatSync(resolved)
+    const realpath = evidenceFs.realpathSync.native ?? evidenceFs.realpathSync
+    if (!rootStat.isDirectory() || rootStat.isSymbolicLink() || realpath(resolved) !== resolved) throw new Error("G11 evidence tree root is unsafe.")
+    const rows = []
+    let directories = 0
+    let files = 0
+    let bytes = 0
+    const walk = (current, relative) => {
+        for (const entry of evidenceFs.readdirSync(current, { withFileTypes: true }).sort((left, right) => left.name.localeCompare(right.name))) {
+            const target = path.join(current, entry.name)
+            const linked = evidenceFs.lstatSync(target)
+            if (linked.isSymbolicLink()) throw new Error("G11 evidence tree contains a symbolic link.")
+            const name = relative ? `${relative}/${entry.name}` : entry.name
+            if (linked.isDirectory()) {
+                directories += 1
+                rows.push(["directory", name, linked.mode & 0o7777])
+                walk(target, name)
+                continue
+            }
+            if (!linked.isFile()) throw new Error("G11 evidence tree contains a special file.")
+            const evidence = readEvidenceFile(target, 4_000_000_000).evidence
+            files += 1
+            bytes += evidence.bytes
+            rows.push(["file", name, evidence.bytes, evidence.sha256, linked.mode & 0o7777])
+        }
+    }
+    walk(resolved, "")
+    return { exists: true, directories, files, bytes, sha256: sha256(JSON.stringify(rows)) }
+}
+
+function openedProjectRoot() {
+    const parent = path.join(app.getPath("userData"), "opened-project-media")
+    const entries = evidenceFs.existsSync(parent)
+        ? evidenceFs.readdirSync(parent, { withFileTypes: true }).filter((entry) => entry.isDirectory() && !entry.isSymbolicLink() && /^open-[a-f0-9-]{36}$/.test(entry.name))
+        : []
+    if (entries.length !== 1) throw new Error("G11 expected one accepted app-owned Project root.")
+    const target = path.join(parent, entries[0].name)
+    const linked = evidenceFs.lstatSync(target)
+    if (!linked.isDirectory() || linked.isSymbolicLink()) throw new Error("G11 accepted Project root is unsafe.")
+    return { target, device: linked.dev, inode: linked.ino, evidence: exactTreeEvidence(target) }
+}
+
+function emptyStagingEvidence() {
+    const projectImport = exactTreeEvidence(path.join(app.getPath("userData"), "project-import-staging"))
+    const privateFrames = exactTreeEvidence(path.join(app.getPath("userData"), "g06-export-video-frames"))
+    if ((projectImport.exists && (projectImport.directories || projectImport.files))
+        || (privateFrames.exists && (privateFrames.directories || privateFrames.files))) throw new Error("G11 app-owned staging residue remains.")
+    return { projectImport, privateFrames }
+}
+
+function exactUnlinkRegular(file) {
+    const resolved = path.resolve(file)
+    const linked = evidenceFs.lstatSync(resolved)
+    if (!linked.isFile() || linked.isSymbolicLink()) throw new Error("G11 staged media target is not an exact regular file.")
+    const evidence = readEvidenceFile(resolved, 4_000_000_000).evidence
+    const descriptor = evidenceFs.openSync(resolved, evidenceFs.constants.O_RDONLY | (evidenceFs.constants.O_NOFOLLOW ?? 0))
+    try {
+        const opened = evidenceFs.fstatSync(descriptor)
+        const finalLink = evidenceFs.lstatSync(resolved)
+        if (!opened.isFile() || opened.dev !== linked.dev || opened.ino !== linked.ino || opened.size !== linked.size
+            || finalLink.dev !== linked.dev || finalLink.ino !== linked.ino || finalLink.size !== linked.size) throw new Error("G11 staged media changed before removal.")
+        evidenceFs.unlinkSync(resolved)
+        if (evidenceFs.existsSync(resolved)) throw new Error("G11 staged media removal did not take effect.")
+    } finally {
+        evidenceFs.closeSync(descriptor)
+    }
+    return evidence
+}
+
+async function failurePackageEvidence(window) {
+    const identity = await window.webContents.executeJavaScript("window.galleryHost.identity()")
+    const preferences = window.webContents.getLastWebPreferences()
+    const rendererSecurity = {
+        contextIsolation: preferences.contextIsolation,
+        nodeIntegration: preferences.nodeIntegration,
+        sandbox: preferences.sandbox,
+        partition: identity.rendererSecurity?.partition,
+    }
+    if (identity.productId !== "galileo-gallery" || identity.profile !== "g03-linux-host-port" || identity.packaged !== true
+        || identity.sourceSha !== process.env.GALLERY_SOURCE_SHA || identity.sourceTree !== process.env.GALLERY_SOURCE_TREE
+        || identity.platform !== "linux" || identity.architecture !== process.arch || identity.appVersion !== require("../package.json").version
+        || JSON.stringify(rendererSecurity) !== JSON.stringify({ contextIsolation: true, nodeIntegration: false, sandbox: true, partition: "persist:galileo-gallery-g03" })
+        || window.webContents.session !== session.fromPartition("persist:galileo-gallery-g03")) {
+        throw new Error("G11 packaged failure runner identity is wrong.")
+    }
+    assert.match(identity.buildId, /^g03-[a-z0-9]+$/, "G11 packaged failure build identity is invalid")
+    const executable = fileEvidence(process.execPath)
+    const appAsar = fileEvidence(path.join(process.resourcesPath, "app.asar"))
+    const ffmpeg = fileEvidence(path.join(process.resourcesPath, "ffmpeg", "ffmpeg"))
+    const sandboxHelper = fileEvidence(path.join(path.dirname(process.execPath), "chrome-sandbox"))
+    if (sandboxHelper.uid !== 0 || sandboxHelper.mode !== 0o4755) throw new Error("G11 failure Chromium sandbox helper is not root-owned mode 4755.")
+    if (process.env.G11_EXPECTED_EXECUTABLE_SHA && executable.sha256 !== process.env.G11_EXPECTED_EXECUTABLE_SHA) throw new Error("G11 failure executable digest is wrong.")
+    if (process.env.G11_EXPECTED_APP_ASAR_SHA && appAsar.sha256 !== process.env.G11_EXPECTED_APP_ASAR_SHA) throw new Error("G11 failure app.asar digest is wrong.")
+    if (process.env.G11_EXPECTED_FFMPEG_SHA && ffmpeg.sha256 !== process.env.G11_EXPECTED_FFMPEG_SHA) throw new Error("G11 failure FFmpeg digest is wrong.")
+    return {
+        productId: identity.productId,
+        profile: identity.profile,
+        sourceSha: identity.sourceSha,
+        sourceTree: identity.sourceTree,
+        buildId: identity.buildId,
+        packaged: identity.packaged,
+        platform: identity.platform,
+        architecture: identity.architecture,
+        appVersion: identity.appVersion,
+        runtime: identity.runtime,
+        rendererSecurity,
+        sandboxHelper,
+        executable,
+        appAsar,
+        ffmpeg,
+    }
+}
+
+async function enterStudioAndOpenProject(window) {
+    await until(window, "document.querySelector('.style-gallery-shell')", "Scene catalogue")
+    await clickText(window, "button", "Back to studio")
+    await until(window, "document.querySelector('.app-shell')", "studio")
+    const notice = await projectAction(window, "Open project", "Project opened")
+    await until(window, "document.querySelectorAll('.media-row').length === 2 && document.querySelector('.vitrine-stage[data-scene-version=\"2\"]')", "opened Vitrine v2 Project")
+    await until(window, "!document.querySelector('.launch-screen')", "launch transition", 15_000)
+    await scrub(window, 0.5)
+    return notice
+}
+
+function writeFailureReceipt(evidenceRoot, receipt) {
+    assertNoPrivateEvidence(receipt)
+    fs.mkdirSync(evidenceRoot, { recursive: true })
+    fs.writeFileSync(path.join(evidenceRoot, "receipt.json"), `${JSON.stringify(receipt, null, 2)}\n`)
+}
+
 async function until(window, expression, label, timeoutMs = 30_000) {
     const deadline = Date.now() + timeoutMs
     while (Date.now() < deadline) {
@@ -152,6 +285,17 @@ async function settle(window) {
                 throw new Error('Vitrine source video did not present its requested frame: ' + JSON.stringify(states))
             }
             await new Promise((resolve) => requestAnimationFrame(resolve))
+        }
+        for (const video of document.querySelectorAll('.vitrine-plane video, .vitrine-guard video')) {
+            const target = Number(video.dataset.storyTargetTime)
+            const presented = Number(video.dataset.storyPresentedTime)
+            if (video.seeking || video.dataset.storyTargetTime === '' || video.dataset.storyPresentedTime === ''
+                || !Number.isFinite(target) || !Number.isFinite(presented)
+                || presented > target + 0.0001 || target - presented >= 1 / 12 + 0.0001) {
+                throw new Error('Vitrine fixture video did not prove the exact requested source frame: ' + JSON.stringify({
+                    ready: video.dataset.storyReady, target, presented, seeking: video.seeking,
+                }))
+            }
         }
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     })()`)
@@ -193,6 +337,17 @@ async function presentationState(window) {
         interfaceScale: value.visible,
         revision: value.manifest?.revision ?? null,
         sha256: value.raw ? sha256(value.raw) : null,
+    }
+}
+
+async function projectOrderEvidence(window) {
+    const raw = await window.webContents.executeJavaScript(`localStorage.getItem(${JSON.stringify(PROJECT_KEY)})`)
+    const receipt = projectEvidence(raw)
+    return {
+        orderedMediaIds: receipt.project.items.map((item) => item.id),
+        semanticSha256: receipt.semanticSha256,
+        grantCount: receipt.grantCount,
+        grantDigest: receipt.grantDigest,
     }
 }
 
@@ -285,6 +440,54 @@ async function keyboardInput(window, keyCode, modifiers = []) {
     window.webContents.sendInputEvent({ type: "keyDown", keyCode, modifiers })
     window.webContents.sendInputEvent({ type: "keyUp", keyCode, modifiers })
     await settle(window)
+}
+
+async function backgroundKeyboardEvidence(window) {
+    const focusBackground = async (label) => {
+        const focused = await window.webContents.executeJavaScript(`(() => {
+            const button = [...document.querySelectorAll('.background-style-grid button')].find((candidate) => candidate.textContent.trim() === ${JSON.stringify(label)})
+            button?.focus()
+            return document.activeElement === button
+        })()`)
+        if (!focused) throw new Error(`Could not focus ${label} background.`)
+    }
+    const state = () => window.webContents.executeJavaScript(`(() => {
+        const project = JSON.parse(localStorage.getItem(${JSON.stringify(PROJECT_KEY)}))
+        const buttons = [...document.querySelectorAll('.background-style-grid button')].map((button) => ({
+            label: button.textContent.trim(),
+            pressed: button.getAttribute('aria-pressed'),
+        }))
+        return {
+            active: buttons.find((button) => button.pressed === 'true')?.label ?? null,
+            focused: document.activeElement?.textContent.trim() ?? null,
+            projectBackground: project.settings.backgroundStyle,
+            stageTransparent: document.querySelector('.vitrine-stage')?.classList.contains('is-transparent') ?? null,
+            buttons,
+        }
+    })()`)
+
+    await focusBackground("solid")
+    await keyboardInput(window, "Space")
+    const solid = await state()
+    assert.deepEqual(solid, {
+        active: "solid",
+        focused: "solid",
+        projectBackground: "solid",
+        stageTransparent: false,
+        buttons: [{ label: "solid", pressed: "true" }, { label: "transparent", pressed: "false" }],
+    }, "Space must causally activate solid background in UI, Project, and renderer")
+
+    await focusBackground("transparent")
+    await keyboardInput(window, "Space")
+    const restored = await state()
+    assert.deepEqual(restored, {
+        active: "transparent",
+        focused: "transparent",
+        projectBackground: "transparent",
+        stageTransparent: true,
+        buttons: [{ label: "solid", pressed: "false" }, { label: "transparent", pressed: "true" }],
+    }, "Space must restore transparent background in UI, Project, and renderer")
+    return { solid, restored }
 }
 
 async function vitrineTargetEvidence(window) {
@@ -412,7 +615,7 @@ async function vitrineInteractionEvidence(window) {
     return { baseline, dragged, dragUndone, shifted, shiftUndone, directionBaseline, directionArrow, directionUndone, placardBaseline, placardSpace, placardUndone, beforeDefaults, restoredDefaults, afterDefaultsUndo }
 }
 
-async function libraryKeyboardEvidence(window) {
+async function libraryKeyboardEvidence(window, persistMoved = false) {
     await window.webContents.executeJavaScript(`(() => {
         window.__g11RetiredVideos = []
         window.__g11VideoObserver?.disconnect()
@@ -469,6 +672,29 @@ async function libraryKeyboardEvidence(window) {
     assert.equal(movedLater.selected, "vitrine-square")
     assert.match(movedLater.notice, /moved to position 2 of 2/)
     assert.equal(movedLater.shortcuts, "Alt+ArrowUp Alt+ArrowDown Alt+ArrowLeft Alt+ArrowRight")
+    const movedProject = await projectOrderEvidence(window)
+    assert.deepEqual(movedProject.orderedMediaIds, ["vitrine-portrait", "vitrine-square"], "Alt reorder must change persisted Project/config order")
+    let movedSaveNotice = null
+    let movedReopenNotice = null
+    let movedReopened = null
+    if (persistMoved) {
+        movedSaveNotice = await projectAction(window, "Save project", "Project saved · media included")
+        movedReopenNotice = await projectAction(window, "Open project", "Project opened")
+        await until(window, `document.querySelectorAll('.media-row').length === 2 && [...document.querySelectorAll('[data-library-item]')].map((item) => item.dataset.libraryItem).join(',') === 'vitrine-portrait,vitrine-square'`, "saved moved Project order")
+        const reopenedProject = await projectOrderEvidence(window)
+        const reopenedUiOrder = await window.webContents.executeJavaScript("[...document.querySelectorAll('[data-library-item]')].map((item) => item.dataset.libraryItem)")
+        movedReopened = { project: reopenedProject, uiOrder: reopenedUiOrder }
+        assert.deepEqual(reopenedProject.orderedMediaIds, ["vitrine-portrait", "vitrine-square"], "Saved moved Project order must reopen")
+        assert.deepEqual(reopenedUiOrder, reopenedProject.orderedMediaIds, "Reopened UI and Project/config order must agree")
+        const selected = await window.webContents.executeJavaScript(`(() => {
+            const item = document.querySelector('[data-library-item="vitrine-square"]')
+            item?.click()
+            item?.focus()
+            return Boolean(item)
+        })()`)
+        if (!selected) throw new Error("Could not select reordered Vitrine square after reopen.")
+        await settle(window)
+    }
     await keyboardInput(window, "Up", ["alt"])
     const movedEarlier = await window.webContents.executeJavaScript(`({
         order: [...document.querySelectorAll('[data-library-item]')].map((item) => item.dataset.libraryItem),
@@ -487,6 +713,8 @@ async function libraryKeyboardEvidence(window) {
         selected: document.querySelector('.media-row.is-selected [data-library-item]')?.dataset.libraryItem ?? null,
     })`)
     assert.deepEqual(voiceOverChord, { order: ["vitrine-square", "vitrine-portrait"], focused: "vitrine-square", selected: "vitrine-square" }, "Control+Option VoiceOver navigation must not reorder or consume library focus")
+    const restoredProject = await projectOrderEvidence(window)
+    assert.deepEqual(restoredProject.orderedMediaIds, ["vitrine-square", "vitrine-portrait"], "Restored UI and Project/config order must agree")
     const retired = await window.webContents.executeJavaScript(`(async () => {
         const deadline = performance.now() + 2_000
         const released = (video) => !video.hasAttribute('src') && video.paused && video.readyState === HTMLMediaElement.HAVE_NOTHING && video.networkState === HTMLMediaElement.NETWORK_EMPTY
@@ -501,7 +729,7 @@ async function libraryKeyboardEvidence(window) {
     })()`)
     if (retired.count < 1 || !retired.allCleared) throw new Error(`G11 source-video handoff did not release the retired decoder: ${JSON.stringify(retired)}`)
     await window.webContents.executeJavaScript("window.__g11VideoObserver.disconnect()")
-    return { next, previous, movedLater, movedEarlier, voiceOverChord, retired }
+    return { next, previous, movedLater, movedProject, movedSaveNotice, movedReopenNotice, movedReopened, movedEarlier, restoredProject, voiceOverChord, retired }
 }
 
 async function documentBoundaryEvidence(window) {
@@ -554,6 +782,7 @@ async function continuousVideoHandoffEvidence(window) {
         let hiddenIncomingFrames = 0
         let maxDecoders = 0
         const presentedTimes = []
+        const presentedFrames = []
         while (performance.now() < deadline) {
             await new Promise((resolve) => requestAnimationFrame(resolve))
             maxDecoders = Math.max(maxDecoders, document.querySelectorAll('.vitrine-stage video').length)
@@ -563,8 +792,13 @@ async function continuousVideoHandoffEvidence(window) {
                 if (getComputedStyle(incoming).visibility !== 'visible') hiddenIncomingFrames += 1
                 const presentedValue = incoming.dataset.storyPresentedTime
                 const presented = Number(presentedValue)
-                if (presentedValue !== '' && Number.isFinite(presented)
-                    && (presentedTimes.length === 0 || Math.abs(presentedTimes.at(-1) - presented) > 0.0001)) presentedTimes.push(presented)
+                const targetValue = incoming.dataset.storyTargetTime
+                const target = Number(targetValue)
+                if (presentedValue !== '' && targetValue !== '' && Number.isFinite(presented) && Number.isFinite(target)
+                    && (presentedTimes.length === 0 || Math.abs(presentedTimes.at(-1) - presented) > 0.0001)) {
+                    presentedTimes.push(presented)
+                    presentedFrames.push({ target, presented, seeking: incoming.seeking, ready: incoming.dataset.storyReady })
+                }
             }
             if (Number(document.querySelector('.timeline').value) >= 0.44) break
         }
@@ -573,14 +807,51 @@ async function continuousVideoHandoffEvidence(window) {
         setter.call(timeline, timeline.value)
         timeline.dispatchEvent(new Event('input', { bubbles: true }))
         timeline.dispatchEvent(new Event('change', { bubbles: true }))
-        return { guardReadyBefore, sawIncoming, hiddenIncomingFrames, maxDecoders, presentedTimes }
+        return { guardReadyBefore, sawIncoming, hiddenIncomingFrames, maxDecoders, presentedTimes, presentedFrames }
     })()`)
     await settle(window)
     if (!result.guardReadyBefore || !result.sawIncoming || result.hiddenIncomingFrames !== 0 || result.maxDecoders > 2
-        || result.presentedTimes.length < 2 || result.presentedTimes.some((value, index) => index > 0 && value <= result.presentedTimes[index - 1])) {
+        || result.presentedTimes.length < 2 || result.presentedTimes.some((value, index) => index > 0 && value <= result.presentedTimes[index - 1])
+        || result.presentedFrames.some((frame) => frame.seeking || frame.presented > frame.target + 0.0001 || frame.target - frame.presented >= 1 / 12 + 0.0001)) {
         throw new Error(`G11 continuous video handoff was not prewarmed and continuously presentable: ${JSON.stringify(result)}`)
     }
     return result
+}
+
+async function sourceVideoSeekBurstEvidence(window) {
+    const sequence = [0.43, 0.36, 0.44, 0.35, 0.42]
+    await scrub(window, 0.35)
+    const interim = await window.webContents.executeJavaScript(`(async () => {
+        const timeline = document.querySelector('.timeline')
+        const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
+        const dispatch = (value) => {
+            setter.call(timeline, String(value))
+            timeline.dispatchEvent(new Event('input', { bubbles: true }))
+            timeline.dispatchEvent(new Event('change', { bubbles: true }))
+        }
+        dispatch(${sequence[0]})
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        for (const value of ${JSON.stringify(sequence.slice(1))}) dispatch(value)
+        const video = document.querySelector('.vitrine-plane[data-media-id="vitrine-portrait"] video')
+        return video ? {
+            ready: video.dataset.storyReady, target: video.dataset.storyTargetTime,
+            presented: video.dataset.storyPresentedTime, seeking: video.seeking,
+        } : null
+    })()`)
+    await settle(window)
+    const scene = await readScene(window)
+    const plane = scene.planes.find((candidate) => candidate.id === "vitrine-portrait")
+    const expectedTarget = Math.floor(0.42 * 2_000 * 24 / 1_000 + 1e-9) / 24
+    if (!plane || plane.mediaTag !== "VIDEO" || plane.storyReady !== "true" || plane.storySeeking
+        || Math.abs(plane.storyTargetTime - expectedTarget) > 0.0001
+        || plane.storyPresentedTime > plane.storyTargetTime + 0.0001
+        || plane.storyTargetTime - plane.storyPresentedTime >= 1 / 12 + 0.0001) {
+        throw new Error(`G11 source-video latest-wins seek burst did not converge exactly: ${JSON.stringify({ sequence, interim, plane })}`)
+    }
+    return { sequence, interim, final: {
+        target: plane.storyTargetTime, presented: plane.storyPresentedTime,
+        seeking: plane.storySeeking, ready: plane.storyReady,
+    } }
 }
 
 const sceneExpression = `(() => {
@@ -663,6 +934,8 @@ const sceneExpression = `(() => {
                 mediaTag: media?.tagName ?? null,
                 storyReady: media?.dataset.storyReady ?? null,
                 storyPresentedTime: media?.dataset.storyPresentedTime === undefined || media?.dataset.storyPresentedTime === "" ? null : Number(media.dataset.storyPresentedTime),
+                storyTargetTime: media?.dataset.storyTargetTime === undefined || media?.dataset.storyTargetTime === "" ? null : Number(media.dataset.storyTargetTime),
+                storySeeking: media?.tagName === "VIDEO" ? media.seeking : null,
                 shadow: getComputedStyle(plane).boxShadow,
                 transform: plane.style.transform,
                 failed: Boolean(plane.querySelector('[data-media-failed="true"]')),
@@ -948,8 +1221,208 @@ async function causalControls(window) {
     return { baseline, presentationScale, objectTurn, transitionDepth, transitionDirection, placard }
 }
 
+async function installHydrationProbe(window) {
+    await window.webContents.executeJavaScript(`(() => {
+        if (window.__g11HydrationProbe) throw new Error('G11 hydration probe is already installed.')
+        const hadOwn = Object.prototype.hasOwnProperty.call(document, 'createElement')
+        const original = document.createElement
+        const records = []
+        document.createElement = function(name, options) {
+            const node = original.call(this, name, options)
+            if (String(name).toLowerCase() === 'video') {
+                const record = { loadeddata: 0, error: 0, disconnectedLoadeddata: 0, disconnectedError: 0 }
+                records.push(record)
+                node.addEventListener('loadeddata', () => {
+                    record.loadeddata += 1
+                    if (!node.isConnected) record.disconnectedLoadeddata += 1
+                })
+                node.addEventListener('error', () => {
+                    record.error += 1
+                    if (!node.isConnected) record.disconnectedError += 1
+                })
+            }
+            return node
+        }
+        window.__g11HydrationProbe = {
+            records,
+            restore() {
+                if (hadOwn) document.createElement = original
+                else delete document.createElement
+            },
+        }
+    })()`)
+}
+
+async function finishHydrationProbe(window) {
+    return window.webContents.executeJavaScript(`(() => {
+        const probe = window.__g11HydrationProbe
+        if (!probe) throw new Error('G11 hydration probe is missing.')
+        probe.restore()
+        const result = probe.records.reduce((total, record) => ({
+            createdVideos: total.createdVideos + 1,
+            loadeddata: total.loadeddata + record.loadeddata,
+            errors: total.errors + record.error,
+            disconnectedLoadeddata: total.disconnectedLoadeddata + record.disconnectedLoadeddata,
+            disconnectedErrors: total.disconnectedErrors + record.disconnectedError,
+        }), { createdVideos: 0, loadeddata: 0, errors: 0, disconnectedLoadeddata: 0, disconnectedErrors: 0 })
+        delete window.__g11HydrationProbe
+        return result
+    })()`)
+}
+
+async function runCorruptOpenEvidence(window, evidenceRoot) {
+    const corruptValue = process.env.REEL_G11_CORRUPT_PROJECT_PATH
+    const validValue = process.env.REEL_G03_PROJECT_PATH
+    if (!corruptValue || !validValue) throw new Error("G11 corrupt-open mode needs valid and corrupt Project fixtures.")
+    const corruptProject = path.resolve(corruptValue)
+    const packageEvidence = await failurePackageEvidence(window)
+    const validOpenNotice = await enterStudioAndOpenProject(window)
+    const projectBeforeRaw = await window.webContents.executeJavaScript(`localStorage.getItem(${JSON.stringify(PROJECT_KEY)})`)
+    const projectBefore = projectEvidence(projectBeforeRaw)
+    const rootBefore = openedProjectRoot()
+    const stagingBefore = emptyStagingEvidence()
+
+    await installHydrationProbe(window)
+    process.env.REEL_G03_PROJECT_PATH = corruptProject
+    const startedAt = Date.now()
+    let corruptOpenNotice
+    let hydration
+    try {
+        await clickText(window, ".project-menu summary", "Project")
+        await clickText(window, ".project-menu button", "Open project")
+        await until(window, `document.querySelector('.autosave-status')?.textContent.includes('Could not hydrate Vitrine Portrait.mp4.')`, "corrupt media hydration rejection", 25_000)
+        corruptOpenNotice = await window.webContents.executeJavaScript("document.querySelector('.autosave-status').textContent.trim()")
+    } finally {
+        process.env.REEL_G03_PROJECT_PATH = validValue
+        hydration = await finishHydrationProbe(window)
+    }
+    const elapsedMs = Date.now() - startedAt
+    await wait(250)
+    const projectAfterRaw = await window.webContents.executeJavaScript(`localStorage.getItem(${JSON.stringify(PROJECT_KEY)})`)
+    const projectAfter = projectEvidence(projectAfterRaw)
+    const rootAfter = openedProjectRoot()
+    const stagingAfter = emptyStagingEvidence()
+    assert.equal(projectAfterRaw, projectBeforeRaw, "Corrupt open changed the accepted Project document")
+    assert.equal(projectAfter.semanticSha256, projectBefore.semanticSha256)
+    assert.equal(projectAfter.grantDigest, projectBefore.grantDigest)
+    assert.equal(rootAfter.device, rootBefore.device)
+    assert.equal(rootAfter.inode, rootBefore.inode)
+    assert.deepEqual(rootAfter.evidence, rootBefore.evidence)
+    assert.equal(hydration.disconnectedLoadeddata, 0)
+    assert.equal(hydration.disconnectedErrors, 1)
+    assert.match(corruptOpenNotice, /Could not hydrate Vitrine Portrait\.mp4\./)
+
+    writeFailureReceipt(evidenceRoot, {
+        mode: "corrupt-open",
+        package: packageEvidence,
+        journey: { validOpenNotice, corruptOpenNotice },
+        corruptArchive: { ...fileEvidence(corruptProject), signatureAccepted: true, browserAccepted: false },
+        chromium: { ...hydration, failureBeforeTimeout: elapsedMs < 15_000 },
+        priorProject: {
+            semanticSha256Before: projectBefore.semanticSha256,
+            semanticSha256After: projectAfter.semanticSha256,
+            grantDigestBefore: projectBefore.grantDigest,
+            grantDigestAfter: projectAfter.grantDigest,
+            documentSha256Before: sha256(projectBeforeRaw),
+            documentSha256After: sha256(projectAfterRaw),
+        },
+        containment: {
+            acceptedRootBefore: rootBefore.evidence,
+            acceptedRootAfter: rootAfter.evidence,
+            acceptedRootIdentityPreserved: rootAfter.device === rootBefore.device && rootAfter.inode === rootBefore.inode,
+            stagingBefore,
+            stagingAfter,
+        },
+    })
+}
+
+async function runMissingMediaExportEvidence(window, evidenceRoot) {
+    const destinationValue = process.env.REEL_G11_PNG_DESTINATION
+    if (!destinationValue) throw new Error("G11 missing-media mode needs a PNG destination.")
+    const destination = path.resolve(destinationValue)
+    const destinationParent = path.dirname(destination)
+    if (evidenceFs.existsSync(destination)) throw new Error("G11 missing-media destination must begin absent.")
+    const destinationBefore = exactTreeEvidence(destinationParent)
+    if (!destinationBefore.exists || destinationBefore.files !== 1 || destinationBefore.directories !== 0) throw new Error("G11 missing-media sentinel tree is wrong.")
+    const packageEvidence = await failurePackageEvidence(window)
+    const validOpenNotice = await enterStudioAndOpenProject(window)
+    const projectBeforeRaw = await window.webContents.executeJavaScript(`localStorage.getItem(${JSON.stringify(PROJECT_KEY)})`)
+    const projectBefore = projectEvidence(projectBeforeRaw)
+    const acceptedRoot = openedProjectRoot()
+    const mediaFiles = evidenceFs.readdirSync(acceptedRoot.target, { withFileTypes: true })
+        .filter((entry) => entry.isFile() && !entry.isSymbolicLink() && entry.name.endsWith(".mp4"))
+    if (mediaFiles.length !== 1) throw new Error("G11 missing-media mode expected one staged MP4.")
+    const removedMedia = exactUnlinkRegular(path.join(acceptedRoot.target, mediaFiles[0].name))
+    const rootAfterRemoval = openedProjectRoot()
+    assert.equal(rootAfterRemoval.device, acceptedRoot.device)
+    assert.equal(rootAfterRemoval.inode, acceptedRoot.inode)
+    assert.equal(acceptedRoot.evidence.files, rootAfterRemoval.evidence.files + 1)
+    assert.equal(acceptedRoot.evidence.bytes, rootAfterRemoval.evidence.bytes + removedMedia.bytes)
+
+    let readySignals = 0
+    let frameReadySignals = 0
+    const onReady = () => { readySignals += 1 }
+    const onFrameReady = () => { frameReadySignals += 1 }
+    ipcMain.on("export:ready", onReady)
+    ipcMain.on("export:frame-ready", onFrameReady)
+    const startedAt = Date.now()
+    let failureMessage
+    try {
+        await clickText(window, ".inspector-top button", "Export")
+        await until(window, "document.querySelector('.export-panel')", "Export panel")
+        await clickText(window, ".export-button", "Export verified PNG Frames")
+        await until(window, "document.querySelector('.export-error')?.textContent.trim()", "missing staged media export failure", 45_000)
+        failureMessage = await window.webContents.executeJavaScript("document.querySelector('.export-error').textContent.trim()")
+    } finally {
+        ipcMain.removeListener("export:ready", onReady)
+        ipcMain.removeListener("export:frame-ready", onFrameReady)
+    }
+    const elapsedMs = Date.now() - startedAt
+    await wait(250)
+    const projectAfterRaw = await window.webContents.executeJavaScript(`localStorage.getItem(${JSON.stringify(PROJECT_KEY)})`)
+    const projectAfter = projectEvidence(projectAfterRaw)
+    const destinationAfter = exactTreeEvidence(destinationParent)
+    const stagingAfter = emptyStagingEvidence()
+    const rootAfterFailure = openedProjectRoot()
+    assert.equal(projectAfterRaw, projectBeforeRaw, "Failed export changed the accepted Project document")
+    assert.equal(projectAfter.semanticSha256, projectBefore.semanticSha256)
+    assert.equal(evidenceFs.existsSync(destination), false)
+    assert.deepEqual(destinationAfter, destinationBefore)
+    assert.equal(readySignals, 0)
+    assert.equal(frameReadySignals, 0)
+    assert.equal(await window.webContents.executeJavaScript("Boolean(document.querySelector('.export-success'))"), false)
+    assert.match(failureMessage, /^(?:internal_error|verification_failed)$/)
+    assert.equal(rootAfterFailure.device, acceptedRoot.device)
+    assert.equal(rootAfterFailure.inode, acceptedRoot.inode)
+    assert.deepEqual(rootAfterFailure.evidence, rootAfterRemoval.evidence)
+
+    writeFailureReceipt(evidenceRoot, {
+        mode: "missing-media-export",
+        package: packageEvidence,
+        journey: { validOpenNotice },
+        project: {
+            semanticSha256Before: projectBefore.semanticSha256,
+            semanticSha256After: projectAfter.semanticSha256,
+            documentSha256Before: sha256(projectBeforeRaw),
+            documentSha256After: sha256(projectAfterRaw),
+        },
+        removedMedia: { ...removedMedia, exactAppOwnedRegularFile: true, absentBeforeExport: true },
+        acceptedProject: {
+            rootIdentityPreserved: rootAfterFailure.device === acceptedRoot.device && rootAfterFailure.inode === acceptedRoot.inode,
+            beforeRemoval: acceptedRoot.evidence,
+            afterRemoval: rootAfterRemoval.evidence,
+            afterFailure: rootAfterFailure.evidence,
+        },
+        export: { failureMessage, elapsedMs, readySignals, frameReadySignals, successVisible: false },
+        destination: { before: destinationBefore, after: destinationAfter, targetExistedBefore: false, targetExistsAfter: false },
+        cleanup: stagingAfter,
+    })
+}
+
 async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_G11_RENDERER_MODE ?? "save") {
-    if (!["save", "reopen"].includes(mode)) throw new Error("G11 Vitrine smoke mode is invalid.")
+    if (!["save", "reopen", "corrupt-open", "missing-media-export"].includes(mode)) throw new Error("G11 Vitrine smoke mode is invalid.")
+    if (mode === "corrupt-open") return runCorruptOpenEvidence(window, evidenceRoot)
+    if (mode === "missing-media-export") return runMissingMediaExportEvidence(window, evidenceRoot)
     const destinationValue = process.env.REEL_G11_PNG_DESTINATION
     const projectValue = process.env.REEL_G03_PROJECT_PATH
     if (!destinationValue || !projectValue) throw new Error("G11 Vitrine smoke needs Project and PNG destinations.")
@@ -1003,7 +1476,9 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         libraryVideos: document.querySelectorAll('.media-list video').length,
     })`)
     if (decoderEvidence.activePlanes > 2 || decoderEvidence.activeVideos > 2 || decoderEvidence.readyVideos !== decoderEvidence.activeVideos || decoderEvidence.guardVideos !== 1 || decoderEvidence.libraryVideos !== 0) throw new Error(`G11 video guard or two-decoder budget is wrong: ${JSON.stringify(decoderEvidence)}`)
-    const libraryKeyboard = await libraryKeyboardEvidence(window)
+    const continuousVideoHandoff = mode === "save" ? await continuousVideoHandoffEvidence(window) : null
+    const sourceVideoSeekBurst = mode === "save" ? await sourceVideoSeekBurstEvidence(window) : null
+    const libraryKeyboard = await libraryKeyboardEvidence(window, mode === "save")
 
     let projectDocument = await window.webContents.executeJavaScript(`localStorage.getItem(${JSON.stringify(PROJECT_KEY)})`)
     let projectReceipt = projectEvidence(projectDocument)
@@ -1042,7 +1517,6 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
     assert.equal(holdA.planes[0].objectPosition, "20% 30%")
     screenshots.hold = await capture(window, evidenceRoot, `vitrine-${mode}-hold-a`)
     const reducedTransport = mode === "reopen" ? await reducedTransportEvidence(window) : null
-    const continuousVideoHandoff = mode === "save" ? await continuousVideoHandoffEvidence(window) : null
     await scrub(window, 0.375)
     const exchange = await readScene(window)
     if (mode === "save" && exchange.phrase !== "exchange") throw new Error("G11 authored preview exchange is wrong.")
@@ -1115,6 +1589,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         || designTruth.backgrounds.filter((entry) => entry.pressed === "true").map((entry) => entry.label).join(",") !== "transparent") {
         throw new Error("G11 Design exposed noncausal or inaccessible Vitrine background controls.")
     }
+    const backgroundKeyboard = await backgroundKeyboardEvidence(window)
     await clickText(window, ".inspector-top button", "Expert")
     const expertTruth = {}
     for (const tab of ["frame", "story", "timing", "look"]) {
@@ -1215,8 +1690,8 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
             },
         },
         presentation: { initial: presentationInitial, final: presentationFinal },
-        preview: { holdA, exchange, semanticHandoff, holdB, terminalVideo, continuousVideoHandoff, reducedTransport, scales: scaleEvidence, cleanAlpha: cleanAlphaPreview, reducedMotionExpected: mode === "reopen" },
-        controls: { causal: controlEvidence, interaction: interactionEvidence, libraryKeyboard, decoderEvidence, targets: targetEvidence, design: designTruth, expert: expertTruth, presets: presetTruth, blockedAlpha: blockedAlphaTruth, formats: formatTruth },
+        preview: { holdA, exchange, semanticHandoff, holdB, terminalVideo, continuousVideoHandoff, sourceVideoSeekBurst, reducedTransport, scales: scaleEvidence, cleanAlpha: cleanAlphaPreview, reducedMotionExpected: mode === "reopen" },
+        controls: { causal: controlEvidence, interaction: interactionEvidence, libraryKeyboard, decoderEvidence, targets: targetEvidence, design: { ...designTruth, keyboard: backgroundKeyboard }, expert: expertTruth, presets: presetTruth, blockedAlpha: blockedAlphaTruth, formats: formatTruth },
         export: { placardVisible: false, probes: exportProbes, manifestSha256: sha256(manifestBytes), frameHashes: manifest.frames.map((frame) => frame.sha256), artwork },
         screenshots,
     }
