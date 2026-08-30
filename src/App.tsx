@@ -7,7 +7,9 @@ import { minimumVitrineFixedDuration, VITRINE_MIN_EXCHANGE_MS, VITRINE_MIN_HOLD_
 import { assertVitrineV2Settings, exclusiveVitrineOpening, firstEligibleVitrineItem, isVitrineV2, reconcileVitrineConfig, VITRINE_MAX_DURATION_MS, VITRINE_MAX_ITEMS } from "./vitrineConfig"
 import { assertShelfV2Settings, exclusiveShelfSpotlight, isShelfV2 } from "./shelfConfig"
 import { SHELF_MAX_DURATION_MS, SHELF_MAX_ITEMS } from "./scenes/shelf"
-import { productUndoKeys, reconcileProductSceneConfig, resetShelfSourceGeometry, type ProductUndoEntry, type ProductUndoKey } from "./productSceneRuntime"
+import { LIGHT_TABLE_MAX_DURATION_MS, LIGHT_TABLE_MAX_ITEMS, LIGHT_TABLE_TRANSPARENCY_REASON, lightTableFrameCount, minimumLightTableDuration } from "./scenes/lightTable"
+import { isLightTableV2, lightTableTimelineFromConfig } from "./lightTableConfig"
+import { productUndoKeys, reconcileProductSceneConfig, resetLightTableControls, resetShelfSourceGeometry, type ProductUndoEntry, type ProductUndoKey } from "./productSceneRuntime"
 import QuietCarouselRenderer, { quietCarouselTimeline } from "./scenes/QuietCarouselRenderer"
 import StyleGallery from "./StyleGallery"
 import { ensureReelAPI } from "./runtime"
@@ -773,7 +775,7 @@ function AppView() {
         ? duration * (repeatCount - 1) + finalCycleDuration
         : duration
     const terminalCycle = config.settings.playKind === "once"
-        || ((isAuthoredVitrine(config) || isShelfV2(config)) && config.settings.playKind === "repeat")
+        || ((isAuthoredVitrine(config) || isShelfV2(config) || isLightTableV2(config)) && config.settings.playKind === "repeat")
         || (config.settings.playKind === "repeat" && playIteration === repeatCount)
     const activeCycleDuration = terminalCycle && config.settings.playKind === "repeat" ? finalCycleDuration : duration
     const liveSlides = React.useMemo(() => sourceItems(config.items), [config.items])
@@ -785,7 +787,8 @@ function AppView() {
     const activeProfile = styleProfile(config.styleId, config.sceneVersion ?? 1)
     const authoredVitrine = isAuthoredVitrine(config)
     const authoredShelf = isShelfV2(config)
-    const authoredProductScene = authoredVitrine || authoredShelf
+    const authoredLightTable = isLightTableV2(config)
+    const authoredProductScene = authoredVitrine || authoredShelf || authoredLightTable
     const reducedProductPreview = authoredProductScene && systemReducedMotion
     const shelfPngVideoBlocked = authoredShelf && config.items.some((item) => item.type === "video")
     const verifiedPngScene = usesLinuxHostPort && supportsVerifiedPngFrames(config.styleId, config.sceneVersion ?? 1) && !shelfPngVideoBlocked
@@ -797,6 +800,7 @@ function AppView() {
     const vitrineFixedMinimum = authoredVitrine
         ? minimumVitrineFixedDuration(Math.max(1, config.items.filter((item) => !item.muted).length), config.settings.holdMs, config.settings.paceMs)
         : 1_000
+    const lightTableFixedMinimum = authoredLightTable ? minimumLightTableDuration(config.items.length) : 1_000
     const isOpeningReel = activeStyle.id === "opening-reel"
     const directionLabels = activeProfile.axisControl
         ? config.settings.axis === "vertical" ? ["Up", "Down"] as const : ["Left", "Right"] as const
@@ -859,7 +863,7 @@ function AppView() {
             clearProductUndo()
             return false
         }
-        const sceneName = isShelfV2(configRef.current) ? "Shelf" : "Vitrine"
+        const sceneName = isLightTableV2(configRef.current) ? "Light Table" : isShelfV2(configRef.current) ? "Shelf" : "Vitrine"
         if (!applyConfig((current) => ({ ...current, settings: { ...current.settings, [previous.key]: previous.value } }))) {
             productUndoStackRef.current.push(previous)
             updateUndoDepth()
@@ -868,7 +872,7 @@ function AppView() {
         setSaveNotice(`${sceneName} control change undone.`)
         updateUndoDepth()
         restart()
-        const groupLabel = previous.key === "transitionDirection" ? "Exchange direction" : previous.key === "showHint" ? "Placard" : previous.key === "direction" ? "Direction" : null
+        const groupLabel = previous.key === "transitionDirection" ? "Exchange direction" : previous.key === "showHint" ? "Placard" : previous.key === "direction" ? "Direction" : previous.key === "focusBehavior" ? "Focus behavior" : null
         if (groupLabel) requestAnimationFrame(() => document.querySelector<HTMLElement>(`.segment[aria-label="${groupLabel}"] button[aria-pressed="true"]`)?.focus())
         return true
     }, [applyConfig, clearProductUndo, restart, updateUndoDepth])
@@ -982,7 +986,7 @@ function AppView() {
                 .createVideoProxy(item.url)
                 .then((previewUrl) => projectMutationLane.run(async () => {
                     const current = configRef.current
-                    if (isVitrineV2(current) || isShelfV2(current)
+                    if (isVitrineV2(current) || isShelfV2(current) || isLightTableV2(current)
                         || !current.items.some((currentItem) => currentItem.id === item.id && currentItem.url === item.url)) return
                     applyConfig((current) => ({
                         ...current,
@@ -1009,8 +1013,8 @@ function AppView() {
     }, [config.items, selectedItemId])
 
     React.useEffect(() => {
-        if (!authoredVitrine || (inspectionItemId && !config.items.some((item) => item.id === inspectionItemId))) setInspectionItemId(null)
-    }, [authoredVitrine, config.items, inspectionItemId])
+        if ((!authoredVitrine && !authoredLightTable) || (inspectionItemId && !config.items.some((item) => item.id === inspectionItemId))) setInspectionItemId(null)
+    }, [authoredLightTable, authoredVitrine, config.items, inspectionItemId])
 
     React.useEffect(() => {
         if (isStaticPreview) document.documentElement.dataset.reelStatic = "true"
@@ -1234,11 +1238,15 @@ function AppView() {
                 setSaveNotice(`Shelf supports at most ${SHELF_MAX_ITEMS} ordered media items. Nothing was added.`)
                 return null
             }
+            if (isLightTableV2(baseline) && baseline.items.length + picked.length > LIGHT_TABLE_MAX_ITEMS) {
+                setSaveNotice(`Light Table supports at most ${LIGHT_TABLE_MAX_ITEMS} ordered media items. Nothing was added.`)
+                return null
+            }
             const videoCount = picked.filter((item) => item.type === "video").length
             if (videoCount) setProcessingMedia((count) => count + videoCount)
             try {
                 const prepare = async () => {
-                    const hydrated = await hydrateMedia(picked, !isVitrineV2(baseline) && !isShelfV2(baseline))
+                    const hydrated = await hydrateMedia(picked, !isVitrineV2(baseline) && !isShelfV2(baseline) && !isLightTableV2(baseline))
                     let preparedItems = hydrated.items
                     if (isShelfV2(baseline)) preparedItems = await admitShelfItems(preparedItems)
                     if (configEpochRef.current !== expectedEpoch || configRef.current !== baseline) {
@@ -1262,12 +1270,18 @@ function AppView() {
 
     const inspectLibraryItem = React.useCallback((id: string) => {
         setSelectedItemId(id)
-        if (!authoredVitrine) return
+        if (!authoredVitrine && !authoredLightTable) return
         setInspectionItemId(id)
         setPreviewStarted(false)
         setScrubPaused(true)
         setIsScrubbing(false)
-    }, [authoredVitrine])
+    }, [authoredLightTable, authoredVitrine])
+
+    const changeLightTableInspection = React.useCallback((id: string | null) => {
+        if (!authoredLightTable) return
+        if (id) inspectLibraryItem(id)
+        else setInspectionItemId(null)
+    }, [authoredLightTable, inspectLibraryItem])
 
     const updateSettings = <K extends keyof ReelSettings>(key: K, value: ReelSettings[K]) => {
         const before = configRef.current
@@ -1314,8 +1328,8 @@ function AppView() {
 
     const updateTimelineMode = (mode: TimelineMode) => {
         const current = configRef.current
-        if (!isVitrineV2(current) && !isShelfV2(current)) return
-        const mediaCount = Math.max(1, current.items.filter((item) => !item.muted).length)
+        if (!isVitrineV2(current) && !isShelfV2(current) && !isLightTableV2(current)) return
+        const mediaCount = isLightTableV2(current) ? current.items.length : Math.max(1, current.items.filter((item) => !item.muted).length)
         let applied = false
         if (mode === "automatic") {
             applied = applyConfig({ ...current, timelineMode: mode, timelineFixedDurationMs: 0, timelineSegments: [] })
@@ -1323,22 +1337,33 @@ function AppView() {
             applied = applyConfig({
                 ...current,
                 timelineMode: mode,
-                timelineFixedDurationMs: isShelfV2(current)
+                timelineFixedDurationMs: isLightTableV2(current)
+                    ? Math.max(minimumLightTableDuration(mediaCount), current.timelineFixedDurationMs ?? 0)
+                    : isShelfV2(current)
                     ? Math.max(1_000, current.timelineFixedDurationMs ?? 0)
                     : Math.max(current.timelineFixedDurationMs ?? 0, mediaCount * (current.settings.holdMs + current.settings.paceMs), minimumVitrineFixedDuration(mediaCount, current.settings.holdMs, current.settings.paceMs)),
                 timelineSegments: [],
             })
         } else {
+            const lightTableSegments = isLightTableV2(current)
+                ? lightTableTimelineFromConfig({ ...current, timelineMode: "automatic", timelineFixedDurationMs: 0, timelineSegments: [] }, fps, mediaCount).phases.map((phase) => ({
+                    id: phase.id,
+                    kind: phase.id === "final-inspection" ? "hold" as const : "cycle" as const,
+                    cycles: 1,
+                    paceScale: phase.id === "wake" || phase.id === "return" ? 2 : 1,
+                    durationMs: phase.endMs - phase.startMs,
+                }))
+                : null
             applied = applyConfig({
                 ...current,
                 timelineMode: mode,
                 timelineFixedDurationMs: 0,
-                settings: isShelfV2(current) ? current.settings : {
+                settings: isShelfV2(current) || isLightTableV2(current) ? current.settings : {
                     ...current.settings,
                     holdMs: Math.max(current.settings.holdMs, VITRINE_MIN_HOLD_MS * 2),
                     paceMs: Math.max(current.settings.paceMs, VITRINE_MIN_EXCHANGE_MS * 2),
                 },
-                timelineSegments: [
+                timelineSegments: lightTableSegments ?? [
                     { id: "fast-opening", kind: "cycle", cycles: 2, paceScale: 2, durationMs: 0 },
                     { id: "regular-middle", kind: "cycle", cycles: 1, paceScale: 1, durationMs: 0 },
                     { id: "fast-finale", kind: "cycle", cycles: 1, paceScale: 2, durationMs: 0 },
@@ -1412,6 +1437,7 @@ function AppView() {
         }
         if (productUndoKeys(configRef.current)) clearProductUndo()
         const applied = applyConfig((current) => {
+            if (isLightTableV2(current)) return resetLightTableControls(current)
             if (isShelfV2(current)) return resetShelfSourceGeometry({
                 ...current,
                 settings: {
@@ -1447,6 +1473,10 @@ function AppView() {
     }
 
     const removeItem = (id: string) => {
+        if (isLightTableV2(configRef.current) && configRef.current.items.length <= 1) {
+            setSaveNotice("Light Table needs at least one ordered media item. The last frame was kept.")
+            return
+        }
         if (isShelfV2(configRef.current) && configRef.current.items.length <= 1) {
             setSaveNotice("Shelf needs at least one ordered media item. The last edition was kept.")
             return
@@ -1482,6 +1512,10 @@ function AppView() {
         if (isExporting) return
         const exportConfig = configRef.current
         const requestedFormat = format
+        if (isLightTableV2(exportConfig)) {
+            setProgress({ exportId: "failed", phase: "error", progress: 0, message: "Light Table v2 export is unavailable until its rendered output is verified." })
+            return
+        }
         if (usesLinuxHostPort && requestedFormat === "png-frames" && !verifiedPngScene) {
             setProgress({ exportId: "failed", phase: "error", progress: 0, message: shelfPngVideoBlocked ? "Verified Shelf PNG Frames currently support still images only." : "Verified PNG Frames currently support Quiet Carousel v1, Vitrine v2, and image-only Shelf v2." })
             return
@@ -1649,6 +1683,16 @@ function AppView() {
                     setShowStyleGallery(false)
                     return
                 }
+                if (style.id === "light-table" && sceneVersion === 2 && current.items.length < 1) {
+                    setSaveNotice("Add at least one photo or video before choosing Light Table.")
+                    setShowStyleGallery(false)
+                    return
+                }
+                if (style.id === "light-table" && sceneVersion === 2 && current.items.length > LIGHT_TABLE_MAX_ITEMS) {
+                    setSaveNotice(`Light Table supports at most ${LIGHT_TABLE_MAX_ITEMS} ordered media items. Remove ${current.items.length - LIGHT_TABLE_MAX_ITEMS} before choosing it.`)
+                    setShowStyleGallery(false)
+                    return
+                }
                 const defaults = applyStyleDefaults(current.settings, style.id, sceneVersion)
                 const settings = style.id === "vitrine" && sceneVersion === 2
                     ? { ...defaults, axis: "horizontal" as const, backgroundStyle: defaults.backgroundStyle === "transparent" ? "transparent" as const : "solid" as const }
@@ -1660,7 +1704,22 @@ function AppView() {
                             theme: defaults.theme === "light" ? "light" as const : "dark" as const,
                             backgroundStyle: defaults.backgroundStyle === "transparent" ? "transparent" as const : "solid" as const,
                         }
-                    : defaults
+                    : style.id === "light-table" && sceneVersion === 2
+                        ? {
+                            ...defaults,
+                            imageFit: "contain" as const,
+                            tableSpread: 0.72,
+                            overlap: 0.1,
+                            underlightStrength: 0.42,
+                            focusBehavior: "route" as const,
+                            nudgeRestraint: 0.28,
+                            theme: "light" as const,
+                            ground: "#e8e6de",
+                            backgroundStyle: "solid" as const,
+                            spotlightsEnabled: false,
+                            finaleEnabled: false,
+                        }
+                        : defaults
                 let candidate = normalizeConfig({
                     ...current,
                     schemaVersion: 2,
@@ -1668,12 +1727,12 @@ function AppView() {
                     sceneVersion,
                     settings,
                     ...(style.id === "the-shelf" && sceneVersion === 2 ? { items: current.items.map((item) => ({ ...item, aspectMode: "auto" as const })) } : {}),
-                    ...((style.id === "vitrine" || style.id === "the-shelf") && sceneVersion === 2 ? { timelineMode: "automatic" as const, timelineFixedDurationMs: 0, timelineSegments: [] } : {}),
+                    ...((style.id === "vitrine" || style.id === "the-shelf" || style.id === "light-table") && sceneVersion === 2 ? { timelineMode: "automatic" as const, timelineFixedDurationMs: 0, timelineSegments: [] } : {}),
                 })
                 const admitAndCommit = async () => {
                     if (isShelfV2(candidate)) candidate = normalizeConfig({ ...candidate, items: await admitShelfItems(candidate.items) })
                     if (configRef.current !== current || configEpochRef.current !== styleEpoch) {
-                        setSaveNotice("Project changed while Shelf media was being admitted. Nothing was applied.")
+                        setSaveNotice("Project changed while Scene media was being admitted. Nothing was applied.")
                         return
                     }
                     if (!applyConfig(candidate)) return
@@ -1691,7 +1750,7 @@ function AppView() {
                 else await admitAndCommit()
             })
         } catch (error) {
-            setSaveNotice(error instanceof Error ? error.message : "Could not prepare Shelf media.")
+            setSaveNotice(error instanceof Error ? error.message : "Could not prepare Scene media.")
         }
     }
 
@@ -1854,7 +1913,7 @@ function AppView() {
                                             <strong title={item.name}>{item.name}</strong>
                                             <div>
                                                 {finaleId === item.id ? <span className="finale-pill">Finale</span> : null}
-                                                {item.muted ? <span>Beat skipped</span> : item.spotlight ? <span>{authoredProductScene ? "Opening" : "Spotlight"}</span> : <span>{item.type}</span>}
+                                                {!authoredLightTable && item.muted ? <span>Beat skipped</span> : !authoredLightTable && item.spotlight ? <span>{authoredProductScene ? "Opening" : "Spotlight"}</span> : <span>{item.type}</span>}
                                             </div>
                                         </div>
                                     </button>
@@ -1867,7 +1926,7 @@ function AppView() {
                                         >
                                             <Icon name="spark" />
                                         </button></Tooltip> : null}
-                                        {!authoredProductScene || config.settings.playKind !== "loop" ? <Tooltip text="Skip story beat. Frame stays in the Project, but cannot become the finite opening or finale."><button
+                                        {!authoredLightTable && (!authoredProductScene || config.settings.playKind !== "loop") ? <Tooltip text="Skip story beat. Frame stays in the Project, but cannot become the finite opening or finale."><button
                                             type="button"
                                             className={item.muted ? "is-active danger" : ""}
                                             aria-label={item.muted ? "Include as story beat" : "Skip as story beat"}
@@ -1875,7 +1934,7 @@ function AppView() {
                                         >
                                             <Icon name="skip" />
                                         </button></Tooltip> : null}
-                                        <Tooltip text={authoredShelf && config.items.length <= 1 ? "Shelf needs one ordered media item." : "Remove frame from this project."}><button type="button" aria-label="Remove frame" disabled={authoredShelf && config.items.length <= 1} onClick={() => removeItem(item.id)}>
+                                        <Tooltip text={authoredLightTable && config.items.length <= 1 ? "Light Table needs one ordered media item." : authoredShelf && config.items.length <= 1 ? "Shelf needs one ordered media item." : "Remove frame from this project."}><button type="button" aria-label="Remove frame" disabled={(authoredLightTable || authoredShelf) && config.items.length <= 1} onClick={() => removeItem(item.id)}>
                                             <Icon name="trash" />
                                         </button></Tooltip>
                                     </div>
@@ -1884,7 +1943,7 @@ function AppView() {
                         </div>
                     )}
                 </div>
-                <button className="add-media" type="button" disabled={projectOpening || Boolean(isExporting)} onClick={() => void addMedia()}>
+                <button className="add-media" type="button" disabled={projectOpening || Boolean(isExporting) || (authoredLightTable && config.items.length >= LIGHT_TABLE_MAX_ITEMS)} onClick={() => void addMedia()}>
                     <Icon name="plus" /> Add photos or videos
                 </button>
             </aside>
@@ -1903,7 +1962,7 @@ function AppView() {
                         ) : isOpeningReel ? (
                             <Reel {...liveReelProps} staticPose={isStaticPreview} onPlaybackStart={handlePlaybackStart} />
                         ) : (
-                            <ProductSceneRenderer config={config} timeMs={previewPose * activeCycleDuration} durationMs={activeCycleDuration} fps={fps} terminal={terminalCycle} reducedMotion={reducedProductPreview} inspectionItemId={inspectionItemId} />
+                            <ProductSceneRenderer config={config} timeMs={previewPose * activeCycleDuration} durationMs={activeCycleDuration} fps={fps} terminal={terminalCycle} reducedMotion={reducedProductPreview} inspectionItemId={inspectionItemId} onInspectionItemChange={authoredLightTable ? changeLightTableInspection : undefined} />
                         )}
                     </div>
                     {processingMedia > 0 ? (
@@ -1998,7 +2057,7 @@ function AppView() {
                                     </button>
                                 ))}
                             </div> : null}
-                            {authoredVitrine && config.settings.playKind === "once" ? <p className="preset-note">Finite entry, opening hold, selected finale exchange, finale hold, and exit use Vitrine's authored phrase.</p> : <>
+                            {authoredLightTable ? <p className="preset-note">Light Table timing comes from the selected automatic, exact-duration, or directed evaluator timeline.</p> : authoredVitrine && config.settings.playKind === "once" ? <p className="preset-note">Finite entry, opening hold, selected finale exchange, finale hold, and exit use Vitrine's authored phrase.</p> : <>
                                 <RangeControl label={authoredVitrine ? "Loop exchange" : authoredShelf ? "Walking pace" : isOpeningReel ? "River pace" : "Motion pace"} value={config.settings.paceMs} min={authoredVitrine ? vitrineExchangeMinimum : authoredShelf ? 180 : 60} max={authoredVitrine ? 1800 : 8000} step={authoredVitrine ? 20 : 10} suffix="ms" onChange={(value) => updateSettings("paceMs", value)} />
                                 {authoredVitrine ? <RangeControl label="Loop readable hold" value={config.settings.holdMs} min={vitrineHoldMinimum} max={6000} step={10} suffix="ms" onChange={(value) => updateSettings("holdMs", value)} /> : null}
                             </>}
@@ -2017,10 +2076,10 @@ function AppView() {
                             {config.settings.playKind === "repeat" ? <RangeControl label="Loop count" value={config.settings.repeatCount} min={1} max={1000} suffix="×" onChange={(value) => updateSettings("repeatCount", Math.round(value))} /> : null}
                             {authoredProductScene ? <div className="playback-direction">
                                 <span>Timeline</span>
-                                <Segment label="Timeline mode" value={config.timelineMode ?? "automatic"} options={authoredShelf || config.settings.playKind === "loop" ? [{ value: "automatic", label: "Auto" }, { value: "fixed-duration", label: "Fixed" }, { value: "directed", label: "Directed" }] : [{ value: "automatic", label: "Auto" }, { value: "fixed-duration", label: "Fixed" }]} onChange={updateTimelineMode} />
+                                <Segment label="Timeline mode" value={config.timelineMode ?? "automatic"} options={authoredShelf || authoredLightTable || config.settings.playKind === "loop" ? [{ value: "automatic", label: "Auto" }, { value: "fixed-duration", label: "Fixed" }, { value: "directed", label: "Directed" }] : [{ value: "automatic", label: "Auto" }, { value: "fixed-duration", label: "Fixed" }]} onChange={updateTimelineMode} />
                             </div> : null}
-                            {authoredProductScene && config.timelineMode === "fixed-duration" ? <RangeControl label="Exact duration" value={Math.max(config.timelineFixedDurationMs ?? 0, authoredShelf ? 1_000 : vitrineFixedMinimum)} min={authoredShelf ? 1_000 : vitrineFixedMinimum} max={authoredShelf ? SHELF_MAX_DURATION_MS : VITRINE_MAX_DURATION_MS} step={1} suffix="ms" onChange={(value) => applyConfig((current) => ({ ...current, timelineFixedDurationMs: value }))} /> : null}
-                            {authoredProductScene && config.timelineMode === "directed" ? <p className="preset-note">Fast ×2 → regular ×1 → fast ×1. Holds remain still; every exchange uses the same evaluator.</p> : null}
+                            {authoredProductScene && config.timelineMode === "fixed-duration" ? <RangeControl label="Exact duration" value={Math.max(config.timelineFixedDurationMs ?? 0, authoredLightTable ? lightTableFixedMinimum : authoredShelf ? 1_000 : vitrineFixedMinimum)} min={authoredLightTable ? lightTableFixedMinimum : authoredShelf ? 1_000 : vitrineFixedMinimum} max={authoredLightTable ? LIGHT_TABLE_MAX_DURATION_MS : authoredShelf ? SHELF_MAX_DURATION_MS : VITRINE_MAX_DURATION_MS} step={1} suffix="ms" onChange={(value) => applyConfig((current) => ({ ...current, timelineFixedDurationMs: value }))} /> : null}
+                            {authoredProductScene && config.timelineMode === "directed" ? <p className="preset-note">{authoredLightTable ? "Wake ×2 → review ×1 → final inspection hold → return ×2. All four authored phases remain on one evaluator clock." : "Fast ×2 → regular ×1 → fast ×1. Holds remain still; every exchange uses the same evaluator."}</p> : null}
                             {activeProfile.axisControl ? <div className="playback-direction">
                                 <span>Axis</span>
                                 <Segment value={config.settings.axis} options={[{ value: "horizontal", label: "Horizontal" }, { value: "vertical", label: "Vertical" }]} onChange={(value) => updateSettings("axis", value)} />
@@ -2061,6 +2120,14 @@ function AppView() {
                                 <RangeControl label="Edition lean" value={config.settings.tilt} min={0} max={6} step={0.25} suffix="°" onBegin={() => beginProductSetting("tilt")} onEnd={() => endProductSetting("tilt")} onChange={(value) => updateSettings("tilt", value)} />
                                 <RangeControl label="Shelf lift" value={config.settings.centerBump} min={3} max={14} step={0.5} suffix="%" onBegin={() => beginProductSetting("centerBump")} onEnd={() => endProductSetting("centerBump")} onChange={(value) => updateSettings("centerBump", value)} />
                                 <p className="preset-note">Natural source geometry stays fixed. Fit, crop, and focal point change pixels inside the plane only.</p>
+                            </> : authoredLightTable ? <>
+                                <RangeControl label="Table spread" value={config.settings.tableSpread} min={0.52} max={0.92} step={0.01} onBegin={() => beginProductSetting("tableSpread")} onEnd={() => endProductSetting("tableSpread")} onChange={(value) => updateSettings("tableSpread", value)} />
+                                <RangeControl label="Overlap" value={config.settings.overlap} min={0} max={0.22} step={0.01} onBegin={() => beginProductSetting("overlap")} onEnd={() => endProductSetting("overlap")} onChange={(value) => updateSettings("overlap", value)} />
+                                <RangeControl label="Under-light" value={config.settings.underlightStrength} min={0} max={0.7} step={0.01} onBegin={() => beginProductSetting("underlightStrength")} onEnd={() => endProductSetting("underlightStrength")} onChange={(value) => updateSettings("underlightStrength", value)} />
+                                <div className="playback-direction"><span>Focus</span><Segment label="Focus behavior" value={config.settings.focusBehavior} options={[{ value: "route", label: "Route" }, { value: "loupe-only", label: "Loupe only" }, { value: "none", label: "None" }]} onChange={(value) => updateSettings("focusBehavior", value)} /></div>
+                                <RangeControl label="Nudge restraint" value={config.settings.nudgeRestraint} min={0} max={0.6} step={0.01} onBegin={() => beginProductSetting("nudgeRestraint")} onEnd={() => endProductSetting("nudgeRestraint")} onChange={(value) => updateSettings("nudgeRestraint", value)} />
+                                <button type="button" className="secondary-button" onClick={() => applyExpertPreset("original")}>Reset Light Table controls</button>
+                                <p className="preset-note">All 1–24 sources keep their Project order and original frame geometry on the opaque illuminated surface.</p>
                             </> : <>
                                 {activeProfile.supportsSpotlight ? <Segment value={config.settings.spotlightsEnabled ? "on" : "off"} options={[{ value: "on", label: `${activeProfile.focusLabel} on` }, { value: "off", label: "Off" }]} onChange={(value) => updateSettings("spotlightsEnabled", value === "on")} /> : null}
                                 {activeProfile.supportsFinale ? <Segment value={config.settings.finaleEnabled ? "on" : "off"} options={[{ value: "on", label: "Final beat on" }, { value: "off", label: "Off" }]} onChange={(value) => updateSettings("finaleEnabled", value === "on")} /> : null}
@@ -2078,19 +2145,19 @@ function AppView() {
                                 <span className="eyebrow">Atmosphere</span>
                                 <h3>Room tone</h3>
                             </div>
-                            {config.settings.backgroundStyle !== "transparent" ? <Segment
+                            {config.settings.backgroundStyle !== "transparent" && !authoredLightTable ? <Segment
                                 value={config.settings.theme}
                                 options={[{ value: "dark", label: "Night" }, { value: "light", label: "Paper" }]}
                                 onChange={(value) => updateSettings("theme", value)}
                             /> : null}
                             <div className="background-style-grid" role="group" aria-label="Room background">
                                 {((authoredProductScene ? ["solid", "transparent"] : ["solid", "gradient", "halo", "paper", "transparent"]) as BackgroundStyle[]).map((style) => (
-                                    <button type="button" aria-pressed={config.settings.backgroundStyle === style} className={config.settings.backgroundStyle === style ? "is-active" : ""} onClick={() => updateSettings("backgroundStyle", style)} key={style}>
+                                    <button type="button" disabled={authoredLightTable && style === "transparent"} aria-pressed={config.settings.backgroundStyle === style} className={config.settings.backgroundStyle === style ? "is-active" : ""} onClick={() => updateSettings("backgroundStyle", style)} key={style}>
                                         <i data-style={style} /><span>{style}</span>
                                     </button>
                                 ))}
                             </div>
-                            {!authoredProductScene ? <RangeControl label="Grid ink" value={config.settings.gridStrength} min={0} max={20} step={0.5} suffix="%" onChange={(value) => updateSettings("gridStrength", value)} /> : <p className="preset-note">Solid room or clean transparency. Authored Looks arrive in G10D without touching artwork pixels.</p>}
+                            {!authoredProductScene ? <RangeControl label="Grid ink" value={config.settings.gridStrength} min={0} max={20} step={0.5} suffix="%" onChange={(value) => updateSettings("gridStrength", value)} /> : <p className="preset-note">{authoredLightTable ? LIGHT_TABLE_TRANSPARENCY_REASON : "Solid room or clean transparency. Authored Looks arrive in G10D without touching artwork pixels."}</p>}
                         </section>
                     </div>
                 ) : inspector === "expert" ? (
@@ -2144,12 +2211,13 @@ function AppView() {
                                     ["webm", "WebM", "VP9 · pristine"],
                                     ["webm-small", "WebM Small", "VP9 · web-ready"],
                                 ] as Array<[ExportFormat, string, string]>).map(([value, title, detail]) => (
-                                    <button type="button" disabled={Boolean(isExporting) || (value === "png-frames" && usesLinuxHostPort && !verifiedPngScene) || (value === "mp4" && ((usesLinuxHostPort && (!verifiedH264Scene || !verifiedH264Audio)) || config.settings.backgroundStyle === "transparent"))} className={format === value ? "is-active" : ""} onClick={() => setFormat(value as ExportFormat)} key={value}>
+                                    <button type="button" disabled={authoredLightTable || Boolean(isExporting) || (value === "png-frames" && usesLinuxHostPort && !verifiedPngScene) || (value === "mp4" && ((usesLinuxHostPort && (!verifiedH264Scene || !verifiedH264Audio)) || config.settings.backgroundStyle === "transparent"))} className={format === value ? "is-active" : ""} onClick={() => setFormat(value as ExportFormat)} key={value}>
                                         <span>{title}</span><small>{detail}</small>
                                         {format === value ? <Icon name="check" /> : null}
                                     </button>
                                 ))}
                             </div>
+                            {authoredLightTable ? <p className="preset-note">Light Table v2 export is unavailable until its rendered output is verified.</p> : null}
                             {format === "premiere" ? (
                                 <p className="preset-note">{config.settings.backgroundStyle === "transparent" ? "Transparency uses ProRes 4444. Master uses ProRes 4444 XQ for compositing." : "Optimized: ProRes 422 LT. High: ProRes 422. Master: ProRes 422 HQ."}</p>
                             ) : null}
@@ -2205,7 +2273,9 @@ function AppView() {
                         </section>
                         <section className="export-summary">
                             <div><span>Runtime</span><strong>{formatDuration(playbackDuration)}</strong></div>
-                            <div><span>Frames</span><strong>{Math.max(1, authoredShelf && usesLinuxHostPort && format === "png-frames" ? Math.ceil((playbackDuration / 1000) * fps) : Math.round((playbackDuration / 1000) * fps)).toLocaleString()}</strong></div>
+                            <div><span>Frames</span><strong>{(authoredLightTable
+                                ? lightTableFrameCount(playbackDuration, fps)
+                                : Math.max(1, authoredShelf && usesLinuxHostPort && format === "png-frames" ? Math.ceil((playbackDuration / 1000) * fps) : Math.round((playbackDuration / 1000) * fps))).toLocaleString()}</strong></div>
                             <div><span>Quality</span><strong>{config.settings.exportQuality === "master" ? "Master" : config.settings.exportQuality === "high" ? "High" : "Optimized"}</strong></div>
                         </section>
 
@@ -2232,7 +2302,7 @@ function AppView() {
                             </div>
                         ) : null}
 
-                        <button className="export-button" type="button" disabled={!!isExporting || (usesLinuxHostPort && format === "png-frames" && !verifiedPngScene) || (usesLinuxHostPort && format === "mp4" && (!verifiedH264Scene || !verifiedH264Audio || config.settings.backgroundStyle === "transparent"))} onClick={exportReel}>
+                        <button className="export-button" type="button" disabled={authoredLightTable || !!isExporting || (usesLinuxHostPort && format === "png-frames" && !verifiedPngScene) || (usesLinuxHostPort && format === "mp4" && (!verifiedH264Scene || !verifiedH264Audio || config.settings.backgroundStyle === "transparent"))} onClick={exportReel}>
                             {isExporting ? "Exporting…" : `Export ${exportButtonLabel(format)}`}
                             <Icon name="film" />
                         </button>

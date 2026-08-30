@@ -1,5 +1,6 @@
 const crypto = require("node:crypto")
 const { HostPortError } = require("./linux-host-port.cjs")
+const { pngFrameCountForScene } = require("./frame-count-policy.cjs")
 
 const PNG_FRAMES_MIME = "application/vnd.galileo.png-frames-directory"
 const SNAPSHOT_ID = /^[a-f0-9]{32}$/
@@ -25,7 +26,8 @@ const SETTINGS_KEYS = new Set([
     "playKind", "repeatCount", "leadInMs", "holdMs", "finaleGrowMs", "finaleHoldMs", "fadeMs", "canvasPose", "spotlightsEnabled",
     "finaleEnabled", "heroSize", "finaleSize", "centerBump", "tilt", "sway", "idleDim", "idleMute", "spotlightDim", "speedBlur",
     "slideHeight", "gap", "cornerStyle", "cornerSmoothing", "radius", "shadow", "gridSize", "gridStrength", "gridDrift", "vignette",
-    "showHint", "theme", "ground", "paper", "backgroundStyle", "backgroundColor2", "backgroundAngle", "backgroundTexture", "exportQuality",
+    "showHint", "tableSpread", "overlap", "underlightStrength", "focusBehavior", "nudgeRestraint", "theme", "ground", "paper",
+    "backgroundStyle", "backgroundColor2", "backgroundAngle", "backgroundTexture", "exportQuality",
 ])
 
 function plainRecord(value) {
@@ -432,9 +434,7 @@ function createPngFramesSnapshot(intent, randomBytes = crypto.randomBytes) {
         || intent.finalCycleDurationMs !== scene.clock.finalCycleDurationMs)) throw new HostPortError("invalid_request")
     if (intent.width !== scene.config.settings.canvasWidth || intent.height !== scene.config.settings.canvasHeight) throw new HostPortError("invalid_request")
     if (intent.transparent !== (scene.config.settings.backgroundStyle === "transparent")) throw new HostPortError("invalid_request")
-    const frameCount = Math.max(1, scene.id === "the-shelf"
-        ? Math.ceil(intent.durationMs * intent.fps / 1000)
-        : Math.round(intent.durationMs * intent.fps / 1000))
+    const frameCount = pngFrameCountForScene(scene.id, intent.durationMs, intent.fps)
     if (frameCount > 216_000 || intent.width * intent.height * frameCount > 100_000_000_000) throw new HostPortError("resource_limit")
     if (scene.id !== "vitrine") {
         const videoCount = reachableVideoIndexes(scene.config).length
@@ -497,4 +497,4 @@ function pngFramesPreflight(snapshot) {
     })
 }
 
-module.exports = { DESTINATION_GRANT, PNG_FRAMES_MIME, SNAPSHOT_ID, createPngFramesSnapshot, pngFramesCapabilities, pngFramesPreflight, reachableMediaIndexes, reachableVideoIndexes }
+module.exports = { DESTINATION_GRANT, PNG_FRAMES_MIME, SNAPSHOT_ID, createPngFramesSnapshot, pngFrameCountForScene, pngFramesCapabilities, pngFramesPreflight, reachableMediaIndexes, reachableVideoIndexes }

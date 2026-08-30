@@ -1,6 +1,8 @@
 import type { MediaItem, ReelConfig, ReelSettings } from "./types"
 import {
     compileLightTableTimeline,
+    LIGHT_TABLE_CORE_MAX_SOURCE_RATIO,
+    LIGHT_TABLE_CORE_MIN_SOURCE_RATIO,
     LIGHT_TABLE_ID,
     LIGHT_TABLE_MAX_ITEMS,
     LIGHT_TABLE_TRANSPARENCY_REASON,
@@ -62,7 +64,7 @@ function validatedCrop(item: MediaItem) {
 
 export function validateLightTableFrameIntent(item: MediaItem, settings: ReelSettings) {
     if (!item || typeof item.id !== "string" || item.id.length < 1 || item.id.length > 256
-        || !finiteInRange(item.ratio, 0.05, 20)
+        || !finiteInRange(item.ratio, LIGHT_TABLE_CORE_MIN_SOURCE_RATIO, LIGHT_TABLE_CORE_MAX_SOURCE_RATIO)
         || !["auto", "global", "custom"].includes(item.aspectMode ?? "auto")
         || !finiteInRange(item.ratioW ?? 16, 1, 10_000)
         || !finiteInRange(item.ratioH ?? 9, 1, 10_000)
@@ -89,7 +91,7 @@ export function resolvedLightTableRatio(item: MediaItem, settings: ReelSettings)
             ratio = settings.customRatioWidth / settings.customRatioHeight
         } else ratio = 16 / 9
     }
-    if (!finiteInRange(ratio, 0.05, 20)) throw new Error("Light Table effective frame ratio is invalid.")
+    if (!finiteInRange(ratio, LIGHT_TABLE_CORE_MIN_SOURCE_RATIO, LIGHT_TABLE_CORE_MAX_SOURCE_RATIO)) throw new Error("Light Table effective frame ratio is invalid.")
     return ratio
 }
 

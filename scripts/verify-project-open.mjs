@@ -40,6 +40,22 @@ for (const failure of [
 ]) {
     assert.strictEqual(projectConfigAfterOpen(priorProject, { failure }), priorProject)
 }
+const lightTableReplacement = {
+    ...priorProject,
+    styleId: "light-table",
+    sceneVersion: 2,
+    items: [{ id: "review-one", ratio: 4 / 3, aspectMode: "auto", fit: "contain", crop: { x: 0, y: 0, width: 1, height: 1 }, focal: { x: 0.5, y: 0.5 } }],
+    settings: { axis: "horizontal", backgroundStyle: "solid", tableSpread: 0.72, overlap: 0.1, underlightStrength: 0.42, focusBehavior: "route", nudgeRestraint: 0.28 },
+}
+assert.strictEqual(projectConfigAfterOpen(priorProject, { config: lightTableReplacement, operationId: "d".repeat(32) }), lightTableReplacement)
+for (const failure of [
+    { code: "scene_invalid", message: "Light Table parameters rejected safely." },
+    { code: "look_invalid", message: "Transparent Light Table rejected safely." },
+    { code: "future_version_unsupported", message: "Future Light Table version rejected safely." },
+    { code: "timeline_invalid", message: "Light Table Timeline rejected safely." },
+]) {
+    assert.strictEqual(projectConfigAfterOpen(priorProject, { failure }), priorProject)
+}
 assert.equal(projectOpenNotice({ cancelled: true }), "Project opening cancelled")
 assert.equal(
     projectOpenNotice({ failure: { code: "legacy_project_unsupported", message: "Legacy project rejected safely." } }),

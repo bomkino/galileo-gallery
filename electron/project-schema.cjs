@@ -27,7 +27,7 @@ const SUPPORTED_SCENE_VERSIONS = Object.freeze({
     "wave-ticker": Object.freeze([1]),
     "deck-contact-strip": Object.freeze([1]),
     "contact-sheet": Object.freeze([1]),
-    "light-table": Object.freeze([1]),
+    "light-table": Object.freeze([1, 2]),
     "deck-river": Object.freeze([1]),
     "deck-river-loader": Object.freeze([1]),
     "orbit-ring": Object.freeze([1]),
@@ -62,6 +62,8 @@ const SCENE_PARAMETER_KEYS = [
 const LOOK_PARAMETER_KEYS = [
     "theme", "ground", "paper", "backgroundStyle", "backgroundColor2", "backgroundAngle", "backgroundTexture",
 ]
+const LIGHT_TABLE_V2_SCENE_PARAMETER_KEYS = [...SCENE_PARAMETER_KEYS, "tableSpread", "overlap", "focusBehavior", "nudgeRestraint"]
+const LIGHT_TABLE_V2_LOOK_PARAMETER_KEYS = [...LOOK_PARAMETER_KEYS, "underlightStrength"]
 const TIMELINE_KEYS = [
     "mode", "fixedDurationMs", "segments", "playKind", "repeatCount", "axis", "direction", "startMode", "launchMs", "arrivalMs", "growMs",
     "exitMs", "paceMs", "leadInMs", "holdMs", "finaleGrowMs", "finaleHoldMs", "fadeMs",
@@ -69,6 +71,37 @@ const TIMELINE_KEYS = [
 const VITRINE_V2_TIMELINE_KEYS = [...TIMELINE_KEYS, "transitionDirection"]
 const FRAME_KEYS = ["ratio", "aspectMode", "ratioW", "ratioH", "caption", "spotlight", "muted"]
 const FRAME_INTENT_KEYS = [...FRAME_KEYS, "fit", "crop", "focal"]
+const LIGHT_TABLE_V2_DIRECTED_PHASES = Object.freeze([
+    Object.freeze({ id: "wake", kind: "cycle", cycles: 1, paceScale: 2 }),
+    Object.freeze({ id: "review", kind: "cycle", cycles: 1, paceScale: 1 }),
+    Object.freeze({ id: "final-inspection", kind: "hold", cycles: 1, paceScale: 1 }),
+    Object.freeze({ id: "return", kind: "cycle", cycles: 1, paceScale: 2 }),
+])
+const LIGHT_TABLE_V2_MAX_DURATION_MS = 60_000
+
+function isLightTableV2(sceneId, sceneVersion) {
+    return sceneId === "light-table" && sceneVersion === 2
+}
+
+function sceneParameterKeysFor(sceneId, sceneVersion) {
+    return isLightTableV2(sceneId, sceneVersion) ? LIGHT_TABLE_V2_SCENE_PARAMETER_KEYS : SCENE_PARAMETER_KEYS
+}
+
+function lookParameterKeysFor(sceneId, sceneVersion) {
+    return isLightTableV2(sceneId, sceneVersion) ? LIGHT_TABLE_V2_LOOK_PARAMETER_KEYS : LOOK_PARAMETER_KEYS
+}
+
+function portableSettingsFor(config) {
+    if (!isLightTableV2(config.styleId, config.sceneVersion ?? 1)) return config.settings
+    return {
+        ...config.settings,
+        tableSpread: config.settings.tableSpread ?? 0.72,
+        overlap: config.settings.overlap ?? 0.1,
+        underlightStrength: config.settings.underlightStrength ?? 0.42,
+        focusBehavior: config.settings.focusBehavior ?? "route",
+        nudgeRestraint: config.settings.nudgeRestraint ?? 0.28,
+    }
+}
 
 function timelineKeysFor(sceneId, sceneVersion) {
     return sceneId === "vitrine" && sceneVersion === 2 ? VITRINE_V2_TIMELINE_KEYS : TIMELINE_KEYS
@@ -288,6 +321,7 @@ function portableProjectFromConfig(config, media, audioAssets = []) {
     if (!isRecord(config) || !Array.isArray(config.items) || !isRecord(config.settings) || media.length !== config.items.length) {
         fail("manifest_invalid", "The current Project cannot be serialized safely.")
     }
+    const portableSettings = portableSettingsFor(config)
     const audio = config.audio ?? defaultAudioIntent()
     const assetsById = new Map(audioAssets.map((entry) => [entry.id, entry]))
     const project = {
@@ -316,22 +350,22 @@ function portableProjectFromConfig(config, media, audioAssets = []) {
                 muted: item.muted,
             },
         })),
-        canvas: settingsSubset(config.settings, CANVAS_KEYS),
+        canvas: settingsSubset(portableSettings, CANVAS_KEYS),
         scene: {
             id: config.styleId,
             version: config.sceneVersion ?? 1,
-            parameters: settingsSubset(config.settings, SCENE_PARAMETER_KEYS),
+            parameters: settingsSubset(portableSettings, sceneParameterKeysFor(config.styleId, config.sceneVersion ?? 1)),
         },
         look: {
             id: `gallery-look.${config.settings.backgroundStyle}`,
             version: 1,
-            parameters: settingsSubset(config.settings, LOOK_PARAMETER_KEYS),
+            parameters: settingsSubset(portableSettings, lookParameterKeysFor(config.styleId, config.sceneVersion ?? 1)),
         },
         timeline: {
             mode: config.timelineMode ?? "automatic",
             fixedDurationMs: config.timelineFixedDurationMs ?? 0,
             segments: config.timelineSegments ?? [],
-            ...settingsSubset(config.settings, timelineKeysFor(config.styleId, config.sceneVersion ?? 1).filter((key) => !["mode", "fixedDurationMs", "segments"].includes(key))),
+            ...settingsSubset(portableSettings, timelineKeysFor(config.styleId, config.sceneVersion ?? 1).filter((key) => !["mode", "fixedDurationMs", "segments"].includes(key))),
         },
         audio: {
             id: audio.id,
@@ -389,7 +423,7 @@ function portableProjectFromConfig(config, media, audioAssets = []) {
             },
             master: { gain: audio.master.gain, muted: audio.master.muted },
         },
-        exportIntent: { quality: config.settings.exportQuality },
+        exportIntent: { quality: portableSettings.exportQuality },
     }
     return validatePortableProject(project)
 }
@@ -470,7 +504,7 @@ function validateScene(scene) {
         if (scene.version > Math.max(...supportedVersions)) fail("future_version_unsupported", "This Scene version was created by a newer Gallery version and cannot be opened here.")
         fail("scene_invalid", "This Gallery Scene version is unsupported.")
     }
-    exactKeys(scene.parameters, SCENE_PARAMETER_KEYS, "scene_invalid", "Scene parameters")
+    exactKeys(scene.parameters, sceneParameterKeysFor(scene.id, scene.version), "scene_invalid", "Scene parameters")
     stringValue(scene.parameters.imageFit, "scene_invalid", "Frame fit", { values: ["contain", "cover"] })
     stringValue(scene.parameters.motionPreset, "scene_invalid", "Motion preset", { values: ["cut", "magnetic", "velvet", "dream", "custom"] })
     stringValue(scene.parameters.cornerStyle, "scene_invalid", "Corner style", { values: ["rounded", "squircle"] })
@@ -483,13 +517,19 @@ function validateScene(scene) {
         numberValue(scene.parameters.tilt, "scene_invalid", "Vitrine object turn", 0, 9)
         numberValue(scene.parameters.sway, "scene_invalid", "Vitrine transition depth", 8, 30)
     }
+    if (isLightTableV2(scene.id, scene.version)) {
+        numberValue(scene.parameters.tableSpread, "scene_invalid", "Light Table spread", 0.52, 0.92)
+        numberValue(scene.parameters.overlap, "scene_invalid", "Light Table overlap", 0, 0.22)
+        stringValue(scene.parameters.focusBehavior, "scene_invalid", "Light Table focus behaviour", { values: ["route", "loupe-only", "none"] })
+        numberValue(scene.parameters.nudgeRestraint, "scene_invalid", "Light Table nudge restraint", 0, 0.6)
+    }
 }
 
-function validateLook(look) {
+function validateLook(look, scene) {
     exactKeys(look, ["id", "version", "parameters"], "look_invalid", "Look")
     stringValue(look.id, "look_invalid", "Look id", { pattern: /^gallery-look\.[a-z-]+$/, max: 120 })
     numberValue(look.version, "look_invalid", "Look version", 1, 1, true)
-    exactKeys(look.parameters, LOOK_PARAMETER_KEYS, "look_invalid", "Look parameters")
+    exactKeys(look.parameters, lookParameterKeysFor(scene.id, scene.version), "look_invalid", "Look parameters")
     stringValue(look.parameters.theme, "look_invalid", "Look theme", { values: ["auto", "dark", "light"] })
     stringValue(look.parameters.ground, "look_invalid", "Look ground", { allowEmpty: true, pattern: /^(?:#[0-9a-fA-F]{6})?$/, max: 7 })
     stringValue(look.parameters.paper, "look_invalid", "Look paper", { allowEmpty: true, pattern: /^(?:#[0-9a-fA-F]{6})?$/, max: 7 })
@@ -498,6 +538,9 @@ function validateLook(look) {
     stringValue(look.parameters.backgroundColor2, "look_invalid", "Background colour", { pattern: /^#[0-9a-fA-F]{6}$/ })
     numberValue(look.parameters.backgroundAngle, "look_invalid", "Background angle", -3600, 3600)
     numberValue(look.parameters.backgroundTexture, "look_invalid", "Background texture", 0, 100)
+    if (isLightTableV2(scene.id, scene.version)) {
+        numberValue(look.parameters.underlightStrength, "look_invalid", "Light Table under-light strength", 0, 0.7)
+    }
 }
 
 function validateTimeline(timeline, scene) {
@@ -529,16 +572,18 @@ function validateTimeline(timeline, scene) {
         numberValue(segment.durationMs, "timeline_invalid", "Timeline segment duration", 0, 24 * 60 * 60 * 1000)
         directedDurationMs += segment.durationMs
         if (segment.kind === "cycle" && segment.cycles < 1) fail("timeline_invalid", "A cycle segment must contain at least one cycle.")
-        if (segment.kind === "hold" && segment.cycles !== 0) fail("timeline_invalid", "A hold segment cannot contain cycles.")
+        const lightTablePhaseHold = isLightTableV2(scene.id, scene.version) && segment.id === "final-inspection" && segment.cycles === 1
+        if (segment.kind === "hold" && segment.cycles !== 0 && !lightTablePhaseHold) fail("timeline_invalid", "A hold segment cannot contain cycles.")
     }
     if (directedDurationMs > 24 * 60 * 60 * 1000) fail("timeline_invalid", "Directed Timeline exceeds the supported duration.")
     if (timeline.mode === "automatic" && (timeline.fixedDurationMs !== 0 || timeline.segments.length !== 0)) {
         fail("timeline_invalid", "Automatic Timeline cannot contain fixed or directed intent.")
     }
-    if (timeline.mode === "fixed-duration" && (timeline.fixedDurationMs < 1000 || timeline.segments.length !== 0)) {
+    const invalidFixedDuration = isLightTableV2(scene.id, scene.version) ? timeline.fixedDurationMs <= 0 : timeline.fixedDurationMs < 1_000
+    if (timeline.mode === "fixed-duration" && (invalidFixedDuration || timeline.segments.length !== 0)) {
         fail("timeline_invalid", "Fixed Timeline duration is invalid.")
     }
-    if (timeline.mode === "directed" && (timeline.fixedDurationMs !== 0 || timeline.segments.length === 0)) {
+    if (timeline.mode === "directed" && (timeline.fixedDurationMs !== 0 || (timeline.segments.length === 0 && !isLightTableV2(scene.id, scene.version)))) {
         fail("timeline_invalid", "Directed Timeline needs explicit segments.")
     }
     numberValue(timeline.repeatCount, "timeline_invalid", "Repeat count", 1, 1000, true)
@@ -615,6 +660,47 @@ function validateVitrineV2Project(project) {
     }
     const totalDurationMs = project.timeline.playKind === "repeat" ? cycleDurationMs * project.timeline.repeatCount : cycleDurationMs
     if (totalDurationMs > 24 * 60 * 60 * 1000) fail("timeline_invalid", "Vitrine playback exceeds the supported duration.")
+}
+
+function lightTableEffectiveFrameRatio(project, frame) {
+    const cropped = frame.crop.x !== 0 || frame.crop.y !== 0 || frame.crop.width !== 1 || frame.crop.height !== 1
+    if (cropped) return frame.ratio * frame.crop.width / frame.crop.height
+    if (frame.aspectMode === "custom") return frame.ratioW / frame.ratioH
+    if (frame.aspectMode === "global" && project.canvas.ratioMode === "fixed") {
+        if (project.canvas.fixedRatio === "wide2576") return 2576 / 1080
+        if (project.canvas.fixedRatio === "custom") return project.canvas.customRatioWidth / project.canvas.customRatioHeight
+        return 16 / 9
+    }
+    return frame.ratio
+}
+
+function validateLightTableV2Project(project) {
+    if (!isLightTableV2(project.scene.id, project.scene.version)) return
+    if (project.media.length < 1 || project.media.length > 24) fail("scene_invalid", "Light Table supports 1 to 24 ordered media items.")
+    for (const entry of project.media) {
+        if (!hasExactKeys(entry.frame, FRAME_INTENT_KEYS)) fail("manifest_invalid", "Light Table v2 requires explicit per-frame fit, crop, and focal intent.")
+        numberValue(entry.frame.ratio, "manifest_invalid", "Light Table source ratio", 0.05, 20)
+        const effectiveRatio = lightTableEffectiveFrameRatio(project, entry.frame)
+        if (!Number.isFinite(effectiveRatio) || effectiveRatio < 0.05 || effectiveRatio > 20) {
+            fail("manifest_invalid", "Light Table effective frame ratio is outside the supported range.")
+        }
+    }
+    if (project.look.parameters.backgroundStyle === "transparent") {
+        fail("look_invalid", "Light Table needs an opaque illuminated surface.")
+    }
+    if (project.timeline.mode !== "directed") return
+    if (project.timeline.segments.length === 0) return
+    if (project.timeline.segments.length !== LIGHT_TABLE_V2_DIRECTED_PHASES.length) {
+        fail("timeline_invalid", "Directed Light Table needs exactly four authored phases.")
+    }
+    for (let index = 0; index < LIGHT_TABLE_V2_DIRECTED_PHASES.length; index += 1) {
+        const segment = project.timeline.segments[index]
+        const expected = LIGHT_TABLE_V2_DIRECTED_PHASES[index]
+        if (segment.id !== expected.id || segment.kind !== expected.kind || segment.cycles !== expected.cycles || segment.paceScale !== expected.paceScale
+            || segment.durationMs <= 0 || segment.durationMs > LIGHT_TABLE_V2_MAX_DURATION_MS) {
+            fail("timeline_invalid", "A directed Light Table phase is invalid.")
+        }
+    }
 }
 
 function automaticShelfDuration(mediaCount, paceMs) {
@@ -805,9 +891,10 @@ function validatePortableProject(input) {
     validateMedia(input.media)
     validateCanvas(input.canvas)
     validateScene(input.scene)
-    validateLook(input.look)
+    validateLook(input.look, input.scene)
     validateTimeline(input.timeline, input.scene)
     validateVitrineV2Project(input)
+    validateLightTableV2Project(input)
     validateShelfV2Project(input)
     validateAudio(input.audio, input.media)
     exactKeys(input.exportIntent, ["quality"], "manifest_invalid", "Export intent")

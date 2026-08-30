@@ -4,7 +4,7 @@ const fs = require("node:fs")
 const os = require("node:os")
 const path = require("node:path")
 const zlib = require("node:zlib")
-const { createPngFramesSnapshot, pngFramesCapabilities, pngFramesPreflight, reachableMediaIndexes, reachableVideoIndexes } = require("../electron/png-export-contract.cjs")
+const { createPngFramesSnapshot, pngFrameCountForScene, pngFramesCapabilities, pngFramesPreflight, reachableMediaIndexes, reachableVideoIndexes } = require("../electron/png-export-contract.cjs")
 const { createPngFramesRuntime, inspectPng } = require("../electron/png-frames-runtime.cjs")
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, index) => {
@@ -74,6 +74,10 @@ const intent = {
 }
 
 async function run() {
+    assert.equal(pngFrameCountForScene("light-table", 12_345, 30), 371, "latent Light Table host policy must retain its partial terminal frame")
+    assert.equal(pngFrameCountForScene("the-shelf", 1_001, 1), 2, "Shelf must preserve its ceiling clock")
+    assert.equal(pngFrameCountForScene("vitrine", 1_001, 1), 1, "Vitrine must preserve its rounding clock")
+    assert.equal(pngFrameCountForScene("quiet-carousel", 1_001, 1), 1, "legacy scenes must preserve their rounding clock")
     const snapshot = createPngFramesSnapshot(intent, () => Buffer.alloc(16, 7))
     assert.equal(snapshot.frameCount, 2, "frame plan must use round(duration * fps)")
     assert.equal(snapshot.cycleDurationMs, 100)
@@ -108,6 +112,10 @@ async function run() {
         { id: "vitrine", versions: [2], video: true },
         { id: "the-shelf", versions: [2], video: false },
     ])
+    assert.throws(() => createPngFramesSnapshot({
+        ...intent,
+        config: { ...intent.config, styleId: "light-table", sceneVersion: 2 },
+    }), (error) => error.code === "unsupported_capability", "Light Table frame policy must not enable PNG export admission")
     assert.throws(() => createPngFramesSnapshot({ ...intent, width: 65 }), (error) => error.code === "invalid_request", "export dimensions must match Project canvas")
     assert.throws(() => createPngFramesSnapshot({
         ...intent,

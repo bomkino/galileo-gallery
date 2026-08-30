@@ -10,6 +10,7 @@ const {
     savePortableProjectArchive,
 } = require("../electron/project-persistence.cjs")
 const {
+    SUPPORTED_SCENE_VERSIONS,
     canonicalProjectJSON,
     validatePortableProject,
 } = require("../electron/project-schema.cjs")
@@ -513,6 +514,250 @@ async function run() {
             const target = path.join(root, `shelf-pre-authority-${index}-${code}.galileo`)
             rewriteArchive(shelfPath, target, (project) => { mutate(project); return project }, (zip, project) => zip.deleteFile(project.media[0].archivePath))
             await expectFailure(code, target, roots, shelfPriorProject)
+        }
+
+        assert.deepEqual(SUPPORTED_SCENE_VERSIONS["light-table"], [1, 2])
+        const lightTableConfig = {
+            ...config,
+            styleId: "light-table",
+            sceneVersion: 2,
+            items: config.items.map((item, index) => ({
+                ...item,
+                ratio: index === 0 ? 2 : 9 / 16,
+                aspectMode: index === 0 ? "auto" : "custom",
+                ratioW: index === 0 ? 16 : 9,
+                ratioH: index === 0 ? 9 : 16,
+                fit: index === 0 ? "cover" : "contain",
+                crop: index === 0 ? { x: 0.25, y: 0, width: 0.5, height: 1 } : { x: 0, y: 0, width: 1, height: 1 },
+                focal: index === 0 ? { x: 0.2, y: 0.7 } : { x: 0.8, y: 0.3 },
+                spotlight: false,
+                muted: false,
+            })),
+            settings: {
+                ...config.settings,
+                axis: "vertical",
+                direction: "reverse",
+                playKind: "loop",
+                repeatCount: 1,
+                imageFit: "contain",
+                ground: "#e8e6de",
+                backgroundStyle: "solid",
+                tableSpread: 0.83,
+                overlap: 0.17,
+                underlightStrength: 0.61,
+                focusBehavior: "loupe-only",
+                nudgeRestraint: 0.49,
+            },
+        }
+        const lightTablePath = path.join(root, "light-table-v2.galileo")
+        const lightTableSaved = await savePortableProjectArchive({ config: lightTableConfig, outputPath: lightTablePath, tempRoot: root, mediaPathFromURL: (url) => url })
+        const legacySceneKeys = Object.keys(manifest.scene.parameters)
+        const legacyLookKeys = Object.keys(manifest.look.parameters)
+        assert.deepEqual(Object.keys(lightTableSaved.project.scene.parameters).sort(), [...legacySceneKeys, "tableSpread", "overlap", "focusBehavior", "nudgeRestraint"].sort())
+        assert.deepEqual(Object.keys(lightTableSaved.project.look.parameters).sort(), [...legacyLookKeys, "underlightStrength"].sort())
+        assert.deepEqual({
+            tableSpread: lightTableSaved.project.scene.parameters.tableSpread,
+            overlap: lightTableSaved.project.scene.parameters.overlap,
+            focusBehavior: lightTableSaved.project.scene.parameters.focusBehavior,
+            nudgeRestraint: lightTableSaved.project.scene.parameters.nudgeRestraint,
+            underlightStrength: lightTableSaved.project.look.parameters.underlightStrength,
+        }, { tableSpread: 0.83, overlap: 0.17, focusBehavior: "loupe-only", nudgeRestraint: 0.49, underlightStrength: 0.61 })
+        assert.equal(Object.hasOwn(lightTableSaved.project.scene.parameters, "underlightStrength"), false, "Under-light belongs to Look intent")
+        assert.equal(["tableSpread", "overlap", "focusBehavior", "nudgeRestraint"].some((key) => Object.hasOwn(lightTableSaved.project.look.parameters, key)), false, "Light Table geometry and focus controls belong to Scene intent")
+        assert.equal(Object.hasOwn(lightTableSaved.project.scene.parameters, "focusBehaviour"), false, "Portable Light Table uses the Product spelling focusBehavior")
+        assert.deepEqual(lightTableSaved.project.media.map((entry) => entry.frame), lightTableConfig.items.map((item) => ({
+            ratio: item.ratio, aspectMode: item.aspectMode, ratioW: item.ratioW, ratioH: item.ratioH,
+            fit: item.fit, crop: item.crop, focal: item.focal, caption: item.caption ?? "", spotlight: false, muted: false,
+        })))
+        assert.equal(lightTableSaved.project.timeline.axis, "vertical", "Light Table must preserve generic axis intent without inventing an axis restriction")
+        assert.equal(lightTableSaved.project.timeline.direction, "reverse")
+
+        const lightTableOpened = await openPortableProjectArchive({ sourcePath: lightTablePath, stagingParent: roots.staging, openedProjectsRoot: roots.opened, mediaURLFromPath: (filePath) => filePath })
+        assert.equal(lightTableOpened.config.styleId, "light-table")
+        assert.equal(lightTableOpened.config.sceneVersion, 2)
+        assert.deepEqual({
+            tableSpread: lightTableOpened.config.settings.tableSpread,
+            overlap: lightTableOpened.config.settings.overlap,
+            focusBehavior: lightTableOpened.config.settings.focusBehavior,
+            nudgeRestraint: lightTableOpened.config.settings.nudgeRestraint,
+            underlightStrength: lightTableOpened.config.settings.underlightStrength,
+        }, { tableSpread: 0.83, overlap: 0.17, focusBehavior: "loupe-only", nudgeRestraint: 0.49, underlightStrength: 0.61 })
+        assert.deepEqual(lightTableOpened.config.items.map((item) => ({ ratio: item.ratio, aspectMode: item.aspectMode, fit: item.fit, crop: item.crop, focal: item.focal })), lightTableConfig.items.map((item) => ({ ratio: item.ratio, aspectMode: item.aspectMode, fit: item.fit, crop: item.crop, focal: item.focal })))
+        const lightTableReopened = await savePortableProjectArchive({ config: lightTableOpened.config, outputPath: path.join(root, "light-table-v2-reopened.galileo"), tempRoot: root, mediaPathFromURL: (url) => url })
+        assert.equal(canonicalProjectJSON(lightTableReopened.project), canonicalProjectJSON(lightTableSaved.project), "Light Table v2 save/open/reopen must preserve canonical portable truth")
+
+        const defaultedLightTableConfig = structuredClone(lightTableConfig)
+        for (const key of ["tableSpread", "overlap", "underlightStrength", "focusBehavior", "nudgeRestraint"]) delete defaultedLightTableConfig.settings[key]
+        const defaultedLightTable = await savePortableProjectArchive({ config: defaultedLightTableConfig, outputPath: path.join(root, "light-table-v2-defaulted.galileo"), tempRoot: root, mediaPathFromURL: (url) => url })
+        assert.deepEqual({
+            tableSpread: defaultedLightTable.project.scene.parameters.tableSpread,
+            overlap: defaultedLightTable.project.scene.parameters.overlap,
+            focusBehavior: defaultedLightTable.project.scene.parameters.focusBehavior,
+            nudgeRestraint: defaultedLightTable.project.scene.parameters.nudgeRestraint,
+            underlightStrength: defaultedLightTable.project.look.parameters.underlightStrength,
+        }, { tableSpread: 0.72, overlap: 0.1, focusBehavior: "route", nudgeRestraint: 0.28, underlightStrength: 0.42 }, "Light Table save must materialize the same defaults as runtime reconciliation")
+
+        const lightTableV1Config = {
+            ...lightTableConfig,
+            sceneVersion: 1,
+            settings: { ...lightTableConfig.settings, backgroundStyle: "transparent" },
+        }
+        const lightTableV1Path = path.join(root, "light-table-v1.galileo")
+        const lightTableV1Saved = await savePortableProjectArchive({ config: lightTableV1Config, outputPath: lightTableV1Path, tempRoot: root, mediaPathFromURL: (url) => url })
+        assert.deepEqual(Object.keys(lightTableV1Saved.project.scene.parameters).sort(), legacySceneKeys.sort(), "Light Table v1 must retain the legacy Scene keyset")
+        assert.deepEqual(Object.keys(lightTableV1Saved.project.look.parameters).sort(), legacyLookKeys.sort(), "Light Table v1 must retain the legacy Look keyset")
+        assert.equal(["tableSpread", "overlap", "underlightStrength", "focusBehavior", "nudgeRestraint"].some((key) => Object.hasOwn(lightTableV1Saved.project.scene.parameters, key) || Object.hasOwn(lightTableV1Saved.project.look.parameters, key)), false)
+        assert.equal(validatePortableProject(structuredClone(lightTableV1Saved.project)).scene.version, 1, "Light Table v1 remains a supported legacy Scene")
+        const lightTableV1Opened = await openPortableProjectArchive({ sourcePath: lightTableV1Path, stagingParent: roots.staging, openedProjectsRoot: roots.opened, mediaURLFromPath: (filePath) => filePath })
+        assert.equal(lightTableV1Opened.config.sceneVersion, undefined)
+        assert.equal(["tableSpread", "overlap", "underlightStrength", "focusBehavior", "nudgeRestraint"].some((key) => Object.hasOwn(lightTableV1Opened.config.settings, key)), false)
+        const lightTableV1Reopened = await savePortableProjectArchive({ config: lightTableV1Opened.config, outputPath: path.join(root, "light-table-v1-reopened.galileo"), tempRoot: root, mediaPathFromURL: (url) => url })
+        assert.equal(canonicalProjectJSON(lightTableV1Reopened.project), canonicalProjectJSON(lightTableV1Saved.project), "Light Table v1 must reopen without adopting v2 parameters")
+        for (const [location, key, value, code] of [
+            ["scene", "tableSpread", 0.72, "scene_invalid"],
+            ["look", "underlightStrength", 0.42, "look_invalid"],
+        ]) {
+            const contaminatedV1 = structuredClone(lightTableV1Saved.project)
+            contaminatedV1[location].parameters[key] = value
+            assert.throws(() => validatePortableProject(contaminatedV1), (error) => error?.code === code)
+        }
+
+        const mediaTableWithCount = (count) => Array.from({ length: count }, (_, index) => {
+            const entry = structuredClone(lightTableSaved.project.media[index % lightTableSaved.project.media.length])
+            entry.id = `light-table-frame-${String(index + 1).padStart(2, "0")}`
+            entry.archivePath = `project/media/${String(index + 1).padStart(4, "0")}-${entry.sha256.slice(0, 16)}${entry.signature === "png" ? ".png" : ".webp"}`
+            return entry
+        })
+        for (const count of [1, 24]) {
+            const boundary = structuredClone(lightTableSaved.project)
+            boundary.media = mediaTableWithCount(count)
+            assert.equal(validatePortableProject(boundary).media.length, count)
+        }
+        for (const count of [0, 25]) {
+            const invalidCount = structuredClone(lightTableSaved.project)
+            invalidCount.media = mediaTableWithCount(count)
+            assert.throws(() => validatePortableProject(invalidCount), (error) => error?.code === "scene_invalid")
+        }
+
+        for (const [code, mutate] of [
+            ["scene_invalid", (project) => { delete project.scene.parameters.tableSpread }],
+            ["scene_invalid", (project) => { project.scene.parameters.lightTableMagic = 1 }],
+            ["scene_invalid", (project) => { project.scene.parameters.tableSpread = 0.519 }],
+            ["scene_invalid", (project) => { project.scene.parameters.tableSpread = 0.921 }],
+            ["scene_invalid", (project) => { project.scene.parameters.overlap = -0.001 }],
+            ["scene_invalid", (project) => { project.scene.parameters.overlap = 0.221 }],
+            ["scene_invalid", (project) => { project.scene.parameters.focusBehavior = "pulse" }],
+            ["scene_invalid", (project) => { project.scene.parameters.nudgeRestraint = -0.001 }],
+            ["scene_invalid", (project) => { project.scene.parameters.nudgeRestraint = 0.601 }],
+            ["look_invalid", (project) => { delete project.look.parameters.underlightStrength }],
+            ["look_invalid", (project) => { project.look.parameters.lightTableMagic = 1 }],
+            ["look_invalid", (project) => { project.look.parameters.underlightStrength = -0.001 }],
+            ["look_invalid", (project) => { project.look.parameters.underlightStrength = 0.701 }],
+            ["look_invalid", (project) => { project.look.id = "gallery-look.transparent"; project.look.parameters.backgroundStyle = "transparent" }],
+            ["manifest_invalid", (project) => { delete project.media[0].frame.focal }],
+            ["manifest_invalid", (project) => { project.media[0].frame.ratio = 0.049 }],
+            ["manifest_invalid", (project) => { project.media[0].frame.ratio = 20.001 }],
+            ["manifest_invalid", (project) => { Object.assign(project.media[0].frame, { ratio: 20, crop: { x: 0, y: 0, width: 1, height: 0.5 } }) }],
+            ["manifest_invalid", (project) => { Object.assign(project.media[0].frame, { aspectMode: "custom", ratioW: 10_000, ratioH: 1, crop: { x: 0, y: 0, width: 1, height: 1 } }) }],
+            ["timeline_invalid", (project) => { project.timeline.direction = "sideways" }],
+        ]) {
+            const invalidLightTable = structuredClone(lightTableSaved.project)
+            mutate(invalidLightTable)
+            assert.throws(() => validatePortableProject(invalidLightTable), (error) => error?.code === code)
+        }
+        for (const [key, values, location] of [
+            ["tableSpread", [0.52, 0.92], "scene"],
+            ["overlap", [0, 0.22], "scene"],
+            ["nudgeRestraint", [0, 0.6], "scene"],
+            ["underlightStrength", [0, 0.7], "look"],
+        ]) {
+            for (const value of values) {
+                const boundaryControl = structuredClone(lightTableSaved.project)
+                boundaryControl[location].parameters[key] = value
+                assert.equal(validatePortableProject(boundaryControl)[location].parameters[key], value)
+            }
+        }
+        for (const focusBehavior of ["route", "loupe-only", "none"]) {
+            const focusBoundary = structuredClone(lightTableSaved.project)
+            focusBoundary.scene.parameters.focusBehavior = focusBehavior
+            assert.equal(validatePortableProject(focusBoundary).scene.parameters.focusBehavior, focusBehavior)
+        }
+        for (const ratio of [0.05, 20]) {
+            const ratioBoundary = structuredClone(lightTableSaved.project)
+            Object.assign(ratioBoundary.media[0].frame, { ratio, aspectMode: "auto", crop: { x: 0, y: 0, width: 1, height: 1 } })
+            assert.equal(validatePortableProject(ratioBoundary).media[0].frame.ratio, ratio)
+        }
+        for (const backgroundStyle of ["solid", "gradient", "halo", "paper"]) {
+            const opaqueLook = structuredClone(lightTableSaved.project)
+            opaqueLook.look.id = `gallery-look.${backgroundStyle}`
+            opaqueLook.look.parameters.backgroundStyle = backgroundStyle
+            assert.equal(validatePortableProject(opaqueLook).look.parameters.backgroundStyle, backgroundStyle)
+        }
+
+        const fixedLightTable = structuredClone(lightTableSaved.project)
+        Object.assign(fixedLightTable.timeline, { mode: "fixed-duration", fixedDurationMs: 0.5, segments: [] })
+        assert.equal(validatePortableProject(fixedLightTable).timeline.fixedDurationMs, 0.5)
+        fixedLightTable.timeline.fixedDurationMs = 90_000
+        assert.equal(validatePortableProject(fixedLightTable).timeline.fixedDurationMs, 90_000, "Portable intent must preserve over-maximum requests for the compiler to clamp with an issue")
+        const implicitDirectedLightTable = structuredClone(lightTableSaved.project)
+        Object.assign(implicitDirectedLightTable.timeline, { mode: "directed", fixedDurationMs: 0, segments: [] })
+        assert.equal(validatePortableProject(implicitDirectedLightTable).timeline.segments.length, 0)
+        const directedLightTable = structuredClone(implicitDirectedLightTable)
+        directedLightTable.timeline.segments = [
+            { id: "wake", kind: "cycle", cycles: 1, paceScale: 2, durationMs: 20_000 },
+            { id: "review", kind: "cycle", cycles: 1, paceScale: 1, durationMs: 20_000 },
+            { id: "final-inspection", kind: "hold", cycles: 1, paceScale: 1, durationMs: 20_000 },
+            { id: "return", kind: "cycle", cycles: 1, paceScale: 2, durationMs: 20_000 },
+        ]
+        assert.equal(validatePortableProject(directedLightTable).timeline.segments.length, 4, "Individually valid authored phases may exceed 60 seconds in aggregate and are clamped by the compiler")
+        const fractionalDirectedLightTable = structuredClone(directedLightTable)
+        fractionalDirectedLightTable.timeline.segments[0].durationMs = 0.5
+        assert.equal(validatePortableProject(fractionalDirectedLightTable).timeline.segments[0].durationMs, 0.5)
+        for (const mutate of [
+            (project) => { project.timeline.segments.pop() },
+            (project) => { project.timeline.segments[0].id = "review" },
+            (project) => { project.timeline.segments[2].kind = "cycle" },
+            (project) => { project.timeline.segments[2].cycles = 0 },
+            (project) => { project.timeline.segments[0].paceScale = 1 },
+            (project) => { project.timeline.segments[0].durationMs = 0 },
+            (project) => { project.timeline.segments[0].durationMs = 60_001 },
+        ]) {
+            const invalidDirected = structuredClone(directedLightTable)
+            mutate(invalidDirected)
+            assert.throws(() => validatePortableProject(invalidDirected), (error) => error?.code === "timeline_invalid")
+        }
+
+        for (const [label, candidate, code] of [
+            ["empty", { ...lightTableConfig, items: [] }, "scene_invalid"],
+            ["too-many", { ...lightTableConfig, items: Array.from({ length: 25 }, (_, index) => ({ ...lightTableConfig.items[index % lightTableConfig.items.length], id: `light-table-save-${index}` })) }, "scene_invalid"],
+            ["version-zero", { ...lightTableConfig, sceneVersion: 0 }, "scene_invalid"],
+            ["future-version", { ...lightTableConfig, sceneVersion: 3 }, "future_version_unsupported"],
+            ["transparent", { ...lightTableConfig, settings: { ...lightTableConfig.settings, backgroundStyle: "transparent" } }, "look_invalid"],
+        ]) {
+            let resolverCalls = 0
+            await expectSaveFailureBeforeStaging({
+                config: candidate,
+                outputPath: path.join(root, `light-table-${label}-invalid.galileo`),
+                tempRoot: root,
+                mediaPathFromURL: () => { resolverCalls += 1; throw new Error(`Invalid Light Table ${label} reached media authority.`) },
+            }, code, `Light Table ${label}`)
+            assert.equal(resolverCalls, 0)
+        }
+
+        const lightTablePriorProject = Object.freeze({ identity: "known-prior-light-table-project", revision: 2 })
+        for (const [index, [code, mutate]] of [
+            ["wrong_product", (project) => { project.product = "pitchdog-drift" }],
+            ["future_version_unsupported", (project) => { project.schemaVersion = 99 }],
+            ["future_version_unsupported", (project) => { project.scene.version = 3 }],
+            ["scene_invalid", (project) => { delete project.scene.parameters.overlap }],
+            ["look_invalid", (project) => { delete project.look.parameters.underlightStrength }],
+            ["look_invalid", (project) => { project.look.id = "gallery-look.transparent"; project.look.parameters.backgroundStyle = "transparent" }],
+            ["manifest_invalid", (project) => { delete project.media[0].frame.crop }],
+            ["timeline_invalid", (project) => { Object.assign(project.timeline, { mode: "directed", fixedDurationMs: 0, segments: [{ id: "wake", kind: "cycle", cycles: 1, paceScale: 2, durationMs: 1_000 }] }) }],
+        ].entries()) {
+            const target = path.join(root, `light-table-pre-authority-${index}-${code}.galileo`)
+            rewriteArchive(lightTablePath, target, (project) => { mutate(project); return project }, (zip, project) => zip.deleteFile(project.media[0].archivePath))
+            await expectFailure(code, target, roots, lightTablePriorProject)
         }
 
         const mediaBytes = mediaPaths.reduce((total, mediaPath) => total + fs.statSync(mediaPath).size, 0)

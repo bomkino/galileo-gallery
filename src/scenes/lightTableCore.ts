@@ -1,8 +1,13 @@
-export const LIGHT_TABLE_CORE_SHA256 = "58cb28c0a6d44b3334ef0c25bc02f902dd1383270fe194f4145f2f34c1eccbf8"
+export const LIGHT_TABLE_CORE_AUTHORITY_SHA256 = "58cb28c0a6d44b3334ef0c25bc02f902dd1383270fe194f4145f2f34c1eccbf8"
+export const LIGHT_TABLE_CORE_IMPLEMENTATION_SHA256 = "8fe4b48d150db186001b16b11ed8bf17cb2beca063cd52ec6448a5ad5ea583f3"
 
 const TAU = Math.PI * 2
 export const LIGHT_TABLE_CORE_MAX_VISIBLE = 24
 export const LIGHT_TABLE_CORE_MAX_DURATION_MS = 60_000
+export const LIGHT_TABLE_CORE_MIN_SOURCE_RATIO = 0.05
+export const LIGHT_TABLE_CORE_MAX_SOURCE_RATIO = 20
+export const LIGHT_TABLE_CORE_MIN_CANVAS_RATIO = 64 / 7_680
+export const LIGHT_TABLE_CORE_MAX_CANVAS_RATIO = 7_680 / 64
 const VALID_MODES = new Set(["automatic", "fixed-duration", "directed"] as const)
 
 export type LightTableCoreMode = "automatic" | "fixed-duration" | "directed"
@@ -132,6 +137,14 @@ function finiteNumber(value: unknown, fallback: number) {
 
 function boundedNumber(value: unknown, fallback: number, minimum: number, maximum: number) {
     return clamp(finiteNumber(value, fallback), minimum, maximum)
+}
+
+function normalizedCanvasRatio(value: unknown) {
+    return boundedNumber(value, 16 / 9, LIGHT_TABLE_CORE_MIN_CANVAS_RATIO, LIGHT_TABLE_CORE_MAX_CANVAS_RATIO)
+}
+
+function normalizedSourceRatio(value: unknown) {
+    return boundedNumber(value, 16 / 9, LIGHT_TABLE_CORE_MIN_SOURCE_RATIO, LIGHT_TABLE_CORE_MAX_SOURCE_RATIO)
 }
 
 export function normalizeLightTableCoreStoryTime(value: unknown) {
@@ -308,7 +321,7 @@ function layoutName(count: number): LightTableCoreSuccess["layout"] {
 
 function boundedSlots(count: number, canvasRatio: unknown): number[][] {
     if (EXPLICIT[count]) return EXPLICIT[count].map((slot) => [...slot])
-    const ratio = boundedNumber(canvasRatio, 16 / 9, 0.35, 3.0)
+    const ratio = normalizedCanvasRatio(canvasRatio)
     const columns = clamp(Math.ceil(Math.sqrt(count * ratio)), 2, Math.min(7, count))
     const rows = Math.ceil(count / columns)
     const left = 0.10
@@ -338,20 +351,54 @@ function nominalWidthForCount(count: number) {
 }
 
 function frameWidthForRatio(count: number, sourceRatio: unknown, canvasRatio: unknown) {
-    const ratio = boundedNumber(sourceRatio, 16 / 9, 0.25, 4)
-    const stageRatio = boundedNumber(canvasRatio, 16 / 9, 0.35, 3)
+    const ratio = normalizedSourceRatio(sourceRatio)
+    const stageRatio = normalizedCanvasRatio(canvasRatio)
     const nominalWidth = nominalWidthForCount(count)
     const maxNormalizedHeight = count <= 2 ? 0.62 : count <= 6 ? 0.40 : count <= 12 ? 0.21 : 0.15
     const widthFromHeight = maxNormalizedHeight * ratio / stageRatio
     return Math.min(nominalWidth, widthFromHeight)
 }
 
+function normalizedFrameAabbDimensions(width: number, ratio: number, canvasRatio: number, rotation: number, scale: number) {
+    const radians = Math.abs(rotation) * Math.PI / 180
+    const cosine = Math.cos(radians)
+    const sine = Math.sin(radians)
+    const scaledWidth = width * scale
+    const scaledHeightInStageWidth = scaledWidth / ratio
+    return {
+        width: scaledWidth * cosine + scaledHeightInStageWidth * sine,
+        height: (scaledWidth * sine + scaledHeightInStageWidth * cosine) * canvasRatio,
+    }
+}
+
+function containedRotation(width: number, ratio: number, canvasRatio: number, rotation: number, scale: number, margin: number) {
+    const maximumExtent = 1 - margin * 2
+    const requested = Math.abs(rotation)
+    const requestedBounds = normalizedFrameAabbDimensions(width, ratio, canvasRatio, requested, scale)
+    if (requestedBounds.width <= maximumExtent && requestedBounds.height <= maximumExtent) return rotation
+
+    let lower = 0
+    let upper = requested
+    for (let pass = 0; pass < 32; pass += 1) {
+        const candidate = (lower + upper) / 2
+        const bounds = normalizedFrameAabbDimensions(width, ratio, canvasRatio, candidate, scale)
+        if (bounds.width <= maximumExtent && bounds.height <= maximumExtent) lower = candidate
+        else upper = candidate
+    }
+    return Math.sign(rotation) * lower
+}
+
 export function lightTableCoreRectangleMetrics(frames: LightTableCoreFrame[], canvasRatio: unknown) {
-    const stageRatio = boundedNumber(canvasRatio, 16 / 9, 0.35, 3)
+    const stageRatio = normalizedCanvasRatio(canvasRatio)
+    // Occlusion keeps the pinned print-footprint contract; containment follows the rotated pixels the renderer emits.
     const rectangles = frames.map((frame) => {
         const width = frame.width * frame.scale
         const height = width * stageRatio / frame.ratio * frame.scale
         return { left: frame.x - width / 2, right: frame.x + width / 2, top: frame.y - height / 2, bottom: frame.y + height / 2, area: width * height }
+    })
+    const renderedBounds = frames.map((frame) => {
+        const { width, height } = normalizedFrameAabbDimensions(frame.width, frame.ratio, stageRatio, frame.rotation, frame.scale)
+        return { left: frame.x - width / 2, right: frame.x + width / 2, top: frame.y - height / 2, bottom: frame.y + height / 2 }
     })
     let maxOcclusionFraction = 0
     let intersectionCount = 0
@@ -368,7 +415,7 @@ export function lightTableCoreRectangleMetrics(frames: LightTableCoreFrame[], ca
             }
         }
     }
-    const outOfBoundsCount = rectangles.filter((rectangle) => rectangle.left < 0 || rectangle.right > 1 || rectangle.top < 0 || rectangle.bottom > 1).length
+    const outOfBoundsCount = renderedBounds.filter((rectangle) => rectangle.left < 0 || rectangle.right > 1 || rectangle.top < 0 || rectangle.bottom > 1).length
     return { maxOcclusionFraction, intersectionCount, outOfBoundsCount }
 }
 
@@ -387,7 +434,7 @@ export function evaluateLightTableCore(
     const sampleTime = story.sample
     const controls = normalizeLightTableCoreControls(compiled?.controls)
     const reducedMotion = Boolean(opts.reducedMotion)
-    const canvasRatio = boundedNumber(opts.canvasRatio, 16 / 9, 0.35, 3.0)
+    const canvasRatio = normalizedCanvasRatio(opts.canvasRatio)
     const focus = focusState(sampleTime, sources, controls.focusBehaviour, reducedMotion, opts.manualFocusIndex, compiled)
     const slots = boundedSlots(sources.length, canvasRatio)
     const spread = controls.tableSpread
@@ -396,9 +443,8 @@ export function evaluateLightTableCore(
 
     const frames = slots.map((slot, index): LightTableCoreFrame => {
         const source = sources[index]
-        const ratio = boundedNumber(source.ratio, 16 / 9, 0.25, 4)
+        const ratio = normalizedSourceRatio(source.ratio)
         const width = frameWidthForRatio(sources.length, ratio, canvasRatio)
-        const normalizedHeight = width * canvasRatio / ratio
         const baseX = 0.5 + (slot[0] - 0.5) * spread * (1 - overlapPull)
         const baseY = 0.5 + (slot[1] - 0.5) * spread * (1 - overlapPull * 0.82)
         const frequencyX = 1 + (index % 3)
@@ -414,9 +460,11 @@ export function evaluateLightTableCore(
         const wakeProgress = wakeSegment ? clamp(sampleTime / Math.max(1e-9, wakeSegment.end), 0, 1) : 0
         const wake = wakeSegment && sampleTime < wakeSegment.end && !reducedMotion ? Math.sin(wakeProgress * Math.PI) : 0
         const scale = 1 + ownFocus * (many ? 0.035 : 0.055)
-        const halfWidth = width * scale / 2
-        const halfHeight = normalizedHeight * scale / 2
         const margin = 0.018
+        const rotation = containedRotation(width, ratio, canvasRatio, slot[2] + driftR, scale, margin)
+        const bounds = normalizedFrameAabbDimensions(width, ratio, canvasRatio, rotation, scale)
+        const halfWidth = bounds.width / 2
+        const halfHeight = bounds.height / 2
         return {
             id: source.id,
             sourceIndex: index,
@@ -426,7 +474,7 @@ export function evaluateLightTableCore(
             x: clamp(baseX + driftX + wake * (index % 2 ? 1 : -1) * 0.006, margin + halfWidth, 1 - margin - halfWidth),
             y: clamp(baseY + driftY + wake * 0.010 - ownFocus * 0.012, margin + halfHeight, 1 - margin - halfHeight),
             width,
-            rotation: slot[2] + driftR,
+            rotation,
             scale,
             z: index + 1 + (ownFocus > 0 ? 100 : 0),
             focusWeight: ownFocus,

@@ -58,7 +58,7 @@ const variants: StyleDefinition[] = [
     { id: "wave-ticker", name: "Ribbon", presetName: "Wave", source: "WaveTicker.tsx", mode: "wave", category: "Reels", description: "An endless material ribbon with invisible recycling beyond the frame.", accent: "#67d2d0", minItems: 5, familyId: "ribbon" },
     { id: "deck-contact-strip", name: "Contact Table", presetName: "Focus Strip", source: "DeckContactStrip.tsx", mode: "contact", category: "Editorial", description: "A working table for scanning frames: strip, grid, or illuminated review surface.", accent: "#f3a45f", minItems: 4, familyId: "contact-table" },
     { id: "contact-sheet", name: "Contact Table", presetName: "Contact Sheet", source: "ContactSheet.tsx", mode: "contact", category: "Editorial", description: "A working table for scanning frames: strip, grid, or illuminated review surface.", accent: "#e7ac62", minItems: 6, familyId: "contact-table" },
-    { id: "light-table", name: "Contact Table", presetName: "Light Table", source: "LightTable.tsx", mode: "lighttable", category: "Editorial", description: "A working table for scanning frames: strip, grid, or illuminated review surface.", accent: "#ffd67c", minItems: 6, familyId: "contact-table" },
+    { id: "light-table", name: "Contact Table", presetName: "Light Table", source: "LightTableRenderer.tsx", mode: "lighttable", category: "Editorial", description: "A working table for scanning frames: strip, grid, or illuminated review surface.", accent: "#ffd67c", minItems: 1, familyId: "contact-table" },
     { id: "deck-river", name: "Deck River", presetName: "Continuous", source: "DeckRiver.tsx", mode: "river", category: "Reels", description: "A depth corridor where frames approach, pass, and recede without teleporting.", accent: "#6e9fff", minItems: 4, familyId: "deck-river" },
     { id: "deck-river-loader", name: "Deck River", presetName: "Chapter Reveal", source: "DeckRiverLoader.tsx", mode: "river", category: "Reels", description: "A depth corridor where frames approach, pass, and recede without teleporting.", accent: "#a6c56e", minItems: 4, familyId: "deck-river" },
     { id: "orbit-ring", name: "Orbit", presetName: "Calm Ring", source: "OrbitRing.tsx", mode: "orbit", category: "Orbits", description: "Slides orbit with coherent depth, scale, light, and occlusion.", accent: "#6ccfee", minItems: 5, familyId: "orbit" },
@@ -134,14 +134,14 @@ export function galleryStyle(id: string | undefined): StyleDefinition {
 
 export function latestSceneVersion(styleId: string) {
     if (styleId !== QUIET_CAROUSEL_STYLE.id && !ALL_STYLE_VARIANTS.some((candidate) => candidate.id === styleId)) throw new Error(`Unsupported Gallery Scene: ${styleId}`)
-    return styleId === "vitrine" || styleId === "the-shelf" ? 2 : 1
+    return styleId === "vitrine" || styleId === "the-shelf" || styleId === "light-table" ? 2 : 1
 }
 
 export function supportsSceneVersion(styleId: string, version = 1) {
     if (styleId === "quiet-carousel") return version === 1
     if (!ALL_STYLE_VARIANTS.some((candidate) => candidate.id === styleId)) return false
     if (styleId === "the-shelf") return version === 2
-    return styleId === "vitrine" ? version === 1 || version === 2 : version === 1
+    return styleId === "vitrine" || styleId === "light-table" ? version === 1 || version === 2 : version === 1
 }
 
 export function supportsVerifiedPngFrames(styleId: string, version = 1) {

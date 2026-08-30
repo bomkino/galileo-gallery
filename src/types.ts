@@ -90,6 +90,11 @@ export type ReelSettings = {
     gridDrift: number
     vignette: number
     showHint: boolean
+    tableSpread: number
+    overlap: number
+    underlightStrength: number
+    focusBehavior: "route" | "loupe-only" | "none"
+    nudgeRestraint: number
     theme: "auto" | "dark" | "light"
     ground: string
     paper: string
@@ -190,11 +195,13 @@ export type PortableGallerySceneParameters = Pick<ReelSettings,
     | "centerBump" | "tilt" | "sway" | "idleDim" | "idleMute" | "spotlightDim"
     | "speedBlur" | "slideHeight" | "gap" | "cornerStyle" | "cornerSmoothing"
     | "radius" | "shadow" | "gridSize" | "gridStrength" | "gridDrift" | "vignette" | "showHint"
+    | "tableSpread" | "overlap" | "focusBehavior" | "nudgeRestraint"
 >
 
 export type PortableGalleryLookParameters = Pick<ReelSettings,
     | "theme" | "ground" | "paper" | "backgroundStyle" | "backgroundColor2"
     | "backgroundAngle" | "backgroundTexture"
+    | "underlightStrength"
 >
 
 export type PortableGalleryTimeline = {

@@ -135,9 +135,41 @@ const SHELF_V2_PROFILE = profile({
     },
 })
 
+const LIGHT_TABLE_V2_PROFILE = profile({
+    id: "light-table",
+    recommendedItems: 6,
+    cycleBaseMs: 10_000,
+    loopCount: 3,
+    directional: true,
+    directionLabels: ["Forward", "Reverse"],
+    focusBehavior: "glow",
+    supportsSpotlight: false,
+    supportsFinale: false,
+    focusLabel: "Loupe",
+    bestFor: "Ordered review-room and process stories",
+    transparentReady: false,
+    settings: {
+        imageFit: "contain",
+        direction: "forward",
+        playKind: "loop",
+        repeatCount: 3,
+        tableSpread: 0.72,
+        overlap: 0.1,
+        underlightStrength: 0.42,
+        focusBehavior: "route",
+        nudgeRestraint: 0.28,
+        theme: "light",
+        ground: "#e8e6de",
+        backgroundStyle: "solid",
+        spotlightsEnabled: false,
+        finaleEnabled: false,
+    },
+})
+
 export function styleProfile(id: string | undefined, sceneVersion = 1): StyleProfile {
     if (id === "vitrine" && sceneVersion === 2) return VITRINE_V2_PROFILE
     if (id === "the-shelf" && sceneVersion === 2) return SHELF_V2_PROFILE
+    if (id === "light-table" && sceneVersion === 2) return LIGHT_TABLE_V2_PROFILE
     return STYLE_PROFILES[id ?? ""] ?? STYLE_PROFILES["opening-reel"]
 }
 

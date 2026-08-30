@@ -19,6 +19,7 @@ type Props = {
     reducedMotion?: boolean
     exportMode?: boolean
     inspectionItemId?: string | null
+    onInspectionItemChange?: (id: string | null) => void
 }
 
 export function isAuthoredVitrine(config: Pick<ReelConfig, "styleId" | "sceneVersion">) {
@@ -40,7 +41,7 @@ export default function ProductSceneRenderer(props: Props) {
         return <ShelfRenderer config={props.config} timeMs={props.timeMs} fps={props.fps} exportFrames={props.exportFrames} terminal={props.terminal} cataloguePreview={props.cataloguePreview} reducedMotion={props.reducedMotion} exportMode={props.exportMode} />
     }
     if (isLightTableV2(props.config)) {
-        return <LightTableRenderer config={props.config} timeMs={props.timeMs} fps={props.fps} exportFrames={props.exportFrames} terminal={props.terminal} cataloguePreview={props.cataloguePreview} reducedMotion={props.reducedMotion} exportMode={props.exportMode} inspectionItemId={props.inspectionItemId} />
+        return <LightTableRenderer config={props.config} timeMs={props.timeMs} fps={props.fps} exportFrames={props.exportFrames} terminal={props.terminal} cataloguePreview={props.cataloguePreview} reducedMotion={props.reducedMotion} exportMode={props.exportMode} inspectionItemId={props.inspectionItemId} onInspectionItemChange={props.onInspectionItemChange} />
     }
     return <GalleryRenderer config={props.config} timeMs={props.timeMs} durationMs={props.durationMs} exportFrames={props.exportFrames} terminal={props.terminal} />
 }

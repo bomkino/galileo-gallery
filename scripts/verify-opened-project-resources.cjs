@@ -6,6 +6,12 @@ const path = require("node:path")
 const root = path.resolve(process.argv[2])
 const runtimes = process.argv.slice(3).map((entry) => path.resolve(entry))
 const sha256 = (value) => crypto.createHash("sha256").update(value).digest("hex")
+const transientShape = (entry) => Number.isSafeInteger(entry.index) && entry.index >= 0 && entry.index <= 10
+    && ["surface", "poster"].includes(entry.kind)
+    && /^[A-Za-z][A-Za-z0-9]{0,63}$/.test(entry.name)
+    && ["canvas-readback", "canvas-security", "media-state-race", "renderer-exception", "resource-limit"].includes(entry.category)
+    && /^[a-f0-9]{8}$/.test(entry.fingerprint)
+    && Number.isSafeInteger(entry.count) && entry.count > 0
 
 function readJson(file) {
     return JSON.parse(fs.readFileSync(file, "utf8"))
@@ -59,6 +65,9 @@ for (const [index, receipt] of receipts.entries()) {
     assert(receipt.preview.replacement.correlation.every((entry) => entry.sourceColorMatches > 1 && entry.posterColorMatches > 1 && entry.posterSourceMatches > 1))
     assert(receipt.preview.original.maximumLive <= 2)
     assert(receipt.preview.replacement.maximumLive <= 2)
+    assert(Array.isArray(receipt.preview.original.transientSamples) && receipt.preview.original.transientSamples.every(transientShape))
+    assert(Array.isArray(receipt.preview.replacement.transientSamples) && receipt.preview.replacement.transientSamples.every(transientShape))
+    assert.deepEqual(receipt.diagnostics, { checkpoint: { stage: "complete" } })
     assert.equal(receipt.project.reverseRepeat.direction, "reverse")
     assert.equal(receipt.project.reverseRepeat.playKind, "repeat")
     assert.equal(receipt.project.reverseRepeat.repeatCount, 2)

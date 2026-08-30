@@ -27,6 +27,22 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+.light-table-underlight-layer {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: visible;
+    pointer-events: none;
+    isolation: isolate;
+}
+
+.light-table-underlight-anchor {
+    position: absolute;
+    display: block;
+    pointer-events: none;
+    transform-origin: 50% 50%;
+}
+
 .light-table-underlight,
 .light-table-frame,
 .light-table-focus-ring {
@@ -147,6 +163,8 @@
 
 @media (prefers-reduced-motion: reduce) {
     .light-table-stage,
+    .light-table-underlight-layer,
+    .light-table-underlight-anchor,
     .light-table-plane,
     .light-table-underlight,
     .light-table-frame,

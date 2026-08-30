@@ -5,6 +5,13 @@ const path = require("node:path")
 const { app, session, nativeImage } = require("electron")
 const { assertNoPrivateEvidence } = require("./g11-vitrine-smoke.cjs")
 const { inspectPng } = require("./png-frames-runtime.cjs")
+const {
+    executeShelfRendererProbe,
+    harnessDiagnostic,
+    shelfDiagnosticCheckpoint,
+    transportDiagnostic,
+    validShelfDiagnostic,
+} = require("./shelf-smoke-diagnostics.cjs")
 
 const evidenceFs = process.versions.electron ? require("original-fs") : fs
 const PROJECT_KEY = "galileo-gallery-project-v1"
@@ -113,8 +120,8 @@ async function projectAction(window, text, notice) {
     return window.webContents.executeJavaScript("document.querySelector('.autosave-status').textContent.trim()")
 }
 
-async function scrub(window, normalized) {
-    await window.webContents.executeJavaScript(`(async () => {
+async function scrub(window, normalized, diagnosticStage = "timeline.scrub") {
+    await executeShelfRendererProbe(window.webContents, diagnosticStage, `async () => {
         const timeline = document.querySelector('.timeline')
         if (!timeline) throw new Error('Shelf Timeline scrubber is unavailable.')
         const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
@@ -122,7 +129,8 @@ async function scrub(window, normalized) {
         timeline.dispatchEvent(new Event('input', { bubbles: true }))
         timeline.dispatchEvent(new Event('change', { bubbles: true }))
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-    })()`)
+        return true
+    }`)
     await wait(80)
 }
 
@@ -257,9 +265,10 @@ async function decoderState(window) {
     return window.webContents.executeJavaScript("window.__shelfDecoderTracker.result()")
 }
 
-async function mediaSamples(window) {
-    return window.webContents.executeJavaScript(`(async () => {
-        const sample = async (media) => {
+async function mediaSamples(window, diagnosticStage = "media.sample") {
+    return executeShelfRendererProbe(window.webContents, diagnosticStage, `async () => {
+        const sampleErrors = []
+        const sample = async (media, index, kind) => {
             if (!media || !media.isConnected) return null
             if (media instanceof HTMLImageElement && (!media.complete || media.naturalWidth < 1)) return null
             if (media instanceof HTMLVideoElement && (media.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || media.videoWidth < 1)) return null
@@ -282,15 +291,23 @@ async function mediaSamples(window) {
                     targetTime: targetValue !== undefined && targetValue !== "" && Number.isFinite(targetTime) ? targetTime : null,
                     presentedTime: presentedValue !== undefined && presentedValue !== "" && Number.isFinite(presentedTime) ? presentedTime : null,
                 }
-            } catch {
+            } catch (error) {
+                const rawName = String(error?.name ?? 'Error')
+                const name = /^[A-Za-z][A-Za-z0-9]{0,63}$/.test(rawName) ? rawName : 'Error'
+                const message = String(error?.message ?? error)
+                sampleErrors.push({ index, kind, name, category: classify(name, message), fingerprint: fingerprint(name + '\n' + message) })
                 return null
             }
         }
         const samples = new Map()
         let liveNodeCount = 0
+        let cardIndex = 0
         for (const card of document.querySelectorAll('.shelf-card')) {
             const id = card.dataset.mediaId
-            if (!id) continue
+            if (!id) {
+                cardIndex += 1
+                continue
+            }
             const video = card.querySelector('video.shelf-video-decoder')
             const surface = card.querySelector('canvas.shelf-video-surface')
             const poster = card.querySelector('img[data-source-poster="true"], img.shelf-video-poster')
@@ -299,14 +316,16 @@ async function mediaSamples(window) {
             const current = samples.get(id) ?? { id, live: null, poster: null, liveNode: false, posterNode: false }
             current.liveNode ||= Boolean(video)
             current.posterNode ||= Boolean(poster)
-            if (!current.live && surface) current.live = await sample(surface)
-            if (!current.poster && poster) current.poster = await sample(poster)
+            if (!current.live && surface) current.live = await sample(surface, cardIndex, 'surface')
+            if (!current.poster && poster) current.poster = await sample(poster, cardIndex, 'poster')
             samples.set(id, current)
+            cardIndex += 1
         }
         const stage = document.querySelector('.shelf-stage')
         return {
             result: [...samples.values()],
             liveNodeCount,
+            sampleErrors,
             stage: stage ? {
                 liveCount: Number(stage.dataset.shelfLiveVideoCount),
                 posterCount: Number(stage.dataset.shelfPosterCount || 0),
@@ -316,7 +335,7 @@ async function mediaSamples(window) {
                 phrase: stage.dataset.shelfPhrase,
             } : null,
         }
-    })()`)
+    }`)
 }
 
 function rgb(hex) {
@@ -352,6 +371,65 @@ function regionMatches(pixels, expected) {
         }
     }
     return matches
+}
+
+function normalizePublicStageEvidence(value) {
+    if (!value || typeof value !== "object") return { available: false, reason: "invalid-public-stage" }
+    const finite = (candidate) => Number.isFinite(candidate) ? candidate : null
+    const phrase = typeof value.phrase === "string" && /^[a-z0-9-]{0,48}$/.test(value.phrase) ? value.phrase : null
+    return {
+        available: true,
+        shelfStage: Boolean(value.shelfStage),
+        sceneVersion: finite(value.sceneVersion),
+        mediaRows: finite(value.mediaRows),
+        cards: finite(value.cards),
+        connectedVideos: finite(value.connectedVideos),
+        readySurfaces: finite(value.readySurfaces),
+        posters: finite(value.posters),
+        liveCount: finite(value.liveCount),
+        posterCount: finite(value.posterCount),
+        posterPending: finite(value.posterPending),
+        sourceCount: finite(value.sourceCount),
+        renderCount: finite(value.renderCount),
+        timelineValue: finite(value.timelineValue),
+        phrase,
+        visibility: ["hidden", "visible"].includes(value.visibility) ? value.visibility : null,
+    }
+}
+
+async function publicStageEvidence(window) {
+    try {
+        const value = await executeShelfRendererProbe(window.webContents, "failure.public-stage", `async () => {
+            const stage = document.querySelector('.shelf-stage')
+            const timeline = document.querySelector('.timeline')
+            return {
+                shelfStage: Boolean(stage),
+                sceneVersion: Number(stage?.dataset.sceneVersion),
+                mediaRows: document.querySelectorAll('.media-row').length,
+                cards: document.querySelectorAll('.shelf-card').length,
+                connectedVideos: document.querySelectorAll('video.shelf-video-decoder[src]').length,
+                readySurfaces: document.querySelectorAll('canvas.shelf-video-surface[data-story-ready="true"]').length,
+                posters: document.querySelectorAll('img[data-source-poster="true"], img.shelf-video-poster').length,
+                liveCount: Number(stage?.dataset.shelfLiveVideoCount),
+                posterCount: Number(stage?.dataset.shelfPosterCount || 0),
+                posterPending: Number(stage?.dataset.shelfPosterPending || 0),
+                sourceCount: Number(stage?.dataset.shelfSourceCount),
+                renderCount: Number(stage?.dataset.shelfRenderCount),
+                timelineValue: Number(timeline?.value),
+                phrase: stage?.dataset.shelfPhrase ?? null,
+                visibility: document.visibilityState,
+            }
+        }`)
+        return normalizePublicStageEvidence(value)
+    } catch (error) {
+        return {
+            available: false,
+            reason: "public-stage-probe-failed",
+            diagnostic: validShelfDiagnostic(error?.shelfDiagnostic)
+                ? error.shelfDiagnostic
+                : transportDiagnostic("failure.public-stage", error),
+        }
+    }
 }
 
 function expectedVfrFrame(contract, targetTime) {
@@ -526,25 +604,46 @@ async function vfrConformanceEvidence(window, contract, mode, runtime) {
     return { scope: "package-identity-pinned-Chromium-precise-seek-conformance", runtime, manifest, shortManifest: contract.short, shortBootstrap, observed: [...observed.values()], terminal, rapidRetarget }
 }
 
-async function collectPosterJourney(window, colors, label) {
+async function collectPosterJourney(window, colors, journey, onCheckpoint = () => {}) {
+    if (!["original", "replacement"].includes(journey)) throw new Error("Shelf poster journey identity is invalid.")
+    const label = `${journey} Shelf`
     const live = new Map()
     const posters = new Map()
+    const transientSamples = new Map()
     let maximumLive = 0
     let maximumRendered = 0
     const observedPhrases = new Set()
     for (let step = 0; step <= 64; step += 1) {
-        await scrub(window, step / 64)
-        const evidence = await mediaSamples(window)
+        const normalized = step / 64
+        onCheckpoint(shelfDiagnosticCheckpoint(`poster.${journey}.scrub-${step}`, { journey, step, normalized }))
+        await scrub(window, normalized, `poster.${journey}.scrub-${step}`)
+        onCheckpoint(shelfDiagnosticCheckpoint(`poster.${journey}.sample-${step}`, { journey, step, normalized }))
+        const evidence = await mediaSamples(window, `poster.${journey}.sample-${step}`)
         if (!evidence.stage) throw new Error("Shelf stage disappeared during poster journey.")
+        const counters = [evidence.liveNodeCount, evidence.stage.liveCount, evidence.stage.posterCount, evidence.stage.posterPending, evidence.stage.sourceCount, evidence.stage.renderCount]
+        if (!counters.every((value) => Number.isSafeInteger(value) && value >= 0)
+            || evidence.stage.sourceCount !== 11 || evidence.stage.renderCount < 1) throw new Error("Shelf poster journey exposed invalid public stage counters.")
+        if (evidence.liveNodeCount > 2 || evidence.stage.liveCount > 2) throw new Error(`${label} exceeded two connected live Shelf decoders.`)
+        if (!Array.isArray(evidence.sampleErrors) || evidence.sampleErrors.length > 22) throw new Error("Shelf transient sample diagnostics exceeded the bounded DOM surface.")
         maximumLive = Math.max(maximumLive, evidence.stage.liveCount, evidence.liveNodeCount)
         maximumRendered = Math.max(maximumRendered, evidence.stage.renderCount)
         observedPhrases.add(evidence.stage.phrase)
+        for (const error of evidence.sampleErrors) {
+            if (!Number.isSafeInteger(error.index) || error.index < 0 || error.index > 10
+                || !["surface", "poster"].includes(error.kind)
+                || !/^[A-Za-z][A-Za-z0-9]{0,63}$/.test(error.name)
+                || !["canvas-readback", "canvas-security", "media-state-race", "renderer-exception", "resource-limit"].includes(error.category)
+                || !/^[a-f0-9]{8}$/.test(error.fingerprint)) throw new Error("Shelf transient sample diagnostic is invalid.")
+            const key = [error.index, error.kind, error.name, error.category, error.fingerprint].join(":")
+            transientSamples.set(key, { ...error, count: (transientSamples.get(key)?.count ?? 0) + 1 })
+        }
         for (const entry of evidence.result) {
             if (entry.live && VIDEO_IDS.includes(entry.id) && !live.has(entry.id)) live.set(entry.id, entry.live)
             if (entry.poster && VIDEO_IDS.includes(entry.id) && !posters.has(entry.id)) posters.set(entry.id, entry.poster)
         }
         if (live.size === 10 && posters.size === 10) break
     }
+    onCheckpoint(shelfDiagnosticCheckpoint(`poster.${journey}.correlate`))
     if (live.size !== 10 || posters.size !== 10) throw new Error(`${label} did not observe source and poster evidence for all 10 videos: ${live.size}/${posters.size}.`)
     if (maximumLive > 2) throw new Error(`${label} exceeded two connected live Shelf decoders.`)
     const correlation = VIDEO_IDS.map((id, index) => {
@@ -558,7 +657,13 @@ async function collectPosterJourney(window, colors, label) {
         }
         return { id, sourceSha256: source.digest, posterSha256: poster.digest, sourceColorMatches, posterColorMatches, posterSourceMatches }
     })
-    return { correlation, maximumLive, maximumRendered, observedPhrases: [...observedPhrases].filter(Boolean).sort() }
+    return {
+        correlation,
+        maximumLive,
+        maximumRendered,
+        observedPhrases: [...observedPhrases].filter(Boolean).sort(),
+        transientSamples: [...transientSamples.values()].sort((left, right) => left.index - right.index || left.kind.localeCompare(right.kind)),
+    }
 }
 
 async function alphaPreviewEvidence(window, expected) {
@@ -855,14 +960,20 @@ async function runShelfRendererSmoke(window, evidenceRoot, mode = process.env.RE
     const pngDestination = path.resolve(pngDestinationValue)
     evidenceFs.mkdirSync(evidenceRoot, { recursive: true })
     let packageIdentity = null
+    let checkpoint = shelfDiagnosticCheckpoint("initializing")
+    const setCheckpoint = (next) => { checkpoint = next }
     try {
+        setCheckpoint(shelfDiagnosticCheckpoint("package.identity"))
         packageIdentity = await packageEvidence(window)
+        setCheckpoint(shelfDiagnosticCheckpoint("runtime.motion"))
         const reducedMotion = await window.webContents.executeJavaScript("window.matchMedia('(prefers-reduced-motion: reduce)').matches")
         if (reducedMotion !== (mode === "reduced")) throw new Error("Shelf renderer motion environment does not match its requested mode.")
+        setCheckpoint(shelfDiagnosticCheckpoint("decoder.tracker"))
         await installDecoderTracker(window)
         await until(window, "document.querySelector('.style-gallery-shell')", "Scene catalogue")
         await clickText(window, "button", "Back to studio")
         await until(window, "document.querySelector('.app-shell')", "studio")
+        setCheckpoint(shelfDiagnosticCheckpoint("project.original.open"))
         const openNotice = await projectAction(window, "Open project", "Project opened")
         await until(window, "document.querySelectorAll('.media-row').length === 11 && document.querySelector('.shelf-stage[data-scene-version=\"2\"]')", "Shelf v2 Project", 45_000)
         await until(window, "!document.querySelector('.launch-screen')", "launch transition", 15_000)
@@ -873,13 +984,16 @@ async function runShelfRendererSmoke(window, evidenceRoot, mode = process.env.RE
         assert.equal(original.evidence.project.settings.playKind, "repeat")
         assert.equal(original.evidence.project.settings.repeatCount, 2)
         assert.deepEqual(original.evidence.ids.filter((id) => id.startsWith("shelf-video-")), VIDEO_IDS)
+        setCheckpoint(shelfDiagnosticCheckpoint("controls.playback"))
         const playbackControls = await playbackControlEvidence(window)
         const originalRoot = acceptedRootEvidence()
-        const originalJourney = await collectPosterJourney(window, colors, `${mode} original`)
+        const originalJourney = await collectPosterJourney(window, colors, "original", setCheckpoint)
+        setCheckpoint(shelfDiagnosticCheckpoint("preview.original.alpha"))
         const alphaPreview = await alphaPreviewEvidence(window, alphaCounts)
         const originalScreenshot = await capture(window, evidenceRoot, `shelf-${mode}-original`)
 
         process.env.REEL_G03_PROJECT_PATH = replacementPath
+        setCheckpoint(shelfDiagnosticCheckpoint("project.replacement.open"))
         const replaceNotice = await projectAction(window, "Open project", "Project opened")
         await until(window, "document.querySelectorAll('.media-row').length === 11 && document.querySelector('.shelf-stage')", "same-ID Shelf replacement", 45_000)
         const replacement = await currentProject(window)
@@ -888,7 +1002,8 @@ async function runShelfRendererSmoke(window, evidenceRoot, mode = process.env.RE
         assert.notEqual(replacement.evidence.grantDigest, original.evidence.grantDigest)
         assert.notEqual(replacementRoot.inode, originalRoot.inode)
         if (evidenceFs.existsSync(originalRoot.target)) throw new Error("Same-ID Shelf replacement retained the old accepted Project root.")
-        const replacementJourney = await collectPosterJourney(window, replacementColors, `${mode} replacement`)
+        const replacementJourney = await collectPosterJourney(window, replacementColors, "replacement", setCheckpoint)
+        setCheckpoint(shelfDiagnosticCheckpoint("poster.replacement.correlate"))
         for (let index = 0; index < VIDEO_IDS.length; index += 1) {
             assert.notEqual(replacementJourney.correlation[index].sourceSha256, originalJourney.correlation[index].sourceSha256)
             assert.notEqual(replacementJourney.correlation[index].posterSha256, originalJourney.correlation[index].posterSha256)
@@ -896,23 +1011,32 @@ async function runShelfRendererSmoke(window, evidenceRoot, mode = process.env.RE
         const replacementRetirement = await decoderState(window)
         if (replacementRetirement.retiredOwned !== 0) throw new Error("Same-ID Shelf source replacement retained old decoder ownership.")
         const replacementScreenshot = await capture(window, evidenceRoot, `shelf-${mode}-replacement`)
+        setCheckpoint(shelfDiagnosticCheckpoint("rollback.corrupt"))
         const corrupt = await corruptOpenEvidence(window, corruptPath)
+        setCheckpoint(shelfDiagnosticCheckpoint("rollback.cancel"))
         const cancelled = await cancelOpenEvidence(window, originalPath)
+        setCheckpoint(shelfDiagnosticCheckpoint("export.unavailable"))
         const exportUnavailable = await exportUnavailableEvidence(window)
         process.env.REEL_G03_PROJECT_PATH = vfrPath
+        setCheckpoint(shelfDiagnosticCheckpoint("project.vfr.open"))
         const vfrNotice = await projectAction(window, "Open project", "Project opened")
         await until(window, "document.querySelectorAll('.media-row').length === 2 && document.querySelector('.shelf-stage')", "sparse and short Shelf VFR Project", 45_000)
         const vfrProject = await currentProject(window)
         const vfrRoot = acceptedRootEvidence()
         assert.deepEqual(vfrProject.evidence.ids, [vfrContract.id, vfrContract.short.id])
         if (evidenceFs.existsSync(replacementRoot.target)) throw new Error("Shelf VFR acceptance retained the replaced Project root.")
+        setCheckpoint(shelfDiagnosticCheckpoint("preview.vfr"))
         const vfr = await vfrConformanceEvidence(window, vfrContract, mode, packageIdentity.runtime)
+        setCheckpoint(shelfDiagnosticCheckpoint("export.image-only"))
         const imageOnlyPng = await imageOnlyPngEvidence(window, imagePath, pngDestination, evidenceRoot, mode, vfrRoot)
+        setCheckpoint(shelfDiagnosticCheckpoint("decoder.bound"))
         const ownershipBeforeTeardown = await decoderState(window)
         if (ownershipBeforeTeardown.maxOwners > 2 || ownershipBeforeTeardown.maxConnected > 2 || ownershipBeforeTeardown.retiredOwned !== 0) {
             throw new Error(`Shelf exceeded or leaked its two-decoder ownership bound: ${JSON.stringify(ownershipBeforeTeardown)}`)
         }
+        setCheckpoint(shelfDiagnosticCheckpoint("decoder.teardown"))
         const teardown = await finalTeardown(window)
+        setCheckpoint(shelfDiagnosticCheckpoint("complete"))
         const receipt = {
             format: "galileo-gallery-shelf-renderer-evidence",
             version: 1,
@@ -937,15 +1061,20 @@ async function runShelfRendererSmoke(window, evidenceRoot, mode = process.env.RE
             decoderOwnership: { replacementRetirement, beforeTeardown: ownershipBeforeTeardown, teardown },
             containment: { staging: stagingEvidence(), oldRootRetired: true },
             screenshots: { original: originalScreenshot, replacement: replacementScreenshot },
+            diagnostics: { checkpoint },
         }
         assertNoPrivateEvidence(receipt)
         evidenceFs.writeFileSync(path.join(evidenceRoot, "receipt.json"), `${JSON.stringify(receipt, null, 2)}\n`)
     } catch (error) {
         let screenshot = null
         try { screenshot = await capture(window, evidenceRoot, `shelf-${mode}-failure`) } catch {}
+        const rendererState = await publicStageEvidence(window)
         const rawMessage = String(error?.message ?? error)
         let message = rawMessage
         try { assertNoPrivateEvidence(message) } catch { message = "Shelf packaged renderer evidence failed; inspect the CI log for the private diagnostic." }
+        const diagnostic = validShelfDiagnostic(error?.shelfDiagnostic)
+            ? error.shelfDiagnostic
+            : harnessDiagnostic(checkpoint.stage, error)
         const failure = {
             format: "galileo-gallery-shelf-renderer-failure",
             version: 1,
@@ -954,6 +1083,9 @@ async function runShelfRendererSmoke(window, evidenceRoot, mode = process.env.RE
             screenshot,
             name: error?.name ?? "Error",
             message,
+            checkpoint,
+            diagnostic,
+            rendererState,
             diagnosticSha256: sha256(rawMessage),
         }
         try {

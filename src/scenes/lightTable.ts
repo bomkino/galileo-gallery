@@ -1,10 +1,13 @@
 import type { MediaItem, TimelineMode, VisualTimelineSegment } from "../types"
+import { lightTableFrameCount } from "../frameCountPolicy.ts"
 import {
     automaticLightTableCoreDurationMs,
     compileLightTableCoreTimeline,
     evaluateLightTableCore,
     LIGHT_TABLE_CORE_MAX_DURATION_MS,
+    LIGHT_TABLE_CORE_MAX_SOURCE_RATIO,
     LIGHT_TABLE_CORE_MAX_VISIBLE,
+    LIGHT_TABLE_CORE_MIN_SOURCE_RATIO,
     minimumLightTableCoreDurationMs,
     normalizeLightTableCoreControls,
     normalizeLightTableCoreStoryTime,
@@ -12,12 +15,18 @@ import {
     type LightTableCoreControls,
     type LightTableCoreSource,
 } from "./lightTableCore.ts"
+export { lightTableFrameCount }
 
 export {
     compileLightTableCoreTimeline,
     evaluateLightTableCore,
+    LIGHT_TABLE_CORE_AUTHORITY_SHA256,
     LIGHT_TABLE_CORE_DEFAULT_CONTROLS,
-    LIGHT_TABLE_CORE_SHA256,
+    LIGHT_TABLE_CORE_IMPLEMENTATION_SHA256,
+    LIGHT_TABLE_CORE_MAX_CANVAS_RATIO,
+    LIGHT_TABLE_CORE_MAX_SOURCE_RATIO,
+    LIGHT_TABLE_CORE_MIN_CANVAS_RATIO,
+    LIGHT_TABLE_CORE_MIN_SOURCE_RATIO,
     lightTableCoreFixture,
     normalizeLightTableCoreControls,
     normalizeLightTableCoreStoryTime,
@@ -136,7 +145,7 @@ export type LightTableFrame = {
         artworkOpacity: 1
         artworkFilter: "none"
         artworkBlend: "normal"
-        underlightPlacement: "sibling-behind-frame"
+        underlightPlacement: "table-layer-below-all-artwork"
         tableLuminance: number
     }
     layout: {
@@ -228,7 +237,7 @@ export function compileLightTableTimeline(intent: LightTableTimelineIntent): Com
         mode: intent.mode,
         direction: intent.direction,
         durationMs: core.durationMs,
-        frameCount: Math.max(1, Math.ceil(core.durationMs / 1_000 * intent.fps)),
+        frameCount: lightTableFrameCount(core.durationMs, intent.fps),
         readableMinimumMs: core.minimumDurationMs,
         phases,
         issues,
@@ -284,7 +293,7 @@ function emptyFrame(parameters: LightTableParameters): LightTableFrame {
             artworkOpacity: 1 as const,
             artworkFilter: "none" as const,
             artworkBlend: "normal" as const,
-            underlightPlacement: "sibling-behind-frame" as const,
+            underlightPlacement: "table-layer-below-all-artwork" as const,
             tableLuminance: 0.78,
         },
         layout: { maximumOcclusion: 0, intersectionCount: 0, outOfBoundsCount: 0 },
@@ -304,7 +313,7 @@ export function evaluateLightTable(input: LightTableEvaluationInput): LightTable
     const ids = new Set<string>()
     input.items.forEach((item) => {
         if (typeof item.id !== "string" || item.id.length < 1 || item.id.length > 256 || ids.has(item.id)) throw new Error("Light Table source identities must be unique and bounded.")
-        if (!Number.isFinite(item.ratio) || item.ratio < 0.05 || item.ratio > 20) throw new Error("Light Table source ratio is invalid.")
+        if (!Number.isFinite(item.ratio) || item.ratio < LIGHT_TABLE_CORE_MIN_SOURCE_RATIO || item.ratio > LIGHT_TABLE_CORE_MAX_SOURCE_RATIO) throw new Error("Light Table source ratio is invalid.")
         ids.add(item.id)
     })
     if (input.manualFocusIndex != null && (!Number.isSafeInteger(input.manualFocusIndex) || input.manualFocusIndex < 0 || input.manualFocusIndex >= input.items.length)) throw new Error("Light Table manual focus is invalid.")
@@ -364,7 +373,7 @@ export function evaluateLightTable(input: LightTableEvaluationInput): LightTable
             artworkOpacity: 1 as const,
             artworkFilter: "none" as const,
             artworkBlend: "normal" as const,
-            underlightPlacement: "sibling-behind-frame" as const,
+            underlightPlacement: "table-layer-below-all-artwork" as const,
             tableLuminance: 0.78,
         },
         layout: {
