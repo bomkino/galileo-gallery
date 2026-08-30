@@ -1210,6 +1210,9 @@ async function causalControls(window) {
     const placard = await readScene(window)
     assert.equal(baseline.placard, null)
     assert(placard.placard && placard.placardBox && placard.placardBox.width > 0 && placard.placardBox.height > 0)
+    if (placard.placardBox.left < -0.001 || placard.placardBox.top < -0.001
+        || placard.placardBox.left + placard.placardBox.width > 1.001 || placard.placardBox.top + placard.placardBox.height > 1.001
+        || placard.placardBox.width > 0.7 || placard.placardBox.height > 0.22) throw new Error("G11 Placard escaped or overwhelmed the Project canvas.")
     assertSamePose(baseline, placard)
     await chooseSegment(window, "Placard", "Clean")
 

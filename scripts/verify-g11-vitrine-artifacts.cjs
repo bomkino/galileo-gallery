@@ -235,6 +235,10 @@ for (const [index, receipt] of receipts.entries()) {
         assert.equal(receipt.preview.terminalVideo.planes[0].mediaTag, "VIDEO")
         assert(receipt.preview.terminalVideo.planes[0].storyPresentedTime >= 1.9 && receipt.preview.terminalVideo.planes[0].storyPresentedTime < 2)
         assert(receipt.controls.causal)
+        const placardBox = receipt.controls.causal.placard.placardBox
+        assert(placardBox.left >= -0.001 && placardBox.top >= -0.001
+            && placardBox.left + placardBox.width <= 1.001 && placardBox.top + placardBox.height <= 1.001
+            && placardBox.width > 0 && placardBox.width <= 0.7 && placardBox.height > 0 && placardBox.height <= 0.22)
         assert.deepEqual(receipt.controls.causal.restoredRhythm, { exchangeMs: 1_760, holdMs: 3_740 })
         assert.deepEqual(receipt.controls.causal.compactExportRhythm, { exchangeMs: 320, holdMs: 680 })
         assert.deepEqual(receipt.controls.causal.compactExportTimeline, { mode: "fixed-duration", fixedDurationMs: 2_000, activeOption: "Fixed", exactDurationMs: 2_000 })

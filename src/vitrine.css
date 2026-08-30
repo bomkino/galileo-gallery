@@ -10,6 +10,7 @@
 .vitrine-logical-stage {
     position: absolute;
     inset: 0 auto auto 0;
+    container-type: size;
     perspective: var(--vitrine-perspective, 1400px);
     transform-origin: 0 0;
     transform-style: preserve-3d;
@@ -69,22 +70,23 @@
     position: absolute;
     left: 50%;
     bottom: 5.5%;
-    display: grid;
-    min-width: 128px;
-    max-width: min(52%, 360px);
-    gap: 3px;
-    padding: 9px 12px 10px;
+    display: flex;
+    align-items: baseline;
+    min-width: min(44cqw, 128px);
+    max-width: min(70cqw, 360px);
+    gap: clamp(1.5px, .4cqmin, 6px);
+    padding: clamp(1.5px, .6cqmin, 7px) clamp(2px, .85cqmin, 10px);
     transform: translateX(-50%);
     color: #24211d;
     background: rgba(248, 244, 235, .96);
-    border: 1px solid rgba(36, 33, 29, .18);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+    border: clamp(.25px, .09cqmin, 1px) solid rgba(36, 33, 29, .18);
+    box-shadow: 0 clamp(1px, .7cqmin, 8px) clamp(3px, 2.1cqmin, 24px) rgba(0, 0, 0, .12);
     font-family: Inter, ui-sans-serif, system-ui, sans-serif;
     pointer-events: none;
 }
 
-.vitrine-placard span { font-size: 8px; font-weight: 780; letter-spacing: .16em; text-transform: uppercase; }
-.vitrine-placard strong { overflow: hidden; font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.vitrine-placard span { flex: none; font-size: clamp(2.5px, .7cqmin, 8px); font-weight: 780; letter-spacing: .16em; text-transform: uppercase; }
+.vitrine-placard strong { min-width: 0; overflow: hidden; font-size: clamp(3.5px, .95cqmin, 11px); font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
 
 .vitrine-status {
     position: absolute;
