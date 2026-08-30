@@ -1719,7 +1719,7 @@ function AppView() {
                                 <span>Timeline</span>
                                 <Segment label="Timeline mode" value={config.timelineMode ?? "automatic"} options={config.settings.playKind === "loop" ? [{ value: "automatic", label: "Auto" }, { value: "fixed-duration", label: "Fixed" }, { value: "directed", label: "Directed" }] : [{ value: "automatic", label: "Auto" }, { value: "fixed-duration", label: "Fixed" }]} onChange={updateTimelineMode} />
                             </div> : null}
-                            {authoredVitrine && config.timelineMode === "fixed-duration" ? <RangeControl label="Exact duration" value={Math.max(config.timelineFixedDurationMs ?? 0, vitrineFixedMinimum)} min={vitrineFixedMinimum} max={VITRINE_MAX_DURATION_MS} step={100} suffix="ms" onChange={(value) => setConfig((current) => reconcileVitrineConfig({ ...current, timelineFixedDurationMs: value }))} /> : null}
+                            {authoredVitrine && config.timelineMode === "fixed-duration" ? <RangeControl label="Exact duration" value={Math.max(config.timelineFixedDurationMs ?? 0, vitrineFixedMinimum)} min={vitrineFixedMinimum} max={VITRINE_MAX_DURATION_MS} step={1} suffix="ms" onChange={(value) => setConfig((current) => reconcileVitrineConfig({ ...current, timelineFixedDurationMs: value }))} /> : null}
                             {authoredVitrine && config.timelineMode === "directed" ? <p className="preset-note">Fast ×2 → regular ×1 → fast ×1. Holds remain still; every exchange uses the same evaluator.</p> : null}
                             {activeProfile.axisControl ? <div className="playback-direction">
                                 <span>Axis</span>
