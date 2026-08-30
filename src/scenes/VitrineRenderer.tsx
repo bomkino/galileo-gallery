@@ -508,7 +508,7 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
         ...evaluated.planes.map((plane) => ({ plane, guard: false })),
     ]
     return <div className={`vitrine-stage ${transparent ? "is-transparent" : ""}`} data-product-scene="vitrine" data-scene-version="2" data-evaluator-hash={evaluated.stateHash} data-vitrine-phrase={evaluated.phrase} data-current-id={evaluated.currentId ?? ""} data-incoming-id={evaluated.incomingId ?? ""} data-semantic-id={semanticId ?? ""} data-vitrine-inspection={inspectedSource?.item.id ?? ""} data-transition-progress={evaluated.transitionProgress} data-logical-width={logicalWidth} data-logical-height={logicalHeight} ref={ref} style={{ background } as React.CSSProperties}>
-        <div className="vitrine-logical-stage" style={{ width: logicalWidth, height: logicalHeight, transform: `scale(${size.width / logicalWidth}, ${size.height / logicalHeight})`, "--vitrine-perspective": `${logicalWidth * 1.46}px` } as React.CSSProperties}>
+        <div className="vitrine-logical-stage" style={{ width: "100%", height: "100%", transform: "none", "--vitrine-perspective": `${size.width * 1.46}px` } as React.CSSProperties}>
             <div className="vitrine-field" aria-hidden="true" />
             {renderPlanes.map(({ plane, guard }) => {
                 const item = items[plane.sourceIndex]
@@ -524,7 +524,13 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
                     width: plane.width * projectScale,
                     height: plane.height * projectScale,
                 }
-                return <figure className={guard ? "vitrine-guard" : `vitrine-plane is-${plane.role}`} data-media-id={plane.id} data-source-index={originalSourceIndex} data-role={guard ? "guard" : plane.role} data-frame-fit={item.fit ?? evaluated.render.fit} data-crop-x={crop.x} data-crop-y={crop.y} data-crop-width={crop.width} data-crop-height={crop.height} data-focal-x={focal.x} data-focal-y={focal.y} data-x={projectPlane.x} data-y={projectPlane.y} data-z={plane.z} data-plane-width={projectPlane.width} data-plane-height={projectPlane.height} data-plane-scale={plane.scale} data-rotate-x={plane.rotateX} data-rotate-y={plane.rotateY} aria-hidden="true" key={plane.id} style={guard ? { position: "absolute", width: 1, height: 1, left: -10_000, top: -10_000, opacity: 0, pointerEvents: "none", overflow: "hidden" } : { width: projectPlane.width, height: projectPlane.height, zIndex: plane.role === "incoming" ? 1_001 : 1_000, transform: `translate3d(${projectPlane.x - projectPlane.width / 2}px, ${projectPlane.y - projectPlane.height / 2}px, 0) rotateX(${plane.rotateX}deg) rotateY(${plane.rotateY}deg) scale(${plane.scale})` }}>
+                const viewportPlane = {
+                    left: (plane.x - plane.width / 2) / designWidth * 100,
+                    top: (plane.y - plane.height / 2) / designHeight * 100,
+                    width: plane.width / designWidth * 100,
+                    height: plane.height / designHeight * 100,
+                }
+                return <figure className={guard ? "vitrine-guard" : `vitrine-plane is-${plane.role}`} data-media-id={plane.id} data-source-index={originalSourceIndex} data-role={guard ? "guard" : plane.role} data-frame-fit={item.fit ?? evaluated.render.fit} data-crop-x={crop.x} data-crop-y={crop.y} data-crop-width={crop.width} data-crop-height={crop.height} data-focal-x={focal.x} data-focal-y={focal.y} data-x={projectPlane.x} data-y={projectPlane.y} data-z={plane.z} data-plane-width={projectPlane.width} data-plane-height={projectPlane.height} data-plane-scale={plane.scale} data-rotate-x={plane.rotateX} data-rotate-y={plane.rotateY} aria-hidden="true" key={plane.id} style={guard ? { position: "absolute", width: 1, height: 1, left: -10_000, top: -10_000, opacity: 0, pointerEvents: "none", overflow: "hidden" } : { left: `${viewportPlane.left}%`, top: `${viewportPlane.top}%`, width: `${viewportPlane.width}%`, height: `${viewportPlane.height}%`, zIndex: plane.role === "incoming" ? 1_001 : 1_000, transform: `rotateX(${plane.rotateX}deg) rotateY(${plane.rotateY}deg) scale(${plane.scale})` }}>
                     <VitrineMedia item={item} source={source} index={originalSourceIndex} timeMs={sourceTimeMs} loop={config.settings.loopVideos} fps={fps} fit={evaluated.render.fit} exportMode={exportMode} prewarm={guard} />
                 </figure>
             })}

@@ -937,7 +937,8 @@ const sceneExpression = `(() => {
             designWidth,
             designHeight,
             projectScale,
-            perspective: parseFloat(logicalStyle.perspective),
+            viewportPerspective: parseFloat(logicalStyle.perspective),
+            perspective: parseFloat(logicalStyle.perspective) * logicalWidth / logical.clientWidth,
         },
         planes: [...stage.querySelectorAll('.vitrine-plane')].map((plane) => {
             const media = plane.querySelector('.vitrine-media')
