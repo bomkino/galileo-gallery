@@ -12,7 +12,7 @@
     position: absolute;
     inset: 0 auto auto 0;
     container-type: size;
-    perspective: 146cqw;
+    perspective: var(--vitrine-perspective, 146cqw);
     transform-origin: 0 0;
     transform-style: preserve-3d;
 }

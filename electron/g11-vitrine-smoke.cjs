@@ -943,8 +943,10 @@ const sceneExpression = `(() => {
     const minimumRenderedDimension = Math.min(designViewportWidth, designViewportHeight)
     const renderedShortEdge = Number(stage.dataset.vitrineShortEdge)
     const cssShortEdge = parseFloat(stageStyle.getPropertyValue('--vitrine-short-edge'))
+    const authoredPerspective = parseFloat(stageStyle.getPropertyValue('--vitrine-perspective'))
     if (!Number.isFinite(renderedShortEdge) || Math.abs(renderedShortEdge - minimumRenderedDimension) > 0.001
         || !Number.isFinite(cssShortEdge) || Math.abs(cssShortEdge - minimumRenderedDimension) > 0.001) throw new Error('Vitrine authored metrics do not match the rendered stage short edge.')
+    if (!Number.isFinite(authoredPerspective) || Math.abs(authoredPerspective - stageLayoutWidth * 1.46) > 0.001) throw new Error('Vitrine authored perspective does not match the rendered stage width.')
     const authoredMetrics = {
         gap: parseFloat(stageStyle.getPropertyValue('--vitrine-placard-gap')),
         paddingX: parseFloat(stageStyle.getPropertyValue('--vitrine-placard-padding-x')),
@@ -1035,6 +1037,7 @@ const sceneExpression = `(() => {
             designViewportWidth,
             designViewportHeight,
             renderedShortEdge,
+            authoredPerspective,
             metricCompensation: Number(stage.dataset.vitrineMetricCompensation),
             authoredMetrics,
             projectScale,

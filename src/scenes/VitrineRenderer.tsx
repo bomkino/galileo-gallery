@@ -455,6 +455,7 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
         }
         const shortEdge = Math.min(width, height)
         const values = {
+            perspective: width * 1.46,
             gap: shortEdge * 0.0234375,
             paddingX: shortEdge * 0.03125,
             border: shortEdge * 0.00390625,
@@ -464,6 +465,7 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
             captionFont: shortEdge * 0.0546875,
         }
         const metrics = [
+            ["--vitrine-perspective", values.perspective],
             ["--vitrine-short-edge", shortEdge],
             ["--vitrine-placard-gap", values.gap],
             ["--vitrine-placard-padding-x", values.paddingX],
