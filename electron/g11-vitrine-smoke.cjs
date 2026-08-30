@@ -930,6 +930,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
     await until(window, "document.querySelectorAll('.media-row').length === 2 && document.querySelector('.vitrine-stage[data-scene-version=\"2\"]')", "opened Vitrine v2 Project")
     await until(window, "!document.querySelector('.launch-screen')", "launch transition", 15_000)
     await settle(window)
+    await scrub(window, 0.125)
     const decoderEvidence = await window.webContents.executeJavaScript(`({
         activePlanes: document.querySelectorAll('.vitrine-plane').length,
         activeVideos: document.querySelectorAll('.vitrine-stage video').length,
@@ -937,7 +938,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         guardVideos: document.querySelectorAll('.vitrine-guard video[data-story-ready="true"]').length,
         libraryVideos: document.querySelectorAll('.media-list video').length,
     })`)
-    if (decoderEvidence.activePlanes > 2 || decoderEvidence.activeVideos > 2 || decoderEvidence.readyVideos !== decoderEvidence.activeVideos || decoderEvidence.guardVideos !== 1 || decoderEvidence.libraryVideos !== 0) throw new Error("G11 video guard or two-decoder budget is wrong.")
+    if (decoderEvidence.activePlanes > 2 || decoderEvidence.activeVideos > 2 || decoderEvidence.readyVideos !== decoderEvidence.activeVideos || decoderEvidence.guardVideos !== 1 || decoderEvidence.libraryVideos !== 0) throw new Error(`G11 video guard or two-decoder budget is wrong: ${JSON.stringify(decoderEvidence)}`)
     const libraryKeyboard = await libraryKeyboardEvidence(window)
 
     let projectDocument = await window.webContents.executeJavaScript(`localStorage.getItem(${JSON.stringify(PROJECT_KEY)})`)
