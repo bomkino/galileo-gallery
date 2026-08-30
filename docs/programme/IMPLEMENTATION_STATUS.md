@@ -1,10 +1,10 @@
 # Implementation status
 
-Updated: 29 August 2026
+Updated: 30 August 2026
 
 Repository start: `bomkino/galileo-gallery@2762043bb733aa28a6c63fe26564504b9f257564`
 
-Task branch: `codex/g08-interface-scale-ui`
+Task branch: `codex/g11-vitrine-v2`
 
 ## G01A — safe archive import boundary
 
@@ -49,6 +49,10 @@ Source checks cover save/open/reopen canonical equality, ordered hashes, privacy
 Xvfb and Xauth were later installed after direct continuation approval. This managed local runner still denies display socket creation, but the display-capable GitHub runner now proves the packaged G03 renderer save, quit, relaunch, open, hydration, and Project-state round trip.
 
 G02 extends visual Timeline intent inside the still-unreleased v2 schema with an explicit fixed duration and bounded directed cycle/hold segments. Automatic/fixed/directed mode and segment identity now survive browser and portable Project round trips.
+
+G11 extends the same portable boundary with the explicit Vitrine Scene v2, five persisted controls,
+per-frame framing intent, ordered image/video identity, fresh-grant save/reopen, and packaged corrupt-open
+and missing-media preservation evidence. No imaginary v1 migration renderer was added.
 
 ## G02 — Quiet Carousel browser tracer
 
@@ -159,6 +163,36 @@ Final CI run `33281906705` passed Ubuntu, macOS, Windows, G02 renderer, and G08 
 and contains 21 screenshots plus progress and final machine receipts. Exact reviewed tree:
 `99fc1f3ddf623ede05651e314dc49847f7f74e97`.
 
+## G11 — Vitrine v2 Product Scene
+
+State: **engineering-complete in source and a sandboxed packaged-directory Linux x64 Electron journey; exact target platforms and human acceptance remain unclaimed**
+
+Implemented and proved:
+
+- an authored Vitrine v2 compiler/evaluator/renderer with natural-ratio image and paused-video planes,
+  readable holds, two-plane exchange, independent temporal/spatial direction, entry/finale/exit, and
+  automatic/fixed/directed Timeline behavior;
+- five causal persisted controls, keyboard operation, grouped undo, Reset, document-boundary undo
+  clearing, semantic current-item status, and a physical 44px target floor;
+- bounded media behavior with no more than two active planes/decoders, presented-frame video proof,
+  fresh-grant save/relaunch/reopen, and corrupt/missing-media prior-state preservation;
+- 75%–200% Interface Scale and 64–7,680-pixel canvas recomposition across standard and extreme ratios;
+- clean transparent PNG Frames with exact normal/reduced-motion export hashes, source alpha/RGB tuple
+  evidence, zero RGB contamination beneath alpha zero, and truthful Vitrine MP4 unavailability;
+- fixed browser-layout/compositing defects exposed by packaged evidence, including stale metric retries,
+  perspective readback separation, fail-fast reachable-source preflight, and accidental universal
+  reduced-motion transitions.
+
+CI run `33311514966` (`#108`) passed Ubuntu, macOS, Windows, G08 renderer regression, and the packaged
+G11 renderer job `99257315622`. Artifact `9732139199` has archive digest
+`sha256:20a1a71d77b989c20a91ddadfeb89f5242ed706cb43b3336d4465a5da165a656` and contains 219 files,
+including 192 RGBA frames, twelve screenshots, save/reopen receipts, and corrupt/missing-media receipts.
+Cancellation artifact `9732139411` has digest
+`sha256:9fa8ba1f3c915704c1437806b5e38519bb997d622cd64cefb3e573a3d8e92a67`.
+Exact implementation tree: `9c6c0dd8d6ac3e9e3f9ce4cb9ad6aeb4b82e4cee`.
+
+Full evidence: `docs/programme/evidence/G11_EVIDENCE_RECEIPT.md`.
+
 ## Known unsafe or unproved surfaces
 
 - legacy non-G03 package paths still exist and are not release candidates;
@@ -166,8 +200,9 @@ and contains 21 screenshots plus progress and final machine receipts. Exact revi
 - exact Garuda and Apple-Silicon target behaviour;
 - human interaction, visual, motion, and audio acceptance.
 
-Current frontier: **serial Scene catalogue integration from completed atelier branches**. The repaired
-handoff is validated evidence input only: 29 candidates, 139 controls, no Product integration, and 43
-pending human decisions. Quiet Carousel remains the only individually authored end-to-end verified
-Product Scene. One catalogue owner may reconcile at most three disjoint Scene implementations at a
-time. G04 remains deferred until an Apple-Silicon runner is available.
+Current frontier: **three disjoint clean-room Scene lanes under one serial catalogue owner**. The repaired
+handoff is validated evidence input only: 29 candidates, 139 controls, and 43 pending human decisions.
+Quiet Carousel and Vitrine v2 are the only individually authored end-to-end engineering-verified Product
+Scenes. Shelf v2 and Light Table v2 are active in isolated task worktrees; Zoetrope v2 is dependency-ready
+for the third implementation slot. Registered IDs are not counted as completion. G04 remains deferred
+until an Apple-Silicon runner is available.
