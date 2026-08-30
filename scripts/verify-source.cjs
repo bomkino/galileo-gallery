@@ -29,9 +29,8 @@ for (const id of ids) {
     if (!profiles.includes(`id: "${id}"`)) fail(`${id} has no style profile`)
 }
 
-const sceneRows = [...registry.matchAll(/^    \["[^"]+",/gm)]
-if (sceneRows.length !== 17) fail(`expected 17 curated scenes; found ${sceneRows.length}`)
-if (!registry.includes('"stack", "Stack"') || !registry.includes('"orbit", "Orbit"')) fail("merged scene families missing")
+if (!/GALLERY_STYLES:[^=]+=[\s\S]*variants\.map\(\(style\)/.test(registry)) fail("29-style catalogue is not generated from the exact source Scene inventory")
+if (!registry.includes("styleIds: [style.id]") || !registry.includes("scene.id === style.id")) fail("catalogue must preserve one-to-one Scene identities")
 if (!renderer.includes("smootherstep") || !renderer.includes("edgeFade")) fail("continuous motion primitives missing")
 if (!css.includes("transform-style:preserve-3d")) fail("depth-preserving card transforms missing")
 
@@ -54,4 +53,4 @@ for (const tag of ["color_primaries", "color_trc", "colorspace", "color_range"])
     if (!electron.includes(`"-${tag}"`)) fail(`export color tag missing: ${tag}`)
 }
 
-if (!process.exitCode) console.log("Verified: 17 scenes / 29 source presets, continuous 3D motion, safe defaults, both scroll owners, axes, Master ProRes, Rec.709 tags.")
+if (!process.exitCode) console.log("Verified: 29 distinct source Scenes, continuous 3D motion, safe defaults, both scroll owners, axes, Master ProRes, Rec.709 tags.")
