@@ -91,9 +91,24 @@ function pcm16Base64(interleaved: Float32Array) {
     return btoa(binary)
 }
 
-async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort) {
+function projectOpenCancelled(): Error {
+    const error = new Error("Project open cancelled.")
+    error.name = "AbortError"
+    return error
+}
+
+async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort, signal: AbortSignal) {
     let cursor = 0
+    let stopped = signal.aborted
+    let firstFailure: unknown = null
+    const activeStops = new Set<() => void>()
+    const stop = () => {
+        stopped = true
+        for (const activeStop of [...activeStops]) activeStop()
+    }
+    signal.addEventListener("abort", stop, { once: true })
     const hydrateOne = (item: ReelConfig["items"][number]) => new Promise<void>((resolve, reject) => {
+        if (stopped) { reject(projectOpenCancelled()); return }
         const media = item.type === "video" ? document.createElement("video") : new Image()
         let finished = false
         const timeout = window.setTimeout(() => finish(new Error(`Timed out hydrating ${item.name}.`)), 15_000)
@@ -101,6 +116,7 @@ async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort) {
             if (finished) return
             finished = true
             window.clearTimeout(timeout)
+            activeStops.delete(cancel)
             media.removeAttribute("src")
             if (media instanceof HTMLMediaElement) {
                 if (media instanceof HTMLVideoElement) {
@@ -114,6 +130,8 @@ async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort) {
             }
             if (error) reject(error); else resolve()
         }
+        const cancel = () => finish(projectOpenCancelled())
+        activeStops.add(cancel)
         if (media instanceof HTMLVideoElement) {
             media.preload = "auto"
             media.onloadeddata = () => finish()
@@ -126,16 +144,33 @@ async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort) {
         }
     })
     const workers = Array.from({ length: Math.min(2, config.items.length) }, async () => {
-        while (cursor < config.items.length) await hydrateOne(config.items[cursor++])
-    })
-    await Promise.all(workers)
-    await hydrateHostAudio(config.audio)
-    for (const source of config.audio?.sources ?? []) {
-        if (source.role !== "source-video" || !source.url) continue
-        const prepared = await host.prepareVideoAudio(source.url, sourceDurationUs(source.sampleFrames, source.sampleRate))
-        if (prepared.sampleRate !== source.sampleRate || prepared.channels !== source.channels || prepared.sampleFrames !== source.sampleFrames) {
-            throw new Error(`Could not hydrate ${source.name ?? source.id}.`)
+        while (!stopped && cursor < config.items.length) {
+            const item = config.items[cursor++]
+            try {
+                await hydrateOne(item)
+            } catch (error) {
+                if (firstFailure === null) firstFailure = error
+                stop()
+            }
         }
+    })
+    try {
+        await Promise.allSettled(workers)
+        if (signal.aborted) throw projectOpenCancelled()
+        if (firstFailure !== null) throw firstFailure
+        await hydrateHostAudio(config.audio, signal)
+        for (const source of config.audio?.sources ?? []) {
+            if (signal.aborted) throw projectOpenCancelled()
+            if (source.role !== "source-video" || !source.url) continue
+            const prepared = await host.prepareVideoAudio(source.url, sourceDurationUs(source.sampleFrames, source.sampleRate))
+            if (signal.aborted) throw projectOpenCancelled()
+            if (prepared.sampleRate !== source.sampleRate || prepared.channels !== source.channels || prepared.sampleFrames !== source.sampleFrames) {
+                throw new Error(`Could not hydrate ${source.name ?? source.id}.`)
+            }
+        }
+    } finally {
+        signal.removeEventListener("abort", stop)
+        stop()
     }
 }
 
@@ -144,25 +179,44 @@ export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
     let exportCancelled = false
     let hostExportAllocated = false
     let exportAudioController: AbortController | null = null
+    let projectOpenController: AbortController | null = null
     return {
         ...browserAPI,
         platform: host.platform,
         pickMedia: () => host.chooseMedia(),
         saveProject: (config) => host.saveProject(config),
         openProject: async () => {
-            const candidate = await host.beginProjectOpen()
-            if ("cancelled" in candidate || "failure" in candidate) return candidate
+            if (projectOpenController) throw new Error("A Project open is already running.")
+            const controller = new AbortController()
+            projectOpenController = controller
+            let operationId: string | null = null
             try {
+                const candidate = await host.beginProjectOpen()
+                if ("cancelled" in candidate || "failure" in candidate) return candidate
+                operationId = candidate.operationId
+                if (controller.signal.aborted) {
+                    await host.discardProjectOpen(operationId).catch(() => undefined)
+                    return { cancelled: true }
+                }
                 const config = validateHostConfig(candidate.config)
-                await hydrateHostConfig(config, host)
-                await host.acceptProjectOpen(candidate.operationId)
+                await hydrateHostConfig(config, host, controller.signal)
+                if (controller.signal.aborted) return { cancelled: true }
+                await host.acceptProjectOpen(operationId)
                 return { config }
             } catch (error) {
-                await host.discardProjectOpen(candidate.operationId).catch(() => undefined)
+                if (operationId) await host.discardProjectOpen(operationId).catch(() => undefined)
+                if (controller.signal.aborted || (error instanceof Error && error.name === "AbortError")) return { cancelled: true }
                 throw error
+            } finally {
+                if (projectOpenController === controller) projectOpenController = null
             }
         },
-        cancelProjectOpen: () => host.cancelProjectOpen(),
+        cancelProjectOpen: async () => {
+            const local = projectOpenController
+            local?.abort()
+            const result = await host.cancelProjectOpen()
+            return { cancelled: Boolean(local) || result.cancelled }
+        },
         exportReel: async (request) => {
             if (exportOwned || hostExportAllocated) throw new Error("An export is already running or still owned by the host.")
             if (!["png-frames", "mp4"].includes(request.format)) throw new Error("This Linux host slice supports verified PNG Frames and opaque H.264/AAC MP4.")

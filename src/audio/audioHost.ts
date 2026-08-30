@@ -46,15 +46,23 @@ export function validateHostAudioIntent(value: unknown, media: MediaItem[]): Aud
     return intent
 }
 
-export async function hydrateHostAudio(intent: AudioTimelineIntent | undefined) {
+function cancelled(): Error {
+    const error = new Error("Project open cancelled.")
+    error.name = "AbortError"
+    return error
+}
+
+export async function hydrateHostAudio(intent: AudioTimelineIntent | undefined, signal?: AbortSignal) {
     if (!intent) return
     for (const source of intent.sources) {
+        if (signal?.aborted) throw cancelled()
         if (source.role === "source-video") continue
-        const response = await fetch(source.url ?? "", { headers: { Range: "bytes=0-43" }, cache: "no-store" })
+        const response = await fetch(source.url ?? "", { headers: { Range: "bytes=0-43" }, cache: "no-store", signal })
         if (response.status !== 206 || response.headers.get("content-length") !== "44" || !/^bytes 0-43\/\d+$/.test(response.headers.get("content-range") ?? "")) {
             throw new Error(`Could not hydrate ${source.name ?? source.id}.`)
         }
         const bytes = new Uint8Array(await response.arrayBuffer())
+        if (signal?.aborted) throw cancelled()
         const text = (offset: number, length: number) => String.fromCharCode(...bytes.subarray(offset, offset + length))
         if (bytes.length !== 44 || text(0, 4) !== "RIFF" || text(8, 4) !== "WAVE" || text(12, 4) !== "fmt " || text(36, 4) !== "data") {
             throw new Error(`Could not hydrate ${source.name ?? source.id}.`)

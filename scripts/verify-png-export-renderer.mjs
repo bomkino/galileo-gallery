@@ -182,18 +182,20 @@ async function run() {
         load() {
             this.loadCalls += 1
             if (!this.source) return
+            if (this.mode === "pending") return
             queueMicrotask(() => this.mode === "error" ? this.onerror?.() : this.onloadeddata?.())
         }
     }
     class FakeHTMLVideoElement extends FakeHTMLMediaElement {}
     let videoMode = "loaded"
+    const videoModes = []
     const videos = []
     globalThis.HTMLMediaElement = FakeHTMLMediaElement
     globalThis.HTMLVideoElement = FakeHTMLVideoElement
     globalThis.Image = class {}
     globalThis.document = { createElement: (tag) => {
         assert.equal(tag, "video")
-        const video = new FakeHTMLVideoElement(videoMode)
+        const video = new FakeHTMLVideoElement(videoModes.shift() ?? videoMode)
         videos.push(video)
         return video
     } }
@@ -210,8 +212,8 @@ async function run() {
         }
         let accepts = 0
         let discards = 0
-        const openHost = (mode) => baseHost({
-            beginProjectOpen: async () => ({ operationId: "7".repeat(32), candidateGeneration: 2, config: videoConfig }),
+        const openHost = (mode, candidateConfig = videoConfig, overrides = {}) => baseHost({
+            beginProjectOpen: async () => ({ operationId: "7".repeat(32), candidateGeneration: 2, config: candidateConfig }),
             acceptProjectOpen: async () => {
                 accepts += 1
                 const video = videos.at(-1)
@@ -221,8 +223,10 @@ async function run() {
                 return { generation: 2 }
             },
             discardProjectOpen: async () => { discards += 1; return { discarded: true } },
+            cancelProjectOpen: async () => ({ cancelled: true }),
             prepareVideoAudio: async () => { throw new Error("no source-video audio expected") },
             mode,
+            ...overrides,
         })
         videoMode = "error"
         await assert.rejects(createHostBackedAPI(openHost("error")).openProject(), /Could not hydrate Edition Video/)
@@ -232,11 +236,50 @@ async function run() {
         assert.equal(videos.at(-1).pauseCalls, 1)
         assert.equal(videos.at(-1).loadCalls, 2)
 
+        const threeVideoConfig = {
+            ...videoConfig,
+            items: Array.from({ length: 3 }, (_, index) => ({
+                ...videoConfig.items[0], id: `edition-video-${index}`, name: `Edition Video ${index}.mp4`, url: `reel-media://grant/${String(index + 7).repeat(64)}`,
+            })),
+        }
+        const failureStart = videos.length
+        videoModes.push("error", "pending", "loaded")
+        await assert.rejects(createHostBackedAPI(openHost("mixed", threeVideoConfig)).openProject(), /Could not hydrate Edition Video 0/)
+        const failedWorkers = videos.slice(failureStart)
+        assert.equal(failedWorkers.length, 2, "first worker failure must stop a third candidate grant from starting")
+        assert(failedWorkers.every((video) => video.source === "" && video.pauseCalls === 1 && video.loadCalls === 2), "all concurrent candidate decoders must drain and release before discard")
+        assert.equal(accepts, 0)
+        assert.equal(discards, 2)
+        videoModes.length = 0
+
+        let hostOpenCancels = 0
+        let hostCancelled = false
+        const cancellationStart = videos.length
+        videoModes.push("pending", "pending", "loaded")
+        const cancelApi = createHostBackedAPI(openHost("pending", threeVideoConfig, {
+            cancelProjectOpen: async () => { hostOpenCancels += 1; hostCancelled = true; return { cancelled: true } },
+            discardProjectOpen: async () => {
+                if (hostCancelled) throw new Error("candidate already discarded")
+                discards += 1
+                return { discarded: true }
+            },
+        }))
+        const pendingOpen = cancelApi.openProject()
+        await new Promise((resolve) => setImmediate(resolve))
+        assert.deepEqual(await cancelApi.cancelProjectOpen(), { cancelled: true })
+        assert.deepEqual(await pendingOpen, { cancelled: true }, "cancelled hydration must resolve as cancellation, not conflict or decoder error")
+        const cancelledWorkers = videos.slice(cancellationStart)
+        assert.equal(cancelledWorkers.length, 2, "cancellation must stop a third candidate grant from starting")
+        assert(cancelledWorkers.every((video) => video.source === "" && video.pauseCalls === 1 && video.loadCalls === 2), "cancellation must drain and release both decoder workers")
+        assert.equal(hostOpenCancels, 1)
+        assert.equal(accepts, 0)
+        videoModes.length = 0
+
         videoMode = "loaded"
         const opened = await createHostBackedAPI(openHost("loaded")).openProject()
         assert.equal(opened.config, videoConfig)
         assert.equal(accepts, 1)
-        assert.equal(discards, 1)
+        assert.equal(discards, 2)
     } finally {
         for (const [key, value] of Object.entries(priorGlobals)) {
             if (value === undefined) delete globalThis[key]
