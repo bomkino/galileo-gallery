@@ -219,6 +219,7 @@ for (const [index, receipt] of receipts.entries()) {
     assert.equal(receipt.preview.holdA.planes[0].objectPosition, "20% 30%")
     if (index === 0) {
         assert.equal(receipt.preview.exchange.phrase, "exchange")
+        assert(receipt.preview.exchange.planes.every((plane) => plane.willChange === "transform"))
         assert(receipt.preview.exchange.planes.length <= 2 && receipt.preview.exchange.planes.some((plane) => plane.mediaTag === "VIDEO" && plane.storyReady === "true"))
         assert.equal(receipt.preview.reducedMotionExpected, false)
         assert.equal(receipt.preview.continuousVideoHandoff.guardReadyBefore, true)
@@ -288,6 +289,7 @@ for (const [index, receipt] of receipts.entries()) {
     } else {
         assert.equal(receipt.preview.exchange.phrase, "reduced-motion-settled")
         assert.equal(receipt.preview.exchange.systemReducedMotion, true)
+        assert(receipt.preview.exchange.planes.every((plane) => plane.willChange === "auto"))
         assert.equal(receipt.preview.reducedMotionExpected, true)
         assert.deepEqual(receipt.preview.reducedTransport, { before: 0.125, after: 0.125, paused: true })
         assert.equal(receipt.preview.continuousVideoHandoff, null)
@@ -501,6 +503,7 @@ for (const [index, receipt] of receipts.entries()) {
         assert.equal(probeIds.has(probe.exportMarker.frameId), false)
         probeIds.add(probe.exportMarker.frameId)
         assert(probe.planes.every((plane) => ["IMG", "VIDEO"].includes(plane.mediaTag) && plane.failed === false))
+        assert(probe.planes.every((plane) => plane.willChange === "transform"))
         for (const plane of probe.planes.filter((candidate) => candidate.id === "vitrine-portrait")) {
             assert.equal(plane.mediaTag, "VIDEO")
             assert.equal(plane.storyReady, "true")
@@ -574,6 +577,7 @@ for (const [index, receipt] of receipts.entries()) {
         assert.notEqual(probe.placard, null)
         assert.equal(probe.placardShadow, "none")
         assert(probe.planes.every((plane) => ["IMG", "VIDEO"].includes(plane.mediaTag) && plane.failed === false))
+        assert(probe.planes.every((plane) => plane.willChange === "transform"))
         for (const plane of probe.planes.filter((candidate) => candidate.id === "vitrine-portrait")) {
             assert.equal(plane.mediaTag, "VIDEO")
             assert.equal(plane.storyReady, "true")

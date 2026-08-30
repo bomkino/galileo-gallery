@@ -115,4 +115,5 @@ html[data-export-transparent="true"] .vitrine-placard { box-shadow: none !import
 
 @media (prefers-reduced-motion: reduce) {
     .vitrine-plane { will-change: auto; }
+    .export-canvas .vitrine-plane { will-change: transform; }
 }

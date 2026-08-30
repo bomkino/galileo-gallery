@@ -1055,6 +1055,7 @@ const sceneExpression = `(() => {
         planes: [...stage.querySelectorAll('.vitrine-plane')].map((plane) => {
             const media = plane.querySelector('.vitrine-media')
             const style = media ? getComputedStyle(media) : null
+            const planeStyle = getComputedStyle(plane)
             const pose = {
                 x: Number(plane.dataset.x), y: Number(plane.dataset.y), z: Number(plane.dataset.z),
                 width: Number(plane.dataset.planeWidth), height: Number(plane.dataset.planeHeight),
@@ -1097,7 +1098,8 @@ const sceneExpression = `(() => {
                 storyPaused: media?.tagName === "VIDEO" ? media.paused : null,
                 storyMuted: media?.tagName === "VIDEO" ? media.muted : null,
                 storyPlaybackRate: media?.tagName === "VIDEO" ? media.playbackRate : null,
-                shadow: getComputedStyle(plane).boxShadow,
+                shadow: planeStyle.boxShadow,
+                willChange: planeStyle.willChange,
                 transform: plane.style.transform,
                 failed: Boolean(plane.querySelector('[data-media-failed="true"]')),
             }
