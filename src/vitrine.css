@@ -81,8 +81,8 @@
     bottom: 5.5%;
     display: flex;
     align-items: baseline;
-    min-width: 44cqw;
-    max-width: 52cqw;
+    width: 52%;
+    box-sizing: border-box;
     gap: 2.34375cqmin;
     padding: 2.34375cqmin 3.125cqmin;
     transform: translateX(-50%);
