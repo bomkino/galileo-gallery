@@ -25,6 +25,7 @@ export const scene: ParitySceneContract = {
     sourceSha256: "f9e4396771cb499d71dd1579df268801e9d45cd0529c5de23c096c8ad2ff3134",
     recommendedItems: 5,
     maximumItems: 127,
+    looping: true,
     alphaSupported: true,
     defaultParameters: defaults,
     controls: [

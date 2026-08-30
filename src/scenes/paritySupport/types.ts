@@ -60,6 +60,7 @@ export type ParitySceneContract = {
     sourceSha256: string
     recommendedItems: number
     maximumItems: number
+    looping: boolean
     alphaSupported: boolean
     defaultParameters: Readonly<Record<string, number | string | boolean>>
     controls: readonly ParityControl[]
