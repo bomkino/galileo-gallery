@@ -908,6 +908,7 @@ const sceneExpression = `(() => {
     const designViewportHeight = parseFloat(designStyle.height)
     if (![stageLayoutWidth, stageLayoutHeight, designViewportWidth, designViewportHeight].every((value) => Number.isFinite(value) && value > 0)) throw new Error('Vitrine rendered design overlay is empty.')
     if (Math.abs(designViewportWidth - stageLayoutWidth) > 0.001 || Math.abs(designViewportHeight - stageLayoutHeight) > 0.001 || designStyle.transform !== 'none') throw new Error('Vitrine rendered design overlay left the stage viewport.')
+    if (stageStyle.containerType !== 'size' || designStyle.containerType !== 'normal') throw new Error('Vitrine layout does not have one physical query container.')
     const minimumRenderedDimension = Math.min(designViewportWidth, designViewportHeight)
     const normalizedBox = (element) => {
         const box = element.getBoundingClientRect()

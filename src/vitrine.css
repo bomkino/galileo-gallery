@@ -4,7 +4,7 @@
     height: 100%;
     overflow: hidden;
     isolation: isolate;
-    container-type: inline-size;
+    container-type: size;
     transform-style: preserve-3d;
 }
 
@@ -21,7 +21,6 @@
     position: absolute;
     inset: 0 auto auto 0;
     z-index: 2000;
-    container-type: size;
     transform-origin: 0 0;
     pointer-events: none;
 }
