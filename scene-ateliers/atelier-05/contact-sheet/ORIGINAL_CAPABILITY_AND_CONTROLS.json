@@ -1,0 +1,120 @@
+{
+  "schema": "galileo-atelier-capability-and-controls-v1",
+  "schemaStatus": "atelier-local-non-runtime",
+  "sceneId": "contact-sheet",
+  "candidateVersion": 1,
+  "verdict": "pending",
+  "capability": {
+    "minimumSources": 1,
+    "recommendedSources": 12,
+    "ordinaryRange": [
+      8,
+      24
+    ],
+    "maximumSources": 24,
+    "sourceOverflowPolicy": "reject-with-capability-copy",
+    "paginationPolicy": "none",
+    "wholeSetVisible": true,
+    "mixedRatios": true,
+    "failedSlotsPreserved": true,
+    "sourceVideoStoryTime": true,
+    "automaticTimeline": true,
+    "fixedDurationTimeline": true,
+    "directedTimeline": true,
+    "reversePolicy": "exact-story-time-retrace",
+    "reducedMotion": true,
+    "transparentOutput": false,
+    "transparentOutputConsequence": "Contact Sheet requires one opaque paper/contact surface to preserve whole-sheet identity. Transparent export is unavailable; capability copy must disable alpha export rather than faking transparency. This alpha limitation does not change Project audio intent or create an audio side effect.",
+    "audioOwnedByScene": false,
+    "sourceTreatment": {
+      "opacity": 1,
+      "filter": "none",
+      "blendMode": "normal",
+      "scale": 1
+    }
+  },
+  "controls": [
+    {
+      "id": "contact-sheet.columns",
+      "parameter": "columns",
+      "label": "Columns",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        "auto",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "resetValue": "auto",
+      "persistenceMeaning": "Discrete column policy used to compile ordered rows, cell dimensions, source wells, and label bands for the canvas.",
+      "evaluatorConsequence": "Recompiles columns/rows/cell bounds while preserving Project source order, failed cells, source treatment, and traversal semantics.",
+      "causalTest": "For twelve sources on 1920\u00d71080, options 2 and 6 must produce different rows/cell sizes with identical identity order and no overlap."
+    },
+    {
+      "id": "contact-sheet.gutter",
+      "parameter": "gutter",
+      "label": "Gutter",
+      "type": "range",
+      "default": 30,
+      "minimum": 10,
+      "maximum": 72,
+      "step": 1,
+      "unit": "design px at 1080 short axis",
+      "resetValue": 30,
+      "persistenceMeaning": "Physical separation between non-overlapping ordered cells.",
+      "evaluatorConsequence": "Changes inter-cell distance and cell dimensions inside fixed grid bounds; source order and focus traversal order are unchanged.",
+      "causalTest": "At one canvas/count, 10 and 72 must change adjacent cell spacing and size; all IDs/rows/columns remain valid and non-overlapping."
+    },
+    {
+      "id": "contact-sheet.sheet-margin",
+      "parameter": "sheetMargin",
+      "label": "Sheet margin",
+      "type": "range",
+      "default": 8,
+      "minimum": 4,
+      "maximum": 16,
+      "step": 1,
+      "unit": "% short axis",
+      "resetValue": 8,
+      "persistenceMeaning": "Inset from opaque paper edge to ordered grid bounds.",
+      "evaluatorConsequence": "Changes grid bounds and all cell dimensions/positions through one layout recompile; paper remains full-canvas opaque.",
+      "causalTest": "At 4 and 16, grid width/height and cell positions must differ while source order, count, and source treatment remain equal."
+    },
+    {
+      "id": "contact-sheet.traversal",
+      "parameter": "traversal",
+      "label": "Focus traversal",
+      "type": "choice",
+      "default": "row-major",
+      "options": [
+        "row-major",
+        "serpentine",
+        "column-major"
+      ],
+      "resetValue": "row-major",
+      "persistenceMeaning": "Attention ordinal mapping over immutable source-order cells.",
+      "evaluatorConsequence": "Changes registration-mark visit order and travel path only; cell geometry, source order, labels, and source pixels are bit-for-bit structurally equal.",
+      "causalTest": "All three options must produce distinct traversal arrays where applicable while every cell x/y/width/height remains equal."
+    },
+    {
+      "id": "contact-sheet.labels",
+      "parameter": "labels",
+      "label": "Labels",
+      "type": "choice",
+      "default": "both",
+      "options": [
+        "both",
+        "indices",
+        "captions",
+        "none"
+      ],
+      "resetValue": "both",
+      "persistenceMeaning": "Visibility of editorial index and caption bands outside source pixels.",
+      "evaluatorConsequence": "Changes label-band/source-well allocation and visible label records inside each fixed outer cell; outer grid topology and source treatment remain equal.",
+      "causalTest": "All four options preserve outer cell bounds/order. None yields zero label height; both exposes both label roles without changing source opacity/filter."
+    }
+  ]
+}

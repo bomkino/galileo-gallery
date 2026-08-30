@@ -1,0 +1,962 @@
+{
+  "schemaVersion": "1.1.0",
+  "sceneId": "the-hang",
+  "sourceArchive": "05_PRINTS_AND_TABLES_PARITY_HANDOFF_2026-08-28(1).zip",
+  "sourceEvaluatorSha256": "5fbbf879c45a14a944831aff39628df1e7f2244007d1f5f2fc9a93715d262592",
+  "evidenceCount": 118,
+  "files": [
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/CAPTURE_RECEIPT.json",
+      "sha256": "aaea8088098172f4c541dd012e7b8da3513ec6108db48240a3edaaea1f2bdea4",
+      "byteSize": 348,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/README.md",
+      "sha256": "0b6c5c8bbda95d680704d47e9fbd079bb572d4c89123c4ac16d3e9b47c7812f3",
+      "byteSize": 467,
+      "proofClass": "prose/limitations",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/SHA256SUMS",
+      "sha256": "fe021c1e671cd281ac4d5c7cfe061d774c9b48ac7fbf3b384e30a39c59ba6f90",
+      "byteSize": 9634,
+      "proofClass": "hash ledger",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/alpha/black.png",
+      "sha256": "243a806e5f2aef3450e06fa33dcc7b66be553f738218ee69828bf4908c0b27de",
+      "byteSize": 5648,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/alpha/blue.png",
+      "sha256": "fd2d6e74c99fabfbf344fd0150afa57ee8427064f8468418956780e201bdf40f",
+      "byteSize": 5650,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/alpha/checkerboard.png",
+      "sha256": "393ce250af73068323e5a2378251276b587e1f05e6fa07bb08a59d62b582c009",
+      "byteSize": 11233,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/alpha/red.png",
+      "sha256": "cc7318eb2ca255b4d0039124275bde21aae994b9ee51ec07269f193529935319",
+      "byteSize": 5655,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/alpha/white.png",
+      "sha256": "9edd058bd854085e442875bfec90bf8e54bdbf436962c949f52b0076935c9c82",
+      "byteSize": 5692,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/debug/geometry.png",
+      "sha256": "2e00805ce26d76aa546fa72067549b45623b57661bf6c27e3320d760eb246584",
+      "byteSize": 17806,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/diagnostics.json",
+      "sha256": "74b55522a395ee5d3419179c2f632bdfd3b978f88e07550e49c6a05a28f740e4",
+      "byteSize": 4295,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/fixtures/bounded-many.png",
+      "sha256": "319a5af056ad9d615604d850170fec5659818da8e9dfa29bd763918533156001",
+      "byteSize": 22651,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/fixtures/mixed-failed.png",
+      "sha256": "01f3ba5ff671a7ea25732a099413a115cc29b993d8415d18c52c62fc0d15b267",
+      "byteSize": 16729,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/fixtures/one.png",
+      "sha256": "b7a2f9b5615333f9703b1431c610008a8bac48b78d2617b6075b5eeb31df81f3",
+      "byteSize": 11664,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/fixtures/recommended.png",
+      "sha256": "0e68e6935bdaa4cb9c89a76fb307c0bb6e3799995df8096e856bfccddd37e6ab",
+      "byteSize": 15935,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/fixtures/two.png",
+      "sha256": "516974321452715eacf1ec9edb6daa73747a8bb4ed01a25e0b22aa6aa4de2ba8",
+      "byteSize": 14082,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-000.png",
+      "sha256": "f275b7145072433586f6210bc029d2f7a910cbc3e085dd4facd4c548608bfa89",
+      "byteSize": 582,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-001.png",
+      "sha256": "b3fe7cbe048c76e44997a0f11745fbb38b67585d8869acd89474099d1b005d98",
+      "byteSize": 1117,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-002.png",
+      "sha256": "a3559985313240bc6cec5d5e96692d5e2ae5bce90572a8b6439cedbb6aa0f101",
+      "byteSize": 1180,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-003.png",
+      "sha256": "43a72b5aa905c3a2a873f91582500aa39548643d1b5bb0d3185959ed95914f11",
+      "byteSize": 1354,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-004.png",
+      "sha256": "d1363a77da8a5ec178a7420457a213c36bfe54da756cd949c34d777c387e714e",
+      "byteSize": 1577,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-005.png",
+      "sha256": "d6d7b22250687ccb9c0a9402ee6eb4bc5ad0a780f6c68d16882e205237c64abb",
+      "byteSize": 1718,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-006.png",
+      "sha256": "2a70e25a39e05b9d966d29f553807147a6317f7301443bcd68abf30b7cf7a6ae",
+      "byteSize": 1800,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-007.png",
+      "sha256": "4a5415e161a52f59efbce413649cad71ad8ff4b6bea63bd3abbb559ab8553800",
+      "byteSize": 1795,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-008.png",
+      "sha256": "cb57a0e195de1ef268210e9165ff7e96c8cd400f0f19a096111c60d8f6e1dfe4",
+      "byteSize": 1817,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-009.png",
+      "sha256": "e16a3487ca823a075a7d4c5ef62a343db61567007a31e1b4c3e561b904018f3b",
+      "byteSize": 1951,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-010.png",
+      "sha256": "42745b6d4020d196e3082b22ba333ca06eb3f1547bf49002d9bd92e480801e4c",
+      "byteSize": 2057,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-011.png",
+      "sha256": "0b377d3531bfda3a77fd7d667b04f4adf6c8640a1a89dc97ac96811853e65217",
+      "byteSize": 2186,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-012.png",
+      "sha256": "37d61bdede0b3c611a840ebe378695e8a816cfb517375f1efd6d27eda87619e1",
+      "byteSize": 2150,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-013.png",
+      "sha256": "f2c584e8c746b61542fbd240876c3742f97ab96f6ca226930c31631a8c1b6dcb",
+      "byteSize": 2099,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-014.png",
+      "sha256": "7389f302a536941371bb85668e4cfba506d544cd34e3523fea763b4e3793edf2",
+      "byteSize": 1983,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-015.png",
+      "sha256": "32e63400f82c75ff323535071f2ace9fe62613112fbdbfbd65e59ae1f4935ff7",
+      "byteSize": 1904,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-016.png",
+      "sha256": "322d61f532d7e079eed7f71e90cbd11e640a291dc028e7ccfb91f7ae97380aa1",
+      "byteSize": 1862,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-017.png",
+      "sha256": "54100bb1e24baa3cacc5ec2e6094d27e622fc979dc573fe2f60a4e512a0db4bd",
+      "byteSize": 1905,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-018.png",
+      "sha256": "c83aa2063bde90b83a76ddcf87f54c48a7dddc7b0f11b447a98bb470c7b03c97",
+      "byteSize": 1933,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-019.png",
+      "sha256": "ee92437c57c5df8c046126c82e5ac3aebb1f6baa9fc0dd8d9fc0435ec722c117",
+      "byteSize": 1966,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-020.png",
+      "sha256": "1f9e75601ec53c5413ec74d5802bcbb1a1db2f31225a67730bd9161b4e097af6",
+      "byteSize": 1831,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-021.png",
+      "sha256": "b9563e9bc4541d3392b1d71f926cfa0c772ab00a08b136df824b9aa896845a10",
+      "byteSize": 1824,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-022.png",
+      "sha256": "e8dd0584771f87ed210cd67f75ef4db2e5a2bafcfd09343468dec7d3631885c7",
+      "byteSize": 1823,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-023.png",
+      "sha256": "4767335ccc59617719c85d2d2c643723891cd9cd8b7824270b49556bbf861a71",
+      "byteSize": 1854,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-024.png",
+      "sha256": "b3445fa1c04324d4cbe100bba3a0a43b3cb1c88dcfc121b5ecf44a7b5baaf821",
+      "byteSize": 1882,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-025.png",
+      "sha256": "7e1724fdc6db5aacce821e09d38e2b721605810d99a312be245da49a147b383d",
+      "byteSize": 1855,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-026.png",
+      "sha256": "9b3c0a2ac07936cf43b9b02f2a7b3f1a42d4a45a0dab9d853a2483fe42bceb8a",
+      "byteSize": 1860,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-027.png",
+      "sha256": "4046e73a96507700d21e03c98f975570d6f3650a4370cbdae97f9ad75fcd54e1",
+      "byteSize": 1819,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-028.png",
+      "sha256": "4bdda95b93ba7997bb24d2e2fb8eeef7611823963e9c0003ff62fb5e2e13f3d5",
+      "byteSize": 1849,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-029.png",
+      "sha256": "24b525e66b7ecbc9df2cfb44063da96aac348c09b9f86a558719f8be3c1952d5",
+      "byteSize": 1857,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-030.png",
+      "sha256": "2498b286d477389fbc86b0d7e778d886cffd09ad0a4dadda4d7f595c988c4f4e",
+      "byteSize": 1822,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-031.png",
+      "sha256": "e7f19f24099c1b0c7610781d820937b546488c3e6c3fdaf2e5c12877bbf94a51",
+      "byteSize": 1825,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-032.png",
+      "sha256": "7de5638e507eae487825cd4fc66995f02810a4ebba2d5cefa59c2646d208b8fb",
+      "byteSize": 1827,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-033.png",
+      "sha256": "7c2c28405269cee8c368067bba654feec7b1033d619277f55eaabf6b32d0ff5b",
+      "byteSize": 1816,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-034.png",
+      "sha256": "f2853b7b0a3fea6a34ed02086e2385a6f4894e7d0022ea659fc055956f09b514",
+      "byteSize": 1827,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-035.png",
+      "sha256": "36c46cd205c460bce84d790f90c75d824d74b75be0ded151a55dd8143390e3d1",
+      "byteSize": 1827,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-036.png",
+      "sha256": "8babb877f3a8417fe8b431f2c073e04c3f20f689e94501dd2c386ddc31da7996",
+      "byteSize": 1820,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-037.png",
+      "sha256": "3beac21e0fd43e7fe7d75cd2096bb06d93558dba9d83c924871f23ec5caee834",
+      "byteSize": 1814,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-038.png",
+      "sha256": "39d600d944119c95d07ba84a1863a4fc94beabbba3508ae86a9f23bada91469e",
+      "byteSize": 1823,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-039.png",
+      "sha256": "6b20eec31ccc807a875fcf3ea14a3accf9520d1d37cf1cf25b5c73fef2f20609",
+      "byteSize": 1818,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-040.png",
+      "sha256": "711138e00d8f80987ab19a4a77c5facd1fd50fe73ac7609ebb193fdd3cf37d3d",
+      "byteSize": 1829,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-041.png",
+      "sha256": "9d738b6bf4781d4dbe08852125e0508411f6e39581162e5d79438854ae689555",
+      "byteSize": 1831,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-042.png",
+      "sha256": "6f9a7f70d5781a7b41231f6b31903450a975de709de2b9819c926648d47739df",
+      "byteSize": 1816,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-043.png",
+      "sha256": "b6e3b7ffca3f91e4bf9190206ed7cc705c8e50508b702240e1de6fe8f7686f04",
+      "byteSize": 1818,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-044.png",
+      "sha256": "19617956802abf9f1b31a1523796be15281e31e6cd05ff1633d3e979cac8af90",
+      "byteSize": 1786,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-045.png",
+      "sha256": "654162d9d2e5a52e5e4ef9f08f5846e981fbcffda94930df4336d38eea847b82",
+      "byteSize": 1605,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-046.png",
+      "sha256": "89f38fb442602e53127455cd8a7f4baed3b267208b873e43d6251e7a559a262a",
+      "byteSize": 1332,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/motion/frame-047.png",
+      "sha256": "5729d669f3b239956f2c9df4885929185003e2ce4cb9e37ae3556fdd6df72059",
+      "byteSize": 1129,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/parity-alpha/RECEIPT.json",
+      "sha256": "25b22e186d589df8e238d2ffb98f116f1a8507471c466c9a408a3eff02363bbe",
+      "byteSize": 1897,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "Phase 3 parity-only capture from unchanged evaluator/raster",
+      "freshness": "current against unchanged evaluator hashes"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/parity-alpha/over-black.png",
+      "sha256": "243a806e5f2aef3450e06fa33dcc7b66be553f738218ee69828bf4908c0b27de",
+      "byteSize": 5648,
+      "proofClass": "alpha/composite",
+      "source": "Phase 3 parity-only capture from unchanged evaluator/raster",
+      "freshness": "current against unchanged evaluator hashes"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/parity-alpha/over-blue.png",
+      "sha256": "fd2d6e74c99fabfbf344fd0150afa57ee8427064f8468418956780e201bdf40f",
+      "byteSize": 5650,
+      "proofClass": "alpha/composite",
+      "source": "Phase 3 parity-only capture from unchanged evaluator/raster",
+      "freshness": "current against unchanged evaluator hashes"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/parity-alpha/over-checkerboard.png",
+      "sha256": "393ce250af73068323e5a2378251276b587e1f05e6fa07bb08a59d62b582c009",
+      "byteSize": 11233,
+      "proofClass": "alpha/composite",
+      "source": "Phase 3 parity-only capture from unchanged evaluator/raster",
+      "freshness": "current against unchanged evaluator hashes"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/parity-alpha/over-red.png",
+      "sha256": "cc7318eb2ca255b4d0039124275bde21aae994b9ee51ec07269f193529935319",
+      "byteSize": 5655,
+      "proofClass": "alpha/composite",
+      "source": "Phase 3 parity-only capture from unchanged evaluator/raster",
+      "freshness": "current against unchanged evaluator hashes"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/parity-alpha/over-white.png",
+      "sha256": "9edd058bd854085e442875bfec90bf8e54bdbf436962c949f52b0076935c9c82",
+      "byteSize": 5692,
+      "proofClass": "alpha/composite",
+      "source": "Phase 3 parity-only capture from unchanged evaluator/raster",
+      "freshness": "current against unchanged evaluator hashes"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/parity-alpha/raw-alpha.png",
+      "sha256": "f087a0f4b1c2767aedcef7d15590ce8b311afaf0f970bd0389d77ba0d6361ce6",
+      "byteSize": 4939,
+      "proofClass": "raw-alpha/composite",
+      "source": "Phase 3 parity-only capture from unchanged evaluator/raster",
+      "freshness": "current against unchanged evaluator hashes"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/ratios/1080x1080.png",
+      "sha256": "b77441552fef30c5dee778a0985268503853d47c153a43a74a1d4bdb4b1a7814",
+      "byteSize": 9717,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/ratios/1080x1350.png",
+      "sha256": "8cfcdcc7151197dd4791e206c601ffd952726a5689249a0bb1377a1b3504d358",
+      "byteSize": 14711,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/ratios/1080x1920.png",
+      "sha256": "5ef9c68188ba1e126093fc56cfd72b3fa0b2c1ff0e792f9e164cbd3bf7b65b24",
+      "byteSize": 19228,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/ratios/1920x1080.png",
+      "sha256": "0e68e6935bdaa4cb9c89a76fb307c0bb6e3799995df8096e856bfccddd37e6ab",
+      "byteSize": 15935,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-000.png",
+      "sha256": "eb7a77c77e2800aae2aeeec927f2ae9fe537b6ee87c5a5f2a751ff66f5be3f19",
+      "byteSize": 932,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-001.png",
+      "sha256": "1b0012d769e6ebcc16a9c239ffdf93f1bbc3c9c1a2ae88e7941d2b37026542e1",
+      "byteSize": 1287,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-002.png",
+      "sha256": "79710f2a4a35d367e032a9b3830b106a223ccf87cf8529cd4c4e2d2520793062",
+      "byteSize": 1670,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-003.png",
+      "sha256": "a5bf105ac04aeb1f119b53625a6966afe1c2fb6d82dc785ad1f14068c2385c19",
+      "byteSize": 1911,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-004.png",
+      "sha256": "a24bc6704f5ff35e3a73bf45301dbc22210f9b290bd4cfe29aa040b8cf7aba20",
+      "byteSize": 1923,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-005.png",
+      "sha256": "47da853ead71432530e101eb7edec0485bca588a8399b366f801aaf16c990398",
+      "byteSize": 1937,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-006.png",
+      "sha256": "fc36749404a27f45e254a276687eb7476a52c0d7307dda0760a7f708f157801b",
+      "byteSize": 1942,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-007.png",
+      "sha256": "201569f07f4cb8511777bcb34f88a130c39d32f33e275447e7a2b00569979d75",
+      "byteSize": 1926,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-008.png",
+      "sha256": "0b385000e41538a2e716514379aa874be1ecea548e184ee486cae91bd894afc3",
+      "byteSize": 1906,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-009.png",
+      "sha256": "cd8b0476b875ad82019a74316aecf9297970170f775f81796e72fe56d212fe9f",
+      "byteSize": 1910,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-010.png",
+      "sha256": "e8169a9bc592d8c0bdbd949246696a9878707ead8c596f802f3d1640363cb60b",
+      "byteSize": 1899,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-011.png",
+      "sha256": "d8db37754b242258c32bdc9002c9b38779d7e0c2359b288d678f4567545703ea",
+      "byteSize": 1906,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-012.png",
+      "sha256": "2314cde7e911a2469541de410a8d9a2a916d4b75f47eb2c0c3a55eab98da568b",
+      "byteSize": 1911,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-013.png",
+      "sha256": "a55a3aa6f31c5bf10a60481b009d60b738d5efd4c4c347b0d85adf406ba07b5c",
+      "byteSize": 1916,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-014.png",
+      "sha256": "7fdef2054d4337f465204fe429b371b8199d55518ddc1e155d82422a876dcf19",
+      "byteSize": 1923,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-015.png",
+      "sha256": "48c4d8edb69c1c3f06bf998750b6022184c23d1a0692658f72c9e17d7043f6a3",
+      "byteSize": 1915,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-016.png",
+      "sha256": "25d899900e06160111334f1ce508699134d02f0785b4abdf348812f92c60e4ea",
+      "byteSize": 1916,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-017.png",
+      "sha256": "55874e97b968c09a31eabccbc9f4ee709c2b99de1f517c6e37c3fe1a832c7650",
+      "byteSize": 1912,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-018.png",
+      "sha256": "eafb0dd47e844f68cf6b591206f6b055489ab3d456cdbdd9458964738a88fe80",
+      "byteSize": 1898,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-019.png",
+      "sha256": "03f6d8d8b5d2cd06940493d017a7333f5d155059d1f470613d572ec3d9f80948",
+      "byteSize": 1910,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-020.png",
+      "sha256": "c01b8a3ef86c0911d686932d67e1dd26cc4f42a762fa9b321a661332ccb493ab",
+      "byteSize": 1912,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-021.png",
+      "sha256": "8008070f8f10c7b2f7404a7259a68739cbd4225342d7af5fc7060389c8bed6bc",
+      "byteSize": 1914,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-022.png",
+      "sha256": "81ad9f285c78b920733c1cc58debe5c3b7a7a785c36304025177352a6a4e1d1b",
+      "byteSize": 1886,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/frame-023.png",
+      "sha256": "e21aece42d67ebd93b8193fa2d3b2cf4454e83d589f1c7288e011ecf940a7cff",
+      "byteSize": 1431,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/silhouette/still.png",
+      "sha256": "06b03c649e218e6eff011890e65ffdf66dbfe1b1e5cd1fe2cdef7f8822479064",
+      "byteSize": 5333,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0000000.png",
+      "sha256": "d84d4707f30e4df0ec60fd3bf9c98283506b8cb8ae496a60ad05c18573329a55",
+      "byteSize": 8130,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0041667.png",
+      "sha256": "dbb41fc2fff4de76bfa09679f489d6ab9ca8e866d85f3a639355147faff53e66",
+      "byteSize": 12730,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0083333.png",
+      "sha256": "ebcb230784acaff1d70ba78c7daa5b86bfeeb13f48f671c964214c70316587cd",
+      "byteSize": 14814,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0140000.png",
+      "sha256": "d85ca647958e9a78c86fbf99c890fc2eb873c3e3ad702f34358abcd51260a724",
+      "byteSize": 15874,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0166667.png",
+      "sha256": "752a9ad314e01a44b0a6ef40ff0e587cbcc1e82a281775803517b81b531265ed",
+      "byteSize": 15897,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0240000.png",
+      "sha256": "df43f3a8f835eb73554c82df87f67b22ee39d945c26316d29d745079e6ffd82d",
+      "byteSize": 17290,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0250000.png",
+      "sha256": "c23541aafe31897d0aa4caee7a914bd0537b20c28ab08dae39a986983754dab1",
+      "byteSize": 17053,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0333333.png",
+      "sha256": "59ca90c62283ebcfa957c78aa4d6738673d380901ece2a83406feefcad710e5b",
+      "byteSize": 16003,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0416667.png",
+      "sha256": "bba21e9a0543b955901128e7d0e9971b1bf7dc3f504bfbb33886a21400240373",
+      "byteSize": 16035,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0500000.png",
+      "sha256": "36f31998ef768d90b2bf67b96c39e3f5696ed4008c5da6cc56370e152d021fd6",
+      "byteSize": 15994,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0583333.png",
+      "sha256": "e8a80b4e13f2da9fe90de039d3eb30cd3d5dac6b54950c1ecce2d57e5fcca275",
+      "byteSize": 15923,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0666667.png",
+      "sha256": "3407ac8c80fcf89ac7b14bb31fbc69a07f700247a3540d97b69c61f5de8b599d",
+      "byteSize": 15905,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0750000.png",
+      "sha256": "d51c271fd6a768938286aaa4043b65ed50a1ac3a1609ed6e09b2b35851d8ec63",
+      "byteSize": 15401,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0780000.png",
+      "sha256": "00971698f6d7d6d0117d2c1fc10972660f0bc23fed100c3558edb5449be3e449",
+      "byteSize": 15880,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0833333.png",
+      "sha256": "a04254ac58c11a78ad9829dcb8dd0cc027640a956772f0a18dd82c84b5eb7dd0",
+      "byteSize": 15469,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0900000.png",
+      "sha256": "3f4474514e39900999e9228303617609421f9c243902be935470c420b2485773",
+      "byteSize": 15389,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0916667.png",
+      "sha256": "c182651c092fc3f566b42c81d8d3bc9b73e7d2fa3c30654902a4a76424db05d8",
+      "byteSize": 15275,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-0999999.png",
+      "sha256": "d84d4707f30e4df0ec60fd3bf9c98283506b8cb8ae496a60ad05c18573329a55",
+      "byteSize": 8130,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-05/the-hang/evidence/stills/t-1000000.png",
+      "sha256": "d84d4707f30e4df0ec60fd3bf9c98283506b8cb8ae496a60ad05c18573329a55",
+      "byteSize": 8130,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    }
+  ],
+  "validationBindings": [
+    "07_VALIDATION/browser-receipts/the-hang.json",
+    "07_VALIDATION/alpha-receipts/the-hang.json",
+    "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "07_VALIDATION/resource-receipts/RESOURCE_LIFECYCLE_SUMMARY.json"
+  ],
+  "claimBoundary": "Evidence proves declared mechanics by proof class. Static images do not prove motion; encoded clips do not restore omitted raw frame ledgers; human verdict remains pending.",
+  "humanVerdict": "pending",
+  "productIntegration": "no"
+}

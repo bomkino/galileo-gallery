@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-hang",
+  "atelier": 5,
+  "sourceArchive": "05_PRINTS_AND_TABLES_PARITY_HANDOFF_2026-08-28(1).zip",
+  "sourceArchiveSha256": "8686e56857c9159d7410513b00adf352db8d59faa441e43c85d21148004695f4",
+  "sourceRoot": "05_PRINTS_AND_TABLES_PARITY_HANDOFF_2026-08-28/WORKING_TREE/scene-ateliers/atelier-05/the-hang",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "5fbbf879c45a14a944831aff39628df1e7f2244007d1f5f2fc9a93715d262592",
+    "rendererOwnsStoryClock": false
+  },
+  "controlCount": 5,
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "catalogueRegistration": "no",
+  "release": "no",
+  "claimBoundary": "Parity candidate packet; no Product integration or human acceptance.",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/the-hang.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  },
+  "currentFiles": {
+    "sceneContractSha256": "2a4a0f86250faf532a473c356e0b1eb1d9056dba371268425696a08c6a1d52d5",
+    "controlContractSha256": "41ad5f4087f193e41f4257403bc37f1aaa531f461d144050a3468cfbd8d6afff",
+    "acceptanceMatrixSha256": "e44e5d2e078a48b4415b7112aa7f50b5cb4513151a43a2730576e8a28f9532fe",
+    "evidenceBindingsSha256": "a5efa817841ceb737c3bc3b9a0c3a337c3bb35d8c6bdb750b15fec9370cfeef0"
+  }
+}

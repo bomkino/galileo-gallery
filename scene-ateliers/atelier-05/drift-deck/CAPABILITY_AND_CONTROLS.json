@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "drift-deck",
+  "sourceContractSha256": "c4c85c0af08bbf1c5ef606fe04920328277bae0d2f0377c67f4cf437b9c939f1",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.drift-deck.quiet-drift-composition-spread",
+      "sceneLocalId": "quiet-drift.composition-spread",
+      "parameter": "compositionSpread",
+      "owner": "Scene",
+      "label": "Composition spread",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 64,
+      "range": {
+        "minimum": 36,
+        "maximum": 92,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 64,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "drift-deck:quiet-drift.composition-spread",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes baseX/baseY distance from canvas centre; does not change ID, source order, harmonic field, or z order.",
+      "acceptanceRow": "control:scene.drift-deck.quiet-drift-composition-spread",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.drift-deck.quiet-drift-overlap-depth",
+      "sceneLocalId": "quiet-drift.overlap-depth",
+      "parameter": "overlapDepth",
+      "owner": "Scene",
+      "label": "Overlap / depth",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 42,
+      "range": {
+        "minimum": 0,
+        "maximum": 80,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 42,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "drift-deck:quiet-drift.overlap-depth",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes card width/height and therefore the stable authored overlap graph; base z order and source pixels remain unchanged.",
+      "acceptanceRow": "control:scene.drift-deck.quiet-drift-overlap-depth",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.drift-deck.quiet-drift-drift-strength",
+      "sceneLocalId": "quiet-drift.drift-strength",
+      "parameter": "driftStrength",
+      "owner": "Scene",
+      "label": "Drift strength",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 34,
+      "range": {
+        "minimum": 0,
+        "maximum": 70,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 34,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "drift-deck:quiet-drift.drift-strength",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Scales x/y/rotation offsets only during the micro-current envelope; seam remains exact.",
+      "acceptanceRow": "control:scene.drift-deck.quiet-drift-drift-strength",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.drift-deck.quiet-drift-focus-lift",
+      "sceneLocalId": "quiet-drift.focus-lift",
+      "parameter": "focusLift",
+      "owner": "Scene",
+      "label": "Focus lift",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 28,
+      "range": {
+        "minimum": 0,
+        "maximum": 60,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 28,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "drift-deck:quiet-drift.focus-lift",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes focused card lift only; base position, baseZ, source opacity/filter/blend, and non-focused cards remain unchanged.",
+      "acceptanceRow": "control:scene.drift-deck.quiet-drift-focus-lift",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "timeline.pace",
+      "sceneLocalId": "quiet-drift.cycle-pace",
+      "parameter": "cyclePace",
+      "owner": "Timeline",
+      "label": "Cycle pace",
+      "valueModel": "number",
+      "unit": "s",
+      "default": 10.5,
+      "range": {
+        "minimum": 6,
+        "maximum": 18,
+        "step": 0.5
+      },
+      "options": null,
+      "resetValue": 10.5,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "drift-deck:quiet-drift.cycle-pace",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes compiled duration and temporal velocity; normalized geometry at the same normalized phase remains equal.",
+      "acceptanceRow": "control:timeline.pace",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

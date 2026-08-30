@@ -1,0 +1,9 @@
+{
+  "atelier": 5,
+  "archive": "05_PRINTS_AND_TABLES_PARITY_HANDOFF_2026-08-28(1).zip",
+  "archiveSha256": "8686e56857c9159d7410513b00adf352db8d59faa441e43c85d21148004695f4",
+  "sourceRoot": "05_PRINTS_AND_TABLES_PARITY_HANDOFF_2026-08-28/WORKING_TREE/scene-ateliers/atelier-05/the-hang",
+  "sourceRootFileCount": 130,
+  "charterSha256": "5185590914ee227545acb0221f508acc233973090a2c786f14cc55ab5883d041",
+  "normalisation": "Original authored files copied. Original control JSON preserved. Canonical parity contracts added."
+}

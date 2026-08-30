@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "image-scatter-gallery",
+  "method": "Parity-only capture calling the unchanged Scene-native evaluator and raster renderer at the source-declared representative time.",
+  "generatedAt": "2026-08-29T10:05:54.711Z",
+  "sourceEvaluator": "prototype/evaluator.mjs",
+  "sourceEvaluatorSha256": "437a683e3baa8f9a7b148bc11a32dbe30045ed229beb6f11f47eb93d6174706a",
+  "sourceRaster": "prototype/raster.mjs",
+  "sourceRasterSha256": "c434742eeeb5f6fd40e64f08763894c3e7ba6b0ff1d4507b3eecb0ab9cf2ffe8",
+  "fixture": "recommended",
+  "normalizedTime": 0.49,
+  "dimensions": [
+    960,
+    540
+  ],
+  "rawAlpha": {
+    "path": "evidence/parity-alpha/raw-alpha.png",
+    "sha256": "785ca6bd919d6491fa4854b6b7f834e1838fb44a3c0ca36870e38664bb556b69",
+    "diagnostics": {
+      "zeroAlpha": 332480,
+      "contaminatedZeroAlpha": 0,
+      "partialAlpha": 0,
+      "opaque": 185920,
+      "pixels": 518400
+    }
+  },
+  "composites": [
+    {
+      "path": "evidence/parity-alpha/over-black.png",
+      "sha256": "51f0377194d60976c1a0070c572a56cc220ae1255211ddbb80b411e4028233b2"
+    },
+    {
+      "path": "evidence/parity-alpha/over-white.png",
+      "sha256": "de0e90c50f8cb59505ce084d087ba42e22a5dc25053bfd506a3459b6085cae90"
+    },
+    {
+      "path": "evidence/parity-alpha/over-red.png",
+      "sha256": "903e05e787937d5df9560297705967f464fadd3cfa13b86381493ccad60cf26f"
+    },
+    {
+      "path": "evidence/parity-alpha/over-blue.png",
+      "sha256": "4bfc5c9e2d9c2b876b5a5fefc962d187aa4269bd75f997c5a8589c2e08183547"
+    },
+    {
+      "path": "evidence/parity-alpha/over-checkerboard.png",
+      "sha256": "7165f8e4807389d5e58c6a12450e4bbb7842c8c6b360d8999647bd82f2115f5c"
+    }
+  ],
+  "sourceArtworkPolicy": "Generated fixtures only; this proves renderer alpha mechanics, not equality against user-imported media.",
+  "humanVerdict": "pending",
+  "productIntegration": "no"
+}

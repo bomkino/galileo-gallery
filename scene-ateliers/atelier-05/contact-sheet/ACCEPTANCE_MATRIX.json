@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "contact-sheet",
+  "rows": [
+    {
+      "id": "control:scene.contact-sheet.contact-sheet-columns",
+      "kind": "control-causality",
+      "controlId": "scene.contact-sheet.contact-sheet-columns",
+      "requirement": "Changing Columns must causally change Recompiles columns/rows/cell bounds while preserving Project source order, failed cells, source treatment, and traversal semantics.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.contact-sheet.contact-sheet-gutter",
+      "kind": "control-causality",
+      "controlId": "scene.contact-sheet.contact-sheet-gutter",
+      "requirement": "Changing Gutter must causally change Changes inter-cell distance and cell dimensions inside fixed grid bounds; source order and focus traversal order are unchanged.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.contact-sheet.contact-sheet-sheet-margin",
+      "kind": "control-causality",
+      "controlId": "scene.contact-sheet.contact-sheet-sheet-margin",
+      "requirement": "Changing Sheet margin must causally change Changes grid bounds and all cell dimensions/positions through one layout recompile; paper remains full-canvas opaque.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.contact-sheet.contact-sheet-traversal",
+      "kind": "control-causality",
+      "controlId": "scene.contact-sheet.contact-sheet-traversal",
+      "requirement": "Changing Focus traversal must causally change Changes registration-mark visit order and travel path only; cell geometry, source order, labels, and source pixels are bit-for-bit structurally equal.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.contact-sheet.contact-sheet-labels",
+      "kind": "control-causality",
+      "controlId": "scene.contact-sheet.contact-sheet-labels",
+      "requirement": "Changing Labels must causally change Changes label-band/source-well allocation and visible label records inside each fixed outer cell; outer grid topology and source treatment remain equal.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "identity",
+      "kind": "programme-invariant",
+      "requirement": "Motion and anti-motion remain recognisable after styling removal.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "source-fidelity",
+      "kind": "programme-invariant",
+      "requirement": "Clean default leaves imported source pixels untouched.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "timeline",
+      "kind": "programme-invariant",
+      "requirement": "Preview, scrub, evidence and export planning consume one semantic model.",
+      "automatedStatus": "pass: renderer-owned story clock prohibited; original evaluator verifier replay passed.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "programme-invariant",
+      "requirement": "Reduced motion preserves narrative meaning.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "lifecycle",
+      "kind": "programme-invariant",
+      "requirement": "Renderer remount and disposal remain bounded.",
+      "automatedStatus": "pass for review-shell mount/remount/disposal; Scene-native GPU/context-loss proof remains as declared in source evidence.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "human-verdict",
+      "kind": "programme-invariant",
+      "requirement": "Human visual, motion, pace, defaults and delight verdict remains pending.",
+      "automatedStatus": "not automatable",
+      "humanStatus": "pending"
+    }
+  ]
+}

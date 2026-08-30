@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "drift-deck",
+  "method": "Parity-only capture calling the unchanged Scene-native evaluator and raster renderer at the source-declared representative time.",
+  "generatedAt": "2026-08-29T10:05:54.494Z",
+  "sourceEvaluator": "prototype/evaluator.mjs",
+  "sourceEvaluatorSha256": "55503cd8b183ac6476057abca678e82af9f9b92cfa6af722449ec49583ec77d2",
+  "sourceRaster": "prototype/raster.mjs",
+  "sourceRasterSha256": "bcd3702dbdaf8a091fa1552d17278fef5ab596dc87a47eb2ac1a7c9e3a834e17",
+  "fixture": "recommended",
+  "normalizedTime": 0.463,
+  "dimensions": [
+    960,
+    540
+  ],
+  "rawAlpha": {
+    "path": "evidence/parity-alpha/raw-alpha.png",
+    "sha256": "4e7e8dc3958444df886efbdb4fe6c8a438dbf1005b8d30e6a91ad7531b53d30b",
+    "diagnostics": {
+      "zeroAlpha": 352208,
+      "contaminatedZeroAlpha": 0,
+      "partialAlpha": 0,
+      "opaque": 166192,
+      "pixels": 518400
+    }
+  },
+  "composites": [
+    {
+      "path": "evidence/parity-alpha/over-black.png",
+      "sha256": "8b39ec2237f596a4fbaf350db8c471f8cc3cca71a317876b0ecb5eb4590d453f"
+    },
+    {
+      "path": "evidence/parity-alpha/over-white.png",
+      "sha256": "a209a2d75c3ada386bd96396d835d04ffc8ce4ddaf1420aed6b108371517c87f"
+    },
+    {
+      "path": "evidence/parity-alpha/over-red.png",
+      "sha256": "8525cb273ce977f91bc4bd9cd761edcda9b0519533d814df11c4607f7bc947e0"
+    },
+    {
+      "path": "evidence/parity-alpha/over-blue.png",
+      "sha256": "5e23061617097fbe39e071588e4e73f7a5e22b4aa63b2d00741181ac0cb17b25"
+    },
+    {
+      "path": "evidence/parity-alpha/over-checkerboard.png",
+      "sha256": "5c5fa0e42e6eab9538d5aa4bb2e93239c3ce6591c989ea22cd91924d34432cf1"
+    }
+  ],
+  "sourceArtworkPolicy": "Generated fixtures only; this proves renderer alpha mechanics, not equality against user-imported media.",
+  "humanVerdict": "pending",
+  "productIntegration": "no"
+}

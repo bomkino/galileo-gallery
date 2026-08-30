@@ -1,0 +1,159 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "deck-contact-strip",
+  "sourceContractSha256": "50ecefe44c75106f83d190d8cd447825611cff1b8897465b5ec32c7f8956a49d",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.deck-contact-strip.focus-strip-frame-size",
+      "sceneLocalId": "focus-strip.frame-size",
+      "parameter": "frameSize",
+      "owner": "Scene",
+      "label": "Frame size",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 64,
+      "range": {
+        "minimum": 35,
+        "maximum": 90,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 64,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "deck-contact-strip:focus-strip.frame-size",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes outer frame size, inner source box, track safety minimum, and visible-card count while preserving IDs/order/station semantics.",
+      "acceptanceRow": "control:scene.deck-contact-strip.focus-strip-frame-size",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.deck-contact-strip.focus-strip-gap",
+      "sceneLocalId": "focus-strip.gap",
+      "parameter": "gap",
+      "owner": "Scene",
+      "label": "Frame gap",
+      "valueModel": "number",
+      "unit": "design px at 1080 cross-axis",
+      "default": 28,
+      "range": {
+        "minimum": 8,
+        "maximum": 80,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 28,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "deck-contact-strip:focus-strip.gap",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes natural track step and adjacent spacing; it never changes source order, station, or source pixels.",
+      "acceptanceRow": "control:scene.deck-contact-strip.focus-strip-gap",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.deck-contact-strip.focus-strip-station-position",
+      "sceneLocalId": "focus-strip.station-position",
+      "parameter": "stationPosition",
+      "owner": "Scene",
+      "label": "Station position",
+      "valueModel": "number",
+      "unit": "% active axis",
+      "default": 50,
+      "range": {
+        "minimum": 25,
+        "maximum": 75,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 50,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "deck-contact-strip:focus-strip.station-position",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Moves station and recompiles offstage-safe track length; all sources keep order and equal frame geometry.",
+      "acceptanceRow": "control:scene.deck-contact-strip.focus-strip-station-position",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.deck-contact-strip.focus-strip-focus-lift",
+      "sceneLocalId": "focus-strip.focus-lift",
+      "parameter": "focusLift",
+      "owner": "Scene",
+      "label": "Focus lift",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 24,
+      "range": {
+        "minimum": 0,
+        "maximum": 50,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 24,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "deck-contact-strip:focus-strip.focus-lift",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes perpendicular lift of station envelope only; source opacity/filter and non-focused track coordinates remain unchanged.",
+      "acceptanceRow": "control:scene.deck-contact-strip.focus-strip-focus-lift",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.deck-contact-strip.focus-strip-labels",
+      "sceneLocalId": "focus-strip.labels",
+      "parameter": "labels",
+      "owner": "Scene",
+      "label": "Labels",
+      "valueModel": "enum",
+      "unit": "unitless",
+      "default": "both",
+      "range": null,
+      "options": [
+        "both",
+        "indices",
+        "captions",
+        "none"
+      ],
+      "resetValue": "both",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "deck-contact-strip:focus-strip.labels",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes label records/render visibility only; card geometry, timeline, source order, and source treatment are identical.",
+      "acceptanceRow": "control:scene.deck-contact-strip.focus-strip-labels",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

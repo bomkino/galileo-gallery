@@ -1,0 +1,277 @@
+{
+  "sceneId": "image-scatter-gallery",
+  "generatedAt": "1970-01-01T00:00:00.000Z",
+  "captureMethod": "Dependency-free Node fixed-step rasteriser calling the same pure evaluator used by the browser prototype.",
+  "stillCount": 18,
+  "canonicalCanvases": [
+    {
+      "name": "1920x1080",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "name": "1080x1920",
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "1080x1080",
+      "width": 1080,
+      "height": 1080
+    },
+    {
+      "name": "1080x1350",
+      "width": 1080,
+      "height": 1350
+    }
+  ],
+  "fixtureNames": [
+    "one",
+    "two",
+    "recommended",
+    "bounded-many",
+    "mixed-failed"
+  ],
+  "evidenceFixtures": [
+    "one",
+    "two",
+    "recommended",
+    "bounded-many",
+    "mixed-failed"
+  ],
+  "realSpeedSequence": {
+    "frames": 48,
+    "fps": 24,
+    "durationSeconds": 2,
+    "resolution": [
+      480,
+      270
+    ],
+    "claim": "verified fixed-step frame sequence; not a recorded browser video"
+  },
+  "silhouetteSequence": {
+    "frames": 24,
+    "fps": 12,
+    "durationSeconds": 2,
+    "resolution": [
+      480,
+      270
+    ],
+    "claim": "silhouette-only fixed-step playback evidence"
+  },
+  "alpha": {
+    "supported": true,
+    "diagnostics": {
+      "zeroAlpha": 332480,
+      "contaminatedZeroAlpha": 0,
+      "partialAlpha": 0,
+      "opaque": 185920,
+      "pixels": 518400
+    },
+    "composites": [
+      "black",
+      "white",
+      "red",
+      "blue",
+      "checkerboard"
+    ]
+  },
+  "seam": {
+    "start": {
+      "phase": 0,
+      "phaseName": "assigned-arrivals",
+      "segmentId": "automatic-field",
+      "activeCohort": 0,
+      "cohortCount": 1,
+      "selectedIndex": 8,
+      "totalIdentityCount": 9,
+      "visibleCount": 0,
+      "identityOrder": [
+        "lively-print-01",
+        "lively-print-02",
+        "lively-print-03",
+        "lively-print-04",
+        "lively-print-05",
+        "lively-print-06",
+        "lively-print-07",
+        "lively-print-08",
+        "lively-print-09"
+      ],
+      "visibleIdentityOrder": [],
+      "routeOwnership": [
+        {
+          "id": "lively-print-01",
+          "routeId": "cohort-0-slot-0-left",
+          "edge": "left"
+        },
+        {
+          "id": "lively-print-02",
+          "routeId": "cohort-0-slot-1-top",
+          "edge": "top"
+        },
+        {
+          "id": "lively-print-03",
+          "routeId": "cohort-0-slot-2-right",
+          "edge": "right"
+        },
+        {
+          "id": "lively-print-04",
+          "routeId": "cohort-0-slot-3-bottom",
+          "edge": "bottom"
+        }
+      ],
+      "negativeSpace": {
+        "x": 1324.8,
+        "y": 529.2,
+        "rx": 345.6,
+        "ry": 237.6
+      },
+      "maxLiftPx": 0,
+      "firstVisible": [],
+      "sourceTreatment": {
+        "artworkOpacity": 1,
+        "artworkFilter": "none",
+        "blendMode": "normal"
+      }
+    },
+    "end": {
+      "phase": 0,
+      "phaseName": "assigned-arrivals",
+      "segmentId": "automatic-field",
+      "activeCohort": 0,
+      "cohortCount": 1,
+      "selectedIndex": 8,
+      "totalIdentityCount": 9,
+      "visibleCount": 0,
+      "identityOrder": [
+        "lively-print-01",
+        "lively-print-02",
+        "lively-print-03",
+        "lively-print-04",
+        "lively-print-05",
+        "lively-print-06",
+        "lively-print-07",
+        "lively-print-08",
+        "lively-print-09"
+      ],
+      "visibleIdentityOrder": [],
+      "routeOwnership": [
+        {
+          "id": "lively-print-01",
+          "routeId": "cohort-0-slot-0-left",
+          "edge": "left"
+        },
+        {
+          "id": "lively-print-02",
+          "routeId": "cohort-0-slot-1-top",
+          "edge": "top"
+        },
+        {
+          "id": "lively-print-03",
+          "routeId": "cohort-0-slot-2-right",
+          "edge": "right"
+        },
+        {
+          "id": "lively-print-04",
+          "routeId": "cohort-0-slot-3-bottom",
+          "edge": "bottom"
+        }
+      ],
+      "negativeSpace": {
+        "x": 1324.8,
+        "y": 529.2,
+        "rx": 345.6,
+        "ry": 237.6
+      },
+      "maxLiftPx": 0,
+      "firstVisible": [],
+      "sourceTreatment": {
+        "artworkOpacity": 1,
+        "artworkFilter": "none",
+        "blendMode": "normal"
+      }
+    },
+    "before": {
+      "phase": 0.999999,
+      "phaseName": "owned-return",
+      "segmentId": "automatic-field",
+      "activeCohort": 0,
+      "cohortCount": 1,
+      "selectedIndex": 8,
+      "totalIdentityCount": 9,
+      "visibleCount": 0,
+      "identityOrder": [
+        "lively-print-01",
+        "lively-print-02",
+        "lively-print-03",
+        "lively-print-04",
+        "lively-print-05",
+        "lively-print-06",
+        "lively-print-07",
+        "lively-print-08",
+        "lively-print-09"
+      ],
+      "visibleIdentityOrder": [],
+      "routeOwnership": [
+        {
+          "id": "lively-print-01",
+          "routeId": "cohort-0-slot-0-left",
+          "edge": "left"
+        },
+        {
+          "id": "lively-print-02",
+          "routeId": "cohort-0-slot-1-top",
+          "edge": "top"
+        },
+        {
+          "id": "lively-print-03",
+          "routeId": "cohort-0-slot-2-right",
+          "edge": "right"
+        },
+        {
+          "id": "lively-print-04",
+          "routeId": "cohort-0-slot-3-bottom",
+          "edge": "bottom"
+        }
+      ],
+      "negativeSpace": {
+        "x": 1324.8,
+        "y": 529.2,
+        "rx": 345.6,
+        "ry": 237.6
+      },
+      "maxLiftPx": 0,
+      "firstVisible": [],
+      "sourceTreatment": {
+        "artworkOpacity": 1,
+        "artworkFilter": "none",
+        "blendMode": "normal"
+      }
+    },
+    "delta": {
+      "startEndMaxPositionPx": 0,
+      "startEndMaxRotationRad": 0,
+      "visibleMismatch": 0,
+      "beforeEndVisibleCount": 0
+    }
+  },
+  "sourceTreatment": {
+    "artworkOpacity": 1,
+    "artworkFilter": "none",
+    "blendMode": "normal",
+    "generatedFixturesOnly": true
+  },
+  "resources": {
+    "maximumAcceptedSources": 24,
+    "activeCohortMaximum": 12,
+    "evaluatedCardsPerFrame": "all ordered identities retained in state; at most 12 visible/renderable",
+    "cohortPolicy": "deterministic contiguous source-order cohorts; every identity owns one route and appears during the compiled phrase",
+    "evaluatorAllocationPolicy": "bounded fresh state only; no random packing, intervals, retained history, media elements, or GPU resources",
+    "remountExpectation": "route ownership recompiles identically from source order and controls"
+  },
+  "limitations": [
+    "No browser video recording was available in this isolated runner.",
+    "No human visual or motion verdict is inferred from generated captures.",
+    "Prototype evidence does not prove Product integration or export packaging."
+  ]
+}

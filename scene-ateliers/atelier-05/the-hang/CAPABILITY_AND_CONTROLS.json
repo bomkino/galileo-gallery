@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-hang",
+  "sourceContractSha256": "92e3735a3a046e086802c9a5c8682a2daf138d89e98f6bad5173a6941308cd71",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.the-hang.the-hang-hang-spread",
+      "sceneLocalId": "the-hang.hang-spread",
+      "parameter": "hangSpread",
+      "owner": "Scene",
+      "label": "Hang spread",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 74,
+      "range": {
+        "minimum": 45,
+        "maximum": 95,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 74,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-hang:the-hang.hang-spread",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes pivotX, local anchor spacing, derived frame-width cap, and swing headroom; source order and rail assignment remain fixed.",
+      "acceptanceRow": "control:scene.the-hang.the-hang-hang-spread",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-hang.the-hang-length-variance",
+      "sceneLocalId": "the-hang.length-variance",
+      "parameter": "lengthVariance",
+      "owner": "Scene",
+      "label": "Length variance",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 36,
+      "range": {
+        "minimum": 0,
+        "maximum": 70,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 36,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-hang:the-hang.length-variance",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes fullLength, periodScale, settled y, and arc envelope; pivot and source identity do not change.",
+      "acceptanceRow": "control:scene.the-hang.the-hang-length-variance",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-hang.the-hang-impulse-strength",
+      "sceneLocalId": "the-hang.impulse-strength",
+      "parameter": "impulseStrength",
+      "owner": "Scene",
+      "label": "Impulse strength",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 32,
+      "range": {
+        "minimum": 0,
+        "maximum": 65,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 32,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-hang:the-hang.impulse-strength",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes damped angle during impulse/settle only; pivots, lengths, frame size, source pixels, and seam remain fixed.",
+      "acceptanceRow": "control:scene.the-hang.the-hang-impulse-strength",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-hang.the-hang-damping",
+      "sceneLocalId": "the-hang.damping",
+      "parameter": "damping",
+      "owner": "Scene",
+      "label": "Damping",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 68,
+      "range": {
+        "minimum": 35,
+        "maximum": 92,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 68,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-hang:the-hang.damping",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes angle envelope decay; period, pivot, length, route, and source pixels remain unchanged.",
+      "acceptanceRow": "control:scene.the-hang.the-hang-damping",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-hang.the-hang-focus-lift",
+      "sceneLocalId": "the-hang.focus-lift",
+      "parameter": "focusLift",
+      "owner": "Scene",
+      "label": "Focus lift",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 20,
+      "range": {
+        "minimum": 0,
+        "maximum": 50,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 20,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-hang:the-hang.focus-lift",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes selected currentLength and angle restraint only; fullLength, pivot, source pixels, and non-selected frames remain equal.",
+      "acceptanceRow": "control:scene.the-hang.the-hang-focus-lift",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

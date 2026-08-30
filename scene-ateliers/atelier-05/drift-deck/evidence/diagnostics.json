@@ -1,0 +1,249 @@
+{
+  "sceneId": "drift-deck",
+  "generatedAt": "1970-01-01T00:00:00.000Z",
+  "captureMethod": "Dependency-free Node fixed-step rasteriser calling the same pure evaluator used by the browser prototype.",
+  "stillCount": 18,
+  "canonicalCanvases": [
+    {
+      "name": "1920x1080",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "name": "1080x1920",
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "1080x1080",
+      "width": 1080,
+      "height": 1080
+    },
+    {
+      "name": "1080x1350",
+      "width": 1080,
+      "height": 1350
+    }
+  ],
+  "fixtureNames": [
+    "one",
+    "two",
+    "recommended",
+    "bounded-many",
+    "mixed-failed"
+  ],
+  "evidenceFixtures": [
+    "one",
+    "two",
+    "recommended",
+    "bounded-many",
+    "mixed-failed"
+  ],
+  "realSpeedSequence": {
+    "frames": 48,
+    "fps": 24,
+    "durationSeconds": 2,
+    "resolution": [
+      480,
+      270
+    ],
+    "claim": "verified fixed-step frame sequence; not a recorded browser video"
+  },
+  "silhouetteSequence": {
+    "frames": 24,
+    "fps": 12,
+    "durationSeconds": 2,
+    "resolution": [
+      480,
+      270
+    ],
+    "claim": "silhouette-only fixed-step playback evidence"
+  },
+  "alpha": {
+    "supported": true,
+    "diagnostics": {
+      "zeroAlpha": 352208,
+      "contaminatedZeroAlpha": 0,
+      "partialAlpha": 0,
+      "opaque": 166192,
+      "pixels": 518400
+    },
+    "composites": [
+      "black",
+      "white",
+      "red",
+      "blue",
+      "checkerboard"
+    ]
+  },
+  "seam": {
+    "start": {
+      "phase": 0,
+      "phaseName": "entry",
+      "segmentId": "automatic-phrase",
+      "selectedIndex": 0,
+      "visibleCount": 5,
+      "identityOrder": [
+        "quiet-print-01",
+        "quiet-print-02",
+        "quiet-print-03",
+        "quiet-print-04",
+        "quiet-print-05"
+      ],
+      "overlapSignature": "quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-04,quiet-print-03|quiet-print-05,quiet-print-04|quiet-print-05",
+      "baselineOverlapSignature": "quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-04,quiet-print-03|quiet-print-05,quiet-print-04|quiet-print-05",
+      "maxLiftPx": 0,
+      "firstCards": [
+        {
+          "id": "quiet-print-01",
+          "x": 571.085,
+          "y": 398.477,
+          "rotation": -0.055,
+          "z": 0,
+          "focusPlane": false
+        },
+        {
+          "id": "quiet-print-02",
+          "x": 979.446,
+          "y": 354.931,
+          "rotation": 0.031,
+          "z": 1,
+          "focusPlane": false
+        },
+        {
+          "id": "quiet-print-03",
+          "x": 1348.915,
+          "y": 463.795,
+          "rotation": -0.021,
+          "z": 2,
+          "focusPlane": false
+        }
+      ],
+      "sourceTreatment": {
+        "artworkOpacity": 1,
+        "artworkFilter": "none",
+        "blendMode": "normal"
+      }
+    },
+    "end": {
+      "phase": 0,
+      "phaseName": "entry",
+      "segmentId": "automatic-phrase",
+      "selectedIndex": 0,
+      "visibleCount": 5,
+      "identityOrder": [
+        "quiet-print-01",
+        "quiet-print-02",
+        "quiet-print-03",
+        "quiet-print-04",
+        "quiet-print-05"
+      ],
+      "overlapSignature": "quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-04,quiet-print-03|quiet-print-05,quiet-print-04|quiet-print-05",
+      "baselineOverlapSignature": "quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-04,quiet-print-03|quiet-print-05,quiet-print-04|quiet-print-05",
+      "maxLiftPx": 0,
+      "firstCards": [
+        {
+          "id": "quiet-print-01",
+          "x": 571.085,
+          "y": 398.477,
+          "rotation": -0.055,
+          "z": 0,
+          "focusPlane": false
+        },
+        {
+          "id": "quiet-print-02",
+          "x": 979.446,
+          "y": 354.931,
+          "rotation": 0.031,
+          "z": 1,
+          "focusPlane": false
+        },
+        {
+          "id": "quiet-print-03",
+          "x": 1348.915,
+          "y": 463.795,
+          "rotation": -0.021,
+          "z": 2,
+          "focusPlane": false
+        }
+      ],
+      "sourceTreatment": {
+        "artworkOpacity": 1,
+        "artworkFilter": "none",
+        "blendMode": "normal"
+      }
+    },
+    "before": {
+      "phase": 0.999999,
+      "phaseName": "return",
+      "segmentId": "automatic-phrase",
+      "selectedIndex": 4,
+      "visibleCount": 5,
+      "identityOrder": [
+        "quiet-print-01",
+        "quiet-print-02",
+        "quiet-print-03",
+        "quiet-print-04",
+        "quiet-print-05"
+      ],
+      "overlapSignature": "quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-04,quiet-print-03|quiet-print-05,quiet-print-04|quiet-print-05",
+      "baselineOverlapSignature": "quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-04,quiet-print-03|quiet-print-05,quiet-print-04|quiet-print-05",
+      "maxLiftPx": 0,
+      "firstCards": [
+        {
+          "id": "quiet-print-01",
+          "x": 571.085,
+          "y": 398.477,
+          "rotation": -0.055,
+          "z": 0,
+          "focusPlane": false
+        },
+        {
+          "id": "quiet-print-02",
+          "x": 979.446,
+          "y": 354.931,
+          "rotation": 0.031,
+          "z": 1,
+          "focusPlane": false
+        },
+        {
+          "id": "quiet-print-03",
+          "x": 1348.915,
+          "y": 463.795,
+          "rotation": -0.021,
+          "z": 2,
+          "focusPlane": false
+        }
+      ],
+      "sourceTreatment": {
+        "artworkOpacity": 1,
+        "artworkFilter": "none",
+        "blendMode": "normal"
+      }
+    },
+    "delta": {
+      "startEndMaxPositionPx": 0,
+      "startEndMaxRotationRad": 0,
+      "startEndMaxLiftPx": 0,
+      "beforeEndMaxPositionPx": 0
+    }
+  },
+  "sourceTreatment": {
+    "artworkOpacity": 1,
+    "artworkFilter": "none",
+    "blendMode": "normal",
+    "generatedFixturesOnly": true
+  },
+  "resources": {
+    "maximumAcceptedSources": 12,
+    "evaluatedCardsPerFrame": "exact source count, bounded at 12",
+    "mountedCardPolicy": "one card object per accepted source; no duplicate loop copies",
+    "evaluatorAllocationPolicy": "fresh bounded state only; no timers, listeners, media elements, retained history, or GPU resources",
+    "remountExpectation": "stateless evaluator; browser shell owns one animation-frame callback and removes no external resources"
+  },
+  "limitations": [
+    "No browser video recording was available in this isolated runner.",
+    "No human visual or motion verdict is inferred from generated captures.",
+    "Prototype evidence does not prove Product integration or export packaging."
+  ]
+}

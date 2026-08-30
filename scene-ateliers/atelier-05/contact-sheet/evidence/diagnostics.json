@@ -1,0 +1,436 @@
+{
+  "sceneId": "contact-sheet",
+  "generatedAt": "1970-01-01T00:00:00.000Z",
+  "captureMethod": "Dependency-free Node fixed-step rasteriser calling the same pure evaluator used by the browser prototype.",
+  "stillCount": 40,
+  "canonicalCanvases": [
+    {
+      "name": "1920x1080",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "name": "1080x1920",
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "1080x1080",
+      "width": 1080,
+      "height": 1080
+    },
+    {
+      "name": "1080x1350",
+      "width": 1080,
+      "height": 1350
+    }
+  ],
+  "fixtureNames": [
+    "one",
+    "two",
+    "recommended",
+    "bounded-many",
+    "mixed-failed"
+  ],
+  "evidenceFixtures": [
+    "one",
+    "two",
+    "recommended",
+    "bounded-many",
+    "mixed-failed"
+  ],
+  "realSpeedSequence": {
+    "frames": 48,
+    "fps": 24,
+    "durationSeconds": 2,
+    "resolution": [
+      480,
+      270
+    ],
+    "claim": "verified fixed-step frame sequence; not a recorded browser video"
+  },
+  "silhouetteSequence": {
+    "frames": 24,
+    "fps": 12,
+    "durationSeconds": 2,
+    "resolution": [
+      480,
+      270
+    ],
+    "claim": "silhouette-only fixed-step playback evidence"
+  },
+  "alpha": {
+    "supported": false,
+    "diagnostics": {
+      "zeroAlpha": 0,
+      "contaminatedZeroAlpha": 0,
+      "partialAlpha": 0,
+      "opaque": 518400,
+      "pixels": 518400
+    },
+    "composites": []
+  },
+  "seam": {
+    "start": {
+      "phase": 0,
+      "phaseName": "cell-inspection",
+      "segmentId": "inspect-0",
+      "segmentKind": "hold",
+      "pace": "regular",
+      "selectedIndex": 0,
+      "layout": {
+        "columns": 5,
+        "rows": 3,
+        "gutterPx": 30,
+        "sheetMarginPx": 86.4,
+        "traversal": "row-major"
+      },
+      "gridBounds": {
+        "x": 86.4,
+        "y": 86.4,
+        "width": 1747.2,
+        "height": 907.2
+      },
+      "totalIdentityCount": 12,
+      "visibleCount": 12,
+      "identityOrder": [
+        "sheet-frame-01",
+        "sheet-frame-02",
+        "sheet-frame-03",
+        "sheet-frame-04",
+        "sheet-frame-05",
+        "sheet-frame-06",
+        "sheet-frame-07",
+        "sheet-frame-08",
+        "sheet-frame-09",
+        "sheet-frame-10",
+        "sheet-frame-11",
+        "sheet-frame-12"
+      ],
+      "traversalOrder": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "focus": {
+        "kind": "cell",
+        "sourceIndex": 0,
+        "x": 249.12,
+        "y": 227.6,
+        "width": 345.208,
+        "height": 302.168
+      },
+      "firstCells": [
+        {
+          "id": "sheet-frame-01",
+          "sourceIndex": 0,
+          "row": 0,
+          "column": 0,
+          "x": 249.12,
+          "y": 227.6,
+          "width": 325.44,
+          "height": 282.4,
+          "failed": false
+        },
+        {
+          "id": "sheet-frame-02",
+          "sourceIndex": 1,
+          "row": 0,
+          "column": 1,
+          "x": 604.56,
+          "y": 227.6,
+          "width": 325.44,
+          "height": 282.4,
+          "failed": false
+        },
+        {
+          "id": "sheet-frame-03",
+          "sourceIndex": 2,
+          "row": 0,
+          "column": 2,
+          "x": 960,
+          "y": 227.6,
+          "width": 325.44,
+          "height": 282.4,
+          "failed": false
+        },
+        {
+          "id": "sheet-frame-04",
+          "sourceIndex": 3,
+          "row": 0,
+          "column": 3,
+          "x": 1315.44,
+          "y": 227.6,
+          "width": 325.44,
+          "height": 282.4,
+          "failed": false
+        }
+      ],
+      "labels": "both",
+      "opaqueSurface": true,
+      "sourceTreatment": {
+        "artworkOpacity": 1,
+        "artworkFilter": "none",
+        "blendMode": "normal"
+      }
+    },
+    "end": {
+      "phase": 0,
+      "phaseName": "cell-inspection",
+      "segmentId": "inspect-0",
+      "segmentKind": "hold",
+      "pace": "regular",
+      "selectedIndex": 0,
+      "layout": {
+        "columns": 5,
+        "rows": 3,
+        "gutterPx": 30,
+        "sheetMarginPx": 86.4,
+        "traversal": "row-major"
+      },
+      "gridBounds": {
+        "x": 86.4,
+        "y": 86.4,
+        "width": 1747.2,
+        "height": 907.2
+      },
+      "totalIdentityCount": 12,
+      "visibleCount": 12,
+      "identityOrder": [
+        "sheet-frame-01",
+        "sheet-frame-02",
+        "sheet-frame-03",
+        "sheet-frame-04",
+        "sheet-frame-05",
+        "sheet-frame-06",
+        "sheet-frame-07",
+        "sheet-frame-08",
+        "sheet-frame-09",
+        "sheet-frame-10",
+        "sheet-frame-11",
+        "sheet-frame-12"
+      ],
+      "traversalOrder": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "focus": {
+        "kind": "cell",
+        "sourceIndex": 0,
+        "x": 249.12,
+        "y": 227.6,
+        "width": 345.208,
+        "height": 302.168
+      },
+      "firstCells": [
+        {
+          "id": "sheet-frame-01",
+          "sourceIndex": 0,
+          "row": 0,
+          "column": 0,
+          "x": 249.12,
+          "y": 227.6,
+          "width": 325.44,
+          "height": 282.4,
+          "failed": false
+        },
+        {
+          "id": "sheet-frame-02",
+          "sourceIndex": 1,
+          "row": 0,
+          "column": 1,
+          "x": 604.56,
+          "y": 227.6,
+          "width": 325.44,
+          "height": 282.4,
+          "failed": false
+        },
+        {
+          "id": "sheet-frame-03",
+          "sourceIndex": 2,
+          "row": 0,
+          "column": 2,
+          "x": 960,
+          "y": 227.6,
+          "width": 325.44,
+          "height": 282.4,
+          "failed": false
+        },
+        {
+          "id": "sheet-frame-04",
+          "sourceIndex": 3,
+          "row": 0,
+          "column": 3,
+          "x": 1315.44,
+          "y": 227.6,
+          "width": 325.44,
+          "height": 282.4,
+          "failed": false
+        }
+      ],
+      "labels": "both",
+      "opaqueSurface": true,
+      "sourceTreatment": {
+        "artworkOpacity": 1,
+        "artworkFilter": "none",
+        "blendMode": "normal"
+      }
+    },
+    "before": {
+      "phase": 0.999999,
+      "phaseName": "return-to-first",
+      "segmentId": "return-to-first",
+      "segmentKind": "return",
+      "pace": "regular",
+      "selectedIndex": 0,
+      "layout": {
+        "columns": 5,
+        "rows": 3,
+        "gutterPx": 30,
+        "sheetMarginPx": 86.4,
+        "traversal": "row-major"
+      },
+      "gridBounds": {
+        "x": 86.4,
+        "y": 86.4,
+        "width": 1747.2,
+        "height": 907.2
+      },
+      "totalIdentityCount": 12,
+      "visibleCount": 12,
+      "identityOrder": [
+        "sheet-frame-01",
+        "sheet-frame-02",
+        "sheet-frame-03",
+        "sheet-frame-04",
+        "sheet-frame-05",
+        "sheet-frame-06",
+        "sheet-frame-07",
+        "sheet-frame-08",
+        "sheet-frame-09",
+        "sheet-frame-10",
+        "sheet-frame-11",
+        "sheet-frame-12"
+      ],
+      "traversalOrder": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "focus": {
+        "kind": "return-to-first",
+        "sourceIndex": 0,
+        "x": 249.12,
+        "y": 227.6,
+        "width": 345.208,
+        "height": 302.168
+      },
+      "firstCells": [
+        {
+          "id": "sheet-frame-01",
+          "sourceIndex": 0,
+          "row": 0,
+          "column": 0,
+          "x": 249.12,
+          "y": 227.6,
+          "width": 325.44,
+          "height": 282.4,
+          "failed": false
+        },
+        {
+          "id": "sheet-frame-02",
+          "sourceIndex": 1,
+          "row": 0,
+          "column": 1,
+          "x": 604.56,
+          "y": 227.6,
+          "width": 325.44,
+          "height": 282.4,
+          "failed": false
+        },
+        {
+          "id": "sheet-frame-03",
+          "sourceIndex": 2,
+          "row": 0,
+          "column": 2,
+          "x": 960,
+          "y": 227.6,
+          "width": 325.44,
+          "height": 282.4,
+          "failed": false
+        },
+        {
+          "id": "sheet-frame-04",
+          "sourceIndex": 3,
+          "row": 0,
+          "column": 3,
+          "x": 1315.44,
+          "y": 227.6,
+          "width": 325.44,
+          "height": 282.4,
+          "failed": false
+        }
+      ],
+      "labels": "both",
+      "opaqueSurface": true,
+      "sourceTreatment": {
+        "artworkOpacity": 1,
+        "artworkFilter": "none",
+        "blendMode": "normal"
+      }
+    },
+    "delta": {
+      "startEndMaxCellPositionPx": 0,
+      "startEndMaxCellSizePx": 0,
+      "focusPositionDeltaPx": 0,
+      "focusSizeDeltaPx": 0,
+      "beforeEndFocusKind": "return-to-first"
+    }
+  },
+  "sourceTreatment": {
+    "artworkOpacity": 1,
+    "artworkFilter": "none",
+    "blendMode": "normal",
+    "generatedFixturesOnly": true
+  },
+  "resources": {
+    "maximumAcceptedSources": 24,
+    "evaluatedStatesPerFrame": "all ordered identities; whole-set reading requires all accepted cells",
+    "visibleMountPolicy": "all accepted cells remain visible and mounted; hard maximum 24 prevents unbounded whole-set work",
+    "paginationPolicy": "none in this candidate; more than 24 is rejected rather than paginated or silently dropped",
+    "evaluatorAllocationPolicy": "bounded fresh state; no timers, masonry observer, hover theatre, lightbox, random tilt, media elements, or retained history"
+  },
+  "limitations": [
+    "No browser video recording was available in this isolated runner.",
+    "No human visual or motion verdict is inferred from generated captures.",
+    "Prototype evidence does not prove Product integration or export packaging."
+  ]
+}

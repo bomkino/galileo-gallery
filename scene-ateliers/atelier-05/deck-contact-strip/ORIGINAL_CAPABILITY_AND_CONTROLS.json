@@ -1,0 +1,116 @@
+{
+  "schema": "galileo-atelier-capability-and-controls-v1",
+  "schemaStatus": "atelier-local-non-runtime",
+  "sceneId": "deck-contact-strip",
+  "candidateVersion": 1,
+  "verdict": "pending",
+  "capability": {
+    "minimumSources": 1,
+    "recommendedSources": 8,
+    "ordinaryRange": [
+      6,
+      12
+    ],
+    "maximumSources": 24,
+    "activeRenderPolicy": "stage-intersection-plus-one-offstage-margin",
+    "sourceOverflowPolicy": "reject-with-capability-copy",
+    "mixedRatios": true,
+    "failedSlotsPreserved": true,
+    "sourceVideoStoryTime": true,
+    "automaticTimeline": true,
+    "fixedDurationTimeline": true,
+    "directedTimeline": true,
+    "reversePolicy": "exact-story-time-retrace",
+    "reducedMotion": true,
+    "transparentOutput": true,
+    "audioOwnedByScene": false,
+    "canvasRecomposition": {
+      "landscapeSquareFourFive": "horizontal-strip",
+      "nineSixteen": "vertical-inspection-column"
+    },
+    "sourceTreatment": {
+      "opacity": 1,
+      "filter": "none",
+      "blendMode": "normal"
+    }
+  },
+  "controls": [
+    {
+      "id": "focus-strip.frame-size",
+      "parameter": "frameSize",
+      "label": "Frame size",
+      "type": "range",
+      "default": 64,
+      "minimum": 35,
+      "maximum": 90,
+      "step": 1,
+      "unit": "%",
+      "resetValue": 64,
+      "persistenceMeaning": "Cross-axis percentage used to compile equal documentary-frame dimensions.",
+      "evaluatorConsequence": "Changes outer frame size, inner source box, track safety minimum, and visible-card count while preserving IDs/order/station semantics.",
+      "causalTest": "At t=0.44, 35 and 90 must differ in card dimensions and visible count; identity order and focused source must match."
+    },
+    {
+      "id": "focus-strip.gap",
+      "parameter": "gap",
+      "label": "Frame gap",
+      "type": "range",
+      "default": 28,
+      "minimum": 8,
+      "maximum": 80,
+      "step": 1,
+      "unit": "design px at 1080 cross-axis",
+      "resetValue": 28,
+      "persistenceMeaning": "Design-pixel separation between ordered documentary frames.",
+      "evaluatorConsequence": "Changes natural track step and adjacent spacing; it never changes source order, station, or source pixels.",
+      "causalTest": "At a hold, 8 and 80 must change adjacent station distances while selected source and card sizes remain equal."
+    },
+    {
+      "id": "focus-strip.station-position",
+      "parameter": "stationPosition",
+      "label": "Station position",
+      "type": "range",
+      "default": 50,
+      "minimum": 25,
+      "maximum": 75,
+      "step": 1,
+      "unit": "% active axis",
+      "resetValue": 50,
+      "persistenceMeaning": "Fixed inspection-station coordinate along the horizontal or vertical active axis.",
+      "evaluatorConsequence": "Moves station and recompiles offstage-safe track length; all sources keep order and equal frame geometry.",
+      "causalTest": "At a hold, 25 and 75 must move station and registered card by the declared axis amount; cross-axis and ID must match."
+    },
+    {
+      "id": "focus-strip.focus-lift",
+      "parameter": "focusLift",
+      "label": "Focus lift",
+      "type": "range",
+      "default": 24,
+      "minimum": 0,
+      "maximum": 50,
+      "step": 1,
+      "unit": "%",
+      "resetValue": 24,
+      "persistenceMeaning": "Maximum source-safe physical separation of the card registered at station.",
+      "evaluatorConsequence": "Changes perpendicular lift of station envelope only; source opacity/filter and non-focused track coordinates remain unchanged.",
+      "causalTest": "At a station hold, 50 must produce greater lift than 0 while source treatment and all along-axis coordinates match."
+    },
+    {
+      "id": "focus-strip.labels",
+      "parameter": "labels",
+      "label": "Labels",
+      "type": "choice",
+      "default": "both",
+      "options": [
+        "both",
+        "indices",
+        "captions",
+        "none"
+      ],
+      "resetValue": "both",
+      "persistenceMeaning": "Visibility of stable editorial index and caption apparatus outside artwork.",
+      "evaluatorConsequence": "Changes label records/render visibility only; card geometry, timeline, source order, and source treatment are identical.",
+      "causalTest": "All four options must change only declared label visibility and preserve the complete numeric card state."
+    }
+  ]
+}

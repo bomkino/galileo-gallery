@@ -1,0 +1,159 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "image-scatter-gallery",
+  "sourceContractSha256": "08577914bdaf2b9864201029adabcf9203dd5fa38c5c42797b304d26a1f330c0",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.image-scatter-gallery.lively-prints-field-spread",
+      "sceneLocalId": "lively-prints.field-spread",
+      "parameter": "fieldSpread",
+      "owner": "Scene",
+      "label": "Field spread",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 72,
+      "range": {
+        "minimum": 45,
+        "maximum": 95,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 72,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "image-scatter-gallery:lively-prints.field-spread",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes field endpoints and route control geometry while preserving route ID, edge start, cohort, and source order.",
+      "acceptanceRow": "control:scene.image-scatter-gallery.lively-prints-field-spread",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.image-scatter-gallery.lively-prints-energy",
+      "sceneLocalId": "lively-prints.energy",
+      "parameter": "energy",
+      "owner": "Scene",
+      "label": "Energy",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 58,
+      "range": {
+        "minimum": 20,
+        "maximum": 100,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 58,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "image-scatter-gallery:lively-prints.energy",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes field-exchange x/y/rotation offsets only; endpoints, route ownership, negative space, and seam remain fixed.",
+      "acceptanceRow": "control:scene.image-scatter-gallery.lively-prints-energy",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.image-scatter-gallery.lively-prints-negative-space",
+      "sceneLocalId": "lively-prints.negative-space",
+      "parameter": "negativeSpace",
+      "owner": "Scene",
+      "label": "Negative space",
+      "valueModel": "enum",
+      "unit": "unitless",
+      "default": "right-quiet",
+      "range": null,
+      "options": [
+        "right-quiet",
+        "left-quiet",
+        "center-clear",
+        "upper-clear"
+      ],
+      "resetValue": "right-quiet",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "image-scatter-gallery:lively-prints.negative-space",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes exclusion ellipse and pushes conflicting field centres outside it; source count and route ownership remain equal.",
+      "acceptanceRow": "control:scene.image-scatter-gallery.lively-prints-negative-space",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.image-scatter-gallery.lively-prints-route-character",
+      "sceneLocalId": "lively-prints.route-character",
+      "parameter": "routeCharacter",
+      "owner": "Scene",
+      "label": "Route character",
+      "valueModel": "enum",
+      "unit": "unitless",
+      "default": "arcs",
+      "range": null,
+      "options": [
+        "arcs",
+        "diagonals",
+        "hooks"
+      ],
+      "resetValue": "arcs",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "image-scatter-gallery:lively-prints.route-character",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes intermediate route positions; start/end, route ID, cohort, field zone, and seam remain equal.",
+      "acceptanceRow": "control:scene.image-scatter-gallery.lively-prints-route-character",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.image-scatter-gallery.lively-prints-focus-lift",
+      "sceneLocalId": "lively-prints.focus-lift",
+      "parameter": "focusLift",
+      "owner": "Scene",
+      "label": "Focus lift",
+      "valueModel": "number",
+      "unit": "%",
+      "default": 34,
+      "range": {
+        "minimum": 0,
+        "maximum": 70,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 34,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "image-scatter-gallery:lively-prints.focus-lift",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes active lift only; source pixels and non-active geometry are untouched.",
+      "acceptanceRow": "control:scene.image-scatter-gallery.lively-prints-focus-lift",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

@@ -1,0 +1,10 @@
+{
+  "sceneId": "deck-contact-strip",
+  "command": "node prototype/capture.mjs",
+  "result": "pass",
+  "evaluator": "prototype/evaluator.mjs",
+  "fixedStepAndPreviewShareEvaluator": true,
+  "generatedFixturesOnly": true,
+  "evidenceFilesBeforeReceipt": 106,
+  "note": "Hashes below are recomputed after all generated evidence and this receipt are present."
+}

@@ -1,0 +1,294 @@
+{
+  "sceneId": "deck-contact-strip",
+  "generatedAt": "1970-01-01T00:00:00.000Z",
+  "captureMethod": "Dependency-free Node fixed-step rasteriser calling the same pure evaluator used by the browser prototype.",
+  "stillCount": 17,
+  "canonicalCanvases": [
+    {
+      "name": "1920x1080",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "name": "1080x1920",
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "1080x1080",
+      "width": 1080,
+      "height": 1080
+    },
+    {
+      "name": "1080x1350",
+      "width": 1080,
+      "height": 1350
+    }
+  ],
+  "fixtureNames": [
+    "one",
+    "two",
+    "recommended",
+    "bounded-many",
+    "mixed-failed"
+  ],
+  "evidenceFixtures": [
+    "one",
+    "two",
+    "recommended",
+    "bounded-many",
+    "mixed-failed"
+  ],
+  "realSpeedSequence": {
+    "frames": 48,
+    "fps": 24,
+    "durationSeconds": 2,
+    "resolution": [
+      480,
+      270
+    ],
+    "claim": "verified fixed-step frame sequence; not a recorded browser video"
+  },
+  "silhouetteSequence": {
+    "frames": 24,
+    "fps": 12,
+    "durationSeconds": 2,
+    "resolution": [
+      480,
+      270
+    ],
+    "claim": "silhouette-only fixed-step playback evidence"
+  },
+  "alpha": {
+    "supported": true,
+    "diagnostics": {
+      "zeroAlpha": 234260,
+      "contaminatedZeroAlpha": 0,
+      "partialAlpha": 714,
+      "opaque": 283426,
+      "pixels": 518400
+    },
+    "composites": [
+      "black",
+      "white",
+      "red",
+      "blue",
+      "checkerboard"
+    ]
+  },
+  "seam": {
+    "start": {
+      "phase": 0,
+      "phaseName": "inspection-hold",
+      "segmentId": "hold-0",
+      "segmentKind": "hold",
+      "pace": "regular",
+      "selectedIndex": 0,
+      "trackProgress": 0,
+      "vertical": false,
+      "station": {
+        "x": 960,
+        "y": 540
+      },
+      "totalIdentityCount": 8,
+      "visibleCount": 5,
+      "identityOrder": [
+        "strip-frame-01",
+        "strip-frame-02",
+        "strip-frame-03",
+        "strip-frame-04",
+        "strip-frame-05",
+        "strip-frame-06",
+        "strip-frame-07",
+        "strip-frame-08"
+      ],
+      "focusedIds": [
+        "strip-frame-01"
+      ],
+      "firstVisible": [
+        {
+          "id": "strip-frame-02",
+          "sourceIndex": 1,
+          "x": 1794.959,
+          "y": 540,
+          "stationDistance": 834.959,
+          "focused": false,
+          "failed": false
+        },
+        {
+          "id": "strip-frame-03",
+          "sourceIndex": 2,
+          "x": 2629.917,
+          "y": 540,
+          "stationDistance": 1669.917,
+          "focused": false,
+          "failed": false
+        },
+        {
+          "id": "strip-frame-07",
+          "sourceIndex": 6,
+          "x": -709.917,
+          "y": 540,
+          "stationDistance": -1669.917,
+          "focused": false,
+          "failed": false
+        }
+      ],
+      "sourceTreatment": {
+        "artworkOpacity": 1,
+        "artworkFilter": "none",
+        "blendMode": "normal"
+      }
+    },
+    "end": {
+      "phase": 0,
+      "phaseName": "inspection-hold",
+      "segmentId": "hold-0",
+      "segmentKind": "hold",
+      "pace": "regular",
+      "selectedIndex": 0,
+      "trackProgress": 0,
+      "vertical": false,
+      "station": {
+        "x": 960,
+        "y": 540
+      },
+      "totalIdentityCount": 8,
+      "visibleCount": 5,
+      "identityOrder": [
+        "strip-frame-01",
+        "strip-frame-02",
+        "strip-frame-03",
+        "strip-frame-04",
+        "strip-frame-05",
+        "strip-frame-06",
+        "strip-frame-07",
+        "strip-frame-08"
+      ],
+      "focusedIds": [
+        "strip-frame-01"
+      ],
+      "firstVisible": [
+        {
+          "id": "strip-frame-02",
+          "sourceIndex": 1,
+          "x": 1794.959,
+          "y": 540,
+          "stationDistance": 834.959,
+          "focused": false,
+          "failed": false
+        },
+        {
+          "id": "strip-frame-03",
+          "sourceIndex": 2,
+          "x": 2629.917,
+          "y": 540,
+          "stationDistance": 1669.917,
+          "focused": false,
+          "failed": false
+        },
+        {
+          "id": "strip-frame-07",
+          "sourceIndex": 6,
+          "x": -709.917,
+          "y": 540,
+          "stationDistance": -1669.917,
+          "focused": false,
+          "failed": false
+        }
+      ],
+      "sourceTreatment": {
+        "artworkOpacity": 1,
+        "artworkFilter": "none",
+        "blendMode": "normal"
+      }
+    },
+    "before": {
+      "phase": 0.999999,
+      "phaseName": "ordered-travel",
+      "segmentId": "travel-7-to-0",
+      "segmentKind": "travel",
+      "pace": "regular",
+      "selectedIndex": 0,
+      "trackProgress": 8,
+      "vertical": false,
+      "station": {
+        "x": 960,
+        "y": 540
+      },
+      "totalIdentityCount": 8,
+      "visibleCount": 5,
+      "identityOrder": [
+        "strip-frame-01",
+        "strip-frame-02",
+        "strip-frame-03",
+        "strip-frame-04",
+        "strip-frame-05",
+        "strip-frame-06",
+        "strip-frame-07",
+        "strip-frame-08"
+      ],
+      "focusedIds": [
+        "strip-frame-01"
+      ],
+      "firstVisible": [
+        {
+          "id": "strip-frame-02",
+          "sourceIndex": 1,
+          "x": 1794.959,
+          "y": 540,
+          "stationDistance": 834.959,
+          "focused": false,
+          "failed": false
+        },
+        {
+          "id": "strip-frame-03",
+          "sourceIndex": 2,
+          "x": 2629.917,
+          "y": 540,
+          "stationDistance": 1669.917,
+          "focused": false,
+          "failed": false
+        },
+        {
+          "id": "strip-frame-07",
+          "sourceIndex": 6,
+          "x": -709.917,
+          "y": 540,
+          "stationDistance": -1669.917,
+          "focused": false,
+          "failed": false
+        }
+      ],
+      "sourceTreatment": {
+        "artworkOpacity": 1,
+        "artworkFilter": "none",
+        "blendMode": "normal"
+      }
+    },
+    "delta": {
+      "startEndMaxPositionPx": 0,
+      "stationDeltaPx": 0,
+      "visibleMismatch": 0,
+      "beforeEndTrackProgress": 8
+    }
+  },
+  "sourceTreatment": {
+    "artworkOpacity": 1,
+    "artworkFilter": "none",
+    "blendMode": "normal",
+    "generatedFixturesOnly": true
+  },
+  "resources": {
+    "maximumAcceptedSources": 24,
+    "evaluatedStatesPerFrame": "all ordered identities",
+    "visibleMountPolicy": "only cards intersecting the stage plus one offstage margin; no duplicate loop deck",
+    "recyclingPolicy": "single identity wraps only across the guaranteed offstage half of a circular track",
+    "evaluatorAllocationPolicy": "bounded fresh state; no scroll listeners, drag state, timers, random tilt, media elements, or retained history"
+  },
+  "limitations": [
+    "No browser video recording was available in this isolated runner.",
+    "No human visual or motion verdict is inferred from generated captures.",
+    "Prototype evidence does not prove Product integration or export packaging."
+  ]
+}

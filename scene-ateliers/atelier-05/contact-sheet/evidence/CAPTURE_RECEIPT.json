@@ -1,0 +1,10 @@
+{
+  "sceneId": "contact-sheet",
+  "command": "node prototype/capture.mjs",
+  "result": "pass",
+  "evaluator": "prototype/evaluator.mjs",
+  "fixedStepAndPreviewShareEvaluator": true,
+  "generatedFixturesOnly": true,
+  "evidenceFilesBeforeReceipt": 125,
+  "note": "Hashes below are recomputed after all generated evidence and this receipt are present."
+}

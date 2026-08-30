@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "atelier": 5,
+  "sourceArchive": "05_PRINTS_AND_TABLES_PARITY_HANDOFF_2026-08-28(1).zip",
+  "sourceArchiveSha256": "8686e56857c9159d7410513b00adf352db8d59faa441e43c85d21148004695f4",
+  "sceneCount": 5,
+  "controlCount": 25,
+  "productIntegration": "no",
+  "humanAcceptance": "pending",
+  "originalReplayCommands": 5,
+  "originalReplayPassed": 5,
+  "browserJourneys": 5,
+  "browserPassed": 5,
+  "nativeControlBindings": 25
+}

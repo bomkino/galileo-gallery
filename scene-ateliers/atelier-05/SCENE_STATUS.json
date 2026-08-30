@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0.0",
+  "atelier": 5,
+  "scenes": [
+    {
+      "sceneId": "contact-sheet",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "deck-contact-strip",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "drift-deck",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "image-scatter-gallery",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "the-hang",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    }
+  ]
+}

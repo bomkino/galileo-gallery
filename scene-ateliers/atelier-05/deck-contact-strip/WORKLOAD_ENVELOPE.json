@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "deck-contact-strip",
+  "sourceCount": {
+    "authoredDefault": 8,
+    "developmentPressure": 16,
+    "supportedMaximum": 24,
+    "source": "Phase 1 inventory and original packet"
+  },
+  "visibleSourceCount": {
+    "authoredDefault": 8,
+    "reviewShellMaximum": 8,
+    "productMaximum": "unmeasured"
+  },
+  "outputPixels": {
+    "reviewShell": {
+      "width": 1280,
+      "height": 720,
+      "devicePixelRatio": 1
+    },
+    "productMaximum": "unmeasured"
+  },
+  "decodedVideoCount": {
+    "reviewShellMaximum": 2,
+    "productMaximum": "unmeasured"
+  },
+  "textureCount": {
+    "status": "renderer-specific and unmeasured; WebGL candidates remain gated"
+  },
+  "domNodeBound": {
+    "reviewShellIframes": 2,
+    "hiddenScenesRender": false
+  },
+  "simultaneousComparisonCount": 2,
+  "disposal": {
+    "unmountHiddenScenes": true,
+    "cancelOutstandingLoads": true,
+    "revokeObjectUrls": true,
+    "removeListeners": true
+  },
+  "humanApprovalRequired": true
+}

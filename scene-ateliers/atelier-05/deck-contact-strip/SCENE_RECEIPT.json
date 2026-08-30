@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "deck-contact-strip",
+  "atelier": 5,
+  "sourceArchive": "05_PRINTS_AND_TABLES_PARITY_HANDOFF_2026-08-28(1).zip",
+  "sourceArchiveSha256": "8686e56857c9159d7410513b00adf352db8d59faa441e43c85d21148004695f4",
+  "sourceRoot": "05_PRINTS_AND_TABLES_PARITY_HANDOFF_2026-08-28/WORKING_TREE/scene-ateliers/atelier-05/deck-contact-strip",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "5e8481e867a75b0b94ddf93b55da796316c9f66ff505092302b501ea16cc69c9",
+    "rendererOwnsStoryClock": false
+  },
+  "controlCount": 5,
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "catalogueRegistration": "no",
+  "release": "no",
+  "claimBoundary": "Parity candidate packet; no Product integration or human acceptance.",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/deck-contact-strip.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  },
+  "currentFiles": {
+    "sceneContractSha256": "e4a14d9be9c0450232f388d64b771dce5b06fa3a8c0ac315f2c353b6d980b596",
+    "controlContractSha256": "27627d71fc260162d76c8812f838f8b6140f1c010e86dccb3bbc7ff84e939aef",
+    "acceptanceMatrixSha256": "d5d5cc73db5d0f36879e0b76fb1d2ab47ffba4691178d5016fa3b3eb2a1edbb7",
+    "evidenceBindingsSha256": "c95cb53b8e029f4acbe40c54c5782ea54a113944ffa73965a4a633478acd7dc6"
+  }
+}

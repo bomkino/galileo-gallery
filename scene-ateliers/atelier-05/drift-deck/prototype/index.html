@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Galileo Scene Atelier Prototype</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="kicker">Galileo Gallery · isolated atelier prototype</p>
+      <h1 id="title">Scene prototype</h1>
+      <p id="motion"></p>
+    </header>
+    <section class="workbench">
+      <div class="stage-wrap"><canvas id="stage" width="960" height="540" tabindex="0" aria-label="Scene prototype stage"></canvas></div>
+      <aside>
+        <div class="transport">
+          <button id="play" type="button">Play</button>
+          <button id="reset" type="button">Reset</button>
+        </div>
+        <label>Story time <input id="scrub" type="range" min="0" max="1000" value="0"></label>
+        <label>Timeline mode <select id="mode"><option value="automatic">Automatic</option><option value="fixed-duration">Fixed</option><option value="directed">Directed</option></select></label>
+        <label>Canvas <select id="canvas"><option value="16:9">16:9</option><option value="9:16">9:16</option><option value="1:1">1:1</option><option value="4:5">4:5</option></select></label>
+        <label>Fixture <select id="fixture"></select></label>
+        <label class="check"><input id="reduced" type="checkbox"> Reduced motion</label>
+        <label class="check"><input id="debug" type="checkbox"> Debug geometry</label>
+        <div id="controls"></div>
+        <output id="status"></output>
+      </aside>
+    </section>
+  </main>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

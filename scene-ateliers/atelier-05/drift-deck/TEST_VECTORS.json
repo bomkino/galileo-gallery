@@ -1,0 +1,916 @@
+{
+  "schema": "galileo-atelier-test-vectors-v1",
+  "schemaStatus": "atelier-local-non-runtime",
+  "sceneId": "drift-deck",
+  "canonicalNormalizedTimes": [
+    0,
+    0.041667,
+    0.083333,
+    0.166667,
+    0.25,
+    0.333333,
+    0.416667,
+    0.5,
+    0.583333,
+    0.666667,
+    0.75,
+    0.833333,
+    0.916667,
+    0.999999,
+    1
+  ],
+  "phaseBoundaries": [
+    0,
+    0.08,
+    0.78,
+    0.9,
+    1
+  ],
+  "vectors": [
+    {
+      "id": "quiet-drift-canonical-00",
+      "fixture": "one",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 2,
+      "expected": {
+        "phase": 0,
+        "phaseName": "entry",
+        "segmentId": "automatic-phrase",
+        "selectedIndex": 0,
+        "visibleCount": 1,
+        "identityOrder": [
+          "quiet-print-01"
+        ],
+        "overlapSignature": "",
+        "baselineOverlapSignature": "",
+        "maxLiftPx": 0,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 960,
+            "y": 540,
+            "rotation": 0,
+            "z": 0,
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-canonical-01",
+      "fixture": "two",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.041667,
+      "mode": "fixed-duration",
+      "reducedMotion": false,
+      "selectedIndex": 2,
+      "expected": {
+        "phase": 0.041667,
+        "phaseName": "entry",
+        "segmentId": "fixed-phrase",
+        "selectedIndex": 0,
+        "visibleCount": 2,
+        "identityOrder": [
+          "quiet-print-01",
+          "quiet-print-02"
+        ],
+        "overlapSignature": "quiet-print-01|quiet-print-02",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-02",
+        "maxLiftPx": 0,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 406.215,
+            "y": 936.821,
+            "rotation": -0.03482,
+            "z": 0,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-02",
+            "x": 678.43,
+            "y": 979.543,
+            "rotation": 0.03161,
+            "z": 1,
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-canonical-02",
+      "fixture": "recommended",
+      "canvas": [
+        1080,
+        1080
+      ],
+      "normalizedTime": 0.083333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 2,
+      "expected": {
+        "phase": 0.416665,
+        "phaseName": "micro-currents",
+        "segmentId": "fast-opening",
+        "selectedIndex": 2,
+        "visibleCount": 5,
+        "identityOrder": [
+          "quiet-print-01",
+          "quiet-print-02",
+          "quiet-print-04",
+          "quiet-print-05",
+          "quiet-print-03"
+        ],
+        "overlapSignature": "quiet-print-01|quiet-print-02,quiet-print-01|quiet-print-04,quiet-print-01|quiet-print-05,quiet-print-02|quiet-print-04,quiet-print-02|quiet-print-03,quiet-print-04|quiet-print-05,quiet-print-05|quiet-print-03",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-02,quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-03,quiet-print-02|quiet-print-04,quiet-print-03|quiet-print-05,quiet-print-04|quiet-print-05",
+        "maxLiftPx": 10.980552,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 312.236,
+            "y": 406.84,
+            "rotation": -0.058834,
+            "z": 0,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-02",
+            "x": 544.673,
+            "y": 347.155,
+            "rotation": 0.0294,
+            "z": 1,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-04",
+            "x": 429.936,
+            "y": 607.603,
+            "rotation": 0.030587,
+            "z": 3,
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-canonical-03",
+      "fixture": "mixed-failed",
+      "canvas": [
+        1080,
+        1350
+      ],
+      "normalizedTime": 0.166667,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 2,
+      "expected": {
+        "phase": 0.166667,
+        "phaseName": "micro-currents",
+        "segmentId": "automatic-phrase",
+        "selectedIndex": 0,
+        "visibleCount": 7,
+        "identityOrder": [
+          "quiet-print-02",
+          "quiet-print-03",
+          "quiet-print-04",
+          "quiet-print-05",
+          "quiet-print-06",
+          "quiet-print-07",
+          "quiet-print-01"
+        ],
+        "overlapSignature": "quiet-print-02|quiet-print-01,quiet-print-03|quiet-print-07,quiet-print-04|quiet-print-05",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-02,quiet-print-03|quiet-print-07,quiet-print-04|quiet-print-05",
+        "maxLiftPx": 4.673782,
+        "firstCards": [
+          {
+            "id": "quiet-print-02",
+            "x": 551.619,
+            "y": 448.185,
+            "rotation": 0.0326,
+            "z": 1,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-03",
+            "x": 751.425,
+            "y": 583.942,
+            "rotation": -0.026094,
+            "z": 2,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-04",
+            "x": 415.166,
+            "y": 765.006,
+            "rotation": 0.021413,
+            "z": 3,
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-canonical-04",
+      "fixture": "one",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.25,
+      "mode": "fixed-duration",
+      "reducedMotion": false,
+      "selectedIndex": 2,
+      "expected": {
+        "phase": 0.25,
+        "phaseName": "micro-currents",
+        "segmentId": "fixed-phrase",
+        "selectedIndex": 0,
+        "visibleCount": 1,
+        "identityOrder": [
+          "quiet-print-01"
+        ],
+        "overlapSignature": "",
+        "baselineOverlapSignature": "",
+        "maxLiftPx": 7.941139,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 954.54,
+            "y": 532.385,
+            "rotation": -0.004829,
+            "z": 1000,
+            "focusPlane": true
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-canonical-05",
+      "fixture": "two",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.333333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 2,
+      "expected": {
+        "phase": 0.666665,
+        "phaseName": "micro-currents",
+        "segmentId": "fast-opening",
+        "selectedIndex": 1,
+        "visibleCount": 2,
+        "identityOrder": [
+          "quiet-print-01",
+          "quiet-print-02"
+        ],
+        "overlapSignature": "quiet-print-01|quiet-print-02",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-02",
+        "maxLiftPx": 9.775425,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 416.717,
+            "y": 937.217,
+            "rotation": -0.031637,
+            "z": 0,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-02",
+            "x": 671.94,
+            "y": 983.874,
+            "rotation": 0.0306,
+            "z": 1001,
+            "focusPlane": true
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-canonical-06",
+      "fixture": "recommended",
+      "canvas": [
+        1080,
+        1080
+      ],
+      "normalizedTime": 0.416667,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 2,
+      "expected": {
+        "phase": 0.416667,
+        "phaseName": "micro-currents",
+        "segmentId": "automatic-phrase",
+        "selectedIndex": 2,
+        "visibleCount": 5,
+        "identityOrder": [
+          "quiet-print-01",
+          "quiet-print-02",
+          "quiet-print-04",
+          "quiet-print-05",
+          "quiet-print-03"
+        ],
+        "overlapSignature": "quiet-print-01|quiet-print-02,quiet-print-01|quiet-print-04,quiet-print-01|quiet-print-05,quiet-print-02|quiet-print-04,quiet-print-02|quiet-print-03,quiet-print-04|quiet-print-05,quiet-print-05|quiet-print-03",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-02,quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-03,quiet-print-02|quiet-print-04,quiet-print-03|quiet-print-05,quiet-print-04|quiet-print-05",
+        "maxLiftPx": 10.980704,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 312.236,
+            "y": 406.84,
+            "rotation": -0.058834,
+            "z": 0,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-02",
+            "x": 544.673,
+            "y": 347.155,
+            "rotation": 0.0294,
+            "z": 1,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-04",
+            "x": 429.936,
+            "y": 607.603,
+            "rotation": 0.030587,
+            "z": 3,
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-canonical-07",
+      "fixture": "mixed-failed",
+      "canvas": [
+        1080,
+        1350
+      ],
+      "normalizedTime": 0.5,
+      "mode": "fixed-duration",
+      "reducedMotion": false,
+      "selectedIndex": 2,
+      "expected": {
+        "phase": 0.5,
+        "phaseName": "micro-currents",
+        "segmentId": "fixed-phrase",
+        "selectedIndex": 4,
+        "visibleCount": 7,
+        "identityOrder": [
+          "quiet-print-01",
+          "quiet-print-02",
+          "quiet-print-03",
+          "quiet-print-04",
+          "quiet-print-06",
+          "quiet-print-07",
+          "quiet-print-05"
+        ],
+        "overlapSignature": "quiet-print-01|quiet-print-02,quiet-print-03|quiet-print-07,quiet-print-04|quiet-print-05",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-02,quiet-print-03|quiet-print-07,quiet-print-04|quiet-print-05",
+        "maxLiftPx": 6.754358,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 312.653,
+            "y": 501.783,
+            "rotation": -0.056639,
+            "z": 0,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-02",
+            "x": 555.645,
+            "y": 449.059,
+            "rotation": 0.034394,
+            "z": 1,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-03",
+            "x": 759.463,
+            "y": 579.235,
+            "rotation": -0.018231,
+            "z": 2,
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-canonical-08",
+      "fixture": "one",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.583333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 2,
+      "expected": {
+        "phase": 0.458333,
+        "phaseName": "micro-currents",
+        "segmentId": "regular-middle",
+        "selectedIndex": 0,
+        "visibleCount": 1,
+        "identityOrder": [
+          "quiet-print-01"
+        ],
+        "overlapSignature": "",
+        "baselineOverlapSignature": "",
+        "maxLiftPx": 11.398427,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 950.559,
+            "y": 546.91,
+            "rotation": -0.002833,
+            "z": 1000,
+            "focusPlane": true
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-canonical-09",
+      "fixture": "two",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.666667,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 2,
+      "expected": {
+        "phase": 0.666667,
+        "phaseName": "micro-currents",
+        "segmentId": "automatic-phrase",
+        "selectedIndex": 1,
+        "visibleCount": 2,
+        "identityOrder": [
+          "quiet-print-01",
+          "quiet-print-02"
+        ],
+        "overlapSignature": "quiet-print-01|quiet-print-02",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-02",
+        "maxLiftPx": 9.775317,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 416.717,
+            "y": 937.217,
+            "rotation": -0.031637,
+            "z": 0,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-02",
+            "x": 671.94,
+            "y": 983.874,
+            "rotation": 0.0306,
+            "z": 1001,
+            "focusPlane": true
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-canonical-10",
+      "fixture": "recommended",
+      "canvas": [
+        1080,
+        1080
+      ],
+      "normalizedTime": 0.75,
+      "mode": "fixed-duration",
+      "reducedMotion": true,
+      "selectedIndex": 2,
+      "expected": {
+        "phase": 0.75,
+        "phaseName": "micro-currents",
+        "segmentId": "fixed-phrase",
+        "selectedIndex": 2,
+        "visibleCount": 5,
+        "identityOrder": [
+          "quiet-print-01",
+          "quiet-print-02",
+          "quiet-print-04",
+          "quiet-print-05",
+          "quiet-print-03"
+        ],
+        "overlapSignature": "quiet-print-01|quiet-print-02,quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-04,quiet-print-02|quiet-print-03,quiet-print-04|quiet-print-05,quiet-print-05|quiet-print-03",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-02,quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-03,quiet-print-02|quiet-print-04,quiet-print-03|quiet-print-05,quiet-print-04|quiet-print-05",
+        "maxLiftPx": 4.826304,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 321.235,
+            "y": 398.477,
+            "rotation": -0.055,
+            "z": 0,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-02",
+            "x": 550.938,
+            "y": 354.931,
+            "rotation": 0.031,
+            "z": 1,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-04",
+            "x": 419.679,
+            "y": 616.205,
+            "rotation": 0.026,
+            "z": 3,
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-canonical-11",
+      "fixture": "mixed-failed",
+      "canvas": [
+        1080,
+        1350
+      ],
+      "normalizedTime": 0.833333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 2,
+      "expected": {
+        "phase": 0.166665,
+        "phaseName": "micro-currents",
+        "segmentId": "fast-finale",
+        "selectedIndex": 0,
+        "visibleCount": 7,
+        "identityOrder": [
+          "quiet-print-02",
+          "quiet-print-03",
+          "quiet-print-04",
+          "quiet-print-05",
+          "quiet-print-06",
+          "quiet-print-07",
+          "quiet-print-01"
+        ],
+        "overlapSignature": "quiet-print-02|quiet-print-01,quiet-print-03|quiet-print-07,quiet-print-04|quiet-print-05",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-02,quiet-print-03|quiet-print-07,quiet-print-04|quiet-print-05",
+        "maxLiftPx": 4.674442,
+        "firstCards": [
+          {
+            "id": "quiet-print-02",
+            "x": 551.62,
+            "y": 448.184,
+            "rotation": 0.0326,
+            "z": 1,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-03",
+            "x": 751.425,
+            "y": 583.941,
+            "rotation": -0.026094,
+            "z": 2,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-04",
+            "x": 415.166,
+            "y": 765.005,
+            "rotation": 0.021413,
+            "z": 3,
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-seam-start",
+      "fixture": "bounded-many",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0,
+      "mode": "automatic",
+      "expected": {
+        "phase": 0,
+        "phaseName": "entry",
+        "segmentId": "automatic-phrase",
+        "selectedIndex": 0,
+        "visibleCount": 12,
+        "identityOrder": [
+          "quiet-print-01",
+          "quiet-print-02",
+          "quiet-print-03",
+          "quiet-print-04",
+          "quiet-print-05",
+          "quiet-print-06",
+          "quiet-print-07",
+          "quiet-print-08",
+          "quiet-print-09",
+          "quiet-print-10",
+          "quiet-print-11",
+          "quiet-print-12"
+        ],
+        "overlapSignature": "quiet-print-01|quiet-print-11,quiet-print-02|quiet-print-10,quiet-print-03|quiet-print-07,quiet-print-04|quiet-print-08,quiet-print-05|quiet-print-09,quiet-print-05|quiet-print-10,quiet-print-06|quiet-print-08,quiet-print-09|quiet-print-12",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-11,quiet-print-02|quiet-print-10,quiet-print-03|quiet-print-07,quiet-print-04|quiet-print-08,quiet-print-05|quiet-print-09,quiet-print-05|quiet-print-10,quiet-print-06|quiet-print-08,quiet-print-09|quiet-print-12",
+        "maxLiftPx": 0,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 571.085,
+            "y": 398.477,
+            "rotation": -0.055,
+            "z": 0,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-02",
+            "x": 979.446,
+            "y": 354.931,
+            "rotation": 0.031,
+            "z": 1,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-03",
+            "x": 1348.915,
+            "y": 463.795,
+            "rotation": -0.021,
+            "z": 2,
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-seam-end",
+      "fixture": "bounded-many",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 1,
+      "mode": "automatic",
+      "expected": {
+        "phase": 0,
+        "phaseName": "entry",
+        "segmentId": "automatic-phrase",
+        "selectedIndex": 0,
+        "visibleCount": 12,
+        "identityOrder": [
+          "quiet-print-01",
+          "quiet-print-02",
+          "quiet-print-03",
+          "quiet-print-04",
+          "quiet-print-05",
+          "quiet-print-06",
+          "quiet-print-07",
+          "quiet-print-08",
+          "quiet-print-09",
+          "quiet-print-10",
+          "quiet-print-11",
+          "quiet-print-12"
+        ],
+        "overlapSignature": "quiet-print-01|quiet-print-11,quiet-print-02|quiet-print-10,quiet-print-03|quiet-print-07,quiet-print-04|quiet-print-08,quiet-print-05|quiet-print-09,quiet-print-05|quiet-print-10,quiet-print-06|quiet-print-08,quiet-print-09|quiet-print-12",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-11,quiet-print-02|quiet-print-10,quiet-print-03|quiet-print-07,quiet-print-04|quiet-print-08,quiet-print-05|quiet-print-09,quiet-print-05|quiet-print-10,quiet-print-06|quiet-print-08,quiet-print-09|quiet-print-12",
+        "maxLiftPx": 0,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 571.085,
+            "y": 398.477,
+            "rotation": -0.055,
+            "z": 0,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-02",
+            "x": 979.446,
+            "y": 354.931,
+            "rotation": 0.031,
+            "z": 1,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-03",
+            "x": 1348.915,
+            "y": 463.795,
+            "rotation": -0.021,
+            "z": 2,
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-control-low",
+      "fixture": "recommended",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.42,
+      "controls": {
+        "driftStrength": 0,
+        "focusLift": 0
+      },
+      "expected": {
+        "phase": 0.42,
+        "phaseName": "micro-currents",
+        "segmentId": "automatic-phrase",
+        "selectedIndex": 2,
+        "visibleCount": 5,
+        "identityOrder": [
+          "quiet-print-01",
+          "quiet-print-02",
+          "quiet-print-04",
+          "quiet-print-05",
+          "quiet-print-03"
+        ],
+        "overlapSignature": "quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-04,quiet-print-04|quiet-print-05,quiet-print-05|quiet-print-03",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-04,quiet-print-03|quiet-print-05,quiet-print-04|quiet-print-05",
+        "maxLiftPx": 0,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 571.085,
+            "y": 398.477,
+            "rotation": -0.055,
+            "z": 0,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-02",
+            "x": 979.446,
+            "y": 354.931,
+            "rotation": 0.031,
+            "z": 1,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-04",
+            "x": 746.097,
+            "y": 616.205,
+            "rotation": 0.026,
+            "z": 3,
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "quiet-drift-control-high",
+      "fixture": "recommended",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.42,
+      "controls": {
+        "driftStrength": 70,
+        "focusLift": 60
+      },
+      "expected": {
+        "phase": 0.42,
+        "phaseName": "micro-currents",
+        "segmentId": "automatic-phrase",
+        "selectedIndex": 2,
+        "visibleCount": 5,
+        "identityOrder": [
+          "quiet-print-01",
+          "quiet-print-02",
+          "quiet-print-04",
+          "quiet-print-05",
+          "quiet-print-03"
+        ],
+        "overlapSignature": "quiet-print-01|quiet-print-04,quiet-print-01|quiet-print-05,quiet-print-02|quiet-print-04,quiet-print-04|quiet-print-05,quiet-print-05|quiet-print-03",
+        "baselineOverlapSignature": "quiet-print-01|quiet-print-04,quiet-print-02|quiet-print-04,quiet-print-03|quiet-print-05,quiet-print-04|quiet-print-05",
+        "maxLiftPx": 24.006625,
+        "firstCards": [
+          {
+            "id": "quiet-print-01",
+            "x": 552.409,
+            "y": 415.632,
+            "rotation": -0.062747,
+            "z": 0,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-02",
+            "x": 966.673,
+            "y": 340.578,
+            "rotation": 0.028127,
+            "z": 1,
+            "focusPlane": false
+          },
+          {
+            "id": "quiet-print-04",
+            "x": 768.315,
+            "y": 597.37,
+            "rotation": 0.035628,
+            "z": 3,
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    }
+  ]
+}

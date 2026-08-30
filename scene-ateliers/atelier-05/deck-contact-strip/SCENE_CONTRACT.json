@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "deck-contact-strip",
+  "displayName": "Focus Strip",
+  "family": "prints-tables",
+  "atelier": 5,
+  "candidateVersion": "parity-1",
+  "identity": {
+    "promise": "An ordered inspection strip moves beneath one stable focus station; the selected frame arrives without reorder, teleport, or disorienting perspective.",
+    "antiMotion": "Focus Strip is not Quiet Carousel, a draggable gallery, a filmstrip river, a coverflow, or a dim-the-neighbours card scroller. It never changes source order, duplicates a hidden loop deck, snaps the selected item into place, tilts cards for spectacle, or uses source brightness/filtering as selection.",
+    "topology": "ordered horizontal strip or portrait inspection column with one reading station",
+    "focusGrammar": "serial focus station; neighbours retain documentary context",
+    "finaleGrammar": "selected frame settles at station or exact strip seam"
+  },
+  "sourcePolicy": {
+    "minimum": 1,
+    "recommended": 8,
+    "maximum": 24,
+    "identityAndOrder": "must survive failure, replacement, reverse and recycling"
+  },
+  "canvasSupport": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:5"
+  ],
+  "orientation": "horizontal strip, vertical inspection column",
+  "timeline": "automatic, fixed-duration, directed; forward/reverse",
+  "alphaPolicy": "transparent output supported; raw alpha proof quality scored separately",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "5e8481e867a75b0b94ddf93b55da796316c9f66ff505092302b501ea16cc69c9",
+    "rendererOwnsStoryClock": false
+  },
+  "prototypeEntrypoint": "prototype/index.html",
+  "controlsRef": "CAPABILITY_AND_CONTROLS.json",
+  "acceptanceRef": "ACCEPTANCE_MATRIX.json",
+  "programme": {
+    "state": "pre-G11 candidate packet; human verdict pending",
+    "pressureGate": null,
+    "gateStatus": "candidate"
+  },
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/deck-contact-strip.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  }
+}

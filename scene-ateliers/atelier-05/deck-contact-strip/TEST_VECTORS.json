@@ -1,0 +1,1168 @@
+{
+  "schema": "galileo-atelier-test-vectors-v1",
+  "schemaStatus": "atelier-local-non-runtime",
+  "sceneId": "deck-contact-strip",
+  "canonicalNormalizedTimes": [
+    0,
+    0.041667,
+    0.083333,
+    0.166667,
+    0.25,
+    0.333333,
+    0.416667,
+    0.5,
+    0.583333,
+    0.666667,
+    0.75,
+    0.833333,
+    0.916667,
+    0.999999,
+    1
+  ],
+  "phaseBoundaries": [
+    0,
+    0.125,
+    0.25,
+    0.5,
+    0.75,
+    0.875,
+    1
+  ],
+  "vectors": [
+    {
+      "id": "focus-strip-canonical-00",
+      "fixture": "one",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 0,
+      "expected": {
+        "phase": 0,
+        "phaseName": "inspection-hold",
+        "segmentId": "single-inspection-hold",
+        "segmentKind": "hold",
+        "pace": "still",
+        "selectedIndex": 0,
+        "trackProgress": 0,
+        "vertical": false,
+        "station": {
+          "x": 960,
+          "y": 540
+        },
+        "totalIdentityCount": 1,
+        "visibleCount": 1,
+        "identityOrder": [
+          "strip-frame-01"
+        ],
+        "focusedIds": [
+          "strip-frame-01"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-01",
+            "sourceIndex": 0,
+            "x": 960,
+            "y": 529.114,
+            "stationDistance": 0,
+            "focused": true,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-canonical-01",
+      "fixture": "two",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.041667,
+      "mode": "fixed-duration",
+      "reducedMotion": false,
+      "selectedIndex": 0,
+      "expected": {
+        "phase": 0.041667,
+        "phaseName": "inspection-hold",
+        "segmentId": "hold-0",
+        "segmentKind": "hold",
+        "pace": "regular",
+        "selectedIndex": 0,
+        "trackProgress": 0,
+        "vertical": true,
+        "station": {
+          "x": 540,
+          "y": 960
+        },
+        "totalIdentityCount": 2,
+        "visibleCount": 2,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02"
+        ],
+        "focusedIds": [
+          "strip-frame-01"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-02",
+            "sourceIndex": 1,
+            "x": 540,
+            "y": -520.308,
+            "stationDistance": -1480.308,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-01",
+            "sourceIndex": 0,
+            "x": 550.886,
+            "y": 960,
+            "stationDistance": 0,
+            "focused": true,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-canonical-02",
+      "fixture": "recommended",
+      "canvas": [
+        1080,
+        1080
+      ],
+      "normalizedTime": 0.083333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 0,
+      "expected": {
+        "phase": 0.083333,
+        "phaseName": "ordered-travel",
+        "segmentId": "travel-0-to-1",
+        "segmentKind": "travel",
+        "pace": "quick",
+        "selectedIndex": 1,
+        "trackProgress": 0.6032999,
+        "vertical": false,
+        "station": {
+          "x": 540,
+          "y": 540
+        },
+        "totalIdentityCount": 8,
+        "visibleCount": 4,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02",
+          "strip-frame-03",
+          "strip-frame-04",
+          "strip-frame-05",
+          "strip-frame-06",
+          "strip-frame-07",
+          "strip-frame-08"
+        ],
+        "focusedIds": [],
+        "firstVisible": [
+          {
+            "id": "strip-frame-01",
+            "sourceIndex": 0,
+            "x": 36.269,
+            "y": 540,
+            "stationDistance": -503.731,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-02",
+            "sourceIndex": 1,
+            "x": 871.228,
+            "y": 540,
+            "stationDistance": 331.228,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-03",
+            "sourceIndex": 2,
+            "x": 1706.187,
+            "y": 540,
+            "stationDistance": 1166.187,
+            "focused": false,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-canonical-03",
+      "fixture": "bounded-many",
+      "canvas": [
+        1080,
+        1350
+      ],
+      "normalizedTime": 0.166667,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 0,
+      "expected": {
+        "phase": 0.166667,
+        "phaseName": "inspection-hold",
+        "segmentId": "hold-4",
+        "segmentKind": "hold",
+        "pace": "regular",
+        "selectedIndex": 4,
+        "trackProgress": 4,
+        "vertical": true,
+        "station": {
+          "x": 540,
+          "y": 675
+        },
+        "totalIdentityCount": 24,
+        "visibleCount": 5,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02",
+          "strip-frame-03",
+          "strip-frame-04",
+          "strip-frame-05",
+          "strip-frame-06",
+          "strip-frame-07",
+          "strip-frame-08",
+          "strip-frame-09",
+          "strip-frame-10",
+          "strip-frame-11",
+          "strip-frame-12",
+          "strip-frame-13",
+          "strip-frame-14",
+          "strip-frame-15",
+          "strip-frame-16",
+          "strip-frame-17",
+          "strip-frame-18",
+          "strip-frame-19",
+          "strip-frame-20",
+          "strip-frame-21",
+          "strip-frame-22",
+          "strip-frame-23",
+          "strip-frame-24"
+        ],
+        "focusedIds": [
+          "strip-frame-05"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-03",
+            "sourceIndex": 2,
+            "x": 540,
+            "y": -248.18,
+            "stationDistance": -923.18,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-04",
+            "sourceIndex": 3,
+            "x": 540,
+            "y": 213.41,
+            "stationDistance": -461.59,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-06",
+            "sourceIndex": 5,
+            "x": 540,
+            "y": 1136.59,
+            "stationDistance": 461.59,
+            "focused": false,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-canonical-04",
+      "fixture": "mixed-failed",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.25,
+      "mode": "fixed-duration",
+      "reducedMotion": false,
+      "selectedIndex": 0,
+      "expected": {
+        "phase": 0.25,
+        "phaseName": "inspection-hold",
+        "segmentId": "hold-3",
+        "segmentKind": "hold",
+        "pace": "regular",
+        "selectedIndex": 3,
+        "trackProgress": 3,
+        "vertical": false,
+        "station": {
+          "x": 960,
+          "y": 540
+        },
+        "totalIdentityCount": 12,
+        "visibleCount": 5,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02",
+          "strip-frame-03",
+          "strip-frame-04",
+          "strip-frame-05",
+          "strip-frame-06",
+          "strip-frame-07",
+          "strip-frame-08",
+          "strip-frame-09",
+          "strip-frame-10",
+          "strip-frame-11",
+          "strip-frame-12"
+        ],
+        "focusedIds": [
+          "strip-frame-04"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-02",
+            "sourceIndex": 1,
+            "x": -709.917,
+            "y": 540,
+            "stationDistance": -1669.917,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-03",
+            "sourceIndex": 2,
+            "x": 125.041,
+            "y": 540,
+            "stationDistance": -834.959,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-05",
+            "sourceIndex": 4,
+            "x": 1794.959,
+            "y": 540,
+            "stationDistance": 834.959,
+            "focused": false,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-canonical-05",
+      "fixture": "one",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.333333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 0,
+      "expected": {
+        "phase": 0.333333,
+        "phaseName": "inspection-hold",
+        "segmentId": "single-inspection-hold",
+        "segmentKind": "hold",
+        "pace": "still",
+        "selectedIndex": 0,
+        "trackProgress": 0,
+        "vertical": true,
+        "station": {
+          "x": 540,
+          "y": 960
+        },
+        "totalIdentityCount": 1,
+        "visibleCount": 1,
+        "identityOrder": [
+          "strip-frame-01"
+        ],
+        "focusedIds": [
+          "strip-frame-01"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-01",
+            "sourceIndex": 0,
+            "x": 550.886,
+            "y": 960,
+            "stationDistance": 0,
+            "focused": true,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-canonical-06",
+      "fixture": "two",
+      "canvas": [
+        1080,
+        1080
+      ],
+      "normalizedTime": 0.416667,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 0,
+      "expected": {
+        "phase": 0.416667,
+        "phaseName": "ordered-travel",
+        "segmentId": "travel-0-to-1",
+        "segmentKind": "travel",
+        "pace": "regular",
+        "selectedIndex": 1,
+        "trackProgress": 0.7432886,
+        "vertical": false,
+        "station": {
+          "x": 540,
+          "y": 540
+        },
+        "totalIdentityCount": 2,
+        "visibleCount": 2,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02"
+        ],
+        "focusedIds": [],
+        "firstVisible": [
+          {
+            "id": "strip-frame-01",
+            "sourceIndex": 0,
+            "x": -581.14,
+            "y": 540,
+            "stationDistance": -1121.14,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-02",
+            "sourceIndex": 1,
+            "x": 927.211,
+            "y": 540,
+            "stationDistance": 387.211,
+            "focused": false,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-canonical-07",
+      "fixture": "recommended",
+      "canvas": [
+        1080,
+        1350
+      ],
+      "normalizedTime": 0.5,
+      "mode": "fixed-duration",
+      "reducedMotion": false,
+      "selectedIndex": 0,
+      "expected": {
+        "phase": 0.5,
+        "phaseName": "inspection-hold",
+        "segmentId": "hold-4",
+        "segmentKind": "hold",
+        "pace": "regular",
+        "selectedIndex": 4,
+        "trackProgress": 4,
+        "vertical": true,
+        "station": {
+          "x": 540,
+          "y": 675
+        },
+        "totalIdentityCount": 8,
+        "visibleCount": 5,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02",
+          "strip-frame-03",
+          "strip-frame-04",
+          "strip-frame-05",
+          "strip-frame-06",
+          "strip-frame-07",
+          "strip-frame-08"
+        ],
+        "focusedIds": [
+          "strip-frame-05"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-03",
+            "sourceIndex": 2,
+            "x": 540,
+            "y": -248.18,
+            "stationDistance": -923.18,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-04",
+            "sourceIndex": 3,
+            "x": 540,
+            "y": 213.41,
+            "stationDistance": -461.59,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-06",
+            "sourceIndex": 5,
+            "x": 540,
+            "y": 1136.59,
+            "stationDistance": 461.59,
+            "focused": false,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-canonical-08",
+      "fixture": "bounded-many",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.583333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 0,
+      "expected": {
+        "phase": 0.583333,
+        "phaseName": "inspection-hold",
+        "segmentId": "hold-14",
+        "segmentKind": "hold",
+        "pace": "regular",
+        "selectedIndex": 14,
+        "trackProgress": 14,
+        "vertical": false,
+        "station": {
+          "x": 960,
+          "y": 540
+        },
+        "totalIdentityCount": 24,
+        "visibleCount": 5,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02",
+          "strip-frame-03",
+          "strip-frame-04",
+          "strip-frame-05",
+          "strip-frame-06",
+          "strip-frame-07",
+          "strip-frame-08",
+          "strip-frame-09",
+          "strip-frame-10",
+          "strip-frame-11",
+          "strip-frame-12",
+          "strip-frame-13",
+          "strip-frame-14",
+          "strip-frame-15",
+          "strip-frame-16",
+          "strip-frame-17",
+          "strip-frame-18",
+          "strip-frame-19",
+          "strip-frame-20",
+          "strip-frame-21",
+          "strip-frame-22",
+          "strip-frame-23",
+          "strip-frame-24"
+        ],
+        "focusedIds": [
+          "strip-frame-15"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-13",
+            "sourceIndex": 12,
+            "x": -709.917,
+            "y": 540,
+            "stationDistance": -1669.917,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-14",
+            "sourceIndex": 13,
+            "x": 125.041,
+            "y": 540,
+            "stationDistance": -834.959,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-16",
+            "sourceIndex": 15,
+            "x": 1794.959,
+            "y": 540,
+            "stationDistance": 834.959,
+            "focused": false,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-canonical-09",
+      "fixture": "mixed-failed",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.666667,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 0,
+      "expected": {
+        "phase": 0.666667,
+        "phaseName": "inspection-hold",
+        "segmentId": "hold-8",
+        "segmentKind": "hold",
+        "pace": "regular",
+        "selectedIndex": 8,
+        "trackProgress": 8,
+        "vertical": true,
+        "station": {
+          "x": 540,
+          "y": 960
+        },
+        "totalIdentityCount": 12,
+        "visibleCount": 7,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02",
+          "strip-frame-03",
+          "strip-frame-04",
+          "strip-frame-05",
+          "strip-frame-06",
+          "strip-frame-07",
+          "strip-frame-08",
+          "strip-frame-09",
+          "strip-frame-10",
+          "strip-frame-11",
+          "strip-frame-12"
+        ],
+        "focusedIds": [
+          "strip-frame-09"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-06",
+            "sourceIndex": 5,
+            "x": 540,
+            "y": -424.769,
+            "stationDistance": -1384.769,
+            "focused": false,
+            "failed": true
+          },
+          {
+            "id": "strip-frame-07",
+            "sourceIndex": 6,
+            "x": 540,
+            "y": 36.82,
+            "stationDistance": -923.18,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-08",
+            "sourceIndex": 7,
+            "x": 540,
+            "y": 498.41,
+            "stationDistance": -461.59,
+            "focused": false,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-canonical-10",
+      "fixture": "one",
+      "canvas": [
+        1080,
+        1080
+      ],
+      "normalizedTime": 0.75,
+      "mode": "fixed-duration",
+      "reducedMotion": true,
+      "selectedIndex": 5,
+      "expected": {
+        "phase": 0.75,
+        "phaseName": "inspection-hold",
+        "segmentId": "single-inspection-hold",
+        "segmentKind": "hold",
+        "pace": "still",
+        "selectedIndex": 0,
+        "trackProgress": 0,
+        "vertical": false,
+        "station": {
+          "x": 540,
+          "y": 540
+        },
+        "totalIdentityCount": 1,
+        "visibleCount": 1,
+        "identityOrder": [
+          "strip-frame-01"
+        ],
+        "focusedIds": [
+          "strip-frame-01"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-01",
+            "sourceIndex": 0,
+            "x": 540,
+            "y": 529.114,
+            "stationDistance": 0,
+            "focused": true,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-canonical-11",
+      "fixture": "two",
+      "canvas": [
+        1080,
+        1350
+      ],
+      "normalizedTime": 0.833333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 0,
+      "expected": {
+        "phase": 0.833333,
+        "phaseName": "ordered-travel",
+        "segmentId": "travel-1-to-0",
+        "segmentKind": "travel",
+        "pace": "quick",
+        "selectedIndex": 1,
+        "trackProgress": 1.1349497,
+        "vertical": true,
+        "station": {
+          "x": 540,
+          "y": 675
+        },
+        "totalIdentityCount": 2,
+        "visibleCount": 2,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02"
+        ],
+        "focusedIds": [],
+        "firstVisible": [
+          {
+            "id": "strip-frame-01",
+            "sourceIndex": 0,
+            "x": 540,
+            "y": 1709.001,
+            "stationDistance": 1034.001,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-02",
+            "sourceIndex": 1,
+            "x": 540,
+            "y": 513.694,
+            "stationDistance": -161.306,
+            "focused": false,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-seam-start",
+      "fixture": "bounded-many",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0,
+      "expected": {
+        "phase": 0,
+        "phaseName": "inspection-hold",
+        "segmentId": "hold-0",
+        "segmentKind": "hold",
+        "pace": "regular",
+        "selectedIndex": 0,
+        "trackProgress": 0,
+        "vertical": false,
+        "station": {
+          "x": 960,
+          "y": 540
+        },
+        "totalIdentityCount": 24,
+        "visibleCount": 5,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02",
+          "strip-frame-03",
+          "strip-frame-04",
+          "strip-frame-05",
+          "strip-frame-06",
+          "strip-frame-07",
+          "strip-frame-08",
+          "strip-frame-09",
+          "strip-frame-10",
+          "strip-frame-11",
+          "strip-frame-12",
+          "strip-frame-13",
+          "strip-frame-14",
+          "strip-frame-15",
+          "strip-frame-16",
+          "strip-frame-17",
+          "strip-frame-18",
+          "strip-frame-19",
+          "strip-frame-20",
+          "strip-frame-21",
+          "strip-frame-22",
+          "strip-frame-23",
+          "strip-frame-24"
+        ],
+        "focusedIds": [
+          "strip-frame-01"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-02",
+            "sourceIndex": 1,
+            "x": 1794.959,
+            "y": 540,
+            "stationDistance": 834.959,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-03",
+            "sourceIndex": 2,
+            "x": 2629.917,
+            "y": 540,
+            "stationDistance": 1669.917,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-23",
+            "sourceIndex": 22,
+            "x": -709.917,
+            "y": 540,
+            "stationDistance": -1669.917,
+            "focused": false,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-seam-end",
+      "fixture": "bounded-many",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 1,
+      "expected": {
+        "phase": 0,
+        "phaseName": "inspection-hold",
+        "segmentId": "hold-0",
+        "segmentKind": "hold",
+        "pace": "regular",
+        "selectedIndex": 0,
+        "trackProgress": 0,
+        "vertical": false,
+        "station": {
+          "x": 960,
+          "y": 540
+        },
+        "totalIdentityCount": 24,
+        "visibleCount": 5,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02",
+          "strip-frame-03",
+          "strip-frame-04",
+          "strip-frame-05",
+          "strip-frame-06",
+          "strip-frame-07",
+          "strip-frame-08",
+          "strip-frame-09",
+          "strip-frame-10",
+          "strip-frame-11",
+          "strip-frame-12",
+          "strip-frame-13",
+          "strip-frame-14",
+          "strip-frame-15",
+          "strip-frame-16",
+          "strip-frame-17",
+          "strip-frame-18",
+          "strip-frame-19",
+          "strip-frame-20",
+          "strip-frame-21",
+          "strip-frame-22",
+          "strip-frame-23",
+          "strip-frame-24"
+        ],
+        "focusedIds": [
+          "strip-frame-01"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-02",
+            "sourceIndex": 1,
+            "x": 1794.959,
+            "y": 540,
+            "stationDistance": 834.959,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-03",
+            "sourceIndex": 2,
+            "x": 2629.917,
+            "y": 540,
+            "stationDistance": 1669.917,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-23",
+            "sourceIndex": 22,
+            "x": -709.917,
+            "y": 540,
+            "stationDistance": -1669.917,
+            "focused": false,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-portrait-station",
+      "fixture": "recommended",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.33,
+      "expected": {
+        "phase": 0.33,
+        "phaseName": "ordered-travel",
+        "segmentId": "travel-2-to-3",
+        "segmentKind": "travel",
+        "pace": "regular",
+        "selectedIndex": 2,
+        "trackProgress": 2.0697011,
+        "vertical": true,
+        "station": {
+          "x": 540,
+          "y": 960
+        },
+        "totalIdentityCount": 8,
+        "visibleCount": 7,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02",
+          "strip-frame-03",
+          "strip-frame-04",
+          "strip-frame-05",
+          "strip-frame-06",
+          "strip-frame-07",
+          "strip-frame-08"
+        ],
+        "focusedIds": [
+          "strip-frame-03"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-01",
+            "sourceIndex": 0,
+            "x": 540,
+            "y": 4.647,
+            "stationDistance": -955.353,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-02",
+            "sourceIndex": 1,
+            "x": 540,
+            "y": 466.237,
+            "stationDistance": -493.763,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-04",
+            "sourceIndex": 3,
+            "x": 540,
+            "y": 1389.416,
+            "stationDistance": 429.416,
+            "focused": false,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "focus-strip-directed-rhythm",
+      "fixture": "recommended",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.41,
+      "mode": "directed",
+      "expected": {
+        "phase": 0.41,
+        "phaseName": "inspection-hold",
+        "segmentId": "hold-3",
+        "segmentKind": "hold",
+        "pace": "quick",
+        "selectedIndex": 3,
+        "trackProgress": 3,
+        "vertical": false,
+        "station": {
+          "x": 960,
+          "y": 540
+        },
+        "totalIdentityCount": 8,
+        "visibleCount": 5,
+        "identityOrder": [
+          "strip-frame-01",
+          "strip-frame-02",
+          "strip-frame-03",
+          "strip-frame-04",
+          "strip-frame-05",
+          "strip-frame-06",
+          "strip-frame-07",
+          "strip-frame-08"
+        ],
+        "focusedIds": [
+          "strip-frame-04"
+        ],
+        "firstVisible": [
+          {
+            "id": "strip-frame-02",
+            "sourceIndex": 1,
+            "x": -709.917,
+            "y": 540,
+            "stationDistance": -1669.917,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-03",
+            "sourceIndex": 2,
+            "x": 125.041,
+            "y": 540,
+            "stationDistance": -834.959,
+            "focused": false,
+            "failed": false
+          },
+          {
+            "id": "strip-frame-05",
+            "sourceIndex": 4,
+            "x": 1794.959,
+            "y": 540,
+            "stationDistance": 834.959,
+            "focused": false,
+            "failed": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    }
+  ]
+}

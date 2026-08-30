@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "image-scatter-gallery",
+  "rows": [
+    {
+      "id": "control:scene.image-scatter-gallery.lively-prints-field-spread",
+      "kind": "control-causality",
+      "controlId": "scene.image-scatter-gallery.lively-prints-field-spread",
+      "requirement": "Changing Field spread must causally change Changes field endpoints and route control geometry while preserving route ID, edge start, cohort, and source order.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.image-scatter-gallery.lively-prints-energy",
+      "kind": "control-causality",
+      "controlId": "scene.image-scatter-gallery.lively-prints-energy",
+      "requirement": "Changing Energy must causally change Changes field-exchange x/y/rotation offsets only; endpoints, route ownership, negative space, and seam remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.image-scatter-gallery.lively-prints-negative-space",
+      "kind": "control-causality",
+      "controlId": "scene.image-scatter-gallery.lively-prints-negative-space",
+      "requirement": "Changing Negative space must causally change Changes exclusion ellipse and pushes conflicting field centres outside it; source count and route ownership remain equal.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.image-scatter-gallery.lively-prints-route-character",
+      "kind": "control-causality",
+      "controlId": "scene.image-scatter-gallery.lively-prints-route-character",
+      "requirement": "Changing Route character must causally change Changes intermediate route positions; start/end, route ID, cohort, field zone, and seam remain equal.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.image-scatter-gallery.lively-prints-focus-lift",
+      "kind": "control-causality",
+      "controlId": "scene.image-scatter-gallery.lively-prints-focus-lift",
+      "requirement": "Changing Focus lift must causally change Changes active lift only; source pixels and non-active geometry are untouched.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "identity",
+      "kind": "programme-invariant",
+      "requirement": "Motion and anti-motion remain recognisable after styling removal.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "source-fidelity",
+      "kind": "programme-invariant",
+      "requirement": "Clean default leaves imported source pixels untouched.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "timeline",
+      "kind": "programme-invariant",
+      "requirement": "Preview, scrub, evidence and export planning consume one semantic model.",
+      "automatedStatus": "pass: renderer-owned story clock prohibited; original evaluator verifier replay passed.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "programme-invariant",
+      "requirement": "Reduced motion preserves narrative meaning.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "lifecycle",
+      "kind": "programme-invariant",
+      "requirement": "Renderer remount and disposal remain bounded.",
+      "automatedStatus": "pass for review-shell mount/remount/disposal; Scene-native GPU/context-loss proof remains as declared in source evidence.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "human-verdict",
+      "kind": "programme-invariant",
+      "requirement": "Human visual, motion, pace, defaults and delight verdict remains pending.",
+      "automatedStatus": "not automatable",
+      "humanStatus": "pending"
+    }
+  ]
+}

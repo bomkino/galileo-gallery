@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-hang",
+  "rows": [
+    {
+      "id": "control:scene.the-hang.the-hang-hang-spread",
+      "kind": "control-causality",
+      "controlId": "scene.the-hang.the-hang-hang-spread",
+      "requirement": "Changing Hang spread must causally change Changes pivotX, local anchor spacing, derived frame-width cap, and swing headroom; source order and rail assignment remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.the-hang.the-hang-length-variance",
+      "kind": "control-causality",
+      "controlId": "scene.the-hang.the-hang-length-variance",
+      "requirement": "Changing Length variance must causally change Changes fullLength, periodScale, settled y, and arc envelope; pivot and source identity do not change.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.the-hang.the-hang-impulse-strength",
+      "kind": "control-causality",
+      "controlId": "scene.the-hang.the-hang-impulse-strength",
+      "requirement": "Changing Impulse strength must causally change Changes damped angle during impulse/settle only; pivots, lengths, frame size, source pixels, and seam remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.the-hang.the-hang-damping",
+      "kind": "control-causality",
+      "controlId": "scene.the-hang.the-hang-damping",
+      "requirement": "Changing Damping must causally change Changes angle envelope decay; period, pivot, length, route, and source pixels remain unchanged.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.the-hang.the-hang-focus-lift",
+      "kind": "control-causality",
+      "controlId": "scene.the-hang.the-hang-focus-lift",
+      "requirement": "Changing Focus lift must causally change Changes selected currentLength and angle restraint only; fullLength, pivot, source pixels, and non-selected frames remain equal.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "identity",
+      "kind": "programme-invariant",
+      "requirement": "Motion and anti-motion remain recognisable after styling removal.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "source-fidelity",
+      "kind": "programme-invariant",
+      "requirement": "Clean default leaves imported source pixels untouched.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "timeline",
+      "kind": "programme-invariant",
+      "requirement": "Preview, scrub, evidence and export planning consume one semantic model.",
+      "automatedStatus": "pass: renderer-owned story clock prohibited; original evaluator verifier replay passed.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "programme-invariant",
+      "requirement": "Reduced motion preserves narrative meaning.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "lifecycle",
+      "kind": "programme-invariant",
+      "requirement": "Renderer remount and disposal remain bounded.",
+      "automatedStatus": "pass for review-shell mount/remount/disposal; Scene-native GPU/context-loss proof remains as declared in source evidence.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "human-verdict",
+      "kind": "programme-invariant",
+      "requirement": "Human visual, motion, pace, defaults and delight verdict remains pending.",
+      "automatedStatus": "not automatable",
+      "humanStatus": "pending"
+    }
+  ]
+}

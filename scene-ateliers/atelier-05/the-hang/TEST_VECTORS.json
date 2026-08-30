@@ -1,0 +1,913 @@
+{
+  "schema": "galileo-atelier-test-vectors-v1",
+  "schemaStatus": "atelier-local-non-runtime",
+  "sceneId": "the-hang",
+  "canonicalNormalizedTimes": [
+    0,
+    0.041667,
+    0.083333,
+    0.166667,
+    0.25,
+    0.333333,
+    0.416667,
+    0.5,
+    0.583333,
+    0.666667,
+    0.75,
+    0.833333,
+    0.916667,
+    0.999999,
+    1
+  ],
+  "phaseBoundaries": [
+    0,
+    0.14,
+    0.24,
+    0.78,
+    0.9,
+    1
+  ],
+  "vectors": [
+    {
+      "id": "the-hang-canonical-00",
+      "fixture": "one",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 4,
+      "expected": {
+        "phase": 0,
+        "phaseName": "descent",
+        "segmentId": "automatic-impulse",
+        "selectedIndex": 0,
+        "visibleCount": 0,
+        "identityOrder": [
+          "hanging-frame-01"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0,
+        "firstFrames": [],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-canonical-01",
+      "fixture": "two",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.041667,
+      "mode": "fixed-duration",
+      "reducedMotion": false,
+      "selectedIndex": 4,
+      "expected": {
+        "phase": 0.041667,
+        "phaseName": "descent",
+        "segmentId": "fixed-impulse",
+        "selectedIndex": 1,
+        "visibleCount": 2,
+        "identityOrder": [
+          "hanging-frame-01",
+          "hanging-frame-02"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-01",
+            "pivotX": 388.8,
+            "pivotY": 124.8,
+            "length": 133.523,
+            "angle": 0,
+            "x": 388.8,
+            "y": 258.323,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-02",
+            "pivotX": 691.2,
+            "pivotY": 140.16,
+            "length": 151.827,
+            "angle": 0,
+            "x": 691.2,
+            "y": 291.987,
+            "focused": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-canonical-02",
+      "fixture": "recommended",
+      "canvas": [
+        1080,
+        1080
+      ],
+      "normalizedTime": 0.083333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 4,
+      "expected": {
+        "phase": 0.416665,
+        "phaseName": "damped-settle",
+        "segmentId": "fast-opening",
+        "selectedIndex": 1,
+        "visibleCount": 6,
+        "identityOrder": [
+          "hanging-frame-01",
+          "hanging-frame-03",
+          "hanging-frame-04",
+          "hanging-frame-05",
+          "hanging-frame-06",
+          "hanging-frame-02"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0.008617,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-01",
+            "pivotX": 196.344,
+            "pivotY": 70.2,
+            "length": 469.571,
+            "angle": -0.0037351,
+            "x": 194.59,
+            "y": 539.768,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-03",
+            "pivotX": 471.269,
+            "pivotY": 87.48,
+            "length": 470.713,
+            "angle": -0.0057494,
+            "x": 468.562,
+            "y": 558.185,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-04",
+            "pivotX": 608.731,
+            "pivotY": 70.2,
+            "length": 409.301,
+            "angle": -0.0052623,
+            "x": 606.577,
+            "y": 479.495,
+            "focused": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-canonical-03",
+      "fixture": "bounded-many",
+      "canvas": [
+        1080,
+        1350
+      ],
+      "normalizedTime": 0.166667,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 4,
+      "expected": {
+        "phase": 0.166667,
+        "phaseName": "shared-impulse",
+        "segmentId": "automatic-impulse",
+        "selectedIndex": 9,
+        "visibleCount": 10,
+        "identityOrder": [
+          "hanging-frame-01",
+          "hanging-frame-02",
+          "hanging-frame-03",
+          "hanging-frame-04",
+          "hanging-frame-05",
+          "hanging-frame-06",
+          "hanging-frame-07",
+          "hanging-frame-08",
+          "hanging-frame-09",
+          "hanging-frame-10"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0.004176,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-01",
+            "pivotX": 196.344,
+            "pivotY": 87.75,
+            "length": 463.062,
+            "angle": 0.0041757,
+            "x": 198.278,
+            "y": 550.808,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-02",
+            "pivotX": 368.172,
+            "pivotY": 98.55,
+            "length": 519.784,
+            "angle": 0.0032033,
+            "x": 369.837,
+            "y": 618.332,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-03",
+            "pivotX": 540,
+            "pivotY": 109.35,
+            "length": 452.636,
+            "angle": 0.0023702,
+            "x": 541.073,
+            "y": 561.985,
+            "focused": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-canonical-04",
+      "fixture": "mixed-failed",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.25,
+      "mode": "fixed-duration",
+      "reducedMotion": false,
+      "selectedIndex": 4,
+      "expected": {
+        "phase": 0.25,
+        "phaseName": "damped-settle",
+        "segmentId": "fixed-impulse",
+        "selectedIndex": 0,
+        "visibleCount": 8,
+        "identityOrder": [
+          "hanging-frame-02",
+          "hanging-frame-03",
+          "hanging-frame-04",
+          "hanging-frame-05",
+          "hanging-frame-06",
+          "hanging-frame-07",
+          "hanging-frame-08",
+          "hanging-frame-01"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0.042478,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-02",
+            "pivotX": 523.611,
+            "pivotY": 78.84,
+            "length": 533.942,
+            "angle": 0.0277987,
+            "x": 538.452,
+            "y": 612.576,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-03",
+            "pivotX": 698.167,
+            "pivotY": 87.48,
+            "length": 470.713,
+            "angle": 0.0303473,
+            "x": 712.45,
+            "y": 557.976,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-04",
+            "pivotX": 872.722,
+            "pivotY": 70.2,
+            "length": 409.301,
+            "angle": 0.0332099,
+            "x": 886.313,
+            "y": 479.275,
+            "focused": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-canonical-05",
+      "fixture": "one",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.333333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 4,
+      "expected": {
+        "phase": 0.666665,
+        "phaseName": "damped-settle",
+        "segmentId": "fast-opening",
+        "selectedIndex": 0,
+        "visibleCount": 1,
+        "identityOrder": [
+          "hanging-frame-01"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0.000147,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-01",
+            "pivotX": 540,
+            "pivotY": 124.8,
+            "length": 810.284,
+            "angle": -0.0001469,
+            "x": 539.881,
+            "y": 935.084,
+            "focused": true
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-canonical-06",
+      "fixture": "two",
+      "canvas": [
+        1080,
+        1080
+      ],
+      "normalizedTime": 0.416667,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 4,
+      "expected": {
+        "phase": 0.416667,
+        "phaseName": "damped-settle",
+        "segmentId": "automatic-impulse",
+        "selectedIndex": 0,
+        "visibleCount": 2,
+        "identityOrder": [
+          "hanging-frame-02",
+          "hanging-frame-01"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0.008421,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-02",
+            "pivotX": 691.2,
+            "pivotY": 78.84,
+            "length": 533.942,
+            "angle": -0.0084207,
+            "x": 686.704,
+            "y": 612.763,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-01",
+            "pivotX": 388.8,
+            "pivotY": 70.2,
+            "length": 461.956,
+            "angle": -0.0024181,
+            "x": 387.683,
+            "y": 532.155,
+            "focused": true
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-canonical-07",
+      "fixture": "recommended",
+      "canvas": [
+        1080,
+        1350
+      ],
+      "normalizedTime": 0.5,
+      "mode": "fixed-duration",
+      "reducedMotion": false,
+      "selectedIndex": 4,
+      "expected": {
+        "phase": 0.5,
+        "phaseName": "damped-settle",
+        "segmentId": "fixed-impulse",
+        "selectedIndex": 2,
+        "visibleCount": 6,
+        "identityOrder": [
+          "hanging-frame-01",
+          "hanging-frame-02",
+          "hanging-frame-04",
+          "hanging-frame-05",
+          "hanging-frame-06",
+          "hanging-frame-03"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0.002812,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-01",
+            "pivotX": 196.344,
+            "pivotY": 87.75,
+            "length": 463.062,
+            "angle": 0.0025714,
+            "x": 197.535,
+            "y": 550.811,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-02",
+            "pivotX": 540,
+            "pivotY": 98.55,
+            "length": 519.784,
+            "angle": 0.0028118,
+            "x": 541.462,
+            "y": 618.332,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-04",
+            "pivotX": 196.344,
+            "pivotY": 330.75,
+            "length": 669.621,
+            "angle": 0.0006317,
+            "x": 196.767,
+            "y": 1000.371,
+            "focused": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-canonical-08",
+      "fixture": "bounded-many",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.583333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 4,
+      "expected": {
+        "phase": 0.458333,
+        "phaseName": "damped-settle",
+        "segmentId": "regular-middle",
+        "selectedIndex": 4,
+        "visibleCount": 10,
+        "identityOrder": [
+          "hanging-frame-01",
+          "hanging-frame-02",
+          "hanging-frame-03",
+          "hanging-frame-04",
+          "hanging-frame-06",
+          "hanging-frame-07",
+          "hanging-frame-08",
+          "hanging-frame-09",
+          "hanging-frame-10",
+          "hanging-frame-05"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0.005048,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-01",
+            "pivotX": 349.056,
+            "pivotY": 70.2,
+            "length": 370.45,
+            "angle": 0.0033297,
+            "x": 350.289,
+            "y": 440.648,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-02",
+            "pivotX": 654.528,
+            "pivotY": 78.84,
+            "length": 415.827,
+            "angle": 0.0019487,
+            "x": 655.338,
+            "y": 494.667,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-03",
+            "pivotX": 960,
+            "pivotY": 87.48,
+            "length": 362.109,
+            "angle": 0.0033391,
+            "x": 961.209,
+            "y": 449.587,
+            "focused": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-canonical-09",
+      "fixture": "mixed-failed",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.666667,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 4,
+      "expected": {
+        "phase": 0.666667,
+        "phaseName": "damped-settle",
+        "segmentId": "automatic-impulse",
+        "selectedIndex": 6,
+        "visibleCount": 8,
+        "identityOrder": [
+          "hanging-frame-01",
+          "hanging-frame-02",
+          "hanging-frame-03",
+          "hanging-frame-04",
+          "hanging-frame-05",
+          "hanging-frame-06",
+          "hanging-frame-08",
+          "hanging-frame-07"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0.000568,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-01",
+            "pivotX": 196.344,
+            "pivotY": 124.8,
+            "length": 658.577,
+            "angle": -0.0003117,
+            "x": 196.139,
+            "y": 783.377,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-02",
+            "pivotX": 425.448,
+            "pivotY": 140.16,
+            "length": 739.249,
+            "angle": -0.000568,
+            "x": 425.028,
+            "y": 879.409,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-03",
+            "pivotX": 654.552,
+            "pivotY": 155.52,
+            "length": 643.749,
+            "angle": -0.0002907,
+            "x": 654.365,
+            "y": 799.269,
+            "focused": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-canonical-10",
+      "fixture": "one",
+      "canvas": [
+        1080,
+        1080
+      ],
+      "normalizedTime": 0.75,
+      "mode": "fixed-duration",
+      "reducedMotion": true,
+      "selectedIndex": 4,
+      "expected": {
+        "phase": 0.75,
+        "phaseName": "damped-settle",
+        "segmentId": "fixed-impulse",
+        "selectedIndex": 0,
+        "visibleCount": 1,
+        "identityOrder": [
+          "hanging-frame-01"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-01",
+            "pivotX": 540,
+            "pivotY": 70.2,
+            "length": 454.32,
+            "angle": 0,
+            "x": 540,
+            "y": 524.52,
+            "focused": true
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-canonical-11",
+      "fixture": "two",
+      "canvas": [
+        1080,
+        1350
+      ],
+      "normalizedTime": 0.833333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 4,
+      "expected": {
+        "phase": 0.166665,
+        "phaseName": "shared-impulse",
+        "segmentId": "fast-finale",
+        "selectedIndex": 1,
+        "visibleCount": 2,
+        "identityOrder": [
+          "hanging-frame-01",
+          "hanging-frame-02"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0.003758,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-01",
+            "pivotX": 388.8,
+            "pivotY": 87.75,
+            "length": 586.964,
+            "angle": 0.0037577,
+            "x": 391.006,
+            "y": 674.71,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-02",
+            "pivotX": 691.2,
+            "pivotY": 98.55,
+            "length": 667.427,
+            "angle": 0,
+            "x": 691.2,
+            "y": 765.977,
+            "focused": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-seam-start",
+      "fixture": "bounded-many",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0,
+      "expected": {
+        "phase": 0,
+        "phaseName": "descent",
+        "segmentId": "automatic-impulse",
+        "selectedIndex": 9,
+        "visibleCount": 0,
+        "identityOrder": [
+          "hanging-frame-01",
+          "hanging-frame-02",
+          "hanging-frame-03",
+          "hanging-frame-04",
+          "hanging-frame-05",
+          "hanging-frame-06",
+          "hanging-frame-07",
+          "hanging-frame-08",
+          "hanging-frame-09",
+          "hanging-frame-10"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0,
+        "firstFrames": [],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-seam-end",
+      "fixture": "bounded-many",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 1,
+      "expected": {
+        "phase": 0,
+        "phaseName": "descent",
+        "segmentId": "automatic-impulse",
+        "selectedIndex": 9,
+        "visibleCount": 0,
+        "identityOrder": [
+          "hanging-frame-01",
+          "hanging-frame-02",
+          "hanging-frame-03",
+          "hanging-frame-04",
+          "hanging-frame-05",
+          "hanging-frame-06",
+          "hanging-frame-07",
+          "hanging-frame-08",
+          "hanging-frame-09",
+          "hanging-frame-10"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0,
+        "firstFrames": [],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-low-impulse",
+      "fixture": "recommended",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.37,
+      "controls": {
+        "impulseStrength": 0
+      },
+      "expected": {
+        "phase": 0.37,
+        "phaseName": "damped-settle",
+        "segmentId": "automatic-impulse",
+        "selectedIndex": 1,
+        "visibleCount": 6,
+        "identityOrder": [
+          "hanging-frame-01",
+          "hanging-frame-03",
+          "hanging-frame-04",
+          "hanging-frame-05",
+          "hanging-frame-06",
+          "hanging-frame-02"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-01",
+            "pivotX": 349.056,
+            "pivotY": 70.2,
+            "length": 469.571,
+            "angle": 0,
+            "x": 349.056,
+            "y": 539.771,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-03",
+            "pivotX": 837.811,
+            "pivotY": 87.48,
+            "length": 470.713,
+            "angle": 0,
+            "x": 837.811,
+            "y": 558.193,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-04",
+            "pivotX": 1082.189,
+            "pivotY": 70.2,
+            "length": 409.301,
+            "angle": 0,
+            "x": 1082.189,
+            "y": 479.501,
+            "focused": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "the-hang-high-impulse",
+      "fixture": "recommended",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.37,
+      "controls": {
+        "impulseStrength": 65,
+        "damping": 35
+      },
+      "expected": {
+        "phase": 0.37,
+        "phaseName": "damped-settle",
+        "segmentId": "automatic-impulse",
+        "selectedIndex": 1,
+        "visibleCount": 6,
+        "identityOrder": [
+          "hanging-frame-01",
+          "hanging-frame-03",
+          "hanging-frame-04",
+          "hanging-frame-05",
+          "hanging-frame-06",
+          "hanging-frame-02"
+        ],
+        "collisionPairs": [],
+        "maximumAngleRad": 0.061176,
+        "firstFrames": [
+          {
+            "id": "hanging-frame-01",
+            "pivotX": 349.056,
+            "pivotY": 70.2,
+            "length": 469.571,
+            "angle": -0.0569425,
+            "x": 322.332,
+            "y": 539.01,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-03",
+            "pivotX": 837.811,
+            "pivotY": 87.48,
+            "length": 470.713,
+            "angle": -0.0563678,
+            "x": 811.292,
+            "y": 557.446,
+            "focused": false
+          },
+          {
+            "id": "hanging-frame-04",
+            "pivotX": 1082.189,
+            "pivotY": 70.2,
+            "length": 409.301,
+            "angle": -0.0611762,
+            "x": 1057.165,
+            "y": 478.735,
+            "focused": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    }
+  ]
+}

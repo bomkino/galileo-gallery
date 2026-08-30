@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-hang",
+  "method": "Parity-only capture calling the unchanged Scene-native evaluator and raster renderer at the source-declared representative time.",
+  "generatedAt": "2026-08-29T10:05:54.869Z",
+  "sourceEvaluator": "prototype/evaluator.mjs",
+  "sourceEvaluatorSha256": "5fbbf879c45a14a944831aff39628df1e7f2244007d1f5f2fc9a93715d262592",
+  "sourceRaster": "prototype/raster.mjs",
+  "sourceRasterSha256": "86501a3b9925d26f13dfc8936a9794d70ef241bf1019be0077de4f03b70e3720",
+  "fixture": "recommended",
+  "normalizedTime": 0.46,
+  "dimensions": [
+    960,
+    540
+  ],
+  "rawAlpha": {
+    "path": "evidence/parity-alpha/raw-alpha.png",
+    "sha256": "f087a0f4b1c2767aedcef7d15590ce8b311afaf0f970bd0389d77ba0d6361ce6",
+    "diagnostics": {
+      "zeroAlpha": 496946,
+      "contaminatedZeroAlpha": 0,
+      "partialAlpha": 0,
+      "opaque": 21454,
+      "pixels": 518400
+    }
+  },
+  "composites": [
+    {
+      "path": "evidence/parity-alpha/over-black.png",
+      "sha256": "243a806e5f2aef3450e06fa33dcc7b66be553f738218ee69828bf4908c0b27de"
+    },
+    {
+      "path": "evidence/parity-alpha/over-white.png",
+      "sha256": "9edd058bd854085e442875bfec90bf8e54bdbf436962c949f52b0076935c9c82"
+    },
+    {
+      "path": "evidence/parity-alpha/over-red.png",
+      "sha256": "cc7318eb2ca255b4d0039124275bde21aae994b9ee51ec07269f193529935319"
+    },
+    {
+      "path": "evidence/parity-alpha/over-blue.png",
+      "sha256": "fd2d6e74c99fabfbf344fd0150afa57ee8427064f8468418956780e201bdf40f"
+    },
+    {
+      "path": "evidence/parity-alpha/over-checkerboard.png",
+      "sha256": "393ce250af73068323e5a2378251276b587e1f05e6fa07bb08a59d62b582c009"
+    }
+  ],
+  "sourceArtworkPolicy": "Generated fixtures only; this proves renderer alpha mechanics, not equality against user-imported media.",
+  "humanVerdict": "pending",
+  "productIntegration": "no"
+}

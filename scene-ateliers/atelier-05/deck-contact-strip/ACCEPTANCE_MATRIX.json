@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "deck-contact-strip",
+  "rows": [
+    {
+      "id": "control:scene.deck-contact-strip.focus-strip-frame-size",
+      "kind": "control-causality",
+      "controlId": "scene.deck-contact-strip.focus-strip-frame-size",
+      "requirement": "Changing Frame size must causally change Changes outer frame size, inner source box, track safety minimum, and visible-card count while preserving IDs/order/station semantics.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.deck-contact-strip.focus-strip-gap",
+      "kind": "control-causality",
+      "controlId": "scene.deck-contact-strip.focus-strip-gap",
+      "requirement": "Changing Frame gap must causally change Changes natural track step and adjacent spacing; it never changes source order, station, or source pixels.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.deck-contact-strip.focus-strip-station-position",
+      "kind": "control-causality",
+      "controlId": "scene.deck-contact-strip.focus-strip-station-position",
+      "requirement": "Changing Station position must causally change Moves station and recompiles offstage-safe track length; all sources keep order and equal frame geometry.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.deck-contact-strip.focus-strip-focus-lift",
+      "kind": "control-causality",
+      "controlId": "scene.deck-contact-strip.focus-strip-focus-lift",
+      "requirement": "Changing Focus lift must causally change Changes perpendicular lift of station envelope only; source opacity/filter and non-focused track coordinates remain unchanged.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.deck-contact-strip.focus-strip-labels",
+      "kind": "control-causality",
+      "controlId": "scene.deck-contact-strip.focus-strip-labels",
+      "requirement": "Changing Labels must causally change Changes label records/render visibility only; card geometry, timeline, source order, and source treatment are identical.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "identity",
+      "kind": "programme-invariant",
+      "requirement": "Motion and anti-motion remain recognisable after styling removal.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "source-fidelity",
+      "kind": "programme-invariant",
+      "requirement": "Clean default leaves imported source pixels untouched.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "timeline",
+      "kind": "programme-invariant",
+      "requirement": "Preview, scrub, evidence and export planning consume one semantic model.",
+      "automatedStatus": "pass: renderer-owned story clock prohibited; original evaluator verifier replay passed.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "programme-invariant",
+      "requirement": "Reduced motion preserves narrative meaning.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "lifecycle",
+      "kind": "programme-invariant",
+      "requirement": "Renderer remount and disposal remain bounded.",
+      "automatedStatus": "pass for review-shell mount/remount/disposal; Scene-native GPU/context-loss proof remains as declared in source evidence.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "human-verdict",
+      "kind": "programme-invariant",
+      "requirement": "Human visual, motion, pace, defaults and delight verdict remains pending.",
+      "automatedStatus": "not automatable",
+      "humanStatus": "pending"
+    }
+  ]
+}

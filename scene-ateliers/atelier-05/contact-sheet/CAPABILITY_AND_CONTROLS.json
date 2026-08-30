@@ -1,0 +1,162 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "contact-sheet",
+  "sourceContractSha256": "5c3207cf0f210ffb706a1dc22af93c231f85b05c5f323c006fb6d57083f1f852",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.contact-sheet.contact-sheet-columns",
+      "sceneLocalId": "contact-sheet.columns",
+      "parameter": "columns",
+      "owner": "Scene",
+      "label": "Columns",
+      "valueModel": "enum",
+      "unit": "unitless",
+      "default": "auto",
+      "range": null,
+      "options": [
+        "auto",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "resetValue": "auto",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "contact-sheet:contact-sheet.columns",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Recompiles columns/rows/cell bounds while preserving Project source order, failed cells, source treatment, and traversal semantics.",
+      "acceptanceRow": "control:scene.contact-sheet.contact-sheet-columns",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.contact-sheet.contact-sheet-gutter",
+      "sceneLocalId": "contact-sheet.gutter",
+      "parameter": "gutter",
+      "owner": "Scene",
+      "label": "Gutter",
+      "valueModel": "number",
+      "unit": "design px at 1080 short axis",
+      "default": 30,
+      "range": {
+        "minimum": 10,
+        "maximum": 72,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 30,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "contact-sheet:contact-sheet.gutter",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes inter-cell distance and cell dimensions inside fixed grid bounds; source order and focus traversal order are unchanged.",
+      "acceptanceRow": "control:scene.contact-sheet.contact-sheet-gutter",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.contact-sheet.contact-sheet-sheet-margin",
+      "sceneLocalId": "contact-sheet.sheet-margin",
+      "parameter": "sheetMargin",
+      "owner": "Scene",
+      "label": "Sheet margin",
+      "valueModel": "number",
+      "unit": "% short axis",
+      "default": 8,
+      "range": {
+        "minimum": 4,
+        "maximum": 16,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 8,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "contact-sheet:contact-sheet.sheet-margin",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes grid bounds and all cell dimensions/positions through one layout recompile; paper remains full-canvas opaque.",
+      "acceptanceRow": "control:scene.contact-sheet.contact-sheet-sheet-margin",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.contact-sheet.contact-sheet-traversal",
+      "sceneLocalId": "contact-sheet.traversal",
+      "parameter": "traversal",
+      "owner": "Scene",
+      "label": "Focus traversal",
+      "valueModel": "enum",
+      "unit": "unitless",
+      "default": "row-major",
+      "range": null,
+      "options": [
+        "row-major",
+        "serpentine",
+        "column-major"
+      ],
+      "resetValue": "row-major",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "contact-sheet:contact-sheet.traversal",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes registration-mark visit order and travel path only; cell geometry, source order, labels, and source pixels are bit-for-bit structurally equal.",
+      "acceptanceRow": "control:scene.contact-sheet.contact-sheet-traversal",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.contact-sheet.contact-sheet-labels",
+      "sceneLocalId": "contact-sheet.labels",
+      "parameter": "labels",
+      "owner": "Scene",
+      "label": "Labels",
+      "valueModel": "enum",
+      "unit": "unitless",
+      "default": "both",
+      "range": null,
+      "options": [
+        "both",
+        "indices",
+        "captions",
+        "none"
+      ],
+      "resetValue": "both",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "contact-sheet:contact-sheet.labels",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes label-band/source-well allocation and visible label records inside each fixed outer cell; outer grid topology and source treatment remain equal.",
+      "acceptanceRow": "control:scene.contact-sheet.contact-sheet-labels",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

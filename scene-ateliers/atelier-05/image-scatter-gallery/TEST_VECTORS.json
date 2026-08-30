@@ -1,0 +1,1449 @@
+{
+  "schema": "galileo-atelier-test-vectors-v1",
+  "schemaStatus": "atelier-local-non-runtime",
+  "sceneId": "image-scatter-gallery",
+  "canonicalNormalizedTimes": [
+    0,
+    0.041667,
+    0.083333,
+    0.166667,
+    0.25,
+    0.333333,
+    0.416667,
+    0.5,
+    0.583333,
+    0.666667,
+    0.75,
+    0.833333,
+    0.916667,
+    0.999999,
+    1
+  ],
+  "phaseBoundaries": [
+    0,
+    0.22,
+    0.72,
+    0.86,
+    1
+  ],
+  "vectors": [
+    {
+      "id": "lively-prints-canonical-00",
+      "fixture": "one",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 15,
+      "expected": {
+        "phase": 0,
+        "phaseName": "assigned-arrivals",
+        "segmentId": "automatic-field",
+        "activeCohort": 0,
+        "cohortCount": 1,
+        "selectedIndex": 0,
+        "totalIdentityCount": 1,
+        "visibleCount": 0,
+        "identityOrder": [
+          "lively-print-01"
+        ],
+        "visibleIdentityOrder": [],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          }
+        ],
+        "negativeSpace": {
+          "x": 1324.8,
+          "y": 529.2,
+          "rx": 345.6,
+          "ry": 237.6
+        },
+        "maxLiftPx": 0,
+        "firstVisible": [],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-canonical-01",
+      "fixture": "two",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.041667,
+      "mode": "fixed-duration",
+      "reducedMotion": false,
+      "selectedIndex": 15,
+      "expected": {
+        "phase": 0.041667,
+        "phaseName": "assigned-arrivals",
+        "segmentId": "fixed-field",
+        "activeCohort": 0,
+        "cohortCount": 1,
+        "selectedIndex": 1,
+        "totalIdentityCount": 2,
+        "visibleCount": 2,
+        "identityOrder": [
+          "lively-print-01",
+          "lively-print-02"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-01",
+          "lively-print-02"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          },
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          }
+        ],
+        "negativeSpace": {
+          "x": 745.2,
+          "y": 940.8,
+          "rx": 194.4,
+          "ry": 422.4
+        },
+        "maxLiftPx": 0,
+        "firstVisible": [
+          {
+            "id": "lively-print-01",
+            "x": -172.131,
+            "y": 345.633,
+            "rotation": -0.074631,
+            "routeId": "cohort-0-slot-0-left",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-02",
+            "x": 280.812,
+            "y": -343.729,
+            "rotation": -0.041033,
+            "routeId": "cohort-0-slot-1-top",
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-canonical-02",
+      "fixture": "recommended",
+      "canvas": [
+        1080,
+        1080
+      ],
+      "normalizedTime": 0.083333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 15,
+      "expected": {
+        "phase": 0.416665,
+        "phaseName": "field-exchange",
+        "segmentId": "fast-opening",
+        "activeCohort": 0,
+        "cohortCount": 1,
+        "selectedIndex": 3,
+        "totalIdentityCount": 9,
+        "visibleCount": 9,
+        "identityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-04"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-04"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          },
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          },
+          {
+            "id": "lively-print-03",
+            "routeId": "cohort-0-slot-2-right",
+            "edge": "right"
+          },
+          {
+            "id": "lively-print-05",
+            "routeId": "cohort-0-slot-4-left",
+            "edge": "left"
+          }
+        ],
+        "negativeSpace": {
+          "x": 745.2,
+          "y": 529.2,
+          "rx": 194.4,
+          "ry": 237.6
+        },
+        "maxLiftPx": 18.215443,
+        "firstVisible": [
+          {
+            "id": "lively-print-01",
+            "x": 175.818,
+            "y": 214.476,
+            "rotation": -0.065624,
+            "routeId": "cohort-0-slot-0-left",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-02",
+            "x": 402.816,
+            "y": 170.476,
+            "rotation": -0.05793,
+            "routeId": "cohort-0-slot-1-top",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-03",
+            "x": 660.875,
+            "y": 179.71,
+            "rotation": 0.002015,
+            "routeId": "cohort-0-slot-2-right",
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-canonical-03",
+      "fixture": "bounded-many",
+      "canvas": [
+        1080,
+        1350
+      ],
+      "normalizedTime": 0.166667,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 15,
+      "expected": {
+        "phase": 0.333334,
+        "phaseName": "field-exchange",
+        "segmentId": "automatic-field",
+        "activeCohort": 0,
+        "cohortCount": 2,
+        "selectedIndex": 2,
+        "totalIdentityCount": 24,
+        "visibleCount": 12,
+        "identityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-10",
+          "lively-print-11",
+          "lively-print-12",
+          "lively-print-13",
+          "lively-print-14",
+          "lively-print-15",
+          "lively-print-16",
+          "lively-print-17",
+          "lively-print-18",
+          "lively-print-19",
+          "lively-print-20",
+          "lively-print-21",
+          "lively-print-22",
+          "lively-print-23",
+          "lively-print-24",
+          "lively-print-03"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-10",
+          "lively-print-11",
+          "lively-print-12",
+          "lively-print-03"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          },
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          },
+          {
+            "id": "lively-print-04",
+            "routeId": "cohort-0-slot-3-bottom",
+            "edge": "bottom"
+          },
+          {
+            "id": "lively-print-05",
+            "routeId": "cohort-0-slot-4-left",
+            "edge": "left"
+          }
+        ],
+        "negativeSpace": {
+          "x": 745.2,
+          "y": 661.5,
+          "rx": 194.4,
+          "ry": 297
+        },
+        "maxLiftPx": 14.146035,
+        "firstVisible": [
+          {
+            "id": "lively-print-01",
+            "x": 180.251,
+            "y": 246.328,
+            "rotation": -0.060286,
+            "routeId": "cohort-0-slot-0-left",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-02",
+            "x": 397.496,
+            "y": 199.818,
+            "rotation": -0.043702,
+            "routeId": "cohort-0-slot-1-top",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-04",
+            "x": 906.829,
+            "y": 382.047,
+            "rotation": -0.122586,
+            "routeId": "cohort-0-slot-3-bottom",
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-canonical-04",
+      "fixture": "mixed-failed",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.25,
+      "mode": "fixed-duration",
+      "reducedMotion": false,
+      "selectedIndex": 15,
+      "expected": {
+        "phase": 0.25,
+        "phaseName": "field-exchange",
+        "segmentId": "fixed-field",
+        "activeCohort": 0,
+        "cohortCount": 1,
+        "selectedIndex": 0,
+        "totalIdentityCount": 12,
+        "visibleCount": 12,
+        "identityOrder": [
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-10",
+          "lively-print-11",
+          "lively-print-12",
+          "lively-print-01"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-10",
+          "lively-print-11",
+          "lively-print-12",
+          "lively-print-01"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          },
+          {
+            "id": "lively-print-03",
+            "routeId": "cohort-0-slot-2-right",
+            "edge": "right"
+          },
+          {
+            "id": "lively-print-04",
+            "routeId": "cohort-0-slot-3-bottom",
+            "edge": "bottom"
+          },
+          {
+            "id": "lively-print-05",
+            "routeId": "cohort-0-slot-4-left",
+            "edge": "left"
+          }
+        ],
+        "negativeSpace": {
+          "x": 1324.8,
+          "y": 529.2,
+          "rx": 345.6,
+          "ry": 237.6
+        },
+        "maxLiftPx": 14.146623,
+        "firstVisible": [
+          {
+            "id": "lively-print-02",
+            "x": 694.119,
+            "y": 170.476,
+            "rotation": -0.039006,
+            "routeId": "cohort-0-slot-1-top",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-03",
+            "x": 1159.666,
+            "y": 174.715,
+            "rotation": 0.026134,
+            "routeId": "cohort-0-slot-2-right",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-04",
+            "x": 1596.165,
+            "y": 286.378,
+            "rotation": -0.112066,
+            "routeId": "cohort-0-slot-3-bottom",
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-canonical-05",
+      "fixture": "one",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.333333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 15,
+      "expected": {
+        "phase": 0.666665,
+        "phaseName": "field-exchange",
+        "segmentId": "fast-opening",
+        "activeCohort": 0,
+        "cohortCount": 1,
+        "selectedIndex": 0,
+        "totalIdentityCount": 1,
+        "visibleCount": 1,
+        "identityOrder": [
+          "lively-print-01"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-01"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          }
+        ],
+        "negativeSpace": {
+          "x": 745.2,
+          "y": 940.8,
+          "rx": 194.4,
+          "ry": 422.4
+        },
+        "maxLiftPx": 6.038173,
+        "firstVisible": [
+          {
+            "id": "lively-print-01",
+            "x": 539.798,
+            "y": 955.418,
+            "rotation": -0.083637,
+            "routeId": "cohort-0-slot-0-left",
+            "focusPlane": true
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-canonical-06",
+      "fixture": "two",
+      "canvas": [
+        1080,
+        1080
+      ],
+      "normalizedTime": 0.416667,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 15,
+      "expected": {
+        "phase": 0.416667,
+        "phaseName": "field-exchange",
+        "segmentId": "automatic-field",
+        "activeCohort": 0,
+        "cohortCount": 1,
+        "selectedIndex": 0,
+        "totalIdentityCount": 2,
+        "visibleCount": 2,
+        "identityOrder": [
+          "lively-print-02",
+          "lively-print-01"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-02",
+          "lively-print-01"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          },
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          }
+        ],
+        "negativeSpace": {
+          "x": 745.2,
+          "y": 529.2,
+          "rx": 194.4,
+          "ry": 237.6
+        },
+        "maxLiftPx": 11.404213,
+        "firstVisible": [
+          {
+            "id": "lively-print-02",
+            "x": 783.961,
+            "y": 567.501,
+            "rotation": -0.057931,
+            "routeId": "cohort-0-slot-1-top",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-01",
+            "x": 302.601,
+            "y": 524.134,
+            "rotation": -0.065624,
+            "routeId": "cohort-0-slot-0-left",
+            "focusPlane": true
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-canonical-07",
+      "fixture": "recommended",
+      "canvas": [
+        1080,
+        1350
+      ],
+      "normalizedTime": 0.5,
+      "mode": "fixed-duration",
+      "reducedMotion": false,
+      "selectedIndex": 15,
+      "expected": {
+        "phase": 0.5,
+        "phaseName": "field-exchange",
+        "segmentId": "fixed-field",
+        "activeCohort": 0,
+        "cohortCount": 1,
+        "selectedIndex": 5,
+        "totalIdentityCount": 9,
+        "visibleCount": 9,
+        "identityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-06"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-06"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          },
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          },
+          {
+            "id": "lively-print-03",
+            "routeId": "cohort-0-slot-2-right",
+            "edge": "right"
+          },
+          {
+            "id": "lively-print-04",
+            "routeId": "cohort-0-slot-3-bottom",
+            "edge": "bottom"
+          }
+        ],
+        "negativeSpace": {
+          "x": 745.2,
+          "y": 661.5,
+          "rx": 194.4,
+          "ry": 297
+        },
+        "maxLiftPx": 2.301118,
+        "firstVisible": [
+          {
+            "id": "lively-print-01",
+            "x": 163.278,
+            "y": 264.637,
+            "rotation": -0.079968,
+            "routeId": "cohort-0-slot-0-left",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-02",
+            "x": 392.342,
+            "y": 199.818,
+            "rotation": -0.067463,
+            "routeId": "cohort-0-slot-1-top",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-03",
+            "x": 677.726,
+            "y": 230.086,
+            "rotation": 0.006059,
+            "routeId": "cohort-0-slot-2-right",
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-canonical-08",
+      "fixture": "bounded-many",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.583333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 15,
+      "expected": {
+        "phase": 0.916665,
+        "phaseName": "owned-return",
+        "segmentId": "regular-middle",
+        "activeCohort": 0,
+        "cohortCount": 2,
+        "selectedIndex": 11,
+        "totalIdentityCount": 24,
+        "visibleCount": 12,
+        "identityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-10",
+          "lively-print-11",
+          "lively-print-13",
+          "lively-print-14",
+          "lively-print-15",
+          "lively-print-16",
+          "lively-print-17",
+          "lively-print-18",
+          "lively-print-19",
+          "lively-print-20",
+          "lively-print-21",
+          "lively-print-22",
+          "lively-print-23",
+          "lively-print-24",
+          "lively-print-12"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-10",
+          "lively-print-11",
+          "lively-print-12"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          },
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          },
+          {
+            "id": "lively-print-03",
+            "routeId": "cohort-0-slot-2-right",
+            "edge": "right"
+          },
+          {
+            "id": "lively-print-04",
+            "routeId": "cohort-0-slot-3-bottom",
+            "edge": "bottom"
+          }
+        ],
+        "negativeSpace": {
+          "x": 1324.8,
+          "y": 529.2,
+          "rx": 345.6,
+          "ry": 237.6
+        },
+        "maxLiftPx": 12.380515,
+        "firstVisible": [
+          {
+            "id": "lively-print-01",
+            "x": 200.235,
+            "y": 184.561,
+            "rotation": -0.074631,
+            "routeId": "cohort-0-slot-0-left",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-02",
+            "x": 627.641,
+            "y": 105.922,
+            "rotation": -0.041033,
+            "routeId": "cohort-0-slot-1-top",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-03",
+            "x": 1363.047,
+            "y": 232.576,
+            "rotation": 0.029281,
+            "routeId": "cohort-0-slot-2-right",
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-canonical-09",
+      "fixture": "mixed-failed",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "normalizedTime": 0.666667,
+      "mode": "automatic",
+      "reducedMotion": false,
+      "selectedIndex": 15,
+      "expected": {
+        "phase": 0.666667,
+        "phaseName": "field-exchange",
+        "segmentId": "automatic-field",
+        "activeCohort": 0,
+        "cohortCount": 1,
+        "selectedIndex": 10,
+        "totalIdentityCount": 12,
+        "visibleCount": 12,
+        "identityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-10",
+          "lively-print-12",
+          "lively-print-11"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-10",
+          "lively-print-12",
+          "lively-print-11"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          },
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          },
+          {
+            "id": "lively-print-03",
+            "routeId": "cohort-0-slot-2-right",
+            "edge": "right"
+          },
+          {
+            "id": "lively-print-04",
+            "routeId": "cohort-0-slot-3-bottom",
+            "edge": "bottom"
+          }
+        ],
+        "negativeSpace": {
+          "x": 745.2,
+          "y": 940.8,
+          "rx": 194.4,
+          "ry": 422.4
+        },
+        "maxLiftPx": 14.146329,
+        "firstVisible": [
+          {
+            "id": "lively-print-01",
+            "x": 175.416,
+            "y": 366.516,
+            "rotation": -0.083637,
+            "routeId": "cohort-0-slot-0-left",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-02",
+            "x": 409.393,
+            "y": 286.677,
+            "rotation": -0.048539,
+            "routeId": "cohort-0-slot-1-top",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-03",
+            "x": 662.047,
+            "y": 333.595,
+            "rotation": 0.030177,
+            "routeId": "cohort-0-slot-2-right",
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-canonical-10",
+      "fixture": "one",
+      "canvas": [
+        1080,
+        1080
+      ],
+      "normalizedTime": 0.75,
+      "mode": "fixed-duration",
+      "reducedMotion": true,
+      "selectedIndex": 15,
+      "expected": {
+        "phase": 0.75,
+        "phaseName": "field-finale",
+        "segmentId": "fixed-field",
+        "activeCohort": 0,
+        "cohortCount": 1,
+        "selectedIndex": 0,
+        "totalIdentityCount": 1,
+        "visibleCount": 1,
+        "identityOrder": [
+          "lively-print-01"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-01"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          }
+        ],
+        "negativeSpace": {
+          "x": 745.2,
+          "y": 529.2,
+          "rx": 194.4,
+          "ry": 237.6
+        },
+        "maxLiftPx": 7.344,
+        "firstVisible": [
+          {
+            "id": "lively-print-01",
+            "x": 540,
+            "y": 540,
+            "rotation": -0.074631,
+            "routeId": "cohort-0-slot-0-left",
+            "focusPlane": true
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-canonical-11",
+      "fixture": "two",
+      "canvas": [
+        1080,
+        1350
+      ],
+      "normalizedTime": 0.833333,
+      "mode": "directed",
+      "reducedMotion": false,
+      "selectedIndex": 15,
+      "expected": {
+        "phase": 0.166665,
+        "phaseName": "assigned-arrivals",
+        "segmentId": "fast-finale",
+        "activeCohort": 0,
+        "cohortCount": 1,
+        "selectedIndex": 1,
+        "totalIdentityCount": 2,
+        "visibleCount": 2,
+        "identityOrder": [
+          "lively-print-01",
+          "lively-print-02"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-01",
+          "lively-print-02"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          },
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          }
+        ],
+        "negativeSpace": {
+          "x": 745.2,
+          "y": 661.5,
+          "rx": 194.4,
+          "ry": 297
+        },
+        "maxLiftPx": 0,
+        "firstVisible": [
+          {
+            "id": "lively-print-01",
+            "x": 300.228,
+            "y": 643.85,
+            "rotation": -0.074631,
+            "routeId": "cohort-0-slot-0-left",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-02",
+            "x": 772.437,
+            "y": 697.619,
+            "rotation": -0.041033,
+            "routeId": "cohort-0-slot-1-top",
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-seam-start",
+      "fixture": "bounded-many",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0,
+      "expected": {
+        "phase": 0,
+        "phaseName": "assigned-arrivals",
+        "segmentId": "automatic-field",
+        "activeCohort": 0,
+        "cohortCount": 2,
+        "selectedIndex": 11,
+        "totalIdentityCount": 24,
+        "visibleCount": 0,
+        "identityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-10",
+          "lively-print-11",
+          "lively-print-12",
+          "lively-print-13",
+          "lively-print-14",
+          "lively-print-15",
+          "lively-print-16",
+          "lively-print-17",
+          "lively-print-18",
+          "lively-print-19",
+          "lively-print-20",
+          "lively-print-21",
+          "lively-print-22",
+          "lively-print-23",
+          "lively-print-24"
+        ],
+        "visibleIdentityOrder": [],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          },
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          },
+          {
+            "id": "lively-print-03",
+            "routeId": "cohort-0-slot-2-right",
+            "edge": "right"
+          },
+          {
+            "id": "lively-print-04",
+            "routeId": "cohort-0-slot-3-bottom",
+            "edge": "bottom"
+          }
+        ],
+        "negativeSpace": {
+          "x": 1324.8,
+          "y": 529.2,
+          "rx": 345.6,
+          "ry": 237.6
+        },
+        "maxLiftPx": 0,
+        "firstVisible": [],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-seam-end",
+      "fixture": "bounded-many",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 1,
+      "expected": {
+        "phase": 0,
+        "phaseName": "assigned-arrivals",
+        "segmentId": "automatic-field",
+        "activeCohort": 0,
+        "cohortCount": 2,
+        "selectedIndex": 11,
+        "totalIdentityCount": 24,
+        "visibleCount": 0,
+        "identityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09",
+          "lively-print-10",
+          "lively-print-11",
+          "lively-print-12",
+          "lively-print-13",
+          "lively-print-14",
+          "lively-print-15",
+          "lively-print-16",
+          "lively-print-17",
+          "lively-print-18",
+          "lively-print-19",
+          "lively-print-20",
+          "lively-print-21",
+          "lively-print-22",
+          "lively-print-23",
+          "lively-print-24"
+        ],
+        "visibleIdentityOrder": [],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          },
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          },
+          {
+            "id": "lively-print-03",
+            "routeId": "cohort-0-slot-2-right",
+            "edge": "right"
+          },
+          {
+            "id": "lively-print-04",
+            "routeId": "cohort-0-slot-3-bottom",
+            "edge": "bottom"
+          }
+        ],
+        "negativeSpace": {
+          "x": 1324.8,
+          "y": 529.2,
+          "rx": 345.6,
+          "ry": 237.6
+        },
+        "maxLiftPx": 0,
+        "firstVisible": [],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-route-arcs",
+      "fixture": "recommended",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.12,
+      "controls": {
+        "routeCharacter": "arcs"
+      },
+      "expected": {
+        "phase": 0.12,
+        "phaseName": "assigned-arrivals",
+        "segmentId": "automatic-field",
+        "activeCohort": 0,
+        "cohortCount": 1,
+        "selectedIndex": 8,
+        "totalIdentityCount": 9,
+        "visibleCount": 9,
+        "identityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          },
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          },
+          {
+            "id": "lively-print-03",
+            "routeId": "cohort-0-slot-2-right",
+            "edge": "right"
+          },
+          {
+            "id": "lively-print-04",
+            "routeId": "cohort-0-slot-3-bottom",
+            "edge": "bottom"
+          }
+        ],
+        "negativeSpace": {
+          "x": 1324.8,
+          "y": 529.2,
+          "rx": 345.6,
+          "ry": 237.6
+        },
+        "maxLiftPx": 0,
+        "firstVisible": [
+          {
+            "id": "lively-print-01",
+            "x": 108.441,
+            "y": 171.254,
+            "rotation": -0.074631,
+            "routeId": "cohort-0-slot-0-left",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-02",
+            "x": 576.452,
+            "y": 55.955,
+            "rotation": -0.041033,
+            "routeId": "cohort-0-slot-1-top",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-03",
+            "x": 1517.327,
+            "y": 259.138,
+            "rotation": 0.029281,
+            "routeId": "cohort-0-slot-2-right",
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    },
+    {
+      "id": "lively-prints-route-hooks",
+      "fixture": "recommended",
+      "canvas": [
+        1920,
+        1080
+      ],
+      "normalizedTime": 0.12,
+      "controls": {
+        "routeCharacter": "hooks"
+      },
+      "expected": {
+        "phase": 0.12,
+        "phaseName": "assigned-arrivals",
+        "segmentId": "automatic-field",
+        "activeCohort": 0,
+        "cohortCount": 1,
+        "selectedIndex": 8,
+        "totalIdentityCount": 9,
+        "visibleCount": 9,
+        "identityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09"
+        ],
+        "visibleIdentityOrder": [
+          "lively-print-01",
+          "lively-print-02",
+          "lively-print-03",
+          "lively-print-04",
+          "lively-print-05",
+          "lively-print-06",
+          "lively-print-07",
+          "lively-print-08",
+          "lively-print-09"
+        ],
+        "routeOwnership": [
+          {
+            "id": "lively-print-01",
+            "routeId": "cohort-0-slot-0-left",
+            "edge": "left"
+          },
+          {
+            "id": "lively-print-02",
+            "routeId": "cohort-0-slot-1-top",
+            "edge": "top"
+          },
+          {
+            "id": "lively-print-03",
+            "routeId": "cohort-0-slot-2-right",
+            "edge": "right"
+          },
+          {
+            "id": "lively-print-04",
+            "routeId": "cohort-0-slot-3-bottom",
+            "edge": "bottom"
+          }
+        ],
+        "negativeSpace": {
+          "x": 1324.8,
+          "y": 529.2,
+          "rx": 345.6,
+          "ry": 237.6
+        },
+        "maxLiftPx": 0,
+        "firstVisible": [
+          {
+            "id": "lively-print-01",
+            "x": 142.68,
+            "y": 204.564,
+            "rotation": -0.074631,
+            "routeId": "cohort-0-slot-0-left",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-02",
+            "x": 648.067,
+            "y": 66.399,
+            "rotation": -0.041033,
+            "routeId": "cohort-0-slot-1-top",
+            "focusPlane": false
+          },
+          {
+            "id": "lively-print-03",
+            "x": 1463.621,
+            "y": 201.031,
+            "rotation": 0.029281,
+            "routeId": "cohort-0-slot-2-right",
+            "focusPlane": false
+          }
+        ],
+        "sourceTreatment": {
+          "artworkOpacity": 1,
+          "artworkFilter": "none",
+          "blendMode": "normal"
+        }
+      }
+    }
+  ]
+}

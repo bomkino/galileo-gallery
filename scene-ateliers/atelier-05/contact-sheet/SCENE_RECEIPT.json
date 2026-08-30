@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "contact-sheet",
+  "atelier": 5,
+  "sourceArchive": "05_PRINTS_AND_TABLES_PARITY_HANDOFF_2026-08-28(1).zip",
+  "sourceArchiveSha256": "8686e56857c9159d7410513b00adf352db8d59faa441e43c85d21148004695f4",
+  "sourceRoot": "05_PRINTS_AND_TABLES_PARITY_HANDOFF_2026-08-28/WORKING_TREE/scene-ateliers/atelier-05/contact-sheet",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "932251382081d126fed8a04442e2ff8a6c8adc2deee65ca7348b5b5589cbb5d7",
+    "rendererOwnsStoryClock": false
+  },
+  "controlCount": 5,
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "catalogueRegistration": "no",
+  "release": "no",
+  "claimBoundary": "Parity candidate packet; no Product integration or human acceptance.",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/contact-sheet.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  },
+  "currentFiles": {
+    "sceneContractSha256": "474e452b794760e5185996dd8e84d134623c9862af06e1174af6462a6e3fd597",
+    "controlContractSha256": "b8e21136fe2c75765965a86ff9841f61c442981071fe75a09a22f39b9cbba41d",
+    "acceptanceMatrixSha256": "6347cdf0a2d2588a5c3668066df448ab1b9cd9874f57bdbee60e3dfc2cb18df0",
+    "evidenceBindingsSha256": "2e184632420d143b192c256fb28f59cbc0ef2461f65130085b231905720b9c78"
+  }
+}

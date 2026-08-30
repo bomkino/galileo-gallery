@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "drift-deck",
+  "rows": [
+    {
+      "id": "control:scene.drift-deck.quiet-drift-composition-spread",
+      "kind": "control-causality",
+      "controlId": "scene.drift-deck.quiet-drift-composition-spread",
+      "requirement": "Changing Composition spread must causally change Changes baseX/baseY distance from canvas centre; does not change ID, source order, harmonic field, or z order.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.drift-deck.quiet-drift-overlap-depth",
+      "kind": "control-causality",
+      "controlId": "scene.drift-deck.quiet-drift-overlap-depth",
+      "requirement": "Changing Overlap / depth must causally change Changes card width/height and therefore the stable authored overlap graph; base z order and source pixels remain unchanged.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.drift-deck.quiet-drift-drift-strength",
+      "kind": "control-causality",
+      "controlId": "scene.drift-deck.quiet-drift-drift-strength",
+      "requirement": "Changing Drift strength must causally change Scales x/y/rotation offsets only during the micro-current envelope; seam remains exact.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.drift-deck.quiet-drift-focus-lift",
+      "kind": "control-causality",
+      "controlId": "scene.drift-deck.quiet-drift-focus-lift",
+      "requirement": "Changing Focus lift must causally change Changes focused card lift only; base position, baseZ, source opacity/filter/blend, and non-focused cards remain unchanged.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:timeline.pace",
+      "kind": "control-causality",
+      "controlId": "timeline.pace",
+      "requirement": "Changing Cycle pace must causally change Changes compiled duration and temporal velocity; normalized geometry at the same normalized phase remains equal.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "identity",
+      "kind": "programme-invariant",
+      "requirement": "Motion and anti-motion remain recognisable after styling removal.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "source-fidelity",
+      "kind": "programme-invariant",
+      "requirement": "Clean default leaves imported source pixels untouched.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "timeline",
+      "kind": "programme-invariant",
+      "requirement": "Preview, scrub, evidence and export planning consume one semantic model.",
+      "automatedStatus": "pass: renderer-owned story clock prohibited; original evaluator verifier replay passed.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "programme-invariant",
+      "requirement": "Reduced motion preserves narrative meaning.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "lifecycle",
+      "kind": "programme-invariant",
+      "requirement": "Renderer remount and disposal remain bounded.",
+      "automatedStatus": "pass for review-shell mount/remount/disposal; Scene-native GPU/context-loss proof remains as declared in source evidence.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "human-verdict",
+      "kind": "programme-invariant",
+      "requirement": "Human visual, motion, pace, defaults and delight verdict remains pending.",
+      "automatedStatus": "not automatable",
+      "humanStatus": "pending"
+    }
+  ]
+}
