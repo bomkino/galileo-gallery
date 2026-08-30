@@ -893,11 +893,17 @@ const sceneExpression = `(() => {
     const logicalWidth = Number(stage.dataset.logicalWidth)
     const logicalHeight = Number(stage.dataset.logicalHeight)
     const logicalStyle = getComputedStyle(logical)
-    const designStyle = getComputedStyle(design)
-    const designWidth = parseFloat(designStyle.width)
-    const designHeight = parseFloat(designStyle.height)
+    const designWidth = Number(design.dataset.designWidth)
+    const designHeight = Number(design.dataset.designHeight)
+    if (!Number.isFinite(designWidth) || designWidth <= 0 || !Number.isFinite(designHeight) || designHeight <= 0) throw new Error('Vitrine design-space metadata is invalid.')
     const projectScale = logicalWidth / designWidth
-    const minimumDesignDimension = Math.min(designWidth, designHeight)
+    const verticalProjectScale = logicalHeight / designHeight
+    if (Math.abs(projectScale - verticalProjectScale) > 0.000000001) throw new Error('Vitrine design-space scale is nonuniform.')
+    const designViewportWidth = design.clientWidth
+    const designViewportHeight = design.clientHeight
+    if (designViewportWidth <= 0 || designViewportHeight <= 0) throw new Error('Vitrine rendered design overlay is empty.')
+    if (designViewportWidth !== stage.clientWidth || designViewportHeight !== stage.clientHeight || getComputedStyle(design).transform !== 'none') throw new Error('Vitrine rendered design overlay left the stage viewport.')
+    const minimumRenderedDimension = Math.min(designViewportWidth, designViewportHeight)
     const normalizedBox = (element) => {
         const box = element.getBoundingClientRect()
         return {
@@ -936,6 +942,8 @@ const sceneExpression = `(() => {
             logicalHeight,
             designWidth,
             designHeight,
+            designViewportWidth,
+            designViewportHeight,
             projectScale,
             viewportPerspective: parseFloat(logicalStyle.perspective),
             perspective: parseFloat(logicalStyle.perspective) * logicalWidth / stage.clientWidth,
@@ -997,14 +1005,14 @@ const sceneExpression = `(() => {
             caption: normalizedBox(placardCaption),
         } : null,
         placardMetrics: placard && placardLabel && placardCaption && placardStyle ? {
-            labelFont: parseFloat(getComputedStyle(placardLabel).fontSize) / minimumDesignDimension,
-            captionFont: parseFloat(getComputedStyle(placardCaption).fontSize) / minimumDesignDimension,
-            gap: parseFloat(placardStyle.columnGap) / minimumDesignDimension,
-            paddingTop: parseFloat(placardStyle.paddingTop) / minimumDesignDimension,
-            paddingRight: parseFloat(placardStyle.paddingRight) / minimumDesignDimension,
-            paddingBottom: parseFloat(placardStyle.paddingBottom) / minimumDesignDimension,
-            paddingLeft: parseFloat(placardStyle.paddingLeft) / minimumDesignDimension,
-            border: parseFloat(placardStyle.borderTopWidth) / minimumDesignDimension,
+            labelFont: parseFloat(getComputedStyle(placardLabel).fontSize) / minimumRenderedDimension,
+            captionFont: parseFloat(getComputedStyle(placardCaption).fontSize) / minimumRenderedDimension,
+            gap: parseFloat(placardStyle.columnGap) / minimumRenderedDimension,
+            paddingTop: parseFloat(placardStyle.paddingTop) / minimumRenderedDimension,
+            paddingRight: parseFloat(placardStyle.paddingRight) / minimumRenderedDimension,
+            paddingBottom: parseFloat(placardStyle.paddingBottom) / minimumRenderedDimension,
+            paddingLeft: parseFloat(placardStyle.paddingLeft) / minimumRenderedDimension,
+            border: parseFloat(placardStyle.borderTopWidth) / minimumRenderedDimension,
         } : null,
         status: stage.querySelector('[role="status"]')?.textContent.trim() ?? null,
         background: getComputedStyle(stage).backgroundColor,
