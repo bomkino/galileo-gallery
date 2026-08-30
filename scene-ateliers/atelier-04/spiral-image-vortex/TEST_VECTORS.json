@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "sceneId": "spiral-image-vortex",
+  "evaluatorVersion": 1,
+  "vectors": [
+    {
+      "id": "loop-start-ordinary",
+      "input": {
+        "fixture": "ordinary8",
+        "canvas": "16:9",
+        "normalizedTime": 0,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "spiral-image-vortex",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0,
+        "direction": "forward",
+        "count": 8,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "turns": 3,
+        "nearId": "ordinary-005",
+        "nearDepth": 1,
+        "renderNodeCount": 7,
+        "stateCount": 8,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "two-reverse",
+      "input": {
+        "fixture": "two",
+        "canvas": "1:1",
+        "normalizedTime": 0.231,
+        "runKind": "loop",
+        "config": {
+          "direction": "reverse"
+        }
+      },
+      "expect": {
+        "sceneId": "spiral-image-vortex",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.231,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.769,
+        "direction": "reverse",
+        "count": 2,
+        "canvas": {
+          "width": 640,
+          "height": 640
+        },
+        "turns": 3,
+        "nearId": null,
+        "nearDepth": null,
+        "renderNodeCount": 1,
+        "stateCount": 2,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "many-portrait-bounded",
+      "input": {
+        "fixture": "many127",
+        "canvas": "9:16",
+        "normalizedTime": 0.417,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "spiral-image-vortex",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.417,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.417,
+        "direction": "forward",
+        "count": 127,
+        "canvas": {
+          "width": 405,
+          "height": 720
+        },
+        "turns": 3,
+        "nearId": "many-075",
+        "nearDepth": 0.999826,
+        "renderNodeCount": 17,
+        "stateCount": 127,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "finite-spotlight",
+      "input": {
+        "fixture": "ordinary8",
+        "canvas": "4:5",
+        "normalizedTime": 0.78,
+        "runKind": "finite",
+        "spotlightId": "ordinary-004"
+      },
+      "expect": {
+        "sceneId": "spiral-image-vortex",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.78,
+        "runKind": "finite",
+        "phrase": "spotlight",
+        "phase": 0.875,
+        "direction": "forward",
+        "count": 8,
+        "canvas": {
+          "width": 576,
+          "height": 720
+        },
+        "turns": 3,
+        "nearId": "ordinary-004",
+        "nearDepth": 1,
+        "renderNodeCount": 5,
+        "stateCount": 8,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "media-edge-reduced",
+      "input": {
+        "fixture": "mediaEdge",
+        "canvas": "16:9",
+        "normalizedTime": 0.637,
+        "runKind": "loop",
+        "reducedMotion": true
+      },
+      "expect": {
+        "sceneId": "spiral-image-vortex",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.637,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.625,
+        "direction": "forward",
+        "count": 8,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "turns": 3,
+        "nearId": "media-edge-002",
+        "nearDepth": 1,
+        "renderNodeCount": 7,
+        "stateCount": 8,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    }
+  ]
+}

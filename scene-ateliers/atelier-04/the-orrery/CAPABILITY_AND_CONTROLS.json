@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-orrery",
+  "sourceContractSha256": "100649fae0f0f2998511ddafe2decf6555a1a3b053b97193087aac72f86c2045",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.the-orrery.ring-count",
+      "sceneLocalId": "ring-count",
+      "parameter": "ringCount",
+      "owner": "Scene",
+      "label": "Ring count",
+      "valueModel": "enum",
+      "unit": "unitless",
+      "default": "auto",
+      "range": null,
+      "options": [
+        "auto",
+        "2",
+        "3"
+      ],
+      "resetValue": "auto",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-orrery:ring-count",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed media, primary, canvas, and story time, satellite ringIndex/slotIndex assignments and signed revolution tables change deterministically while source order and primary identity stay fixed.",
+      "acceptanceRow": "control:scene.the-orrery.ring-count",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-orrery.orbit-size",
+      "sceneLocalId": "orbit-size",
+      "parameter": "orbitSize",
+      "owner": "Scene",
+      "label": "Orbit size",
+      "valueModel": "number",
+      "unit": "normalized canvas radius",
+      "default": 0.38,
+      "range": {
+        "minimum": 0.25,
+        "maximum": 0.48,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.38,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-orrery:orbit-size",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed time, satellite x/y distances from centre change while membership, source size, primary pose, depth phase, and revolution count remain fixed.",
+      "acceptanceRow": "control:scene.the-orrery.orbit-size",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-orrery.vertical-squash",
+      "sceneLocalId": "vertical-squash",
+      "parameter": "verticalSquash",
+      "owner": "Scene",
+      "label": "Vertical squash",
+      "valueModel": "number",
+      "unit": "projection multiplier",
+      "default": 0.34,
+      "range": {
+        "minimum": 0.18,
+        "maximum": 0.55,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.34,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-orrery:vertical-squash",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed time, satellite y positions change while x radius, membership, source dimensions, and primary pose remain fixed.",
+      "acceptanceRow": "control:scene.the-orrery.vertical-squash",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-orrery.satellite-scale",
+      "sceneLocalId": "satellite-scale",
+      "parameter": "satelliteScale",
+      "owner": "Scene",
+      "label": "Satellite scale",
+      "valueModel": "number",
+      "unit": "minimum-canvas fraction",
+      "default": 0.19,
+      "range": {
+        "minimum": 0.12,
+        "maximum": 0.28,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.19,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-orrery:satellite-scale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Satellite width/height change proportionally while primary size, ring poses, membership, and source order remain fixed.",
+      "acceptanceRow": "control:scene.the-orrery.satellite-scale",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "timeline.pace",
+      "sceneLocalId": "orbit-pace",
+      "parameter": "orbitPace",
+      "owner": "Timeline",
+      "label": "Orbit pace",
+      "valueModel": "number",
+      "unit": "timeline compilation multiplier",
+      "default": 1,
+      "range": {
+        "minimum": 0.6,
+        "maximum": 1.4,
+        "step": 0.05
+      },
+      "options": null,
+      "resetValue": 1,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-orrery:orbit-pace",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Compiled duration changes from 20 seconds at 0.6 to 8.571429 seconds at 1.4; normalized pose and exact seam remain identical.",
+      "acceptanceRow": "control:timeline.pace",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

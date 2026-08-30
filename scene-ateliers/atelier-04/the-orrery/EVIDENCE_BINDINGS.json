@@ -1,0 +1,226 @@
+{
+  "schemaVersion": "1.1.0",
+  "sceneId": "the-orrery",
+  "sourceArchive": "GALILEO_ATELIER_04_SPATIAL_OBJECTS_PARITY_HANDOFF_2026-08-28(1).zip",
+  "sourceEvaluatorSha256": "3b1df09f29f9b35f123c29355c4d7be101aa31bc8ae1276ad49b03fbaa870fbb",
+  "evidenceCount": 26,
+  "files": [
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/ALPHA_ANALYSIS.json",
+      "sha256": "7205bcb7d5976247f3757f2a94a818041a406cd5e769fe8b8c61a615bc7e6506",
+      "byteSize": 235,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/CAPTURE_MANIFEST.sha256",
+      "sha256": "a249a0457818bc196a34b897761b40d5897fd24a520418d12d0f792e4684c19c",
+      "byteSize": 2107,
+      "proofClass": "hash ledger",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/CAPTURE_RECEIPT.json",
+      "sha256": "4d1d4eb7ca20001db3d0f8ddeb65fbea6723802aed3456752041ebcd1f610197",
+      "byteSize": 64338,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/RESOURCE_LIFECYCLE_NOTES.md",
+      "sha256": "5d424d817bebc9b98509a2c291abcb4ef2cb2954c4ea748b7613b0e27c6a3a0e",
+      "byteSize": 1233,
+      "proofClass": "prose/limitations",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/TEST_VECTOR_READBACK.json",
+      "sha256": "96b8e73a90acc63448ca2059e73a6b62af1c78d601308a76381fd6d952509a22",
+      "byteSize": 25484,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/captures/alpha-over-black.png",
+      "sha256": "b26f343af8ae427d6d90418a421e14586bbd5386ab018eb838b9d09e658730b9",
+      "byteSize": 31138,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/captures/alpha-over-blue.png",
+      "sha256": "6a6c41f2bbd8b187fa55a271ebe324a408a6749d6540daa0f3f84b274f1b71a0",
+      "byteSize": 31478,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/captures/alpha-over-checkerboard.png",
+      "sha256": "3d96a62cbaa5bf76939a38e4f8dd708795ffbf92a5a86749e868ce02bf392085",
+      "byteSize": 32265,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/captures/alpha-over-red.png",
+      "sha256": "d67bc066be05a2f1c08e202f4c82d3e02055e6244735228218cd981669d63806",
+      "byteSize": 31521,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/captures/alpha-over-white.png",
+      "sha256": "e6c5ace6da4d19aeb92eb95d0d59efad3f19b6f85c6e3119b11c574e5d26bb06",
+      "byteSize": 30680,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/captures/alpha-transparent.png",
+      "sha256": "6509811dbda0f0d6e87e84c8293407ed33b5bbbeb4933351940bc27f07488535",
+      "byteSize": 34297,
+      "proofClass": "raw-alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/captures/canonical-nested-planes.png",
+      "sha256": "6de2cbfe7681ba68dc12b4a5c1ab751bda0379b9a588e73b9883badeea4d5287",
+      "byteSize": 45961,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/captures/portrait-many-bounded.png",
+      "sha256": "b457e188027efb371bd654b37d53c42ba86e78cf036ede0f05162b55396ad9dd",
+      "byteSize": 29891,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/captures/primary-exchange-mid.png",
+      "sha256": "87df5b6e284099a069e027569294089a1305d976a81151fac7f34ace26cbc83b",
+      "byteSize": 47960,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/frames/frame-000.png",
+      "sha256": "c544900e586d819ef867e405ab011f0fe724d7eb3982490009c3d78da46c1aa9",
+      "byteSize": 25438,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/frames/frame-001.png",
+      "sha256": "5a1a845d9cf1a0ab0eeb6b197cce14a931be271a905fd5daa59f8bc105a49f6f",
+      "byteSize": 53198,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/frames/frame-002.png",
+      "sha256": "f0c957172825d03e02bf7bc65728130890a969f2db3249244cad136ebdd657f7",
+      "byteSize": 44939,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/frames/frame-003.png",
+      "sha256": "4dc1a699988fb45de377d330ab167e2242026571f0c2ff73c51d1c12b083472f",
+      "byteSize": 51500,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/frames/frame-004.png",
+      "sha256": "cf7828ef01cb2d4667e22074da9dc0342ed6626374fbb029a1b49678023cfb36",
+      "byteSize": 47370,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/frames/frame-005.png",
+      "sha256": "d0000ce37d3557ce790f95030790b33bd678251d239d459ce4ec0b99358bb51d",
+      "byteSize": 51295,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/frames/frame-006.png",
+      "sha256": "3e37e00dc3dfb327fc7d4ab472836131a3958a54a4ca49611ca49c1c3e1624f4",
+      "byteSize": 52442,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/frames/frame-007.png",
+      "sha256": "1f95fd7916fd7fc416ff15098dcac9466268009f24ed79cef64c62fe03643e59",
+      "byteSize": 51101,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/frames/frame-008.png",
+      "sha256": "8028198b53cdeca3ef4c39541e9cdd0b90f712468fbb363f5a167e6f13f58e78",
+      "byteSize": 47314,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/frames/frame-009.png",
+      "sha256": "9943396c1361e2665335c2c607ae8fb9dcac724b6accc79c0c98bbcd99b74244",
+      "byteSize": 53932,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/frames/frame-010.png",
+      "sha256": "12eff9390770abf277c55df60f11493ff708c2b49bd255a95a187ae56cef70b1",
+      "byteSize": 58218,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-orrery/evidence/frames/frame-011.png",
+      "sha256": "b83314b1d063903a8b5b7dbca2a5d95a81ee491e851a47c0d66c2176145ae370",
+      "byteSize": 25095,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    }
+  ],
+  "validationBindings": [
+    "07_VALIDATION/browser-receipts/the-orrery.json",
+    "07_VALIDATION/alpha-receipts/the-orrery.json",
+    "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "07_VALIDATION/resource-receipts/RESOURCE_LIFECYCLE_SUMMARY.json"
+  ],
+  "claimBoundary": "Evidence proves declared mechanics by proof class. Static images do not prove motion; encoded clips do not restore omitted raw frame ledgers; human verdict remains pending.",
+  "humanVerdict": "pending",
+  "productIntegration": "no"
+}

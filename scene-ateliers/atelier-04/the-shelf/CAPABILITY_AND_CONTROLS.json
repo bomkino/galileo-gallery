@@ -1,0 +1,157 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-shelf",
+  "sourceContractSha256": "44b4123a6a4f86140f95ecd16b69553a1b82f45fe4a44bb73603f93044d21703",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.the-shelf.card-height",
+      "sceneLocalId": "card-height",
+      "parameter": "cardHeight",
+      "owner": "Scene",
+      "label": "Card height",
+      "valueModel": "number",
+      "unit": "canvas-height fraction before width bound",
+      "default": 0.42,
+      "range": {
+        "minimum": 0.28,
+        "maximum": 0.58,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.42,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-shelf:card-height",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed media/canvas/time, source heights and natural-ratio widths change while track order, baseline, identity lean sign, source treatment, and phase remain fixed.",
+      "acceptanceRow": "control:scene.the-shelf.card-height",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-shelf.gap",
+      "sceneLocalId": "gap",
+      "parameter": "gap",
+      "owner": "Scene",
+      "label": "Gap",
+      "valueModel": "number",
+      "unit": "design pixels at evaluated canvas",
+      "default": 34,
+      "range": {
+        "minimum": 8,
+        "maximum": 120,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 34,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-shelf:gap",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Track length, source centres, and visible spacing change deterministically while source dimensions, order, baseline, treatment, and per-ID lean remain fixed.",
+      "acceptanceRow": "control:scene.the-shelf.gap",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-shelf.lean-amount",
+      "sceneLocalId": "lean-amount",
+      "parameter": "leanAmount",
+      "owner": "Scene",
+      "label": "Lean amount",
+      "valueModel": "number",
+      "unit": "degrees",
+      "default": 2.5,
+      "range": {
+        "minimum": 0,
+        "maximum": 6,
+        "step": 0.25
+      },
+      "options": null,
+      "resetValue": 2.5,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-shelf:lean-amount",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed source/time, baseLeanDeg magnitude changes proportionally while width, baseline, x position, source pixels, and stable hash sign remain fixed.",
+      "acceptanceRow": "control:scene.the-shelf.lean-amount",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "timeline.direction",
+      "sceneLocalId": "direction",
+      "parameter": "direction",
+      "owner": "Timeline",
+      "label": "Direction",
+      "valueModel": "enum",
+      "unit": "unitless",
+      "default": "forward",
+      "range": null,
+      "options": [
+        "forward",
+        "reverse"
+      ],
+      "resetValue": "forward",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-shelf:direction",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed story time, phase mirrors to the forward state at `1−t`; source order, geometry, baseline, and treatment remain fixed.",
+      "acceptanceRow": "control:timeline.direction",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-shelf.spotlight-lift",
+      "sceneLocalId": "spotlight-lift",
+      "parameter": "spotlightLift",
+      "owner": "Scene",
+      "label": "Spotlight lift",
+      "valueModel": "number",
+      "unit": "canvas-height fraction",
+      "default": 0.08,
+      "range": {
+        "minimum": 0.03,
+        "maximum": 0.14,
+        "step": 0.005
+      },
+      "options": null,
+      "resetValue": 0.08,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-shelf:spotlight-lift",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "During a focus hold, selected bottomY changes by the authored lift and lean becomes zero; neighbours, track phase, source scale, opacity, filter, and blend remain fixed.",
+      "acceptanceRow": "control:scene.the-shelf.spotlight-lift",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

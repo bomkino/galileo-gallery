@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "vitrine",
+  "atelier": 4,
+  "sourceArchive": "GALILEO_ATELIER_04_SPATIAL_OBJECTS_PARITY_HANDOFF_2026-08-28(1).zip",
+  "sourceArchiveSha256": "4b40dd64b9756d9e4d125f89869ac768329f08b73c0d7856d0383d922ae3aaf2",
+  "sourceRoot": "GALILEO_ATELIER_04_SPATIAL_OBJECTS_PARITY_HANDOFF/payload/scene-ateliers/atelier-04/vitrine",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "8ef43774b7753fe63aa849d39ebee4d08b18d09d0a0574ad15f057e19a2dfb90",
+    "rendererOwnsStoryClock": false
+  },
+  "controlCount": 5,
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "catalogueRegistration": "no",
+  "release": "no",
+  "claimBoundary": "Parity candidate packet; no Product integration or human acceptance.",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/vitrine.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  },
+  "currentFiles": {
+    "sceneContractSha256": "c09a3b8cbcdcf222fbe3bb64ce21b1d9ff5c861eca3b613ed43ad3c42165b904",
+    "controlContractSha256": "5448975a70606984477d838efe48dc4f87af2f8162c651f44a905b30bffba37d",
+    "acceptanceMatrixSha256": "8bbe67e52ad0e8b8a49fee65c169939f1916f7b21d20bf46967da37513c93d20",
+    "evidenceBindingsSha256": "2298e88c6d0af3f05a7121dbed6813af0a478483c998066d1204544d4060e7ee"
+  }
+}

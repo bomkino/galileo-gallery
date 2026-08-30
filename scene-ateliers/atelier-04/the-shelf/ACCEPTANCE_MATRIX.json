@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-shelf",
+  "rows": [
+    {
+      "id": "control:scene.the-shelf.card-height",
+      "kind": "control-causality",
+      "controlId": "scene.the-shelf.card-height",
+      "requirement": "Changing Card height must causally change At fixed media/canvas/time, source heights and natural-ratio widths change while track order, baseline, identity lean sign, source treatment, and phase remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.the-shelf.gap",
+      "kind": "control-causality",
+      "controlId": "scene.the-shelf.gap",
+      "requirement": "Changing Gap must causally change Track length, source centres, and visible spacing change deterministically while source dimensions, order, baseline, treatment, and per-ID lean remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.the-shelf.lean-amount",
+      "kind": "control-causality",
+      "controlId": "scene.the-shelf.lean-amount",
+      "requirement": "Changing Lean amount must causally change At fixed source/time, baseLeanDeg magnitude changes proportionally while width, baseline, x position, source pixels, and stable hash sign remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:timeline.direction",
+      "kind": "control-causality",
+      "controlId": "timeline.direction",
+      "requirement": "Changing Direction must causally change At fixed story time, phase mirrors to the forward state at `1−t`; source order, geometry, baseline, and treatment remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.the-shelf.spotlight-lift",
+      "kind": "control-causality",
+      "controlId": "scene.the-shelf.spotlight-lift",
+      "requirement": "Changing Spotlight lift must causally change During a focus hold, selected bottomY changes by the authored lift and lean becomes zero; neighbours, track phase, source scale, opacity, filter, and blend remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "identity",
+      "kind": "programme-invariant",
+      "requirement": "Motion and anti-motion remain recognisable after styling removal.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "source-fidelity",
+      "kind": "programme-invariant",
+      "requirement": "Clean default leaves imported source pixels untouched.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "timeline",
+      "kind": "programme-invariant",
+      "requirement": "Preview, scrub, evidence and export planning consume one semantic model.",
+      "automatedStatus": "pass: renderer-owned story clock prohibited; original evaluator verifier replay passed.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "programme-invariant",
+      "requirement": "Reduced motion preserves narrative meaning.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "lifecycle",
+      "kind": "programme-invariant",
+      "requirement": "Renderer remount and disposal remain bounded.",
+      "automatedStatus": "pass for review-shell mount/remount/disposal; Scene-native GPU/context-loss proof remains as declared in source evidence.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "human-verdict",
+      "kind": "programme-invariant",
+      "requirement": "Human visual, motion, pace, defaults and delight verdict remains pending.",
+      "automatedStatus": "not automatable",
+      "humanStatus": "pending"
+    }
+  ]
+}

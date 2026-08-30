@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "scene": {
+    "id": "vitrine",
+    "versionCandidate": 1,
+    "status": "candidate",
+    "verdict": "pending"
+  },
+  "capabilities": {
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "finite": true,
+    "loop": true,
+    "exactReverse": true,
+    "spotlight": true,
+    "finale": true,
+    "sourceVideo": true,
+    "transparent": true,
+    "reducedMotion": true,
+    "maxConcurrentSourcePlanes": 2,
+    "readableHoldSourceTreatment": {
+      "opacity": 1,
+      "filter": "none",
+      "blend": "normal"
+    },
+    "unsupported": [
+      "crossfade-only-transition",
+      "artwork-light-sweep",
+      "source-tint-or-grade",
+      "continuous-hold-sway",
+      "default-reflection",
+      "default-sheen",
+      "glow-slideshow"
+    ]
+  },
+  "defaults": {
+    "presentationScale": 0.62,
+    "objectTurnAmplitude": 5,
+    "transitionDepth": 0.18,
+    "transitionDirection": "left",
+    "placardVisibility": true
+  },
+  "controls": [
+    {
+      "id": "presentation-scale",
+      "parameter": "presentationScale",
+      "label": "Presentation scale",
+      "type": "number",
+      "bounds": {
+        "min": 0.42,
+        "max": 0.78,
+        "step": 0.01,
+        "unit": "canvas-height fraction before width bound"
+      },
+      "default": 0.62,
+      "serializedMeaning": "Sets the natural-ratio source plane height, capped by safe canvas width.",
+      "causalObservation": "At fixed source/canvas/time, source plane width and height change proportionally while centre station, source treatment, chapter identity, and exchange progress remain fixed.",
+      "reset": {
+        "value": 0.62,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Object-to-room scale defines the Scene composition.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "object-turn-amplitude",
+      "parameter": "objectTurnAmplitude",
+      "label": "Object turn amplitude",
+      "type": "number",
+      "bounds": {
+        "min": 0,
+        "max": 9,
+        "step": 0.25,
+        "unit": "degrees"
+      },
+      "default": 5,
+      "serializedMeaning": "Bounds yaw during entry, exit, and exchange; readable holds remain at zero yaw.",
+      "causalObservation": "At a sampled transition, rotateY changes while x path, chapter timing, source opacity/filter/blend, and hold pose stay fixed.",
+      "reset": {
+        "value": 5,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Bounded object turn communicates physical passage without creating continuous sway.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "transition-depth",
+      "parameter": "transitionDepth",
+      "label": "Transition depth",
+      "type": "number",
+      "bounds": {
+        "min": 0.08,
+        "max": 0.3,
+        "step": 0.01,
+        "unit": "normalized recession"
+      },
+      "default": 0.18,
+      "serializedMeaning": "Sets the bounded mid-transition recession and derived scale/y offset.",
+      "causalObservation": "At a sampled exchange, depth, scale, and derived y offset change while x endpoints, source order, opacity, filter, and blend remain fixed.",
+      "reset": {
+        "value": 0.18,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Depth passage distinguishes object exchange from flat slide movement.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "transition-direction",
+      "parameter": "transitionDirection",
+      "label": "Transition direction",
+      "type": "enum",
+      "options": [
+        "left",
+        "right"
+      ],
+      "default": "left",
+      "serializedMeaning": "Chooses the outgoing side; incoming always arrives from the opposite side.",
+      "causalObservation": "At fixed transition progress, outgoing/incoming x signs mirror while y, depth magnitude, source dimensions, and story order remain fixed.",
+      "reset": {
+        "value": "left",
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Spatial handoff direction is a Scene composition choice distinct from Timeline forward/reverse source order.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "placard-visibility",
+      "parameter": "placardVisibility",
+      "label": "Placard",
+      "type": "boolean",
+      "default": true,
+      "serializedMeaning": "Shows or hides an accessible external caption for the current readable/incoming source.",
+      "causalObservation": "Placard semantic/render state toggles without changing any source plane pose, timing, treatment, or media identity.",
+      "reset": {
+        "value": true,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "External labeling is an explicit Vitrine presentation capability, not source artwork or Look decoration.",
+      "resetBehavior": "Exact canonical reset."
+    }
+  ],
+  "serializedIntentNotControls": [
+    {
+      "id": "direction",
+      "owner": "Timeline",
+      "reason": "Source order/reverse is portable Timeline truth."
+    },
+    {
+      "id": "spotlightId",
+      "owner": "directed Timeline intent",
+      "reason": "Spotlight source selection must survive save/scrub/export."
+    },
+    {
+      "id": "finaleId",
+      "owner": "directed Timeline intent",
+      "reason": "Finale role is semantic story intent, not hidden local selection."
+    }
+  ],
+  "rejectedControls": [
+    {
+      "id": "dwell",
+      "reason": "Timeline-owned."
+    },
+    {
+      "id": "pace",
+      "reason": "Timeline-owned."
+    },
+    {
+      "id": "opacity-or-crossfade",
+      "reason": "Source must remain fully faithful; geometry owns exchange."
+    },
+    {
+      "id": "reflection",
+      "reason": "Rejected for v1; source-derived duplicate would complicate alpha and fidelity."
+    },
+    {
+      "id": "sheen-or-light-sweep",
+      "reason": "Would touch or visually wash artwork."
+    },
+    {
+      "id": "continuous-sway",
+      "reason": "Contradicts deliberate readable stillness."
+    }
+  ]
+}

@@ -1,0 +1,1815 @@
+{
+  "sceneId": "spiral-image-vortex",
+  "captureTool": "Playwright Python with system Chromium",
+  "browserVersion": "144.0.7559.96",
+  "captureCount": 4,
+  "frameSequenceCount": 12,
+  "captures": [
+    {
+      "file": "captures/canonical-near-crossing.png",
+      "fixture": "ordinary8",
+      "canvas": "16:9",
+      "normalizedTime": 0.184,
+      "transparent": false,
+      "readback": {
+        "sceneId": "spiral-image-vortex",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.184,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.184,
+        "direction": "forward",
+        "count": 8,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "turns": 3,
+        "nearId": "ordinary-001",
+        "nearDepth": 0.947098,
+        "renderNodeCount": 6,
+        "stateCount": 8,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "ordinary8",
+        "canvasPreset": "16:9",
+        "transparent": false,
+        "reducedMotion": false,
+        "exactState": [
+          {
+            "id": "ordinary-001",
+            "u": 0.816,
+            "x": 538.925,
+            "y": 552.58,
+            "depth": 0.947098,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "ordinary-002",
+            "u": 0.941,
+            "x": 315.377,
+            "y": 664.36,
+            "depth": -0.442758,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "ordinary-003",
+            "u": 0.066,
+            "x": 653.887,
+            "y": -118.1,
+            "depth": -0.320944,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "ordinary-004",
+            "u": 0.191,
+            "x": 398.71,
+            "y": -6.32,
+            "depth": 0.896641,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "ordinary-005",
+            "u": 0.316,
+            "x": 421.075,
+            "y": 105.46,
+            "depth": -0.947098,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "ordinary-006",
+            "u": 0.441,
+            "x": 644.623,
+            "y": 217.24,
+            "depth": 0.442758,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "ordinary-007",
+            "u": 0.566,
+            "x": 306.113,
+            "y": 329.02,
+            "depth": 0.320944,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "ordinary-008",
+            "u": 0.691,
+            "x": 561.29,
+            "y": 440.8,
+            "depth": -0.896641,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "captures/portrait-thread.png",
+      "fixture": "mixed21",
+      "canvas": "9:16",
+      "normalizedTime": 0.417,
+      "transparent": false,
+      "readback": {
+        "sceneId": "spiral-image-vortex",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.417,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.417,
+        "direction": "forward",
+        "count": 21,
+        "canvas": {
+          "width": 405,
+          "height": 720
+        },
+        "turns": 3,
+        "nearId": "mixed-020",
+        "nearDepth": 0.973511,
+        "renderNodeCount": 16,
+        "stateCount": 21,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "mixed21",
+        "canvasPreset": "9:16",
+        "transparent": false,
+        "reducedMotion": false,
+        "exactState": [
+          {
+            "id": "mixed-001",
+            "u": 0.583,
+            "x": 58.816,
+            "y": 458.963,
+            "depth": 0.006283,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-002",
+            "u": 0.630619,
+            "x": 112.209,
+            "y": 515.74,
+            "depth": -0.777899,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-003",
+            "u": 0.678238,
+            "x": 233.593,
+            "y": 572.517,
+            "depth": -0.976307,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-004",
+            "u": 0.725857,
+            "x": 331.563,
+            "y": 629.294,
+            "depth": -0.439536,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-005",
+            "u": 0.773476,
+            "x": 332.347,
+            "y": 686.071,
+            "depth": 0.428214,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-006",
+            "u": 0.821095,
+            "x": 235.353,
+            "y": 742.848,
+            "depth": 0.973511,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "mixed-007",
+            "u": 0.868714,
+            "x": 113.62,
+            "y": 799.625,
+            "depth": 0.785734,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-008",
+            "u": 0.916333,
+            "x": 58.816,
+            "y": 856.403,
+            "depth": 0.006283,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-009",
+            "u": 0.963952,
+            "x": 112.209,
+            "y": 913.18,
+            "depth": -0.777899,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-010",
+            "u": 0.011571,
+            "x": 233.593,
+            "y": -222.363,
+            "depth": -0.976307,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-011",
+            "u": 0.05919,
+            "x": 331.563,
+            "y": -165.586,
+            "depth": -0.439536,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-012",
+            "u": 0.10681,
+            "x": 332.347,
+            "y": -108.809,
+            "depth": 0.428214,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-013",
+            "u": 0.154429,
+            "x": 235.353,
+            "y": -52.032,
+            "depth": 0.973511,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "mixed-014",
+            "u": 0.202048,
+            "x": 113.62,
+            "y": 4.745,
+            "depth": 0.785734,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-015",
+            "u": 0.249667,
+            "x": 58.816,
+            "y": 61.523,
+            "depth": 0.006283,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-016",
+            "u": 0.297286,
+            "x": 112.209,
+            "y": 118.3,
+            "depth": -0.777899,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-017",
+            "u": 0.344905,
+            "x": 233.593,
+            "y": 175.077,
+            "depth": -0.976307,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-018",
+            "u": 0.392524,
+            "x": 331.563,
+            "y": 231.854,
+            "depth": -0.439536,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-019",
+            "u": 0.440143,
+            "x": 332.347,
+            "y": 288.631,
+            "depth": 0.428214,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "mixed-020",
+            "u": 0.487762,
+            "x": 235.353,
+            "y": 345.408,
+            "depth": 0.973511,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "mixed-021",
+            "u": 0.535381,
+            "x": 113.62,
+            "y": 402.185,
+            "depth": 0.785734,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "captures/many-bounded.png",
+      "fixture": "many127",
+      "canvas": "4:5",
+      "normalizedTime": 0.583,
+      "transparent": false,
+      "readback": {
+        "sceneId": "spiral-image-vortex",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.583,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.583,
+        "direction": "forward",
+        "count": 127,
+        "canvas": {
+          "width": 576,
+          "height": 720
+        },
+        "turns": 3,
+        "nearId": "many-054",
+        "nearDepth": 0.999826,
+        "renderNodeCount": 17,
+        "stateCount": 127,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "many127",
+        "canvasPreset": "4:5",
+        "transparent": false,
+        "reducedMotion": false,
+        "exactState": [
+          {
+            "id": "many-001",
+            "u": 0.417,
+            "x": 492.351,
+            "y": 261.037,
+            "depth": 0.006283,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-002",
+            "u": 0.424874,
+            "x": 489.914,
+            "y": 270.426,
+            "depth": 0.154089,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-003",
+            "u": 0.432748,
+            "x": 483.038,
+            "y": 279.814,
+            "depth": 0.298506,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-004",
+            "u": 0.440622,
+            "x": 471.873,
+            "y": 289.202,
+            "depth": 0.436359,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-005",
+            "u": 0.448496,
+            "x": 456.665,
+            "y": 298.591,
+            "depth": 0.564618,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-006",
+            "u": 0.45637,
+            "x": 437.748,
+            "y": 307.979,
+            "depth": 0.680461,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-007",
+            "u": 0.464244,
+            "x": 415.538,
+            "y": 317.368,
+            "depth": 0.781342,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-008",
+            "u": 0.472118,
+            "x": 390.525,
+            "y": 326.756,
+            "depth": 0.865043,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-009",
+            "u": 0.479992,
+            "x": 363.256,
+            "y": 336.144,
+            "depth": 0.929722,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-010",
+            "u": 0.487866,
+            "x": 334.333,
+            "y": 345.533,
+            "depth": 0.973958,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-011",
+            "u": 0.49574,
+            "x": 304.391,
+            "y": 354.921,
+            "depth": 0.996778,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-012",
+            "u": 0.503614,
+            "x": 274.089,
+            "y": 364.309,
+            "depth": 0.99768,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-013",
+            "u": 0.511488,
+            "x": 244.093,
+            "y": 373.698,
+            "depth": 0.976645,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-014",
+            "u": 0.519362,
+            "x": 215.062,
+            "y": 383.086,
+            "depth": 0.934135,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-015",
+            "u": 0.527236,
+            "x": 187.634,
+            "y": 392.474,
+            "depth": 0.871084,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-016",
+            "u": 0.53511,
+            "x": 162.414,
+            "y": 401.863,
+            "depth": 0.78888,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-017",
+            "u": 0.542984,
+            "x": 139.955,
+            "y": 411.251,
+            "depth": 0.689329,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-018",
+            "u": 0.550858,
+            "x": 120.752,
+            "y": 420.639,
+            "depth": 0.574621,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-019",
+            "u": 0.558732,
+            "x": 105.226,
+            "y": 430.028,
+            "depth": 0.447277,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-020",
+            "u": 0.566606,
+            "x": 93.719,
+            "y": 439.416,
+            "depth": 0.310099,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-021",
+            "u": 0.57448,
+            "x": 86.484,
+            "y": 448.804,
+            "depth": 0.166102,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-022",
+            "u": 0.582354,
+            "x": 83.68,
+            "y": 458.193,
+            "depth": 0.018453,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-023",
+            "u": 0.590228,
+            "x": 85.369,
+            "y": 467.581,
+            "depth": -0.129602,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-024",
+            "u": 0.598102,
+            "x": 91.513,
+            "y": 476.969,
+            "depth": -0.274808,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-025",
+            "u": 0.605976,
+            "x": 101.978,
+            "y": 486.358,
+            "depth": -0.41397,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-026",
+            "u": 0.61385,
+            "x": 116.533,
+            "y": 495.746,
+            "depth": -0.54403,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-027",
+            "u": 0.621724,
+            "x": 134.858,
+            "y": 505.134,
+            "depth": -0.662128,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-028",
+            "u": 0.629598,
+            "x": 156.551,
+            "y": 514.523,
+            "depth": -0.765666,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-029",
+            "u": 0.637472,
+            "x": 181.134,
+            "y": 523.911,
+            "depth": -0.852369,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-030",
+            "u": 0.645346,
+            "x": 208.067,
+            "y": 533.299,
+            "depth": -0.920329,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-031",
+            "u": 0.65322,
+            "x": 236.758,
+            "y": 542.688,
+            "depth": -0.968052,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-032",
+            "u": 0.661094,
+            "x": 266.575,
+            "y": 552.076,
+            "depth": -0.994489,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-033",
+            "u": 0.668969,
+            "x": 296.864,
+            "y": 561.465,
+            "depth": -0.999059,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-034",
+            "u": 0.676843,
+            "x": 326.957,
+            "y": 570.853,
+            "depth": -0.981661,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-035",
+            "u": 0.684717,
+            "x": 356.194,
+            "y": 580.241,
+            "depth": -0.942677,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-036",
+            "u": 0.692591,
+            "x": 383.932,
+            "y": 589.63,
+            "depth": -0.882966,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-037",
+            "u": 0.700465,
+            "x": 409.56,
+            "y": 599.018,
+            "depth": -0.803839,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-038",
+            "u": 0.708339,
+            "x": 432.515,
+            "y": 608.406,
+            "depth": -0.707037,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-039",
+            "u": 0.716213,
+            "x": 452.292,
+            "y": 617.795,
+            "depth": -0.594688,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-040",
+            "u": 0.724087,
+            "x": 468.457,
+            "y": 627.183,
+            "depth": -0.469263,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-041",
+            "u": 0.731961,
+            "x": 480.654,
+            "y": 636.571,
+            "depth": -0.333519,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-042",
+            "u": 0.739835,
+            "x": 488.615,
+            "y": 645.96,
+            "depth": -0.190442,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-043",
+            "u": 0.747709,
+            "x": 492.164,
+            "y": 655.348,
+            "depth": -0.043177,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-044",
+            "u": 0.755583,
+            "x": 491.224,
+            "y": 664.736,
+            "depth": 0.105037,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-045",
+            "u": 0.763457,
+            "x": 485.816,
+            "y": 674.125,
+            "depth": 0.250941,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-046",
+            "u": 0.771331,
+            "x": 476.058,
+            "y": 683.513,
+            "depth": 0.391328,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-047",
+            "u": 0.779205,
+            "x": 462.164,
+            "y": 692.901,
+            "depth": 0.52311,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-048",
+            "u": 0.787079,
+            "x": 444.442,
+            "y": 702.29,
+            "depth": 0.64339,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-049",
+            "u": 0.794953,
+            "x": 423.279,
+            "y": 711.678,
+            "depth": 0.749522,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-050",
+            "u": 0.802827,
+            "x": 399.141,
+            "y": 721.066,
+            "depth": 0.839173,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-051",
+            "u": 0.810701,
+            "x": 372.56,
+            "y": 730.455,
+            "depth": 0.910372,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-052",
+            "u": 0.818575,
+            "x": 344.119,
+            "y": 739.843,
+            "depth": 0.961554,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-053",
+            "u": 0.826449,
+            "x": 314.445,
+            "y": 749.231,
+            "depth": 0.991592,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-054",
+            "u": 0.834323,
+            "x": 284.189,
+            "y": 758.62,
+            "depth": 0.999826,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-055",
+            "u": 0.842197,
+            "x": 254.016,
+            "y": 768.008,
+            "depth": 0.986076,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-056",
+            "u": 0.850071,
+            "x": 224.591,
+            "y": 777.396,
+            "depth": 0.950643,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-057",
+            "u": 0.857945,
+            "x": 196.561,
+            "y": 786.785,
+            "depth": 0.894307,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-058",
+            "u": 0.865819,
+            "x": 170.54,
+            "y": 796.173,
+            "depth": 0.818306,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-059",
+            "u": 0.873693,
+            "x": 147.103,
+            "y": 805.562,
+            "depth": 0.724312,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-060",
+            "u": 0.881567,
+            "x": 126.764,
+            "y": 814.95,
+            "depth": 0.614391,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-061",
+            "u": 0.889441,
+            "x": 109.97,
+            "y": 824.338,
+            "depth": 0.490961,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-062",
+            "u": 0.897315,
+            "x": 97.091,
+            "y": 833.727,
+            "depth": 0.356735,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-063",
+            "u": 0.905189,
+            "x": 88.409,
+            "y": 843.115,
+            "depth": 0.214666,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-064",
+            "u": 0.913063,
+            "x": 84.116,
+            "y": 852.503,
+            "depth": 0.067875,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-065",
+            "u": 0.920937,
+            "x": 84.307,
+            "y": 861.892,
+            "depth": -0.080407,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-066",
+            "u": 0.928811,
+            "x": 88.976,
+            "y": 871.28,
+            "depth": -0.226922,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-067",
+            "u": 0.936685,
+            "x": 98.022,
+            "y": 880.668,
+            "depth": -0.368447,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-068",
+            "u": 0.944559,
+            "x": 111.245,
+            "y": 890.057,
+            "depth": -0.50187,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-069",
+            "u": 0.952433,
+            "x": 128.354,
+            "y": 899.445,
+            "depth": -0.624258,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-070",
+            "u": 0.960307,
+            "x": 148.974,
+            "y": 908.833,
+            "depth": -0.732919,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-071",
+            "u": 0.968181,
+            "x": 172.651,
+            "y": 918.222,
+            "depth": -0.825464,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-072",
+            "u": 0.976055,
+            "x": 198.864,
+            "y": 927.61,
+            "depth": -0.899859,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-073",
+            "u": 0.983929,
+            "x": 227.038,
+            "y": 936.998,
+            "depth": -0.954467,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-074",
+            "u": 0.991803,
+            "x": 256.551,
+            "y": 946.387,
+            "depth": -0.988088,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-075",
+            "u": 0.999677,
+            "x": 286.756,
+            "y": 955.775,
+            "depth": -0.999981,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-076",
+            "u": 0.007551,
+            "x": 316.989,
+            "y": -227.157,
+            "depth": -0.989887,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-077",
+            "u": 0.015425,
+            "x": 346.584,
+            "y": -217.768,
+            "depth": -0.958027,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-078",
+            "u": 0.023299,
+            "x": 374.891,
+            "y": -208.38,
+            "depth": -0.905101,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-079",
+            "u": 0.031173,
+            "x": 401.287,
+            "y": -198.992,
+            "depth": -0.832273,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-080",
+            "u": 0.039047,
+            "x": 425.193,
+            "y": -189.603,
+            "depth": -0.741144,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-081",
+            "u": 0.046921,
+            "x": 446.081,
+            "y": -180.215,
+            "depth": -0.633719,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-082",
+            "u": 0.054795,
+            "x": 463.494,
+            "y": -170.826,
+            "depth": -0.512359,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-083",
+            "u": 0.062669,
+            "x": 477.048,
+            "y": -161.438,
+            "depth": -0.379733,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "many-084",
+            "u": 0.070543,
+            "x": 486.445,
+            "y": -152.05,
+            "depth": -0.238758,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-085",
+            "u": 0.078417,
+            "x": 491.478,
+            "y": -142.661,
+            "depth": -0.092532,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-086",
+            "u": 0.086291,
+            "x": 492.037,
+            "y": -133.273,
+            "depth": 0.055728,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-087",
+            "u": 0.094165,
+            "x": 488.11,
+            "y": -123.885,
+            "depth": 0.202763,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-088",
+            "u": 0.102039,
+            "x": 479.782,
+            "y": -114.496,
+            "depth": 0.345339,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-089",
+            "u": 0.109913,
+            "x": 467.238,
+            "y": -105.108,
+            "depth": 0.480322,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-090",
+            "u": 0.117787,
+            "x": 450.752,
+            "y": -95.72,
+            "depth": 0.604744,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-091",
+            "u": 0.125661,
+            "x": 430.688,
+            "y": -86.331,
+            "depth": 0.715867,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-092",
+            "u": 0.133535,
+            "x": 407.486,
+            "y": -76.943,
+            "depth": 0.81125,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-093",
+            "u": 0.141409,
+            "x": 381.657,
+            "y": -67.555,
+            "depth": 0.888795,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-094",
+            "u": 0.149283,
+            "x": 353.768,
+            "y": -58.166,
+            "depth": 0.946796,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-095",
+            "u": 0.157157,
+            "x": 324.434,
+            "y": -48.778,
+            "depth": 0.983979,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-096",
+            "u": 0.165031,
+            "x": 294.298,
+            "y": -39.39,
+            "depth": 0.999525,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-097",
+            "u": 0.172906,
+            "x": 264.023,
+            "y": -30.001,
+            "depth": 0.993093,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-098",
+            "u": 0.18078,
+            "x": 234.276,
+            "y": -20.613,
+            "depth": 0.964825,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-099",
+            "u": 0.188654,
+            "x": 205.71,
+            "y": -11.225,
+            "depth": 0.915341,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "many-100",
+            "u": 0.196528,
+            "x": 178.954,
+            "y": -1.836,
+            "depth": 0.84573,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-101",
+            "u": 0.204402,
+            "x": 154.595,
+            "y": 7.552,
+            "depth": 0.757523,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-102",
+            "u": 0.212276,
+            "x": 133.17,
+            "y": 16.94,
+            "depth": 0.652659,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-103",
+            "u": 0.22015,
+            "x": 115.149,
+            "y": 26.329,
+            "depth": 0.533444,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-104",
+            "u": 0.228024,
+            "x": 100.929,
+            "y": 35.717,
+            "depth": 0.402499,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-105",
+            "u": 0.235898,
+            "x": 90.823,
+            "y": 45.105,
+            "depth": 0.262704,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-106",
+            "u": 0.243772,
+            "x": 85.052,
+            "y": 54.494,
+            "depth": 0.117132,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-107",
+            "u": 0.251646,
+            "x": 83.744,
+            "y": 63.882,
+            "depth": -0.031015,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-108",
+            "u": 0.25952,
+            "x": 86.926,
+            "y": 73.271,
+            "depth": -0.17848,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-109",
+            "u": 0.267394,
+            "x": 94.531,
+            "y": 82.659,
+            "depth": -0.322021,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-110",
+            "u": 0.275268,
+            "x": 106.389,
+            "y": 92.047,
+            "depth": -0.458481,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-111",
+            "u": 0.283142,
+            "x": 122.241,
+            "y": 101.436,
+            "depth": -0.58486,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-112",
+            "u": 0.291016,
+            "x": 141.737,
+            "y": 110.824,
+            "depth": -0.698378,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-113",
+            "u": 0.29889,
+            "x": 164.45,
+            "y": 120.212,
+            "depth": -0.79654,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-114",
+            "u": 0.306764,
+            "x": 189.879,
+            "y": 129.601,
+            "depth": -0.877187,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-115",
+            "u": 0.314638,
+            "x": 217.466,
+            "y": 138.989,
+            "depth": -0.938546,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-116",
+            "u": 0.322512,
+            "x": 246.604,
+            "y": 148.377,
+            "depth": -0.979268,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-117",
+            "u": 0.330386,
+            "x": 276.652,
+            "y": 157.766,
+            "depth": -0.998457,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-118",
+            "u": 0.33826,
+            "x": 306.95,
+            "y": 167.154,
+            "depth": -0.995691,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-119",
+            "u": 0.346134,
+            "x": 336.831,
+            "y": 176.542,
+            "depth": -0.971032,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-120",
+            "u": 0.354008,
+            "x": 365.638,
+            "y": 185.931,
+            "depth": -0.925021,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-121",
+            "u": 0.361882,
+            "x": 392.738,
+            "y": 195.319,
+            "depth": -0.85867,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-122",
+            "u": 0.369756,
+            "x": 417.535,
+            "y": 204.707,
+            "depth": -0.773438,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-123",
+            "u": 0.37763,
+            "x": 439.484,
+            "y": 214.096,
+            "depth": -0.671199,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-124",
+            "u": 0.385504,
+            "x": 458.101,
+            "y": 223.484,
+            "depth": -0.554202,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-125",
+            "u": 0.393378,
+            "x": 472.979,
+            "y": 232.872,
+            "depth": -0.425018,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-126",
+            "u": 0.401252,
+            "x": 483.789,
+            "y": 242.261,
+            "depth": -0.286489,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "many-127",
+            "u": 0.409126,
+            "x": 490.294,
+            "y": 251.649,
+            "depth": -0.14166,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "captures/alpha-transparent.png",
+      "fixture": "mediaEdge",
+      "canvas": "1:1",
+      "normalizedTime": 0.271,
+      "transparent": true,
+      "readback": {
+        "sceneId": "spiral-image-vortex",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.271,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.271,
+        "direction": "forward",
+        "count": 8,
+        "canvas": {
+          "width": 640,
+          "height": 640
+        },
+        "turns": 3,
+        "nearId": "media-edge-002",
+        "nearDepth": 0.925077,
+        "renderNodeCount": 6,
+        "stateCount": 8,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "mediaEdge",
+        "canvasPreset": "1:1",
+        "transparent": true,
+        "reducedMotion": false,
+        "exactState": [
+          {
+            "id": "media-edge-001",
+            "u": 0.729,
+            "x": 512.044,
+            "y": 562.703,
+            "depth": -0.385584,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "media-edge-002",
+            "u": 0.854,
+            "x": 240.953,
+            "y": 695.183,
+            "depth": 0.925077,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "media-edge-003",
+            "u": 0.979,
+            "x": 239.745,
+            "y": 827.663,
+            "depth": -0.922673,
+            "visible": false,
+            "seamZone": true,
+            "nearPass": false
+          },
+          {
+            "id": "media-edge-004",
+            "u": 0.104,
+            "x": 512.545,
+            "y": -99.697,
+            "depth": 0.379779,
+            "visible": false,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "media-edge-005",
+            "u": 0.229,
+            "x": 127.956,
+            "y": 32.783,
+            "depth": 0.385584,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "media-edge-006",
+            "u": 0.354,
+            "x": 399.047,
+            "y": 165.263,
+            "depth": -0.925077,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          },
+          {
+            "id": "media-edge-007",
+            "u": 0.479,
+            "x": 400.255,
+            "y": 297.743,
+            "depth": 0.922673,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": true
+          },
+          {
+            "id": "media-edge-008",
+            "u": 0.604,
+            "x": 127.455,
+            "y": 430.223,
+            "depth": -0.379779,
+            "visible": true,
+            "seamZone": false,
+            "nearPass": false
+          }
+        ]
+      }
+    }
+  ],
+  "alpha": {
+    "source": "captures/alpha-transparent.png",
+    "width": 640,
+    "height": 640,
+    "alphaZeroPixels": 322138,
+    "alphaZeroWithNonZeroRgb": 0,
+    "partialAlphaPixels": 4794,
+    "opaquePixels": 82668,
+    "passZeroRgbBelowZeroAlpha": true
+  },
+  "manifest": "CAPTURE_MANIFEST.sha256",
+  "limitations": [
+    "Generated local SVG fixtures prove helix geometry and treatment state, not arbitrary decoded RGB equivalence.",
+    "The deterministic frame sequence supports motion review but is not a human verdict."
+  ],
+  "captureCountMeaning": "Canonical/edge/transparent source captures listed in `captures`; alpha composites are counted separately.",
+  "alphaCompositeCount": 5,
+  "totalCapturePngCount": 9
+}

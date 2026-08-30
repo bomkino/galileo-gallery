@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "scene": {
+    "id": "zoetrope",
+    "versionCandidate": 1,
+    "status": "candidate",
+    "verdict": "pending"
+  },
+  "capabilities": {
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "finite": true,
+    "loop": true,
+    "exactReverse": true,
+    "spotlight": true,
+    "finale": true,
+    "sourceVideo": true,
+    "transparent": true,
+    "reducedMotion": true,
+    "axes": [
+      "horizontal-cylinder"
+    ],
+    "unsupported": [
+      "vertical-axis",
+      "pointer-momentum-project-authority",
+      "random-impulse",
+      "speed-blur",
+      "artwork-lighting"
+    ]
+  },
+  "defaults": {
+    "cylinderRadius": 0.39,
+    "cardSize": 0.31,
+    "ringTiltDeg": -4,
+    "cadenceCharacter": "ratchet",
+    "direction": "forward"
+  },
+  "controls": [
+    {
+      "id": "cylinder-radius",
+      "parameter": "cylinderRadius",
+      "label": "Cylinder radius",
+      "type": "number",
+      "bounds": {
+        "min": 0.28,
+        "max": 0.48,
+        "step": 0.01,
+        "unit": "normalized apparatus capacity"
+      },
+      "default": 0.39,
+      "serializedMeaning": "Scales the projected horizontal radius before portrait recomposition.",
+      "causalObservation": "At fixed media, canvas, and story time, every non-gate card changes x position while source order, phase, and card size remain unchanged.",
+      "reset": {
+        "value": 0.39,
+        "behavior": "Exact canonical reset; no retained local offset."
+      },
+      "ownershipReason": "Defines Scene apparatus geometry and cannot be derived from Timeline or Look.",
+      "resetBehavior": "Exact canonical reset; no retained local offset."
+    },
+    {
+      "id": "card-size",
+      "parameter": "cardSize",
+      "label": "Card size",
+      "type": "number",
+      "bounds": {
+        "min": 0.22,
+        "max": 0.42,
+        "step": 0.01,
+        "unit": "canvas-height fraction"
+      },
+      "default": 0.31,
+      "serializedMeaning": "Sets natural-ratio card height before portrait wide-card reduction.",
+      "causalObservation": "At fixed geometry and time, card width and height change proportionally while angular position and phase remain unchanged.",
+      "reset": {
+        "value": 0.31,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Source presentation scale is intrinsic to the Scene composition.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "ring-tilt",
+      "parameter": "ringTiltDeg",
+      "label": "Ring tilt",
+      "type": "number",
+      "bounds": {
+        "min": -12,
+        "max": 8,
+        "step": 1,
+        "unit": "degrees"
+      },
+      "default": -4,
+      "serializedMeaning": "Tilts the cylinder horizon without changing source order or gate position.",
+      "causalObservation": "At fixed phase, side-card y positions and rotateZ change; the front gate remains centred and source pixels remain untreated.",
+      "reset": {
+        "value": -4,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Physical horizon is Scene geometry, not a Look treatment.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "cadence-character",
+      "parameter": "cadenceCharacter",
+      "label": "Cadence",
+      "type": "enum",
+      "options": [
+        "ratchet",
+        "flywheel"
+      ],
+      "default": "ratchet",
+      "serializedMeaning": "Selects the normalized within-slot phase curve; it never changes Timeline duration or source order.",
+      "causalObservation": "At a non-boundary story time, phase and angular card positions differ while start/end seam, item order, and total cycle count remain identical.",
+      "reset": {
+        "value": "ratchet",
+        "behavior": "Returns to 68% eased travel and 32% gate dwell."
+      },
+      "ownershipReason": "The authored mechanical cadence is the Scene's identity-bearing motion grammar.",
+      "resetBehavior": "Returns to 68% eased travel and 32% gate dwell."
+    },
+    {
+      "id": "direction",
+      "parameter": "direction",
+      "label": "Direction",
+      "type": "enum",
+      "options": [
+        "forward",
+        "reverse"
+      ],
+      "default": "forward",
+      "serializedMeaning": "Applies a sign to evaluated phase while preserving ordered media and exact inverse paths.",
+      "causalObservation": "At fixed time, phase maps to its modular inverse and every card traverses the same cylinder in reverse.",
+      "reset": {
+        "value": "forward",
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Directional reading of the apparatus is a causal Scene choice already represented in portable Timeline intent; production integration must map one authoritative field, not duplicate it.",
+      "resetBehavior": "Exact canonical reset."
+    }
+  ],
+  "rejectedControls": [
+    {
+      "id": "pace",
+      "reason": "Timeline-owned."
+    },
+    {
+      "id": "rear-opacity",
+      "reason": "Depth derives from geometry; source dimming is forbidden."
+    },
+    {
+      "id": "front-gate-width",
+      "reason": "Derived from count and minimum readability."
+    },
+    {
+      "id": "speed-blur",
+      "reason": "Would conceal sampling failure and corrupt source."
+    },
+    {
+      "id": "pointer-momentum",
+      "reason": "Untracked local interaction cannot become Project/export authority."
+    }
+  ]
+}

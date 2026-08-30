@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "scene": {
+    "id": "the-shelf",
+    "versionCandidate": 1,
+    "status": "candidate",
+    "verdict": "pending"
+  },
+  "capabilities": {
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "finite": true,
+    "loop": true,
+    "exactReverse": true,
+    "spotlight": true,
+    "finale": true,
+    "sourceVideo": true,
+    "transparent": true,
+    "reducedMotion": true,
+    "axes": [
+      "horizontal-only"
+    ],
+    "naturalRatioWidths": true,
+    "stableBaseline": true,
+    "offstageRecycling": true,
+    "unsupported": [
+      "vertical-shelf",
+      "centre-focus-well",
+      "uniform-forced-ratio",
+      "random-lean",
+      "floating-frames",
+      "visible-project-media-duplication",
+      "neighbour-dimming"
+    ]
+  },
+  "defaults": {
+    "cardHeight": 0.42,
+    "gap": 34,
+    "leanAmount": 2.5,
+    "direction": "forward",
+    "spotlightLift": 0.08
+  },
+  "controls": [
+    {
+      "id": "card-height",
+      "parameter": "cardHeight",
+      "label": "Card height",
+      "type": "number",
+      "bounds": {
+        "min": 0.28,
+        "max": 0.58,
+        "step": 0.01,
+        "unit": "canvas-height fraction before width bound"
+      },
+      "default": 0.42,
+      "serializedMeaning": "Sets the common nominal edition height; very wide sources reduce proportionally to fit the safe canvas-width bound.",
+      "causalObservation": "At fixed media/canvas/time, source heights and natural-ratio widths change while track order, baseline, identity lean sign, source treatment, and phase remain fixed.",
+      "reset": {
+        "value": 0.42,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Edition scale determines how the collection reads and how many works fit.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "gap",
+      "parameter": "gap",
+      "label": "Gap",
+      "type": "number",
+      "bounds": {
+        "min": 8,
+        "max": 120,
+        "step": 1,
+        "unit": "design pixels at evaluated canvas"
+      },
+      "default": 34,
+      "serializedMeaning": "Sets minimum source-to-source spacing; loop-safety slack may increase effective gap uniformly.",
+      "causalObservation": "Track length, source centres, and visible spacing change deterministically while source dimensions, order, baseline, treatment, and per-ID lean remain fixed.",
+      "reset": {
+        "value": 34,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Physical spacing is intrinsic to collected editions and recycling safety.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "lean-amount",
+      "parameter": "leanAmount",
+      "label": "Lean amount",
+      "type": "number",
+      "bounds": {
+        "min": 0,
+        "max": 6,
+        "step": 0.25,
+        "unit": "degrees"
+      },
+      "default": 2.5,
+      "serializedMeaning": "Scales deterministic source-identity bottom-pivot lean; sign/order remain stable.",
+      "causalObservation": "At fixed source/time, baseLeanDeg magnitude changes proportionally while width, baseline, x position, source pixels, and stable hash sign remain fixed.",
+      "reset": {
+        "value": 2.5,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Restrained placement variation is a defining Shelf physical cue.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "direction",
+      "parameter": "direction",
+      "label": "Direction",
+      "type": "enum",
+      "options": [
+        "forward",
+        "reverse"
+      ],
+      "default": "forward",
+      "serializedMeaning": "Changes the sign of track traversal and exact finite playback direction without reordering Project media.",
+      "causalObservation": "At fixed story time, phase mirrors to the forward state at `1−t`; source order, geometry, baseline, and treatment remain fixed.",
+      "reset": {
+        "value": "forward",
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "The prototype exposes Scene direction; production must map authoritative portable Timeline direction here without duplicate state.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "spotlight-lift",
+      "parameter": "spotlightLift",
+      "label": "Spotlight lift",
+      "type": "number",
+      "bounds": {
+        "min": 0.03,
+        "max": 0.14,
+        "step": 0.005,
+        "unit": "canvas-height fraction"
+      },
+      "default": 0.08,
+      "serializedMeaning": "Sets how far the serialized Spotlight/Finale edition rises above the shared baseline while straightening.",
+      "causalObservation": "During a focus hold, selected bottomY changes by the authored lift and lean becomes zero; neighbours, track phase, source scale, opacity, filter, and blend remain fixed.",
+      "reset": {
+        "value": 0.08,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Lift is the causal Shelf-specific expression of Spotlight hierarchy.",
+      "resetBehavior": "Exact canonical reset."
+    }
+  ],
+  "serializedIntentNotControls": [
+    {
+      "id": "pace",
+      "owner": "Timeline",
+      "reason": "Walking speed and duration are story-time authority."
+    },
+    {
+      "id": "spotlightId",
+      "owner": "directed Timeline intent",
+      "reason": "Selected edition must survive save/scrub/export."
+    },
+    {
+      "id": "finaleId",
+      "owner": "directed Timeline intent",
+      "reason": "Final settled edition is semantic story intent."
+    }
+  ],
+  "rejectedControls": [
+    {
+      "id": "pace",
+      "reason": "Timeline-owned; do not densify panel."
+    },
+    {
+      "id": "per-card-lean",
+      "reason": "Identity-derived lean prevents clutter and arbitrary placement."
+    },
+    {
+      "id": "centre-bump",
+      "reason": "Would collapse into Quiet Carousel."
+    },
+    {
+      "id": "neighbour-dim",
+      "reason": "Would corrupt source fidelity and create a focus well."
+    },
+    {
+      "id": "vertical-axis",
+      "reason": "Betrays shelf metaphor."
+    },
+    {
+      "id": "ledge-material",
+      "reason": "Future Look-owned."
+    },
+    {
+      "id": "captions",
+      "reason": "Broader optional accessible caption system, not essential Scene geometry."
+    }
+  ]
+}

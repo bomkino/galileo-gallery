@@ -1,0 +1,156 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "zoetrope",
+  "sourceContractSha256": "a6a9091da97d87cbc5b89034509b5dc77a066be568f2d8261155725111504758",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.zoetrope.cylinder-radius",
+      "sceneLocalId": "cylinder-radius",
+      "parameter": "cylinderRadius",
+      "owner": "Scene",
+      "label": "Cylinder radius",
+      "valueModel": "number",
+      "unit": "normalized apparatus capacity",
+      "default": 0.39,
+      "range": {
+        "minimum": 0.28,
+        "maximum": 0.48,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.39,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "zoetrope:cylinder-radius",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed media, canvas, and story time, every non-gate card changes x position while source order, phase, and card size remain unchanged.",
+      "acceptanceRow": "control:scene.zoetrope.cylinder-radius",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.zoetrope.card-size",
+      "sceneLocalId": "card-size",
+      "parameter": "cardSize",
+      "owner": "Scene",
+      "label": "Card size",
+      "valueModel": "number",
+      "unit": "canvas-height fraction",
+      "default": 0.31,
+      "range": {
+        "minimum": 0.22,
+        "maximum": 0.42,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.31,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "zoetrope:card-size",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed geometry and time, card width and height change proportionally while angular position and phase remain unchanged.",
+      "acceptanceRow": "control:scene.zoetrope.card-size",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.zoetrope.ring-tilt",
+      "sceneLocalId": "ring-tilt",
+      "parameter": "ringTiltDeg",
+      "owner": "Scene",
+      "label": "Ring tilt",
+      "valueModel": "number",
+      "unit": "degrees",
+      "default": -4,
+      "range": {
+        "minimum": -12,
+        "maximum": 8,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": -4,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "zoetrope:ring-tilt",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed phase, side-card y positions and rotateZ change; the front gate remains centred and source pixels remain untreated.",
+      "acceptanceRow": "control:scene.zoetrope.ring-tilt",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.zoetrope.cadence-character",
+      "sceneLocalId": "cadence-character",
+      "parameter": "cadenceCharacter",
+      "owner": "Scene",
+      "label": "Cadence",
+      "valueModel": "enum",
+      "unit": "unitless",
+      "default": "ratchet",
+      "range": null,
+      "options": [
+        "ratchet",
+        "flywheel"
+      ],
+      "resetValue": "ratchet",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "zoetrope:cadence-character",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At a non-boundary story time, phase and angular card positions differ while start/end seam, item order, and total cycle count remain identical.",
+      "acceptanceRow": "control:scene.zoetrope.cadence-character",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "timeline.direction",
+      "sceneLocalId": "direction",
+      "parameter": "direction",
+      "owner": "Timeline",
+      "label": "Direction",
+      "valueModel": "enum",
+      "unit": "unitless",
+      "default": "forward",
+      "range": null,
+      "options": [
+        "forward",
+        "reverse"
+      ],
+      "resetValue": "forward",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "zoetrope:direction",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed time, phase maps to its modular inverse and every card traverses the same cylinder in reverse.",
+      "acceptanceRow": "control:timeline.direction",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

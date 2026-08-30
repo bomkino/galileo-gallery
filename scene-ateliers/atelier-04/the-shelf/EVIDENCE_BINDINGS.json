@@ -1,0 +1,234 @@
+{
+  "schemaVersion": "1.1.0",
+  "sceneId": "the-shelf",
+  "sourceArchive": "GALILEO_ATELIER_04_SPATIAL_OBJECTS_PARITY_HANDOFF_2026-08-28(1).zip",
+  "sourceEvaluatorSha256": "8520586750ccf2b51b60625dbb37d8bc54603b1c4c1db17b7aefe9661062fb60",
+  "evidenceCount": 27,
+  "files": [
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/ALPHA_ANALYSIS.json",
+      "sha256": "329933b8fd875697886bed6d2eb3be712df46cedf036ebfea29e15d779a48a16",
+      "byteSize": 299,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/CAPTURE_MANIFEST.sha256",
+      "sha256": "d6555eaf28d46863667ba9a46c77479411a324c0e0a398224e208470bc9421eb",
+      "byteSize": 2208,
+      "proofClass": "hash ledger",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/CAPTURE_RECEIPT.json",
+      "sha256": "fa051fbd34f60e01cfbc66361ebf0361a863d3d38f8ab8f058292d0297542ba2",
+      "byteSize": 78175,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/RESOURCE_LIFECYCLE_NOTES.md",
+      "sha256": "56de96ca3904c23f6d583d8e2ae72794ffbefc278884094909d5619a60bc50e9",
+      "byteSize": 1205,
+      "proofClass": "prose/limitations",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/TEST_VECTOR_READBACK.json",
+      "sha256": "7d6cb32cebb2bdd087db59ce72c2cc06015bb9a8f94fc60d40f87fbae8fa4580",
+      "byteSize": 71863,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/captures/alpha-over-black.png",
+      "sha256": "b43f478606d745d7c2816a03a529f4ec3414991082751f8f76df831bcfddc5b7",
+      "byteSize": 10651,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/captures/alpha-over-blue.png",
+      "sha256": "62375f5c075c1247a01f3ad578d82fd35efc9609511fda2e694c2e4f077466c0",
+      "byteSize": 11936,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/captures/alpha-over-checkerboard.png",
+      "sha256": "1414d98006459640c7f3325a959434936bb32c4517d6e9bc785ee87adb87ae39",
+      "byteSize": 14480,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/captures/alpha-over-red.png",
+      "sha256": "61d944392cd1bfa7f9a631775006f5f570af8bb860b709d49d08f42efd7b47a0",
+      "byteSize": 12107,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/captures/alpha-over-white.png",
+      "sha256": "47543b1f32ace68deb441e28b9bb2a7e67fd44dd0d6077a746d46d13744c9992",
+      "byteSize": 13160,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/captures/alpha-transparent.png",
+      "sha256": "644bbd4cc65b5fff1e81f8f43547f06314ba6ff0fc598af5c5cb06342697c800",
+      "byteSize": 15751,
+      "proofClass": "raw-alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/captures/canonical-collected-row.png",
+      "sha256": "919b2693dc6b30fa460649edd7789c6057cbfe3c1f4208d3644ddfe4111463cd",
+      "byteSize": 69403,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/captures/portrait-many-bounded.png",
+      "sha256": "b380c0f83dd568892093bea2555beedbfa6b61f6909ed7ffae3ecffc27133c51",
+      "byteSize": 31078,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/captures/spotlight-straighten-lift.png",
+      "sha256": "e14b375ce47df8a16d72c3441de018af0621baa95232f67c58ec3988cf117b7c",
+      "byteSize": 66243,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/captures/two-item-handoff.png",
+      "sha256": "2fc34620c25c915777b8c109b570175d7e2e2f4183371666e69d0bbed9754fe9",
+      "byteSize": 37699,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/frames/frame-000.png",
+      "sha256": "50535064fff31d237784d787c930f5c203ecc5223b4fb4b464e02dcf055cc86c",
+      "byteSize": 63466,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/frames/frame-001.png",
+      "sha256": "f93f86814bff418dc36eb5c931a2aecd5497e2c0a37319060d30ef8ba32d31b6",
+      "byteSize": 66690,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/frames/frame-002.png",
+      "sha256": "bb559b7da266b0f2840062a2b8999b12197597019ce8409bbdc937cb7c32ba23",
+      "byteSize": 69671,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/frames/frame-003.png",
+      "sha256": "093644552a89d13938d85569c4c7840a586f95b84218d0459882e7c21a25b3d4",
+      "byteSize": 65043,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/frames/frame-004.png",
+      "sha256": "5b3a2ef974b84bd8225c7fc1945f797c1a55f9af6792f8e576c86b43f951a1ed",
+      "byteSize": 65687,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/frames/frame-005.png",
+      "sha256": "15038de6afcbfb0238feb7c3472a4edd3994301a6893893c4500bb836d57e113",
+      "byteSize": 67279,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/frames/frame-006.png",
+      "sha256": "d9265044edce8dde0496ee7f47a08fcece47556421ad74109c75ce64403bf706",
+      "byteSize": 66282,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/frames/frame-007.png",
+      "sha256": "d9265044edce8dde0496ee7f47a08fcece47556421ad74109c75ce64403bf706",
+      "byteSize": 66282,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/frames/frame-008.png",
+      "sha256": "d52746f4c309b59a3d4e8b460a874b84c13e7a3c0759b3041be30a4db79283b7",
+      "byteSize": 69262,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/frames/frame-009.png",
+      "sha256": "679ba2aa847b54888a942a2726777067019ee975969a2453c1b94bd988ffb001",
+      "byteSize": 66631,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/frames/frame-010.png",
+      "sha256": "39884656cf6c8e333f0a13fe7f9ffd0986641683bb95d46f47de0772d421fc3c",
+      "byteSize": 55374,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-04/the-shelf/evidence/frames/frame-011.png",
+      "sha256": "7f70b387b82ea2b934a519ad04cab47ffc29dde01c2066a78934ea7ebad15035",
+      "byteSize": 69169,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    }
+  ],
+  "validationBindings": [
+    "07_VALIDATION/browser-receipts/the-shelf.json",
+    "07_VALIDATION/alpha-receipts/the-shelf.json",
+    "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "07_VALIDATION/resource-receipts/RESOURCE_LIFECYCLE_SUMMARY.json"
+  ],
+  "claimBoundary": "Evidence proves declared mechanics by proof class. Static images do not prove motion; encoded clips do not restore omitted raw frame ledgers; human verdict remains pending.",
+  "humanVerdict": "pending",
+  "productIntegration": "no"
+}

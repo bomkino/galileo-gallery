@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-orrery",
+  "displayName": "The Orrery",
+  "family": "spatial-objects",
+  "atelier": 4,
+  "candidateVersion": "parity-1",
+  "identity": {
+    "promise": "One source-faithful primary anchors the composition while ordered satellites travel on two or three visibly distinct orbital planes whose integer revolution relationships return the entire hierarchy to one exact loop state.",
+    "antiMotion": "Nothing becomes a generic single ring, decorative solar-system graphic, random constellation, quasi-periodic drift, click-owned state, fixed first-item hero, permanent glow, or nested constants inside the central renderer.",
+    "topology": "serialized primary plus two/three orbital planes with integer revolution relationships",
+    "focusGrammar": "primary authority and explicit directed primary exchange",
+    "finaleGrammar": "resolved primary with coherent satellite planes"
+  },
+  "sourcePolicy": {
+    "minimum": 1,
+    "recommended": 9,
+    "maximum": 127,
+    "identityAndOrder": "must survive failure, replacement, reverse and recycling"
+  },
+  "canvasSupport": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:5"
+  ],
+  "orientation": "two/three orbital planes",
+  "timeline": "automatic, fixed-duration, directed; forward/reverse",
+  "alphaPolicy": "transparent output supported; raw alpha proof quality scored separately",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "3b1df09f29f9b35f123c29355c4d7be101aa31bc8ae1276ad49b03fbaa870fbb",
+    "rendererOwnsStoryClock": false
+  },
+  "prototypeEntrypoint": "prototype/index.html",
+  "controlsRef": "CAPABILITY_AND_CONTROLS.json",
+  "acceptanceRef": "ACCEPTANCE_MATRIX.json",
+  "programme": {
+    "state": "G10B preflight candidate; implementation blocked by G10A",
+    "pressureGate": "G10B",
+    "gateStatus": "blocked"
+  },
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/the-orrery.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  }
+}

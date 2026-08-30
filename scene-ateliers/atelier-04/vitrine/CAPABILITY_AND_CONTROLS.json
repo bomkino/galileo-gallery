@@ -1,0 +1,153 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "vitrine",
+  "sourceContractSha256": "028bc3e7c4b6f8e8336d984a204a304564d8b17819f82c81ad6fd49fed1d358c",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.vitrine.presentation-scale",
+      "sceneLocalId": "presentation-scale",
+      "parameter": "presentationScale",
+      "owner": "Scene",
+      "label": "Presentation scale",
+      "valueModel": "number",
+      "unit": "canvas-height fraction before width bound",
+      "default": 0.62,
+      "range": {
+        "minimum": 0.42,
+        "maximum": 0.78,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.62,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "vitrine:presentation-scale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed source/canvas/time, source plane width and height change proportionally while centre station, source treatment, chapter identity, and exchange progress remain fixed.",
+      "acceptanceRow": "control:scene.vitrine.presentation-scale",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.vitrine.object-turn-amplitude",
+      "sceneLocalId": "object-turn-amplitude",
+      "parameter": "objectTurnAmplitude",
+      "owner": "Scene",
+      "label": "Object turn amplitude",
+      "valueModel": "number",
+      "unit": "degrees",
+      "default": 5,
+      "range": {
+        "minimum": 0,
+        "maximum": 9,
+        "step": 0.25
+      },
+      "options": null,
+      "resetValue": 5,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "vitrine:object-turn-amplitude",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At a sampled transition, rotateY changes while x path, chapter timing, source opacity/filter/blend, and hold pose stay fixed.",
+      "acceptanceRow": "control:scene.vitrine.object-turn-amplitude",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.vitrine.transition-depth",
+      "sceneLocalId": "transition-depth",
+      "parameter": "transitionDepth",
+      "owner": "Scene",
+      "label": "Transition depth",
+      "valueModel": "number",
+      "unit": "normalized recession",
+      "default": 0.18,
+      "range": {
+        "minimum": 0.08,
+        "maximum": 0.3,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.18,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "vitrine:transition-depth",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At a sampled exchange, depth, scale, and derived y offset change while x endpoints, source order, opacity, filter, and blend remain fixed.",
+      "acceptanceRow": "control:scene.vitrine.transition-depth",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "timeline.direction",
+      "sceneLocalId": "transition-direction",
+      "parameter": "transitionDirection",
+      "owner": "Timeline",
+      "label": "Transition direction",
+      "valueModel": "enum",
+      "unit": "unitless",
+      "default": "left",
+      "range": null,
+      "options": [
+        "left",
+        "right"
+      ],
+      "resetValue": "left",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "vitrine:transition-direction",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed transition progress, outgoing/incoming x signs mirror while y, depth magnitude, source dimensions, and story order remain fixed.",
+      "acceptanceRow": "control:timeline.direction",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.vitrine.placard-visibility",
+      "sceneLocalId": "placard-visibility",
+      "parameter": "placardVisibility",
+      "owner": "Scene",
+      "label": "Placard",
+      "valueModel": "boolean",
+      "unit": "unitless",
+      "default": true,
+      "range": null,
+      "options": null,
+      "resetValue": true,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "vitrine:placard-visibility",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Placard semantic/render state toggles without changing any source plane pose, timing, treatment, or media identity.",
+      "acceptanceRow": "control:scene.vitrine.placard-visibility",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

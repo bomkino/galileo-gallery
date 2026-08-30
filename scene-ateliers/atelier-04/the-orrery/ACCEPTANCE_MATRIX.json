@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-orrery",
+  "rows": [
+    {
+      "id": "control:scene.the-orrery.ring-count",
+      "kind": "control-causality",
+      "controlId": "scene.the-orrery.ring-count",
+      "requirement": "Changing Ring count must causally change At fixed media, primary, canvas, and story time, satellite ringIndex/slotIndex assignments and signed revolution tables change deterministically while source order and primary identity stay fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.the-orrery.orbit-size",
+      "kind": "control-causality",
+      "controlId": "scene.the-orrery.orbit-size",
+      "requirement": "Changing Orbit size must causally change At fixed time, satellite x/y distances from centre change while membership, source size, primary pose, depth phase, and revolution count remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.the-orrery.vertical-squash",
+      "kind": "control-causality",
+      "controlId": "scene.the-orrery.vertical-squash",
+      "requirement": "Changing Vertical squash must causally change At fixed time, satellite y positions change while x radius, membership, source dimensions, and primary pose remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.the-orrery.satellite-scale",
+      "kind": "control-causality",
+      "controlId": "scene.the-orrery.satellite-scale",
+      "requirement": "Changing Satellite scale must causally change Satellite width/height change proportionally while primary size, ring poses, membership, and source order remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:timeline.pace",
+      "kind": "control-causality",
+      "controlId": "timeline.pace",
+      "requirement": "Changing Orbit pace must causally change Compiled duration changes from 20 seconds at 0.6 to 8.571429 seconds at 1.4; normalized pose and exact seam remain identical.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "identity",
+      "kind": "programme-invariant",
+      "requirement": "Motion and anti-motion remain recognisable after styling removal.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "source-fidelity",
+      "kind": "programme-invariant",
+      "requirement": "Clean default leaves imported source pixels untouched.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "timeline",
+      "kind": "programme-invariant",
+      "requirement": "Preview, scrub, evidence and export planning consume one semantic model.",
+      "automatedStatus": "pass: renderer-owned story clock prohibited; original evaluator verifier replay passed.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "programme-invariant",
+      "requirement": "Reduced motion preserves narrative meaning.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "lifecycle",
+      "kind": "programme-invariant",
+      "requirement": "Renderer remount and disposal remain bounded.",
+      "automatedStatus": "pass for review-shell mount/remount/disposal; Scene-native GPU/context-loss proof remains as declared in source evidence.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "human-verdict",
+      "kind": "programme-invariant",
+      "requirement": "Human visual, motion, pace, defaults and delight verdict remains pending.",
+      "automatedStatus": "not automatable",
+      "humanStatus": "pending"
+    }
+  ]
+}

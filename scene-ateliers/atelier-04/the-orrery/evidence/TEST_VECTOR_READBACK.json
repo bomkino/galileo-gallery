@@ -1,0 +1,1091 @@
+{
+  "sceneId": "the-orrery",
+  "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+  "evaluatorVersion": 1,
+  "vectorCount": 7,
+  "pass": true,
+  "failures": [],
+  "loopSeam": {
+    "masterStart": 0,
+    "masterEnd": 0,
+    "revolutionCounts": [
+      3,
+      -2,
+      1
+    ]
+  },
+  "membershipStable": true,
+  "exchange": {
+    "beforePrimary": "ordinary-004",
+    "afterPrimary": "ordinary-008",
+    "outgoingVacatedMembership": {
+      "ringIndex": 0,
+      "slotIndex": 2,
+      "ringMemberCount": 3,
+      "satelliteOrdinal": 6
+    }
+  },
+  "readback": [
+    {
+      "id": "single-primary",
+      "summary": {
+        "sceneId": "the-orrery",
+        "evaluatorVersion": 1,
+        "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+        "normalizedTime": 0,
+        "runKind": "loop",
+        "phrase": "orbit",
+        "masterCycle": 0,
+        "timelineDirection": "forward",
+        "exchangeProgress": 0,
+        "basePrimaryId": "one-001",
+        "effectivePrimaryId": "one-001",
+        "exchangeTargetId": null,
+        "ringCountControl": "auto",
+        "effectiveRingCount": 0,
+        "revolutionCounts": [],
+        "compiledDurationSeconds": 12,
+        "count": 1,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "renderNodeCount": 1,
+        "stateCount": 1,
+        "membershipDigest": [],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "two-primary-not-first",
+      "summary": {
+        "sceneId": "the-orrery",
+        "evaluatorVersion": 1,
+        "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+        "normalizedTime": 0.271,
+        "runKind": "loop",
+        "phrase": "orbit",
+        "masterCycle": 0.271,
+        "timelineDirection": "forward",
+        "exchangeProgress": 0,
+        "basePrimaryId": "two-002",
+        "effectivePrimaryId": "two-002",
+        "exchangeTargetId": null,
+        "ringCountControl": "auto",
+        "effectiveRingCount": 1,
+        "revolutionCounts": [
+          1
+        ],
+        "compiledDurationSeconds": 12,
+        "count": 2,
+        "canvas": {
+          "width": 640,
+          "height": 640
+        },
+        "renderNodeCount": 2,
+        "stateCount": 2,
+        "membershipDigest": [
+          {
+            "id": "two-001",
+            "ringIndex": 0,
+            "slotIndex": 0
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "ordinary-three-rings",
+      "summary": {
+        "sceneId": "the-orrery",
+        "evaluatorVersion": 1,
+        "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+        "normalizedTime": 0.417,
+        "runKind": "loop",
+        "phrase": "orbit",
+        "masterCycle": 0.417,
+        "timelineDirection": "forward",
+        "exchangeProgress": 0,
+        "basePrimaryId": "ordinary-004",
+        "effectivePrimaryId": "ordinary-004",
+        "exchangeTargetId": null,
+        "ringCountControl": "auto",
+        "effectiveRingCount": 3,
+        "revolutionCounts": [
+          3,
+          -2,
+          1
+        ],
+        "compiledDurationSeconds": 12,
+        "count": 9,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "renderNodeCount": 9,
+        "stateCount": 9,
+        "membershipDigest": [
+          {
+            "id": "ordinary-001",
+            "ringIndex": 0,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-002",
+            "ringIndex": 1,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-003",
+            "ringIndex": 2,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-005",
+            "ringIndex": 0,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-006",
+            "ringIndex": 1,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-007",
+            "ringIndex": 2,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-008",
+            "ringIndex": 0,
+            "slotIndex": 2
+          },
+          {
+            "id": "ordinary-009",
+            "ringIndex": 1,
+            "slotIndex": 2
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "directed-exchange-mid",
+      "summary": {
+        "sceneId": "the-orrery",
+        "evaluatorVersion": 1,
+        "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+        "normalizedTime": 0.67,
+        "runKind": "finite",
+        "phrase": "primary-exchange",
+        "masterCycle": 0.7125,
+        "timelineDirection": "forward",
+        "exchangeProgress": 0.5,
+        "basePrimaryId": "ordinary-004",
+        "effectivePrimaryId": "ordinary-004",
+        "exchangeTargetId": "ordinary-008",
+        "ringCountControl": "auto",
+        "effectiveRingCount": 3,
+        "revolutionCounts": [
+          3,
+          -2,
+          1
+        ],
+        "compiledDurationSeconds": 12,
+        "count": 9,
+        "canvas": {
+          "width": 576,
+          "height": 720
+        },
+        "renderNodeCount": 9,
+        "stateCount": 9,
+        "membershipDigest": [
+          {
+            "id": "ordinary-001",
+            "ringIndex": 0,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-002",
+            "ringIndex": 1,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-003",
+            "ringIndex": 2,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-005",
+            "ringIndex": 0,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-006",
+            "ringIndex": 1,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-007",
+            "ringIndex": 2,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-008",
+            "ringIndex": 0,
+            "slotIndex": 2
+          },
+          {
+            "id": "ordinary-009",
+            "ringIndex": 1,
+            "slotIndex": 2
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "directed-exchange-complete",
+      "summary": {
+        "sceneId": "the-orrery",
+        "evaluatorVersion": 1,
+        "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+        "normalizedTime": 0.82,
+        "runKind": "finite",
+        "phrase": "settled-hierarchy",
+        "masterCycle": 0.9,
+        "timelineDirection": "forward",
+        "exchangeProgress": 1,
+        "basePrimaryId": "ordinary-004",
+        "effectivePrimaryId": "ordinary-008",
+        "exchangeTargetId": "ordinary-008",
+        "ringCountControl": "auto",
+        "effectiveRingCount": 3,
+        "revolutionCounts": [
+          3,
+          -2,
+          1
+        ],
+        "compiledDurationSeconds": 12,
+        "count": 9,
+        "canvas": {
+          "width": 576,
+          "height": 720
+        },
+        "renderNodeCount": 9,
+        "stateCount": 9,
+        "membershipDigest": [
+          {
+            "id": "ordinary-001",
+            "ringIndex": 0,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-002",
+            "ringIndex": 1,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-003",
+            "ringIndex": 2,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-004",
+            "ringIndex": 0,
+            "slotIndex": 2
+          },
+          {
+            "id": "ordinary-005",
+            "ringIndex": 0,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-006",
+            "ringIndex": 1,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-007",
+            "ringIndex": 2,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-009",
+            "ringIndex": 1,
+            "slotIndex": 2
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "many-portrait-bounded",
+      "summary": {
+        "sceneId": "the-orrery",
+        "evaluatorVersion": 1,
+        "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+        "normalizedTime": 0.583,
+        "runKind": "loop",
+        "phrase": "orbit",
+        "masterCycle": 0.583,
+        "timelineDirection": "forward",
+        "exchangeProgress": 0,
+        "basePrimaryId": "many-061",
+        "effectivePrimaryId": "many-061",
+        "exchangeTargetId": null,
+        "ringCountControl": "auto",
+        "effectiveRingCount": 3,
+        "revolutionCounts": [
+          3,
+          -2,
+          1
+        ],
+        "compiledDurationSeconds": 12,
+        "count": 127,
+        "canvas": {
+          "width": 405,
+          "height": 720
+        },
+        "renderNodeCount": 19,
+        "stateCount": 127,
+        "membershipDigest": [
+          {
+            "id": "many-001",
+            "ringIndex": 0,
+            "slotIndex": 0
+          },
+          {
+            "id": "many-002",
+            "ringIndex": 1,
+            "slotIndex": 0
+          },
+          {
+            "id": "many-003",
+            "ringIndex": 2,
+            "slotIndex": 0
+          },
+          {
+            "id": "many-004",
+            "ringIndex": 0,
+            "slotIndex": 1
+          },
+          {
+            "id": "many-005",
+            "ringIndex": 1,
+            "slotIndex": 1
+          },
+          {
+            "id": "many-006",
+            "ringIndex": 2,
+            "slotIndex": 1
+          },
+          {
+            "id": "many-007",
+            "ringIndex": 0,
+            "slotIndex": 2
+          },
+          {
+            "id": "many-008",
+            "ringIndex": 1,
+            "slotIndex": 2
+          },
+          {
+            "id": "many-009",
+            "ringIndex": 2,
+            "slotIndex": 2
+          },
+          {
+            "id": "many-010",
+            "ringIndex": 0,
+            "slotIndex": 3
+          },
+          {
+            "id": "many-011",
+            "ringIndex": 1,
+            "slotIndex": 3
+          },
+          {
+            "id": "many-012",
+            "ringIndex": 2,
+            "slotIndex": 3
+          },
+          {
+            "id": "many-013",
+            "ringIndex": 0,
+            "slotIndex": 4
+          },
+          {
+            "id": "many-014",
+            "ringIndex": 1,
+            "slotIndex": 4
+          },
+          {
+            "id": "many-015",
+            "ringIndex": 2,
+            "slotIndex": 4
+          },
+          {
+            "id": "many-016",
+            "ringIndex": 0,
+            "slotIndex": 5
+          },
+          {
+            "id": "many-017",
+            "ringIndex": 1,
+            "slotIndex": 5
+          },
+          {
+            "id": "many-018",
+            "ringIndex": 2,
+            "slotIndex": 5
+          },
+          {
+            "id": "many-019",
+            "ringIndex": 0,
+            "slotIndex": 6
+          },
+          {
+            "id": "many-020",
+            "ringIndex": 1,
+            "slotIndex": 6
+          },
+          {
+            "id": "many-021",
+            "ringIndex": 2,
+            "slotIndex": 6
+          },
+          {
+            "id": "many-022",
+            "ringIndex": 0,
+            "slotIndex": 7
+          },
+          {
+            "id": "many-023",
+            "ringIndex": 1,
+            "slotIndex": 7
+          },
+          {
+            "id": "many-024",
+            "ringIndex": 2,
+            "slotIndex": 7
+          },
+          {
+            "id": "many-025",
+            "ringIndex": 0,
+            "slotIndex": 8
+          },
+          {
+            "id": "many-026",
+            "ringIndex": 1,
+            "slotIndex": 8
+          },
+          {
+            "id": "many-027",
+            "ringIndex": 2,
+            "slotIndex": 8
+          },
+          {
+            "id": "many-028",
+            "ringIndex": 0,
+            "slotIndex": 9
+          },
+          {
+            "id": "many-029",
+            "ringIndex": 1,
+            "slotIndex": 9
+          },
+          {
+            "id": "many-030",
+            "ringIndex": 2,
+            "slotIndex": 9
+          },
+          {
+            "id": "many-031",
+            "ringIndex": 0,
+            "slotIndex": 10
+          },
+          {
+            "id": "many-032",
+            "ringIndex": 1,
+            "slotIndex": 10
+          },
+          {
+            "id": "many-033",
+            "ringIndex": 2,
+            "slotIndex": 10
+          },
+          {
+            "id": "many-034",
+            "ringIndex": 0,
+            "slotIndex": 11
+          },
+          {
+            "id": "many-035",
+            "ringIndex": 1,
+            "slotIndex": 11
+          },
+          {
+            "id": "many-036",
+            "ringIndex": 2,
+            "slotIndex": 11
+          },
+          {
+            "id": "many-037",
+            "ringIndex": 0,
+            "slotIndex": 12
+          },
+          {
+            "id": "many-038",
+            "ringIndex": 1,
+            "slotIndex": 12
+          },
+          {
+            "id": "many-039",
+            "ringIndex": 2,
+            "slotIndex": 12
+          },
+          {
+            "id": "many-040",
+            "ringIndex": 0,
+            "slotIndex": 13
+          },
+          {
+            "id": "many-041",
+            "ringIndex": 1,
+            "slotIndex": 13
+          },
+          {
+            "id": "many-042",
+            "ringIndex": 2,
+            "slotIndex": 13
+          },
+          {
+            "id": "many-043",
+            "ringIndex": 0,
+            "slotIndex": 14
+          },
+          {
+            "id": "many-044",
+            "ringIndex": 1,
+            "slotIndex": 14
+          },
+          {
+            "id": "many-045",
+            "ringIndex": 2,
+            "slotIndex": 14
+          },
+          {
+            "id": "many-046",
+            "ringIndex": 0,
+            "slotIndex": 15
+          },
+          {
+            "id": "many-047",
+            "ringIndex": 1,
+            "slotIndex": 15
+          },
+          {
+            "id": "many-048",
+            "ringIndex": 2,
+            "slotIndex": 15
+          },
+          {
+            "id": "many-049",
+            "ringIndex": 0,
+            "slotIndex": 16
+          },
+          {
+            "id": "many-050",
+            "ringIndex": 1,
+            "slotIndex": 16
+          },
+          {
+            "id": "many-051",
+            "ringIndex": 2,
+            "slotIndex": 16
+          },
+          {
+            "id": "many-052",
+            "ringIndex": 0,
+            "slotIndex": 17
+          },
+          {
+            "id": "many-053",
+            "ringIndex": 1,
+            "slotIndex": 17
+          },
+          {
+            "id": "many-054",
+            "ringIndex": 2,
+            "slotIndex": 17
+          },
+          {
+            "id": "many-055",
+            "ringIndex": 0,
+            "slotIndex": 18
+          },
+          {
+            "id": "many-056",
+            "ringIndex": 1,
+            "slotIndex": 18
+          },
+          {
+            "id": "many-057",
+            "ringIndex": 2,
+            "slotIndex": 18
+          },
+          {
+            "id": "many-058",
+            "ringIndex": 0,
+            "slotIndex": 19
+          },
+          {
+            "id": "many-059",
+            "ringIndex": 1,
+            "slotIndex": 19
+          },
+          {
+            "id": "many-060",
+            "ringIndex": 2,
+            "slotIndex": 19
+          },
+          {
+            "id": "many-062",
+            "ringIndex": 0,
+            "slotIndex": 20
+          },
+          {
+            "id": "many-063",
+            "ringIndex": 1,
+            "slotIndex": 20
+          },
+          {
+            "id": "many-064",
+            "ringIndex": 2,
+            "slotIndex": 20
+          },
+          {
+            "id": "many-065",
+            "ringIndex": 0,
+            "slotIndex": 21
+          },
+          {
+            "id": "many-066",
+            "ringIndex": 1,
+            "slotIndex": 21
+          },
+          {
+            "id": "many-067",
+            "ringIndex": 2,
+            "slotIndex": 21
+          },
+          {
+            "id": "many-068",
+            "ringIndex": 0,
+            "slotIndex": 22
+          },
+          {
+            "id": "many-069",
+            "ringIndex": 1,
+            "slotIndex": 22
+          },
+          {
+            "id": "many-070",
+            "ringIndex": 2,
+            "slotIndex": 22
+          },
+          {
+            "id": "many-071",
+            "ringIndex": 0,
+            "slotIndex": 23
+          },
+          {
+            "id": "many-072",
+            "ringIndex": 1,
+            "slotIndex": 23
+          },
+          {
+            "id": "many-073",
+            "ringIndex": 2,
+            "slotIndex": 23
+          },
+          {
+            "id": "many-074",
+            "ringIndex": 0,
+            "slotIndex": 24
+          },
+          {
+            "id": "many-075",
+            "ringIndex": 1,
+            "slotIndex": 24
+          },
+          {
+            "id": "many-076",
+            "ringIndex": 2,
+            "slotIndex": 24
+          },
+          {
+            "id": "many-077",
+            "ringIndex": 0,
+            "slotIndex": 25
+          },
+          {
+            "id": "many-078",
+            "ringIndex": 1,
+            "slotIndex": 25
+          },
+          {
+            "id": "many-079",
+            "ringIndex": 2,
+            "slotIndex": 25
+          },
+          {
+            "id": "many-080",
+            "ringIndex": 0,
+            "slotIndex": 26
+          },
+          {
+            "id": "many-081",
+            "ringIndex": 1,
+            "slotIndex": 26
+          },
+          {
+            "id": "many-082",
+            "ringIndex": 2,
+            "slotIndex": 26
+          },
+          {
+            "id": "many-083",
+            "ringIndex": 0,
+            "slotIndex": 27
+          },
+          {
+            "id": "many-084",
+            "ringIndex": 1,
+            "slotIndex": 27
+          },
+          {
+            "id": "many-085",
+            "ringIndex": 2,
+            "slotIndex": 27
+          },
+          {
+            "id": "many-086",
+            "ringIndex": 0,
+            "slotIndex": 28
+          },
+          {
+            "id": "many-087",
+            "ringIndex": 1,
+            "slotIndex": 28
+          },
+          {
+            "id": "many-088",
+            "ringIndex": 2,
+            "slotIndex": 28
+          },
+          {
+            "id": "many-089",
+            "ringIndex": 0,
+            "slotIndex": 29
+          },
+          {
+            "id": "many-090",
+            "ringIndex": 1,
+            "slotIndex": 29
+          },
+          {
+            "id": "many-091",
+            "ringIndex": 2,
+            "slotIndex": 29
+          },
+          {
+            "id": "many-092",
+            "ringIndex": 0,
+            "slotIndex": 30
+          },
+          {
+            "id": "many-093",
+            "ringIndex": 1,
+            "slotIndex": 30
+          },
+          {
+            "id": "many-094",
+            "ringIndex": 2,
+            "slotIndex": 30
+          },
+          {
+            "id": "many-095",
+            "ringIndex": 0,
+            "slotIndex": 31
+          },
+          {
+            "id": "many-096",
+            "ringIndex": 1,
+            "slotIndex": 31
+          },
+          {
+            "id": "many-097",
+            "ringIndex": 2,
+            "slotIndex": 31
+          },
+          {
+            "id": "many-098",
+            "ringIndex": 0,
+            "slotIndex": 32
+          },
+          {
+            "id": "many-099",
+            "ringIndex": 1,
+            "slotIndex": 32
+          },
+          {
+            "id": "many-100",
+            "ringIndex": 2,
+            "slotIndex": 32
+          },
+          {
+            "id": "many-101",
+            "ringIndex": 0,
+            "slotIndex": 33
+          },
+          {
+            "id": "many-102",
+            "ringIndex": 1,
+            "slotIndex": 33
+          },
+          {
+            "id": "many-103",
+            "ringIndex": 2,
+            "slotIndex": 33
+          },
+          {
+            "id": "many-104",
+            "ringIndex": 0,
+            "slotIndex": 34
+          },
+          {
+            "id": "many-105",
+            "ringIndex": 1,
+            "slotIndex": 34
+          },
+          {
+            "id": "many-106",
+            "ringIndex": 2,
+            "slotIndex": 34
+          },
+          {
+            "id": "many-107",
+            "ringIndex": 0,
+            "slotIndex": 35
+          },
+          {
+            "id": "many-108",
+            "ringIndex": 1,
+            "slotIndex": 35
+          },
+          {
+            "id": "many-109",
+            "ringIndex": 2,
+            "slotIndex": 35
+          },
+          {
+            "id": "many-110",
+            "ringIndex": 0,
+            "slotIndex": 36
+          },
+          {
+            "id": "many-111",
+            "ringIndex": 1,
+            "slotIndex": 36
+          },
+          {
+            "id": "many-112",
+            "ringIndex": 2,
+            "slotIndex": 36
+          },
+          {
+            "id": "many-113",
+            "ringIndex": 0,
+            "slotIndex": 37
+          },
+          {
+            "id": "many-114",
+            "ringIndex": 1,
+            "slotIndex": 37
+          },
+          {
+            "id": "many-115",
+            "ringIndex": 2,
+            "slotIndex": 37
+          },
+          {
+            "id": "many-116",
+            "ringIndex": 0,
+            "slotIndex": 38
+          },
+          {
+            "id": "many-117",
+            "ringIndex": 1,
+            "slotIndex": 38
+          },
+          {
+            "id": "many-118",
+            "ringIndex": 2,
+            "slotIndex": 38
+          },
+          {
+            "id": "many-119",
+            "ringIndex": 0,
+            "slotIndex": 39
+          },
+          {
+            "id": "many-120",
+            "ringIndex": 1,
+            "slotIndex": 39
+          },
+          {
+            "id": "many-121",
+            "ringIndex": 2,
+            "slotIndex": 39
+          },
+          {
+            "id": "many-122",
+            "ringIndex": 0,
+            "slotIndex": 40
+          },
+          {
+            "id": "many-123",
+            "ringIndex": 1,
+            "slotIndex": 40
+          },
+          {
+            "id": "many-124",
+            "ringIndex": 2,
+            "slotIndex": 40
+          },
+          {
+            "id": "many-125",
+            "ringIndex": 0,
+            "slotIndex": 41
+          },
+          {
+            "id": "many-126",
+            "ringIndex": 1,
+            "slotIndex": 41
+          },
+          {
+            "id": "many-127",
+            "ringIndex": 2,
+            "slotIndex": 41
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "media-edge-reduced",
+      "summary": {
+        "sceneId": "the-orrery",
+        "evaluatorVersion": 1,
+        "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+        "normalizedTime": 0.637,
+        "runKind": "loop",
+        "phrase": "orbit",
+        "masterCycle": 0,
+        "timelineDirection": "forward",
+        "exchangeProgress": 0,
+        "basePrimaryId": "media-edge-004",
+        "effectivePrimaryId": "media-edge-004",
+        "exchangeTargetId": null,
+        "ringCountControl": "auto",
+        "effectiveRingCount": 3,
+        "revolutionCounts": [
+          3,
+          -2,
+          1
+        ],
+        "compiledDurationSeconds": 12,
+        "count": 9,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "renderNodeCount": 9,
+        "stateCount": 9,
+        "membershipDigest": [
+          {
+            "id": "media-edge-001",
+            "ringIndex": 0,
+            "slotIndex": 0
+          },
+          {
+            "id": "media-edge-002",
+            "ringIndex": 1,
+            "slotIndex": 0
+          },
+          {
+            "id": "media-edge-003",
+            "ringIndex": 2,
+            "slotIndex": 0
+          },
+          {
+            "id": "media-edge-005",
+            "ringIndex": 0,
+            "slotIndex": 1
+          },
+          {
+            "id": "media-edge-006",
+            "ringIndex": 1,
+            "slotIndex": 1
+          },
+          {
+            "id": "media-edge-007",
+            "ringIndex": 2,
+            "slotIndex": 1
+          },
+          {
+            "id": "media-edge-008",
+            "ringIndex": 0,
+            "slotIndex": 2
+          },
+          {
+            "id": "media-edge-009",
+            "ringIndex": 1,
+            "slotIndex": 2
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    }
+  ]
+}

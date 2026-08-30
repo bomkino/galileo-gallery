@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "zoetrope",
+  "displayName": "Zoetrope",
+  "family": "spatial-objects",
+  "atelier": 4,
+  "candidateVersion": "parity-1",
+  "identity": {
+    "promise": "A disciplined cylinder advances one upright frame at a time through a fixed front gate, using a percussive ratchet with a readable dwell and an exact mechanical return.",
+    "antiMotion": "It never drifts like Calm Ring, washes into speed blur, jitters between sampled angles, accepts random impulse, or treats faster generic-orbit constants as authorship.",
+    "topology": "horizontal cylinder with fixed front gate and rear occlusion",
+    "focusGrammar": "percussive gate dwell; optional flywheel cadence",
+    "finaleGrammar": "front-gate hold with apparatus still legible"
+  },
+  "sourcePolicy": {
+    "minimum": 1,
+    "recommended": 6,
+    "maximum": 127,
+    "identityAndOrder": "must survive failure, replacement, reverse and recycling"
+  },
+  "canvasSupport": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:5"
+  ],
+  "orientation": "horizontal cylinder",
+  "timeline": "automatic, fixed-duration, directed; forward/reverse",
+  "alphaPolicy": "transparent output supported; raw alpha proof quality scored separately",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "a2bb3c73c42742dbfe8d6ff2a6f1f06c24be453b679e8212747436e8ea634604",
+    "rendererOwnsStoryClock": false
+  },
+  "prototypeEntrypoint": "prototype/index.html",
+  "controlsRef": "CAPABILITY_AND_CONTROLS.json",
+  "acceptanceRef": "ACCEPTANCE_MATRIX.json",
+  "programme": {
+    "state": "pre-G11 candidate packet; human verdict pending",
+    "pressureGate": null,
+    "gateStatus": "candidate"
+  },
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/zoetrope.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  }
+}

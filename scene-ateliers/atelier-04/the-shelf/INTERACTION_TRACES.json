@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-shelf",
+  "traces": [
+    {
+      "id": "trace:scene.the-shelf.card-height",
+      "operation": "control-change",
+      "controlId": "scene.the-shelf.card-height",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:scene.the-shelf.gap",
+      "operation": "control-change",
+      "controlId": "scene.the-shelf.gap",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:scene.the-shelf.lean-amount",
+      "operation": "control-change",
+      "controlId": "scene.the-shelf.lean-amount",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:timeline.direction",
+      "operation": "control-change",
+      "controlId": "timeline.direction",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:scene.the-shelf.spotlight-lift",
+      "operation": "control-change",
+      "controlId": "scene.the-shelf.spotlight-lift",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:keyboard",
+      "operation": "keyboard-navigation",
+      "precondition": "review shell loaded",
+      "steps": [
+        "Tab through shell",
+        "verify visible focus",
+        "activate Scene",
+        "inspect controls"
+      ],
+      "expected": "Logical order and visible focus.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:remount",
+      "operation": "remount-disposal",
+      "precondition": "Scene mounted",
+      "steps": [
+        "mount Scene",
+        "switch away",
+        "return"
+      ],
+      "expected": "At most two active iframes; semantic state reconstructs from contract.",
+      "automatedStatus": "pending fresh browser journey"
+    }
+  ]
+}

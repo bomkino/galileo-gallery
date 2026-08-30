@@ -1,0 +1,11 @@
+{
+  "source": "captures/alpha-transparent.png",
+  "width": 640,
+  "height": 640,
+  "alphaZeroPixels": 367194,
+  "alphaZeroWithNonZeroRgb": 0,
+  "partialAlphaPixels": 3533,
+  "opaquePixels": 38873,
+  "passZeroRgbBelowZeroAlpha": true,
+  "minimalSceneGeometry": "one alpha-safe horizontal baseline"
+}

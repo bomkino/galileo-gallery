@@ -1,0 +1,10 @@
+{
+  "source": "captures/alpha-transparent.png",
+  "width": 640,
+  "height": 640,
+  "alphaZeroPixels": 319272,
+  "alphaZeroWithNonZeroRgb": 0,
+  "partialAlphaPixels": 4480,
+  "opaquePixels": 85848,
+  "passZeroRgbBelowZeroAlpha": true
+}

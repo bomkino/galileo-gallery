@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-orrery",
+  "previewRenderer": "WebGL candidate — programme blocked by G10A/G10B sequence",
+  "exportRenderer": "WebGL — programme blocked by G10A/G10B sequence",
+  "currentProof": "browser DOM/CSS 3D preflight laboratory",
+  "reason": "Multiple orbital planes, primary/satellite hierarchy and occlusion may justify GPU rendering; promotion is blocked by programme sequence, measured workload, parity, and human approval.",
+  "alternativesRejected": [
+    "one generic Scene engine",
+    "WebGL because premium",
+    "renderer-owned story clock"
+  ],
+  "fidelityRisks": [
+    "Imported artwork must remain source-clean."
+  ],
+  "performanceRisks": [
+    "visible: not measured; must remain below semantic source maximum and be declared in Phase 2; pixels/DPR/video bounds unmeasured"
+  ],
+  "passes": [
+    {
+      "id": "scene-output",
+      "owns": "Scene-native presentation only",
+      "lifecycle": "create on mount; dispose on unmount",
+      "cacheKey": "the-orrery:source-hash:canvas-preset:renderer-version",
+      "invalidators": [
+        "source replacement",
+        "canvas preset",
+        "Scene-owned geometry control"
+      ],
+      "fallback": "source-native prototype renderer"
+    }
+  ],
+  "contextLoss": {
+    "behaviour": "retain semantic state; dispose and reconstruct presentation resources; use source-native fallback",
+    "humanApprovalRequired": "yes"
+  },
+  "storyClockOwner": "Timeline/Project semantic evaluator",
+  "productDecision": "pending"
+}

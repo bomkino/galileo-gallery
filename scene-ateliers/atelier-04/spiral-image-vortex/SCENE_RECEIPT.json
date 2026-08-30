@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "spiral-image-vortex",
+  "atelier": 4,
+  "sourceArchive": "GALILEO_ATELIER_04_SPATIAL_OBJECTS_PARITY_HANDOFF_2026-08-28(1).zip",
+  "sourceArchiveSha256": "4b40dd64b9756d9e4d125f89869ac768329f08b73c0d7856d0383d922ae3aaf2",
+  "sourceRoot": "GALILEO_ATELIER_04_SPATIAL_OBJECTS_PARITY_HANDOFF/payload/scene-ateliers/atelier-04/spiral-image-vortex",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "7212c72d93731e71f6bbb810717c9b3c283474667b45743e53dfc0b5b2be4240",
+    "rendererOwnsStoryClock": false
+  },
+  "controlCount": 5,
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "catalogueRegistration": "no",
+  "release": "no",
+  "claimBoundary": "Parity candidate packet; no Product integration or human acceptance.",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/spiral-image-vortex.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  },
+  "currentFiles": {
+    "sceneContractSha256": "810534757c72d321687b8d5d92db48890b3fa1d0aad5339151be604a8d5094cb",
+    "controlContractSha256": "d36789fd6d125aa980ccacae459ad63692f6a6d1d5f5bc41c6bb493a06ffd416",
+    "acceptanceMatrixSha256": "ca5455e8785b6c7af466a8aab4813543000f63fa7f877e2545ae08978f8e4dc8",
+    "evidenceBindingsSha256": "f4d5c9e9be0819b3c1bb0860da416944edaf63a14f490c7bada61136bb44ec29"
+  }
+}

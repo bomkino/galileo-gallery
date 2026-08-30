@@ -1,0 +1,168 @@
+{
+  "sceneId": "zoetrope",
+  "evaluatorVersion": 1,
+  "vectorCount": 5,
+  "pass": true,
+  "failures": [],
+  "sampling": [
+    {
+      "fps": 24,
+      "frameCount": 63,
+      "maxAngularStepDeg": 15.795119259310066,
+      "gateSamples": 18
+    },
+    {
+      "fps": 30,
+      "frameCount": 79,
+      "maxAngularStepDeg": 12.609862471990976,
+      "gateSamples": 24
+    },
+    {
+      "fps": 60,
+      "frameCount": 156,
+      "maxAngularStepDeg": 6.389938865258147,
+      "gateSamples": 49
+    }
+  ],
+  "loopSeam": {
+    "phaseStart": 0,
+    "phaseEnd": 0
+  },
+  "readback": [
+    {
+      "id": "loop-start-ordinary",
+      "summary": {
+        "sceneId": "zoetrope",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0,
+        "count": 6,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "direction": "forward",
+        "cadenceCharacter": "ratchet",
+        "frontId": "ordinary-001",
+        "frontDepth": 1,
+        "renderNodeCount": 5,
+        "stateCount": 6,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "two-reverse-quarter",
+      "summary": {
+        "sceneId": "zoetrope",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.25,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.559815,
+        "count": 2,
+        "canvas": {
+          "width": 640,
+          "height": 640
+        },
+        "direction": "reverse",
+        "cadenceCharacter": "ratchet",
+        "frontId": "two-002",
+        "frontDepth": 0.930204,
+        "renderNodeCount": 1,
+        "stateCount": 2,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "many-portrait-bounded",
+      "summary": {
+        "sceneId": "zoetrope",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.417,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.417323,
+        "count": 127,
+        "canvas": {
+          "width": 405,
+          "height": 720
+        },
+        "direction": "forward",
+        "cadenceCharacter": "ratchet",
+        "frontId": "many-054",
+        "frontDepth": 1,
+        "renderNodeCount": 15,
+        "stateCount": 127,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "finite-spotlight",
+      "summary": {
+        "sceneId": "zoetrope",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.78,
+        "runKind": "finite",
+        "phrase": "spotlight",
+        "phase": 0.333333,
+        "count": 6,
+        "canvas": {
+          "width": 576,
+          "height": 720
+        },
+        "direction": "forward",
+        "cadenceCharacter": "ratchet",
+        "frontId": "ordinary-003",
+        "frontDepth": 1,
+        "renderNodeCount": 5,
+        "stateCount": 6,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "reduced-motion-media-edge",
+      "summary": {
+        "sceneId": "zoetrope",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.631,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.666667,
+        "count": 6,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "direction": "forward",
+        "cadenceCharacter": "ratchet",
+        "frontId": "media-edge-005",
+        "frontDepth": 1,
+        "renderNodeCount": 5,
+        "stateCount": 6,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "atelier": 4,
+  "archive": "GALILEO_ATELIER_04_SPATIAL_OBJECTS_PARITY_HANDOFF_2026-08-28(1).zip",
+  "archiveSha256": "4b40dd64b9756d9e4d125f89869ac768329f08b73c0d7856d0383d922ae3aaf2",
+  "sourceRoot": "GALILEO_ATELIER_04_SPATIAL_OBJECTS_PARITY_HANDOFF/payload/scene-ateliers/atelier-04/zoetrope",
+  "sourceRootFileCount": 42,
+  "charterSha256": "0edbdc1369a8c888cf38f88c6220fdcdbc57a61e6cf4f87bc08f2d37444a8834",
+  "normalisation": "Original authored files copied. Original control JSON preserved. Canonical parity contracts added."
+}

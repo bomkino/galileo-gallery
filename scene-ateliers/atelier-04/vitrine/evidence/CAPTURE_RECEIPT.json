@@ -1,0 +1,555 @@
+{
+  "sceneId": "vitrine",
+  "captureTool": "Playwright Python with system Chromium",
+  "browserVersion": "144.0.7559.96",
+  "captureCount": 5,
+  "frameSequenceCount": 12,
+  "captures": [
+    {
+      "name": "canonical-readable-hold.png",
+      "fixture": "ordinary8",
+      "canvas": "16:9",
+      "time": 0.04,
+      "runKind": "loop",
+      "spotlight": "ordinary-001",
+      "finale": "ordinary-008",
+      "transparent": false,
+      "reduced": false,
+      "placard": true,
+      "file": "captures/canonical-readable-hold.png",
+      "readback": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.04,
+        "temporalTime": 0.04,
+        "timelineDirection": "forward",
+        "runKind": "loop",
+        "phrase": "readable-hold",
+        "count": 8,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "currentId": "ordinary-001",
+        "incomingId": null,
+        "transitionProgress": 0,
+        "renderNodeCount": 1,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 44,
+        "placardVisible": true,
+        "placard": {
+          "mediaId": "ordinary-001",
+          "caption": "Object 1"
+        },
+        "activeRoles": [
+          {
+            "id": "ordinary-001",
+            "role": "readable",
+            "x": 480,
+            "y": 253.8,
+            "depth": 0,
+            "rotateYDeg": 0,
+            "width": 595.2,
+            "height": 334.8
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "ordinary8",
+        "canvasPreset": "16:9",
+        "transparent": false,
+        "reducedMotion": false,
+        "exactSourceState": [
+          {
+            "id": "ordinary-001",
+            "role": "readable",
+            "active": true,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-002",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-003",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-004",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-005",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-006",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-007",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-008",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "composed-pair-exchange.png",
+      "fixture": "two",
+      "canvas": "16:9",
+      "time": 0.42,
+      "runKind": "loop",
+      "spotlight": "two-001",
+      "finale": "two-002",
+      "transparent": false,
+      "reduced": false,
+      "placard": true,
+      "file": "captures/composed-pair-exchange.png",
+      "readback": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.42,
+        "temporalTime": 0.42,
+        "timelineDirection": "forward",
+        "runKind": "loop",
+        "phrase": "exchange",
+        "count": 2,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "currentId": "two-001",
+        "incomingId": "two-002",
+        "transitionProgress": 0.5,
+        "renderNodeCount": 2,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 11,
+        "placardVisible": true,
+        "placard": {
+          "mediaId": "two-002",
+          "caption": "Edition 2"
+        },
+        "activeRoles": [
+          {
+            "id": "two-001",
+            "role": "outgoing",
+            "x": 79.2,
+            "y": 262.548,
+            "depth": -0.18,
+            "rotateYDeg": 2.5,
+            "width": 595.2,
+            "height": 334.8
+          },
+          {
+            "id": "two-002",
+            "role": "incoming",
+            "x": 798.96,
+            "y": 262.548,
+            "depth": -0.18,
+            "rotateYDeg": -2.5,
+            "width": 267.84,
+            "height": 334.8
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "two",
+        "canvasPreset": "16:9",
+        "transparent": false,
+        "reducedMotion": false,
+        "exactSourceState": [
+          {
+            "id": "two-001",
+            "role": "outgoing",
+            "active": true,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "two-002",
+            "role": "incoming",
+            "active": true,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "portrait-negative-space.png",
+      "fixture": "one",
+      "canvas": "9:16",
+      "time": 0.3,
+      "runKind": "loop",
+      "spotlight": "one-001",
+      "finale": "one-001",
+      "transparent": false,
+      "reduced": false,
+      "placard": true,
+      "file": "captures/portrait-negative-space.png",
+      "readback": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.3,
+        "temporalTime": 0.3,
+        "timelineDirection": "forward",
+        "runKind": "loop",
+        "phrase": "single-still",
+        "count": 1,
+        "canvas": {
+          "width": 405,
+          "height": 720
+        },
+        "currentId": "one-001",
+        "incomingId": null,
+        "transitionProgress": 0,
+        "renderNodeCount": 1,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 5.5,
+        "placardVisible": true,
+        "placard": {
+          "mediaId": "one-001",
+          "caption": "Object 1"
+        },
+        "activeRoles": [
+          {
+            "id": "one-001",
+            "role": "readable",
+            "x": 202.5,
+            "y": 338.4,
+            "depth": 0,
+            "rotateYDeg": 0,
+            "width": 332.1,
+            "height": 186.806
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "one",
+        "canvasPreset": "9:16",
+        "transparent": false,
+        "reducedMotion": false,
+        "exactSourceState": [
+          {
+            "id": "one-001",
+            "role": "readable",
+            "active": true,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "finite-finale-hold.png",
+      "fixture": "ordinary8",
+      "canvas": "4:5",
+      "time": 0.92,
+      "runKind": "finite",
+      "spotlight": "ordinary-004",
+      "finale": "ordinary-008",
+      "transparent": false,
+      "reduced": false,
+      "placard": true,
+      "file": "captures/finite-finale-hold.png",
+      "readback": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.92,
+        "temporalTime": 0.92,
+        "timelineDirection": "forward",
+        "runKind": "finite",
+        "phrase": "finale-hold",
+        "count": 8,
+        "canvas": {
+          "width": 576,
+          "height": 720
+        },
+        "currentId": "ordinary-008",
+        "incomingId": null,
+        "transitionProgress": 0,
+        "renderNodeCount": 1,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 44,
+        "placardVisible": true,
+        "placard": {
+          "mediaId": "ordinary-008",
+          "caption": "Edition 8"
+        },
+        "activeRoles": [
+          {
+            "id": "ordinary-008",
+            "role": "readable",
+            "x": 288,
+            "y": 338.4,
+            "depth": 0,
+            "rotateYDeg": 0,
+            "width": 357.12,
+            "height": 446.4
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "ordinary8",
+        "canvasPreset": "4:5",
+        "transparent": false,
+        "reducedMotion": false,
+        "exactSourceState": [
+          {
+            "id": "ordinary-001",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-002",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-003",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-004",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-005",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-006",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-007",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "ordinary-008",
+            "role": "readable",
+            "active": true,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "alpha-transparent.png",
+      "fixture": "mediaEdge",
+      "canvas": "1:1",
+      "time": 0.34,
+      "runKind": "finite",
+      "spotlight": "media-edge-003",
+      "finale": "media-edge-006",
+      "transparent": true,
+      "reduced": false,
+      "placard": false,
+      "file": "captures/alpha-transparent.png",
+      "readback": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.34,
+        "temporalTime": 0.34,
+        "timelineDirection": "forward",
+        "runKind": "finite",
+        "phrase": "readable-hold",
+        "count": 8,
+        "canvas": {
+          "width": 640,
+          "height": 640
+        },
+        "currentId": "media-edge-003",
+        "incomingId": null,
+        "transitionProgress": 0,
+        "renderNodeCount": 1,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 44,
+        "placardVisible": false,
+        "placard": null,
+        "activeRoles": [
+          {
+            "id": "media-edge-003",
+            "role": "readable",
+            "x": 320,
+            "y": 300.8,
+            "depth": 0,
+            "rotateYDeg": 0,
+            "width": 396.8,
+            "height": 396.8
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "mediaEdge",
+        "canvasPreset": "1:1",
+        "transparent": true,
+        "reducedMotion": false,
+        "exactSourceState": [
+          {
+            "id": "media-edge-001",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "media-edge-002",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "media-edge-003",
+            "role": "readable",
+            "active": true,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "media-edge-004",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "media-edge-005",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "media-edge-006",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "media-edge-007",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          },
+          {
+            "id": "media-edge-008",
+            "role": "offstage",
+            "active": false,
+            "artworkOpacity": 1,
+            "artworkFilter": "none",
+            "artworkBlend": "normal"
+          }
+        ]
+      }
+    }
+  ],
+  "alpha": {
+    "source": "captures/alpha-transparent.png",
+    "width": 640,
+    "height": 640,
+    "alphaZeroPixels": 382447,
+    "alphaZeroWithNonZeroRgb": 0,
+    "partialAlphaPixels": 2421,
+    "opaquePixels": 24732,
+    "passZeroRgbBelowZeroAlpha": true
+  },
+  "manifest": "CAPTURE_MANIFEST.sha256",
+  "limitations": [
+    "Generated fixtures do not prove decoded pixel-for-pixel equality against external user media.",
+    "Frame sequence and stills do not constitute human motion/taste acceptance or Product export integration."
+  ],
+  "captureCountMeaning": "Canonical/edge/transparent source captures listed in `captures`; alpha composites are counted separately.",
+  "alphaCompositeCount": 5,
+  "totalCapturePngCount": 10
+}

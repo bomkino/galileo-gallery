@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "scene": {
+    "id": "the-orrery",
+    "versionCandidate": 1,
+    "status": "G10B preflight candidate; implementation blocked by G10A",
+    "verdict": "pending"
+  },
+  "capabilities": {
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "finite": true,
+    "loop": true,
+    "exactReverse": true,
+    "spotlight": true,
+    "finale": true,
+    "serializedPrimary": true,
+    "directedPrimaryExchange": true,
+    "sourceVideo": true,
+    "transparent": true,
+    "reducedMotion": true,
+    "laboratoryRenderer": "dom-css-3d",
+    "productionRendererDecision": "blocked-by-g10a",
+    "unsupported": [
+      "implicit-index-zero-primary",
+      "click-only-primary-authority",
+      "random-ring-membership",
+      "quasi-periodic-ring-speeds",
+      "source-lighting",
+      "mandatory-orbit-guides",
+      "decorative-webgl"
+    ]
+  },
+  "defaults": {
+    "ringCount": "auto",
+    "orbitSize": 0.38,
+    "verticalSquash": 0.34,
+    "satelliteScale": 0.19,
+    "orbitPace": 1
+  },
+  "controls": [
+    {
+      "id": "ring-count",
+      "parameter": "ringCount",
+      "label": "Ring count",
+      "type": "enum",
+      "options": [
+        "auto",
+        "2",
+        "3"
+      ],
+      "default": "auto",
+      "serializedMeaning": "Chooses automatic count or exactly two/three orbital memberships, clamped by available satellites.",
+      "causalObservation": "At fixed media, primary, canvas, and story time, satellite ringIndex/slotIndex assignments and signed revolution tables change deterministically while source order and primary identity stay fixed.",
+      "reset": {
+        "value": "auto",
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Ring topology is intrinsic Scene structure, not Timeline pace or Look treatment.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "orbit-size",
+      "parameter": "orbitSize",
+      "label": "Orbit size",
+      "type": "number",
+      "bounds": {
+        "min": 0.25,
+        "max": 0.48,
+        "step": 0.01,
+        "unit": "normalized canvas radius"
+      },
+      "default": 0.38,
+      "serializedMeaning": "Scales all projected ring radii before canvas-specific recomposition.",
+      "causalObservation": "At fixed time, satellite x/y distances from centre change while membership, source size, primary pose, depth phase, and revolution count remain fixed.",
+      "reset": {
+        "value": 0.38,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Radial apparatus size defines composition and collision pressure.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "vertical-squash",
+      "parameter": "verticalSquash",
+      "label": "Vertical squash",
+      "type": "number",
+      "bounds": {
+        "min": 0.18,
+        "max": 0.55,
+        "step": 0.01,
+        "unit": "projection multiplier"
+      },
+      "default": 0.34,
+      "serializedMeaning": "Sets the projected vertical compression of every orbital plane.",
+      "causalObservation": "At fixed time, satellite y positions change while x radius, membership, source dimensions, and primary pose remain fixed.",
+      "reset": {
+        "value": 0.34,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Plane projection is Scene geometry and determines whether nested rings remain legible.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "satellite-scale",
+      "parameter": "satelliteScale",
+      "label": "Satellite scale",
+      "type": "number",
+      "bounds": {
+        "min": 0.12,
+        "max": 0.28,
+        "step": 0.01,
+        "unit": "minimum-canvas fraction"
+      },
+      "default": 0.19,
+      "serializedMeaning": "Sets natural-ratio satellite height before ring/depth hierarchy and portrait wide-card reduction.",
+      "causalObservation": "Satellite width/height change proportionally while primary size, ring poses, membership, and source order remain fixed.",
+      "reset": {
+        "value": 0.19,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Satellite-to-primary hierarchy is an intrinsic Scene capability.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "orbit-pace",
+      "parameter": "orbitPace",
+      "label": "Orbit pace",
+      "type": "number",
+      "bounds": {
+        "min": 0.6,
+        "max": 1.4,
+        "step": 0.05,
+        "unit": "timeline compilation multiplier"
+      },
+      "default": 1,
+      "serializedMeaning": "Scales the canonical 12-second reconciled master-cycle duration during Timeline compilation without changing integer revolution counts.",
+      "causalObservation": "Compiled duration changes from 20 seconds at 0.6 to 8.571429 seconds at 1.4; normalized pose and exact seam remain identical.",
+      "reset": {
+        "value": 1,
+        "behavior": "Exact canonical reset to 12 seconds."
+      },
+      "ownershipReason": "The apparatus needs a bounded cadence capability; authoritative story duration and segments remain Timeline-owned.",
+      "resetBehavior": "Exact canonical reset to 12 seconds."
+    }
+  ],
+  "serializedIntentNotControls": [
+    {
+      "id": "primaryId",
+      "owner": "Scene/Timeline intent",
+      "reason": "Primary identity is a semantic media role, not untracked local UI state."
+    },
+    {
+      "id": "exchangeTargetId",
+      "owner": "directed Timeline intent",
+      "reason": "Role exchange must be reproducible in preview, scrub, and export."
+    },
+    {
+      "id": "direction",
+      "owner": "Timeline",
+      "reason": "Direction is already portable Timeline truth and must not be duplicated."
+    }
+  ],
+  "rejectedControls": [
+    {
+      "id": "per-ring-speed",
+      "reason": "Would permit non-reconciling or quasi-periodic drift."
+    },
+    {
+      "id": "random-phase",
+      "reason": "Destroys exact repeat and stable hierarchy."
+    },
+    {
+      "id": "guide-visibility",
+      "reason": "Diagnostic/accessory state, not essential Scene capability."
+    },
+    {
+      "id": "glow-or-light",
+      "reason": "Look treatment cannot touch artwork or carry identity."
+    },
+    {
+      "id": "local-primary",
+      "reason": "Primary authority must be serialized intent."
+    }
+  ]
+}

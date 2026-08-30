@@ -1,0 +1,622 @@
+{
+  "schemaVersion": 1,
+  "sceneId": "the-shelf",
+  "evaluatorVersion": 1,
+  "vectors": [
+    {
+      "id": "one-still",
+      "input": {
+        "fixture": "one",
+        "canvas": "16:9",
+        "normalizedTime": 0.83,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "the-shelf",
+        "evaluatorVersion": 1,
+        "axis": "horizontal-only",
+        "normalizedTime": 0.83,
+        "runKind": "loop",
+        "phrase": "single-still",
+        "direction": "forward",
+        "phase": 0,
+        "count": 1,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "baselineY": 432,
+        "trackLength": 437.2,
+        "naturalTrackLength": 437.2,
+        "effectiveGap": 34,
+        "currentFocusId": null,
+        "focusProgress": 0,
+        "spotlightId": "one-001",
+        "finaleId": "one-001",
+        "renderNodeCount": 1,
+        "maxObservedNodes": 18,
+        "duplicateProjectMedia": false,
+        "compiledDurationSeconds": 8,
+        "visibleSlots": [
+          {
+            "id": "one-001",
+            "copyIndex": 0,
+            "x": 480,
+            "bottomY": 432,
+            "width": 403.2,
+            "height": 226.8,
+            "baseLeanDeg": 1.47863,
+            "leanDeg": 1.47863,
+            "lift": 0,
+            "focusProgress": 0
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "two-handoff",
+      "input": {
+        "fixture": "two",
+        "canvas": "16:9",
+        "normalizedTime": 0.35,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "the-shelf",
+        "evaluatorVersion": 1,
+        "axis": "horizontal-only",
+        "normalizedTime": 0.35,
+        "runKind": "loop",
+        "phrase": "walking-loop",
+        "direction": "forward",
+        "phase": 0.35,
+        "count": 2,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "baselineY": 432,
+        "trackLength": 1862.4,
+        "naturalTrackLength": 652.64,
+        "effectiveGap": 638.88,
+        "currentFocusId": null,
+        "focusProgress": 0,
+        "spotlightId": "two-002",
+        "finaleId": "two-002",
+        "renderNodeCount": 2,
+        "maxObservedNodes": 18,
+        "duplicateProjectMedia": false,
+        "compiledDurationSeconds": 8,
+        "visibleSlots": [
+          {
+            "id": "two-001",
+            "copyIndex": 0,
+            "x": -54,
+            "bottomY": 432,
+            "width": 403.2,
+            "height": 226.8,
+            "baseLeanDeg": -1.984788,
+            "leanDeg": -1.984788,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "two-002",
+            "copyIndex": 0,
+            "x": 877.2,
+            "bottomY": 432,
+            "width": 181.44,
+            "height": 226.8,
+            "baseLeanDeg": -1.965257,
+            "leanDeg": -1.965257,
+            "lift": 0,
+            "focusProgress": 0
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "ordinary-walking",
+      "input": {
+        "fixture": "ordinary8",
+        "canvas": "16:9",
+        "normalizedTime": 0.2,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "the-shelf",
+        "evaluatorVersion": 1,
+        "axis": "horizontal-only",
+        "normalizedTime": 0.2,
+        "runKind": "loop",
+        "phrase": "walking-loop",
+        "direction": "forward",
+        "phase": 0.2,
+        "count": 8,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "baselineY": 432,
+        "trackLength": 2479.52,
+        "naturalTrackLength": 2479.52,
+        "effectiveGap": 34,
+        "currentFocusId": null,
+        "focusProgress": 0,
+        "spotlightId": "ordinary-003",
+        "finaleId": "ordinary-008",
+        "renderNodeCount": 5,
+        "maxObservedNodes": 18,
+        "duplicateProjectMedia": false,
+        "compiledDurationSeconds": 13.2,
+        "visibleSlots": [
+          {
+            "id": "ordinary-001",
+            "copyIndex": 0,
+            "x": -200.504,
+            "bottomY": 432,
+            "width": 403.2,
+            "height": 226.8,
+            "baseLeanDeg": -1.815406,
+            "leanDeg": -1.815406,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "ordinary-002",
+            "copyIndex": 0,
+            "x": 125.816,
+            "bottomY": 432,
+            "width": 181.44,
+            "height": 226.8,
+            "baseLeanDeg": -1.874001,
+            "leanDeg": -1.874001,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "ordinary-003",
+            "copyIndex": 0,
+            "x": 363.936,
+            "bottomY": 432,
+            "width": 226.8,
+            "height": 226.8,
+            "baseLeanDeg": -1.85447,
+            "leanDeg": -1.85447,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "ordinary-004",
+            "copyIndex": 0,
+            "x": 712.936,
+            "bottomY": 432,
+            "width": 403.2,
+            "height": 226.8,
+            "baseLeanDeg": -1.756811,
+            "leanDeg": -1.756811,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "ordinary-005",
+            "copyIndex": 0,
+            "x": 1039.256,
+            "bottomY": 432,
+            "width": 181.44,
+            "height": 226.8,
+            "baseLeanDeg": -1.737279,
+            "leanDeg": -1.737279,
+            "lift": 0,
+            "focusProgress": 0
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "mixed-portrait",
+      "input": {
+        "fixture": "mixed21",
+        "canvas": "9:16",
+        "normalizedTime": 0.237,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "the-shelf",
+        "evaluatorVersion": 1,
+        "axis": "horizontal-only",
+        "normalizedTime": 0.237,
+        "runKind": "loop",
+        "phrase": "walking-loop",
+        "direction": "forward",
+        "phase": 0.237,
+        "count": 21,
+        "canvas": {
+          "width": 405,
+          "height": 720
+        },
+        "baselineY": 561.6,
+        "trackLength": 6842.46,
+        "naturalTrackLength": 6842.46,
+        "effectiveGap": 34,
+        "currentFocusId": null,
+        "focusProgress": 0,
+        "spotlightId": "mixed-003",
+        "finaleId": "mixed-021",
+        "renderNodeCount": 2,
+        "maxObservedNodes": 12,
+        "duplicateProjectMedia": false,
+        "compiledDurationSeconds": 34.65,
+        "visibleSlots": [
+          {
+            "id": "mixed-006",
+            "copyIndex": 0,
+            "x": 142.407,
+            "bottomY": 561.6,
+            "width": 332.1,
+            "height": 158.143,
+            "baseLeanDeg": 0.45,
+            "leanDeg": 0.45,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "mixed-007",
+            "copyIndex": 0,
+            "x": 508.507,
+            "bottomY": 561.6,
+            "width": 332.1,
+            "height": 265.68,
+            "baseLeanDeg": 0.45,
+            "leanDeg": 0.45,
+            "lift": 0,
+            "focusProgress": 0
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "finite-spotlight-hold",
+      "input": {
+        "fixture": "ordinary8",
+        "canvas": "4:5",
+        "normalizedTime": 0.6,
+        "runKind": "finite",
+        "spotlightId": "ordinary-004",
+        "finaleId": "ordinary-008"
+      },
+      "expect": {
+        "sceneId": "the-shelf",
+        "evaluatorVersion": 1,
+        "axis": "horizontal-only",
+        "normalizedTime": 0.6,
+        "runKind": "finite",
+        "phrase": "spotlight-hold",
+        "direction": "forward",
+        "phase": 0.374192,
+        "count": 8,
+        "canvas": {
+          "width": 576,
+          "height": 720
+        },
+        "baselineY": 561.6,
+        "trackLength": 3019.52,
+        "naturalTrackLength": 3019.52,
+        "effectiveGap": 34,
+        "currentFocusId": "ordinary-004",
+        "focusProgress": 1,
+        "spotlightId": "ordinary-004",
+        "finaleId": "ordinary-008",
+        "renderNodeCount": 3,
+        "maxObservedNodes": 12,
+        "duplicateProjectMedia": false,
+        "compiledDurationSeconds": 13.2,
+        "visibleSlots": [
+          {
+            "id": "ordinary-003",
+            "copyIndex": 0,
+            "x": -133.36,
+            "bottomY": 561.6,
+            "width": 302.4,
+            "height": 302.4,
+            "baseLeanDeg": -1.85447,
+            "leanDeg": -1.85447,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "ordinary-005",
+            "copyIndex": 0,
+            "x": 679.12,
+            "bottomY": 561.6,
+            "width": 241.92,
+            "height": 302.4,
+            "baseLeanDeg": -1.737279,
+            "leanDeg": -1.737279,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "ordinary-004",
+            "copyIndex": 0,
+            "x": 288,
+            "bottomY": 504,
+            "width": 472.32,
+            "height": 265.68,
+            "baseLeanDeg": -1.756811,
+            "leanDeg": 0,
+            "lift": 57.6,
+            "focusProgress": 1
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "finite-finale-hold",
+      "input": {
+        "fixture": "ordinary8",
+        "canvas": "16:9",
+        "normalizedTime": 0.9,
+        "runKind": "finite",
+        "spotlightId": "ordinary-004",
+        "finaleId": "ordinary-008"
+      },
+      "expect": {
+        "sceneId": "the-shelf",
+        "evaluatorVersion": 1,
+        "axis": "horizontal-only",
+        "normalizedTime": 0.9,
+        "runKind": "finite",
+        "phrase": "finale-hold",
+        "direction": "forward",
+        "phase": 0.793944,
+        "count": 8,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "baselineY": 432,
+        "trackLength": 2479.52,
+        "naturalTrackLength": 2479.52,
+        "effectiveGap": 34,
+        "currentFocusId": "ordinary-008",
+        "focusProgress": 1,
+        "spotlightId": "ordinary-004",
+        "finaleId": "ordinary-008",
+        "renderNodeCount": 3,
+        "maxObservedNodes": 18,
+        "duplicateProjectMedia": false,
+        "compiledDurationSeconds": 13.2,
+        "visibleSlots": [
+          {
+            "id": "ordinary-001",
+            "copyIndex": 1,
+            "x": 806.32,
+            "bottomY": 432,
+            "width": 403.2,
+            "height": 226.8,
+            "baseLeanDeg": -1.815406,
+            "leanDeg": -1.815406,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "ordinary-007",
+            "copyIndex": 0,
+            "x": 153.68,
+            "bottomY": 432,
+            "width": 403.2,
+            "height": 226.8,
+            "baseLeanDeg": -1.776343,
+            "leanDeg": -1.776343,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "ordinary-008",
+            "copyIndex": 0,
+            "x": 480,
+            "bottomY": 388.8,
+            "width": 181.44,
+            "height": 226.8,
+            "baseLeanDeg": -1.991192,
+            "leanDeg": 0,
+            "lift": 43.2,
+            "focusProgress": 1
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "many-127-bounded",
+      "input": {
+        "fixture": "many127",
+        "canvas": "9:16",
+        "normalizedTime": 0.613,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "the-shelf",
+        "evaluatorVersion": 1,
+        "axis": "horizontal-only",
+        "normalizedTime": 0.613,
+        "runKind": "loop",
+        "phrase": "walking-loop",
+        "direction": "forward",
+        "phase": 0.613,
+        "count": 127,
+        "canvas": {
+          "width": 405,
+          "height": 720
+        },
+        "baselineY": 561.6,
+        "trackLength": 41459.74,
+        "naturalTrackLength": 41459.74,
+        "effectiveGap": 34,
+        "currentFocusId": null,
+        "focusProgress": 0,
+        "spotlightId": "many-003",
+        "finaleId": "many-127",
+        "renderNodeCount": 3,
+        "maxObservedNodes": 12,
+        "duplicateProjectMedia": false,
+        "compiledDurationSeconds": 42,
+        "visibleSlots": [
+          {
+            "id": "many-078",
+            "copyIndex": 0,
+            "x": -111.701,
+            "bottomY": 561.6,
+            "width": 302.4,
+            "height": 302.4,
+            "baseLeanDeg": 1.884322,
+            "leanDeg": 1.884322,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "many-079",
+            "copyIndex": 0,
+            "x": 239.549,
+            "bottomY": 561.6,
+            "width": 332.1,
+            "height": 186.806,
+            "baseLeanDeg": 1.903854,
+            "leanDeg": 1.903854,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "many-080",
+            "copyIndex": 0,
+            "x": 560.559,
+            "bottomY": 561.6,
+            "width": 241.92,
+            "height": 302.4,
+            "baseLeanDeg": 2.238702,
+            "leanDeg": 2.238702,
+            "lift": 0,
+            "focusProgress": 0
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "media-edge-reduced",
+      "input": {
+        "fixture": "mediaEdge",
+        "canvas": "1:1",
+        "normalizedTime": 0.637,
+        "runKind": "loop",
+        "reducedMotion": true,
+        "spotlightId": "media-edge-004",
+        "finaleId": "media-edge-009"
+      },
+      "expect": {
+        "sceneId": "the-shelf",
+        "evaluatorVersion": 1,
+        "axis": "horizontal-only",
+        "normalizedTime": 0.637,
+        "runKind": "loop",
+        "phrase": "reduced-motion-settled",
+        "direction": "forward",
+        "phase": 0.310276,
+        "count": 9,
+        "canvas": {
+          "width": 640,
+          "height": 640
+        },
+        "baselineY": 512,
+        "trackLength": 2871.12,
+        "naturalTrackLength": 2871.12,
+        "effectiveGap": 34,
+        "currentFocusId": "media-edge-004",
+        "focusProgress": 1,
+        "spotlightId": "media-edge-004",
+        "finaleId": "media-edge-009",
+        "renderNodeCount": 3,
+        "maxObservedNodes": 18,
+        "duplicateProjectMedia": false,
+        "compiledDurationSeconds": 14.85,
+        "visibleSlots": [
+          {
+            "id": "media-edge-003",
+            "copyIndex": 0,
+            "x": -34,
+            "bottomY": 512,
+            "width": 268.8,
+            "height": 268.8,
+            "baseLeanDeg": 0.866278,
+            "leanDeg": 0.866278,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "media-edge-005",
+            "copyIndex": 0,
+            "x": 647.12,
+            "bottomY": 512,
+            "width": 215.04,
+            "height": 268.8,
+            "baseLeanDeg": 0.983469,
+            "leanDeg": 0.983469,
+            "lift": 0,
+            "focusProgress": 0
+          },
+          {
+            "id": "media-edge-004",
+            "copyIndex": 0,
+            "x": 320,
+            "bottomY": 460.8,
+            "width": 371.2,
+            "height": 208.8,
+            "baseLeanDeg": 0.963937,
+            "leanDeg": 0,
+            "lift": 51.2,
+            "focusProgress": 1
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    }
+  ]
+}

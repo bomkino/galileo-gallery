@@ -1,0 +1,460 @@
+{
+  "schemaVersion": 1,
+  "sceneId": "vitrine",
+  "evaluatorVersion": 1,
+  "vectors": [
+    {
+      "id": "one-still",
+      "input": {
+        "fixture": "one",
+        "canvas": "16:9",
+        "normalizedTime": 0.83,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.83,
+        "temporalTime": 0.83,
+        "timelineDirection": "forward",
+        "runKind": "loop",
+        "phrase": "single-still",
+        "count": 1,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "currentId": "one-001",
+        "incomingId": null,
+        "transitionProgress": 0,
+        "renderNodeCount": 1,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 5.5,
+        "placardVisible": true,
+        "placard": {
+          "mediaId": "one-001",
+          "caption": "Object 1"
+        },
+        "activeRoles": [
+          {
+            "id": "one-001",
+            "role": "readable",
+            "x": 480,
+            "y": 253.8,
+            "depth": 0,
+            "rotateYDeg": 0,
+            "width": 595.2,
+            "height": 334.8
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "two-hold",
+      "input": {
+        "fixture": "two",
+        "canvas": "1:1",
+        "normalizedTime": 0.05,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.05,
+        "temporalTime": 0.05,
+        "timelineDirection": "forward",
+        "runKind": "loop",
+        "phrase": "readable-hold",
+        "count": 2,
+        "canvas": {
+          "width": 640,
+          "height": 640
+        },
+        "currentId": "two-001",
+        "incomingId": null,
+        "transitionProgress": 0,
+        "renderNodeCount": 1,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 11,
+        "placardVisible": true,
+        "placard": {
+          "mediaId": "two-001",
+          "caption": "Object 1"
+        },
+        "activeRoles": [
+          {
+            "id": "two-001",
+            "role": "readable",
+            "x": 320,
+            "y": 300.8,
+            "depth": 0,
+            "rotateYDeg": 0,
+            "width": 460.8,
+            "height": 259.2
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "two-exchange",
+      "input": {
+        "fixture": "two",
+        "canvas": "16:9",
+        "normalizedTime": 0.42,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.42,
+        "temporalTime": 0.42,
+        "timelineDirection": "forward",
+        "runKind": "loop",
+        "phrase": "exchange",
+        "count": 2,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "currentId": "two-001",
+        "incomingId": "two-002",
+        "transitionProgress": 0.5,
+        "renderNodeCount": 2,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 11,
+        "placardVisible": true,
+        "placard": {
+          "mediaId": "two-002",
+          "caption": "Edition 2"
+        },
+        "activeRoles": [
+          {
+            "id": "two-001",
+            "role": "outgoing",
+            "x": 79.2,
+            "y": 262.548,
+            "depth": -0.18,
+            "rotateYDeg": 2.5,
+            "width": 595.2,
+            "height": 334.8
+          },
+          {
+            "id": "two-002",
+            "role": "incoming",
+            "x": 798.96,
+            "y": 262.548,
+            "depth": -0.18,
+            "rotateYDeg": -2.5,
+            "width": 267.84,
+            "height": 334.8
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "mixed-portrait",
+      "input": {
+        "fixture": "mixed21",
+        "canvas": "9:16",
+        "normalizedTime": 0.237,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.237,
+        "temporalTime": 0.237,
+        "timelineDirection": "forward",
+        "runKind": "loop",
+        "phrase": "exchange",
+        "count": 21,
+        "canvas": {
+          "width": 405,
+          "height": 720
+        },
+        "currentId": "mixed-005",
+        "incomingId": "mixed-006",
+        "transitionProgress": 0.996676,
+        "renderNodeCount": 2,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 115.5,
+        "placardVisible": true,
+        "placard": {
+          "mediaId": "mixed-006",
+          "caption": "Edition 6"
+        },
+        "activeRoles": [
+          {
+            "id": "mixed-005",
+            "role": "outgoing",
+            "x": -149.55,
+            "y": 338.4,
+            "depth": 0,
+            "rotateYDeg": 4.999998,
+            "width": 251.1,
+            "height": 446.4
+          },
+          {
+            "id": "mixed-006",
+            "role": "incoming",
+            "x": 202.5,
+            "y": 338.4,
+            "depth": 0,
+            "rotateYDeg": -0.000002,
+            "width": 332.1,
+            "height": 158.143
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "finite-spotlight-hold",
+      "input": {
+        "fixture": "ordinary8",
+        "canvas": "4:5",
+        "normalizedTime": 0.42,
+        "runKind": "finite",
+        "spotlightId": "ordinary-004",
+        "finaleId": "ordinary-008"
+      },
+      "expect": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.42,
+        "temporalTime": 0.42,
+        "timelineDirection": "forward",
+        "runKind": "finite",
+        "phrase": "readable-hold",
+        "count": 8,
+        "canvas": {
+          "width": 576,
+          "height": 720
+        },
+        "currentId": "ordinary-004",
+        "incomingId": null,
+        "transitionProgress": 0,
+        "renderNodeCount": 1,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 44,
+        "placardVisible": true,
+        "placard": {
+          "mediaId": "ordinary-004",
+          "caption": "Edition 4"
+        },
+        "activeRoles": [
+          {
+            "id": "ordinary-004",
+            "role": "readable",
+            "x": 288,
+            "y": 338.4,
+            "depth": 0,
+            "rotateYDeg": 0,
+            "width": 472.32,
+            "height": 265.68
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "finite-exchange",
+      "input": {
+        "fixture": "ordinary8",
+        "canvas": "4:5",
+        "normalizedTime": 0.77,
+        "runKind": "finite",
+        "spotlightId": "ordinary-004",
+        "finaleId": "ordinary-008"
+      },
+      "expect": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.77,
+        "temporalTime": 0.77,
+        "timelineDirection": "forward",
+        "runKind": "finite",
+        "phrase": "exchange",
+        "count": 8,
+        "canvas": {
+          "width": 576,
+          "height": 720
+        },
+        "currentId": "ordinary-004",
+        "incomingId": "ordinary-008",
+        "transitionProgress": 0.5,
+        "renderNodeCount": 2,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 44,
+        "placardVisible": true,
+        "placard": {
+          "mediaId": "ordinary-008",
+          "caption": "Edition 8"
+        },
+        "activeRoles": [
+          {
+            "id": "ordinary-004",
+            "role": "outgoing",
+            "x": 13.92,
+            "y": 350.064,
+            "depth": -0.18,
+            "rotateYDeg": 2.5,
+            "width": 472.32,
+            "height": 265.68
+          },
+          {
+            "id": "ordinary-008",
+            "role": "incoming",
+            "x": 533.28,
+            "y": 350.064,
+            "depth": -0.18,
+            "rotateYDeg": -2.5,
+            "width": 357.12,
+            "height": 446.4
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "many-127-bounded",
+      "input": {
+        "fixture": "many127",
+        "canvas": "9:16",
+        "normalizedTime": 0.613,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.613,
+        "temporalTime": 0.613,
+        "timelineDirection": "forward",
+        "runKind": "loop",
+        "phrase": "exchange",
+        "count": 127,
+        "canvas": {
+          "width": 405,
+          "height": 720
+        },
+        "currentId": "many-078",
+        "incomingId": "many-079",
+        "transitionProgress": 0.56425,
+        "renderNodeCount": 2,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 698.5,
+        "placardVisible": true,
+        "placard": {
+          "mediaId": "many-079",
+          "caption": "Object 79"
+        },
+        "activeRoles": [
+          {
+            "id": "many-078",
+            "role": "outgoing",
+            "x": -40.547,
+            "y": 349.256,
+            "depth": -0.167536,
+            "rotateYDeg": 3.095749,
+            "width": 332.1,
+            "height": 332.1
+          },
+          {
+            "id": "many-079",
+            "role": "incoming",
+            "x": 352.003,
+            "y": 349.256,
+            "depth": -0.167536,
+            "rotateYDeg": -1.904251,
+            "width": 332.1,
+            "height": 186.806
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "media-edge-reduced",
+      "input": {
+        "fixture": "mediaEdge",
+        "canvas": "16:9",
+        "normalizedTime": 0.637,
+        "runKind": "loop",
+        "reducedMotion": true
+      },
+      "expect": {
+        "sceneId": "vitrine",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.637,
+        "temporalTime": 0.637,
+        "timelineDirection": "forward",
+        "runKind": "loop",
+        "phrase": "reduced-motion-settled",
+        "count": 8,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "currentId": "media-edge-006",
+        "incomingId": null,
+        "transitionProgress": 0,
+        "renderNodeCount": 1,
+        "maxObservedNodes": 2,
+        "compiledDurationSeconds": 44,
+        "placardVisible": true,
+        "placard": {
+          "mediaId": "media-edge-006",
+          "caption": "Edition 6"
+        },
+        "activeRoles": [
+          {
+            "id": "media-edge-006",
+            "role": "readable",
+            "x": 480,
+            "y": 253.8,
+            "depth": 0,
+            "rotateYDeg": 0,
+            "width": 334.8,
+            "height": 334.8
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    }
+  ]
+}

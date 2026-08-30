@@ -1,0 +1,157 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "spiral-image-vortex",
+  "sourceContractSha256": "99173564c6fbac5af457de6fc840c6be02bd59d2cbf8c3b83ec27233cb8aef29",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.spiral-image-vortex.turns",
+      "sceneLocalId": "turns",
+      "parameter": "turns",
+      "owner": "Scene",
+      "label": "Turns",
+      "valueModel": "integer",
+      "unit": "turns",
+      "default": 3,
+      "range": {
+        "minimum": 2,
+        "maximum": 5,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 3,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "spiral-image-vortex:turns",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed source, canvas, and time, every card's angle/depth and the number of front/rear crossings change while source order and endpoint seam remain fixed.",
+      "acceptanceRow": "control:scene.spiral-image-vortex.turns",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.spiral-image-vortex.radial-spread",
+      "sceneLocalId": "radial-spread",
+      "parameter": "radialSpread",
+      "owner": "Scene",
+      "label": "Radial spread",
+      "valueModel": "number",
+      "unit": "normalized radius capacity",
+      "default": 0.34,
+      "range": {
+        "minimum": 0.22,
+        "maximum": 0.46,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.34,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "spiral-image-vortex:radial-spread",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed time, x positions change while `u`, y pitch, source order, and depth phase stay unchanged.",
+      "acceptanceRow": "control:scene.spiral-image-vortex.radial-spread",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.spiral-image-vortex.depth-pitch",
+      "sceneLocalId": "depth-pitch",
+      "parameter": "depthPitch",
+      "owner": "Scene",
+      "label": "Depth pitch",
+      "valueModel": "number",
+      "unit": "normalized longitudinal pitch",
+      "default": 0.28,
+      "range": {
+        "minimum": 0.16,
+        "maximum": 0.42,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.28,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "spiral-image-vortex:depth-pitch",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed time, y positions and inter-turn separation change while x radius and angular depth remain unchanged.",
+      "acceptanceRow": "control:scene.spiral-image-vortex.depth-pitch",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.spiral-image-vortex.card-size",
+      "sceneLocalId": "card-size",
+      "parameter": "cardSize",
+      "owner": "Scene",
+      "label": "Card size",
+      "valueModel": "number",
+      "unit": "canvas-height fraction",
+      "default": 0.22,
+      "range": {
+        "minimum": 0.16,
+        "maximum": 0.3,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.22,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "spiral-image-vortex:card-size",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Card width/height change proportionally while path coordinate and crossing order remain fixed.",
+      "acceptanceRow": "control:scene.spiral-image-vortex.card-size",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "timeline.direction",
+      "sceneLocalId": "direction",
+      "parameter": "direction",
+      "owner": "Timeline",
+      "label": "Direction",
+      "valueModel": "enum",
+      "unit": "unitless",
+      "default": "forward",
+      "range": null,
+      "options": [
+        "forward",
+        "reverse"
+      ],
+      "resetValue": "forward",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "spiral-image-vortex:direction",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed story time, path phase becomes its modular inverse and every source traverses the same path backwards.",
+      "acceptanceRow": "control:timeline.direction",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

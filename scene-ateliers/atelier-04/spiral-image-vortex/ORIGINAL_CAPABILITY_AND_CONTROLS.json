@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "scene": {
+    "id": "spiral-image-vortex",
+    "versionCandidate": 1,
+    "status": "candidate",
+    "verdict": "pending"
+  },
+  "capabilities": {
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "finite": true,
+    "loop": true,
+    "exactReverse": true,
+    "spotlight": true,
+    "finale": true,
+    "sourceVideo": true,
+    "transparent": true,
+    "reducedMotion": true,
+    "axes": [
+      "longitudinal-helix"
+    ],
+    "unsupported": [
+      "flat-spiral",
+      "particle-swarm",
+      "random-card-rotation",
+      "opacity-seam",
+      "central-singularity",
+      "vortex-texture"
+    ]
+  },
+  "defaults": {
+    "turns": 3,
+    "radialSpread": 0.34,
+    "depthPitch": 0.28,
+    "cardSize": 0.22,
+    "direction": "forward"
+  },
+  "controls": [
+    {
+      "id": "turns",
+      "parameter": "turns",
+      "label": "Turns",
+      "type": "integer",
+      "bounds": {
+        "min": 2,
+        "max": 5,
+        "step": 1,
+        "unit": "turns"
+      },
+      "default": 3,
+      "serializedMeaning": "Sets the integer angular revolutions along one longitudinal path.",
+      "causalObservation": "At fixed source, canvas, and time, every card's angle/depth and the number of front/rear crossings change while source order and endpoint seam remain fixed.",
+      "reset": {
+        "value": 3,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Turn count defines the Scene topology and cannot be derived from Timeline or Look.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "radial-spread",
+      "parameter": "radialSpread",
+      "label": "Radial spread",
+      "type": "number",
+      "bounds": {
+        "min": 0.22,
+        "max": 0.46,
+        "step": 0.01,
+        "unit": "normalized radius capacity"
+      },
+      "default": 0.34,
+      "serializedMeaning": "Scales horizontal helix radius before canvas recomposition.",
+      "causalObservation": "At fixed time, x positions change while `u`, y pitch, source order, and depth phase stay unchanged.",
+      "reset": {
+        "value": 0.34,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Radial geometry is intrinsic to the helix.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "depth-pitch",
+      "parameter": "depthPitch",
+      "label": "Depth pitch",
+      "type": "number",
+      "bounds": {
+        "min": 0.16,
+        "max": 0.42,
+        "step": 0.01,
+        "unit": "normalized longitudinal pitch"
+      },
+      "default": 0.28,
+      "serializedMeaning": "Sets longitudinal separation and total offstage endpoint span per turn.",
+      "causalObservation": "At fixed time, y positions and inter-turn separation change while x radius and angular depth remain unchanged.",
+      "reset": {
+        "value": 0.28,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Pitch distinguishes a 3D helix from a flat spiral.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "card-size",
+      "parameter": "cardSize",
+      "label": "Card size",
+      "type": "number",
+      "bounds": {
+        "min": 0.16,
+        "max": 0.3,
+        "step": 0.01,
+        "unit": "canvas-height fraction"
+      },
+      "default": 0.22,
+      "serializedMeaning": "Sets natural-ratio card height before portrait wide-card reduction.",
+      "causalObservation": "Card width/height change proportionally while path coordinate and crossing order remain fixed.",
+      "reset": {
+        "value": 0.22,
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Source scale affects path legibility and collision bounds.",
+      "resetBehavior": "Exact canonical reset."
+    },
+    {
+      "id": "direction",
+      "parameter": "direction",
+      "label": "Direction",
+      "type": "enum",
+      "options": [
+        "forward",
+        "reverse"
+      ],
+      "default": "forward",
+      "serializedMeaning": "Changes the sign of path traversal without reordering media or changing the helix.",
+      "causalObservation": "At fixed story time, path phase becomes its modular inverse and every source traverses the same path backwards.",
+      "reset": {
+        "value": "forward",
+        "behavior": "Exact canonical reset."
+      },
+      "ownershipReason": "Production integration must map the authoritative portable Timeline direction into this Scene field without creating duplicate state.",
+      "resetBehavior": "Exact canonical reset."
+    }
+  ],
+  "rejectedControls": [
+    {
+      "id": "pace",
+      "reason": "Timeline-owned."
+    },
+    {
+      "id": "fade-window",
+      "reason": "Seam is hidden geometrically; source opacity must stay faithful."
+    },
+    {
+      "id": "random-rotation",
+      "reason": "Would destroy one-thread identity."
+    },
+    {
+      "id": "central-pull",
+      "reason": "Introduces a singularity and flat spiral behaviour."
+    },
+    {
+      "id": "glow-or-streak",
+      "reason": "Look/post-processing cannot be required for Scene topology."
+    }
+  ]
+}

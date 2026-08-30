@@ -1,0 +1,2534 @@
+{
+  "sceneId": "the-orrery",
+  "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+  "captureTool": "Playwright Python with system Chromium",
+  "browserVersion": "144.0.7559.96",
+  "captureCount": 4,
+  "frameSequenceCount": 12,
+  "captures": [
+    {
+      "file": "captures/canonical-nested-planes.png",
+      "fixture": "ordinary9",
+      "canvas": "16:9",
+      "normalizedTime": 0.187,
+      "runKind": "loop",
+      "primaryId": "ordinary-004",
+      "exchangeTargetId": "ordinary-008",
+      "exchangeEnabled": false,
+      "transparent": false,
+      "readback": {
+        "sceneId": "the-orrery",
+        "evaluatorVersion": 1,
+        "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+        "normalizedTime": 0.187,
+        "runKind": "loop",
+        "phrase": "orbit",
+        "masterCycle": 0.187,
+        "timelineDirection": "forward",
+        "exchangeProgress": 0,
+        "basePrimaryId": "ordinary-004",
+        "effectivePrimaryId": "ordinary-004",
+        "exchangeTargetId": "ordinary-008",
+        "ringCountControl": "auto",
+        "effectiveRingCount": 3,
+        "revolutionCounts": [
+          3,
+          -2,
+          1
+        ],
+        "compiledDurationSeconds": 12,
+        "count": 9,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "renderNodeCount": 9,
+        "stateCount": 9,
+        "membershipDigest": [
+          {
+            "id": "ordinary-001",
+            "ringIndex": 0,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-002",
+            "ringIndex": 1,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-003",
+            "ringIndex": 2,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-005",
+            "ringIndex": 0,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-006",
+            "ringIndex": 1,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-007",
+            "ringIndex": 2,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-008",
+            "ringIndex": 0,
+            "slotIndex": 2
+          },
+          {
+            "id": "ordinary-009",
+            "ringIndex": 1,
+            "slotIndex": 2
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "ordinary9",
+        "canvasPreset": "16:9",
+        "transparent": false,
+        "reducedMotion": false,
+        "showGuides": false,
+        "exactState": [
+          {
+            "id": "ordinary-001",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 0,
+            "x": 392.815,
+            "y": 229.395,
+            "depth": -0.803058,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "ordinary-002",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 0,
+            "x": 645.7,
+            "y": 240.076,
+            "depth": -0.451725,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "ordinary-003",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 0,
+            "x": 489.774,
+            "y": 195.201,
+            "depth": -0.883358,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "ordinary-004",
+            "role": "primary",
+            "ringIndex": null,
+            "slotIndex": null,
+            "x": 480,
+            "y": 270,
+            "depth": 0,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "ordinary-005",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 1,
+            "x": 616.038,
+            "y": 269.202,
+            "depth": -0.049009,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "ordinary-006",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 1,
+            "x": 458.181,
+            "y": 331.556,
+            "depth": 0.976458,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "ordinary-007",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 1,
+            "x": 470.226,
+            "y": 344.799,
+            "depth": 0.883358,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "ordinary-008",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 2,
+            "x": 431.147,
+            "y": 311.403,
+            "depth": 0.852067,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "ordinary-009",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 2,
+            "x": 336.12,
+            "y": 238.369,
+            "depth": -0.524733,
+            "frontOfPrimary": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "captures/primary-exchange-mid.png",
+      "fixture": "ordinary9",
+      "canvas": "4:5",
+      "normalizedTime": 0.67,
+      "runKind": "finite",
+      "primaryId": "ordinary-004",
+      "exchangeTargetId": "ordinary-008",
+      "exchangeEnabled": true,
+      "transparent": false,
+      "readback": {
+        "sceneId": "the-orrery",
+        "evaluatorVersion": 1,
+        "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+        "normalizedTime": 0.67,
+        "runKind": "finite",
+        "phrase": "primary-exchange",
+        "masterCycle": 0.7125,
+        "timelineDirection": "forward",
+        "exchangeProgress": 0.5,
+        "basePrimaryId": "ordinary-004",
+        "effectivePrimaryId": "ordinary-004",
+        "exchangeTargetId": "ordinary-008",
+        "ringCountControl": "auto",
+        "effectiveRingCount": 3,
+        "revolutionCounts": [
+          3,
+          -2,
+          1
+        ],
+        "compiledDurationSeconds": 12,
+        "count": 9,
+        "canvas": {
+          "width": 576,
+          "height": 720
+        },
+        "renderNodeCount": 9,
+        "stateCount": 9,
+        "membershipDigest": [
+          {
+            "id": "ordinary-001",
+            "ringIndex": 0,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-002",
+            "ringIndex": 1,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-003",
+            "ringIndex": 2,
+            "slotIndex": 0
+          },
+          {
+            "id": "ordinary-005",
+            "ringIndex": 0,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-006",
+            "ringIndex": 1,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-007",
+            "ringIndex": 2,
+            "slotIndex": 1
+          },
+          {
+            "id": "ordinary-008",
+            "ringIndex": 0,
+            "slotIndex": 2
+          },
+          {
+            "id": "ordinary-009",
+            "ringIndex": 1,
+            "slotIndex": 2
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "ordinary9",
+        "canvasPreset": "4:5",
+        "transparent": false,
+        "reducedMotion": false,
+        "showGuides": false,
+        "exactState": [
+          {
+            "id": "ordinary-001",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 0,
+            "x": 312.079,
+            "y": 400.724,
+            "depth": 0.952602,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "ordinary-002",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 0,
+            "x": 404.366,
+            "y": 320.931,
+            "depth": -0.701733,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "ordinary-003",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 0,
+            "x": 249.162,
+            "y": 420.943,
+            "depth": 0.841192,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "ordinary-004",
+            "role": "outgoing-primary",
+            "ringIndex": null,
+            "slotIndex": null,
+            "x": 332.329,
+            "y": 314.763,
+            "depth": -0.497113,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "ordinary-005",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 1,
+            "x": 175.263,
+            "y": 341.749,
+            "depth": -0.398377,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "ordinary-006",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 1,
+            "x": 318.663,
+            "y": 410.6,
+            "depth": 0.940029,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "ordinary-007",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 1,
+            "x": 326.838,
+            "y": 299.057,
+            "depth": -0.841192,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "ordinary-008",
+            "role": "incoming-primary",
+            "ringIndex": 0,
+            "slotIndex": 2,
+            "x": 332.329,
+            "y": 382.763,
+            "depth": -0.057113,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "ordinary-009",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 2,
+            "x": 140.972,
+            "y": 348.468,
+            "depth": -0.238296,
+            "frontOfPrimary": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "captures/portrait-many-bounded.png",
+      "fixture": "many127",
+      "canvas": "9:16",
+      "normalizedTime": 0.417,
+      "runKind": "loop",
+      "primaryId": "many-061",
+      "exchangeTargetId": "many-088",
+      "exchangeEnabled": false,
+      "transparent": false,
+      "readback": {
+        "sceneId": "the-orrery",
+        "evaluatorVersion": 1,
+        "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+        "normalizedTime": 0.417,
+        "runKind": "loop",
+        "phrase": "orbit",
+        "masterCycle": 0.417,
+        "timelineDirection": "forward",
+        "exchangeProgress": 0,
+        "basePrimaryId": "many-061",
+        "effectivePrimaryId": "many-061",
+        "exchangeTargetId": "many-088",
+        "ringCountControl": "auto",
+        "effectiveRingCount": 3,
+        "revolutionCounts": [
+          3,
+          -2,
+          1
+        ],
+        "compiledDurationSeconds": 12,
+        "count": 127,
+        "canvas": {
+          "width": 405,
+          "height": 720
+        },
+        "renderNodeCount": 19,
+        "stateCount": 127,
+        "membershipDigest": [
+          {
+            "id": "many-001",
+            "ringIndex": 0,
+            "slotIndex": 0
+          },
+          {
+            "id": "many-002",
+            "ringIndex": 1,
+            "slotIndex": 0
+          },
+          {
+            "id": "many-003",
+            "ringIndex": 2,
+            "slotIndex": 0
+          },
+          {
+            "id": "many-004",
+            "ringIndex": 0,
+            "slotIndex": 1
+          },
+          {
+            "id": "many-005",
+            "ringIndex": 1,
+            "slotIndex": 1
+          },
+          {
+            "id": "many-006",
+            "ringIndex": 2,
+            "slotIndex": 1
+          },
+          {
+            "id": "many-007",
+            "ringIndex": 0,
+            "slotIndex": 2
+          },
+          {
+            "id": "many-008",
+            "ringIndex": 1,
+            "slotIndex": 2
+          },
+          {
+            "id": "many-009",
+            "ringIndex": 2,
+            "slotIndex": 2
+          },
+          {
+            "id": "many-010",
+            "ringIndex": 0,
+            "slotIndex": 3
+          },
+          {
+            "id": "many-011",
+            "ringIndex": 1,
+            "slotIndex": 3
+          },
+          {
+            "id": "many-012",
+            "ringIndex": 2,
+            "slotIndex": 3
+          },
+          {
+            "id": "many-013",
+            "ringIndex": 0,
+            "slotIndex": 4
+          },
+          {
+            "id": "many-014",
+            "ringIndex": 1,
+            "slotIndex": 4
+          },
+          {
+            "id": "many-015",
+            "ringIndex": 2,
+            "slotIndex": 4
+          },
+          {
+            "id": "many-016",
+            "ringIndex": 0,
+            "slotIndex": 5
+          },
+          {
+            "id": "many-017",
+            "ringIndex": 1,
+            "slotIndex": 5
+          },
+          {
+            "id": "many-018",
+            "ringIndex": 2,
+            "slotIndex": 5
+          },
+          {
+            "id": "many-019",
+            "ringIndex": 0,
+            "slotIndex": 6
+          },
+          {
+            "id": "many-020",
+            "ringIndex": 1,
+            "slotIndex": 6
+          },
+          {
+            "id": "many-021",
+            "ringIndex": 2,
+            "slotIndex": 6
+          },
+          {
+            "id": "many-022",
+            "ringIndex": 0,
+            "slotIndex": 7
+          },
+          {
+            "id": "many-023",
+            "ringIndex": 1,
+            "slotIndex": 7
+          },
+          {
+            "id": "many-024",
+            "ringIndex": 2,
+            "slotIndex": 7
+          },
+          {
+            "id": "many-025",
+            "ringIndex": 0,
+            "slotIndex": 8
+          },
+          {
+            "id": "many-026",
+            "ringIndex": 1,
+            "slotIndex": 8
+          },
+          {
+            "id": "many-027",
+            "ringIndex": 2,
+            "slotIndex": 8
+          },
+          {
+            "id": "many-028",
+            "ringIndex": 0,
+            "slotIndex": 9
+          },
+          {
+            "id": "many-029",
+            "ringIndex": 1,
+            "slotIndex": 9
+          },
+          {
+            "id": "many-030",
+            "ringIndex": 2,
+            "slotIndex": 9
+          },
+          {
+            "id": "many-031",
+            "ringIndex": 0,
+            "slotIndex": 10
+          },
+          {
+            "id": "many-032",
+            "ringIndex": 1,
+            "slotIndex": 10
+          },
+          {
+            "id": "many-033",
+            "ringIndex": 2,
+            "slotIndex": 10
+          },
+          {
+            "id": "many-034",
+            "ringIndex": 0,
+            "slotIndex": 11
+          },
+          {
+            "id": "many-035",
+            "ringIndex": 1,
+            "slotIndex": 11
+          },
+          {
+            "id": "many-036",
+            "ringIndex": 2,
+            "slotIndex": 11
+          },
+          {
+            "id": "many-037",
+            "ringIndex": 0,
+            "slotIndex": 12
+          },
+          {
+            "id": "many-038",
+            "ringIndex": 1,
+            "slotIndex": 12
+          },
+          {
+            "id": "many-039",
+            "ringIndex": 2,
+            "slotIndex": 12
+          },
+          {
+            "id": "many-040",
+            "ringIndex": 0,
+            "slotIndex": 13
+          },
+          {
+            "id": "many-041",
+            "ringIndex": 1,
+            "slotIndex": 13
+          },
+          {
+            "id": "many-042",
+            "ringIndex": 2,
+            "slotIndex": 13
+          },
+          {
+            "id": "many-043",
+            "ringIndex": 0,
+            "slotIndex": 14
+          },
+          {
+            "id": "many-044",
+            "ringIndex": 1,
+            "slotIndex": 14
+          },
+          {
+            "id": "many-045",
+            "ringIndex": 2,
+            "slotIndex": 14
+          },
+          {
+            "id": "many-046",
+            "ringIndex": 0,
+            "slotIndex": 15
+          },
+          {
+            "id": "many-047",
+            "ringIndex": 1,
+            "slotIndex": 15
+          },
+          {
+            "id": "many-048",
+            "ringIndex": 2,
+            "slotIndex": 15
+          },
+          {
+            "id": "many-049",
+            "ringIndex": 0,
+            "slotIndex": 16
+          },
+          {
+            "id": "many-050",
+            "ringIndex": 1,
+            "slotIndex": 16
+          },
+          {
+            "id": "many-051",
+            "ringIndex": 2,
+            "slotIndex": 16
+          },
+          {
+            "id": "many-052",
+            "ringIndex": 0,
+            "slotIndex": 17
+          },
+          {
+            "id": "many-053",
+            "ringIndex": 1,
+            "slotIndex": 17
+          },
+          {
+            "id": "many-054",
+            "ringIndex": 2,
+            "slotIndex": 17
+          },
+          {
+            "id": "many-055",
+            "ringIndex": 0,
+            "slotIndex": 18
+          },
+          {
+            "id": "many-056",
+            "ringIndex": 1,
+            "slotIndex": 18
+          },
+          {
+            "id": "many-057",
+            "ringIndex": 2,
+            "slotIndex": 18
+          },
+          {
+            "id": "many-058",
+            "ringIndex": 0,
+            "slotIndex": 19
+          },
+          {
+            "id": "many-059",
+            "ringIndex": 1,
+            "slotIndex": 19
+          },
+          {
+            "id": "many-060",
+            "ringIndex": 2,
+            "slotIndex": 19
+          },
+          {
+            "id": "many-062",
+            "ringIndex": 0,
+            "slotIndex": 20
+          },
+          {
+            "id": "many-063",
+            "ringIndex": 1,
+            "slotIndex": 20
+          },
+          {
+            "id": "many-064",
+            "ringIndex": 2,
+            "slotIndex": 20
+          },
+          {
+            "id": "many-065",
+            "ringIndex": 0,
+            "slotIndex": 21
+          },
+          {
+            "id": "many-066",
+            "ringIndex": 1,
+            "slotIndex": 21
+          },
+          {
+            "id": "many-067",
+            "ringIndex": 2,
+            "slotIndex": 21
+          },
+          {
+            "id": "many-068",
+            "ringIndex": 0,
+            "slotIndex": 22
+          },
+          {
+            "id": "many-069",
+            "ringIndex": 1,
+            "slotIndex": 22
+          },
+          {
+            "id": "many-070",
+            "ringIndex": 2,
+            "slotIndex": 22
+          },
+          {
+            "id": "many-071",
+            "ringIndex": 0,
+            "slotIndex": 23
+          },
+          {
+            "id": "many-072",
+            "ringIndex": 1,
+            "slotIndex": 23
+          },
+          {
+            "id": "many-073",
+            "ringIndex": 2,
+            "slotIndex": 23
+          },
+          {
+            "id": "many-074",
+            "ringIndex": 0,
+            "slotIndex": 24
+          },
+          {
+            "id": "many-075",
+            "ringIndex": 1,
+            "slotIndex": 24
+          },
+          {
+            "id": "many-076",
+            "ringIndex": 2,
+            "slotIndex": 24
+          },
+          {
+            "id": "many-077",
+            "ringIndex": 0,
+            "slotIndex": 25
+          },
+          {
+            "id": "many-078",
+            "ringIndex": 1,
+            "slotIndex": 25
+          },
+          {
+            "id": "many-079",
+            "ringIndex": 2,
+            "slotIndex": 25
+          },
+          {
+            "id": "many-080",
+            "ringIndex": 0,
+            "slotIndex": 26
+          },
+          {
+            "id": "many-081",
+            "ringIndex": 1,
+            "slotIndex": 26
+          },
+          {
+            "id": "many-082",
+            "ringIndex": 2,
+            "slotIndex": 26
+          },
+          {
+            "id": "many-083",
+            "ringIndex": 0,
+            "slotIndex": 27
+          },
+          {
+            "id": "many-084",
+            "ringIndex": 1,
+            "slotIndex": 27
+          },
+          {
+            "id": "many-085",
+            "ringIndex": 2,
+            "slotIndex": 27
+          },
+          {
+            "id": "many-086",
+            "ringIndex": 0,
+            "slotIndex": 28
+          },
+          {
+            "id": "many-087",
+            "ringIndex": 1,
+            "slotIndex": 28
+          },
+          {
+            "id": "many-088",
+            "ringIndex": 2,
+            "slotIndex": 28
+          },
+          {
+            "id": "many-089",
+            "ringIndex": 0,
+            "slotIndex": 29
+          },
+          {
+            "id": "many-090",
+            "ringIndex": 1,
+            "slotIndex": 29
+          },
+          {
+            "id": "many-091",
+            "ringIndex": 2,
+            "slotIndex": 29
+          },
+          {
+            "id": "many-092",
+            "ringIndex": 0,
+            "slotIndex": 30
+          },
+          {
+            "id": "many-093",
+            "ringIndex": 1,
+            "slotIndex": 30
+          },
+          {
+            "id": "many-094",
+            "ringIndex": 2,
+            "slotIndex": 30
+          },
+          {
+            "id": "many-095",
+            "ringIndex": 0,
+            "slotIndex": 31
+          },
+          {
+            "id": "many-096",
+            "ringIndex": 1,
+            "slotIndex": 31
+          },
+          {
+            "id": "many-097",
+            "ringIndex": 2,
+            "slotIndex": 31
+          },
+          {
+            "id": "many-098",
+            "ringIndex": 0,
+            "slotIndex": 32
+          },
+          {
+            "id": "many-099",
+            "ringIndex": 1,
+            "slotIndex": 32
+          },
+          {
+            "id": "many-100",
+            "ringIndex": 2,
+            "slotIndex": 32
+          },
+          {
+            "id": "many-101",
+            "ringIndex": 0,
+            "slotIndex": 33
+          },
+          {
+            "id": "many-102",
+            "ringIndex": 1,
+            "slotIndex": 33
+          },
+          {
+            "id": "many-103",
+            "ringIndex": 2,
+            "slotIndex": 33
+          },
+          {
+            "id": "many-104",
+            "ringIndex": 0,
+            "slotIndex": 34
+          },
+          {
+            "id": "many-105",
+            "ringIndex": 1,
+            "slotIndex": 34
+          },
+          {
+            "id": "many-106",
+            "ringIndex": 2,
+            "slotIndex": 34
+          },
+          {
+            "id": "many-107",
+            "ringIndex": 0,
+            "slotIndex": 35
+          },
+          {
+            "id": "many-108",
+            "ringIndex": 1,
+            "slotIndex": 35
+          },
+          {
+            "id": "many-109",
+            "ringIndex": 2,
+            "slotIndex": 35
+          },
+          {
+            "id": "many-110",
+            "ringIndex": 0,
+            "slotIndex": 36
+          },
+          {
+            "id": "many-111",
+            "ringIndex": 1,
+            "slotIndex": 36
+          },
+          {
+            "id": "many-112",
+            "ringIndex": 2,
+            "slotIndex": 36
+          },
+          {
+            "id": "many-113",
+            "ringIndex": 0,
+            "slotIndex": 37
+          },
+          {
+            "id": "many-114",
+            "ringIndex": 1,
+            "slotIndex": 37
+          },
+          {
+            "id": "many-115",
+            "ringIndex": 2,
+            "slotIndex": 37
+          },
+          {
+            "id": "many-116",
+            "ringIndex": 0,
+            "slotIndex": 38
+          },
+          {
+            "id": "many-117",
+            "ringIndex": 1,
+            "slotIndex": 38
+          },
+          {
+            "id": "many-118",
+            "ringIndex": 2,
+            "slotIndex": 38
+          },
+          {
+            "id": "many-119",
+            "ringIndex": 0,
+            "slotIndex": 39
+          },
+          {
+            "id": "many-120",
+            "ringIndex": 1,
+            "slotIndex": 39
+          },
+          {
+            "id": "many-121",
+            "ringIndex": 2,
+            "slotIndex": 39
+          },
+          {
+            "id": "many-122",
+            "ringIndex": 0,
+            "slotIndex": 40
+          },
+          {
+            "id": "many-123",
+            "ringIndex": 1,
+            "slotIndex": 40
+          },
+          {
+            "id": "many-124",
+            "ringIndex": 2,
+            "slotIndex": 40
+          },
+          {
+            "id": "many-125",
+            "ringIndex": 0,
+            "slotIndex": 41
+          },
+          {
+            "id": "many-126",
+            "ringIndex": 1,
+            "slotIndex": 41
+          },
+          {
+            "id": "many-127",
+            "ringIndex": 2,
+            "slotIndex": 41
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "many127",
+        "canvasPreset": "9:16",
+        "transparent": false,
+        "reducedMotion": false,
+        "showGuides": false,
+        "exactState": [
+          {
+            "id": "many-001",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 0,
+            "x": 161.819,
+            "y": 382.778,
+            "depth": 0.779329,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-002",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 0,
+            "x": 94.661,
+            "y": 369.453,
+            "depth": 0.221991,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-003",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 0,
+            "x": 336.714,
+            "y": 366.013,
+            "depth": 0.081144,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-004",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 1,
+            "x": 151.407,
+            "y": 379.925,
+            "depth": 0.687883,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-005",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 1,
+            "x": 93.423,
+            "y": 363.97,
+            "depth": 0.077649,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-006",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 1,
+            "x": 336.852,
+            "y": 372.866,
+            "depth": 0.21447,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-007",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 2,
+            "x": 142.136,
+            "y": 376.626,
+            "depth": 0.581071,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-008",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 2,
+            "x": 94.622,
+            "y": 358.399,
+            "depth": -0.068426,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-009",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 2,
+            "x": 333.989,
+            "y": 379.432,
+            "depth": 0.343005,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-010",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 3,
+            "x": 134.214,
+            "y": 372.957,
+            "depth": 0.461279,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-011",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 3,
+            "x": 98.231,
+            "y": 352.864,
+            "depth": -0.212974,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-012",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 3,
+            "x": 328.189,
+            "y": 385.563,
+            "depth": 0.463877,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-013",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 4,
+            "x": 127.817,
+            "y": 368.998,
+            "depth": 0.331183,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-014",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 4,
+            "x": 104.169,
+            "y": 347.488,
+            "depth": -0.352764,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-015",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 4,
+            "x": 319.582,
+            "y": 391.124,
+            "depth": 0.574388,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-016",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 5,
+            "x": 123.088,
+            "y": 364.838,
+            "depth": 0.193689,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-017",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 5,
+            "x": 112.303,
+            "y": 342.392,
+            "depth": -0.484673,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-018",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 5,
+            "x": 308.359,
+            "y": 395.989,
+            "depth": 0.672067,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-019",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 6,
+            "x": 120.133,
+            "y": 360.569,
+            "depth": 0.051868,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-020",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 6,
+            "x": 122.452,
+            "y": 337.689,
+            "depth": -0.605756,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-021",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 6,
+            "x": 294.771,
+            "y": 400.05,
+            "depth": 0.754734,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-022",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 7,
+            "x": 119.018,
+            "y": 356.289,
+            "depth": -0.091112,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-023",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 7,
+            "x": 134.39,
+            "y": 333.484,
+            "depth": -0.713307,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-024",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 7,
+            "x": 279.122,
+            "y": 403.217,
+            "depth": 0.820541,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-025",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 8,
+            "x": 119.768,
+            "y": 352.091,
+            "depth": -0.232056,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-026",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 8,
+            "x": 147.849,
+            "y": 329.872,
+            "depth": -0.804925,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-027",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 8,
+            "x": 261.761,
+            "y": 405.418,
+            "depth": 0.868018,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-028",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 9,
+            "x": 122.366,
+            "y": 348.069,
+            "depth": -0.367817,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-029",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 9,
+            "x": 162.528,
+            "y": 326.932,
+            "depth": -0.878561,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-030",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 9,
+            "x": 243.077,
+            "y": 406.605,
+            "depth": 0.896106,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-031",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 10,
+            "x": 126.754,
+            "y": 344.315,
+            "depth": -0.495361,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-032",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 10,
+            "x": 178.101,
+            "y": 324.732,
+            "depth": -0.932572,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-033",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 10,
+            "x": 223.486,
+            "y": 406.75,
+            "depth": 0.904175,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-034",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 11,
+            "x": 132.835,
+            "y": 340.91,
+            "depth": -0.611839,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-035",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 11,
+            "x": 194.219,
+            "y": 323.319,
+            "depth": -0.965751,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-036",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 11,
+            "x": 203.427,
+            "y": 405.851,
+            "depth": 0.892048,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-037",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 12,
+            "x": 140.471,
+            "y": 337.932,
+            "depth": -0.714651,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-038",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 12,
+            "x": 210.521,
+            "y": 322.726,
+            "depth": -0.977356,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-039",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 12,
+            "x": 183.346,
+            "y": 403.928,
+            "depth": 0.859993,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-040",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 13,
+            "x": 149.493,
+            "y": 335.447,
+            "depth": -0.801498,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-041",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 13,
+            "x": 226.645,
+            "y": 322.965,
+            "depth": -0.967129,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-042",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 13,
+            "x": 163.694,
+            "y": 401.024,
+            "depth": 0.808727,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-043",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 14,
+            "x": 159.699,
+            "y": 333.511,
+            "depth": -0.87044,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-044",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 14,
+            "x": 242.229,
+            "y": 324.031,
+            "depth": -0.935298,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-045",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 14,
+            "x": 144.908,
+            "y": 397.203,
+            "depth": 0.739396,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-046",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 15,
+            "x": 170.861,
+            "y": 332.166,
+            "depth": -0.919939,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-047",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 15,
+            "x": 256.925,
+            "y": 325.901,
+            "depth": -0.882574,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-048",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 15,
+            "x": 127.409,
+            "y": 392.552,
+            "depth": 0.653548,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-049",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 16,
+            "x": 182.73,
+            "y": 331.443,
+            "depth": -0.948888,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-050",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 16,
+            "x": 270.406,
+            "y": 328.533,
+            "depth": -0.810135,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-051",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 16,
+            "x": 111.588,
+            "y": 387.173,
+            "depth": 0.553101,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-052",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 17,
+            "x": 195.041,
+            "y": 331.358,
+            "depth": -0.95664,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-053",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 17,
+            "x": 282.37,
+            "y": 331.868,
+            "depth": -0.719598,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-054",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 17,
+            "x": 97.797,
+            "y": 381.187,
+            "depth": 0.440298,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-055",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 18,
+            "x": 207.518,
+            "y": 331.913,
+            "depth": -0.943022,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-056",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 18,
+            "x": 292.55,
+            "y": 335.831,
+            "depth": -0.612987,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-057",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 18,
+            "x": 86.345,
+            "y": 374.728,
+            "depth": 0.31766,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-058",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 19,
+            "x": 219.883,
+            "y": 333.095,
+            "depth": -0.908339,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-059",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 19,
+            "x": 300.718,
+            "y": 340.334,
+            "depth": -0.492683,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-060",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 19,
+            "x": 77.488,
+            "y": 367.939,
+            "depth": 0.187926,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-061",
+            "role": "primary",
+            "ringIndex": null,
+            "slotIndex": null,
+            "x": 202.5,
+            "y": 360,
+            "depth": 0,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-062",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 20,
+            "x": 231.86,
+            "y": 334.878,
+            "depth": -0.853365,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-063",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 20,
+            "x": 306.692,
+            "y": 345.276,
+            "depth": -0.361373,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-064",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 20,
+            "x": 71.423,
+            "y": 360.974,
+            "depth": 0.053994,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-065",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 21,
+            "x": 243.181,
+            "y": 337.222,
+            "depth": -0.779329,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-066",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 21,
+            "x": 310.339,
+            "y": 350.547,
+            "depth": -0.221991,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-067",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 21,
+            "x": 68.286,
+            "y": 353.987,
+            "depth": -0.081144,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-068",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 22,
+            "x": 253.593,
+            "y": 340.075,
+            "depth": -0.687883,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-069",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 22,
+            "x": 311.577,
+            "y": 356.03,
+            "depth": -0.077649,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-070",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 22,
+            "x": 68.148,
+            "y": 347.134,
+            "depth": -0.21447,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-071",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 23,
+            "x": 262.864,
+            "y": 343.374,
+            "depth": -0.581071,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-072",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 23,
+            "x": 310.378,
+            "y": 361.601,
+            "depth": 0.068426,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-073",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 23,
+            "x": 71.011,
+            "y": 340.568,
+            "depth": -0.343005,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-074",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 24,
+            "x": 270.786,
+            "y": 347.043,
+            "depth": -0.461279,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-075",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 24,
+            "x": 306.769,
+            "y": 367.136,
+            "depth": 0.212974,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-076",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 24,
+            "x": 76.811,
+            "y": 334.437,
+            "depth": -0.463877,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-077",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 25,
+            "x": 277.183,
+            "y": 351.002,
+            "depth": -0.331183,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-078",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 25,
+            "x": 300.831,
+            "y": 372.512,
+            "depth": 0.352764,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-079",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 25,
+            "x": 85.418,
+            "y": 328.876,
+            "depth": -0.574388,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-080",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 26,
+            "x": 281.912,
+            "y": 355.162,
+            "depth": -0.193689,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-081",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 26,
+            "x": 292.697,
+            "y": 377.608,
+            "depth": 0.484673,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-082",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 26,
+            "x": 96.641,
+            "y": 324.011,
+            "depth": -0.672067,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-083",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 27,
+            "x": 284.867,
+            "y": 359.431,
+            "depth": -0.051868,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-084",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 27,
+            "x": 282.548,
+            "y": 382.311,
+            "depth": 0.605756,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-085",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 27,
+            "x": 110.229,
+            "y": 319.95,
+            "depth": -0.754734,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-086",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 28,
+            "x": 285.982,
+            "y": 363.711,
+            "depth": 0.091112,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-087",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 28,
+            "x": 270.61,
+            "y": 386.516,
+            "depth": 0.713307,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-088",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 28,
+            "x": 125.878,
+            "y": 316.783,
+            "depth": -0.820541,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-089",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 29,
+            "x": 285.232,
+            "y": 367.909,
+            "depth": 0.232056,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-090",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 29,
+            "x": 257.151,
+            "y": 390.128,
+            "depth": 0.804925,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-091",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 29,
+            "x": 143.239,
+            "y": 314.582,
+            "depth": -0.868018,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-092",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 30,
+            "x": 282.634,
+            "y": 371.931,
+            "depth": 0.367817,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-093",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 30,
+            "x": 242.472,
+            "y": 393.068,
+            "depth": 0.878561,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-094",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 30,
+            "x": 161.923,
+            "y": 313.395,
+            "depth": -0.896106,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-095",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 31,
+            "x": 278.246,
+            "y": 375.685,
+            "depth": 0.495361,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-096",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 31,
+            "x": 226.899,
+            "y": 395.268,
+            "depth": 0.932572,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-097",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 31,
+            "x": 181.514,
+            "y": 313.25,
+            "depth": -0.904175,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-098",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 32,
+            "x": 272.165,
+            "y": 379.09,
+            "depth": 0.611839,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-099",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 32,
+            "x": 210.781,
+            "y": 396.681,
+            "depth": 0.965751,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-100",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 32,
+            "x": 201.573,
+            "y": 314.149,
+            "depth": -0.892048,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-101",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 33,
+            "x": 264.529,
+            "y": 382.068,
+            "depth": 0.714651,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-102",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 33,
+            "x": 194.479,
+            "y": 397.274,
+            "depth": 0.977356,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-103",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 33,
+            "x": 221.654,
+            "y": 316.072,
+            "depth": -0.859993,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-104",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 34,
+            "x": 255.507,
+            "y": 384.553,
+            "depth": 0.801498,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-105",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 34,
+            "x": 178.355,
+            "y": 397.035,
+            "depth": 0.967129,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-106",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 34,
+            "x": 241.306,
+            "y": 318.976,
+            "depth": -0.808727,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-107",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 35,
+            "x": 245.301,
+            "y": 386.489,
+            "depth": 0.87044,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-108",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 35,
+            "x": 162.771,
+            "y": 395.969,
+            "depth": 0.935298,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-109",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 35,
+            "x": 260.092,
+            "y": 322.797,
+            "depth": -0.739396,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-110",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 36,
+            "x": 234.139,
+            "y": 387.834,
+            "depth": 0.919939,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-111",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 36,
+            "x": 148.075,
+            "y": 394.099,
+            "depth": 0.882574,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-112",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 36,
+            "x": 277.591,
+            "y": 327.448,
+            "depth": -0.653548,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-113",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 37,
+            "x": 222.27,
+            "y": 388.557,
+            "depth": 0.948888,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-114",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 37,
+            "x": 134.594,
+            "y": 391.467,
+            "depth": 0.810135,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-115",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 37,
+            "x": 293.412,
+            "y": 332.827,
+            "depth": -0.553101,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-116",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 38,
+            "x": 209.959,
+            "y": 388.642,
+            "depth": 0.95664,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-117",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 38,
+            "x": 122.63,
+            "y": 388.132,
+            "depth": 0.719598,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-118",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 38,
+            "x": 307.203,
+            "y": 338.813,
+            "depth": -0.440298,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-119",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 39,
+            "x": 197.482,
+            "y": 388.087,
+            "depth": 0.943022,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-120",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 39,
+            "x": 112.45,
+            "y": 384.169,
+            "depth": 0.612987,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-121",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 39,
+            "x": 318.655,
+            "y": 345.272,
+            "depth": -0.31766,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-122",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 40,
+            "x": 185.117,
+            "y": 386.905,
+            "depth": 0.908339,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-123",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 40,
+            "x": 104.282,
+            "y": 379.666,
+            "depth": 0.492683,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-124",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 40,
+            "x": 327.512,
+            "y": 352.061,
+            "depth": -0.187926,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "many-125",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 41,
+            "x": 173.14,
+            "y": 385.122,
+            "depth": 0.853365,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-126",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 41,
+            "x": 98.308,
+            "y": 374.724,
+            "depth": 0.361373,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "many-127",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 41,
+            "x": 333.577,
+            "y": 359.026,
+            "depth": -0.053994,
+            "frontOfPrimary": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "captures/alpha-transparent.png",
+      "fixture": "mediaEdge",
+      "canvas": "1:1",
+      "normalizedTime": 0.271,
+      "runKind": "loop",
+      "primaryId": "media-edge-004",
+      "exchangeTargetId": "media-edge-008",
+      "exchangeEnabled": false,
+      "transparent": true,
+      "readback": {
+        "sceneId": "the-orrery",
+        "evaluatorVersion": 1,
+        "statusLabel": "G10B preflight candidate; implementation blocked by G10A",
+        "normalizedTime": 0.271,
+        "runKind": "loop",
+        "phrase": "orbit",
+        "masterCycle": 0.271,
+        "timelineDirection": "forward",
+        "exchangeProgress": 0,
+        "basePrimaryId": "media-edge-004",
+        "effectivePrimaryId": "media-edge-004",
+        "exchangeTargetId": "media-edge-008",
+        "ringCountControl": "auto",
+        "effectiveRingCount": 3,
+        "revolutionCounts": [
+          3,
+          -2,
+          1
+        ],
+        "compiledDurationSeconds": 12,
+        "count": 9,
+        "canvas": {
+          "width": 640,
+          "height": 640
+        },
+        "renderNodeCount": 9,
+        "stateCount": 9,
+        "membershipDigest": [
+          {
+            "id": "media-edge-001",
+            "ringIndex": 0,
+            "slotIndex": 0
+          },
+          {
+            "id": "media-edge-002",
+            "ringIndex": 1,
+            "slotIndex": 0
+          },
+          {
+            "id": "media-edge-003",
+            "ringIndex": 2,
+            "slotIndex": 0
+          },
+          {
+            "id": "media-edge-005",
+            "ringIndex": 0,
+            "slotIndex": 1
+          },
+          {
+            "id": "media-edge-006",
+            "ringIndex": 1,
+            "slotIndex": 1
+          },
+          {
+            "id": "media-edge-007",
+            "ringIndex": 2,
+            "slotIndex": 1
+          },
+          {
+            "id": "media-edge-008",
+            "ringIndex": 0,
+            "slotIndex": 2
+          },
+          {
+            "id": "media-edge-009",
+            "ringIndex": 1,
+            "slotIndex": 2
+          }
+        ],
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "fixture": "mediaEdge",
+        "canvasPreset": "1:1",
+        "transparent": true,
+        "reducedMotion": false,
+        "showGuides": false,
+        "exactState": [
+          {
+            "id": "media-edge-001",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 0,
+            "x": 433.057,
+            "y": 294.992,
+            "depth": -0.510104,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "media-edge-002",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 0,
+            "x": 341.305,
+            "y": 255.457,
+            "depth": -0.976777,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "media-edge-003",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 0,
+            "x": 446.117,
+            "y": 262.522,
+            "depth": -0.665761,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "media-edge-004",
+            "role": "primary",
+            "ringIndex": null,
+            "slotIndex": null,
+            "x": 320,
+            "y": 320,
+            "depth": 0,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "media-edge-005",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 1,
+            "x": 341.409,
+            "y": 369.647,
+            "depth": 0.956127,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "media-edge-006",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 1,
+            "x": 471.795,
+            "y": 352.698,
+            "depth": 0.517807,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "media-edge-007",
+            "role": "satellite",
+            "ringIndex": 2,
+            "slotIndex": 1,
+            "x": 193.883,
+            "y": 377.478,
+            "depth": 0.665761,
+            "frontOfPrimary": true
+          },
+          {
+            "id": "media-edge-008",
+            "role": "satellite",
+            "ringIndex": 0,
+            "slotIndex": 2,
+            "x": 185.535,
+            "y": 295.361,
+            "depth": -0.446023,
+            "frontOfPrimary": false
+          },
+          {
+            "id": "media-edge-009",
+            "role": "satellite",
+            "ringIndex": 1,
+            "slotIndex": 2,
+            "x": 146.9,
+            "y": 351.845,
+            "depth": 0.45897,
+            "frontOfPrimary": true
+          }
+        ]
+      }
+    }
+  ],
+  "alpha": {
+    "source": "captures/alpha-transparent.png",
+    "width": 640,
+    "height": 640,
+    "alphaZeroPixels": 329012,
+    "alphaZeroWithNonZeroRgb": 0,
+    "partialAlphaPixels": 4165,
+    "opaquePixels": 76423,
+    "passZeroRgbBelowZeroAlpha": true
+  },
+  "manifest": "CAPTURE_MANIFEST.sha256",
+  "limitations": [
+    "Laboratory DOM/CSS 3D only; no Product renderer or WebGL path implemented.",
+    "Generated fixtures and deterministic frames do not constitute human acceptance or G10B activation."
+  ],
+  "captureCountMeaning": "Canonical/edge/transparent source captures listed in `captures`; alpha composites are counted separately.",
+  "alphaCompositeCount": 5,
+  "totalCapturePngCount": 9
+}

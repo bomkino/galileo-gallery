@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "sceneId": "zoetrope",
+  "evaluatorVersion": 1,
+  "vectors": [
+    {
+      "id": "loop-start-ordinary",
+      "input": {
+        "fixture": "ordinary6",
+        "canvas": "16:9",
+        "normalizedTime": 0,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "zoetrope",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0,
+        "count": 6,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "direction": "forward",
+        "cadenceCharacter": "ratchet",
+        "frontId": "ordinary-001",
+        "frontDepth": 1,
+        "renderNodeCount": 5,
+        "stateCount": 6,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "two-reverse-quarter",
+      "input": {
+        "fixture": "two",
+        "canvas": "1:1",
+        "normalizedTime": 0.25,
+        "runKind": "loop",
+        "config": {
+          "direction": "reverse"
+        }
+      },
+      "expect": {
+        "sceneId": "zoetrope",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.25,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.559815,
+        "count": 2,
+        "canvas": {
+          "width": 640,
+          "height": 640
+        },
+        "direction": "reverse",
+        "cadenceCharacter": "ratchet",
+        "frontId": "two-002",
+        "frontDepth": 0.930204,
+        "renderNodeCount": 1,
+        "stateCount": 2,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "many-portrait-bounded",
+      "input": {
+        "fixture": "many127",
+        "canvas": "9:16",
+        "normalizedTime": 0.417,
+        "runKind": "loop"
+      },
+      "expect": {
+        "sceneId": "zoetrope",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.417,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.417323,
+        "count": 127,
+        "canvas": {
+          "width": 405,
+          "height": 720
+        },
+        "direction": "forward",
+        "cadenceCharacter": "ratchet",
+        "frontId": "many-054",
+        "frontDepth": 1,
+        "renderNodeCount": 15,
+        "stateCount": 127,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "finite-spotlight",
+      "input": {
+        "fixture": "ordinary6",
+        "canvas": "4:5",
+        "normalizedTime": 0.78,
+        "runKind": "finite",
+        "spotlightId": "ordinary-003"
+      },
+      "expect": {
+        "sceneId": "zoetrope",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.78,
+        "runKind": "finite",
+        "phrase": "spotlight",
+        "phase": 0.333333,
+        "count": 6,
+        "canvas": {
+          "width": 576,
+          "height": 720
+        },
+        "direction": "forward",
+        "cadenceCharacter": "ratchet",
+        "frontId": "ordinary-003",
+        "frontDepth": 1,
+        "renderNodeCount": 5,
+        "stateCount": 6,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    },
+    {
+      "id": "reduced-motion-media-edge",
+      "input": {
+        "fixture": "mediaEdge",
+        "canvas": "16:9",
+        "normalizedTime": 0.631,
+        "runKind": "loop",
+        "reducedMotion": true
+      },
+      "expect": {
+        "sceneId": "zoetrope",
+        "evaluatorVersion": 1,
+        "normalizedTime": 0.631,
+        "runKind": "loop",
+        "phrase": "cycle",
+        "phase": 0.666667,
+        "count": 6,
+        "canvas": {
+          "width": 960,
+          "height": 540
+        },
+        "direction": "forward",
+        "cadenceCharacter": "ratchet",
+        "frontId": "media-edge-005",
+        "frontDepth": 1,
+        "renderNodeCount": 5,
+        "stateCount": 6,
+        "artworkContract": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "zoetrope",
+  "rows": [
+    {
+      "id": "control:scene.zoetrope.cylinder-radius",
+      "kind": "control-causality",
+      "controlId": "scene.zoetrope.cylinder-radius",
+      "requirement": "Changing Cylinder radius must causally change At fixed media, canvas, and story time, every non-gate card changes x position while source order, phase, and card size remain unchanged.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.zoetrope.card-size",
+      "kind": "control-causality",
+      "controlId": "scene.zoetrope.card-size",
+      "requirement": "Changing Card size must causally change At fixed geometry and time, card width and height change proportionally while angular position and phase remain unchanged.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.zoetrope.ring-tilt",
+      "kind": "control-causality",
+      "controlId": "scene.zoetrope.ring-tilt",
+      "requirement": "Changing Ring tilt must causally change At fixed phase, side-card y positions and rotateZ change; the front gate remains centred and source pixels remain untreated.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.zoetrope.cadence-character",
+      "kind": "control-causality",
+      "controlId": "scene.zoetrope.cadence-character",
+      "requirement": "Changing Cadence must causally change At a non-boundary story time, phase and angular card positions differ while start/end seam, item order, and total cycle count remain identical.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:timeline.direction",
+      "kind": "control-causality",
+      "controlId": "timeline.direction",
+      "requirement": "Changing Direction must causally change At fixed time, phase maps to its modular inverse and every card traverses the same cylinder in reverse.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "identity",
+      "kind": "programme-invariant",
+      "requirement": "Motion and anti-motion remain recognisable after styling removal.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "source-fidelity",
+      "kind": "programme-invariant",
+      "requirement": "Clean default leaves imported source pixels untouched.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "timeline",
+      "kind": "programme-invariant",
+      "requirement": "Preview, scrub, evidence and export planning consume one semantic model.",
+      "automatedStatus": "pass: renderer-owned story clock prohibited; original evaluator verifier replay passed.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "programme-invariant",
+      "requirement": "Reduced motion preserves narrative meaning.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "lifecycle",
+      "kind": "programme-invariant",
+      "requirement": "Renderer remount and disposal remain bounded.",
+      "automatedStatus": "pass for review-shell mount/remount/disposal; Scene-native GPU/context-loss proof remains as declared in source evidence.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "human-verdict",
+      "kind": "programme-invariant",
+      "requirement": "Human visual, motion, pace, defaults and delight verdict remains pending.",
+      "automatedStatus": "not automatable",
+      "humanStatus": "pending"
+    }
+  ]
+}
