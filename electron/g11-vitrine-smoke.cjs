@@ -198,19 +198,26 @@ async function presentationState(window) {
 
 async function setScale(window, target) {
     await window.webContents.executeJavaScript(`(async () => {
-        const control = document.querySelector('.interface-scale-control')
-        const decrease = control?.querySelector('button:first-child')
-        const increase = control?.querySelector('button:last-child')
-        if (!decrease || !increase) throw new Error('Interface Scale control is missing.')
-        for (let guard = 0; guard < 40; guard += 1) {
+        const deadline = performance.now() + 10_000
+        while (performance.now() < deadline) {
             const current = Number(document.querySelector('[data-interface-scale]')?.dataset.interfaceScale)
             if (current === ${target}) break
-            ;(current < ${target} ? increase : decrease).click()
+            const control = document.querySelector('.interface-scale-control')
+            const button = control?.querySelector(current < ${target} ? 'button:last-child' : 'button:first-child')
+            if (!button || button.disabled) throw new Error('Interface Scale control is missing or disabled before target.')
+            button.click()
+            await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        }
+        const persistenceDeadline = performance.now() + 2_000
+        while (performance.now() < persistenceDeadline) {
+            const current = Number(document.querySelector('[data-interface-scale]')?.dataset.interfaceScale)
+            const saved = JSON.parse(localStorage.getItem(${JSON.stringify(PRESENTATION_KEY)}))
+            if (current === ${target} && saved?.interfaceScale === ${target}) return
             await new Promise((resolve) => requestAnimationFrame(resolve))
         }
         const current = Number(document.querySelector('[data-interface-scale]')?.dataset.interfaceScale)
         const saved = JSON.parse(localStorage.getItem(${JSON.stringify(PRESENTATION_KEY)}))
-        if (current !== ${target} || saved?.interfaceScale !== ${target}) throw new Error('Interface Scale did not persist.')
+        throw new Error('Interface Scale did not persist: ' + JSON.stringify({ target: ${target}, current, saved: saved?.interfaceScale ?? null }))
     })()`)
     await settle(window)
 }
