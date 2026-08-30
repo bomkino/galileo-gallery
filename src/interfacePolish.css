@@ -75,6 +75,15 @@
 }
 
 .titlebar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+        "brand actions"
+        "autosave actions";
+    align-content: center;
+    column-gap: 24px;
+    row-gap: 3px;
     padding: 0 28px 0 100px;
     border-bottom: 3px solid var(--ink);
     color: var(--ink);
@@ -85,18 +94,28 @@
 .platform-win32 .titlebar,
 .platform-linux .titlebar { padding-left: 28px; }
 
-.brand-lockup { gap: 15px; min-width: 0; }
+.brand-lockup { grid-area: brand; gap: 15px; min-width: 0; }
 .brand-lockup .galileo-app-icon.compact { width: 52px; height: 52px; border: 2px solid var(--ink); border-radius: 8px; box-shadow: none; }
 .brand-lockup div { min-width: 0; gap: 3px; }
 .brand-lockup strong { font-size: 18px; font-weight: 780; letter-spacing: -.035em; }
 .brand-lockup span { overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 
 .autosave-status {
+    position: static;
+    grid-area: autosave;
+    justify-self: start;
+    margin-left: 67px;
+    min-width: 0;
+    max-width: 44ch;
+    overflow: hidden;
+    transform: none;
     color: rgba(24, 25, 23, .48);
     font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .autosave-status i { width: 6px; height: 6px; background: #3f9b69; box-shadow: none; }
-.title-actions { align-items: center; gap: 12px; }
+.title-actions { grid-area: actions; align-items: center; justify-self: end; gap: 12px; }
 
 .button,
 .icon-button,
@@ -227,7 +246,7 @@
 }
 
 .tooltip-bubble {
-    width: min(280px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
     padding: calc(11px * var(--interface-scale-ratio, 1)) calc(13px * var(--interface-scale-ratio, 1));
     border: 1px solid rgba(255, 255, 255, .12);
     border-radius: calc(10px * var(--interface-scale-ratio, 1));
@@ -236,12 +255,15 @@
     box-shadow: 0 16px 42px rgba(0, 0, 0, .26);
     font-size: calc(11px * var(--interface-scale-ratio, 1));
     opacity: 1;
+    animation: none;
     transition: opacity 140ms var(--ease-out);
 }
 
 @starting-style {
-    .tooltip-bubble { opacity: 0; }
+    .tooltip-bubble:not([data-instant="true"]) { opacity: 0; }
 }
+
+.tooltip-bubble[data-instant="true"] { transition-duration: 0ms; }
 
 .studio {
     padding: 44px clamp(32px, 4vw, 76px) 34px;
@@ -377,6 +399,15 @@
 .format-cards button small { color: var(--muted); font-size: 11px; }
 .format-cards button.is-active { border-color: var(--ink); background: var(--accent-soft); }
 .format-cards button svg { color: var(--accent); }
+.format-cards button:disabled {
+    opacity: 1;
+    border-color: rgba(24, 25, 23, .38);
+    color: #555852;
+    background: rgba(24, 25, 23, .045);
+    cursor: not-allowed;
+}
+.format-cards button:disabled small { color: #666963; }
+.format-cards button:disabled svg { color: #777a74; }
 .export-mark { color: var(--accent); background: var(--paper-cool); border-color: rgba(24, 25, 23, .08); }
 .export-intro p { max-width: 300px; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .export-summary { border: 2px solid var(--ink); border-radius: 4px; }
@@ -529,7 +560,11 @@
 
 @container (max-width: 1240px) {
     .app-shell { grid-template-columns: 248px minmax(340px, 1fr) 330px; grid-template-rows: 86px minmax(0, 1fr); }
-    .titlebar { padding-right: 16px; }
+    .titlebar {
+        grid-template-rows: auto;
+        grid-template-areas: "brand actions";
+        padding-right: 16px;
+    }
     .title-actions { gap: 6px; }
     .title-actions .button { padding-inline: 12px; }
     .autosave-status { display: none; }
@@ -567,6 +602,10 @@
         grid-row: 1;
         display: grid;
         grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        grid-template-areas:
+            "brand"
+            "actions";
         gap: 18px;
         width: 100%;
         min-height: max-content;

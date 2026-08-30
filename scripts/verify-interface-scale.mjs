@@ -20,6 +20,14 @@ import {
     tryParsePresentationManifest,
 } from "../src/presentation/presentationManifest.ts"
 import { createBrowserPresentationAdapter } from "../src/presentation/browserPresentationAdapter.ts"
+import {
+    createTooltipDelayGroup,
+    positionTooltip,
+    TOOLTIP_GRACE_MS,
+    TOOLTIP_INITIAL_DELAY_MS,
+    TOOLTIP_MAX_WIDTH,
+    TOOLTIP_VIEWPORT_GUTTER,
+} from "../src/presentation/tooltipPresentation.ts"
 
 // Promise: the semantic control exposes every 5% stop from 75% through 200%, and no others.
 assert.equal(INTERFACE_SCALE_VALUES.length, 26)
@@ -36,6 +44,34 @@ assert.equal(coerceInterfaceScale(103), 105)
 assert.equal(coerceInterfaceScale(102), 100)
 assert.equal(coerceInterfaceScale(1_000), 200)
 assert.equal(coerceInterfaceScale(NaN), DEFAULT_INTERFACE_SCALE)
+
+// Promise: tooltip geometry and delay behavior use one bounded public seam at every Interface Scale.
+let tooltipNow = 1_000
+const tooltipGroup = createTooltipDelayGroup(() => tooltipNow)
+assert.deepEqual(tooltipGroup.intent("pointer"), { delayMs: TOOLTIP_INITIAL_DELAY_MS, instant: false })
+tooltipGroup.hidden()
+assert.deepEqual(tooltipGroup.intent("pointer"), { delayMs: TOOLTIP_INITIAL_DELAY_MS, instant: false })
+tooltipGroup.shown()
+tooltipGroup.hidden()
+assert.deepEqual(tooltipGroup.intent("pointer"), { delayMs: 0, instant: true })
+tooltipNow += TOOLTIP_GRACE_MS + 1
+assert.deepEqual(tooltipGroup.intent("pointer"), { delayMs: TOOLTIP_INITIAL_DELAY_MS, instant: false })
+assert.deepEqual(tooltipGroup.intent("keyboard"), { delayMs: 0, instant: true })
+
+const centeredTooltip = positionTooltip({ left: 400, right: 444, top: 90, bottom: 134, width: 44 }, 1_000)
+assert.equal(centeredTooltip.width, TOOLTIP_MAX_WIDTH)
+assert.equal(centeredTooltip.left, 282)
+assert.equal(centeredTooltip.above, true)
+const leftTooltip = positionTooltip({ left: 0, right: 44, top: 20, bottom: 64, width: 44 }, 320)
+assert.equal(leftTooltip.left, TOOLTIP_VIEWPORT_GUTTER)
+assert.equal(leftTooltip.width, TOOLTIP_MAX_WIDTH)
+assert.equal(leftTooltip.above, false)
+const narrowTooltip = positionTooltip({ left: 120, right: 164, top: 90, bottom: 134, width: 44 }, 240)
+assert.equal(narrowTooltip.left, TOOLTIP_VIEWPORT_GUTTER)
+assert.equal(narrowTooltip.width, 240 - TOOLTIP_VIEWPORT_GUTTER * 2)
+assert.equal(narrowTooltip.left + narrowTooltip.width, 240 - TOOLTIP_VIEWPORT_GUTTER)
+const tinyTooltip = positionTooltip({ left: 0, right: 20, top: 20, bottom: 64, width: 20 }, 20)
+assert.deepEqual(tinyTooltip, { left: 10, top: 74, width: 0, above: false })
 
 // Promise: presentation identity is a bounded, exact, local-only record.
 const manifestText = serializePresentationManifest(createPresentationManifest(135))

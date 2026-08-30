@@ -38,8 +38,8 @@ export default function StyleGallery({ currentStyleId, onChoose, onClose }: Prop
                 <img className="galileo-app-icon" src="./icon.png" alt="" aria-hidden="true" />
                 <div>
                     <span className="eyebrow">Galileo Gallery</span>
-                    <h1>Choose a motion world.</h1>
-                    <p>{GALLERY_STYLES.length} scene studies · 29 registered motion worlds.</p>
+                    <h1>Choose a Scene.</h1>
+                    <p>{GALLERY_STYLES.length} curated Scenes · 29 registered presets.</p>
                 </div>
                 <div className="style-gallery-actions">
                     <InterfaceScaleControl />
@@ -50,11 +50,11 @@ export default function StyleGallery({ currentStyleId, onChoose, onClose }: Prop
                 <div className="style-category-pills">
                     {CATEGORIES.map((item) => <button type="button" className={category === item ? "is-active" : ""} aria-pressed={category === item} onClick={() => setCategory(item)} key={item}>{item}</button>)}
                 </div>
-                <label className="style-search"><span>Search styles</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Orbit, reel, stack…" /></label>
+                <label className="style-search"><span>Search Scenes</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Orbit, reel, stack…" /></label>
             </div>
             <main className="style-gallery-grid">
                 {visible.length === 0 ? <div className="style-gallery-empty">
-                    <strong>No motion worlds found.</strong>
+                    <strong>No Scenes found.</strong>
                     <p>Try another phrase or clear the current filters.</p>
                     <button type="button" className="button quiet" onClick={() => { setCategory("All"); setQuery("") }}>Clear filters</button>
                 </div> : null}
@@ -68,7 +68,7 @@ export default function StyleGallery({ currentStyleId, onChoose, onClose }: Prop
                     </button>
                 })}
             </main>
-            <footer className="style-gallery-footer"><span>{visible.length} scenes</span><p>Pick freely. Frames stay with you; merged scenes expose their original behaviors as presets.</p></footer>
+            <footer className="style-gallery-footer"><span>{visible.length} Scenes</span><p>Pick freely. Frames stay with you; merged Scenes expose their original behaviors as presets.</p></footer>
         </div>
     )
 }

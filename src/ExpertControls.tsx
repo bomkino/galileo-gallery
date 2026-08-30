@@ -305,7 +305,7 @@ export default function ExpertControls(props: Props) {
                         <p className="expert-help">The source plane is never dimmed, graded, blurred, tinted, or crossfaded.</p>
                     </ControlGroup> : <>
                     <ControlGroup eyebrow="Story" title={props.profile.focusLabel}>
-                        {props.profile.supportsSpotlight ? <Toggle label={`${props.profile.focusLabel} beats`} detail={`Honor marked frames with this world's contained ${props.profile.focusBehavior} gesture.`} checked={settings.spotlightsEnabled} onChange={(value) => props.onSetting("spotlightsEnabled", value)} /> : null}
+                        {props.profile.supportsSpotlight ? <Toggle label={`${props.profile.focusLabel} beats`} detail={`Honor marked frames with this Scene's contained ${props.profile.focusBehavior} gesture.`} checked={settings.spotlightsEnabled} onChange={(value) => props.onSetting("spotlightsEnabled", value)} /> : null}
                         {props.profile.supportsFinale ? <Toggle label="Final beat" detail="Optional closing gesture. Off keeps every loop visually even." checked={settings.finaleEnabled} onChange={(value) => props.onSetting("finaleEnabled", value)} /> : null}
                         {props.profile.supportsSpotlight && settings.spotlightsEnabled ? <Range label={`${props.profile.focusLabel} size`} value={settings.heroSize} min={24} max={80} suffix="%" onChange={(value) => props.onSetting("heroSize", value)} /> : null}
                         {props.profile.supportsFinale && settings.finaleEnabled ? <Range label="Final beat size" value={settings.finaleSize} min={30} max={84} suffix="%" onChange={(value) => props.onSetting("finaleSize", value)} /> : null}

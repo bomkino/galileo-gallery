@@ -36,6 +36,10 @@ async function settleRenderer(window) {
     })()`)
 }
 
+function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 async function resize(window, width, height) {
     window.setSize(width, height)
     await new Promise((resolve) => setTimeout(resolve, 120))
@@ -117,6 +121,12 @@ async function readMetrics(window) {
             const box = element.getBoundingClientRect()
             return { left: box.left, top: box.top, right: box.right, bottom: box.bottom, width: box.width, height: box.height }
         }
+        const optionalRect = (selector) => {
+            const element = document.querySelector(selector)
+            if (!element || getComputedStyle(element).display === 'none') return null
+            const box = element.getBoundingClientRect()
+            return { left: box.left, top: box.top, right: box.right, bottom: box.bottom, width: box.width, height: box.height }
+        }
         const scaleRoot = document.querySelector('[data-interface-scale]')
         const shell = document.querySelector('.app-shell')
         const stage = rect('.stage')
@@ -147,6 +157,10 @@ async function readMetrics(window) {
                 library: rect('.library'),
                 studio: rect('.studio'),
                 inspector: rect('.inspector'),
+            },
+            header: {
+                autosave: optionalRect('.autosave-status'),
+                scale: rect('.interface-scale-control'),
             },
             targets: {
                 primary: rect('.title-actions .button.primary'),
@@ -183,6 +197,106 @@ async function readMetrics(window) {
             },
         }
     })()`)
+}
+
+async function verifyCatalogueVocabulary(window) {
+    return window.webContents.executeJavaScript(`(async () => {
+        const input = document.querySelector('.style-search input')
+        const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
+        const initial = input.value
+        setValue.call(input, 'no-scene-can-match-this-query')
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        const result = {
+            heading: document.querySelector('.style-gallery-header h1')?.textContent?.trim(),
+            summary: document.querySelector('.style-gallery-header p')?.textContent?.trim(),
+            search: document.querySelector('.style-search span')?.textContent?.trim(),
+            empty: document.querySelector('.style-gallery-empty strong')?.textContent?.trim(),
+            footer: document.querySelector('.style-gallery-footer span')?.textContent?.trim(),
+        }
+        setValue.call(input, initial)
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        return result
+    })()`)
+}
+
+async function verifyTooltipBehavior(window) {
+    const anchor = await window.webContents.executeJavaScript(`(() => {
+        const element = document.querySelector('.transport .tooltip-anchor')
+        if (!element) throw new Error('Transport tooltip anchor is missing.')
+        const box = element.getBoundingClientRect()
+        return { x: Math.round((box.left + box.right) / 2), y: Math.round((box.top + box.bottom) / 2) }
+    })()`)
+    window.webContents.sendInputEvent({ type: "mouseMove", x: 1, y: 1 })
+    await delay(30)
+    window.webContents.sendInputEvent({ type: "mouseMove", x: anchor.x, y: anchor.y })
+    await delay(120)
+    const premature = await window.webContents.executeJavaScript(`Boolean(document.querySelector('.tooltip-bubble'))`)
+    if (premature) throw new Error("The first pointer tooltip skipped its protective delay.")
+    await waitFor(window, `document.querySelector('.tooltip-bubble')`, "first delayed tooltip", 1_000)
+    const first = await window.webContents.executeJavaScript(`(() => {
+        const element = document.querySelector('.tooltip-bubble')
+        const box = element.getBoundingClientRect()
+        const style = getComputedStyle(element)
+        return {
+            instant: element.dataset.instant,
+            animationName: style.animationName,
+            transitionDuration: style.transitionDuration,
+            left: box.left,
+            right: box.right,
+            viewportWidth: innerWidth,
+        }
+    })()`)
+    window.webContents.sendInputEvent({ type: "mouseMove", x: 1, y: 1 })
+    await waitFor(window, `!document.querySelector('.tooltip-bubble')`, "pointer tooltip dismissal")
+    window.webContents.sendInputEvent({ type: "mouseMove", x: anchor.x, y: anchor.y })
+    await waitFor(window, `document.querySelector('.tooltip-bubble')?.dataset.instant === 'true'`, "grace-window tooltip", 250)
+    const adjacent = await window.webContents.executeJavaScript(`(() => {
+        const element = document.querySelector('.tooltip-bubble')
+        return { instant: element.dataset.instant, transitionDuration: getComputedStyle(element).transitionDuration }
+    })()`)
+    window.webContents.sendInputEvent({ type: "mouseMove", x: 1, y: 1 })
+    await waitFor(window, `!document.querySelector('.tooltip-bubble')`, "grace-window tooltip dismissal")
+    const keyboard = await window.webContents.executeJavaScript(`(async () => {
+        const button = document.querySelector('.transport .tooltip-anchor button')
+        button.focus()
+        await new Promise((resolve) => setTimeout(() => requestAnimationFrame(resolve), 0))
+        const element = document.querySelector('.tooltip-bubble')
+        if (!element) throw new Error('Keyboard tooltip did not appear immediately.')
+        const style = getComputedStyle(element)
+        const result = { instant: element.dataset.instant, animationName: style.animationName, transitionDuration: style.transitionDuration }
+        button.blur()
+        return result
+    })()`)
+    if (first.instant !== "false" || first.animationName !== "none" || first.left < 15.5 || first.right > first.viewportWidth - 15.5) {
+        throw new Error("The first tooltip did not use delayed, clamped, transition-only geometry.")
+    }
+    if (adjacent.instant !== "true" || adjacent.transitionDuration !== "0s") throw new Error("A tooltip inside the shared grace window was not instant.")
+    if (keyboard.instant !== "true" || keyboard.animationName !== "none" || keyboard.transitionDuration !== "0s") throw new Error("Keyboard focus animated its tooltip.")
+    return { first, adjacent, keyboard }
+}
+
+async function verifyLinearIndeterminateProgress(window) {
+    const result = await window.webContents.executeJavaScript(`(() => {
+        const fixture = document.createElement('div')
+        fixture.innerHTML = '<div class="export-progress is-preparing"><div><span></span></div></div><div class="launch-progress"><span></span></div>'
+        document.body.append(fixture)
+        const exportStyle = getComputedStyle(fixture.querySelector('.export-progress span'))
+        const launchStyle = getComputedStyle(fixture.querySelector('.launch-progress span'))
+        const value = {
+            exportName: exportStyle.animationName,
+            exportTiming: exportStyle.animationTimingFunction,
+            launchName: launchStyle.animationName,
+            launchTiming: launchStyle.animationTimingFunction,
+        }
+        fixture.remove()
+        return value
+    })()`)
+    if (result.exportName === "none" || result.exportTiming !== "linear" || result.launchName === "none" || result.launchTiming !== "linear") {
+        throw new Error("Indeterminate progress motion is not linear.")
+    }
+    return result
 }
 
 async function verifyWorkflowNavigation(window) {
@@ -369,6 +483,9 @@ function assertInvariant(metrics) {
         if (value.regions.titlebar.bottom > value.regions.library.top + 1) {
             throw new Error(`${key} lets the header overlap the Slides rail.`)
         }
+        if (value.header.autosave && value.header.autosave.right > value.header.scale.left - 1) {
+            throw new Error(`${key} lets autosave overlap Interface Scale.`)
+        }
         const physicalTargetFloor = value.interfaceScale < 100 ? 44 : 44 * value.interfaceScale / 100
         if (Object.values(value.targets).some((target) => target.height + 0.2 < physicalTargetFloor)) {
             throw new Error(`${key} has a primary target below its ${physicalTargetFloor}px physical floor.`)
@@ -383,6 +500,14 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
     await resize(window, 1280, 900)
     await waitFor(window, `document.querySelector('.style-gallery-shell')`, "scene catalogue")
     await setScale(window, 100)
+    const catalogueVocabulary = await verifyCatalogueVocabulary(window)
+    if (catalogueVocabulary.heading !== "Choose a Scene."
+        || !catalogueVocabulary.summary?.includes("curated Scenes")
+        || catalogueVocabulary.search !== "Search Scenes"
+        || catalogueVocabulary.empty !== "No Scenes found."
+        || !catalogueVocabulary.footer?.endsWith("Scenes")) {
+        throw new Error("The catalogue does not use the Product Scene vocabulary consistently.")
+    }
     const captures = { catalogue100: await capture(window, outputDirectory, "gallery-catalogue-100") }
 
     // Keyboard, persisted reload, and a real StorageEvent all converge without StrictMode leaks.
@@ -437,9 +562,37 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
     if (host.identity.productId !== "galileo-gallery" || host.capabilities.formats.map((format) => format.id).join(",") !== "png-frames,mp4-h264-aac") {
         throw new Error("G08 did not exercise the current Linux HostPort and export capability seam.")
     }
-    const formatTruth = await window.webContents.executeJavaScript(`Array.from(document.querySelectorAll('.format-cards button')).map((button) => ({ text: button.textContent.replace(/\\s+/g, ' ').trim(), disabled: button.disabled }))`)
+    const formatTruth = await window.webContents.executeJavaScript(`(() => {
+        const luminance = (value) => {
+            const channels = value.match(/[\\d.]+/g).slice(0, 3).map((channel) => Number(channel) / 255)
+            const linear = channels.map((channel) => channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4)
+            return .2126 * linear[0] + .7152 * linear[1] + .0722 * linear[2]
+        }
+        const contrast = (foreground, background) => {
+            const [bright, dark] = [luminance(foreground), luminance(background)].sort((a, b) => b - a)
+            return (bright + .05) / (dark + .05)
+        }
+        const paper = 'rgb(251, 250, 246)'
+        return Array.from(document.querySelectorAll('.format-cards button')).map((button) => {
+            const titleColor = getComputedStyle(button.querySelector('span')).color
+            const detailColor = getComputedStyle(button.querySelector('small')).color
+            return {
+                text: button.textContent.replace(/\\s+/g, ' ').trim(),
+                disabled: button.disabled,
+                opacity: getComputedStyle(button).opacity,
+                cursor: getComputedStyle(button).cursor,
+                titleColor,
+                detailColor,
+                titleContrast: contrast(titleColor, paper),
+                detailContrast: contrast(detailColor, paper),
+            }
+        })
+    })()`)
     if (!formatTruth[0]?.disabled || !formatTruth[0]?.text.includes("Quiet Carousel v1 or Vitrine v2 only") || !formatTruth[1]?.disabled || !formatTruth[1]?.text.includes("Quiet Carousel only")) {
         throw new Error("G08 did not preserve the honest Scene-specific export capability boundary.")
+    }
+    if (formatTruth.some((card) => card.opacity !== "1" || card.cursor !== "not-allowed" || card.titleContrast < 4.5 || card.detailContrast < 4.5)) {
+        throw new Error("Disabled export cards hide or wash out their availability explanation.")
     }
     const workflow = await verifyWorkflowNavigation(window)
     if (workflow.slides !== "Slides"
@@ -453,6 +606,21 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
         || !workflow.projectInvariant) {
         throw new Error("G08 did not preserve the Slides, Look, Motion, Export workflow without changing Project truth.")
     }
+    const sceneVocabulary = await window.webContents.executeJavaScript(`(async () => {
+        const tabs = Array.from(document.querySelectorAll('.inspector-top .segment button'))
+        tabs.find((button) => button.textContent.trim() === 'Look').click()
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        const value = {
+            eyebrow: document.querySelector('.style-current-panel .eyebrow')?.textContent?.trim(),
+            browse: document.querySelector('.style-current-panel .button')?.textContent?.replace(/\\s+/g, ' ').trim(),
+        }
+        tabs.find((button) => button.textContent.trim() === 'Export').click()
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        return value
+    })()`)
+    if (sceneVocabulary.eyebrow !== "Scene" || !sceneVocabulary.browse?.endsWith("Scenes")) throw new Error("Studio Scene naming drifted.")
+    const tooltipBehavior = await verifyTooltipBehavior(window)
+    const progressMotion = await verifyLinearIndeterminateProgress(window)
     await freezeStoryPose(window)
 
     const metrics = {}
@@ -496,6 +664,11 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
         },
         host,
         workflow,
+        catalogueVocabulary,
+        sceneVocabulary,
+        formatTruth,
+        tooltipBehavior,
+        progressMotion,
         captures,
         catalogueMetrics,
         catalogueReachability,

@@ -15,6 +15,7 @@ import { styleProfile, styleSettings } from "./styleProfiles"
 import { placeholderItems, studioTimeline } from "./timeline"
 import { GALLERY_STYLES, galleryScene, galleryStyle, latestSceneVersion, sceneVariants, supportsSceneVersion, supportsVerifiedPngFrames, type StyleDefinition } from "./styleRegistry"
 import { InterfaceScaleControl, InterfaceScaleSurface } from "./presentation/InterfaceScaleSurface"
+import { positionTooltip, sharedTooltipDelayGroup, type TooltipInput } from "./presentation/tooltipPresentation"
 import type {
     ExportFormat,
     ExportProgress,
@@ -197,33 +198,46 @@ function idForMedia(media: SelectedMedia) {
 function Tooltip({ text, children }: { text: string; children: React.ReactElement }) {
     const anchor = React.useRef<HTMLSpanElement | null>(null)
     const timer = React.useRef<number | null>(null)
-    const [position, setPosition] = React.useState<{ left: number; top: number; above: boolean } | null>(null)
+    const visible = React.useRef(false)
+    const pointerFocus = React.useRef(false)
+    const [position, setPosition] = React.useState<ReturnType<typeof positionTooltip> & { instant: boolean } | null>(null)
     const hide = React.useCallback(() => {
+        pointerFocus.current = false
         if (timer.current != null) window.clearTimeout(timer.current)
         timer.current = null
+        if (visible.current) sharedTooltipDelayGroup.hidden()
+        visible.current = false
         setPosition(null)
     }, [])
-    const show = (delay = 360) => {
+    const show = (input: TooltipInput) => {
         if (timer.current != null) window.clearTimeout(timer.current)
+        const intent = sharedTooltipDelayGroup.intent(input)
         timer.current = window.setTimeout(() => {
             const rect = anchor.current?.getBoundingClientRect()
             if (!rect) return
-            const width = Math.min(240, window.innerWidth - 24)
-            const above = rect.top > 64
-            setPosition({
-                left: clamp(rect.left + rect.width / 2 - width / 2, 12, window.innerWidth - width - 12),
-                top: above ? rect.top - 10 : rect.bottom + 10,
-                above,
-            })
-        }, delay)
+            visible.current = true
+            sharedTooltipDelayGroup.shown()
+            setPosition({ ...positionTooltip(rect, window.innerWidth), instant: intent.instant })
+        }, intent.delayMs)
     }
     React.useEffect(() => () => {
         if (timer.current != null) window.clearTimeout(timer.current)
+        if (visible.current) sharedTooltipDelayGroup.hidden()
     }, [])
     return (
-        <span className="tooltip-anchor" ref={anchor} onPointerEnter={() => show()} onPointerLeave={hide} onFocusCapture={() => show(0)} onBlurCapture={hide}>
+        <span
+            className="tooltip-anchor"
+            ref={anchor}
+            onPointerEnter={() => show("pointer")}
+            onPointerLeave={hide}
+            onPointerDownCapture={() => { pointerFocus.current = true }}
+            onPointerUpCapture={() => { pointerFocus.current = false }}
+            onPointerCancel={() => { pointerFocus.current = false }}
+            onFocusCapture={() => { if (!pointerFocus.current) show("keyboard") }}
+            onBlurCapture={hide}
+        >
             {children}
-            {position ? createPortal(<span className={`tooltip-bubble ${position.above ? "is-above" : "is-below"}`} role="tooltip" style={{ left: position.left, top: position.top }}>{text}</span>, document.body) : null}
+            {position ? createPortal(<span className={`tooltip-bubble ${position.above ? "is-above" : "is-below"}`} data-instant={position.instant ? "true" : "false"} role="tooltip" style={{ left: position.left, top: position.top, width: position.width }}>{text}</span>, document.body) : null}
         </span>
     )
 }
@@ -1587,7 +1601,7 @@ function AppView() {
                                         </div>
                                     </button>
                                     <div className="media-actions">
-                                        {activeProfile.supportsSpotlight && (!authoredVitrine || config.settings.playKind !== "loop") ? <Tooltip text={item.spotlight ? `Remove ${authoredVitrine ? "opening object" : activeProfile.focusLabel.toLowerCase()}. Frame returns to normal flow.` : authoredVitrine ? "Use as the finite presentation's opening object." : `${activeProfile.focusLabel}. Uses this motion world's ${activeProfile.focusBehavior} beat without leaving the canvas.`}><button
+                                        {activeProfile.supportsSpotlight && (!authoredVitrine || config.settings.playKind !== "loop") ? <Tooltip text={item.spotlight ? `Remove ${authoredVitrine ? "opening object" : activeProfile.focusLabel.toLowerCase()}. Frame returns to normal flow.` : authoredVitrine ? "Use as the finite presentation's opening object." : `${activeProfile.focusLabel}. Uses this Scene's ${activeProfile.focusBehavior} beat without leaving the canvas.`}><button
                                             type="button"
                                             className={item.spotlight ? "is-active" : ""}
                                             aria-label={item.spotlight ? `Remove ${authoredVitrine ? "opening object" : "spotlight"}` : `Make ${authoredVitrine ? "opening object" : "spotlight"}`}
@@ -1681,13 +1695,13 @@ function AppView() {
                     <div className="inspector-scroll">
                         <section className="control-section style-current-panel">
                             <div className="section-title">
-                                <span className="eyebrow">Motion world</span>
+                                <span className="eyebrow">Scene</span>
                                 <h3>{activeScene.name}</h3>
                             </div>
                             <p>{activeStyle.description}</p>
                             <p className="profile-guidance">Best for {activeProfile.bestFor.toLowerCase()}. {activeProfile.transparentReady ? "Ready for transparent overlays." : "Best with its authored room tone."}</p>
                             {activeVariants.length > 1 ? <label className="scene-preset-select"><span>Scene preset</span><select value={activeStyle.id} onChange={(event) => chooseStyle(galleryStyle(event.target.value))}>{activeVariants.map((variant) => <option value={variant.id} key={variant.id}>{variant.presetName} · {variant.source.replace(".tsx", "")}</option>)}</select></label> : null}
-                            <button type="button" className="button quiet" onClick={() => setShowStyleGallery(true)}>Browse all {GALLERY_STYLES.length} scenes</button>
+                            <button type="button" className="button quiet" onClick={() => setShowStyleGallery(true)}>Browse all {GALLERY_STYLES.length} Scenes</button>
                         </section>
                         <section className="control-section">
                             <div className="section-title">
@@ -1971,7 +1985,7 @@ function AppView() {
                     </div>
                     <div className="launch-copy">
                         <strong>Galileo Gallery</strong>
-                        <span>Motion worlds for your frames</span>
+                        <span>Scenes for your frames</span>
                     </div>
                     <div className="launch-progress"><span /></div>
                 </div>

@@ -340,10 +340,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .media-actions button.is-active { color: #ffae79; }
 .media-actions button.danger { color: #fa7b75; }
 .tooltip-anchor { display:inline-flex; }
-.tooltip-bubble { position:fixed; z-index:1000; width:min(240px,calc(100vw - 24px)); padding:8px 10px; border:1px solid rgba(255,255,255,.11); border-radius:8px; color:rgba(255,255,255,.78); background:rgba(35,33,30,.96); box-shadow:0 12px 34px rgba(0,0,0,.42); backdrop-filter:blur(18px) saturate(140%); font-size:8px; line-height:1.4; pointer-events:none; animation:tooltip-in 150ms var(--ease-out) both; }
+.tooltip-bubble { position:fixed; z-index:1000; max-width:calc(100vw - 32px); padding:8px 10px; border:1px solid rgba(255,255,255,.11); border-radius:8px; color:rgba(255,255,255,.78); background:rgba(35,33,30,.96); box-shadow:0 12px 34px rgba(0,0,0,.42); backdrop-filter:blur(18px) saturate(140%); font-size:8px; line-height:1.4; pointer-events:none; }
 .tooltip-bubble.is-above { transform:translateY(-100%); transform-origin:50% 100%; }
 .tooltip-bubble.is-below { transform-origin:50% 0; }
-@keyframes tooltip-in { from { opacity:0; filter:blur(2px); } to { opacity:1; filter:blur(0); } }
 .add-media {
     display: flex;
     align-items: center;
@@ -760,7 +759,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .export-progress { margin-top: 16px; padding: 10px; border: 1px solid var(--hairline); border-radius: 9px; background: rgba(255,255,255,.025); }
 .export-progress > div { height: 3px; overflow: hidden; border-radius: 2px; background: rgba(255,255,255,.09); }
 .export-progress > div span { display: block; width: 100%; height: 100%; transform-origin: left; background: linear-gradient(90deg, var(--accent), var(--accent-bright)); transition: transform 140ms linear; }
-.export-progress.is-preparing > div span { animation: export-preparing 1.25s var(--ease-out) infinite; }
+.export-progress.is-preparing > div span { animation: export-preparing 1.25s linear infinite; }
 @keyframes export-preparing { 0% { transform: translateX(-105%) scaleX(.35) !important; } 100% { transform: translateX(205%) scaleX(.35) !important; } }
 .export-progress p { margin: 8px 0 7px; color: rgba(255,255,255,.46); font-size: 8px; }
 .export-progress button { padding: 0; border: 0; background: transparent; color: #ff9a85; font-size: 8px; cursor: pointer; }
@@ -876,7 +875,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
     border-radius: inherit;
     background: linear-gradient(90deg, #e86e55, #ffb284);
     transform-origin: left;
-    animation: launch-progress 700ms 120ms var(--ease-out) both;
+    animation: launch-progress 700ms 120ms linear both;
 }
 
 @keyframes launch-back {
