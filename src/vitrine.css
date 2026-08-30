@@ -109,7 +109,7 @@
     border: 0;
 }
 
-html[data-export-transparent="true"] .vitrine-placard { box-shadow: none; }
+html[data-export-transparent="true"] .vitrine-placard { box-shadow: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
     .vitrine-plane { will-change: auto; }

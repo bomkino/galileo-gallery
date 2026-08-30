@@ -478,12 +478,17 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
             placard.style.gap = `${values.gap}px`
             placard.style.padding = `${values.gap}px ${values.paddingX}px`
             placard.style.borderWidth = `${values.border}px`
+            placard.style.boxShadow = `0 ${values.shadowY}px ${values.shadowBlur}px rgba(0, 0, 0, .12)`
             label.style.fontSize = `${values.labelFont}px`
             caption.style.fontSize = `${values.captionFont}px`
         }
         metricCache.current = { width, height, placard, label, caption }
         element.dataset.vitrineShortEdge = String(shortEdge)
     }, [])
+    const placardRef = React.useCallback((node: HTMLDivElement | null) => {
+        metricCache.current = { ...metricCache.current, placard: null, label: null, caption: null }
+        if (node) syncMetrics()
+    }, [syncMetrics])
     const [systemReducedMotion, setSystemReducedMotion] = React.useState(() => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false)
     React.useEffect(() => {
         const query = window.matchMedia?.("(prefers-reduced-motion: reduce)")
@@ -512,9 +517,6 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
     const finaleId = config.settings.finaleEnabled ? eligibleItems.at(-1)?.id : spotlightId
     const logicalWidth = Math.max(1, config.settings.canvasWidth)
     const logicalHeight = Math.max(1, config.settings.canvasHeight)
-    React.useLayoutEffect(() => {
-        syncMetrics()
-    })
     React.useLayoutEffect(() => {
         syncMetrics()
         const element = ref.current
@@ -590,7 +592,7 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
             })}
         </div>
         <div className="vitrine-design-overlay" data-design-width={designWidth} data-design-height={designHeight} data-project-width={logicalWidth} data-project-height={logicalHeight} style={{ width: "100%", height: "100%", transform: "none" }}>
-            {evaluated.placard ? <div className="vitrine-placard" data-media-id={evaluated.placard.mediaId}><span>Vitrine</span><strong>{evaluated.placard.caption}</strong></div> : null}
+            {evaluated.placard ? <div className="vitrine-placard" data-media-id={evaluated.placard.mediaId} ref={placardRef}><span>Vitrine</span><strong>{evaluated.placard.caption}</strong></div> : null}
         </div>
         <div className="vitrine-status" role="status" aria-live="polite" aria-atomic="true">{currentLabel ? `Showing ${currentLabel}, item ${semanticIndex + 1} of ${allSourceItems.length}` : "Vitrine is empty"}</div>
     </div>

@@ -958,7 +958,11 @@ const sceneExpression = `(() => {
     const placardLabel = placard?.querySelector('span')
     const placardCaption = placard?.querySelector('strong')
     const placardStyle = placard ? getComputedStyle(placard) : null
+    const transparentExport = document.documentElement.dataset.exportTransparent === 'true'
+    const shadowPixels = placardStyle?.boxShadow.match(/-?\\d*\\.?\\d+px/g)?.map((value) => parseFloat(value)) ?? []
+    if (placardStyle && transparentExport && placardStyle.boxShadow !== 'none') throw new Error('Vitrine Placard shadow contaminated transparent export.')
     if (placard && placardLabel && placardCaption && placardStyle) {
+        if (!transparentExport && shadowPixels.length < 3) throw new Error('Vitrine Placard authored shadow is missing.')
         const computedPlacardMetrics = {
             gap: parseFloat(placardStyle.columnGap),
             paddingTop: parseFloat(placardStyle.paddingTop),
@@ -968,11 +972,13 @@ const sceneExpression = `(() => {
             border: parseFloat(placardStyle.borderTopWidth),
             labelFont: parseFloat(getComputedStyle(placardLabel).fontSize),
             captionFont: parseFloat(getComputedStyle(placardCaption).fontSize),
+            ...(!transparentExport ? { shadowY: shadowPixels[1], shadowBlur: shadowPixels[2] } : {}),
         }
         const expectedPlacardMetrics = {
             gap: authoredMetrics.gap, paddingTop: authoredMetrics.gap, paddingRight: authoredMetrics.paddingX,
             paddingBottom: authoredMetrics.gap, paddingLeft: authoredMetrics.paddingX, border: authoredMetrics.border,
             labelFont: authoredMetrics.labelFont, captionFont: authoredMetrics.captionFont,
+            ...(!transparentExport ? { shadowY: authoredMetrics.shadowY, shadowBlur: authoredMetrics.shadowBlur } : {}),
         }
         for (const [name, expected] of Object.entries(expectedPlacardMetrics)) {
             const value = computedPlacardMetrics[name]
