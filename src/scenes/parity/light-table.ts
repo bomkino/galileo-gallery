@@ -60,6 +60,42 @@ export const scene = createA06Scene({
                 sourceTimeMs,
             }
         })
-        return { phase: progress, cards, opaque: true, background: config.settings.ground, state: frame }
+        const decorations = frames.flatMap((candidate, index) => {
+            const card = cards[index]
+            if (!card) return []
+            const underlight = clamp(finite(candidate.underlight, 0), 0, 1)
+            const expansion = clamp(finite(candidate.underlightExpansion, 0.035), 0, 0.2) * 100
+            const focusWeight = clamp(finite(candidate.focusWeight, 0), 0, 1)
+            return [{
+                id: `light-table-underlight-${card.id}`,
+                kind: "glow" as const,
+                x: card.x,
+                y: card.y,
+                width: card.width + expansion * 2,
+                height: card.height + expansion * 2,
+                scale: card.scale,
+                rotation: card.rotation,
+                z: card.z - 1,
+                opacity: underlight,
+                fill: "rgba(255, 214, 124, 0.62)",
+                blur: 14,
+            }, ...(focusWeight > 0.001 ? [{
+                id: `light-table-focus-${card.id}`,
+                kind: "box" as const,
+                x: card.x,
+                y: card.y,
+                width: card.width,
+                height: card.height,
+                scale: card.scale,
+                rotation: card.rotation,
+                z: card.z + 1,
+                opacity: focusWeight,
+                color: "#ffd67c",
+                borderWidth: 2,
+                radius: config.settings.radius,
+                label: "Loupe",
+            }] : [])]
+        })
+        return { phase: progress, cards, decorations, opaque: true, background: config.settings.ground, state: frame }
     },
 })

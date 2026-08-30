@@ -1,5 +1,5 @@
 import type { ReelConfig } from "../../types"
-import type { ParityControl, ParitySceneContract } from "./types.ts"
+import type { ParityControl, ParityDecoration, ParitySceneContract } from "./types.ts"
 import { authoredParameters, parityItems, stableFrameHash } from "./types.ts"
 
 export type A05Evaluator = {
@@ -39,6 +39,11 @@ type A05SceneOptions = {
     gapReference?: number
     liftFactor?: number
     opaque?: boolean
+    decorations?: (context: {
+        frame: ReturnType<A05Evaluator["evaluateScene"]>
+        width: number
+        height: number
+    }) => ParityDecoration[]
 }
 
 const finite = (value: unknown, fallback = 0) => Number.isFinite(value) ? Number(value) : fallback
@@ -164,6 +169,7 @@ export function createA05Scene(options: A05SceneOptions): ParitySceneContract {
                 phase,
                 terminal,
                 cards,
+                decorations: options.decorations?.({ frame, width, height }),
                 background: options.opaque ? "#f5f2ea" : undefined,
                 opaque: options.opaque ?? false,
                 stateHash: stableFrameHash({ phaseName: frame.phaseName, phase, selectedIndex: frame.selectedIndex, focus: frame.focus, cards }),

@@ -14,6 +14,33 @@
     will-change: transform;
 }
 
+.atelier-decoration {
+    position: absolute;
+    pointer-events: none;
+    transform-style: preserve-3d;
+    box-sizing: border-box;
+}
+
+.atelier-decoration.is-line,
+.atelier-decoration.is-dot,
+.atelier-decoration.is-glow {
+    border: 0;
+}
+
+.atelier-decoration-label {
+    position: absolute;
+    left: 7px;
+    top: 6px;
+    padding: 3px 5px;
+    color: currentColor;
+    background: rgba(12, 12, 13, 0.84);
+    border-radius: 999px;
+    font: 700 clamp(5px, 0.75vw, 9px)/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
 .atelier-media,
 .atelier-placeholder {
     display: block;

@@ -1,6 +1,6 @@
 import * as React from "react"
 import type { MediaItem, ReelConfig } from "../types"
-import type { ParityCard, ParitySceneContract } from "./paritySupport/types.ts"
+import type { ParityCard, ParityDecoration, ParitySceneContract } from "./paritySupport/types.ts"
 import { parityItems } from "./paritySupport/types.ts"
 import "../atelierScene.css"
 
@@ -52,6 +52,10 @@ function cardTransform(card: ParityCard) {
     return `translate3d(-50%,-50%,0) rotateX(${card.rotateX ?? 0}deg) rotateY(${card.rotateY ?? 0}deg) rotateZ(${card.rotation}deg) scale(${card.scale})`
 }
 
+function decorationTransform(decoration: ParityDecoration) {
+    return `translate3d(-50%,-50%,0) rotateX(${decoration.rotateX ?? 0}deg) rotateY(${decoration.rotateY ?? 0}deg) rotateZ(${decoration.rotation ?? 0}deg) scale(${decoration.scale ?? 1})`
+}
+
 export default function AtelierSceneRenderer({ contract, config, timeMs, durationMs, exportFrames = {}, terminal = false, reducedMotion = false }: Props) {
     const items = parityItems(config, contract.recommendedItems).slice(0, contract.maximumItems)
     const frame = contract.evaluate({ config, timeMs, durationMs, terminal, reducedMotion })
@@ -67,6 +71,27 @@ export default function AtelierSceneRenderer({ contract, config, timeMs, duratio
         role="img"
         aria-label={`${contract.id} gallery Scene`}
     >
+        {frame.decorations?.map((decoration) => <div
+            aria-hidden="true"
+            className={`atelier-decoration is-${decoration.kind}`}
+            key={decoration.id}
+            style={{
+                left: `${decoration.x}%`,
+                top: `${decoration.y}%`,
+                width: `${decoration.width}%`,
+                height: `${decoration.height}%`,
+                opacity: decoration.opacity,
+                zIndex: decoration.z,
+                transform: decorationTransform(decoration),
+                color: decoration.color,
+                background: decoration.kind === "box" ? decoration.fill : decoration.color ?? decoration.fill,
+                borderColor: decoration.color,
+                borderWidth: decoration.kind === "box" ? `${decoration.borderWidth ?? 1}px` : undefined,
+                borderStyle: decoration.kind === "box" ? (decoration.dashed ? "dashed" : "solid") : undefined,
+                borderRadius: `${decoration.radius ?? (decoration.kind === "dot" || decoration.kind === "glow" ? 999 : settings.radius)}px`,
+                filter: decoration.blur ? `blur(${decoration.blur}px)` : undefined,
+            }}
+        >{decoration.label ? <span className="atelier-decoration-label">{decoration.label}</span> : null}</div>)}
         {frame.cards.map((card) => {
             const item = items[card.sourceIndex]
             if (!item || !card.visible) return null

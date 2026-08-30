@@ -43,6 +43,50 @@ export const scene = createA06Scene({
             ? (frame.source as Record<string, unknown>).media as Record<string, unknown> | undefined
             : undefined
         const sourceClipRight = clamp(finite(apparatus?.sourceClipRight, 1), 0, 1)
+        const frameOpacity = clamp(finite(apparatus?.frameOpacity, 0), 0, 1)
+        const frameY = finite(apparatus?.frameY, 0)
+        const frameScale = Math.max(0.001, finite(apparatus?.frameScale, 1))
+        const guideOpacity = clamp(finite(apparatus?.guideOpacity, 0), 0, 1)
+        const guideLines = Array.isArray(frame.guideLines) ? frame.guideLines as Array<Record<string, unknown>> : []
+        const cursor = frame.cursor as Record<string, unknown> | undefined
+        const decorations = [{
+            id: "build-frame-apparatus",
+            kind: "box" as const,
+            x: 50,
+            y: 50 + frameY * 100,
+            width,
+            height: width * canvasRatio / ratio,
+            scale: frameScale,
+            z: 9,
+            opacity: frameOpacity,
+            color: "#ff775e",
+            borderWidth: 2,
+            radius: config.settings.radius,
+            label: "Build frame",
+        }, ...guideLines.map((guide, index) => {
+            const vertical = guide.axis === "v"
+            return {
+                id: `build-guide-${String(guide.id ?? index)}`,
+                kind: "line" as const,
+                x: vertical ? finite(guide.position, 0.5) * 100 : 50,
+                y: vertical ? 50 : finite(guide.position, 0.5) * 100,
+                width: vertical ? 0.12 : 100,
+                height: vertical ? 100 : 0.2,
+                z: 8,
+                opacity: guideOpacity * 0.82,
+                color: "#7ea7ff",
+            }
+        }), ...(finite(cursor?.opacity, 0) > 0.001 ? [{
+            id: "build-cursor",
+            kind: "dot" as const,
+            x: finite(cursor?.x, 0.5) * 100,
+            y: finite(cursor?.y, 0.5) * 100,
+            width: 1.3,
+            height: 2.2,
+            z: 20,
+            opacity: clamp(finite(cursor?.opacity, 0), 0, 1),
+            color: "#ffd67c",
+        }] : [])]
         return {
             phase: progress,
             cards: [{
@@ -62,6 +106,7 @@ export const scene = createA06Scene({
                 clipPath: `inset(0 ${sourceClipRight * 100}% 0 0)`,
                 sourceTimeMs,
             }],
+            decorations,
             opaque: false,
             state: frame,
         }

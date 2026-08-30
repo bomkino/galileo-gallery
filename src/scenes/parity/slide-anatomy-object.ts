@@ -44,6 +44,31 @@ export const scene = createA06Scene({
         const media = frame.source && typeof frame.source === "object"
             ? (frame.source as Record<string, unknown>).media as Record<string, unknown> | undefined
             : undefined
+        const labelVisibility = String(frame.labelVisibility ?? "known-structure")
+        const decorations = planes.map((plane, index) => {
+            const id = String(plane.id ?? `anatomy-plane-${index}`)
+            const sourceOwned = plane.sourceOwned === true
+            const colors: Record<string, string> = { backing: "#79d6ba", "source-frame": "#f5f1e8", "frame-edge": "#ff775e", "safe-area": "#7ea7ff", caption: "#df9bff" }
+            return {
+                id: `anatomy-apparatus-${id}`,
+                kind: "box" as const,
+                x: 50 + finite(plane.x, 0) * 100,
+                y: 50 + finite(plane.y, 0) * 100,
+                width,
+                height: width * canvasRatio / ratio,
+                rotation: finite(plane.rotation, 0),
+                rotateX: finite(stage?.rotateX, 0),
+                rotateY: finite(stage?.rotateY, 0),
+                z: Math.round(100 + finite(plane.zOrder, index + 1) + (sourceOwned ? 0.5 : 0)),
+                opacity: clamp(finite(plane.opacity, 1), 0, 1),
+                color: colors[id] ?? "#f5f1e8",
+                fill: id === "backing" ? "rgba(121, 214, 186, 0.14)" : "transparent",
+                borderWidth: sourceOwned ? 1 : 2,
+                dashed: id === "safe-area",
+                radius: config.settings.radius,
+                label: labelVisibility === "hidden" ? undefined : labelVisibility === "numbers-only" ? String(index + 1).padStart(2, "0") : String(plane.label ?? id),
+            }
+        })
         return {
             phase: progress,
             cards: [{
@@ -64,6 +89,7 @@ export const scene = createA06Scene({
                 blend: String(media?.blend ?? "normal"),
                 sourceTimeMs,
             }],
+            decorations,
             opaque: false,
             state: frame,
         }

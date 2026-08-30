@@ -34,12 +34,35 @@ export type ParityCard = {
     sourceTimeMs?: number
 }
 
+export type ParityDecoration = {
+    id: string
+    kind: "box" | "line" | "dot" | "glow"
+    x: number
+    y: number
+    width: number
+    height: number
+    rotation?: number
+    rotateX?: number
+    rotateY?: number
+    scale?: number
+    z: number
+    opacity: number
+    color?: string
+    fill?: string
+    borderWidth?: number
+    dashed?: boolean
+    radius?: number
+    blur?: number
+    label?: string
+}
+
 export type ParityFrame = {
     sceneId: string
     durationMs: number
     phase: number
     terminal: boolean
     cards: ParityCard[]
+    decorations?: ParityDecoration[]
     background?: string
     opaque?: boolean
     stateHash?: string

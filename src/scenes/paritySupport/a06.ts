@@ -52,7 +52,7 @@ export type A06NormalizeContext = {
     sourceTimeMs: number
 }
 
-type Normalized = Pick<ParityFrame, "cards" | "background" | "opaque"> & {
+type Normalized = Pick<ParityFrame, "cards" | "decorations" | "background" | "opaque"> & {
     phase?: number
     state?: unknown
 }
@@ -155,6 +155,7 @@ export function createA06Scene(options: A06SceneOptions): ParitySceneContract {
                 phase: finite(normalized.phase, progress),
                 terminal,
                 cards: normalized.cards,
+                decorations: normalized.decorations,
                 background: normalized.background,
                 opaque: normalized.opaque ?? false,
                 stateHash: stableFrameHash(normalized.state ?? frame),
