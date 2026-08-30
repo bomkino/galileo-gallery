@@ -36,7 +36,7 @@ const { inspectAudioFile, inspectMediaFile } = require("./project-schema.cjs")
 const { createAudioGrantStaging } = require("./audio-grant-staging.cjs")
 const { createLinuxVideoAudioRuntime } = require("./linux-video-audio-runtime.cjs")
 const { createPngFramesRuntime } = require("./png-frames-runtime.cjs")
-const { reachableVideoIndexes } = require("./png-export-contract.cjs")
+const { reachableMediaIndexes, reachableVideoIndexes } = require("./png-export-contract.cjs")
 const { createH264ExportRuntime } = require("./h264-export-runtime.cjs")
 const { cleanupH264AudioResidue, createH264AudioStage } = require("./h264-audio-stage.cjs")
 const { cleanupG06PrivateFrameCache, createG06PrivateFrameCache } = require("./g06-private-frame-cache.cjs")
@@ -593,7 +593,29 @@ async function prepareExportVideoFrames(request, exportState, resolveMediaPath =
     // waits for requestVideoFrameCallback before every capture. Keeping those
     // sources live avoids an artificial decoded-frame cache ceiling on long
     // authored Vitrine stories.
-    if (request.config.styleId === "vitrine" && request.config.sceneVersion === 2) return {}
+    if (request.config.styleId === "vitrine" && request.config.sceneVersion === 2) {
+        for (const index of reachableMediaIndexes(request.config)) {
+            if (exportState.signal?.aborted) throw new HostPortError("cancelled")
+            const item = request.config.items[index]
+            try {
+                const opened = openMediaSource?.(item.url)
+                if (opened) {
+                    try {
+                        verifyOpenedMediaSource(opened)
+                    } finally {
+                        fs.closeSync(opened.handle)
+                    }
+                    continue
+                }
+                const stat = fs.statSync(resolveMediaPath(item.url))
+                if (!stat.isFile()) throw new HostPortError("verification_failed")
+            } catch (error) {
+                if (error instanceof HostPortError) throw error
+                throw new HostPortError("verification_failed")
+            }
+        }
+        return {}
+    }
     if (!privateCacheRoot) pruneExportFrameCache()
     const result = {}
     const decoded = new Map()

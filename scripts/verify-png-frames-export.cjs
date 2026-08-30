@@ -4,7 +4,7 @@ const fs = require("node:fs")
 const os = require("node:os")
 const path = require("node:path")
 const zlib = require("node:zlib")
-const { createPngFramesSnapshot, pngFramesCapabilities, pngFramesPreflight, reachableVideoIndexes } = require("../electron/png-export-contract.cjs")
+const { createPngFramesSnapshot, pngFramesCapabilities, pngFramesPreflight, reachableMediaIndexes, reachableVideoIndexes } = require("../electron/png-export-contract.cjs")
 const { createPngFramesRuntime, inspectPng } = require("../electron/png-frames-runtime.cjs")
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, index) => {
@@ -185,7 +185,10 @@ async function run() {
             { ...vitrineConfig.items[0], id: "visible-image", type: "image", muted: false },
         ],
     }
+    assert.deepEqual(reachableMediaIndexes(mutedLoopConfig), [1], "muted Loop media must never enter the live export working set")
     assert.deepEqual(reachableVideoIndexes(mutedLoopConfig), [], "muted Loop videos must never consume decoders")
+    assert.deepEqual(reachableMediaIndexes(finiteVideoConfig), [0, 19], "finite Vitrine must preflight only its opening and finale sources")
+    assert.deepEqual(reachableVideoIndexes(finiteVideoConfig), [0, 19], "finite Vitrine must allocate only its opening and finale video sources")
     const repeatedVideoConfig = {
         ...vitrineConfig,
         items: [{ ...vitrineConfig.items[0], type: "video" }],

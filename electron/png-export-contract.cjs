@@ -294,19 +294,23 @@ function validatedScene(config) {
     return { id: config.styleId, version, config: safeConfig }
 }
 
-function reachableVideoIndexes(config) {
-    const allVideoIndexes = config.items.map((item, index) => item.type === "video" ? index : -1).filter((index) => index >= 0)
-    if (config.styleId !== "vitrine" || config.sceneVersion !== 2) return allVideoIndexes
-    const eligibleVideoIndexes = config.items
-        .map((item, index) => item.type === "video" && !item.muted ? index : -1)
+function reachableMediaIndexes(config) {
+    const allIndexes = config.items.map((_item, index) => index)
+    if (config.styleId !== "vitrine" || config.sceneVersion !== 2) return allIndexes
+    const eligibleIndexes = config.items
+        .map((item, index) => !item.muted ? index : -1)
         .filter((index) => index >= 0)
-    if (config.settings.playKind === "loop") return eligibleVideoIndexes
+    if (config.settings.playKind === "loop") return eligibleIndexes
     const eligible = config.items.map((item, index) => ({ item, index })).filter(({ item }) => !item.muted)
     const opening = config.settings.spotlightsEnabled
         ? eligible.find(({ item }) => item.spotlight) ?? eligible[0]
         : eligible[0]
     const finale = config.settings.finaleEnabled ? eligible[eligible.length - 1] : opening
-    return [...new Set([opening?.index, finale?.index])].filter((index) => index !== undefined && config.items[index].type === "video")
+    return [...new Set([opening?.index, finale?.index])].filter((index) => index !== undefined)
+}
+
+function reachableVideoIndexes(config) {
+    return reachableMediaIndexes(config).filter((index) => config.items[index].type === "video")
 }
 
 function createPngFramesSnapshot(intent, randomBytes = crypto.randomBytes) {
@@ -384,4 +388,4 @@ function pngFramesPreflight(snapshot) {
     })
 }
 
-module.exports = { DESTINATION_GRANT, PNG_FRAMES_MIME, SNAPSHOT_ID, createPngFramesSnapshot, pngFramesCapabilities, pngFramesPreflight, reachableVideoIndexes }
+module.exports = { DESTINATION_GRANT, PNG_FRAMES_MIME, SNAPSHOT_ID, createPngFramesSnapshot, pngFramesCapabilities, pngFramesPreflight, reachableMediaIndexes, reachableVideoIndexes }
