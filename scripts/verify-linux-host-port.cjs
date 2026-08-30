@@ -55,12 +55,14 @@ try {
 
     const restoredMtimePath = path.join(temporary, "same-size-restored-mtime.bin")
     fs.writeFileSync(restoredMtimePath, Buffer.alloc(128, 3))
+    const restoredMtimeSeconds = 1_700_000_000
+    fs.utimesSync(restoredMtimePath, restoredMtimeSeconds, restoredMtimeSeconds)
     const restoredMtimeIdentity = fs.statSync(restoredMtimePath)
     const restoredMtimeRegistry = createGrantRegistry()
     const restoredMtimeGrant = restoredMtimeRegistry.create({ scope: "media", filePath: restoredMtimePath, owner: "window-restored", generation: 1, mime: "application/octet-stream" })
     await new Promise((resolve) => setTimeout(resolve, 5))
     fs.writeFileSync(restoredMtimePath, Buffer.alloc(128, 4))
-    fs.utimesSync(restoredMtimePath, restoredMtimeIdentity.atimeMs / 1000, restoredMtimeIdentity.mtimeMs / 1000)
+    fs.utimesSync(restoredMtimePath, restoredMtimeSeconds, restoredMtimeSeconds)
     const restoredMtimeAfter = fs.statSync(restoredMtimePath)
     assert.equal(restoredMtimeAfter.mtimeMs, restoredMtimeIdentity.mtimeMs)
     assert.notEqual(restoredMtimeAfter.ctimeMs, restoredMtimeIdentity.ctimeMs)
@@ -143,6 +145,8 @@ try {
 
     const midReadPath = path.join(temporary, "mid-read-mutation.bin")
     fs.writeFileSync(midReadPath, Buffer.alloc(2 * 1024 * 1024, 5))
+    const midReadMtimeSeconds = 1_700_000_100
+    fs.utimesSync(midReadPath, midReadMtimeSeconds, midReadMtimeSeconds)
     const midReadIdentity = fs.statSync(midReadPath)
     await new Promise((resolve) => setTimeout(resolve, 5))
     let mutateAfterFirstRead = true
@@ -153,7 +157,7 @@ try {
                 mutateAfterFirstRead = false
                 const mutationHandle = fs.openSync(midReadPath, "r+")
                 try { fs.writeSync(mutationHandle, Buffer.alloc(4_096, 6), 0, 4_096, 1024 * 1024 + 4_096) } finally { fs.closeSync(mutationHandle) }
-                fs.utimesSync(midReadPath, midReadIdentity.atimeMs / 1000, midReadIdentity.mtimeMs / 1000)
+                fs.utimesSync(midReadPath, midReadMtimeSeconds, midReadMtimeSeconds)
             }
             return bytesRead
         },
