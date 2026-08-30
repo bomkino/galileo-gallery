@@ -6,6 +6,7 @@ const { app, session, nativeImage } = require("electron")
 const { assertNoPrivateEvidence } = require("./g11-vitrine-smoke.cjs")
 const { inspectPng } = require("./png-frames-runtime.cjs")
 const {
+    decodeShelfPixelSample,
     executeShelfRendererProbe,
     harnessDiagnostic,
     shelfDiagnosticCheckpoint,
@@ -266,9 +267,9 @@ async function decoderState(window) {
 }
 
 async function mediaSamples(window, diagnosticStage = "media.sample") {
-    return executeShelfRendererProbe(window.webContents, diagnosticStage, `async () => {
+    const evidence = await executeShelfRendererProbe(window.webContents, diagnosticStage, `async () => {
         const sampleErrors = []
-        const sample = async (media, index, kind) => {
+        const sample = (media, index, kind) => {
             if (!media || !media.isConnected) return null
             if (media instanceof HTMLImageElement && (!media.complete || media.naturalWidth < 1)) return null
             if (media instanceof HTMLVideoElement && (media.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || media.videoWidth < 1)) return null
@@ -279,15 +280,15 @@ async function mediaSamples(window, diagnosticStage = "media.sample") {
                 canvas.height = 12
                 const context = canvas.getContext('2d', { alpha: true, willReadFrequently: true })
                 context.drawImage(media, 0, 0, 16, 12)
-                const pixels = [...context.getImageData(0, 0, 16, 12).data]
-                const digest = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new Uint8Array(pixels)))].map((value) => value.toString(16).padStart(2, '0')).join('')
+                const pixels = context.getImageData(0, 0, 16, 12).data
+                let binary = ''
+                for (let offset = 0; offset < pixels.length; offset += 1) binary += String.fromCharCode(pixels[offset])
                 const targetValue = media.dataset.storyTargetTime
                 const presentedValue = media.dataset.storyPresentedTime
                 const targetTime = Number(targetValue)
                 const presentedTime = Number(presentedValue)
                 return {
-                    pixels,
-                    digest,
+                    pixelsBase64: btoa(binary),
                     targetTime: targetValue !== undefined && targetValue !== "" && Number.isFinite(targetTime) ? targetTime : null,
                     presentedTime: presentedValue !== undefined && presentedValue !== "" && Number.isFinite(presentedTime) ? presentedTime : null,
                 }
@@ -316,8 +317,8 @@ async function mediaSamples(window, diagnosticStage = "media.sample") {
             const current = samples.get(id) ?? { id, live: null, poster: null, liveNode: false, posterNode: false }
             current.liveNode ||= Boolean(video)
             current.posterNode ||= Boolean(poster)
-            if (!current.live && surface) current.live = await sample(surface, cardIndex, 'surface')
-            if (!current.poster && poster) current.poster = await sample(poster, cardIndex, 'poster')
+            if (!current.live && surface) current.live = sample(surface, cardIndex, 'surface')
+            if (!current.poster && poster) current.poster = sample(poster, cardIndex, 'poster')
             samples.set(id, current)
             cardIndex += 1
         }
@@ -336,6 +337,13 @@ async function mediaSamples(window, diagnosticStage = "media.sample") {
             } : null,
         }
     }`)
+    if (!evidence || !Array.isArray(evidence.result) || evidence.result.length > 11 || !Array.isArray(evidence.sampleErrors)) throw new Error("Shelf media sample envelope is invalid.")
+    for (const entry of evidence.result) {
+        if (!entry || typeof entry.id !== "string") throw new Error("Shelf media sample entry is invalid.")
+        entry.live = entry.live ? decodeShelfPixelSample(entry.live) : null
+        entry.poster = entry.poster ? decodeShelfPixelSample(entry.poster) : null
+    }
+    return evidence
 }
 
 function rgb(hex) {

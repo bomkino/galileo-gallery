@@ -46,12 +46,12 @@ function rendererProbeSource(stage, expression) {
             return 'renderer-exception'
         }
         try {
-            return { ok: true, value: await (${expression})() }
+            return JSON.stringify({ ok: true, value: await (${expression})() })
         } catch (error) {
             const rawName = String(error?.name ?? 'Error')
             const name = /^[A-Za-z][A-Za-z0-9]{0,63}$/.test(rawName) ? rawName : 'Error'
             const message = String(error?.message ?? error)
-            return {
+            return JSON.stringify({
                 ok: false,
                 error: {
                     stage: ${JSON.stringify(exactStage)},
@@ -60,9 +60,25 @@ function rendererProbeSource(stage, expression) {
                     category: classify(name, message),
                     fingerprint: fingerprint(name + '\\n' + message),
                 },
-            }
+            })
         }
     })()`
+}
+
+function decodeShelfPixelSample(value) {
+    if (!value || typeof value !== "object" || typeof value.pixelsBase64 !== "string"
+        || !/^[A-Za-z0-9+/]{1024}$/.test(value.pixelsBase64)
+        || ![value.targetTime, value.presentedTime].every((candidate) => candidate === null || (typeof candidate === "number" && Number.isFinite(candidate)))) {
+        throw new Error("Shelf pixel sample is invalid.")
+    }
+    const pixels = Buffer.from(value.pixelsBase64, "base64")
+    if (pixels.length !== 16 * 12 * 4 || pixels.toString("base64") !== value.pixelsBase64) throw new Error("Shelf pixel sample is invalid.")
+    return {
+        pixels: [...pixels],
+        digest: crypto.createHash("sha256").update(pixels).digest("hex"),
+        targetTime: value.targetTime,
+        presentedTime: value.presentedTime,
+    }
 }
 
 function validShelfDiagnostic(value) {
@@ -104,7 +120,8 @@ async function executeShelfRendererProbe(webContents, stage, expression) {
     const exactStage = shelfDiagnosticStage(stage)
     let envelope
     try {
-        envelope = await webContents.executeJavaScript(rendererProbeSource(exactStage, expression))
+        const serialized = await webContents.executeJavaScript(rendererProbeSource(exactStage, expression))
+        envelope = typeof serialized === "string" ? JSON.parse(serialized) : serialized
     } catch (error) {
         const diagnostic = transportDiagnostic(exactStage, error)
         const failure = new Error(`Shelf renderer transport failed at ${diagnostic.stage} (${diagnostic.name}/${diagnostic.fingerprint}).`)
@@ -123,6 +140,7 @@ async function executeShelfRendererProbe(webContents, stage, expression) {
 }
 
 module.exports = {
+    decodeShelfPixelSample,
     executeShelfRendererProbe,
     harnessDiagnostic,
     rendererProbeSource,

@@ -221,7 +221,7 @@ function productEvaluation(direction, timeMs, items = lightTableSourcesFromConfi
 
 assert.equal(LIGHT_TABLE_CORE_AUTHORITY_SHA256, PINNED_CORE_AUTHORITY_SHA256)
 assert.equal(LIGHT_TABLE_CORE_IMPLEMENTATION_SHA256, PINNED_CORE_IMPLEMENTATION_SHA256)
-const coreSource = fs.readFileSync(new URL("../src/scenes/lightTableCore.ts", import.meta.url), "utf8")
+const coreSource = fs.readFileSync(new URL("../src/scenes/lightTableCore.ts", import.meta.url), "utf8").replace(/\r\n/g, "\n")
 const coreSourceWithoutImplementationIdentity = coreSource.replace(/^export const LIGHT_TABLE_CORE_IMPLEMENTATION_SHA256 = "[a-f0-9]{64}"\r?\n/m, "")
 assert.notEqual(coreSourceWithoutImplementationIdentity, coreSource, "implementation identity declaration must remain canonical")
 assert.equal(crypto.createHash("sha256").update(coreSourceWithoutImplementationIdentity).digest("hex"), PINNED_CORE_IMPLEMENTATION_SHA256)
