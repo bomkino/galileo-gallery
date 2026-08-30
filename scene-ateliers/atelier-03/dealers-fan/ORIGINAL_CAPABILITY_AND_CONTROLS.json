@@ -1,0 +1,147 @@
+{
+  "scene": {
+    "id": "dealers-fan",
+    "versionCandidate": 1,
+    "label": "Fan \u2014 Dealer's Pick",
+    "verdict": "pending"
+  },
+  "ownership": {
+    "timelineOwns": [
+      "pace",
+      "direction",
+      "mode",
+      "holds",
+      "finite-or-loop"
+    ],
+    "frameOwns": [
+      "fit",
+      "ratio",
+      "padding",
+      "corner-treatment",
+      "focal-intent"
+    ],
+    "lookOwns": [
+      "background",
+      "world-material",
+      "grain",
+      "vignette"
+    ],
+    "sceneOwns": [
+      "fan-step",
+      "pivot-depth",
+      "visible-window",
+      "presentation-lift",
+      "card-size"
+    ]
+  },
+  "controls": [
+    {
+      "id": "fan-step",
+      "parameter": "fanStep",
+      "label": "Fan step",
+      "type": "number",
+      "unit": "degrees per source index",
+      "bounds": {
+        "min": 4,
+        "max": 18,
+        "step": 0.5
+      },
+      "default": 11,
+      "serializedMeaning": "Angular displacement produced by one whole source-index distance from fractional focus.",
+      "causalObservation": "At fixed focus, outer card angles and lateral spread change while pivot, crown identity, source ratio, and story time remain unchanged.",
+      "reset": {
+        "value": 11,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Defines the hand's temporal spatial grammar; it is neither Frame nor Timeline."
+    },
+    {
+      "id": "pivot-depth",
+      "parameter": "pivotDepth",
+      "label": "Pivot depth",
+      "type": "number",
+      "unit": "percent of canvas height below bottom",
+      "bounds": {
+        "min": 18,
+        "max": 78,
+        "step": 1
+      },
+      "default": 42,
+      "serializedMeaning": "Vertical location of the common radial pivot below the stage.",
+      "causalObservation": "All card bottom-centre arcs steepen or flatten coherently; crown identity and source order do not change.",
+      "reset": {
+        "value": 42,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "The below-stage pivot is essential Scene physics."
+    },
+    {
+      "id": "visible-window",
+      "parameter": "visibleWindow",
+      "label": "Visible window",
+      "type": "integer",
+      "unit": "cards",
+      "bounds": {
+        "min": 3,
+        "max": 11,
+        "step": 2
+      },
+      "default": 7,
+      "serializedMeaning": "Maximum odd count of mounted source identities nearest fractional focus.",
+      "causalObservation": "Mounted neighbour count and guard-zone extent change without changing focus, order, or any mounted card's canonical path.",
+      "reset": {
+        "value": 7,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Controls bounded hand context and virtualization, unique to this Scene."
+    },
+    {
+      "id": "presentation-lift",
+      "parameter": "presentationLift",
+      "label": "Presentation lift",
+      "type": "number",
+      "unit": "percent of canvas short axis",
+      "bounds": {
+        "min": 6,
+        "max": 30,
+        "step": 0.5
+      },
+      "default": 17,
+      "serializedMeaning": "Maximum radial crown lift applied by the smooth focus kernel.",
+      "causalObservation": "Only near-crown bottom-centre distance, scale, and depth promotion change; angular focus and card order remain fixed.",
+      "reset": {
+        "value": 17,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Defines the hand-dealt presentation gesture."
+    },
+    {
+      "id": "card-size",
+      "parameter": "cardSize",
+      "label": "Card size",
+      "type": "number",
+      "unit": "percent of canvas short axis",
+      "bounds": {
+        "min": 22,
+        "max": 48,
+        "step": 1
+      },
+      "default": 35,
+      "serializedMeaning": "Source card width before ratio and portrait collision adaptation.",
+      "causalObservation": "Card widths/heights and collision pressure change while pivot path and focus timing remain unchanged.",
+      "reset": {
+        "value": 35,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Determines Scene composition density; global Frame fit remains separate."
+    }
+  ],
+  "unsupportedCapabilities": [
+    "spatial-axis",
+    "random-riffle",
+    "pointer-driven-output",
+    "scroll-driven-output",
+    "independent-card-tumble",
+    "ambient-lighting-control"
+  ]
+}

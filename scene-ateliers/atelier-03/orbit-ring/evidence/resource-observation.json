@@ -1,0 +1,37 @@
+{
+  "scene": "orbit-ring",
+  "sampling": "pure evaluator plus removable SVG renderer",
+  "checkpointMountedCounts": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+  ],
+  "boundedAcrossCheckpoints": true,
+  "repeatRender": {
+    "reference": "still-02-early.png",
+    "referenceSha256": "5b0cf984540aad7cf8b0d069b90b6d197d66e12b6f35374ab1d3f3ae6a52cf77",
+    "repeatSha256": "5b0cf984540aad7cf8b0d069b90b6d197d66e12b6f35374ab1d3f3ae6a52cf77",
+    "equal": true
+  },
+  "stableNodeContract": {
+    "keyedBySourceId": true,
+    "renderLoopReusesMountedNodes": true,
+    "focusOrderIndependentOfZOrder": true
+  },
+  "alphaRasterSanitisation": {
+    "reason": "Inkscape stores matte RGB in fully transparent pixels; evidence output zeros those bytes before hashing.",
+    "sanitisedPixels": 791038,
+    "remainingContamination": 0
+  },
+  "browserCapture": {
+    "attempted": true,
+    "result": "blocked",
+    "error": "Headless Chromium did not complete in the managed runner; DBus/session initialization failed and the attempt was terminated after 30 seconds."
+  }
+}

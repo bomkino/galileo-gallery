@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "dealers-fan",
+  "sourceCount": {
+    "authoredDefault": 5,
+    "developmentPressure": 10,
+    "supportedMaximum": 127,
+    "source": "Phase 1 inventory and original packet"
+  },
+  "visibleSourceCount": {
+    "authoredDefault": 5,
+    "reviewShellMaximum": 5,
+    "productMaximum": "unmeasured"
+  },
+  "outputPixels": {
+    "reviewShell": {
+      "width": 1280,
+      "height": 720,
+      "devicePixelRatio": 1
+    },
+    "productMaximum": "unmeasured"
+  },
+  "decodedVideoCount": {
+    "reviewShellMaximum": 2,
+    "productMaximum": "unmeasured"
+  },
+  "textureCount": {
+    "status": "renderer-specific and unmeasured; WebGL candidates remain gated"
+  },
+  "domNodeBound": {
+    "reviewShellIframes": 2,
+    "hiddenScenesRender": false
+  },
+  "simultaneousComparisonCount": 2,
+  "disposal": {
+    "unmountHiddenScenes": true,
+    "cancelOutstandingLoads": true,
+    "revokeObjectUrls": true,
+    "removeListeners": true
+  },
+  "humanApprovalRequired": true
+}

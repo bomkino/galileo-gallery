@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "orbit-ring",
+  "sourceContractSha256": "e831afee48a2fbdebbf0b44f8536c6beeabb991898365a086eee85f224b3711e",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.orbit-ring.ring-radius",
+      "sceneLocalId": "ring-radius",
+      "parameter": "ringRadius",
+      "owner": "Scene",
+      "label": "Ring radius",
+      "valueModel": "number",
+      "unit": "percent of canvas short axis",
+      "default": 38,
+      "range": {
+        "minimum": 24,
+        "maximum": 48,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 38,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "orbit-ring:ring-radius",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "All card centres move radially while angular identity, phase, source ratio, and front gate stay unchanged.",
+      "acceptanceRow": "control:scene.orbit-ring.ring-radius",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.orbit-ring.plane-tilt",
+      "sceneLocalId": "plane-tilt",
+      "parameter": "planeTilt",
+      "owner": "Scene",
+      "label": "Plane tilt",
+      "valueModel": "number",
+      "unit": "degrees",
+      "default": 12,
+      "range": {
+        "minimum": 4,
+        "maximum": 24,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 12,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "orbit-ring:plane-tilt",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Vertical projection and depth amplitude change coherently; angular spacing and source pixels do not.",
+      "acceptanceRow": "control:scene.orbit-ring.plane-tilt",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.orbit-ring.card-size",
+      "sceneLocalId": "card-size",
+      "parameter": "cardSize",
+      "owner": "Scene",
+      "label": "Card size",
+      "valueModel": "number",
+      "unit": "percent of canvas short axis",
+      "default": 24,
+      "range": {
+        "minimum": 16,
+        "maximum": 34,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 24,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "orbit-ring:card-size",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Outer card bounds and overlap change while centres, phase, depth order, and source ratios remain fixed.",
+      "acceptanceRow": "control:scene.orbit-ring.card-size",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "proximity-orbit",
+  "atelier": 3,
+  "sourceArchive": "GALILEO_ATELIER_03_PARITY_HANDOFF_FOR_SOL_5_6_PRO(1).zip",
+  "sourceArchiveSha256": "5d70ee32739775f013bb0e7465228eb0210bb610e32a639d46a65cefb3c20d93",
+  "sourceRoot": "GALILEO_ATELIER_03_PARITY_HANDOFF/canonical-packet/scene-ateliers/atelier-03/proximity-orbit",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "de38266eae4670c94836aac2fc829354111bc1efcffa6856a05fd5bd35d71ebd",
+    "rendererOwnsStoryClock": false
+  },
+  "controlCount": 4,
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "catalogueRegistration": "no",
+  "release": "no",
+  "claimBoundary": "Parity candidate packet; no Product integration or human acceptance.",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/proximity-orbit.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "4/4",
+    "humanVerdict": "pending"
+  },
+  "currentFiles": {
+    "sceneContractSha256": "e27d38ca937c44421b51ec7fe36a72662597ce542cea36f0dd531def77d027a1",
+    "controlContractSha256": "4dc7a4d2ab838d3c25978915ebfda103a7dd7b79ccf9d943f590825dbe2b161d",
+    "acceptanceMatrixSha256": "9c3c2ff16897999ced435335aa73950bf98041890619d26884ddf4b957548069",
+    "evidenceBindingsSha256": "629b53cca89ef28ff535e1141560329c1ad1081c93368e5676050490009549fe"
+  }
+}

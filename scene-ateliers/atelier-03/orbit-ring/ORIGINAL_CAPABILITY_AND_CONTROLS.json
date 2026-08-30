@@ -1,0 +1,113 @@
+{
+  "scene": {
+    "id": "orbit-ring",
+    "versionCandidate": 1,
+    "label": "Orbit \u2014 Calm Ring",
+    "verdict": "pending"
+  },
+  "ownership": {
+    "sceneOwns": [
+      "ring-radius",
+      "plane-tilt",
+      "card-size"
+    ],
+    "timelineOwns": [
+      "pace",
+      "direction",
+      "mode",
+      "holds",
+      "finite-or-loop"
+    ],
+    "frameOwns": [
+      "fit",
+      "ratio",
+      "padding",
+      "crop",
+      "focal-intent"
+    ],
+    "lookOwns": [
+      "background",
+      "world-material",
+      "grain",
+      "vignette"
+    ]
+  },
+  "controls": [
+    {
+      "id": "ring-radius",
+      "parameter": "ringRadius",
+      "label": "Ring radius",
+      "type": "number",
+      "unit": "percent of canvas short axis",
+      "bounds": {
+        "min": 24,
+        "max": 48,
+        "step": 1
+      },
+      "default": 38,
+      "serializedMeaning": "Radius of the single circular tray before projection.",
+      "causalObservation": "All card centres move radially while angular identity, phase, source ratio, and front gate stay unchanged.",
+      "reset": {
+        "value": 38,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "The tray radius is primary Scene geometry."
+    },
+    {
+      "id": "plane-tilt",
+      "parameter": "planeTilt",
+      "label": "Plane tilt",
+      "type": "number",
+      "unit": "degrees",
+      "bounds": {
+        "min": 4,
+        "max": 24,
+        "step": 1
+      },
+      "default": 12,
+      "serializedMeaning": "Pitch of the one ring plane toward camera.",
+      "causalObservation": "Vertical projection and depth amplitude change coherently; angular spacing and source pixels do not.",
+      "reset": {
+        "value": 12,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Defines the ring projection, not Look lighting."
+    },
+    {
+      "id": "card-size",
+      "parameter": "cardSize",
+      "label": "Card size",
+      "type": "number",
+      "unit": "percent of canvas short axis",
+      "bounds": {
+        "min": 16,
+        "max": 34,
+        "step": 1
+      },
+      "default": 24,
+      "serializedMeaning": "Card width before source ratio and collision adaptation.",
+      "causalObservation": "Outer card bounds and overlap change while centres, phase, depth order, and source ratios remain fixed.",
+      "reset": {
+        "value": 24,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Controls readable density of this spatial composition."
+    }
+  ],
+  "derivedNotControlled": [
+    "depth-falloff",
+    "rear-alpha",
+    "perspective-scale",
+    "front-gate-width",
+    "occlusion"
+  ],
+  "unsupportedCapabilities": [
+    "spatial-axis",
+    "nested-rings",
+    "satellites",
+    "nonlinear-proximity",
+    "card-tumble",
+    "pointer-driven-output",
+    "source-lighting"
+  ]
+}

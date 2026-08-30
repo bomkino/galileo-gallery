@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "dealers-fan",
+  "sourceContractSha256": "2be3c0230919c232a5dfffecd15f5d0cf5c938fcbe43abfe19fd245318f041ea",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.dealers-fan.fan-step",
+      "sceneLocalId": "fan-step",
+      "parameter": "fanStep",
+      "owner": "Scene",
+      "label": "Fan step",
+      "valueModel": "number",
+      "unit": "degrees per source index",
+      "default": 11,
+      "range": {
+        "minimum": 4,
+        "maximum": 18,
+        "step": 0.5
+      },
+      "options": null,
+      "resetValue": 11,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "dealers-fan:fan-step",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At fixed focus, outer card angles and lateral spread change while pivot, crown identity, source ratio, and story time remain unchanged.",
+      "acceptanceRow": "control:scene.dealers-fan.fan-step",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.dealers-fan.pivot-depth",
+      "sceneLocalId": "pivot-depth",
+      "parameter": "pivotDepth",
+      "owner": "Scene",
+      "label": "Pivot depth",
+      "valueModel": "number",
+      "unit": "percent of canvas height below bottom",
+      "default": 42,
+      "range": {
+        "minimum": 18,
+        "maximum": 78,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 42,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "dealers-fan:pivot-depth",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "All card bottom-centre arcs steepen or flatten coherently; crown identity and source order do not change.",
+      "acceptanceRow": "control:scene.dealers-fan.pivot-depth",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.dealers-fan.visible-window",
+      "sceneLocalId": "visible-window",
+      "parameter": "visibleWindow",
+      "owner": "Scene",
+      "label": "Visible window",
+      "valueModel": "integer",
+      "unit": "cards",
+      "default": 7,
+      "range": {
+        "minimum": 3,
+        "maximum": 11,
+        "step": 2
+      },
+      "options": null,
+      "resetValue": 7,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "dealers-fan:visible-window",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Mounted neighbour count and guard-zone extent change without changing focus, order, or any mounted card's canonical path.",
+      "acceptanceRow": "control:scene.dealers-fan.visible-window",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.dealers-fan.presentation-lift",
+      "sceneLocalId": "presentation-lift",
+      "parameter": "presentationLift",
+      "owner": "Scene",
+      "label": "Presentation lift",
+      "valueModel": "number",
+      "unit": "percent of canvas short axis",
+      "default": 17,
+      "range": {
+        "minimum": 6,
+        "maximum": 30,
+        "step": 0.5
+      },
+      "options": null,
+      "resetValue": 17,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "dealers-fan:presentation-lift",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Only near-crown bottom-centre distance, scale, and depth promotion change; angular focus and card order remain fixed.",
+      "acceptanceRow": "control:scene.dealers-fan.presentation-lift",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.dealers-fan.card-size",
+      "sceneLocalId": "card-size",
+      "parameter": "cardSize",
+      "owner": "Scene",
+      "label": "Card size",
+      "valueModel": "number",
+      "unit": "percent of canvas short axis",
+      "default": 35,
+      "range": {
+        "minimum": 22,
+        "maximum": 48,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 35,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "dealers-fan:card-size",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Card widths/heights and collision pressure change while pivot path and focus timing remain unchanged.",
+      "acceptanceRow": "control:scene.dealers-fan.card-size",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

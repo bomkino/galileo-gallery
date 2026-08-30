@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "spin-image-orbit",
+  "sourceContractSha256": "3fea91601782f6c8c59f7560a2e64a432a66221dffc1ad90ddc1309e6b0c7105",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.spin-image-orbit.ellipse-width",
+      "sceneLocalId": "ellipse-width",
+      "parameter": "ellipseWidth",
+      "owner": "Scene",
+      "label": "Ellipse width",
+      "valueModel": "number",
+      "unit": "percent of canvas width",
+      "default": 88,
+      "range": {
+        "minimum": 58,
+        "maximum": 110,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 88,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "spin-image-orbit:ellipse-width",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Projected x span and shoulder travel distance change at identical story time while minor axis, source order, story phase, and source pixels remain fixed.",
+      "acceptanceRow": "control:scene.spin-image-orbit.ellipse-width",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.spin-image-orbit.ellipse-height",
+      "sceneLocalId": "ellipse-height",
+      "parameter": "ellipseHeight",
+      "owner": "Scene",
+      "label": "Ellipse height",
+      "valueModel": "number",
+      "unit": "percent of canvas height",
+      "default": 34,
+      "range": {
+        "minimum": 16,
+        "maximum": 58,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 34,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "spin-image-orbit:ellipse-height",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Projected vertical arc and the pitch contribution to depth change while major-axis identity, source order, and story phase remain fixed.",
+      "acceptanceRow": "control:scene.spin-image-orbit.ellipse-height",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.spin-image-orbit.plane-yaw",
+      "sceneLocalId": "plane-yaw",
+      "parameter": "planeYaw",
+      "owner": "Scene",
+      "label": "Plane yaw",
+      "valueModel": "number",
+      "unit": "degrees",
+      "default": 26,
+      "range": {
+        "minimum": -42,
+        "maximum": 42,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 26,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "spin-image-orbit:plane-yaw",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Front gate, shoulder asymmetry, projected width, depth, and z-order change coherently through one rotation matrix; cards remain camera-facing.",
+      "acceptanceRow": "control:scene.spin-image-orbit.plane-yaw",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.spin-image-orbit.plane-pitch",
+      "sceneLocalId": "plane-pitch",
+      "parameter": "planePitch",
+      "owner": "Scene",
+      "label": "Plane pitch",
+      "valueModel": "number",
+      "unit": "degrees",
+      "default": 14,
+      "range": {
+        "minimum": -18,
+        "maximum": 30,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 14,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "spin-image-orbit:plane-pitch",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Vertical projection, depth contribution from the minor axis, front-gate angle, and occlusion change coherently without per-card rotation.",
+      "acceptanceRow": "control:scene.spin-image-orbit.plane-pitch",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.spin-image-orbit.card-size",
+      "sceneLocalId": "card-size",
+      "parameter": "cardSize",
+      "owner": "Scene",
+      "label": "Card size",
+      "valueModel": "number",
+      "unit": "percent of canvas short axis",
+      "default": 21,
+      "range": {
+        "minimum": 14,
+        "maximum": 28,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 21,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "spin-image-orbit:card-size",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Card bounds and safety-cap activation change while centre path, depth, source ratio, and phase remain fixed.",
+      "acceptanceRow": "control:scene.spin-image-orbit.card-size",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

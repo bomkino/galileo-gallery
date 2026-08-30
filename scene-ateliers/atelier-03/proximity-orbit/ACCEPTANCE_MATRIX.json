@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "proximity-orbit",
+  "rows": [
+    {
+      "id": "control:scene.proximity-orbit.orbit-radius",
+      "kind": "control-causality",
+      "controlId": "scene.proximity-orbit.orbit-radius",
+      "requirement": "Changing Orbit radius must causally change Card centre x range changes while camera-distance response, source order, phase, and source pixels remain unchanged.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.proximity-orbit.proximity-strength",
+      "kind": "control-causality",
+      "controlId": "scene.proximity-orbit.proximity-strength",
+      "requirement": "Changing Proximity strength must causally change At identical story time near-card scale and local phase distribution change coherently; far identity/order and global duration do not.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.proximity-orbit.path-projection",
+      "kind": "control-causality",
+      "controlId": "scene.proximity-orbit.path-projection",
+      "requirement": "Changing Path projection must causally change Vertical near/far separation, geometric perspective, alpha, and depth ordering change from one path coordinate; horizontal phase/order do not.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.proximity-orbit.card-size",
+      "kind": "control-causality",
+      "controlId": "scene.proximity-orbit.card-size",
+      "requirement": "Changing Card size must causally change Card bounds and cap activation change while centre path, phase, and source ratio stay fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "identity",
+      "kind": "programme-invariant",
+      "requirement": "Motion and anti-motion remain recognisable after styling removal.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "source-fidelity",
+      "kind": "programme-invariant",
+      "requirement": "Clean default leaves imported source pixels untouched.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "timeline",
+      "kind": "programme-invariant",
+      "requirement": "Preview, scrub, evidence and export planning consume one semantic model.",
+      "automatedStatus": "pass: renderer-owned story clock prohibited; original evaluator verifier replay passed.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "programme-invariant",
+      "requirement": "Reduced motion preserves narrative meaning.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "lifecycle",
+      "kind": "programme-invariant",
+      "requirement": "Renderer remount and disposal remain bounded.",
+      "automatedStatus": "pass for review-shell mount/remount/disposal; Scene-native GPU/context-loss proof remains as declared in source evidence.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "human-verdict",
+      "kind": "programme-invariant",
+      "requirement": "Human visual, motion, pace, defaults and delight verdict remains pending.",
+      "automatedStatus": "not automatable",
+      "humanStatus": "pending"
+    }
+  ]
+}

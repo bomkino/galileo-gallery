@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "spin-image-orbit",
+  "rows": [
+    {
+      "id": "control:scene.spin-image-orbit.ellipse-width",
+      "kind": "control-causality",
+      "controlId": "scene.spin-image-orbit.ellipse-width",
+      "requirement": "Changing Ellipse width must causally change Projected x span and shoulder travel distance change at identical story time while minor axis, source order, story phase, and source pixels remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.spin-image-orbit.ellipse-height",
+      "kind": "control-causality",
+      "controlId": "scene.spin-image-orbit.ellipse-height",
+      "requirement": "Changing Ellipse height must causally change Projected vertical arc and the pitch contribution to depth change while major-axis identity, source order, and story phase remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.spin-image-orbit.plane-yaw",
+      "kind": "control-causality",
+      "controlId": "scene.spin-image-orbit.plane-yaw",
+      "requirement": "Changing Plane yaw must causally change Front gate, shoulder asymmetry, projected width, depth, and z-order change coherently through one rotation matrix; cards remain camera-facing.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.spin-image-orbit.plane-pitch",
+      "kind": "control-causality",
+      "controlId": "scene.spin-image-orbit.plane-pitch",
+      "requirement": "Changing Plane pitch must causally change Vertical projection, depth contribution from the minor axis, front-gate angle, and occlusion change coherently without per-card rotation.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.spin-image-orbit.card-size",
+      "kind": "control-causality",
+      "controlId": "scene.spin-image-orbit.card-size",
+      "requirement": "Changing Card size must causally change Card bounds and safety-cap activation change while centre path, depth, source ratio, and phase remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "identity",
+      "kind": "programme-invariant",
+      "requirement": "Motion and anti-motion remain recognisable after styling removal.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "source-fidelity",
+      "kind": "programme-invariant",
+      "requirement": "Clean default leaves imported source pixels untouched.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "timeline",
+      "kind": "programme-invariant",
+      "requirement": "Preview, scrub, evidence and export planning consume one semantic model.",
+      "automatedStatus": "pass: renderer-owned story clock prohibited; original evaluator verifier replay passed.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "programme-invariant",
+      "requirement": "Reduced motion preserves narrative meaning.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "lifecycle",
+      "kind": "programme-invariant",
+      "requirement": "Renderer remount and disposal remain bounded.",
+      "automatedStatus": "pass for review-shell mount/remount/disposal; Scene-native GPU/context-loss proof remains as declared in source evidence.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "human-verdict",
+      "kind": "programme-invariant",
+      "requirement": "Human visual, motion, pace, defaults and delight verdict remains pending.",
+      "automatedStatus": "not automatable",
+      "humanStatus": "pending"
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+{
+  "schemaVersion": "1.1.0",
+  "sceneId": "slide-fan",
+  "sourceArchive": "GALILEO_ATELIER_03_PARITY_HANDOFF_FOR_SOL_5_6_PRO(1).zip",
+  "sourceEvaluatorSha256": "f09f241782da25cbaff7298594c0e087576870728b8a56513bb405530ec7d991",
+  "evidenceCount": 33,
+  "files": [
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/CAPTURE_HASHES.sha256",
+      "sha256": "5f3e778e44b4ed45b145d63739e9738a19cac3051d79e1132940c138cc51ffe9",
+      "byteSize": 2768,
+      "proofClass": "hash ledger",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/README.md",
+      "sha256": "b5d2e7ef5c5791ac3e59a51e0c91ca36a566f4c348bc4a24e594ce68768640b0",
+      "byteSize": 1430,
+      "proofClass": "prose/limitations",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/RESOURCE_AND_LIFECYCLE_NOTES.md",
+      "sha256": "4f04113b1cfa3917d067d301c9832d6ae22e6261890763498fee63ef1e3ea4bc",
+      "byteSize": 1328,
+      "proofClass": "prose/limitations",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/alpha-over-black.png",
+      "sha256": "c04c5d591606a8cc7540871da96df99f81d1c5ecd98e80be53e6279b83dd6f78",
+      "byteSize": 104211,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/alpha-over-blue.png",
+      "sha256": "1efc5a78daf0f7e565aab25650812baf5222ea444b2516d600476b5c49c8ab0e",
+      "byteSize": 102786,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/alpha-over-checkerboard.png",
+      "sha256": "4857cc083dac347c75016767d57b6940c9b838761f2f6d5ab415a3129d18f10b",
+      "byteSize": 100478,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/alpha-over-red.png",
+      "sha256": "88b159619b2d96a016f300437cf859c70a35800039f88fbbaedba2c21e000602",
+      "byteSize": 103274,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/alpha-over-white.png",
+      "sha256": "1a3171330e57a10a9034ff2424fc5c1768cc5711e618dc463f30293db15287b7",
+      "byteSize": 99197,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/alpha-source.png",
+      "sha256": "e0571459ae2cd2b9ed4170c5f734455096988bca085fb66ec56c96e4838b8594",
+      "byteSize": 100799,
+      "proofClass": "raw-alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/alpha-source.svg",
+      "sha256": "9aea574211705ead4eb81f70432d64756851a00c33fb242244dfc89f6c0b4db5",
+      "byteSize": 5134,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/canonical-readback.json",
+      "sha256": "aee6e6c17b0902b27553fe823cb6fd080099da181b074c2a09f135ac8a1cabd0",
+      "byteSize": 19795,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/capture-manifest.json",
+      "sha256": "236a3b2ead811e0da3a8ba047e03cb2bd7eb5d03482e47002eaeae7b9b217df4",
+      "byteSize": 10666,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/motion-real-time-5s.mp4",
+      "sha256": "bd7babb771c09f1679ea6a2d3db25370efd6b4ad33c974e060c380f0299003b8",
+      "byteSize": 88522,
+      "proofClass": "real-speed encoded motion",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/motion-silhouette-5s.mp4",
+      "sha256": "4463122d33e36b54635edea0fadf63a52cd58ded49282b6676f7b3a93db3f6d6",
+      "byteSize": 31013,
+      "proofClass": "real-speed encoded motion",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/portrait-mixed.png",
+      "sha256": "38bd46b8cbb53790e72f81a1a8bc8c1fd043855ffb63028f9d7214476ee71887",
+      "byteSize": 69844,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/portrait-mixed.svg",
+      "sha256": "cc4b282c5a1580cae36a07425e666ed7d8c2c1040f286f41b1666bc0018d9b97",
+      "byteSize": 7899,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/resource-observation.json",
+      "sha256": "58e8df312bf6351c55ad17060e569feb63b0b3c0888fcf7af74991d4bbbb29f0",
+      "byteSize": 1068,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/silhouette-still.png",
+      "sha256": "7d233f44d6e0ff9c04122e735fd33d608097b8e132b1b55786f86ebfd997ce22",
+      "byteSize": 18894,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/silhouette-still.svg",
+      "sha256": "fe917093b2e64dd8b04297ba8c1d8a19934899bf43306931d00f8b9ca68e83d7",
+      "byteSize": 1611,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-00-start.png",
+      "sha256": "189012454f59ae7dd440fb1a35dc8dee0015ff1b6b4537a53104f1cdaf2b75f1",
+      "byteSize": 39104,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-00-start.svg",
+      "sha256": "c1c29bee628a8284e52fc8c483519ba2ae5b343cc78a8685ee5d8e590dfdb4b1",
+      "byteSize": 5165,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-01-open.png",
+      "sha256": "2a97f43bfb38eead1d64f1938855bbc0fcee5c692d4965c5dd750b0e2ffd67d8",
+      "byteSize": 96305,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-01-open.svg",
+      "sha256": "031e4642573df84c4279a6e625d2417e2bbe160b09967601231191e044e92093",
+      "byteSize": 5203,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-02-featured.png",
+      "sha256": "2544602939066c1b7a4c6b75885dd2309dcd3aa6411c26e9913ef6a5ecfd1915",
+      "byteSize": 108354,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-02-featured.svg",
+      "sha256": "9b78f4ade8b6f9f06e0c834a664fb9a20fe0d4482e6e94f6eed73d2cafe5a930",
+      "byteSize": 5183,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-03-return.png",
+      "sha256": "aa673ed8796f97a054a766285541083754670695516e115344ade86282b048c7",
+      "byteSize": 95716,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-03-return.svg",
+      "sha256": "21b94fb8c43f0adcf3220cd3018a01727e6a8d69bd613e3a21db60361a4db6c2",
+      "byteSize": 5181,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-04-finale.png",
+      "sha256": "b88ffab849b4b94d3d2a758d3eb9440d3cff3faeff742aa4e511e836ffa829f6",
+      "byteSize": 101532,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-04-finale.svg",
+      "sha256": "005dcac7d0ba01c6657f576492e801c87b78519fbc473fda014137984d3cdb64",
+      "byteSize": 5205,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-05-exit.png",
+      "sha256": "edf14373bbee36ee1591efc20ca2124d63230637658b4fddfab353a5ba311be5",
+      "byteSize": 83671,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-05-exit.svg",
+      "sha256": "cee7da3983eeec3c109239962ce37f050136c3690d03dd28826c65aa801ad16c",
+      "byteSize": 5199,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-06-seam.png",
+      "sha256": "189012454f59ae7dd440fb1a35dc8dee0015ff1b6b4537a53104f1cdaf2b75f1",
+      "byteSize": 39104,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/slide-fan/evidence/still-06-seam.svg",
+      "sha256": "c1c29bee628a8284e52fc8c483519ba2ae5b343cc78a8685ee5d8e590dfdb4b1",
+      "byteSize": 5165,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    }
+  ],
+  "validationBindings": [
+    "07_VALIDATION/browser-receipts/slide-fan.json",
+    "07_VALIDATION/alpha-receipts/slide-fan.json",
+    "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "07_VALIDATION/resource-receipts/RESOURCE_LIFECYCLE_SUMMARY.json",
+    "07_VALIDATION/evidence-manifests/VIDEO_EVIDENCE_RECEIPT.json"
+  ],
+  "claimBoundary": "Evidence proves declared mechanics by proof class. Static images do not prove motion; encoded clips do not restore omitted raw frame ledgers; human verdict remains pending.",
+  "humanVerdict": "pending",
+  "productIntegration": "no"
+}

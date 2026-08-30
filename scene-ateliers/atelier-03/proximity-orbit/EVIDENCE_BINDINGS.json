@@ -1,0 +1,315 @@
+{
+  "schemaVersion": "1.1.0",
+  "sceneId": "proximity-orbit",
+  "sourceArchive": "GALILEO_ATELIER_03_PARITY_HANDOFF_FOR_SOL_5_6_PRO(1).zip",
+  "sourceEvaluatorSha256": "de38266eae4670c94836aac2fc829354111bc1efcffa6856a05fd5bd35d71ebd",
+  "evidenceCount": 37,
+  "files": [
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/CAPTURE_HASHES.sha256",
+      "sha256": "60d410a4a6358e0282fff34dce0cb980e6c3d3348cf413920705ffe4142ea056",
+      "byteSize": 3124,
+      "proofClass": "hash ledger",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/README.md",
+      "sha256": "06868c89e30631127abd85240e3e066a4f6a2bab5992b9a9a1576f9886cf23e2",
+      "byteSize": 1284,
+      "proofClass": "prose/limitations",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/RESOURCE_AND_LIFECYCLE_NOTES.md",
+      "sha256": "133bfc90f82b791b75d71c62b4493db5b2e7bb3c398b2965f6683eda14e8d265",
+      "byteSize": 1125,
+      "proofClass": "prose/limitations",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/alpha-over-black.png",
+      "sha256": "ed3c2156f417b1303c814beb77a612de6153a8c680a3503ff1cafc958f088d71",
+      "byteSize": 42394,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/alpha-over-blue.png",
+      "sha256": "5b766c067a2587584039fe5731f02a798957d1e16e249582c24baa319329a01d",
+      "byteSize": 42619,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/alpha-over-checkerboard.png",
+      "sha256": "ff3f00c7f3c8bdb6cbee709c5f424e21d611bae38496c2f9ebb58703f1e21880",
+      "byteSize": 45767,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/alpha-over-red.png",
+      "sha256": "2a6073cc994c9cbc707752f36778fdfc6e6076a8468211ffbe60f98bbc5a70ef",
+      "byteSize": 42660,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/alpha-over-white.png",
+      "sha256": "bc52c604bb5e284a159caafb3a4eda33c15a4dc21b14bb5c3e30b2478332b14f",
+      "byteSize": 40890,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/alpha-source.png",
+      "sha256": "acbe614eab5907174583edfc70e75f0184f16134b7edd6f3df3e2a114e53080a",
+      "byteSize": 44947,
+      "proofClass": "raw-alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/alpha-source.svg",
+      "sha256": "eae2b98e62eacceacb88601a8b45d7996f886213b7c9765443ee0dbf2f4ca920",
+      "byteSize": 6698,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/canonical-readback.json",
+      "sha256": "0aff3d424fbac4ef0ce3bf4b0b50b3922e74e4ff9d3d36289ad8bef136bc6bcc",
+      "byteSize": 49595,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/capture-manifest.json",
+      "sha256": "145d8282de5b228032a9d6a41a9179ae62bc767897da38212b02d237836b73cf",
+      "byteSize": 12032,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/motion-real-time-5s.mp4",
+      "sha256": "d1307649ddd31f97f16bc64fbe2f330f914eb67d9f397e6803108d973fa85244",
+      "byteSize": 187047,
+      "proofClass": "real-speed encoded motion",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/motion-silhouette-5s.mp4",
+      "sha256": "0fdb025314464613f318d3e99fa7895dc2531bde640ff136c92591082fe7141d",
+      "byteSize": 39019,
+      "proofClass": "real-speed encoded motion",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/portrait-mixed.png",
+      "sha256": "1bc021075dc1b9b21b897666dd21922d5b0c46fe1773850adcac32e8f667216e",
+      "byteSize": 44717,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/portrait-mixed.svg",
+      "sha256": "186a874e42e35d310e403fce69b71371419168ef850d5bb34a695ca4db6f1109",
+      "byteSize": 6803,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/resource-observation.json",
+      "sha256": "4ce8c2d85bc0be056bfd823e47b0779d7cd03a8af007129b0931b0374a8019f6",
+      "byteSize": 1088,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/silhouette-still.png",
+      "sha256": "713489015fce9837fbc4006147e7f668ac5a3f58db684d130afa7c3e965d60d5",
+      "byteSize": 7089,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/silhouette-still.svg",
+      "sha256": "414200e436d8b5ce4280be4cde5771c1c55454a962c03a08a6ee072ea105b181",
+      "byteSize": 1850,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-00-start.png",
+      "sha256": "92c5f3c44bdcf63831b103eaa58077d2a413ed2fc7585da257ffc5cf7049c74e",
+      "byteSize": 5370,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-00-start.svg",
+      "sha256": "1e3e77bb9f9713d03b07a83d4d9ee3948df6b133f5f214009c5ffb833af4917e",
+      "byteSize": 5707,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-01-established.png",
+      "sha256": "3c4cf5175be650d0efec3cac78d659f5f2243b12147825ba3240ad435578f042",
+      "byteSize": 47427,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-01-established.svg",
+      "sha256": "1ae5e0a41be11affa676c437f20910d10b24fff9879d8f6f31f72905c0f4caa0",
+      "byteSize": 6675,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-02-approach.png",
+      "sha256": "88da1fc407e6902f15a50ecd5b9a4cbb553d129fe3a3aaefd22472b241a4d60a",
+      "byteSize": 41626,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-02-approach.svg",
+      "sha256": "cd93cd1e8c9e6c183322f72427f977850d0b7dfd68c9aff7e638f63fb781629f",
+      "byteSize": 6747,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-03-near.png",
+      "sha256": "855cb3bacb52aa5cbbc0e9830eaec34b9e4922803c9d2463df6f3d6cafe4fe74",
+      "byteSize": 46646,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-03-near.svg",
+      "sha256": "3544ff6e8f113cd453906cd2f700fed0e1488c55e24a3ef841a4843a9cc26476",
+      "byteSize": 6567,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-04-hold-end.png",
+      "sha256": "855cb3bacb52aa5cbbc0e9830eaec34b9e4922803c9d2463df6f3d6cafe4fe74",
+      "byteSize": 46646,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-04-hold-end.svg",
+      "sha256": "3544ff6e8f113cd453906cd2f700fed0e1488c55e24a3ef841a4843a9cc26476",
+      "byteSize": 6567,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-05-later.png",
+      "sha256": "5525dcf81cea65a63705d8d12b51db623acd523ed9e3dd369b07fe9c90de426a",
+      "byteSize": 43886,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-05-later.svg",
+      "sha256": "2aec78a318dccd2363441f83772ea58eef2ce17100fba225b28639fa5deb6673",
+      "byteSize": 6730,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-06-finale.png",
+      "sha256": "26d8e8aebc1969956df45fa5600f1186d01b9dc605d0fb23c11d6fbba906a453",
+      "byteSize": 41459,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-06-finale.svg",
+      "sha256": "389636a4f641ac1aae8c78390253ad26e3e20eab0c2a500b6f46e2de06eaad52",
+      "byteSize": 6605,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-07-exit.png",
+      "sha256": "29b81bb7a2b80489a3ce93b7b35e4a6195e79e2287ce4f18c2fed0692e38f38c",
+      "byteSize": 36895,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-07-exit.svg",
+      "sha256": "93e35b3acb39b349e33c5bd430cc6d64421c85d779e2a9eaca3fbe7ce2d52019",
+      "byteSize": 6761,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-08-seam.png",
+      "sha256": "92c5f3c44bdcf63831b103eaa58077d2a413ed2fc7585da257ffc5cf7049c74e",
+      "byteSize": 5370,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-03/proximity-orbit/evidence/still-08-seam.svg",
+      "sha256": "1e3e77bb9f9713d03b07a83d4d9ee3948df6b133f5f214009c5ffb833af4917e",
+      "byteSize": 5707,
+      "proofClass": "other",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    }
+  ],
+  "validationBindings": [
+    "07_VALIDATION/browser-receipts/proximity-orbit.json",
+    "07_VALIDATION/alpha-receipts/proximity-orbit.json",
+    "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "07_VALIDATION/resource-receipts/RESOURCE_LIFECYCLE_SUMMARY.json",
+    "07_VALIDATION/evidence-manifests/VIDEO_EVIDENCE_RECEIPT.json"
+  ],
+  "claimBoundary": "Evidence proves declared mechanics by proof class. Static images do not prove motion; encoded clips do not restore omitted raw frame ledgers; human verdict remains pending.",
+  "humanVerdict": "pending",
+  "productIntegration": "no"
+}

@@ -1,0 +1,9 @@
+{
+  "atelier": 3,
+  "archive": "GALILEO_ATELIER_03_PARITY_HANDOFF_FOR_SOL_5_6_PRO(1).zip",
+  "archiveSha256": "5d70ee32739775f013bb0e7465228eb0210bb610e32a639d46a65cefb3c20d93",
+  "sourceRoot": "GALILEO_ATELIER_03_PARITY_HANDOFF/canonical-packet/scene-ateliers/atelier-03/proximity-orbit",
+  "sourceRootFileCount": 54,
+  "charterSha256": "fbb072266b61c03d38990d33c351cf164bd60ea0b28862151661078c345e8422",
+  "normalisation": "Original authored files copied. Original control JSON preserved. Canonical parity contracts added."
+}

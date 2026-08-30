@@ -1,0 +1,158 @@
+{
+  "scene": {
+    "id": "spin-image-orbit",
+    "versionCandidate": 1,
+    "label": "Orbit \u2014 Wide Ellipse",
+    "verdict": "pending"
+  },
+  "ownership": {
+    "sceneOwns": [
+      "ellipse-width",
+      "ellipse-height",
+      "plane-yaw",
+      "plane-pitch",
+      "card-size"
+    ],
+    "timelineOwns": [
+      "global-pace",
+      "direction",
+      "mode",
+      "holds",
+      "finite-or-loop"
+    ],
+    "frameOwns": [
+      "fit",
+      "ratio",
+      "padding",
+      "crop",
+      "focal-intent"
+    ],
+    "lookOwns": [
+      "background",
+      "world-material",
+      "grain",
+      "vignette"
+    ]
+  },
+  "controls": [
+    {
+      "id": "ellipse-width",
+      "parameter": "ellipseWidth",
+      "label": "Ellipse width",
+      "type": "number",
+      "unit": "percent of canvas width",
+      "bounds": {
+        "min": 58,
+        "max": 110,
+        "step": 1
+      },
+      "default": 88,
+      "serializedMeaning": "Full local major-axis span before plane rotation and canvas recomposition.",
+      "causalObservation": "Projected x span and shoulder travel distance change at identical story time while minor axis, source order, story phase, and source pixels remain fixed.",
+      "reset": {
+        "value": 88,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Primary panoramic path geometry."
+    },
+    {
+      "id": "ellipse-height",
+      "parameter": "ellipseHeight",
+      "label": "Ellipse height",
+      "type": "number",
+      "unit": "percent of canvas height",
+      "bounds": {
+        "min": 16,
+        "max": 58,
+        "step": 1
+      },
+      "default": 34,
+      "serializedMeaning": "Full local minor-axis span before plane rotation and canvas recomposition.",
+      "causalObservation": "Projected vertical arc and the pitch contribution to depth change while major-axis identity, source order, and story phase remain fixed.",
+      "reset": {
+        "value": 34,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Independent minor-axis geometry, not a generic orbit radius."
+    },
+    {
+      "id": "plane-yaw",
+      "parameter": "planeYaw",
+      "label": "Plane yaw",
+      "type": "number",
+      "unit": "degrees",
+      "bounds": {
+        "min": -42,
+        "max": 42,
+        "step": 1
+      },
+      "default": 26,
+      "serializedMeaning": "Rotation of the whole ellipse plane around its vertical axis.",
+      "causalObservation": "Front gate, shoulder asymmetry, projected width, depth, and z-order change coherently through one rotation matrix; cards remain camera-facing.",
+      "reset": {
+        "value": 26,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Defines cinematic near-side orientation of the plane."
+    },
+    {
+      "id": "plane-pitch",
+      "parameter": "planePitch",
+      "label": "Plane pitch",
+      "type": "number",
+      "unit": "degrees",
+      "bounds": {
+        "min": -18,
+        "max": 30,
+        "step": 1
+      },
+      "default": 14,
+      "serializedMeaning": "Rotation of the whole ellipse plane around its horizontal axis after yaw.",
+      "causalObservation": "Vertical projection, depth contribution from the minor axis, front-gate angle, and occlusion change coherently without per-card rotation.",
+      "reset": {
+        "value": 14,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Defines the authored spatial tilt and shoulder composition."
+    },
+    {
+      "id": "card-size",
+      "parameter": "cardSize",
+      "label": "Card size",
+      "type": "number",
+      "unit": "percent of canvas short axis",
+      "bounds": {
+        "min": 14,
+        "max": 28,
+        "step": 1
+      },
+      "default": 21,
+      "serializedMeaning": "Base card width before source ratio, geometric perspective, density reduction, and deterministic canvas safety cap.",
+      "causalObservation": "Card bounds and safety-cap activation change while centre path, depth, source ratio, and phase remain fixed.",
+      "reset": {
+        "value": 21,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Sets readable density for the panoramic pass."
+    }
+  ],
+  "derivedNotControlled": [
+    "front-gate-angle",
+    "shoulder-zones",
+    "perspective-scale",
+    "rear-alpha-floor",
+    "depth-order",
+    "portrait-recomposition",
+    "collision-cap"
+  ],
+  "unsupportedCapabilities": [
+    "spatial-axis",
+    "pointer-driven-output",
+    "hover-driven-output",
+    "nested-rings",
+    "source-lighting",
+    "card-tumble",
+    "orbit-decoration",
+    "nonlinear-proximity-swell"
+  ]
+}

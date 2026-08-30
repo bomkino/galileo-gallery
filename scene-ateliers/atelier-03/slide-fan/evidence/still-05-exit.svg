@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720"><defs><linearGradient id="g0" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#88b8e7"/><stop offset="1" stop-color="#5f20b6"/></linearGradient><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a388e7"/><stop offset="1" stop-color="#b62098"/></linearGradient><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e788e0"/><stop offset="1" stop-color="#b62023"/></linearGradient><linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e78897"/><stop offset="1" stop-color="#b69320"/></linearGradient><linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e7c488"/><stop offset="1" stop-color="#64b620"/></linearGradient></defs><rect width="100%" height="100%" fill="#ddd8cb"/><g transform="translate(640 568.8) rotate(-38.999074) scale(1)">
+    <rect x="-129.6" y="-145.8" width="259.2" height="145.8" rx="14" fill="#f0ece1"/>
+    <rect x="-121.6" y="-137.8" width="243.2" height="129.8" rx="9" fill="url(#g0)"/>
+    <rect x="-102.14399999999999" y="-114.436" width="107.008" height="9.086000000000002" fill="#14212c" opacity=".86"/>
+    <path d="M -94.848 -118.33000000000001 C -29.183999999999997 -133.906, 43.77600000000001 -78.09200000000001, 92.416 -114.436 L 82.68799999999999 -44.34400000000001 C 12.159999999999997 -18.384, -46.208 -66.41, -92.416 -30.066000000000003 Z" fill="none" stroke="#fff" stroke-width="2.6244" opacity=".86"/>
+    <text x="-102.14399999999999" y="-20.980000000000004" font-family="ui-monospace,monospace" font-size="13.376" font-weight="700" letter-spacing="1.2" fill="#fff">OPEN</text>
+  </g><g transform="translate(640 568.8) rotate(38.999074) scale(1)">
+    <rect x="-129.6" y="-345.6" width="259.2" height="345.6" rx="14" fill="#f0ece1"/>
+    <rect x="-121.6" y="-337.6" width="243.2" height="329.6" rx="9" fill="url(#g1)"/>
+    <rect x="-102.14399999999999" y="-278.27200000000005" width="107.008" height="23.072000000000003" fill="#14212c" opacity=".86"/>
+    <path d="M -94.848 -288.16 C -29.183999999999997 -327.71200000000005, 43.77600000000001 -185.984, 92.416 -278.27200000000005 L 82.68799999999999 -100.28800000000001 C 12.159999999999997 -34.367999999999995, -46.208 -156.32, -92.416 -64.03200000000004 Z" fill="none" stroke="#fff" stroke-width="4.6655999999999995" opacity=".86"/>
+    <text x="-102.14399999999999" y="-40.95999999999998" font-family="ui-monospace,monospace" font-size="13.376" font-weight="700" letter-spacing="1.2" fill="#fff">RETURN</text>
+  </g><g transform="translate(640 568.8) rotate(-19.499537) scale(1)">
+    <rect x="-129.6" y="-259.2" width="259.2" height="259.2" rx="14" fill="#f0ece1"/>
+    <rect x="-121.6" y="-251.2" width="243.2" height="243.2" rx="9" fill="url(#g2)"/>
+    <rect x="-102.14399999999999" y="-207.42399999999998" width="107.008" height="17.024" fill="#14212c" opacity=".86"/>
+    <path d="M -94.848 -214.72 C -29.183999999999997 -243.904, 43.77600000000001 -139.32799999999997, 92.416 -207.42399999999998 L 82.68799999999999 -76.096 C 12.159999999999997 -27.45599999999999, -46.208 -117.44, -92.416 -49.343999999999994 Z" fill="none" stroke="#fff" stroke-width="4.6655999999999995" opacity=".86"/>
+    <text x="-102.14399999999999" y="-32.31999999999999" font-family="ui-monospace,monospace" font-size="13.376" font-weight="700" letter-spacing="1.2" fill="#fff">FAN</text>
+  </g><g transform="translate(640 568.8) rotate(19.499537) scale(1)">
+    <rect x="-129.6" y="-108.451883" width="259.2" height="108.451883" rx="14" fill="#f0ece1"/>
+    <rect x="-121.6" y="-100.451883" width="243.2" height="92.451883" rx="9" fill="url(#g3)"/>
+    <rect x="-102.14399999999999" y="-83.81054406" width="107.008" height="6.47163181" fill="#14212c" opacity=".86"/>
+    <path d="M -94.848 -86.58410055 C -29.183999999999997 -97.67832650999999, 43.77600000000001 -57.92401682, 92.416 -83.81054406 L 82.68799999999999 -33.88652724000001 C 12.159999999999997 -15.396150640000002, -46.208 -49.60334734999999, -92.416 -23.71682011 Z" fill="none" stroke="#fff" stroke-width="2" opacity=".86"/>
+    <text x="-102.14399999999999" y="-17.245188299999995" font-family="ui-monospace,monospace" font-size="13.376" font-weight="700" letter-spacing="1.2" fill="#fff">LIFT</text>
+  </g><g transform="translate(640 568.8) rotate(0) scale(1)">
+    <rect x="-129.6" y="-324" width="259.2" height="324" rx="14" fill="#f0ece1"/>
+    <rect x="-121.6" y="-316" width="243.2" height="308" rx="9" fill="url(#g4)"/>
+    <rect x="-102.14399999999999" y="-260.56" width="107.008" height="21.560000000000002" fill="#14212c" opacity=".86"/>
+    <path d="M -94.848 -269.8 C -29.183999999999997 -306.76, 43.77600000000001 -174.32, 92.416 -260.56 L 82.68799999999999 -94.24000000000001 C 12.159999999999997 -32.639999999999986, -46.208 -146.6, -92.416 -60.360000000000014 Z" fill="none" stroke="#fff" stroke-width="4.6655999999999995" opacity=".86"/>
+    <text x="-102.14399999999999" y="-38.80000000000001" font-family="ui-monospace,monospace" font-size="13.376" font-weight="700" letter-spacing="1.2" fill="#fff">HINGE</text>
+  </g></svg>

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0.0",
+  "atelier": 3,
+  "scenes": [
+    {
+      "sceneId": "dealers-fan",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "orbit-ring",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "proximity-orbit",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "slide-fan",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "spin-image-orbit",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    }
+  ]
+}

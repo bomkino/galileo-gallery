@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "slide-fan",
+  "sourceContractSha256": "4b7de90da7b79a989528fe846db9e8cd447c3b4a4158aa7f03561c4eb1d14769",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.slide-fan.spread-angle",
+      "sceneLocalId": "spread-angle",
+      "parameter": "spread-angle",
+      "owner": "Scene",
+      "label": "Spread angle",
+      "valueModel": "number",
+      "unit": "deg",
+      "default": 135,
+      "range": {
+        "minimum": 18,
+        "maximum": 170,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 135,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "slide-fan:spread-angle",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes every non-central slot angle and the projected fan width while preserving hinge and order.",
+      "acceptanceRow": "control:scene.slide-fan.spread-angle",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.slide-fan.hinge-height",
+      "sceneLocalId": "hinge-height",
+      "parameter": "hinge-height",
+      "owner": "Scene",
+      "label": "Hinge height",
+      "valueModel": "number",
+      "unit": "stage-percent",
+      "default": 79,
+      "range": {
+        "minimum": 68,
+        "maximum": 96,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 79,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "slide-fan:hinge-height",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Moves every card bottom-centre together without changing spread, ratio, or source order.",
+      "acceptanceRow": "control:scene.slide-fan.hinge-height",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.slide-fan.card-size",
+      "sceneLocalId": "card-size",
+      "parameter": "card-size",
+      "owner": "Scene",
+      "label": "Card size",
+      "valueModel": "number",
+      "unit": "short-axis-percent",
+      "default": 36,
+      "range": {
+        "minimum": 24,
+        "maximum": 58,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 36,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "slide-fan:card-size",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes card projected bounds and derived collision compression; does not alter source fit.",
+      "acceptanceRow": "control:scene.slide-fan.card-size",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.slide-fan.featured-lift",
+      "sceneLocalId": "featured-lift",
+      "parameter": "featured-lift",
+      "owner": "Scene",
+      "label": "Featured lift",
+      "valueModel": "number",
+      "unit": "short-axis-percent",
+      "default": 14,
+      "range": {
+        "minimum": 4,
+        "maximum": 26,
+        "step": 0.5
+      },
+      "options": null,
+      "resetValue": 14,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "slide-fan:featured-lift",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes selected-card radial displacement only; zero-time and return poses remain unchanged.",
+      "acceptanceRow": "control:scene.slide-fan.featured-lift",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.slide-fan.paper-breath",
+      "sceneLocalId": "paper-breath",
+      "parameter": "paper-breath",
+      "owner": "Scene",
+      "label": "Paper breath",
+      "valueModel": "number",
+      "unit": "short-axis-percent",
+      "default": 0.35,
+      "range": {
+        "minimum": 0,
+        "maximum": 1.2,
+        "step": 0.05
+      },
+      "options": null,
+      "resetValue": 0.35,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "slide-fan:paper-breath",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes sub-pixel settled y displacement without changing angle, order, or hold fidelity.",
+      "acceptanceRow": "control:scene.slide-fan.paper-breath",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

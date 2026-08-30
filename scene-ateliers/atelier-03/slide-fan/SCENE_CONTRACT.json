@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "slide-fan",
+  "displayName": "Open Fan",
+  "family": "fans-orbits",
+  "atelier": 3,
+  "candidateVersion": "parity-1",
+  "identity": {
+    "promise": "Cards begin as one lightly gathered hand, open on a common bottom-centre hinge, settle into a balanced overview, and close through the exact inverse geometry.",
+    "antiMotion": "The Scene must never become a continuously advancing selection system, an orbit, a random paper swarm, a hover-led z-order fight, or a static pile whose only authored event is generic scale-up.",
+    "topology": "stable angular slots on one hinge/pivot",
+    "focusGrammar": "collection remains visible; optional slot spotlight never becomes traversal",
+    "finaleGrammar": "whole hand remains legible at stable spread"
+  },
+  "sourcePolicy": {
+    "minimum": 1,
+    "recommended": 5,
+    "maximum": 127,
+    "identityAndOrder": "must survive failure, replacement, reverse and recycling"
+  },
+  "canvasSupport": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:5"
+  ],
+  "orientation": "fan plane",
+  "timeline": "automatic, fixed-duration, directed; forward/reverse",
+  "alphaPolicy": "transparent output supported; raw alpha proof quality scored separately",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "f09f241782da25cbaff7298594c0e087576870728b8a56513bb405530ec7d991",
+    "rendererOwnsStoryClock": false
+  },
+  "prototypeEntrypoint": "prototype/index.html",
+  "controlsRef": "CAPABILITY_AND_CONTROLS.json",
+  "acceptanceRef": "ACCEPTANCE_MATRIX.json",
+  "programme": {
+    "state": "pre-G11 candidate packet; human verdict pending",
+    "pressureGate": null,
+    "gateStatus": "candidate"
+  },
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/slide-fan.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  }
+}

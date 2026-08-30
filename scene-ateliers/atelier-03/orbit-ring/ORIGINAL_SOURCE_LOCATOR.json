@@ -1,0 +1,9 @@
+{
+  "atelier": 3,
+  "archive": "GALILEO_ATELIER_03_PARITY_HANDOFF_FOR_SOL_5_6_PRO(1).zip",
+  "archiveSha256": "5d70ee32739775f013bb0e7465228eb0210bb610e32a639d46a65cefb3c20d93",
+  "sourceRoot": "GALILEO_ATELIER_03_PARITY_HANDOFF/canonical-packet/scene-ateliers/atelier-03/orbit-ring",
+  "sourceRootFileCount": 54,
+  "charterSha256": "4f9211f81b1ea848a303cc86edf51c1b23ca92a535a7f8702dc40f8728099f1e",
+  "normalisation": "Original authored files copied. Original control JSON preserved. Canonical parity contracts added."
+}

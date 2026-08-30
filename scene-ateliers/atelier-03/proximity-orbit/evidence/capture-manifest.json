@@ -1,0 +1,423 @@
+{
+  "scene": "proximity-orbit",
+  "prototype": "clean-room deterministic HTML/JS evaluator with its own removable SVG evidence renderer",
+  "captureAuthority": "explicit story-time samples; no wall-clock, pointer, scroll, or rAF evaluator authority",
+  "versions": {
+    "node": "v22.16.0",
+    "inkscape": "Inkscape 1.4 (e7c3feb100, 2024-10-09)",
+    "ffmpeg": "ffmpeg version 7.1.5-0+deb13u1 Copyright (c) 2000-2026 the FFmpeg developers"
+  },
+  "files": [
+    {
+      "path": "alpha-over-black.png",
+      "kind": "alpha-composite",
+      "timeMs": 2340,
+      "sha256": "ed3c2156f417b1303c814beb77a612de6153a8c680a3503ff1cafc958f088d71",
+      "bytes": 42394,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "alpha-over-blue.png",
+      "kind": "alpha-composite",
+      "timeMs": 2340,
+      "sha256": "5b766c067a2587584039fe5731f02a798957d1e16e249582c24baa319329a01d",
+      "bytes": 42619,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "alpha-over-checkerboard.png",
+      "kind": "alpha-composite",
+      "timeMs": 2340,
+      "sha256": "ff3f00c7f3c8bdb6cbee709c5f424e21d611bae38496c2f9ebb58703f1e21880",
+      "bytes": 45767,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "alpha-over-red.png",
+      "kind": "alpha-composite",
+      "timeMs": 2340,
+      "sha256": "2a6073cc994c9cbc707752f36778fdfc6e6076a8468211ffbe60f98bbc5a70ef",
+      "bytes": 42660,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "alpha-over-white.png",
+      "kind": "alpha-composite",
+      "timeMs": 2340,
+      "sha256": "bc52c604bb5e284a159caafb3a4eda33c15a4dc21b14bb5c3e30b2478332b14f",
+      "bytes": 40890,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "alpha-source.png",
+      "kind": "alpha-source",
+      "timeMs": 2340,
+      "sha256": "acbe614eab5907174583edfc70e75f0184f16134b7edd6f3df3e2a114e53080a",
+      "bytes": 44947,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 722589,
+      "alphaPartial": 102893,
+      "alphaOpaque": 96118,
+      "alphaZeroRgbContamination": 0,
+      "alphaZeroRgbSanitisedPixels": 722589,
+      "alphaRasterSanitisationReason": "Inkscape stores matte RGB in fully transparent pixels; evidence output zeros those bytes before hashing."
+    },
+    {
+      "path": "alpha-source.svg",
+      "kind": "alpha-svg",
+      "timeMs": 2340,
+      "sha256": "eae2b98e62eacceacb88601a8b45d7996f886213b7c9765443ee0dbf2f4ca920",
+      "bytes": 6698
+    },
+    {
+      "path": "canonical-readback.json",
+      "kind": "json-evidence",
+      "sha256": "0aff3d424fbac4ef0ce3bf4b0b50b3922e74e4ff9d3d36289ad8bef136bc6bcc",
+      "bytes": 49595
+    },
+    {
+      "path": "motion-real-time-5s.mp4",
+      "kind": "real-time-sampled-motion",
+      "sha256": "d1307649ddd31f97f16bc64fbe2f330f914eb67d9f397e6803108d973fa85244",
+      "bytes": 187047,
+      "startMs": 0,
+      "seconds": 5.0,
+      "fps": 12,
+      "frameCount": 60,
+      "silhouette": false,
+      "ffprobe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 960,
+            "height": 540,
+            "r_frame_rate": "12/1",
+            "nb_frames": "60"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      }
+    },
+    {
+      "path": "motion-silhouette-5s.mp4",
+      "kind": "real-time-sampled-motion",
+      "sha256": "0fdb025314464613f318d3e99fa7895dc2531bde640ff136c92591082fe7141d",
+      "bytes": 39019,
+      "startMs": 0,
+      "seconds": 5.0,
+      "fps": 12,
+      "frameCount": 60,
+      "silhouette": true,
+      "ffprobe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 960,
+            "height": 540,
+            "r_frame_rate": "12/1",
+            "nb_frames": "60"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      }
+    },
+    {
+      "path": "portrait-mixed.png",
+      "kind": "portrait-recomposition",
+      "timeMs": 720,
+      "fixture": "mixed",
+      "canvas": "portrait",
+      "sha256": "1bc021075dc1b9b21b897666dd21922d5b0c46fe1773850adcac32e8f667216e",
+      "bytes": 44717,
+      "width": 720,
+      "height": 1280,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "portrait-mixed.svg",
+      "kind": "portrait-svg",
+      "timeMs": 720,
+      "fixture": "mixed",
+      "canvas": "portrait",
+      "sha256": "186a874e42e35d310e403fce69b71371419168ef850d5bb34a695ca4db6f1109",
+      "bytes": 6803
+    },
+    {
+      "path": "resource-observation.json",
+      "kind": "resource-and-render-observation",
+      "sha256": "4ce8c2d85bc0be056bfd823e47b0779d7cd03a8af007129b0931b0374a8019f6",
+      "bytes": 1088
+    },
+    {
+      "path": "silhouette-still.png",
+      "kind": "silhouette-still",
+      "timeMs": 2340,
+      "sha256": "713489015fce9837fbc4006147e7f668ac5a3f58db684d130afa7c3e965d60d5",
+      "bytes": 7089,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "silhouette-still.svg",
+      "kind": "silhouette-svg",
+      "timeMs": 2340,
+      "sha256": "414200e436d8b5ce4280be4cde5771c1c55454a962c03a08a6ee072ea105b181",
+      "bytes": 1850
+    },
+    {
+      "path": "still-00-start.png",
+      "kind": "canonical-still",
+      "timeMs": 0,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "92c5f3c44bdcf63831b103eaa58077d2a413ed2fc7585da257ffc5cf7049c74e",
+      "bytes": 5370,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "still-00-start.svg",
+      "kind": "canonical-svg",
+      "timeMs": 0,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "1e3e77bb9f9713d03b07a83d4d9ee3948df6b133f5f214009c5ffb833af4917e",
+      "bytes": 5707
+    },
+    {
+      "path": "still-01-established.png",
+      "kind": "canonical-still",
+      "timeMs": 720,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "3c4cf5175be650d0efec3cac78d659f5f2243b12147825ba3240ad435578f042",
+      "bytes": 47427,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "still-01-established.svg",
+      "kind": "canonical-svg",
+      "timeMs": 720,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "1ae5e0a41be11affa676c437f20910d10b24fff9879d8f6f31f72905c0f4caa0",
+      "bytes": 6675
+    },
+    {
+      "path": "still-02-approach.png",
+      "kind": "canonical-still",
+      "timeMs": 2340,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "88da1fc407e6902f15a50ecd5b9a4cbb553d129fe3a3aaefd22472b241a4d60a",
+      "bytes": 41626,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "still-02-approach.svg",
+      "kind": "canonical-svg",
+      "timeMs": 2340,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "cd93cd1e8c9e6c183322f72427f977850d0b7dfd68c9aff7e638f63fb781629f",
+      "bytes": 6747
+    },
+    {
+      "path": "still-03-near.png",
+      "kind": "canonical-still",
+      "timeMs": 3240,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "855cb3bacb52aa5cbbc0e9830eaec34b9e4922803c9d2463df6f3d6cafe4fe74",
+      "bytes": 46646,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "still-03-near.svg",
+      "kind": "canonical-svg",
+      "timeMs": 3240,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "3544ff6e8f113cd453906cd2f700fed0e1488c55e24a3ef841a4843a9cc26476",
+      "bytes": 6567
+    },
+    {
+      "path": "still-04-hold-end.png",
+      "kind": "canonical-still",
+      "timeMs": 4320,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "855cb3bacb52aa5cbbc0e9830eaec34b9e4922803c9d2463df6f3d6cafe4fe74",
+      "bytes": 46646,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "still-04-hold-end.svg",
+      "kind": "canonical-svg",
+      "timeMs": 4320,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "3544ff6e8f113cd453906cd2f700fed0e1488c55e24a3ef841a4843a9cc26476",
+      "bytes": 6567
+    },
+    {
+      "path": "still-05-later.png",
+      "kind": "canonical-still",
+      "timeMs": 5940,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "5525dcf81cea65a63705d8d12b51db623acd523ed9e3dd369b07fe9c90de426a",
+      "bytes": 43886,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "still-05-later.svg",
+      "kind": "canonical-svg",
+      "timeMs": 5940,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "2aec78a318dccd2363441f83772ea58eef2ce17100fba225b28639fa5deb6673",
+      "bytes": 6730
+    },
+    {
+      "path": "still-06-finale.png",
+      "kind": "canonical-still",
+      "timeMs": 7740,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "26d8e8aebc1969956df45fa5600f1186d01b9dc605d0fb23c11d6fbba906a453",
+      "bytes": 41459,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "still-06-finale.svg",
+      "kind": "canonical-svg",
+      "timeMs": 7740,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "389636a4f641ac1aae8c78390253ad26e3e20eab0c2a500b6f46e2de06eaad52",
+      "bytes": 6605
+    },
+    {
+      "path": "still-07-exit.png",
+      "kind": "canonical-still",
+      "timeMs": 8640,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "29b81bb7a2b80489a3ce93b7b35e4a6195e79e2287ce4f18c2fed0692e38f38c",
+      "bytes": 36895,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "still-07-exit.svg",
+      "kind": "canonical-svg",
+      "timeMs": 8640,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "93e35b3acb39b349e33c5bd430cc6d64421c85d779e2a9eaca3fbe7ce2d52019",
+      "bytes": 6761
+    },
+    {
+      "path": "still-08-seam.png",
+      "kind": "canonical-still",
+      "timeMs": 9000,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "92c5f3c44bdcf63831b103eaa58077d2a413ed2fc7585da257ffc5cf7049c74e",
+      "bytes": 5370,
+      "width": 1280,
+      "height": 720,
+      "alphaZero": 0,
+      "alphaPartial": 0,
+      "alphaOpaque": 921600,
+      "alphaZeroRgbContamination": 0
+    },
+    {
+      "path": "still-08-seam.svg",
+      "kind": "canonical-svg",
+      "timeMs": 9000,
+      "fixture": "seven",
+      "canvas": "wide",
+      "sha256": "1e3e77bb9f9713d03b07a83d4d9ee3948df6b133f5f214009c5ffb833af4917e",
+      "bytes": 5707
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "dealers-fan",
+  "traces": [
+    {
+      "id": "trace:scene.dealers-fan.fan-step",
+      "operation": "control-change",
+      "controlId": "scene.dealers-fan.fan-step",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:scene.dealers-fan.pivot-depth",
+      "operation": "control-change",
+      "controlId": "scene.dealers-fan.pivot-depth",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:scene.dealers-fan.visible-window",
+      "operation": "control-change",
+      "controlId": "scene.dealers-fan.visible-window",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:scene.dealers-fan.presentation-lift",
+      "operation": "control-change",
+      "controlId": "scene.dealers-fan.presentation-lift",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:scene.dealers-fan.card-size",
+      "operation": "control-change",
+      "controlId": "scene.dealers-fan.card-size",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:keyboard",
+      "operation": "keyboard-navigation",
+      "precondition": "review shell loaded",
+      "steps": [
+        "Tab through shell",
+        "verify visible focus",
+        "activate Scene",
+        "inspect controls"
+      ],
+      "expected": "Logical order and visible focus.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:remount",
+      "operation": "remount-disposal",
+      "precondition": "Scene mounted",
+      "steps": [
+        "mount Scene",
+        "switch away",
+        "return"
+      ],
+      "expected": "At most two active iframes; semantic state reconstructs from contract.",
+      "automatedStatus": "pending fresh browser journey"
+    }
+  ]
+}

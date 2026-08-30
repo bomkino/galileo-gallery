@@ -1,0 +1,37 @@
+{
+  "scene": "spin-image-orbit",
+  "sampling": "pure evaluator plus removable SVG renderer",
+  "checkpointMountedCounts": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+  ],
+  "boundedAcrossCheckpoints": true,
+  "repeatRender": {
+    "reference": "still-02-shoulder.png",
+    "referenceSha256": "93ad2cbc2e0e3acb0e2c7bcbdd6024ecfd66bac2f88edef5ed5bab5f5d4aba76",
+    "repeatSha256": "93ad2cbc2e0e3acb0e2c7bcbdd6024ecfd66bac2f88edef5ed5bab5f5d4aba76",
+    "equal": true
+  },
+  "stableNodeContract": {
+    "keyedBySourceId": true,
+    "renderLoopReusesMountedNodes": true,
+    "focusOrderIndependentOfZOrder": true
+  },
+  "alphaRasterSanitisation": {
+    "reason": "Inkscape stores matte RGB in fully transparent pixels; evidence output zeros those bytes before hashing.",
+    "sanitisedPixels": 795772,
+    "remainingContamination": 0
+  },
+  "browserCapture": {
+    "attempted": true,
+    "result": "blocked",
+    "error": "Headless Chromium did not complete in the managed runner; DBus/session initialization failed and the attempt was terminated after 30 seconds."
+  }
+}

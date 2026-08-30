@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "dealers-fan",
+  "displayName": "Dealer's Pick",
+  "family": "fans-orbits",
+  "atelier": 3,
+  "candidateVersion": "parity-1",
+  "identity": {
+    "promise": "An ordered hand turns around one pivot below the stage; a continuous fractional focus brings each card to a straight, lifted crown, lets it be read, then yields through the exact inverse path.",
+    "antiMotion": "Never display a symmetric overview, drive output from scroll or hover, teleport the active card, randomize a flourish, or fake selection by changing only z-index.",
+    "topology": "ordered hand around a below-stage pivot with fractional focus",
+    "focusGrammar": "one straight lifted crown card with causal neighbours",
+    "finaleGrammar": "final source at crown, hand still explanatory, then optional collapse"
+  },
+  "sourcePolicy": {
+    "minimum": 1,
+    "recommended": 5,
+    "maximum": 127,
+    "identityAndOrder": "must survive failure, replacement, reverse and recycling"
+  },
+  "canvasSupport": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:5"
+  ],
+  "orientation": "below-stage fan pivot",
+  "timeline": "automatic, fixed-duration, directed; forward/reverse",
+  "alphaPolicy": "transparent output supported; raw alpha proof quality scored separately",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "50993bb61d01548c21bfad829f0296982df23ba7474e251415ff3e160e77ccb2",
+    "rendererOwnsStoryClock": false
+  },
+  "prototypeEntrypoint": "prototype/index.html",
+  "controlsRef": "CAPABILITY_AND_CONTROLS.json",
+  "acceptanceRef": "ACCEPTANCE_MATRIX.json",
+  "programme": {
+    "state": "pre-G11 candidate packet; human verdict pending",
+    "pressureGate": null,
+    "gateStatus": "candidate"
+  },
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/dealers-fan.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "scene": {
+    "id": "slide-fan",
+    "versionCandidate": 1,
+    "verdict": "pending"
+  },
+  "capabilities": {
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "spatialDirection": "unsupported",
+    "temporalReverseInspection": true,
+    "spotlight": true,
+    "finale": true,
+    "transparentBackground": true,
+    "reducedMotion": true,
+    "sourceVideo": "story-time sampled by Product",
+    "maxSourceCount": 127,
+    "maxMountedCards": 12
+  },
+  "controls": [
+    {
+      "id": "spread-angle",
+      "label": "Spread angle",
+      "type": "number",
+      "unit": "deg",
+      "bounds": {
+        "min": 18,
+        "max": 170,
+        "step": 1
+      },
+      "default": 135,
+      "serializedMeaning": "Total angular span between the first and last mounted ordered card before derived canvas recomposition.",
+      "causalObservation": "Changes every non-central slot angle and the projected fan width while preserving hinge and order.",
+      "resetBehavior": "Reset to 135 degrees.",
+      "ownershipReason": "Defines Open Fan's primary silhouette; not a shared Frame, Look, or Timeline property."
+    },
+    {
+      "id": "hinge-height",
+      "label": "Hinge height",
+      "type": "number",
+      "unit": "stage-percent",
+      "bounds": {
+        "min": 68,
+        "max": 96,
+        "step": 1
+      },
+      "default": 79,
+      "serializedMeaning": "Common bottom-centre hinge y-coordinate as a percentage of stage height before safe-area clamping.",
+      "causalObservation": "Moves every card bottom-centre together without changing spread, ratio, or source order.",
+      "resetBehavior": "Reset to 79 percent.",
+      "ownershipReason": "The shared hinge is the Scene's physical cause."
+    },
+    {
+      "id": "card-size",
+      "label": "Card size",
+      "type": "number",
+      "unit": "short-axis-percent",
+      "bounds": {
+        "min": 24,
+        "max": 58,
+        "step": 1
+      },
+      "default": 36,
+      "serializedMeaning": "Unpadded card width as a percentage of the stage short axis before source-ratio height resolution.",
+      "causalObservation": "Changes card projected bounds and derived collision compression; does not alter source fit.",
+      "resetBehavior": "Reset to 36 percent.",
+      "ownershipReason": "Controls the collection-versus-object reading of the fan."
+    },
+    {
+      "id": "featured-lift",
+      "label": "Featured lift",
+      "type": "number",
+      "unit": "short-axis-percent",
+      "bounds": {
+        "min": 4,
+        "max": 26,
+        "step": 0.5
+      },
+      "default": 14,
+      "serializedMeaning": "Maximum radial translation of spotlight/finale card from its stable angular slot.",
+      "causalObservation": "Changes selected-card radial displacement only; zero-time and return poses remain unchanged.",
+      "resetBehavior": "Reset to 14 percent.",
+      "ownershipReason": "Defines authored lift while avoiding generic zoom."
+    },
+    {
+      "id": "paper-breath",
+      "label": "Paper breath",
+      "type": "number",
+      "unit": "short-axis-percent",
+      "bounds": {
+        "min": 0,
+        "max": 1.2,
+        "step": 0.05
+      },
+      "default": 0.35,
+      "serializedMeaning": "Maximum deterministic settled micro-translation; forced to zero in reduced motion and at phase seams.",
+      "causalObservation": "Changes sub-pixel settled y displacement without changing angle, order, or hold fidelity.",
+      "resetBehavior": "Reset to 0.35 percent.",
+      "ownershipReason": "Optional material micro-motion belongs to this Scene; it remains bounded and causal."
+    }
+  ],
+  "sharedOwnership": [
+    "canvas",
+    "frame-ratio",
+    "fit",
+    "crop",
+    "focal-point",
+    "padding",
+    "corners",
+    "background",
+    "look",
+    "timeline-pace",
+    "audio"
+  ]
+}

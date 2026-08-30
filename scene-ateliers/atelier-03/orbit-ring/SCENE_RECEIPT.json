@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "orbit-ring",
+  "atelier": 3,
+  "sourceArchive": "GALILEO_ATELIER_03_PARITY_HANDOFF_FOR_SOL_5_6_PRO(1).zip",
+  "sourceArchiveSha256": "5d70ee32739775f013bb0e7465228eb0210bb610e32a639d46a65cefb3c20d93",
+  "sourceRoot": "GALILEO_ATELIER_03_PARITY_HANDOFF/canonical-packet/scene-ateliers/atelier-03/orbit-ring",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "8d9c83ac09356d3afc2c09d53f09da668678029d8ea1b3a69c7c02be6ded8c15",
+    "rendererOwnsStoryClock": false
+  },
+  "controlCount": 3,
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "catalogueRegistration": "no",
+  "release": "no",
+  "claimBoundary": "Parity candidate packet; no Product integration or human acceptance.",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/orbit-ring.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "3/3",
+    "humanVerdict": "pending"
+  },
+  "currentFiles": {
+    "sceneContractSha256": "70475fd4855084cd2aa32b85dad4bfe779d19195bf0aeedaca72d62b7086933d",
+    "controlContractSha256": "c5b4fc562e7518564940a27c1fae8ef7d61792bc0742d1957b20dcf98c3dd0c0",
+    "acceptanceMatrixSha256": "c901d5c71002af943ab983c4fa0ca17bdd8a188df5441cca24bbd9086d148bd5",
+    "evidenceBindingsSha256": "2bc1f743f969ee55dee9a055f18065181910ad8518cb5296dffa283cee890221"
+  }
+}

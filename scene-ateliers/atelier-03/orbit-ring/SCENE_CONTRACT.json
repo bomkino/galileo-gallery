@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "orbit-ring",
+  "displayName": "Calm Ring",
+  "family": "fans-orbits",
+  "atelier": 3,
+  "candidateVersion": "parity-1",
+  "identity": {
+    "promise": "Evenly ordered cards travel one quiet circular plane, passing a single front gate with coherent position, depth, scale, opacity, occlusion, and exact reverse.",
+    "antiMotion": "Never add nonlinear proximity swell, a cinematic wide ellipse, cylinder walls, nested rings, satellites, permanent orbit decoration, card tumbling, or source-lighting tricks.",
+    "topology": "one circular tray plane projected with bounded tilt",
+    "focusGrammar": "single front gate with coherent depth/scale/occlusion",
+    "finaleGrammar": "selected source held at front while ring remains legible"
+  },
+  "sourcePolicy": {
+    "minimum": 1,
+    "recommended": 6,
+    "maximum": 127,
+    "identityAndOrder": "must survive failure, replacement, reverse and recycling"
+  },
+  "canvasSupport": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:5"
+  ],
+  "orientation": "single tilted circular plane",
+  "timeline": "automatic, fixed-duration, directed; forward/reverse",
+  "alphaPolicy": "transparent output supported; raw alpha proof quality scored separately",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.mjs",
+    "sha256": "8d9c83ac09356d3afc2c09d53f09da668678029d8ea1b3a69c7c02be6ded8c15",
+    "rendererOwnsStoryClock": false
+  },
+  "prototypeEntrypoint": "prototype/index.html",
+  "controlsRef": "CAPABILITY_AND_CONTROLS.json",
+  "acceptanceRef": "ACCEPTANCE_MATRIX.json",
+  "programme": {
+    "state": "pre-G11 candidate packet; human verdict pending",
+    "pressureGate": null,
+    "gateStatus": "candidate"
+  },
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/orbit-ring.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "3/3",
+    "humanVerdict": "pending"
+  }
+}

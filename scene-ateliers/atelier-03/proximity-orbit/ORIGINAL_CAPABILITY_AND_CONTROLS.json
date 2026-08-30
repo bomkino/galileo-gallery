@@ -1,0 +1,134 @@
+{
+  "scene": {
+    "id": "proximity-orbit",
+    "versionCandidate": 1,
+    "label": "Orbit \u2014 Proximity",
+    "verdict": "pending"
+  },
+  "ownership": {
+    "sceneOwns": [
+      "orbit-radius",
+      "proximity-strength",
+      "path-projection",
+      "card-size"
+    ],
+    "timelineOwns": [
+      "global-pace",
+      "direction",
+      "mode",
+      "holds",
+      "finite-or-loop"
+    ],
+    "frameOwns": [
+      "fit",
+      "ratio",
+      "padding",
+      "crop",
+      "focal-intent"
+    ],
+    "lookOwns": [
+      "background",
+      "world-material",
+      "grain",
+      "vignette"
+    ]
+  },
+  "controls": [
+    {
+      "id": "orbit-radius",
+      "parameter": "orbitRadius",
+      "label": "Orbit radius",
+      "type": "number",
+      "unit": "percent of canvas short axis",
+      "bounds": {
+        "min": 24,
+        "max": 50,
+        "step": 1
+      },
+      "default": 36,
+      "serializedMeaning": "Horizontal radius of the one proximity path.",
+      "causalObservation": "Card centre x range changes while camera-distance response, source order, phase, and source pixels remain unchanged.",
+      "reset": {
+        "value": 36,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Primary Scene path geometry."
+    },
+    {
+      "id": "proximity-strength",
+      "parameter": "proximityStrength",
+      "label": "Proximity strength",
+      "type": "number",
+      "unit": "percent",
+      "bounds": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      },
+      "default": 68,
+      "serializedMeaning": "Strength of bounded nonlinear near swell and amount of travel time reserved for near approach/departure.",
+      "causalObservation": "At identical story time near-card scale and local phase distribution change coherently; far identity/order and global duration do not.",
+      "reset": {
+        "value": 68,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Defines the Scene's distinctive near/far physics."
+    },
+    {
+      "id": "path-projection",
+      "parameter": "pathProjection",
+      "label": "Path projection",
+      "type": "number",
+      "unit": "percent",
+      "bounds": {
+        "min": 25,
+        "max": 85,
+        "step": 1
+      },
+      "default": 56,
+      "serializedMeaning": "Coupled vertical projection and camera-depth amplitude of the path.",
+      "causalObservation": "Vertical near/far separation, geometric perspective, alpha, and depth ordering change from one path coordinate; horizontal phase/order do not.",
+      "reset": {
+        "value": 56,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Controls spatial projection rather than Look lighting."
+    },
+    {
+      "id": "card-size",
+      "parameter": "cardSize",
+      "label": "Card size",
+      "type": "number",
+      "unit": "percent of canvas short axis",
+      "bounds": {
+        "min": 14,
+        "max": 30,
+        "step": 1
+      },
+      "default": 22,
+      "serializedMeaning": "Base card width before source ratio and deterministic near collision cap.",
+      "causalObservation": "Card bounds and cap activation change while centre path, phase, and source ratio stay fixed.",
+      "reset": {
+        "value": 22,
+        "source": "Scene v1 candidate default"
+      },
+      "ownershipReason": "Sets readable density for this spatial path."
+    }
+  ],
+  "derivedNotControlled": [
+    "far-alpha-floor",
+    "camera-distance",
+    "near-scale-cap",
+    "depth-order",
+    "near-gate-width"
+  ],
+  "unsupportedCapabilities": [
+    "spatial-axis",
+    "hover-driven-output",
+    "pointer-driven-output",
+    "source-lighting",
+    "nested-rings",
+    "card-tumble",
+    "ambient-flourish"
+  ]
+}

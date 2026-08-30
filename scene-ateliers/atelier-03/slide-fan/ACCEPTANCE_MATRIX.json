@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "slide-fan",
+  "rows": [
+    {
+      "id": "control:scene.slide-fan.spread-angle",
+      "kind": "control-causality",
+      "controlId": "scene.slide-fan.spread-angle",
+      "requirement": "Changing Spread angle must causally change Changes every non-central slot angle and the projected fan width while preserving hinge and order.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.slide-fan.hinge-height",
+      "kind": "control-causality",
+      "controlId": "scene.slide-fan.hinge-height",
+      "requirement": "Changing Hinge height must causally change Moves every card bottom-centre together without changing spread, ratio, or source order.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.slide-fan.card-size",
+      "kind": "control-causality",
+      "controlId": "scene.slide-fan.card-size",
+      "requirement": "Changing Card size must causally change Changes card projected bounds and derived collision compression; does not alter source fit.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.slide-fan.featured-lift",
+      "kind": "control-causality",
+      "controlId": "scene.slide-fan.featured-lift",
+      "requirement": "Changing Featured lift must causally change Changes selected-card radial displacement only; zero-time and return poses remain unchanged.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.slide-fan.paper-breath",
+      "kind": "control-causality",
+      "controlId": "scene.slide-fan.paper-breath",
+      "requirement": "Changing Paper breath must causally change Changes sub-pixel settled y displacement without changing angle, order, or hold fidelity.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "identity",
+      "kind": "programme-invariant",
+      "requirement": "Motion and anti-motion remain recognisable after styling removal.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "source-fidelity",
+      "kind": "programme-invariant",
+      "requirement": "Clean default leaves imported source pixels untouched.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "timeline",
+      "kind": "programme-invariant",
+      "requirement": "Preview, scrub, evidence and export planning consume one semantic model.",
+      "automatedStatus": "pass: renderer-owned story clock prohibited; original evaluator verifier replay passed.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "programme-invariant",
+      "requirement": "Reduced motion preserves narrative meaning.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "lifecycle",
+      "kind": "programme-invariant",
+      "requirement": "Renderer remount and disposal remain bounded.",
+      "automatedStatus": "pass for review-shell mount/remount/disposal; Scene-native GPU/context-loss proof remains as declared in source evidence.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "human-verdict",
+      "kind": "programme-invariant",
+      "requirement": "Human visual, motion, pace, defaults and delight verdict remains pending.",
+      "automatedStatus": "not automatable",
+      "humanStatus": "pending"
+    }
+  ]
+}

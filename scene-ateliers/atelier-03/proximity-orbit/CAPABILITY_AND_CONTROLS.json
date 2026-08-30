@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "proximity-orbit",
+  "sourceContractSha256": "fc8649d1624c397637c6560b706afe70dd1d2e1328513f10a21fef5bd3c886c3",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.proximity-orbit.orbit-radius",
+      "sceneLocalId": "orbit-radius",
+      "parameter": "orbitRadius",
+      "owner": "Scene",
+      "label": "Orbit radius",
+      "valueModel": "number",
+      "unit": "percent of canvas short axis",
+      "default": 36,
+      "range": {
+        "minimum": 24,
+        "maximum": 50,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 36,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "proximity-orbit:orbit-radius",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Card centre x range changes while camera-distance response, source order, phase, and source pixels remain unchanged.",
+      "acceptanceRow": "control:scene.proximity-orbit.orbit-radius",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.proximity-orbit.proximity-strength",
+      "sceneLocalId": "proximity-strength",
+      "parameter": "proximityStrength",
+      "owner": "Scene",
+      "label": "Proximity strength",
+      "valueModel": "number",
+      "unit": "percent",
+      "default": 68,
+      "range": {
+        "minimum": 0,
+        "maximum": 100,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 68,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "proximity-orbit:proximity-strength",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "At identical story time near-card scale and local phase distribution change coherently; far identity/order and global duration do not.",
+      "acceptanceRow": "control:scene.proximity-orbit.proximity-strength",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.proximity-orbit.path-projection",
+      "sceneLocalId": "path-projection",
+      "parameter": "pathProjection",
+      "owner": "Scene",
+      "label": "Path projection",
+      "valueModel": "number",
+      "unit": "percent",
+      "default": 56,
+      "range": {
+        "minimum": 25,
+        "maximum": 85,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 56,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "proximity-orbit:path-projection",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Vertical near/far separation, geometric perspective, alpha, and depth ordering change from one path coordinate; horizontal phase/order do not.",
+      "acceptanceRow": "control:scene.proximity-orbit.path-projection",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.proximity-orbit.card-size",
+      "sceneLocalId": "card-size",
+      "parameter": "cardSize",
+      "owner": "Scene",
+      "label": "Card size",
+      "valueModel": "number",
+      "unit": "percent of canvas short axis",
+      "default": 22,
+      "range": {
+        "minimum": 14,
+        "maximum": 30,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 22,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "proximity-orbit:card-size",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Card bounds and cap activation change while centre path, phase, and source ratio stay fixed.",
+      "acceptanceRow": "control:scene.proximity-orbit.card-size",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

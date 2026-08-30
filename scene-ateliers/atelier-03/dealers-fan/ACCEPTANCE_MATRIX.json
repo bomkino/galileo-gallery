@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "dealers-fan",
+  "rows": [
+    {
+      "id": "control:scene.dealers-fan.fan-step",
+      "kind": "control-causality",
+      "controlId": "scene.dealers-fan.fan-step",
+      "requirement": "Changing Fan step must causally change At fixed focus, outer card angles and lateral spread change while pivot, crown identity, source ratio, and story time remain unchanged.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.dealers-fan.pivot-depth",
+      "kind": "control-causality",
+      "controlId": "scene.dealers-fan.pivot-depth",
+      "requirement": "Changing Pivot depth must causally change All card bottom-centre arcs steepen or flatten coherently; crown identity and source order do not change.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.dealers-fan.visible-window",
+      "kind": "control-causality",
+      "controlId": "scene.dealers-fan.visible-window",
+      "requirement": "Changing Visible window must causally change Mounted neighbour count and guard-zone extent change without changing focus, order, or any mounted card's canonical path.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.dealers-fan.presentation-lift",
+      "kind": "control-causality",
+      "controlId": "scene.dealers-fan.presentation-lift",
+      "requirement": "Changing Presentation lift must causally change Only near-crown bottom-centre distance, scale, and depth promotion change; angular focus and card order remain fixed.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "control:scene.dealers-fan.card-size",
+      "kind": "control-causality",
+      "controlId": "scene.dealers-fan.card-size",
+      "requirement": "Changing Card size must causally change Card widths/heights and collision pressure change while pivot path and focus timing remain unchanged.",
+      "automatedStatus": "pass: schema/range/reset/acceptance linkage validated; native control binding verified in Chromium; Scene-native verifier replay passed. Human visual causality remains pending.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "identity",
+      "kind": "programme-invariant",
+      "requirement": "Motion and anti-motion remain recognisable after styling removal.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "source-fidelity",
+      "kind": "programme-invariant",
+      "requirement": "Clean default leaves imported source pixels untouched.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "timeline",
+      "kind": "programme-invariant",
+      "requirement": "Preview, scrub, evidence and export planning consume one semantic model.",
+      "automatedStatus": "pass: renderer-owned story clock prohibited; original evaluator verifier replay passed.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "programme-invariant",
+      "requirement": "Reduced motion preserves narrative meaning.",
+      "automatedStatus": "source contract bound; original canonical verifier replay passed; no new human verdict inferred.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "lifecycle",
+      "kind": "programme-invariant",
+      "requirement": "Renderer remount and disposal remain bounded.",
+      "automatedStatus": "pass for review-shell mount/remount/disposal; Scene-native GPU/context-loss proof remains as declared in source evidence.",
+      "humanStatus": "pending"
+    },
+    {
+      "id": "human-verdict",
+      "kind": "programme-invariant",
+      "requirement": "Human visual, motion, pace, defaults and delight verdict remains pending.",
+      "automatedStatus": "not automatable",
+      "humanStatus": "pending"
+    }
+  ]
+}

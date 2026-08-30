@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "atelier": 3,
+  "sourceArchive": "GALILEO_ATELIER_03_PARITY_HANDOFF_FOR_SOL_5_6_PRO(1).zip",
+  "sourceArchiveSha256": "5d70ee32739775f013bb0e7465228eb0210bb610e32a639d46a65cefb3c20d93",
+  "sceneCount": 5,
+  "controlCount": 22,
+  "productIntegration": "no",
+  "humanAcceptance": "pending",
+  "originalReplayCommands": 2,
+  "originalReplayPassed": 2,
+  "browserJourneys": 5,
+  "browserPassed": 5,
+  "nativeControlBindings": 22
+}
