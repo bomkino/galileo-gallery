@@ -917,7 +917,7 @@ html[data-export-transparent] #root { background: transparent !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 80ms !important; animation-duration: 1ms !important; }
+    *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0ms !important; transition-delay: 0ms !important; animation-duration: 1ms !important; }
 }
 
 @media (prefers-reduced-transparency: reduce) {

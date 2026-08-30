@@ -1100,6 +1100,8 @@ const sceneExpression = `(() => {
                 storyPlaybackRate: media?.tagName === "VIDEO" ? media.playbackRate : null,
                 shadow: planeStyle.boxShadow,
                 willChange: planeStyle.willChange,
+                transitionDuration: planeStyle.transitionDuration,
+                transitionDelay: planeStyle.transitionDelay,
                 transform: plane.style.transform,
                 failed: Boolean(plane.querySelector('[data-media-failed="true"]')),
             }
