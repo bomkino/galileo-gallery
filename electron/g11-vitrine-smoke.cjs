@@ -1988,9 +1988,18 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         || !probe.placardExpected || probe.placard === null || probe.placardShadow !== "none")) {
         throw new Error("G11 transparent export window did not prove a current visible Placard with its shadow suppressed.")
     }
-    if (mode === "save" && (!normalizedParity(exchange, placardExportProbes[18])
-        || !normalizedPlacardParity(exchange, placardExportProbes[18]))) {
-        throw new Error("G11 visible Placard preview/export geometry diverged.")
+    if (mode === "save") {
+        const visibleExportExchange = placardExportProbes[18]
+        const rasterTolerance = 1 / Math.min(visibleExportExchange.stage.layoutWidth, visibleExportExchange.stage.layoutHeight) + 0.001
+        const planeParity = normalizedParity(exchange, visibleExportExchange)
+        const placardParity = normalizedPlacardParity(exchange, visibleExportExchange, rasterTolerance)
+        if (!planeParity || !placardParity) {
+            throw new Error("G11 visible Placard preview/export geometry diverged: " + JSON.stringify({
+                planeParity, placardParity, rasterTolerance,
+                preview: { placardBox: exchange.placardBox, placardChildren: exchange.placardChildren, placardMetrics: exchange.placardMetrics },
+                exported: { stage: visibleExportExchange.stage, placardBox: visibleExportExchange.placardBox, placardChildren: visibleExportExchange.placardChildren, placardMetrics: visibleExportExchange.placardMetrics },
+            }))
+        }
     }
     const placardManifestBytes = stableFileBytes(path.join(placardDestination, "manifest.json"), 5_000_000)
     const placardManifest = JSON.parse(placardManifestBytes)

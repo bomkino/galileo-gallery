@@ -118,6 +118,18 @@ function exactTreeEvidence(directory) {
     return { exists: true, directories, files, bytes, sha256: sha256(Buffer.from(JSON.stringify(rows))) }
 }
 
+function normalizedBoxParity(left, right, tolerance) {
+    return Boolean(left && right && ["left", "top", "width", "height"].every((key) => Math.abs(left[key] - right[key]) <= tolerance))
+}
+
+function normalizedPlacardParity(left, right, tolerance) {
+    return Boolean(left?.placard && left.placard === right?.placard && normalizedBoxParity(left.placardBox, right.placardBox, tolerance)
+        && left.placardChildren && right.placardChildren
+        && Object.keys(left.placardChildren).every((key) => normalizedBoxParity(left.placardChildren[key], right.placardChildren[key], tolerance))
+        && left.placardMetrics && right.placardMetrics
+        && Object.keys(left.placardMetrics).every((key) => Math.abs(left.placardMetrics[key] - right.placardMetrics[key]) <= tolerance))
+}
+
 const runs = [
     { id: "run-a", mode: "save", frameDirectory: "run-a-frames", visiblePlacardFrameDirectory: "vitrine-save-placard-visible-frames" },
     { id: "run-b", mode: "reopen", frameDirectory: "run-b-frames", visiblePlacardFrameDirectory: "vitrine-reopen-placard-visible-frames" },
@@ -568,6 +580,11 @@ for (const [index, receipt] of receipts.entries()) {
             assert.equal(plane.storySeeking, false)
         }
     }
+    const visibleExportExchange = visiblePlacardProof.probes[18]
+    const rasterTolerance = 1 / Math.min(visibleExportExchange.stage.layoutWidth, visibleExportExchange.stage.layoutHeight) + 0.001
+    assert(rasterTolerance > 0 && rasterTolerance <= 0.02)
+    assert(normalizedPlacardParity(receipt.preview.exchange, visibleExportExchange, rasterTolerance),
+        "visible Placard preview/export geometry must agree within one output pixel")
 
     const screenshotNames = new Set()
     for (const screenshot of Object.values(receipt.screenshots)) {
