@@ -444,8 +444,18 @@ async function libraryKeyboardEvidence(window) {
     assert.equal(previous.scene.currentId, "vitrine-square")
     assert.equal(previous.scene.inspectionId, "vitrine-square")
     assert.equal(previous.scene.status, "Showing Signal square, item 1 of 2")
-    const retired = await window.webContents.executeJavaScript(`({ count: window.__g11RetiredVideos.length, allCleared: window.__g11RetiredVideos.every((video) => !video.getAttribute('src') && !video.currentSrc) })`)
-    if (retired.count < 1 || !retired.allCleared) throw new Error("G11 source-video handoff did not release the retired decoder source.")
+    const retired = await window.webContents.executeJavaScript(`(async () => {
+        const deadline = performance.now() + 2_000
+        while (performance.now() < deadline && !window.__g11RetiredVideos.every((video) => !video.getAttribute('src') && !video.currentSrc)) {
+            await new Promise((resolve) => requestAnimationFrame(resolve))
+        }
+        const states = window.__g11RetiredVideos.map((video) => ({
+            hasSourceAttribute: video.hasAttribute('src'), hasCurrentSource: Boolean(video.currentSrc),
+            paused: video.paused, readyState: video.readyState, networkState: video.networkState,
+        }))
+        return { count: states.length, allCleared: states.every((state) => !state.hasSourceAttribute && !state.hasCurrentSource), states }
+    })()`)
+    if (retired.count < 1 || !retired.allCleared) throw new Error(`G11 source-video handoff did not release the retired decoder source: ${JSON.stringify(retired)}`)
     await window.webContents.executeJavaScript("window.__g11VideoObserver.disconnect()")
     return { next, previous, retired }
 }
