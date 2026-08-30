@@ -425,6 +425,65 @@ export function vitrineTimeline(config: ReelConfig, fps = 30, mediaCount = confi
 
 export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames, terminal = false, cataloguePreview = false, reducedMotion, exportMode = false, inspectionItemId = null }: Props) {
     const ref = React.useRef<HTMLDivElement>(null)
+    const metricCache = React.useRef<{ width: number; height: number; placard: HTMLElement | null; label: HTMLElement | null; caption: HTMLElement | null }>({
+        width: Number.NaN, height: Number.NaN, placard: null, label: null, caption: null,
+    })
+    const syncMetrics = React.useCallback(() => {
+        const element = ref.current
+        if (!element) return
+        const style = getComputedStyle(element)
+        const width = Number.parseFloat(style.width)
+        const height = Number.parseFloat(style.height)
+        const placard = element.querySelector<HTMLElement>(".vitrine-placard")
+        const label = placard?.querySelector<HTMLElement>("span") ?? null
+        const caption = placard?.querySelector<HTMLElement>("strong") ?? null
+        if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) {
+            delete element.dataset.vitrineShortEdge
+            metricCache.current = { width: Number.NaN, height: Number.NaN, placard: null, label: null, caption: null }
+            return
+        }
+        const shortEdge = Math.min(width, height)
+        const values = {
+            gap: shortEdge * 0.0234375,
+            paddingX: shortEdge * 0.03125,
+            border: shortEdge * 0.00390625,
+            shadowY: shortEdge * 0.015625,
+            shadowBlur: shortEdge * 0.046875,
+            labelFont: shortEdge * 0.0390625,
+            captionFont: shortEdge * 0.0546875,
+        }
+        const consumedGap = placard ? Number.parseFloat(getComputedStyle(placard).columnGap) : Number.NaN
+        const cached = metricCache.current
+        if (width === cached.width && height === cached.height && placard === cached.placard
+            && label === cached.label && caption === cached.caption && element.dataset.vitrineShortEdge
+            && (!placard || Math.abs(consumedGap - values.gap) <= 0.001)) return
+
+        const metrics = [
+            ["--vitrine-short-edge", shortEdge],
+            ["--vitrine-placard-gap", values.gap],
+            ["--vitrine-placard-padding-x", values.paddingX],
+            ["--vitrine-placard-border", values.border],
+            ["--vitrine-placard-shadow-y", values.shadowY],
+            ["--vitrine-placard-shadow-blur", values.shadowBlur],
+            ["--vitrine-placard-label-size", values.labelFont],
+            ["--vitrine-placard-caption-size", values.captionFont],
+        ] as const
+        for (const [name, value] of metrics) element.style.setProperty(name, `${value}px`)
+        if (placard && (!label || !caption)) {
+            delete element.dataset.vitrineShortEdge
+            metricCache.current = { width, height, placard, label, caption }
+            return
+        }
+        if (placard && label && caption) {
+            placard.style.gap = `${values.gap}px`
+            placard.style.padding = `${values.gap}px ${values.paddingX}px`
+            placard.style.borderWidth = `${values.border}px`
+            label.style.fontSize = `${values.labelFont}px`
+            caption.style.fontSize = `${values.captionFont}px`
+        }
+        metricCache.current = { width, height, placard, label, caption }
+        element.dataset.vitrineShortEdge = String(shortEdge)
+    }, [])
     const [systemReducedMotion, setSystemReducedMotion] = React.useState(() => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false)
     React.useEffect(() => {
         const query = window.matchMedia?.("(prefers-reduced-motion: reduce)")
@@ -454,42 +513,16 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
     const logicalWidth = Math.max(1, config.settings.canvasWidth)
     const logicalHeight = Math.max(1, config.settings.canvasHeight)
     React.useLayoutEffect(() => {
+        syncMetrics()
+    })
+    React.useLayoutEffect(() => {
+        syncMetrics()
         const element = ref.current
         if (!element) return
-
-        let lastWidth = Number.NaN
-        let lastHeight = Number.NaN
-        const sync = () => {
-            const style = getComputedStyle(element)
-            const width = Number.parseFloat(style.width)
-            const height = Number.parseFloat(style.height)
-            if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) {
-                delete element.dataset.vitrineShortEdge
-                return
-            }
-            if (width === lastWidth && height === lastHeight && element.dataset.vitrineShortEdge) return
-            lastWidth = width
-            lastHeight = height
-            const shortEdge = Math.min(width, height)
-            const metrics = [
-                ["--vitrine-short-edge", shortEdge],
-                ["--vitrine-placard-gap", shortEdge * 0.0234375],
-                ["--vitrine-placard-padding-x", shortEdge * 0.03125],
-                ["--vitrine-placard-border", shortEdge * 0.00390625],
-                ["--vitrine-placard-shadow-y", shortEdge * 0.015625],
-                ["--vitrine-placard-shadow-blur", shortEdge * 0.046875],
-                ["--vitrine-placard-label-size", shortEdge * 0.0390625],
-                ["--vitrine-placard-caption-size", shortEdge * 0.0546875],
-            ] as const
-            for (const [name, value] of metrics) element.style.setProperty(name, `${value}px`)
-            element.dataset.vitrineShortEdge = String(shortEdge)
-        }
-
-        sync()
-        const observer = new ResizeObserver(sync)
+        const observer = new ResizeObserver(syncMetrics)
         observer.observe(element)
         return () => observer.disconnect()
-    }, [logicalWidth, logicalHeight])
+    }, [logicalWidth, logicalHeight, syncMetrics])
     const { designWidth, designHeight, projectScale } = vitrineDesignSpace(logicalWidth, logicalHeight)
     const effectiveReducedMotion = reducedMotion ?? (!exportMode && systemReducedMotion)
     const evaluated = evaluateVitrine({
