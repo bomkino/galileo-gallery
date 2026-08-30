@@ -260,26 +260,30 @@ async function decoderState(window) {
 async function mediaSamples(window) {
     return window.webContents.executeJavaScript(`(async () => {
         const sample = async (media) => {
-            if (!media) return null
+            if (!media || !media.isConnected) return null
             if (media instanceof HTMLImageElement && (!media.complete || media.naturalWidth < 1)) return null
             if (media instanceof HTMLVideoElement && (media.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || media.videoWidth < 1)) return null
             if (media instanceof HTMLCanvasElement && (media.dataset.storyReady !== 'true' || media.width < 1 || media.height < 1)) return null
-            const canvas = document.createElement('canvas')
-            canvas.width = 16
-            canvas.height = 12
-            const context = canvas.getContext('2d', { alpha: true, willReadFrequently: true })
-            context.drawImage(media, 0, 0, 16, 12)
-            const pixels = [...context.getImageData(0, 0, 16, 12).data]
-            const digest = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new Uint8Array(pixels)))].map((value) => value.toString(16).padStart(2, '0')).join('')
-            const targetValue = media.dataset.storyTargetTime
-            const presentedValue = media.dataset.storyPresentedTime
-            const targetTime = Number(targetValue)
-            const presentedTime = Number(presentedValue)
-            return {
-                pixels,
-                digest,
-                targetTime: targetValue !== undefined && targetValue !== "" && Number.isFinite(targetTime) ? targetTime : null,
-                presentedTime: presentedValue !== undefined && presentedValue !== "" && Number.isFinite(presentedTime) ? presentedTime : null,
+            try {
+                const canvas = document.createElement('canvas')
+                canvas.width = 16
+                canvas.height = 12
+                const context = canvas.getContext('2d', { alpha: true, willReadFrequently: true })
+                context.drawImage(media, 0, 0, 16, 12)
+                const pixels = [...context.getImageData(0, 0, 16, 12).data]
+                const digest = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new Uint8Array(pixels)))].map((value) => value.toString(16).padStart(2, '0')).join('')
+                const targetValue = media.dataset.storyTargetTime
+                const presentedValue = media.dataset.storyPresentedTime
+                const targetTime = Number(targetValue)
+                const presentedTime = Number(presentedValue)
+                return {
+                    pixels,
+                    digest,
+                    targetTime: targetValue !== undefined && targetValue !== "" && Number.isFinite(targetTime) ? targetTime : null,
+                    presentedTime: presentedValue !== undefined && presentedValue !== "" && Number.isFinite(presentedTime) ? presentedTime : null,
+                }
+            } catch {
+                return null
             }
         }
         const samples = new Map()
