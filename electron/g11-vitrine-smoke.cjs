@@ -275,25 +275,30 @@ async function settle(window) {
             if (!image.complete || image.naturalWidth < 1 || image.naturalHeight < 1) throw new Error('Vitrine image did not decode.')
         }))
         const deadline = performance.now() + 10_000
-        while ([...document.querySelectorAll('.vitrine-plane video, .vitrine-guard video')].some((video) => video.dataset.storyReady !== 'true')) {
+        while ([...document.querySelectorAll('.vitrine-plane video, .vitrine-guard video')].some((video) => video.dataset.storyReady !== 'true'
+            || (!video.parentElement?.classList.contains('vitrine-guard') && video.dataset.storyFrameProof !== 'presented')
+            || (video.parentElement?.classList.contains('vitrine-guard') && !['decoded', 'presented'].includes(video.dataset.storyFrameProof)))) {
             if (performance.now() >= deadline) {
                 const states = [...document.querySelectorAll('.vitrine-plane video, .vitrine-guard video')].map((video) => ({
                     ready: video.dataset.storyReady, currentTime: video.currentTime, duration: video.duration,
                     seeking: video.seeking, paused: video.paused, readyState: video.readyState, networkState: video.networkState,
-                    visibility: getComputedStyle(video).visibility, parent: video.parentElement?.className,
+                    visibility: getComputedStyle(video).visibility, parent: video.parentElement?.className, proof: video.dataset.storyFrameProof,
                 }))
                 throw new Error('Vitrine source video did not present its requested frame: ' + JSON.stringify(states))
             }
             await new Promise((resolve) => requestAnimationFrame(resolve))
         }
         for (const video of document.querySelectorAll('.vitrine-plane video, .vitrine-guard video')) {
-            const target = Number(video.dataset.storyTargetTime)
-            const presented = Number(video.dataset.storyPresentedTime)
-            if (video.seeking || video.dataset.storyTargetTime === '' || video.dataset.storyPresentedTime === ''
+            const decoded = video.dataset.storyFrameProof === 'decoded'
+            const targetValue = decoded ? video.dataset.storyDecodedTargetTime : video.dataset.storyTargetTime
+            const frameValue = decoded ? video.dataset.storyDecodedTime : video.dataset.storyPresentedTime
+            const target = Number(targetValue)
+            const presented = Number(frameValue)
+            if (video.seeking || targetValue === '' || frameValue === ''
                 || !Number.isFinite(target) || !Number.isFinite(presented)
                 || presented > target + 0.0001 || target - presented >= 1 / 12 + 0.0001) {
                 throw new Error('Vitrine fixture video did not prove the exact requested source frame: ' + JSON.stringify({
-                    ready: video.dataset.storyReady, target, presented, seeking: video.seeking,
+                    ready: video.dataset.storyReady, proof: video.dataset.storyFrameProof, target, presented, seeking: video.seeking,
                 }))
             }
         }
@@ -790,7 +795,8 @@ async function continuousVideoHandoffEvidence(window) {
     await scrub(window, 0.33)
     const result = await window.webContents.executeJavaScript(`(async () => {
         const guard = document.querySelector('.vitrine-guard video')
-        const guardReadyBefore = guard?.dataset.storyReady === 'true'
+        const guardProofBefore = guard?.dataset.storyFrameProof ?? null
+        const guardReadyBefore = guard?.dataset.storyReady === 'true' && ['decoded', 'presented'].includes(guardProofBefore)
         document.querySelector('.transport-play').click()
         const deadline = performance.now() + 1_500
         let sawIncoming = false
@@ -809,10 +815,10 @@ async function continuousVideoHandoffEvidence(window) {
                 const presented = Number(presentedValue)
                 const targetValue = incoming.dataset.storyTargetTime
                 const target = Number(targetValue)
-                if (presentedValue !== '' && targetValue !== '' && Number.isFinite(presented) && Number.isFinite(target)
+                if (incoming.dataset.storyFrameProof === 'presented' && presentedValue !== '' && targetValue !== '' && Number.isFinite(presented) && Number.isFinite(target)
                     && (presentedTimes.length === 0 || Math.abs(presentedTimes.at(-1) - presented) > 0.0001)) {
                     presentedTimes.push(presented)
-                    presentedFrames.push({ target, presented, seeking: incoming.seeking, ready: incoming.dataset.storyReady })
+                    presentedFrames.push({ target, presented, seeking: incoming.seeking, ready: incoming.dataset.storyReady, proof: incoming.dataset.storyFrameProof })
                 }
             }
             if (Number(document.querySelector('.timeline').value) >= 0.44) break
@@ -822,12 +828,12 @@ async function continuousVideoHandoffEvidence(window) {
         setter.call(timeline, timeline.value)
         timeline.dispatchEvent(new Event('input', { bubbles: true }))
         timeline.dispatchEvent(new Event('change', { bubbles: true }))
-        return { guardReadyBefore, sawIncoming, hiddenIncomingFrames, maxDecoders, presentedTimes, presentedFrames }
+        return { guardReadyBefore, guardProofBefore, sawIncoming, hiddenIncomingFrames, maxDecoders, presentedTimes, presentedFrames }
     })()`)
     await settle(window)
     if (!result.guardReadyBefore || !result.sawIncoming || result.hiddenIncomingFrames !== 0 || result.maxDecoders > 2
         || result.presentedTimes.length < 2 || result.presentedTimes.some((value, index) => index > 0 && value <= result.presentedTimes[index - 1])
-        || result.presentedFrames.some((frame) => frame.seeking || frame.presented > frame.target + 0.0001 || frame.target - frame.presented >= 1 / 12 + 0.0001)) {
+        || result.presentedFrames.some((frame) => frame.proof !== 'presented' || frame.seeking || frame.presented > frame.target + 0.0001 || frame.target - frame.presented >= 1 / 12 + 0.0001)) {
         throw new Error(`G11 continuous video handoff was not prewarmed and continuously presentable: ${JSON.stringify(result)}`)
     }
     return result
@@ -849,7 +855,7 @@ async function sourceVideoSeekBurstEvidence(window) {
         for (const value of ${JSON.stringify(sequence.slice(1))}) dispatch(value)
         const video = document.querySelector('.vitrine-plane[data-media-id="vitrine-portrait"] video')
         return video ? {
-            ready: video.dataset.storyReady, target: video.dataset.storyTargetTime,
+            ready: video.dataset.storyReady, proof: video.dataset.storyFrameProof, target: video.dataset.storyTargetTime,
             presented: video.dataset.storyPresentedTime, seeking: video.seeking,
         } : null
     })()`)
@@ -859,13 +865,13 @@ async function sourceVideoSeekBurstEvidence(window) {
     const expectedTarget = Math.floor(0.42 * 2_000 * 24 / 1_000 + 1e-9) / 24
     if (!plane || plane.mediaTag !== "VIDEO" || plane.storyReady !== "true" || plane.storySeeking
         || Math.abs(plane.storyTargetTime - expectedTarget) > 0.0001
-        || plane.storyPresentedTime > plane.storyTargetTime + 0.0001
+        || plane.storyProof !== "presented" || plane.storyPresentedTime > plane.storyTargetTime + 0.0001
         || plane.storyTargetTime - plane.storyPresentedTime >= 1 / 12 + 0.0001) {
         throw new Error(`G11 source-video latest-wins seek burst did not converge exactly: ${JSON.stringify({ sequence, interim, plane })}`)
     }
     return { sequence, interim, final: {
         target: plane.storyTargetTime, presented: plane.storyPresentedTime,
-        seeking: plane.storySeeking, ready: plane.storyReady,
+        seeking: plane.storySeeking, ready: plane.storyReady, proof: plane.storyProof,
     } }
 }
 
@@ -953,6 +959,7 @@ const sceneExpression = `(() => {
                 } : null,
                 mediaTag: media?.tagName ?? null,
                 storyReady: media?.dataset.storyReady ?? null,
+                storyProof: media?.dataset.storyFrameProof ?? null,
                 storyPresentedTime: media?.dataset.storyPresentedTime === undefined || media?.dataset.storyPresentedTime === "" ? null : Number(media.dataset.storyPresentedTime),
                 storyTargetTime: media?.dataset.storyTargetTime === undefined || media?.dataset.storyTargetTime === "" ? null : Number(media.dataset.storyTargetTime),
                 storySeeking: media?.tagName === "VIDEO" ? media.seeking : null,

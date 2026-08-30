@@ -204,6 +204,7 @@ for (const [index, receipt] of receipts.entries()) {
         assert(receipt.preview.exchange.planes.length <= 2 && receipt.preview.exchange.planes.some((plane) => plane.mediaTag === "VIDEO" && plane.storyReady === "true"))
         assert.equal(receipt.preview.reducedMotionExpected, false)
         assert.equal(receipt.preview.continuousVideoHandoff.guardReadyBefore, true)
+        assert(["decoded", "presented"].includes(receipt.preview.continuousVideoHandoff.guardProofBefore))
         assert.equal(receipt.preview.continuousVideoHandoff.sawIncoming, true)
         assert.equal(receipt.preview.continuousVideoHandoff.hiddenIncomingFrames, 0)
         assert(receipt.preview.continuousVideoHandoff.maxDecoders >= 1 && receipt.preview.continuousVideoHandoff.maxDecoders <= 2)
@@ -213,12 +214,14 @@ for (const [index, receipt] of receipts.entries()) {
         })
         assert.equal(receipt.preview.continuousVideoHandoff.presentedFrames.length, receipt.preview.continuousVideoHandoff.presentedTimes.length)
         for (const frame of receipt.preview.continuousVideoHandoff.presentedFrames) {
+            assert.equal(frame.proof, "presented")
             assert.equal(frame.seeking, false)
             assert(frame.presented <= frame.target + 0.0001)
             assert(frame.target - frame.presented < 1 / 12 + 0.0001)
         }
         assert.deepEqual(receipt.preview.sourceVideoSeekBurst.sequence, [0.43, 0.36, 0.44, 0.35, 0.42])
         assert.equal(receipt.preview.sourceVideoSeekBurst.final.ready, "true")
+        assert.equal(receipt.preview.sourceVideoSeekBurst.final.proof, "presented")
         assert.equal(receipt.preview.sourceVideoSeekBurst.final.seeking, false)
         assert(Math.abs(receipt.preview.sourceVideoSeekBurst.final.target - 20 / 24) < 0.0001)
         assert(receipt.preview.sourceVideoSeekBurst.final.presented <= receipt.preview.sourceVideoSeekBurst.final.target + 0.0001)
@@ -277,6 +280,7 @@ for (const [index, receipt] of receipts.entries()) {
     for (const scene of [receipt.preview.holdA, receipt.preview.exchange, receipt.preview.semanticHandoff, receipt.preview.holdB, receipt.preview.terminalVideo].filter(Boolean)) {
         for (const plane of scene.planes.filter((candidate) => candidate.mediaTag === "VIDEO")) {
             assert.equal(plane.storyReady, "true")
+            assert.equal(plane.storyProof, "presented")
             assert.equal(plane.storySeeking, false)
             assert(Number.isFinite(plane.storyTargetTime) && Number.isFinite(plane.storyPresentedTime))
             assert(plane.storyPresentedTime <= plane.storyTargetTime + 0.0001)
@@ -431,6 +435,7 @@ for (const [index, receipt] of receipts.entries()) {
         for (const plane of probe.planes.filter((candidate) => candidate.id === "vitrine-portrait")) {
             assert.equal(plane.mediaTag, "VIDEO")
             assert.equal(plane.storyReady, "true")
+            assert.equal(plane.storyProof, "presented")
             assert.equal(plane.storySeeking, false)
             assert(plane.storyPresentedTime <= plane.storyTargetTime + 0.0001)
             assert(plane.storyTargetTime - plane.storyPresentedTime < 1 / 12 + 0.0001)

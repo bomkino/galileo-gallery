@@ -75,7 +75,7 @@ function sameVideoTarget(left: VideoTarget | null, right: VideoTarget | null) {
     return Boolean(left && right && left.source === right.source && Math.abs(left.target - right.target) <= 0.0005)
 }
 
-function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source: string; timeMs: number; loop: boolean; fps: number; style: React.CSSProperties; onFailure: () => void }) {
+function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: { source: string; timeMs: number; loop: boolean; fps: number; style: React.CSSProperties; prewarm: boolean; onFailure: () => void }) {
     const ref = React.useRef<HTMLVideoElement>(null)
     const epochRef = React.useRef(0)
     const frameCallbackRef = React.useRef<number | null>(null)
@@ -85,13 +85,19 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
     const [hasPresented, setHasPresented] = React.useState(false)
     const [presentedTime, setPresentedTime] = React.useState<number | null>(null)
     const [presentedTarget, setPresentedTarget] = React.useState<number | null>(null)
+    const [decodedTime, setDecodedTime] = React.useState<number | null>(null)
+    const [decodedTarget, setDecodedTarget] = React.useState<number | null>(null)
+    const [frameProof, setFrameProof] = React.useState<"none" | "decoded" | "presented">("none")
     const readyRef = React.useRef(false)
+    const frameProofRef = React.useRef<"none" | "decoded" | "presented">("none")
+    const prewarmRef = React.useRef(prewarm)
     const loadedSourceRef = React.useRef<string | null>(null)
     const desiredRef = React.useRef<VideoTarget | null>(null)
     const activeRef = React.useRef<VideoSeekOperation | null>(null)
     const confirmedRef = React.useRef<(VideoTarget & { mediaTime: number }) | null>(null)
     const seekCleanupRef = React.useRef<(() => void) | null>(null)
     const pumpRef = React.useRef<() => void>(() => undefined)
+    prewarmRef.current = prewarm
     const sampledTimeMs = Math.floor(Math.max(0, timeMs) * fps / 1_000 + 1e-9) * 1_000 / fps
     const cancelFrameConfirmation = React.useCallback((video?: HTMLVideoElement | null) => {
         const frameVideo = video as (HTMLVideoElement & { cancelVideoFrameCallback?: (id: number) => void }) | null | undefined
@@ -108,7 +114,7 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         })
         pumpFrameRef.current = frameId
     }, [])
-    const seekToPresentedFrame = React.useCallback((video: HTMLVideoElement, operation: VideoSeekOperation) => {
+    const seekToPresentedFrame = React.useCallback((video: HTMLVideoElement, operation: VideoSeekOperation, decodedAtTarget = false) => {
         const isCurrent = () => activeRef.current === operation && operation.epoch === epochRef.current
             && loadedSourceRef.current === operation.source && ref.current === video
         if (!isCurrent()) return
@@ -117,20 +123,35 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
             requestVideoFrameCallback?: (handler: (_now: number, metadata: { mediaTime: number }) => void) => number
         }
         const targetTolerance = Math.max(0.0005, 0.5 / Math.max(1, fps))
-        let seekComplete = false
+        let seekComplete = decodedAtTarget
         let presentedMediaTime: number | null = null
-        const finishPresentedFrame = () => {
+        const finishFrame = (proof: "decoded" | "presented") => {
             if (isCurrent() && seekComplete && !video.seeking && Number.isFinite(presentedMediaTime)
                 && Math.abs(video.currentTime - operation.target) <= targetTolerance) {
                 video.pause()
                 activeRef.current = null
                 confirmedRef.current = { source: operation.source, target: operation.target, mediaTime: presentedMediaTime as number }
                 setHasPresented(true)
-                setPresentedTime(presentedMediaTime)
-                setPresentedTarget(operation.target)
+                if (proof === "decoded") {
+                    setDecodedTime(presentedMediaTime)
+                    setDecodedTarget(operation.target)
+                    setPresentedTime(null)
+                    setPresentedTarget(null)
+                } else {
+                    video.dataset.storyFrameProof = "presented"
+                    video.dataset.storyPresentedTime = String(presentedMediaTime)
+                    video.dataset.storyTargetTime = String(operation.target)
+                    setDecodedTime(null)
+                    setDecodedTarget(null)
+                    setPresentedTime(presentedMediaTime)
+                    setPresentedTarget(operation.target)
+                }
+                frameProofRef.current = proof
+                setFrameProof(proof)
                 const latest = desiredRef.current
                 const converged = sameVideoTarget(latest, operation)
                 readyRef.current = converged
+                if (proof === "presented") video.dataset.storyReady = converged ? "true" : "false"
                 setReady(converged)
                 if (!converged) schedulePump()
                 return true
@@ -144,7 +165,7 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
                     if (animationFrameRef.current === secondFrame) animationFrameRef.current = null
                     if (!isCurrent()) return
                     presentedMediaTime = video.currentTime
-                    finishPresentedFrame()
+                    finishFrame("presented")
                 })
                 animationFrameRef.current = secondFrame
             })
@@ -157,7 +178,7 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
                 if (!isCurrent()) return
                 if (!seekComplete) return
                 if (Number.isFinite(metadata.mediaTime)) presentedMediaTime = metadata.mediaTime
-                finishPresentedFrame()
+                finishFrame("presented")
             })
             frameCallbackRef.current = callbackId
         }
@@ -165,16 +186,32 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
             seekCleanupRef.current = null
             if (!isCurrent()) return
             seekComplete = true
+            if (prewarmRef.current && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+                presentedMediaTime = video.currentTime
+                finishFrame("decoded")
+                return
+            }
             if (!frameVideo.requestVideoFrameCallback) {
                 schedulePaintFallback()
                 return
             }
             if (frameCallbackRef.current === null) armFrameCallback()
         }
+        if (decodedAtTarget) {
+            if (!isCurrent() || video.seeking || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA
+                || Math.abs(video.currentTime - operation.target) > targetTolerance) {
+                activeRef.current = null
+                schedulePump()
+                return
+            }
+            if (frameVideo.requestVideoFrameCallback) armFrameCallback()
+            else schedulePaintFallback()
+            return
+        }
         video.addEventListener("seeked", onSeeked, { once: true })
         seekCleanupRef.current = () => video.removeEventListener("seeked", onSeeked)
         video.currentTime = operation.target
-        armFrameCallback()
+        if (!prewarmRef.current) armFrameCallback()
     }, [cancelFrameConfirmation, fps, schedulePump])
     const startSeek = React.useCallback((video: HTMLVideoElement, request: VideoTarget) => {
         if (activeRef.current || loadedSourceRef.current !== request.source || ref.current !== video) return
@@ -235,10 +272,27 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         if (!sameVideoTarget(confirmedRef.current, next)) {
             readyRef.current = false
             setReady(false)
+            frameProofRef.current = "none"
+            setFrameProof("none")
         }
         pump()
     }, [fps, loop, pump, sampledTimeMs, source])
     React.useLayoutEffect(sync, [sync])
+    React.useLayoutEffect(() => {
+        const video = ref.current
+        const desired = desiredRef.current
+        const targetTolerance = Math.max(0.0005, 0.5 / Math.max(1, fps))
+        if (prewarm || !video || frameProofRef.current !== "decoded" || !sameVideoTarget(confirmedRef.current, desired)
+            || activeRef.current || loadedSourceRef.current !== source || video.seeking
+            || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA
+            || Math.abs(video.currentTime - (desired?.target ?? Number.NaN)) > targetTolerance) return
+        const operation = { ...(desired as VideoTarget), epoch: epochRef.current }
+        activeRef.current = operation
+        readyRef.current = false
+        video.dataset.storyReady = "false"
+        setReady(false)
+        seekToPresentedFrame(video, operation, true)
+    }, [fps, frameProof, prewarm, seekToPresentedFrame, source])
     React.useLayoutEffect(() => {
         const video = ref.current
         if (!video) return
@@ -248,10 +302,14 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         desiredRef.current = null
         activeRef.current = null
         confirmedRef.current = null
+        frameProofRef.current = "none"
         setReady(false)
         setHasPresented(false)
         setPresentedTime(null)
         setPresentedTarget(null)
+        setDecodedTime(null)
+        setDecodedTarget(null)
+        setFrameProof("none")
         video.src = source
         video.load()
         return () => {
@@ -261,6 +319,7 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
             readyRef.current = false
             desiredRef.current = null
             confirmedRef.current = null
+            frameProofRef.current = "none"
             seekCleanupRef.current?.()
             seekCleanupRef.current = null
             cancelFrameConfirmation(video)
@@ -277,6 +336,9 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         data-story-ready={ready ? "true" : "false"}
         data-story-presented-time={presentedTime ?? ""}
         data-story-target-time={presentedTarget ?? ""}
+        data-story-decoded-time={decodedTime ?? ""}
+        data-story-decoded-target-time={decodedTarget ?? ""}
+        data-story-frame-proof={frameProof}
         muted
         playsInline
         preload="auto"
@@ -287,12 +349,12 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
     />
 }
 
-function VitrineMedia({ item, source, index, timeMs, loop, fps, fit, exportMode }: { item: MediaItem; source: string; index: number; timeMs: number; loop: boolean; fps: number; fit: "contain" | "cover"; exportMode: boolean }) {
+function VitrineMedia({ item, source, index, timeMs, loop, fps, fit, exportMode, prewarm }: { item: MediaItem; source: string; index: number; timeMs: number; loop: boolean; fps: number; fit: "contain" | "cover"; exportMode: boolean; prewarm: boolean }) {
     const [failed, setFailed] = React.useState(false)
     React.useEffect(() => setFailed(false), [source])
     if (!source || failed) return <div className={`vitrine-placeholder vitrine-placeholder-${index + 1}`} data-media-failed={failed || exportMode ? "true" : "false"}><span>{failed ? "SOURCE UNAVAILABLE" : "OBJECT"}</span><strong>{String(index + 1).padStart(2, "0")}</strong></div>
     const style = mediaStyle(item, fit)
-    if (item.type === "video" && source === (item.previewUrl ?? item.url)) return <VitrineVideo source={source} timeMs={timeMs} loop={loop} fps={fps} style={style} onFailure={() => setFailed(true)} />
+    if (item.type === "video" && source === (item.previewUrl ?? item.url)) return <VitrineVideo source={source} timeMs={timeMs} loop={loop} fps={fps} style={style} prewarm={prewarm} onFailure={() => setFailed(true)} />
     return <img className="vitrine-media product-export-media" src={source} alt="" aria-hidden="true" draggable={false} onError={() => setFailed(true)} style={style} />
 }
 
@@ -403,7 +465,7 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
                 const crop = resolvedCrop(item)
                 const focal = item.focal ?? { x: 0.5, y: 0.5 }
                 return <figure className={guard ? "vitrine-guard" : `vitrine-plane is-${plane.role}`} data-media-id={plane.id} data-source-index={originalSourceIndex} data-role={guard ? "guard" : plane.role} data-frame-fit={item.fit ?? evaluated.render.fit} data-crop-x={crop.x} data-crop-y={crop.y} data-crop-width={crop.width} data-crop-height={crop.height} data-focal-x={focal.x} data-focal-y={focal.y} data-x={plane.x} data-y={plane.y} data-z={plane.z} data-plane-width={plane.width} data-plane-height={plane.height} data-plane-scale={plane.scale} data-rotate-x={plane.rotateX} data-rotate-y={plane.rotateY} aria-hidden="true" key={plane.id} style={guard ? { position: "absolute", width: 1, height: 1, left: -10_000, top: -10_000, opacity: 0, pointerEvents: "none", overflow: "hidden" } : { width: plane.width, height: plane.height, zIndex: plane.role === "incoming" ? 1_001 : 1_000, transform: `translate3d(${plane.x - plane.width / 2}px, ${plane.y - plane.height / 2}px, 0) rotateX(${plane.rotateX}deg) rotateY(${plane.rotateY}deg) scale(${plane.scale})` }}>
-                    <VitrineMedia item={item} source={source} index={originalSourceIndex} timeMs={sourceTimeMs} loop={config.settings.loopVideos} fps={fps} fit={evaluated.render.fit} exportMode={exportMode} />
+                    <VitrineMedia item={item} source={source} index={originalSourceIndex} timeMs={sourceTimeMs} loop={config.settings.loopVideos} fps={fps} fit={evaluated.render.fit} exportMode={exportMode} prewarm={guard} />
                 </figure>
             })}
             {evaluated.placard ? <div className="vitrine-placard" data-media-id={evaluated.placard.mediaId}><span>Vitrine</span><strong>{evaluated.placard.caption}</strong></div> : null}
