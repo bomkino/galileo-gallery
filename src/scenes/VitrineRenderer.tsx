@@ -88,14 +88,15 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         animationFrameRef.current = null
     }, [])
     const confirmPresentedFrame = React.useCallback((video: HTMLVideoElement, revision: number, target: number) => {
-        if (revision !== revisionRef.current || (!video.seeking && Math.abs(video.currentTime - target) > 0.0005)) return
+        const currentTimeTolerance = 1 / Math.max(1, fps)
+        if (revision !== revisionRef.current || (!video.seeking && Math.abs(video.currentTime - target) > currentTimeTolerance)) return
         cancelFrameConfirmation(video)
         const frameVideo = video as HTMLVideoElement & {
             requestVideoFrameCallback?: (handler: (_now: number, metadata: { mediaTime: number }) => void) => number
         }
         const markReady = (mediaTime: number) => {
             if (revision === revisionRef.current && !video.seeking && Math.abs(targetRef.current - target) <= 0.0005
-                && Math.abs(video.currentTime - target) <= 0.0005 && Number.isFinite(mediaTime)) {
+                && Math.abs(video.currentTime - target) <= currentTimeTolerance && Number.isFinite(mediaTime)) {
                 readyRef.current = true
                 setHasPresented(true)
                 setPresentedTime(mediaTime)
@@ -106,18 +107,22 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         }
         const requestConfirmation = () => {
             if (revision !== revisionRef.current || Math.abs(targetRef.current - target) > 0.0005
-                || (!video.seeking && Math.abs(video.currentTime - target) > 0.0005)) return
+                || (!video.seeking && Math.abs(video.currentTime - target) > currentTimeTolerance)) return
             if (frameVideo.requestVideoFrameCallback) {
                 frameCallbackRef.current = frameVideo.requestVideoFrameCallback((_now, metadata) => {
                     frameCallbackRef.current = null
+                    video.pause()
                     if (!markReady(metadata.mediaTime)) requestConfirmation()
                 })
+                if (video.paused) void video.play().catch(() => undefined)
                 return
             }
             animationFrameRef.current = requestAnimationFrame(() => {
                 animationFrameRef.current = null
+                video.pause()
                 if (!markReady(video.currentTime)) requestConfirmation()
             })
+            if (video.paused) void video.play().catch(() => undefined)
         }
         requestConfirmation()
     }, [cancelFrameConfirmation, fps])

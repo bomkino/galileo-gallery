@@ -146,7 +146,7 @@ async function settle(window) {
             if (performance.now() >= deadline) {
                 const states = [...document.querySelectorAll('.vitrine-plane video, .vitrine-guard video')].map((video) => ({
                     ready: video.dataset.storyReady, currentTime: video.currentTime, duration: video.duration,
-                    seeking: video.seeking, readyState: video.readyState, networkState: video.networkState,
+                    seeking: video.seeking, paused: video.paused, readyState: video.readyState, networkState: video.networkState,
                     visibility: getComputedStyle(video).visibility, parent: video.parentElement?.className,
                 }))
                 throw new Error('Vitrine source video did not present its requested frame: ' + JSON.stringify(states))
