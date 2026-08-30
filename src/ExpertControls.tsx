@@ -13,12 +13,17 @@ type Props = {
     selectedItemId: string | null
     onSelectItem: (id: string) => void
     onSetting: <K extends keyof ReelSettings>(key: K, value: ReelSettings[K]) => void
+    onSettingStart?: (key: keyof ReelSettings) => void
+    onSettingEnd?: (key: keyof ReelSettings) => void
     onItem: (id: string, patch: Partial<MediaItem>) => void
     onPreset: (preset: ExpertPreset) => void
     freezePreview: boolean
     onFreezePreview: (value: boolean) => void
     isOpeningReel: boolean
     profile: StyleProfile
+    isVitrineV2?: boolean
+    vitrineHoldMinimum?: number
+    vitrineExchangeMinimum?: number
 }
 
 function ControlGroup({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
@@ -41,6 +46,8 @@ function Range({
     step = 1,
     suffix = "",
     onChange,
+    onBegin,
+    onEnd,
 }: {
     label: string
     value: number
@@ -49,24 +56,40 @@ function Range({
     step?: number
     suffix?: string
     onChange: (value: number) => void
+    onBegin?: () => void
+    onEnd?: () => void
 }) {
-    const progress = ((value - min) / Math.max(1, max - min)) * 100
+    const progress = Math.min(100, Math.max(0, ((value - min) / Math.max(1, max - min)) * 100))
+    const shiftArrow = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (!event.shiftKey || !["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp"].includes(event.key)) return
+        event.preventDefault()
+        const direction = ["ArrowRight", "ArrowUp"].includes(event.key) ? 1 : -1
+        onChange(Math.min(max, Math.max(min, value + direction * step * 10)))
+    }
     return (
         <div className="range-row expert-range">
             <span>{label}</span>
             <label className="range-value" aria-label={`${label} value`}>
-                <input type="number" min={min} max={max} step={step} value={value} onChange={(event) => {
+                <input type="number" min={min} max={max} step={step} value={value} onFocus={onBegin} onBlur={onEnd} onKeyDown={shiftArrow} onChange={(event) => {
                     if (Number.isFinite(event.target.valueAsNumber)) onChange(Math.min(max, Math.max(min, event.target.valueAsNumber)))
                 }} />
                 {suffix ? <small>{suffix}</small> : null}
             </label>
             <input
+                aria-label={label}
                 type="range"
                 min={min}
                 max={max}
                 step={step}
                 value={value}
                 style={{ "--range-progress": `${progress}%` } as React.CSSProperties}
+                onPointerDown={onBegin}
+                onPointerUp={onEnd}
+                onPointerCancel={onEnd}
+                onLostPointerCapture={onEnd}
+                onBlur={onEnd}
+                onKeyDown={(event) => { onBegin?.(); shiftArrow(event) }}
+                onKeyUp={onEnd}
                 onChange={(event) => onChange(Number(event.target.value))}
             />
         </div>
@@ -139,15 +162,17 @@ function ColorControl({ label, value, fallback, onChange }: { label: string; val
     )
 }
 
-function Presets({ onPreset }: { onPreset: (preset: ExpertPreset) => void }) {
+function Presets({ onPreset, defaultsOnly = false }: { onPreset: (preset: ExpertPreset) => void; defaultsOnly?: boolean }) {
     return (
         <div className="expert-presets">
             <span className="eyebrow">Starting points</span>
             <div>
                 <button type="button" title="Restore every control to its factory value" onClick={() => onPreset("original")}>Restore Defaults</button>
-                <button type="button" onClick={() => onPreset("fast")}>Fast Cut</button>
-                <button type="button" onClick={() => onPreset("velvet")}>Velvet</button>
-                <button type="button" onClick={() => onPreset("mixed")}>Mixed Media</button>
+                {!defaultsOnly ? <>
+                    <button type="button" onClick={() => onPreset("fast")}>Fast Cut</button>
+                    <button type="button" onClick={() => onPreset("velvet")}>Velvet</button>
+                    <button type="button" onClick={() => onPreset("mixed")}>Mixed Media</button>
+                </> : null}
             </div>
         </div>
     )
@@ -156,16 +181,26 @@ function Presets({ onPreset }: { onPreset: (preset: ExpertPreset) => void }) {
 export default function ExpertControls(props: Props) {
     const { settings, items } = props
     const selected = items.find((item) => item.id === props.selectedItemId) ?? items[0]
+    const crop = selected?.crop ?? { x: 0, y: 0, width: 1, height: 1 }
+    const updateCrop = (patch: Partial<NonNullable<MediaItem["crop"]>>) => {
+        if (!selected) return
+        const next = { ...crop, ...patch }
+        next.x = Math.max(0, Math.min(1 - 0.0001, next.x))
+        next.y = Math.max(0, Math.min(1 - 0.0001, next.y))
+        next.width = Math.max(0.0001, Math.min(1 - next.x, next.width))
+        next.height = Math.max(0.0001, Math.min(1 - next.y, next.height))
+        props.onItem(selected.id, { crop: next })
+    }
     const directionLabels = props.profile.axisControl
         ? settings.axis === "vertical" ? ["Up", "Down"] as const : ["Left", "Right"] as const
         : props.profile.directionLabels ?? ["Forward", "Reverse"] as const
 
     return (
         <div className="expert-panel">
-            <Presets onPreset={props.onPreset} />
-            <div className="expert-tabs" role="tablist" aria-label="Expert controls">
+            <Presets onPreset={props.onPreset} defaultsOnly={props.isVitrineV2} />
+            <div className="expert-tabs" role="group" aria-label="Motion fine controls">
                 {(["slides", "frame", "story", "timing", "look"] as ExpertTab[]).map((tab) => (
-                    <button type="button" role="tab" aria-selected={props.tab === tab} className={props.tab === tab ? "is-active" : ""} onClick={() => props.onTab(tab)} key={tab}>{tab}</button>
+                    <button type="button" aria-pressed={props.tab === tab} className={props.tab === tab ? "is-active" : ""} onClick={() => props.onTab(tab)} key={tab}>{tab}</button>
                 ))}
             </div>
 
@@ -175,13 +210,15 @@ export default function ExpertControls(props: Props) {
                         <>
                             <ControlGroup eyebrow="Selected frame" title={selected.name}>
                                 <div className="selected-media-card">
-                                    {selected.type === "image" ? <img src={selected.url} alt="" /> : <video src={selected.previewUrl ?? selected.url} muted autoPlay loop playsInline preload="auto" />}
+                                    {selected.type === "image" ? <img src={selected.url} alt="" /> : props.isVitrineV2 ? <div className="selected-video-placeholder" aria-label="Video thumbnail deferred">VIDEO</div> : <video src={selected.previewUrl ?? selected.url} muted autoPlay loop playsInline preload="auto" />}
                                     <select value={selected.id} onChange={(event) => props.onSelectItem(event.target.value)}>
                                         {items.map((item, index) => <option value={item.id} key={item.id}>{String(index + 1).padStart(2, "0")} · {item.name}</option>)}
                                     </select>
                                 </div>
-                                <Toggle label="Spotlight" detail="Stops and grows at center." checked={selected.spotlight} onChange={(value) => props.onItem(selected.id, { spotlight: value })} />
-                                <Toggle label="Skip story beat" detail="Still appears; never spotlights or becomes finale." checked={selected.muted} onChange={(value) => props.onItem(selected.id, { muted: value })} />
+                                {!props.isVitrineV2 || settings.playKind !== "loop" ? <>
+                                    <Toggle label={props.isVitrineV2 ? "Opening object" : "Spotlight"} detail={props.isVitrineV2 ? "Chooses the first object in a finite presentation." : "Stops and grows at center."} checked={selected.spotlight} onChange={(value) => props.onItem(selected.id, { spotlight: value })} />
+                                    <Toggle label="Skip story beat" detail="Still appears; never becomes the finite opening or finale." checked={selected.muted} onChange={(value) => props.onItem(selected.id, { muted: value })} />
+                                </> : <p className="expert-help">Finite opening/finale marks are hidden while Forever is active.</p>}
                                 <label className="expert-field"><span>Caption · optional</span><input type="text" maxLength={120} placeholder="A quiet line beneath this frame" value={selected.caption ?? ""} onChange={(event) => props.onItem(selected.id, { caption: event.target.value })} /></label>
                             </ControlGroup>
                             <ControlGroup eyebrow="Geometry" title="Frame ratio">
@@ -207,6 +244,17 @@ export default function ExpertControls(props: Props) {
                                 ) : null}
                                 <p className="expert-help">Detected media ratio: {selected.ratio.toFixed(3)}. Global behavior lives under Frame.</p>
                             </ControlGroup>
+                            {props.isVitrineV2 ? <ControlGroup eyebrow="Source framing" title="Fit, crop & focal point">
+                                <Select label="Frame fit" value={selected.fit ?? "contain"} options={[{ value: "contain", label: "Contain · show everything" }, { value: "cover", label: "Cover · fill plane" }]} onChange={(value) => props.onItem(selected.id, { fit: value })} />
+                                <Range label="Focal X" value={(selected.focal?.x ?? 0.5) * 100} min={0} max={100} step={0.01} suffix="%" onChange={(value) => props.onItem(selected.id, { focal: { x: value / 100, y: selected.focal?.y ?? 0.5 } })} />
+                                <Range label="Focal Y" value={(selected.focal?.y ?? 0.5) * 100} min={0} max={100} step={0.01} suffix="%" onChange={(value) => props.onItem(selected.id, { focal: { x: selected.focal?.x ?? 0.5, y: value / 100 } })} />
+                                <Range label="Crop left" value={crop.x * 100} min={0} max={(1 - crop.width) * 100} step={0.01} suffix="%" onChange={(value) => updateCrop({ x: value / 100 })} />
+                                <Range label="Crop top" value={crop.y * 100} min={0} max={(1 - crop.height) * 100} step={0.01} suffix="%" onChange={(value) => updateCrop({ y: value / 100 })} />
+                                <Range label="Crop width" value={crop.width * 100} min={0.01} max={(1 - crop.x) * 100} step={0.01} suffix="%" onChange={(value) => updateCrop({ width: value / 100 })} />
+                                <Range label="Crop height" value={crop.height * 100} min={0.01} max={(1 - crop.y) * 100} step={0.01} suffix="%" onChange={(value) => updateCrop({ height: value / 100 })} />
+                                {crop.x !== 0 || crop.y !== 0 || crop.width !== 1 || crop.height !== 1 ? <p className="expert-help">Explicit crop owns the visible source region; fit and focal resume after Reset framing.</p> : null}
+                                <button type="button" className="button quiet" onClick={() => props.onItem(selected.id, { crop: { x: 0, y: 0, width: 1, height: 1 }, focal: { x: 0.5, y: 0.5 } })}>Reset framing</button>
+                            </ControlGroup> : null}
                         </>
                     ) : (
                         <div className="expert-empty"><strong>Add media first</strong><span>Per-slide ratio controls appear here.</span></div>
@@ -224,26 +272,38 @@ export default function ExpertControls(props: Props) {
                                 {settings.fixedRatio === "custom" ? <NumberPair firstLabel="Ratio W" first={settings.customRatioWidth} secondLabel="Ratio H" second={settings.customRatioHeight} onFirst={(value) => props.onSetting("customRatioWidth", value)} onSecond={(value) => props.onSetting("customRatioHeight", value)} /> : null}
                             </>
                         ) : null}
-                        <Select label="Media fit" value={settings.imageFit} options={[{ value: "contain", label: "Contain · show everything" }, { value: "cover", label: "Cover · fill frame" }]} onChange={(value) => props.onSetting("imageFit", value)} />
+                        {!props.isVitrineV2 ? <Select label="Media fit" value={settings.imageFit} options={[{ value: "contain", label: "Contain · show everything" }, { value: "cover", label: "Cover · fill frame" }]} onChange={(value) => props.onSetting("imageFit", value)} /> : <p className="expert-help">Vitrine fit, crop, and focal point belong to each source under Slides.</p>}
                     </ControlGroup>
-                    <ControlGroup eyebrow="Paper" title="Padding">
+                    {!props.isVitrineV2 ? <ControlGroup eyebrow="Paper" title="Padding">
                         <Select label="Unit" value={settings.paddingUnit} options={[{ value: "px", label: "Pixels" }, { value: "percent", label: "% of image width" }]} onChange={(value) => props.onSetting("paddingUnit", value)} />
                         <Range label="Top" value={settings.paddingTop} min={0} max={settings.paddingUnit === "px" ? 400 : 30} suffix={settings.paddingUnit === "px" ? "px" : "%"} onChange={(value) => props.onSetting("paddingTop", value)} />
                         <Range label="Right" value={settings.paddingRight} min={0} max={settings.paddingUnit === "px" ? 400 : 30} suffix={settings.paddingUnit === "px" ? "px" : "%"} onChange={(value) => props.onSetting("paddingRight", value)} />
                         <Range label="Bottom" value={settings.paddingBottom} min={0} max={settings.paddingUnit === "px" ? 400 : 30} suffix={settings.paddingUnit === "px" ? "px" : "%"} onChange={(value) => props.onSetting("paddingBottom", value)} />
                         <Range label="Left" value={settings.paddingLeft} min={0} max={settings.paddingUnit === "px" ? 400 : 30} suffix={settings.paddingUnit === "px" ? "px" : "%"} onChange={(value) => props.onSetting("paddingLeft", value)} />
                         <Range label="Caption gap" value={settings.captionGap} min={0} max={80} suffix="px" onChange={(value) => props.onSetting("captionGap", value)} />
-                    </ControlGroup>
+                    </ControlGroup> : null}
                     <ControlGroup eyebrow="Video" title="Playback">
-                        <Toggle label="Autoplay clips" detail="Muted playback inside moving frames." checked={settings.autoplayVideos} onChange={(value) => props.onSetting("autoplayVideos", value)} />
+                        {!props.isVitrineV2 ? <Toggle label="Autoplay clips" detail="Muted playback inside moving frames." checked={settings.autoplayVideos} onChange={(value) => props.onSetting("autoplayVideos", value)} /> : null}
                         <Toggle label="Loop source clips" detail="Repeat clips shorter than the gallery film." checked={settings.loopVideos} onChange={(value) => props.onSetting("loopVideos", value)} />
-                        <p className="expert-help">Verified Linux MP4 preserves authored source-video, presenter, and soundtrack audio against the same story clock. Legacy native exporters remain silent.</p>
+                        <p className="expert-help">{props.isVitrineV2 ? "Vitrine pauses and seeks source video against exact story time for deterministic preview, scrub, and PNG Frames." : "Verified Linux MP4 preserves authored source-video, presenter, and soundtrack audio against the same story clock. Legacy native exporters remain silent."}</p>
                     </ControlGroup>
                 </div>
             ) : null}
 
             {props.tab === "story" ? (
                 <div className="expert-tab-body">
+                    {props.isVitrineV2 ? <ControlGroup eyebrow="Vitrine" title="Museum object">
+                        {settings.playKind !== "loop" ? <>
+                            <Toggle label="Opening object" detail="Use the one marked eligible frame for finite entry and hold; otherwise use the first eligible frame." checked={settings.spotlightsEnabled} onChange={(value) => props.onSetting("spotlightsEnabled", value)} />
+                            <Toggle label="Finite finale" detail="Exchange to the last eligible frame before the exact inverse exit." checked={settings.finaleEnabled} onChange={(value) => props.onSetting("finaleEnabled", value)} />
+                        </> : <p className="expert-help">Opening and finale choices are saved for Once/Repeat; Forever uses the ordered loop only.</p>}
+                        <Range label="Presentation scale · height cap" value={settings.slideHeight} min={42} max={78} suffix="%" onBegin={() => props.onSettingStart?.("slideHeight")} onEnd={() => props.onSettingEnd?.("slideHeight")} onChange={(value) => props.onSetting("slideHeight", value)} />
+                        <Range label="Object turn" value={settings.tilt} min={0} max={9} step={0.25} suffix="°" onBegin={() => props.onSettingStart?.("tilt")} onEnd={() => props.onSettingEnd?.("tilt")} onChange={(value) => props.onSetting("tilt", value)} />
+                        <Range label="Transition depth" value={settings.sway} min={8} max={30} suffix="%" onBegin={() => props.onSettingStart?.("sway")} onEnd={() => props.onSettingEnd?.("sway")} onChange={(value) => props.onSetting("sway", value)} />
+                        <Select label="Exchange direction" value={settings.transitionDirection} options={[{ value: "left", label: "Left" }, { value: "right", label: "Right" }]} onChange={(value) => props.onSetting("transitionDirection", value)} />
+                        <Toggle label="Placard" detail="A small caption outside the artwork plane." checked={settings.showHint} onChange={(value) => props.onSetting("showHint", value)} />
+                        <p className="expert-help">The source plane is never dimmed, graded, blurred, tinted, or crossfaded.</p>
+                    </ControlGroup> : <>
                     <ControlGroup eyebrow="Story" title={props.profile.focusLabel}>
                         {props.profile.supportsSpotlight ? <Toggle label={`${props.profile.focusLabel} beats`} detail={`Honor marked frames with this world's contained ${props.profile.focusBehavior} gesture.`} checked={settings.spotlightsEnabled} onChange={(value) => props.onSetting("spotlightsEnabled", value)} /> : null}
                         {props.profile.supportsFinale ? <Toggle label="Final beat" detail="Optional closing gesture. Off keeps every loop visually even." checked={settings.finaleEnabled} onChange={(value) => props.onSetting("finaleEnabled", value)} /> : null}
@@ -261,33 +321,36 @@ export default function ExpertControls(props: Props) {
                         <Range label="Idle mute" value={settings.idleMute} min={0} max={100} suffix="%" onChange={(value) => props.onSetting("idleMute", value)} />
                         <Range label="Spotlight dim" value={settings.spotlightDim} min={0} max={92} suffix="%" onChange={(value) => props.onSetting("spotlightDim", value)} />
                     </ControlGroup>
+                    </>}
                 </div>
             ) : null}
 
             {props.tab === "timing" ? (
                 <div className="expert-tab-body">
                     <ControlGroup eyebrow="Playback" title="Start & mode">
-                        <Select label="Starts" value={settings.startMode} options={[{ value: "auto", label: "On load" }, { value: "click", label: "On click" }]} onChange={(value) => props.onSetting("startMode", value)} />
-                        {props.profile.axisControl ? <Select label="Axis" value={settings.axis} options={[{ value: "horizontal", label: "Horizontal" }, { value: "vertical", label: "Vertical" }]} onChange={(value) => props.onSetting("axis", value)} /> : null}
+                        {!props.isVitrineV2 ? <Select label="Starts" value={settings.startMode} options={[{ value: "auto", label: "On load" }, { value: "click", label: "On click" }]} onChange={(value) => props.onSetting("startMode", value)} /> : null}
+                        {props.profile.axisControl && !props.isVitrineV2 ? <Select label="Axis" value={settings.axis} options={[{ value: "horizontal", label: "Horizontal" }, { value: "vertical", label: "Vertical" }]} onChange={(value) => props.onSetting("axis", value)} /> : null}
                         {props.profile.directional ? <Select label="Direction" value={settings.direction} options={[{ value: "forward", label: directionLabels[0] }, { value: "reverse", label: directionLabels[1] }]} onChange={(value) => props.onSetting("direction", value)} /> : null}
                         <Select label="Mode" value={settings.playKind} options={[{ value: "once", label: "Once · hold finale" }, { value: "repeat", label: "Repeat · finite loops" }, { value: "loop", label: "Loop · forever" }]} onChange={(value) => props.onSetting("playKind", value)} />
                         {settings.playKind === "repeat" ? <Range label="Loop count" value={settings.repeatCount} min={2} max={20} suffix="×" onChange={(value) => props.onSetting("repeatCount", Math.round(value))} /> : null}
-                        <Range label="Lead-in" value={settings.leadInMs} min={0} max={4000} step={50} suffix="ms" onChange={(value) => props.onSetting("leadInMs", value)} />
-                        <Range label="Motion pace" value={settings.paceMs} min={60} max={8000} step={25} suffix="ms" onChange={(value) => props.onSetting("paceMs", value)} />
+                        {!props.isVitrineV2 ? <Range label="Lead-in" value={settings.leadInMs} min={0} max={4000} step={50} suffix="ms" onChange={(value) => props.onSetting("leadInMs", value)} /> : null}
+                        {!props.isVitrineV2 || settings.playKind !== "once" ? <Range label={props.isVitrineV2 ? "Loop exchange" : "Motion pace"} value={settings.paceMs} min={props.isVitrineV2 ? props.vitrineExchangeMinimum ?? 280 : 60} max={props.isVitrineV2 ? 1800 : 8000} step={props.isVitrineV2 ? 20 : 25} suffix="ms" onChange={(value) => props.onSetting("paceMs", value)} /> : <p className="expert-help">Finite entry, opening hold, selected finale exchange, finale hold, and exit use Vitrine's authored phrase.</p>}
                     </ControlGroup>
-                    <ControlGroup eyebrow="Motion" title="Catch & release">
+                    {!props.isVitrineV2 ? <ControlGroup eyebrow="Motion" title="Catch & release">
                         <Select label="Motion feel" value={settings.motionPreset} options={(["cut", "magnetic", "velvet", "dream", "custom"] as MotionPreset[]).map((value) => ({ value, label: value[0].toUpperCase() + value.slice(1) }))} onChange={(value) => props.onSetting("motionPreset", value)} />
                         <Range label="Launch" value={settings.launchMs} min={0} max={1200} step={10} suffix="ms" onChange={(value) => props.onSetting("launchMs", value)} />
                         <Range label="Arrival" value={settings.arrivalMs} min={20} max={2000} step={10} suffix="ms" onChange={(value) => props.onSetting("arrivalMs", value)} />
                         <Range label="Spotlight grow" value={settings.growMs} min={120} max={2000} step={20} suffix="ms" onChange={(value) => props.onSetting("growMs", value)} />
                         <Range label="Spotlight exit" value={settings.exitMs} min={120} max={2000} step={20} suffix="ms" onChange={(value) => props.onSetting("exitMs", value)} />
                         <p className="expert-help">Preset supplies baseline physics. First fine-tune promotes it to Custom without losing that feel.</p>
-                    </ControlGroup>
-                    <ControlGroup eyebrow="Story beats" title="Holds & finale">
-                        <Range label="Spotlight hold" value={settings.holdMs} min={0} max={5000} step={50} suffix="ms" onChange={(value) => props.onSetting("holdMs", value)} />
+                    </ControlGroup> : null}
+                    <ControlGroup eyebrow={props.isVitrineV2 ? "Readability" : "Story beats"} title={props.isVitrineV2 ? "True still hold" : "Holds & finale"}>
+                        {!props.isVitrineV2 || settings.playKind !== "once" ? <Range label={props.isVitrineV2 ? "Loop readable hold" : "Spotlight hold"} value={settings.holdMs} min={props.isVitrineV2 ? props.vitrineHoldMinimum ?? 600 : 0} max={props.isVitrineV2 ? 6000 : 5000} step={props.isVitrineV2 ? 10 : 50} suffix="ms" onChange={(value) => props.onSetting("holdMs", value)} /> : null}
+                        {!props.isVitrineV2 ? <>
                         <Range label="Finale grow" value={settings.finaleGrowMs} min={200} max={3000} step={50} suffix="ms" onChange={(value) => props.onSetting("finaleGrowMs", value)} />
                         <Range label="Finale hold" value={settings.finaleHoldMs} min={200} max={10000} step={100} suffix="ms" onChange={(value) => props.onSetting("finaleHoldMs", value)} />
                         <Range label="Others fade" value={settings.fadeMs} min={120} max={3000} step={20} suffix="ms" onChange={(value) => props.onSetting("fadeMs", value)} />
+                        </> : <p className="expert-help">Holds have exactly zero motion. Exchange duration controls only the reciprocal handoff.</p>}
                     </ControlGroup>
                     <ControlGroup eyebrow="Art direction" title="Canvas pose">
                         <Toggle label="Freeze preview" detail="Scrub exact timeline math." checked={props.freezePreview} onChange={props.onFreezePreview} />
@@ -298,6 +361,12 @@ export default function ExpertControls(props: Props) {
 
             {props.tab === "look" ? (
                 <div className="expert-tab-body">
+                    {props.isVitrineV2 ? <ControlGroup eyebrow="Room" title="Solid or transparent">
+                        {settings.backgroundStyle === "solid" ? <Select label="Theme" value={settings.theme === "light" ? "light" : "dark"} options={[{ value: "dark", label: "Dark" }, { value: "light", label: "Light" }]} onChange={(value) => props.onSetting("theme", value)} /> : null}
+                        <Select label="Background" value={settings.backgroundStyle} options={[{ value: "solid", label: "Solid" }, { value: "transparent", label: "Transparent" }]} onChange={(value) => props.onSetting("backgroundStyle", value)} />
+                        {settings.backgroundStyle === "solid" ? <ColorControl label="Ground" value={settings.ground} fallback={settings.theme === "light" ? "#f3f1ea" : "#141312"} onChange={(value) => props.onSetting("ground", value)} /> : null}
+                        <p className="expert-help">No shadow, glow, texture, vignette, grid, tint, or light overlaps artwork. Authored Look families remain G10D work.</p>
+                    </ControlGroup> : <>
                     <ControlGroup eyebrow="Palette" title="Theme & paper">
                         <Select label="Theme" value={settings.theme} options={[{ value: "dark", label: "Dark" }, { value: "light", label: "Light" }, { value: "auto", label: "Follow system" }]} onChange={(value) => props.onSetting("theme", value)} />
                         <Select label="Background" value={settings.backgroundStyle} options={[{ value: "solid", label: "Solid" }, { value: "gradient", label: "Gradient" }, { value: "halo", label: "Soft halo" }, { value: "paper", label: "Textured paper" }, { value: "transparent", label: "Transparent" }]} onChange={(value) => props.onSetting("backgroundStyle", value)} />
@@ -322,6 +391,7 @@ export default function ExpertControls(props: Props) {
                         <Range label="Vignette" value={settings.vignette} min={0} max={45} suffix="%" onChange={(value) => props.onSetting("vignette", value)} />
                         {settings.startMode === "click" ? <Toggle label="Click hint" checked={settings.showHint} onChange={(value) => props.onSetting("showHint", value)} /> : null}
                     </ControlGroup>
+                    </>}
                 </div>
             ) : null}
         </div>

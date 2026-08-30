@@ -25,6 +25,9 @@ export type MediaItem = {
     aspectMode?: "auto" | "global" | "custom"
     ratioW?: number
     ratioH?: number
+    fit?: "contain" | "cover"
+    crop?: { x: number; y: number; width: number; height: number }
+    focal?: { x: number; y: number }
     caption?: string
     spotlight: boolean
     muted: boolean
@@ -55,6 +58,7 @@ export type ReelSettings = {
     paceMs: number
     axis: "horizontal" | "vertical"
     direction: "forward" | "reverse"
+    transitionDirection: "left" | "right"
     startMode: "auto" | "click"
     playKind: "once" | "repeat" | "loop"
     repeatCount: number
@@ -99,6 +103,7 @@ export type ReelSettings = {
 export type ReelConfig = {
     schemaVersion?: number
     styleId: string
+    sceneVersion?: number
     items: MediaItem[]
     settings: ReelSettings
     timelineMode?: TimelineMode
@@ -196,6 +201,7 @@ export type PortableGalleryTimeline = {
     mode: TimelineMode
     fixedDurationMs: number
     segments: VisualTimelineSegment[]
+    transitionDirection?: "left" | "right"
 } & Pick<ReelSettings,
     | "playKind" | "repeatCount" | "axis" | "direction" | "startMode" | "launchMs"
     | "arrivalMs" | "growMs" | "exitMs" | "paceMs" | "leadInMs" | "holdMs"
@@ -209,7 +215,7 @@ export type PortableGalleryProjectV2 = {
     engineVersion: 1
     media: PortableGalleryMedia[]
     canvas: PortableGalleryCanvas
-    scene: { id: string; version: 1; parameters: PortableGallerySceneParameters }
+    scene: { id: string; version: 1 | 2; parameters: PortableGallerySceneParameters }
     look: { id: string; version: 1; parameters: PortableGalleryLookParameters }
     timeline: PortableGalleryTimeline
     audio: {
@@ -340,7 +346,7 @@ export interface GalleryHostPort {
     audioWaveform(url: string, buckets: number): Promise<{ sampleRate: number; channels: 1 | 2; sampleFrames: number; buckets: Array<{ minimum: number; maximum: number; rms: number }> }>
     cancelAudio(): Promise<{ cancelled: number }>
     exportCapabilities(): Promise<{ version: 1; formats: Array<
-        | { id: "png-frames"; available: true; alpha: true; audio: false; consequence: string }
+        | { id: "png-frames"; available: true; alpha: true; audio: false; sceneVersions: [{ id: "quiet-carousel"; versions: [1] }, { id: "vitrine"; versions: [2] }]; consequence: string }
         | { id: "mp4-h264-aac"; available: boolean; alpha: false; audio: true; sceneIds: ["quiet-carousel"]; consequence: string }
     > }>
     preflightPngFrames(intent: { config: ReelConfig; width: number; height: number; fps: number; durationMs: number; cycleDurationMs: number; finalCycleDurationMs: number; transparent: boolean }): Promise<{ snapshotId: string; format: "png-frames"; width: number; height: number; fps: number; durationMs: number; frameCount: number; alpha: boolean; audio: "none"; consequence: string }>

@@ -373,14 +373,14 @@ function transformFor(value: Pose, extraScale: number, lift: number) {
 
 export default function GalleryRenderer({ config, timeMs, durationMs, exportFrames = {}, terminal = false }: Props) {
     const style = galleryStyle(config.styleId)
-    const profile = styleProfile(config.styleId)
+    const profile = styleProfile(config.styleId, config.sceneVersion ?? 1)
     const settings = config.settings
     const placeholders = Array.from({ length: profile.recommendedItems }, (_, index) => ({ id: `placeholder-${index}`, name: `Frame ${index + 1}`, type: "image" as const, url: "", ratio: 16 / 9, caption: "", spotlight: false, muted: false }))
     const source = config.items.length ? config.items : placeholders
     const clockConfig = config.items.length ? config : { ...config, items: source }
     const slotCount = profile.renderSlots ?? source.length
     const items = Array.from({ length: slotCount }, (_, index) => ({ item: source[index % source.length], sourceIndex: index % source.length, slotIndex: index }))
-    const baseDuration = styleCycleDuration(style.id, source.length, settings)
+    const baseDuration = styleCycleDuration(style.id, source.length, settings, config.sceneVersion ?? 1)
     const clock = sceneClock(clockConfig, timeMs, baseDuration, terminal)
     const rawPhase = clock.rawPhase
     const direction = settings.direction === "reverse" ? -1 : 1

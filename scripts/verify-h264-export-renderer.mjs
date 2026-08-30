@@ -5,6 +5,7 @@ import { createHostBackedAPI } from "../src/runtime.ts"
 const SNAPSHOT_ID = "1".repeat(32)
 const DESTINATION_GRANT = "2".repeat(64)
 const AUDIO_FRAMES = 6_000
+const PNG_CAPABILITY = { id: "png-frames", available: true, alpha: true, audio: false, sceneVersions: [{ id: "quiet-carousel", versions: [1] }, { id: "vitrine", versions: [2] }], consequence: "No audio." }
 
 const request = {
     config: {
@@ -28,7 +29,7 @@ function baseHost(overrides = {}) {
         exportCapabilities: async () => ({
             version: 1,
             formats: [
-                { id: "png-frames", available: true, alpha: true, audio: false, consequence: "No audio." },
+                PNG_CAPABILITY,
                 { id: "mp4-h264-aac", available: true, alpha: false, audio: true, sceneIds: ["quiet-carousel"], consequence: "Verified AAC audio." },
             ],
         }),
@@ -171,7 +172,7 @@ async function run() {
 
     await assert.rejects(
         createHostBackedAPI(baseHost({
-            exportCapabilities: async () => ({ version: 1, formats: [{ id: "png-frames", available: true, alpha: true, audio: false, consequence: "No audio." }] }),
+            exportCapabilities: async () => ({ version: 1, formats: [PNG_CAPABILITY] }),
         })).exportReel(request),
         /unavailable/,
         "renderer must refuse a host that does not advertise verified H.264/AAC",
@@ -182,7 +183,7 @@ async function run() {
     await assert.rejects(
         createHostBackedAPI(baseHost({
             exportCapabilities: async () => ({ version: 1, formats: [
-                { id: "png-frames", available: true, alpha: true, audio: false, consequence: "No audio." },
+                PNG_CAPABILITY,
                 { id: "mp4-h264-aac", available: false, alpha: false, audio: true, sceneIds: ["quiet-carousel"], consequence: unavailableReason },
             ] }),
             preflightH264: async () => { unavailablePreflight = true; throw new Error("must not preflight") },

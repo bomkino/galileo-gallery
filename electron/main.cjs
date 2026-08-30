@@ -36,6 +36,7 @@ const { inspectAudioFile, inspectMediaFile } = require("./project-schema.cjs")
 const { createAudioGrantStaging } = require("./audio-grant-staging.cjs")
 const { createLinuxVideoAudioRuntime } = require("./linux-video-audio-runtime.cjs")
 const { createPngFramesRuntime } = require("./png-frames-runtime.cjs")
+const { reachableMediaIndexes, reachableVideoIndexes } = require("./png-export-contract.cjs")
 const { createH264ExportRuntime } = require("./h264-export-runtime.cjs")
 const { cleanupH264AudioResidue, createH264AudioStage } = require("./h264-audio-stage.cjs")
 const { cleanupG06PrivateFrameCache, createG06PrivateFrameCache } = require("./g06-private-frame-cache.cjs")
@@ -45,7 +46,7 @@ const {
     installSessionSecurity,
     installWindowSecurity,
 } = require("./linux-protocols.cjs")
-const { createLinuxHostController } = require("./linux-host-controller.cjs")
+const { createLinuxHostController, verifyOpenedMediaSource } = require("./linux-host-controller.cjs")
 const { HostPortError } = require("./linux-host-port.cjs")
 let ffmpegStatic = null
 try {
@@ -95,7 +96,7 @@ function developmentRendererOrigin() {
 }
 
 function linuxHostMode() {
-    return process.platform === "linux" && (Boolean(process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT) || (app.isPackaged && packagedBuildIdentity().profile === "g03-linux-host-port"))
+    return process.platform === "linux" && (Boolean(process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT) || (app.isPackaged && packagedBuildIdentity().profile === "g03-linux-host-port"))
 }
 
 function packagedBuildIdentity() {
@@ -162,7 +163,7 @@ function rendererURL(exportMode = false) {
     const query = new URLSearchParams()
     if (exportMode) query.set("export", "1")
     if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT) query.set("tracer", "quiet-carousel")
-    if (process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT) query.set("host", "linux")
+    if (process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT) query.set("host", "linux")
     const suffix = query.size ? `?${query}` : ""
     const developmentOrigin = developmentRendererOrigin()
     if (developmentOrigin) {
@@ -398,7 +399,8 @@ function openedCanonicalWav(grant) {
     const handle = fs.openSync(grant.filePath, "r")
     try {
         const stat = fs.fstatSync(handle)
-        if (!stat.isFile() || stat.dev !== grant.device || stat.ino !== grant.inode || stat.size !== grant.bytes || stat.mtimeMs !== grant.mtimeMs) throw new HostPortError("verification_failed")
+        if (!stat.isFile() || stat.dev !== grant.device || stat.ino !== grant.inode || stat.size !== grant.bytes
+            || stat.mtimeMs !== grant.mtimeMs || stat.ctimeMs !== grant.ctimeMs) throw new HostPortError("verification_failed")
         const header = Buffer.alloc(44)
         if (fs.readSync(handle, header, 0, 44, 0) !== 44) throw new HostPortError("corrupt_input")
         const channels = header.readUInt16LE(22)
@@ -421,7 +423,8 @@ function openedCanonicalWav(grant) {
 
 function verifyGrantAfterRead(descriptor, grant) {
     const after = fs.fstatSync(descriptor.handle)
-    if (after.dev !== grant.device || after.ino !== grant.inode || after.size !== grant.bytes || after.mtimeMs !== grant.mtimeMs) throw new HostPortError("verification_failed")
+    if (after.dev !== grant.device || after.ino !== grant.inode || after.size !== grant.bytes
+        || after.mtimeMs !== grant.mtimeMs || after.ctimeMs !== grant.ctimeMs) throw new HostPortError("verification_failed")
 }
 
 function decodeAudioForHost({ grant, startFrame, frameCount, signal }) {
@@ -586,14 +589,42 @@ function pruneExportFrameCache() {
 }
 
 async function prepareExportVideoFrames(request, exportState, resolveMediaPath = mediaURLToPath, frameURLFromPath = (filePath) => fileToMedia(filePath).url, openMediaSource, privateCacheRoot) {
+    // Vitrine's product renderer owns a verified paused-video seek path and
+    // waits for requestVideoFrameCallback before every capture. Keeping those
+    // sources live avoids an artificial decoded-frame cache ceiling on long
+    // authored Vitrine stories.
+    if (request.config.styleId === "vitrine" && request.config.sceneVersion === 2) {
+        for (const index of reachableMediaIndexes(request.config)) {
+            if (exportState.signal?.aborted) throw new HostPortError("cancelled")
+            const item = request.config.items[index]
+            try {
+                const opened = openMediaSource?.(item.url)
+                if (opened) {
+                    try {
+                        verifyOpenedMediaSource(opened)
+                    } finally {
+                        fs.closeSync(opened.handle)
+                    }
+                    continue
+                }
+                const stat = fs.statSync(resolveMediaPath(item.url))
+                if (!stat.isFile()) throw new HostPortError("verification_failed")
+            } catch (error) {
+                if (error instanceof HostPortError) throw error
+                throw new HostPortError("verification_failed")
+            }
+        }
+        return {}
+    }
     if (!privateCacheRoot) pruneExportFrameCache()
     const result = {}
     const decoded = new Map()
-    const videoItems = request.config.items.filter((item) => item.type === "video")
+    const reachableIndexes = new Set(reachableVideoIndexes(request.config))
+    const videoItems = request.config.items.filter((_item, index) => reachableIndexes.has(index))
     let prepared = 0
     for (let index = 0; index < request.config.items.length; index += 1) {
         const item = request.config.items[index]
-        if (item.type !== "video") continue
+        if (!reachableIndexes.has(index)) continue
         report({
             exportId: exportState.exportId,
             phase: "preparing",
@@ -682,6 +713,7 @@ async function prepareExportVideoFrames(request, exportState, resolveMediaPath =
             }
             decoded.set(key, { fps: request.fps, frames: frames.map(frameURLFromPath) })
         }
+        if (opened) verifyOpenedMediaSource(opened)
         result[index] = decoded.get(key)
         prepared += 1
         report({
@@ -698,6 +730,7 @@ async function prepareExportVideoFrames(request, exportState, resolveMediaPath =
 }
 
 async function choosePngFramesDestination(suggestedName) {
+    if (process.env.REEL_G11_PNG_DESTINATION) return path.resolve(process.env.REEL_G11_PNG_DESTINATION)
     if (process.env.REEL_G06_PNG_DESTINATION) return path.resolve(process.env.REEL_G06_PNG_DESTINATION)
     const result = await dialog.showOpenDialog(mainWindow, {
         title: "Choose a folder for PNG Frames",
@@ -906,7 +939,10 @@ function createMainWindow() {
                 protocol: 1,
                 projectSchemaRange: { minimum: 2, maximum: 2 },
                 platform: process.platform,
+                architecture: process.arch,
+                appVersion: app.getVersion(),
                 runtime: { electron: process.versions.electron, chromium: process.versions.chrome, node: process.versions.node },
+                rendererSecurity: { contextIsolation: true, nodeIntegration: false, sandbox: true, partition: G03_SESSION_PARTITION },
                 packaged: app.isPackaged,
                 securityDecisions: { ...securityDecisions },
             }),
@@ -939,10 +975,13 @@ function createMainWindow() {
     }
     installWindowSecurity(mainWindow, { developmentOrigin: developmentRendererOrigin(), onDecision: recordSecurityDecision })
     mainWindow.loadURL(rendererURL())
-    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT) {
+    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT) {
         mainWindow.webContents.once("did-finish-load", async () => {
             try {
-                if (process.env.REEL_G08_RENDERER_OUTPUT) {
+                if (process.env.REEL_G11_RENDERER_OUTPUT) {
+                    const { runG11VitrineSmoke } = require("./g11-vitrine-smoke.cjs")
+                    await runG11VitrineSmoke(mainWindow, path.resolve(process.env.REEL_G11_RENDERER_OUTPUT), process.env.REEL_G11_RENDERER_MODE ?? "save")
+                } else if (process.env.REEL_G08_RENDERER_OUTPUT) {
                     const { runG08InterfaceSmoke } = require("./g08-interface-smoke.cjs")
                     await runG08InterfaceSmoke(mainWindow, path.resolve(process.env.REEL_G08_RENDERER_OUTPUT))
                 } else if (process.env.REEL_G06_RENDERER_OUTPUT) {

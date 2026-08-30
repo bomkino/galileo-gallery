@@ -17,7 +17,7 @@ const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "galileo-g05-video-audio
 
 function grant(filePath, token, mime = "video/mp4") {
     const stat = fs.statSync(filePath)
-    return { token, filePath, mime, bytes: stat.size, device: stat.dev, inode: stat.ino, mtimeMs: stat.mtimeMs }
+    return { token, filePath, mime, bytes: stat.size, device: stat.dev, inode: stat.ino, mtimeMs: stat.mtimeMs, ctimeMs: stat.ctimeMs }
 }
 
 function makeVideo(target, withAudio) {

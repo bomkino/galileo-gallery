@@ -2,7 +2,7 @@ const assert = require("node:assert/strict")
 const fs = require("node:fs")
 const os = require("node:os")
 const path = require("node:path")
-const { createLinuxHostController } = require("../electron/linux-host-controller.cjs")
+const { createLinuxHostController, verifyOpenedMediaSource } = require("../electron/linux-host-controller.cjs")
 const { HostPortError } = require("../electron/linux-host-port.cjs")
 
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "galileo-g03-controller-"))
@@ -30,6 +30,7 @@ const mainFrame = { url: "gallery-app://app/index.html" }
 const sender = { id: 71, mainFrame }
 const event = { sender, senderFrame: mainFrame }
 let openCount = 0
+let saveCount = 0
 
 const host = createLinuxHostController({
     owner: "window-71",
@@ -44,7 +45,10 @@ const host = createLinuxHostController({
     },
     decodeAudio: ({ startFrame, frameCount }) => ({ sampleRate: 48_000, channels: 1, startFrame, frameCount, samples: Array.from({ length: frameCount }, () => 0) }),
     audioWaveform: ({ buckets }) => ({ sampleRate: 48_000, channels: 1, sampleFrames: 4, buckets: Array.from({ length: buckets }, () => ({ minimum: -0.5, maximum: 0.5, rms: 0.25 })) }),
-    saveProject: ({ config, mediaPath: resolve }) => ({ itemCount: config.items.length, resolved: resolve(config.items[0].url) === mediaPath }),
+    saveProject: ({ config, mediaPath: resolve }) => {
+        saveCount += 1
+        return { itemCount: config.items.length, resolved: resolve(config.items[0].url) === mediaPath }
+    },
     openProject: async ({ generation, grantMedia, signal }) => {
         openCount += 1
         if (signal.aborted) return { cancelled: true }
@@ -60,6 +64,19 @@ function envelope(operation, payload = {}, generation = host.snapshot().generati
 }
 
 async function run() {
+    const heldSource = path.join(temporary, "held-source.mov")
+    fs.writeFileSync(heldSource, "abcdefgh")
+    const heldHandle = fs.openSync(heldSource, "r")
+    try {
+        const heldStat = fs.fstatSync(heldHandle)
+        const identity = { handle: heldHandle, device: heldStat.dev, inode: heldStat.ino, size: heldStat.size, mtimeMs: heldStat.mtimeMs, ctimeMs: heldStat.ctimeMs }
+        assert.doesNotThrow(() => verifyOpenedMediaSource(identity))
+        await new Promise((resolve) => setTimeout(resolve, 5))
+        fs.writeFileSync(heldSource, "hgfedcba")
+        assert.throws(() => verifyOpenedMediaSource(identity), (error) => error.code === "verification_failed", "same-size in-place mutation must invalidate held export source identity")
+    } finally {
+        fs.closeSync(heldHandle)
+    }
     assert.deepEqual(host.bootstrap(event), { protocol: 1, generation: 1, state: "ready" })
     const identity = await host.handle(event, envelope("identity.read"))
     assert.deepEqual(identity.value, { productId: "galileo-gallery", protocol: 1, platform: "linux" })
@@ -86,6 +103,17 @@ async function run() {
     assert.equal(oversizedDecode.error.code, "invalid_request")
     const saved = await host.handle(event, envelope("project.save", { config: { items: [{ url: chosen.value[0].mediaURL }] } }))
     assert.deepEqual(saved.value, { itemCount: 1, resolved: true })
+    assert.equal(saveCount, 1)
+    const oversizedVitrine = await host.handle(event, envelope("project.save", { config: {
+        styleId: "vitrine", sceneVersion: 2, items: Array.from({ length: 128 }, (_, index) => ({ id: `vitrine-${index}`, url: chosen.value[0].mediaURL })),
+    } }, 1, "request-vitrine-save-quota"))
+    assert.equal(oversizedVitrine.error.code, "invalid_request")
+    assert.equal(saveCount, 1, "invalid Vitrine save must be rejected before host persistence")
+    const oversizedGeneric = await host.handle(event, envelope("project.save", { config: {
+        styleId: "quiet-carousel", sceneVersion: 1, items: Array.from({ length: 257 }, (_, index) => ({ id: `generic-${index}`, url: chosen.value[0].mediaURL })),
+    } }, 1, "request-generic-save-quota"))
+    assert.equal(oversizedGeneric.error.code, "invalid_request")
+    assert.equal(saveCount, 1, "generic save beyond the renderer reopen envelope must be rejected before host persistence")
 
     const begun = await host.handle(event, envelope("project.open.begin"))
     assert.equal(begun.ok, true)

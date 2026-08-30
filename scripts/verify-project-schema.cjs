@@ -4,6 +4,7 @@ const fs = require("node:fs")
 const os = require("node:os")
 const path = require("node:path")
 const AdmZip = require("adm-zip")
+const { createStoredZipPlan } = require("../electron/project-archive-writer.cjs")
 const {
     openPortableProjectArchive,
     savePortableProjectArchive,
@@ -120,10 +121,42 @@ async function expectFailure(code, archivePath, roots, priorProject) {
     assert.deepEqual(fs.existsSync(roots.staging) ? fs.readdirSync(roots.staging) : [], [], `${code} left staging residue`)
 }
 
+async function expectSaveFailureBeforeStaging(options, code, label) {
+    const originalMkdtemp = fs.mkdtempSync
+    const originalCreateWriteStream = fs.createWriteStream
+    let saveMkdtempCalls = 0
+    let stagingCopyCalls = 0
+    fs.mkdtempSync = (prefix, ...args) => {
+        if (String(prefix).includes("galileo-gallery-save-")) {
+            saveMkdtempCalls += 1
+            throw new Error(`${label} reached mkdtemp`)
+        }
+        return originalMkdtemp(prefix, ...args)
+    }
+    fs.createWriteStream = (target, ...args) => {
+        if (String(target).includes("galileo-gallery-save-")) stagingCopyCalls += 1
+        return originalCreateWriteStream(target, ...args)
+    }
+    try {
+        await assert.rejects(savePortableProjectArchive(options), (error) => error?.code === code)
+    } finally {
+        fs.mkdtempSync = originalMkdtemp
+        fs.createWriteStream = originalCreateWriteStream
+    }
+    assert.equal(saveMkdtempCalls, 0, `${label} must reject before mkdtemp`)
+    assert.equal(stagingCopyCalls, 0, `${label} must reject before copying into staging`)
+}
+
 async function run() {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "galileo-project-schema-"))
     const roots = { staging: path.join(root, "staging"), opened: path.join(root, "opened") }
     try {
+        const smallPlan = createStoredZipPlan([{ archivePath: "one.bin", bytes: 3, sourceRelativePath: "one.bin" }])
+        assert.equal(smallPlan.archiveBytes, 30 + 7 + 3 + 16 + 46 + 7 + 22, "stored ZIP planning must charge every local, descriptor, central, and end byte")
+        const zip64Plan = createStoredZipPlan([{ archivePath: "large.bin", bytes: 0xffffffff, sourceRelativePath: "large.bin" }])
+        assert.equal(zip64Plan.entries[0].sizeZip64, true)
+        assert.equal(zip64Plan.zip64End, true, "ZIP64-sized authored entries must also receive ZIP64 end records")
+
         const mediaPaths = writeMedia(root)
         const config = fixtureConfig(mediaPaths)
         const projectPath = path.join(root, "canonical.galileo")
@@ -133,6 +166,8 @@ async function run() {
             tempRoot: root,
             mediaPathFromURL: (url) => url,
         })
+        if (process.platform !== "win32") assert.equal(fs.statSync(projectPath).mode & 0o777, 0o600, "authored Project archives must remain private")
+        assert(new AdmZip(projectPath).getEntries().filter((entry) => !entry.isDirectory).every((entry) => entry.header.method === 0), "bounded authored entries must be stored without compression-ratio amplification")
         const manifest = archiveManifest(projectPath)
         assert.deepEqual(manifest, saved.project)
         assert.equal(canonicalProjectJSON(manifest), canonicalProjectJSON(validatePortableProject(structuredClone(manifest))))
@@ -144,6 +179,7 @@ async function run() {
         assert.equal(manifest.timeline.mode, "automatic")
         assert.equal(manifest.timeline.fixedDurationMs, 0)
         assert.deepEqual(manifest.timeline.segments, [])
+        assert.equal(Object.hasOwn(manifest.timeline, "transitionDirection"), false, "v1 manifests must not adopt Vitrine v2 fields")
         assert.deepEqual(manifest.audio, config.audio)
 
         const portableText = canonicalProjectJSON(manifest)
@@ -171,6 +207,130 @@ async function run() {
         })
         assert.equal(canonicalProjectJSON(reopenedSave.project), canonicalProjectJSON(manifest))
 
+        const vitrineConfig = {
+            ...config,
+            styleId: "vitrine",
+            sceneVersion: 2,
+            items: config.items.map((item, index) => index === 0 ? {
+                ...item, spotlight: false, muted: false, aspectMode: "custom", ratioW: 16, ratioH: 9, fit: "cover",
+                crop: { x: 0, y: 0, width: 1, height: 1 }, focal: { x: 0.2, y: 0.3 },
+            } : {
+                ...item, spotlight: false, muted: false, aspectMode: "auto", ratioW: 9, ratioH: 16, fit: "contain",
+                crop: { x: 0, y: 0.25, width: 1, height: 0.5 }, focal: { x: 0.8, y: 0.7 },
+            }),
+            settings: { ...config.settings, axis: "horizontal", direction: "reverse", transitionDirection: "left", slideHeight: 62, tilt: 5, sway: 18, holdMs: 1_400, paceMs: 760, showHint: true },
+        }
+        const vitrinePath = path.join(root, "vitrine-v2.galileo")
+        const vitrineSaved = await savePortableProjectArchive({ config: vitrineConfig, outputPath: vitrinePath, tempRoot: root, mediaPathFromURL: (url) => url })
+        assert.deepEqual(vitrineSaved.project.scene, { id: "vitrine", version: 2, parameters: vitrineSaved.project.scene.parameters })
+        assert.equal(vitrineSaved.project.timeline.direction, "reverse")
+        assert.equal(vitrineSaved.project.timeline.transitionDirection, "left")
+        assert.deepEqual(vitrineSaved.project.media.map((entry) => entry.frame), vitrineConfig.items.map((item) => ({
+            ratio: item.ratio, aspectMode: item.aspectMode, ratioW: item.ratioW, ratioH: item.ratioH,
+            fit: item.fit, crop: item.crop, focal: item.focal, caption: item.caption ?? "", spotlight: item.spotlight, muted: item.muted,
+        })), "Vitrine v2 manifest must preserve distinct per-frame fit/crop/focal intent")
+        let oversizedVitrineResolverCalls = 0
+        await assert.rejects(savePortableProjectArchive({
+            config: {
+                ...vitrineConfig,
+                items: Array.from({ length: 128 }, (_, index) => ({ ...vitrineConfig.items[index % vitrineConfig.items.length], id: `vitrine-quota-${index}` })),
+            },
+            outputPath: path.join(root, "vitrine-too-many.galileo"),
+            tempRoot: root,
+            mediaPathFromURL: () => { oversizedVitrineResolverCalls += 1; throw new Error("Vitrine quota rejection reached media authority.") },
+        }), (error) => error?.code === "scene_invalid")
+        assert.equal(oversizedVitrineResolverCalls, 0, "Vitrine item quota must reject before resolving or reading media")
+        const vitrineOpened = await openPortableProjectArchive({ sourcePath: vitrinePath, stagingParent: roots.staging, openedProjectsRoot: roots.opened, mediaURLFromPath: (filePath) => filePath })
+        assert.equal(vitrineOpened.config.styleId, "vitrine")
+        assert.equal(vitrineOpened.config.sceneVersion, 2)
+        assert.equal(vitrineOpened.config.settings.slideHeight, 62)
+        assert.equal(vitrineOpened.config.settings.tilt, 5)
+        assert.equal(vitrineOpened.config.settings.sway, 18)
+        assert.equal(vitrineOpened.config.settings.direction, "reverse")
+        assert.equal(vitrineOpened.config.settings.transitionDirection, "left")
+        assert.deepEqual(vitrineOpened.config.items.map((item) => ({ fit: item.fit, crop: item.crop, focal: item.focal })), vitrineConfig.items.map((item) => ({ fit: item.fit, crop: item.crop, focal: item.focal })))
+        const vitrineReopenPath = path.join(root, "vitrine-v2-reopened.galileo")
+        const vitrineReopened = await savePortableProjectArchive({ config: vitrineOpened.config, outputPath: vitrineReopenPath, tempRoot: root, mediaPathFromURL: (url) => url })
+        assert.equal(canonicalProjectJSON(vitrineReopened.project), canonicalProjectJSON(vitrineSaved.project))
+
+        const legacyVitrine = structuredClone(vitrineSaved.project)
+        legacyVitrine.scene.version = 1
+        legacyVitrine.scene.parameters.slideHeight = 90
+        delete legacyVitrine.timeline.transitionDirection
+        for (const entry of legacyVitrine.media) {
+            delete entry.frame.fit
+            delete entry.frame.crop
+            delete entry.frame.focal
+        }
+        assert.equal(validatePortableProject(legacyVitrine).scene.version, 1, "legacy Vitrine v1 parameters retain their generic contract")
+        const legacyVitrinePath = path.join(root, "vitrine-v1.galileo")
+        const legacyVitrineSaved = await savePortableProjectArchive({ config: { ...vitrineConfig, sceneVersion: 1, settings: { ...vitrineConfig.settings, slideHeight: 90 } }, outputPath: legacyVitrinePath, tempRoot: root, mediaPathFromURL: (url) => url })
+        const legacyVitrineOpened = await openPortableProjectArchive({ sourcePath: legacyVitrinePath, stagingParent: roots.staging, openedProjectsRoot: roots.opened, mediaURLFromPath: (filePath) => filePath })
+        assert.equal(legacyVitrineOpened.config.sceneVersion, undefined)
+        assert.equal(legacyVitrineOpened.config.settings.slideHeight, 90)
+        assert.equal(legacyVitrineOpened.config.settings.transitionDirection, "left", "runtime-only legacy default must not alter its manifest")
+        assert.equal(Object.hasOwn(legacyVitrineSaved.project.timeline, "transitionDirection"), false)
+        const legacyVitrineReopened = await savePortableProjectArchive({ config: legacyVitrineOpened.config, outputPath: path.join(root, "vitrine-v1-reopened.galileo"), tempRoot: root, mediaPathFromURL: (url) => url })
+        assert.equal(canonicalProjectJSON(legacyVitrineReopened.project), canonicalProjectJSON(legacyVitrineSaved.project), "Vitrine v1 must reopen without adopting v2 semantics")
+        for (const [key, value] of [["slideHeight", 41], ["tilt", 10], ["sway", 31]]) {
+            const invalidVitrine = structuredClone(vitrineSaved.project)
+            invalidVitrine.scene.parameters[key] = value
+            assert.throws(() => validatePortableProject(invalidVitrine), (error) => error?.code === "scene_invalid")
+        }
+        const missingFrameIntent = structuredClone(vitrineSaved.project)
+        delete missingFrameIntent.media[0].frame.fit
+        delete missingFrameIntent.media[0].frame.crop
+        delete missingFrameIntent.media[0].frame.focal
+        assert.throws(() => validatePortableProject(missingFrameIntent), (error) => error?.code === "manifest_invalid")
+        for (const mutate of [
+            (frame) => { frame.fit = "stretch" },
+            (frame) => { frame.crop = { x: 0.5, y: 0, width: 0.6, height: 1 } },
+            (frame) => { frame.crop.width = 0.00009 },
+            (frame) => { frame.focal.x = 1.01 },
+            (frame) => { frame.ratio = 10_000; frame.crop = { x: 0, y: 0, width: 1, height: 0.0001 } },
+        ]) {
+            const invalidFrameIntent = structuredClone(vitrineSaved.project)
+            mutate(invalidFrameIntent.media[0].frame)
+            assert.throws(() => validatePortableProject(invalidFrameIntent), (error) => error?.code === "manifest_invalid")
+        }
+        for (const [ratioW, ratioH] of [[1, 10_000], [10_000, 1]]) {
+            const boundaryFrameIntent = structuredClone(vitrineSaved.project)
+            Object.assign(boundaryFrameIntent.media[0].frame, { aspectMode: "custom", ratioW, ratioH, crop: { x: 0, y: 0, width: 1, height: 1 } })
+            assert.equal(validatePortableProject(boundaryFrameIntent).media[0].frame.ratioW, ratioW)
+        }
+        for (const mutate of [
+            (project) => { project.timeline.paceMs = 279 },
+            (project) => { project.timeline.holdMs = 599 },
+            (project) => { project.look.id = "gallery-look.gradient"; project.look.parameters.backgroundStyle = "gradient" },
+            (project) => { project.timeline.mode = "fixed-duration"; project.timeline.fixedDurationMs = 999 },
+            (project) => { project.timeline.axis = "vertical" },
+            (project) => { project.timeline.direction = "left" },
+            (project) => { project.timeline.transitionDirection = "forward" },
+            (project) => { delete project.timeline.transitionDirection },
+            (project) => { project.media.forEach((entry) => { entry.frame.muted = true }) },
+            (project) => { project.media[0].frame.spotlight = true },
+            (project) => { project.scene.parameters.spotlightsEnabled = true },
+            (project) => { project.media[0].frame.spotlight = true; project.media[1].frame.spotlight = true },
+            (project) => { project.timeline.mode = "fixed-duration"; project.timeline.fixedDurationMs = 24 * 60 * 60 * 1_000; project.timeline.repeatCount = 2 },
+            (project) => { project.timeline.mode = "directed"; project.timeline.fixedDurationMs = 0; project.timeline.playKind = "loop"; project.timeline.segments = [
+                { id: "long-a", kind: "cycle", cycles: 1, paceScale: 1, durationMs: 50_000_000 },
+                { id: "long-b", kind: "cycle", cycles: 1, paceScale: 1, durationMs: 50_000_000 },
+            ] },
+        ]) {
+            const invalidVitrine = structuredClone(vitrineSaved.project)
+            mutate(invalidVitrine)
+            assert.throws(() => validatePortableProject(invalidVitrine), (error) => ["scene_invalid", "timeline_invalid", "look_invalid"].includes(error?.code))
+        }
+        const emptyVitrine = structuredClone(vitrineSaved.project)
+        emptyVitrine.media = []
+        assert.throws(() => validatePortableProject(emptyVitrine), (error) => error?.code === "scene_invalid")
+        const prototypeName = structuredClone(vitrineSaved.project)
+        prototypeName.scene.id = "constructor"
+        assert.throws(() => validatePortableProject(prototypeName), (error) => error?.code === "scene_invalid")
+        const customPrototype = Object.assign(Object.create({ inherited: true }), structuredClone(vitrineSaved.project))
+        assert.throws(() => validatePortableProject(customPrototype), (error) => error?.code === "manifest_invalid")
+
+        const mediaBytes = mediaPaths.reduce((total, mediaPath) => total + fs.statSync(mediaPath).size, 0)
         const presenterPath = writePcm16Wav(path.join(root, "private-presenter.wav"), 4_800)
         const soundtrackPath = writePcm16Wav(path.join(root, "private-soundtrack.wav"), 9_600, 2, 48_000, false)
         const audioConfig = { ...config, audio: audioFixture(presenterPath, soundtrackPath) }
@@ -203,6 +363,18 @@ async function run() {
         const audioReopened = await savePortableProjectArchive({ config: audioOpened.config, outputPath: audioReopenedPath, tempRoot: root, mediaPathFromURL: (url) => url })
         assert.equal(canonicalProjectJSON(audioReopened.project), canonicalProjectJSON(audioSaved.project))
 
+        const audioQuotaDestination = path.join(root, "audio-quota-protected.galileo")
+        fs.writeFileSync(audioQuotaDestination, "known-prior-audio-project-bytes")
+        const audioBytes = fs.statSync(presenterPath).size + fs.statSync(soundtrackPath).size
+        await expectSaveFailureBeforeStaging({
+            config: audioConfig,
+            outputPath: audioQuotaDestination,
+            tempRoot: root,
+            mediaPathFromURL: (url) => url,
+            limits: { totalExpandedBytes: mediaBytes + audioBytes - 1 },
+        }, "expanded_size_exceeded", "audio aggregate charge")
+        assert.equal(fs.readFileSync(audioQuotaDestination, "utf8"), "known-prior-audio-project-bytes")
+
         const quotaDestination = path.join(root, "quota-protected.galileo")
         fs.writeFileSync(quotaDestination, "known-prior-project-bytes")
         await assert.rejects(
@@ -216,6 +388,66 @@ async function run() {
             (error) => error?.code === "entry_too_large"
         )
         assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
+
+        const manifestBytes = Buffer.byteLength(canonicalProjectJSON(saved.project))
+        const canonicalArchiveBytes = fs.statSync(projectPath).size
+        const canonicalExpandedBytes = mediaBytes + manifestBytes
+        const diskReserveBytes = 73
+        const sharedAvailableBytes = diskReserveBytes
+            + Math.max(canonicalExpandedBytes, canonicalArchiveBytes)
+            + Math.floor(Math.min(canonicalExpandedBytes, canonicalArchiveBytes) / 2)
+        const originalStatfs = fs.statfsSync
+        fs.statfsSync = () => ({ bavail: sharedAvailableBytes, bsize: 1 })
+        try {
+            await expectSaveFailureBeforeStaging({
+                config,
+                outputPath: quotaDestination,
+                tempRoot: root,
+                mediaPathFromURL: (url) => url,
+                limits: { freeSpaceReserveBytes: diskReserveBytes },
+            }, "insufficient_staging_space", "same-volume Project-plus-archive peak")
+        } finally {
+            fs.statfsSync = originalStatfs
+        }
+        assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
+
+        const outputVolume = path.join(root, "output-volume")
+        fs.mkdirSync(outputVolume)
+        const outputVolumeDestination = path.join(outputVolume, "output-volume-protected.galileo")
+        fs.writeFileSync(outputVolumeDestination, "known-prior-output-volume-project-bytes")
+        const originalStatSync = fs.statSync
+        fs.statSync = (target, ...args) => {
+            const stat = originalStatSync(target, ...args)
+            if (path.resolve(String(target)) !== path.resolve(outputVolume)) return stat
+            return Object.assign(Object.create(Object.getPrototypeOf(stat)), stat, { dev: stat.dev + 1 })
+        }
+        fs.statfsSync = (folder) => ({
+            bavail: path.resolve(String(folder)) === path.resolve(outputVolume)
+                ? diskReserveBytes + canonicalArchiveBytes - 1
+                : diskReserveBytes + canonicalExpandedBytes + canonicalArchiveBytes + 1_000,
+            bsize: 1,
+        })
+        try {
+            await expectSaveFailureBeforeStaging({
+                config,
+                outputPath: outputVolumeDestination,
+                tempRoot: root,
+                mediaPathFromURL: (url) => url,
+                limits: { freeSpaceReserveBytes: diskReserveBytes },
+            }, "insufficient_staging_space", "output-volume archive charge")
+        } finally {
+            fs.statSync = originalStatSync
+            fs.statfsSync = originalStatfs
+        }
+        assert.equal(fs.readFileSync(outputVolumeDestination, "utf8"), "known-prior-output-volume-project-bytes")
+        await expectSaveFailureBeforeStaging({
+            config,
+            outputPath: quotaDestination,
+            tempRoot: root,
+            mediaPathFromURL: (url) => url,
+            limits: { totalExpandedBytes: mediaBytes + manifestBytes - 1 },
+        }, "expanded_size_exceeded", "manifest aggregate charge")
+        assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
         await assert.rejects(
             savePortableProjectArchive({
                 config,
@@ -227,16 +459,13 @@ async function run() {
             (error) => error?.code === "entry_too_large"
         )
         assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
-        await assert.rejects(
-            savePortableProjectArchive({
-                config,
-                outputPath: quotaDestination,
-                tempRoot: root,
-                mediaPathFromURL: (url) => url,
-                limits: { archiveBytes: 64 },
-            }),
-            (error) => error?.code === "archive_too_large"
-        )
+        await expectSaveFailureBeforeStaging({
+            config,
+            outputPath: quotaDestination,
+            tempRoot: root,
+            mediaPathFromURL: (url) => url,
+            limits: { archiveBytes: 64 },
+        }, "archive_too_large", "exact authored archive charge")
         assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
 
         const sourceVideoManifest = structuredClone(manifest)
@@ -260,15 +489,21 @@ async function run() {
         duplicateSourceVideo.audio.sources.push({ ...duplicateSourceVideo.audio.sources[0], id: "source-video-audio-duplicate" })
         assert.throws(() => validatePortableProject(duplicateSourceVideo), (error) => error?.code === "audio_invalid")
 
+        let oversizedResolverCalls = 0
         await assert.rejects(
             savePortableProjectArchive({
-                config: { ...config, items: Array.from({ length: 4_094 }, (_, index) => ({ ...config.items[0], id: `quota-${index}`, url: path.join(root, "never-read.png") })) },
-                outputPath: path.join(root, "too-many-authored-entries.galileo"),
+                config: { ...config, items: Array.from({ length: 257 }, (_, index) => ({ ...config.items[0], id: `quota-${index}`, url: path.join(root, "never-read.png") })) },
+                outputPath: quotaDestination,
                 tempRoot: root,
-                mediaPathFromURL: (url) => url,
+                mediaPathFromURL: (url) => {
+                    oversizedResolverCalls += 1
+                    return url
+                },
             }),
-            (error) => error?.code === "too_many_entries"
+            (error) => error?.code === "manifest_invalid"
         )
+        assert.equal(oversizedResolverCalls, 0, "oversized save must reject before resolving any source authority")
+        assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
 
         const protectedDestination = path.join(root, "protected.galileo")
         fs.writeFileSync(protectedDestination, "known-prior-project-bytes")
@@ -283,14 +518,68 @@ async function run() {
         )
         assert.equal(fs.readFileSync(protectedDestination, "utf8"), "known-prior-project-bytes")
 
+        const mutableMedia = path.join(root, "mutable-between-inspection-and-copy.png")
+        fs.copyFileSync(mediaPaths[0], mutableMedia)
+        const mutationDestination = path.join(root, "mutation-protected.galileo")
+        fs.writeFileSync(mutationDestination, "known-prior-mutation-project-bytes")
+        const mutationConfig = {
+            ...config,
+            items: config.items.map((item, index) => index === 0 ? { ...item, url: mutableMedia } : item),
+        }
+        const originalMkdtemp = fs.mkdtempSync
+        let mutationInjected = false
+        fs.mkdtempSync = (prefix, ...args) => {
+            const staging = originalMkdtemp(prefix, ...args)
+            if (String(prefix).includes("galileo-gallery-save-")) {
+                const bytes = fs.readFileSync(mutableMedia)
+                bytes[bytes.length - 1] ^= 0xff
+                fs.writeFileSync(mutableMedia, bytes)
+                mutationInjected = true
+            }
+            return staging
+        }
+        try {
+            await assert.rejects(savePortableProjectArchive({
+                config: mutationConfig,
+                outputPath: mutationDestination,
+                tempRoot: root,
+                mediaPathFromURL: (url) => url,
+            }), (error) => error?.code === "media_hash_mismatch")
+        } finally {
+            fs.mkdtempSync = originalMkdtemp
+        }
+        assert.equal(mutationInjected, true, "mutation fixture must fire after inspection and immediately before staging copy")
+        assert.equal(fs.readFileSync(mutationDestination, "utf8"), "known-prior-mutation-project-bytes")
+        assert.deepEqual(fs.readdirSync(root).filter((entry) => entry.startsWith("galileo-gallery-save-")), [], "mutated save must leave no Project staging residue")
+        assert.equal(fs.readdirSync(root).some((entry) => entry.includes("mutation-protected") && entry !== "mutation-protected.galileo"), false, "mutated save must leave no output sibling residue")
+
+        const directoryDestination = path.join(root, "prior-directory.galileo")
+        fs.mkdirSync(directoryDestination)
+        const directoryChild = path.join(directoryDestination, "must-survive.txt")
+        fs.writeFileSync(directoryChild, "known-prior-directory-bytes")
+        await assert.rejects(savePortableProjectArchive({
+            config,
+            outputPath: directoryDestination,
+            tempRoot: root,
+            mediaPathFromURL: (url) => url,
+        }), (error) => error?.code === "internal_error")
+        assert.equal(fs.readFileSync(directoryChild, "utf8"), "known-prior-directory-bytes", "Project save must not replace or delete a directory destination")
+        assert.deepEqual(fs.readdirSync(root).filter((entry) => entry.startsWith("galileo-gallery-save-")), [])
+        assert.equal(fs.readdirSync(root).some((entry) => entry.includes("prior-directory") && entry !== "prior-directory.galileo"), false)
+
         const priorProject = Object.freeze({ identity: "known-prior-project", revision: 7 })
         const cases = [
             ["wrong_product", (project) => ({ ...project, product: "pitchdog-drift" })],
             ["future_version_unsupported", (project) => ({ ...project, schemaVersion: 99 })],
             ["canvas_invalid", (project) => ({ ...project, canvas: { ...project.canvas, canvasWidth: 1 } })],
-            ["scene_invalid", (project) => ({ ...project, scene: { ...project.scene, version: 2 } })],
+            ["canvas_invalid", (project) => ({ ...project, canvas: { ...project.canvas, canvasPreset: "custom", canvasWidth: 97, canvasHeight: 65 } })],
+            ["canvas_invalid", (project) => ({ ...project, canvas: { ...project.canvas, canvasPreset: "fullHD", canvasWidth: 1919, canvasHeight: 1080 } })],
+            ["future_version_unsupported", (project) => ({ ...project, scene: { ...project.scene, version: 2 } })],
+            ["scene_invalid", (project) => ({ ...project, scene: { ...project.scene, id: "unknown-gallery-world" } })],
             ["look_invalid", (project) => ({ ...project, look: { ...project.look, id: "gallery-look.paper" } })],
             ["look_invalid", (project) => ({ ...project, look: { ...project.look, parameters: { ...project.look.parameters, ground: "/Users/alice/private" } } })],
+            ["look_invalid", (project) => ({ ...project, look: { ...project.look, parameters: { ...project.look.parameters, ground: "#fff" } } })],
+            ["look_invalid", (project) => ({ ...project, look: { ...project.look, parameters: { ...project.look.parameters, paper: "#12345678" } } })],
             ["timeline_invalid", (project) => ({ ...project, timeline: { ...project.timeline, mode: "mystery" } })],
             ["timeline_invalid", (project) => ({ ...project, timeline: { ...project.timeline, mode: "fixed-duration", fixedDurationMs: 0 } })],
             ["timeline_invalid", (project) => ({ ...project, timeline: { ...project.timeline, mode: "directed", segments: [{ id: "bad", kind: "cycle", cycles: 0, paceScale: 1, durationMs: 1000 }] } })],
@@ -400,7 +689,7 @@ async function run() {
         assert.deepEqual(fs.readdirSync(roots.opened).sort(), openedBeforeAudioCancel)
         assert.deepEqual(fs.readdirSync(roots.staging), [])
 
-        console.log("Verified: clean v2 Project schema, canonical visual/audio save/open/reopen, ordered hashes, three audio roles, privacy exclusions, typed failures, cancellation, and prior-state preservation.")
+        console.log("Verified: canonical visual/audio Project round-trips, bounded stored-ZIP output, causal quotas and mutation rollback, peak volume reserves, typed failures, and prior-state preservation.")
     } finally {
         fs.rmSync(root, { recursive: true, force: true })
     }

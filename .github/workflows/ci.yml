@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, codex/g02-quiet-carousel-tracer, codex/g03-linux-host-port, codex/g05-deterministic-audio, codex/g06-verified-png-export, codex/g06b-verified-h264-aac, codex/g08-interface-scale-core, codex/g08-interface-polish, codex/g08-interface-scale-ui]
+    branches: [main, 'codex/**']
   pull_request:
 
 permissions:
@@ -171,8 +171,7 @@ jobs:
           project="$PWD/artifacts/g06/quiet.galileo"
           success="$PWD/artifacts/g06/png-success"
           cancelled="$PWD/artifacts/g06/png-cancelled"
-          mkdir -p "$PWD/artifacts/g06" "$cancelled"
-          printf 'preserve-me' > "$cancelled/prior.txt"
+          mkdir -p "$PWD/artifacts/g06"
           fixtures="$(node scripts/create-g05-audio-fixtures.cjs "$PWD/artifacts/g06-fixtures")"
           presenter="$(node -e 'process.stdout.write(JSON.parse(process.argv[1]).presenter)' "$fixtures")"
           node scripts/create-g06-smoke-project.cjs "$project" "$PWD/build/icon.png" "$presenter"
@@ -189,7 +188,7 @@ jobs:
             REEL_G06_PNG_DESTINATION="$cancelled" \
             REEL_G03_PROJECT_PATH="$project" \
             "$executable"
-          test "$(cat "$cancelled/prior.txt")" = preserve-me
+          test ! -e "$cancelled"
           if test "$GITHUB_REF_NAME" = codex/g06b-verified-h264-aac || test "$GITHUB_REF_NAME" = codex/g08-interface-scale-ui || test "$GITHUB_REF_NAME" = main || test "$GITHUB_EVENT_NAME" = pull_request; then
             h264_success="$PWD/artifacts/g06/h264-success.mp4"
             h264_cancelled="$PWD/artifacts/g06/h264-cancelled.mp4"
@@ -250,7 +249,7 @@ jobs:
           path: artifacts/g05/
 
   renderer-g08:
-    if: github.ref_name == 'main' || github.ref_name == 'codex/g08-interface-polish' || github.ref_name == 'codex/g08-interface-scale-ui' || github.event_name == 'pull_request'
+    if: github.ref_name == 'main' || startsWith(github.ref_name, 'codex/') || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -277,3 +276,76 @@ jobs:
         with:
           name: g08-interface-renderer-evidence
           path: artifacts/g08/
+
+  renderer-g11:
+    if: github.ref_name == 'main' || startsWith(github.ref_name, 'codex/g11-') || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Build exact hardened Linux candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_sha="$GITHUB_SHA"
+          source_tree="$(git rev-parse HEAD^{tree})"
+          GALLERY_SOURCE_SHA="$source_sha" GALLERY_SOURCE_TREE="$source_tree" npm run package:linux:g03
+          sudo chown root:root release/g03/linux-unpacked/chrome-sandbox
+          sudo chmod 4755 release/g03/linux-unpacked/chrome-sandbox
+          npm run verify:packaged-ffmpeg
+      - name: Run packaged Vitrine positive and failure journeys
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_sha="$GITHUB_SHA"
+          source_tree="$(git rev-parse HEAD^{tree})"
+          executable="$PWD/release/g03/linux-unpacked/galileo-gallery"
+          app_asar="$PWD/release/g03/linux-unpacked/resources/app.asar"
+          root="$PWD/artifacts/g11"
+          test -x "$executable"
+          test -f "$app_asar"
+          mkdir -p "$root"
+          GALLERY_SOURCE_SHA="$source_sha" \
+          GALLERY_SOURCE_TREE="$source_tree" \
+          G11_EXPECTED_EXECUTABLE_SHA="$(sha256sum "$executable" | cut -d' ' -f1)" \
+          G11_EXPECTED_APP_ASAR_SHA="$(sha256sum "$app_asar" | cut -d' ' -f1)" \
+          REEL_G11_ARTIFACTS="$root" \
+          REEL_G11_EXECUTABLE="$executable" \
+          xvfb-run -a node scripts/run-g11-renderer.cjs
+      - name: Re-run packaged PNG cancellation after G11 runtime changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          executable="$PWD/release/g03/linux-unpacked/galileo-gallery"
+          project="$PWD/artifacts/g11-regression/quiet.galileo"
+          cancelled="$PWD/artifacts/g11-regression/png-cancelled"
+          mkdir -p "$PWD/artifacts/g11-regression"
+          fixtures="$(node scripts/create-g05-audio-fixtures.cjs "$PWD/artifacts/g11-regression-fixtures")"
+          presenter="$(node -e 'process.stdout.write(JSON.parse(process.argv[1]).presenter)' "$fixtures")"
+          node scripts/create-g06-smoke-project.cjs "$project" "$PWD/build/icon.png" "$presenter"
+          xvfb-run -a env \
+            REEL_USER_DATA_DIR="$PWD/artifacts/g11-regression-runtime" \
+            REEL_G06_RENDERER_OUTPUT="$PWD/artifacts/g11-regression/evidence-cancel" \
+            REEL_G06_RENDERER_MODE=cancel \
+            REEL_G06_PNG_DESTINATION="$cancelled" \
+            REEL_G03_PROJECT_PATH="$project" \
+            "$executable"
+          test ! -e "$cancelled"
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: g11-vitrine-positive-and-failure-evidence
+          path: artifacts/g11/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v6
+        if: success()
+        with:
+          name: g11-png-cancellation-regression-evidence
+          path: artifacts/g11-regression/
+          if-no-files-found: error

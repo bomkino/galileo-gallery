@@ -25,6 +25,7 @@ export const DEFAULT_SETTINGS: ReelSettings = {
     paceMs: 230,
     axis: "horizontal",
     direction: "forward",
+    transitionDirection: "left",
     startMode: "auto",
     playKind: "repeat",
     repeatCount: 5,

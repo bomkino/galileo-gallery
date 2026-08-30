@@ -14,7 +14,7 @@ if (compile.status !== 0) throw new Error(compile.error?.message || compile.stde
 
 try {
     const { sceneClock, sceneDurationMs, sceneFinaleIndex } = require(path.join(outputDir, "storyTiming.js"))
-    const { STYLE_PROFILES } = require(path.join(outputDir, "styleProfiles.js"))
+    const { STYLE_PROFILES, styleSettings } = require(path.join(outputDir, "styleProfiles.js"))
     const items = [0, 1, 2, 3].map((index) => ({
         id: String(index),
         name: String(index),
@@ -34,6 +34,8 @@ try {
     }
     const config = { schemaVersion: 2, styleId: "swipe-stack", items, settings }
     const base = 10000
+
+    assert.equal(styleSettings("vitrine", 2).playKind, "loop", "fresh Vitrine v2 must tour all ordered media by default")
 
     assert.equal(sceneFinaleIndex(items), 2, "finale skips muted trailing frames")
     assert.equal(sceneDurationMs(config, base, false), 12200, "loop includes one spotlight and finale dwell")

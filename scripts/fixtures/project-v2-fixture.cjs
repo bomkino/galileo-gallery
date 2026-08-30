@@ -6,7 +6,7 @@ const SETTINGS = {
     customRatioWidth: 16, customRatioHeight: 9, imageFit: "contain", autoplayVideos: true, loopVideos: true,
     paddingUnit: "px", paddingTop: 6, paddingRight: 6, paddingBottom: 6, paddingLeft: 6, captionGap: 10,
     motionPreset: "magnetic", launchMs: 120, arrivalMs: 160, growMs: 420, exitMs: 340, paceMs: 230,
-    axis: "horizontal", direction: "forward", startMode: "auto", playKind: "repeat", repeatCount: 5,
+    axis: "horizontal", direction: "forward", transitionDirection: "left", startMode: "auto", playKind: "repeat", repeatCount: 5,
     leadInMs: 800, holdMs: 900, finaleGrowMs: 750, finaleHoldMs: 2600, fadeMs: 600, canvasPose: 62,
     spotlightsEnabled: false, finaleEnabled: false, heroSize: 70, finaleSize: 100, centerBump: 5, tilt: 10,
     sway: 70, idleDim: 30, idleMute: 45, spotlightDim: 55, speedBlur: 3, slideHeight: 44, gap: 30,
@@ -42,8 +42,8 @@ function fixtureConfig(media) {
             master: { gain: 1, muted: false },
         },
         items: [
-            { id: "frame-one", name: "First frame.png", type: "image", url: media[0], ratio: 4 / 3, aspectMode: "auto", ratioW: 16, ratioH: 9, caption: "Opening", spotlight: true, muted: false },
-            { id: "frame-two", name: "Second frame.webp", type: "image", url: media[1], ratio: 9 / 16, aspectMode: "custom", ratioW: 9, ratioH: 16, spotlight: false, muted: true },
+            { id: "frame-one", name: "First frame.png", type: "image", url: media[0], ratio: 4 / 3, aspectMode: "auto", ratioW: 16, ratioH: 9, fit: "contain", crop: { x: 0, y: 0, width: 1, height: 1 }, focal: { x: 0.5, y: 0.5 }, caption: "Opening", spotlight: true, muted: false },
+            { id: "frame-two", name: "Second frame.webp", type: "image", url: media[1], ratio: 9 / 16, aspectMode: "custom", ratioW: 9, ratioH: 16, fit: "contain", crop: { x: 0, y: 0, width: 1, height: 1 }, focal: { x: 0.5, y: 0.5 }, spotlight: false, muted: true },
         ],
         settings: { ...SETTINGS, canvasPreset: "vertical", canvasWidth: 1080, canvasHeight: 1920, axis: "vertical" },
     }

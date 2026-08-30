@@ -142,6 +142,12 @@ async function readMetrics(window) {
                 clientHeight: shell.clientHeight,
                 scrollHeight: shell.scrollHeight,
             },
+            regions: {
+                titlebar: rect('.titlebar'),
+                library: rect('.library'),
+                studio: rect('.studio'),
+                inspector: rect('.inspector'),
+            },
             targets: {
                 primary: rect('.title-actions .button.primary'),
                 icon: rect('.icon-button'),
@@ -175,6 +181,51 @@ async function readMetrics(window) {
                 schemaVersion: manifest.schemaVersion,
                 interfaceScale: manifest.interfaceScale,
             },
+        }
+    })()`)
+}
+
+async function verifyWorkflowNavigation(window) {
+    return window.webContents.executeJavaScript(`(async () => {
+        const before = localStorage.getItem('${PROJECT_KEY}')
+        const slides = document.querySelector('.library .panel-heading h2')?.textContent?.trim()
+        const buttons = Array.from(document.querySelectorAll('.inspector-top .segment button'))
+        const tabs = buttons.map((button) => button.textContent.trim())
+        const seams = ['.style-current-panel', '.motion-workspace-intro', '.export-intro']
+        const steps = []
+        for (let index = 0; index < buttons.length; index += 1) {
+            const button = buttons[index]
+            button.click()
+            await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+            const active = document.querySelector('.inspector-top .segment button.is-active')?.textContent?.trim()
+            const seam = document.querySelector(seams[index])
+            steps.push({
+                active,
+                seam: seams[index],
+                visible: Boolean(seam && seam.getClientRects().length),
+                projectInvariant: before === localStorage.getItem('${PROJECT_KEY}'),
+            })
+        }
+        buttons[0].focus()
+        buttons[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        const arrow = {
+            active: document.querySelector('.inspector-top .segment button.is-active')?.textContent?.trim(),
+            focused: document.activeElement?.textContent?.trim(),
+        }
+        document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        const end = {
+            active: document.querySelector('.inspector-top .segment button.is-active')?.textContent?.trim(),
+            focused: document.activeElement?.textContent?.trim(),
+        }
+        return {
+            slides,
+            tabs,
+            steps,
+            keyboard: { arrow, end },
+            projectInvariant: before === localStorage.getItem('${PROJECT_KEY}'),
+            active: document.querySelector('.inspector-top .segment button.is-active')?.textContent?.trim(),
         }
     })()`)
 }
@@ -315,6 +366,9 @@ function assertInvariant(metrics) {
             throw new Error(`${key} changed or distorted the preview canvas ratio.`)
         }
         if (value.shell.scrollWidth > value.shell.clientWidth + 1) throw new Error(`${key} has horizontally clipped studio content.`)
+        if (value.regions.titlebar.bottom > value.regions.library.top + 1) {
+            throw new Error(`${key} lets the header overlap the Slides rail.`)
+        }
         const physicalTargetFloor = value.interfaceScale < 100 ? 44 : 44 * value.interfaceScale / 100
         if (Object.values(value.targets).some((target) => target.height + 0.2 < physicalTargetFloor)) {
             throw new Error(`${key} has a primary target below its ${physicalTargetFloor}px physical floor.`)
@@ -384,8 +438,20 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
         throw new Error("G08 did not exercise the current Linux HostPort and export capability seam.")
     }
     const formatTruth = await window.webContents.executeJavaScript(`Array.from(document.querySelectorAll('.format-cards button')).map((button) => ({ text: button.textContent.replace(/\\s+/g, ' ').trim(), disabled: button.disabled }))`)
-    if (formatTruth[0]?.disabled || !formatTruth[0]?.text.startsWith("PNG Frames") || !formatTruth[1]?.disabled || !formatTruth[1]?.text.includes("Quiet Carousel only")) {
+    if (!formatTruth[0]?.disabled || !formatTruth[0]?.text.includes("Quiet Carousel v1 or Vitrine v2 only") || !formatTruth[1]?.disabled || !formatTruth[1]?.text.includes("Quiet Carousel only")) {
         throw new Error("G08 did not preserve the honest Scene-specific export capability boundary.")
+    }
+    const workflow = await verifyWorkflowNavigation(window)
+    if (workflow.slides !== "Slides"
+        || workflow.tabs.join(",") !== "Look,Motion,Export"
+        || workflow.steps.some((step, index) => step.active !== workflow.tabs[index] || !step.visible || !step.projectInvariant)
+        || workflow.keyboard.arrow.active !== "Motion"
+        || workflow.keyboard.arrow.focused !== "Motion"
+        || workflow.keyboard.end.active !== "Export"
+        || workflow.keyboard.end.focused !== "Export"
+        || workflow.active !== "Export"
+        || !workflow.projectInvariant) {
+        throw new Error("G08 did not preserve the Slides, Look, Motion, Export workflow without changing Project truth.")
     }
     await freezeStoryPose(window)
 
@@ -429,6 +495,7 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
             tree: process.env.GALLERY_SOURCE_TREE ?? null,
         },
         host,
+        workflow,
         captures,
         catalogueMetrics,
         catalogueReachability,

@@ -53,7 +53,7 @@ const variants: StyleDefinition[] = [
     { id: "the-stack", name: "Stack", presetName: "Calm", source: "TheStack.tsx", mode: "stack", category: "Objects", description: "A physical deck: top card leaves, every card advances, then it returns underneath.", accent: "#9b8cff", minItems: 3, familyId: "stack" },
     { id: "hero-deck-object", name: "Stack", presetName: "Hero", source: "HeroDeckObject.tsx", mode: "hero", category: "Objects", description: "A physical deck: top card leaves, every card advances, then it returns underneath.", accent: "#ff8d74", minItems: 4, familyId: "stack" },
     { id: "spiral-image-vortex", name: "Spiral Vortex", presetName: "Vortex", source: "SpiralImageVortex.tsx", mode: "spiral", category: "Orbits", description: "Frames travel one continuous helix, passing naturally in front and behind.", accent: "#7ea7ff", minItems: 4, familyId: "spiral" },
-    { id: "vitrine", name: "Vitrine", presetName: "Gallery Light", source: "Vitrine.tsx", mode: "focus", category: "Objects", description: "One precious frame at a time, cross-dissolved beneath a quiet light.", accent: "#f4c67a", minItems: 2, familyId: "vitrine" },
+    { id: "vitrine", name: "Vitrine", presetName: "Museum Hold", source: "VitrineRenderer.tsx", mode: "focus", category: "Objects", description: "One readable source rests in negative space, then exchanges through restrained depth without dimming or grading.", accent: "#f4c67a", minItems: 1, familyId: "vitrine" },
     { id: "filmstrip-river", name: "Ribbon", presetName: "Two-lane Filmstrip", source: "FilmstripRiver.tsx", mode: "strip", category: "Reels", description: "An endless material ribbon with invisible recycling beyond the frame.", accent: "#67d4c0", minItems: 4, familyId: "ribbon" },
     { id: "wave-ticker", name: "Ribbon", presetName: "Wave", source: "WaveTicker.tsx", mode: "wave", category: "Reels", description: "An endless material ribbon with invisible recycling beyond the frame.", accent: "#67d2d0", minItems: 5, familyId: "ribbon" },
     { id: "deck-contact-strip", name: "Contact Table", presetName: "Focus Strip", source: "DeckContactStrip.tsx", mode: "contact", category: "Editorial", description: "A working table for scanning frames: strip, grid, or illuminated review surface.", accent: "#f3a45f", minItems: 4, familyId: "contact-table" },
@@ -79,6 +79,29 @@ const variants: StyleDefinition[] = [
     { id: "cms-slideshow", name: "CMS Slideshow", presetName: "Autoplay Carousel", source: "CmsSlideshow.tsx", mode: "strip", category: "Carousels", description: "Source-faithful horizontal or vertical autoplay with a composed focus well.", accent: "#f3a56e", minItems: 4, familyId: "cms" },
 ]
 
+const QUIET_CAROUSEL_STYLE: StyleDefinition = {
+    id: "quiet-carousel",
+    name: "Quiet Carousel",
+    presetName: "Source-faithful",
+    source: "QuietCarouselRenderer.tsx",
+    mode: "strip",
+    category: "Carousels",
+    description: "A source-faithful horizontal or vertical carousel with deterministic holds and exchanges.",
+    accent: "#f3a56e",
+    minItems: 1,
+    familyId: "quiet-carousel",
+}
+
+const QUIET_CAROUSEL_SCENE: SceneDefinition = {
+    id: "quiet-carousel",
+    name: "Quiet Carousel",
+    category: "Carousels",
+    description: QUIET_CAROUSEL_STYLE.description,
+    accent: QUIET_CAROUSEL_STYLE.accent,
+    defaultStyleId: QUIET_CAROUSEL_STYLE.id,
+    styleIds: [QUIET_CAROUSEL_STYLE.id],
+}
+
 export const ALL_STYLE_VARIANTS = variants
 
 export const GALLERY_STYLES: SceneDefinition[] = [
@@ -86,7 +109,7 @@ export const GALLERY_STYLES: SceneDefinition[] = [
     ["stack", "Stack", "Carousels", "Swipe, calm, and hero deck physics", "#df9bff", "swipe-stack", ["swipe-stack", "the-stack", "hero-deck-object"]],
     ["orbit", "Orbit", "Orbits", "Ring, proximity, ellipse, and zoetrope", "#6ccfee", "orbit-ring", ["orbit-ring", "proximity-orbit", "spin-image-orbit", "zoetrope"]],
     ["spiral", "Spiral Vortex", "Orbits", "A continuous helical flight", "#7ea7ff", "spiral-image-vortex", ["spiral-image-vortex"]],
-    ["vitrine", "Vitrine", "Objects", "One precious frame under light", "#f4c67a", "vitrine", ["vitrine"]],
+    ["vitrine", "Vitrine", "Objects", "One source at rest, then one restrained exchange", "#f4c67a", "vitrine", ["vitrine"]],
     ["ribbon", "Ribbon", "Reels", "Two-lane filmstrip or wave", "#67d4c0", "filmstrip-river", ["filmstrip-river", "wave-ticker"]],
     ["contact-table", "Contact Table", "Editorial", "Strip, sheet, or illuminated table", "#f3a45f", "deck-contact-strip", ["deck-contact-strip", "contact-sheet", "light-table"]],
     ["deck-river", "Deck River", "Reels", "Continuous corridor or chapter reveal", "#6e9fff", "deck-river", ["deck-river", "deck-river-loader"]],
@@ -102,10 +125,30 @@ export const GALLERY_STYLES: SceneDefinition[] = [
 ].map(([id, name, category, description, accent, defaultStyleId, styleIds]) => ({ id, name, category, description, accent, defaultStyleId, styleIds } as SceneDefinition))
 
 export function galleryStyle(id: string | undefined): StyleDefinition {
-    return ALL_STYLE_VARIANTS.find((style) => style.id === id) ?? ALL_STYLE_VARIANTS[0]
+    if (id === undefined) return ALL_STYLE_VARIANTS[0]
+    if (id === QUIET_CAROUSEL_STYLE.id) return QUIET_CAROUSEL_STYLE
+    const style = ALL_STYLE_VARIANTS.find((candidate) => candidate.id === id)
+    if (!style) throw new Error(`Unsupported Gallery Scene: ${id}`)
+    return style
+}
+
+export function latestSceneVersion(styleId: string) {
+    if (styleId !== QUIET_CAROUSEL_STYLE.id && !ALL_STYLE_VARIANTS.some((candidate) => candidate.id === styleId)) throw new Error(`Unsupported Gallery Scene: ${styleId}`)
+    return styleId === "vitrine" ? 2 : 1
+}
+
+export function supportsSceneVersion(styleId: string, version = 1) {
+    if (styleId === "quiet-carousel") return version === 1
+    if (!ALL_STYLE_VARIANTS.some((candidate) => candidate.id === styleId)) return false
+    return styleId === "vitrine" ? version === 1 || version === 2 : version === 1
+}
+
+export function supportsVerifiedPngFrames(styleId: string, version = 1) {
+    return (styleId === "quiet-carousel" && version === 1) || (styleId === "vitrine" && version === 2)
 }
 
 export function galleryScene(styleId: string | undefined): SceneDefinition {
+    if (styleId === QUIET_CAROUSEL_STYLE.id) return QUIET_CAROUSEL_SCENE
     const style = galleryStyle(styleId)
     return GALLERY_STYLES.find((scene) => scene.id === style.familyId) ?? GALLERY_STYLES[0]
 }

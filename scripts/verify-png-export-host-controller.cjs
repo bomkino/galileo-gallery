@@ -7,6 +7,11 @@ const { createLinuxHostController } = require("../electron/linux-host-controller
 const { HostPortError } = require("../electron/linux-host-port.cjs")
 const { createPngFramesRuntime } = require("../electron/png-frames-runtime.cjs")
 
+if (process.platform !== "linux") {
+    console.log("Skipped: Linux HostPort PNG controller runtime is Linux-only.")
+    process.exit(0)
+}
+
 const CRC_TABLE = Array.from({ length: 256 }, (_, index) => {
     let value = index
     for (let bit = 0; bit < 8; bit += 1) value = value & 1 ? 0xedb88320 ^ (value >>> 1) : value >>> 1
@@ -42,8 +47,6 @@ const source = path.join(temporary, "source.png")
 fs.writeFileSync(source, transparentPng(64, 64, 1))
 const destination = path.join(temporary, "output")
 const cancelledDestination = path.join(temporary, "cancelled-output")
-fs.mkdirSync(cancelledDestination)
-fs.writeFileSync(path.join(cancelledDestination, "prior.txt"), "keep-me")
 const frameRuntime = createPngFramesRuntime({ freeSpaceReserveBytes: 0 })
 let selectedDestination = destination
 let shouldWaitForCancel = false
@@ -89,7 +92,7 @@ function envelope(operation, payload = {}) {
 
 async function preflight(url) {
     return host.handle(event, envelope("export.png.preflight", { intent: {
-        config: { schemaVersion: 2, styleId: "quiet-carousel", items: [{ id: "one", name: "Source", type: "image", url, ratio: 1, spotlight: false, muted: false }], settings: { backgroundStyle: "transparent" } },
+        config: { schemaVersion: 2, styleId: "quiet-carousel", items: [{ id: "one", name: "Source", type: "image", url, ratio: 1, spotlight: false, muted: false }], settings: { canvasPreset: "custom", canvasWidth: 64, canvasHeight: 64, backgroundStyle: "transparent" } },
         width: 64, height: 64, fps: 10, durationMs: 150, cycleDurationMs: 100, finalCycleDurationMs: 50, transparent: true,
     } }))
 }
@@ -122,23 +125,42 @@ async function run() {
     const cancelled = await host.handle(event, envelope("export.cancel"))
     assert.deepEqual(cancelled.value, { cancelled: true })
     assert.equal((await running).error.code, "cancelled")
-    assert.equal(fs.readFileSync(path.join(cancelledDestination, "prior.txt"), "utf8"), "keep-me")
+    assert.equal(fs.existsSync(cancelledDestination), false)
     assert.equal(fs.readdirSync(temporary).some((name) => name.startsWith(".gallery-png-")), false)
 
     const staleStart = await host.handle(event, envelope("export.png.start", { snapshotId: cancelPrepared.value.snapshotId, destinationGrant: cancelChosen.value.destinationGrant }))
     assert.equal(staleStart.error.code, "conflict")
 
     shouldWaitForCancel = false
+    const sameSizeIdentity = fs.statSync(source)
+    const sameSizeBytes = fs.readFileSync(source)
+    await new Promise((resolve) => setTimeout(resolve, 5))
+    sameSizeBytes[sameSizeBytes.length - 5] ^= 1
+    fs.writeFileSync(source, sameSizeBytes)
+    fs.utimesSync(source, sameSizeIdentity.atimeMs / 1000, sameSizeIdentity.mtimeMs / 1000)
+    const sameSizeAfter = fs.statSync(source)
+    assert.equal(sameSizeAfter.dev, sameSizeIdentity.dev)
+    assert.equal(sameSizeAfter.ino, sameSizeIdentity.ino)
+    assert.equal(sameSizeAfter.size, sameSizeIdentity.size)
+    assert.equal(sameSizeAfter.mtimeMs, sameSizeIdentity.mtimeMs)
+    assert.notEqual(sameSizeAfter.ctimeMs, sameSizeIdentity.ctimeMs)
+    selectedDestination = path.join(temporary, "same-size-mutated-output")
+    const sameSizePrepared = await preflight(media.value[0].url)
+    const sameSizeChosen = await host.handle(event, envelope("export.destination.choose", { suggestedName: "Gallery PNG Frames" }))
+    const sameSizeResult = await host.handle(event, envelope("export.png.start", { snapshotId: sameSizePrepared.value.snapshotId, destinationGrant: sameSizeChosen.value.destinationGrant }))
+    assert.equal(sameSizeResult.error.code, "verification_failed", "same-size source mutation with restored mtime must fail grant-bound export opening")
+
+    const refreshedMedia = await host.handle(event, envelope("media.choose"))
     const replacement = path.join(temporary, "replacement.png")
     fs.writeFileSync(replacement, transparentPng(64, 64, 44))
     fs.renameSync(replacement, source)
     selectedDestination = path.join(temporary, "swapped-output")
-    const swappedPrepared = await preflight(media.value[0].url)
+    const swappedPrepared = await preflight(refreshedMedia.value[0].url)
     const swappedChosen = await host.handle(event, envelope("export.destination.choose", { suggestedName: "Gallery PNG Frames" }))
     const swapped = await host.handle(event, envelope("export.png.start", { snapshotId: swappedPrepared.value.snapshotId, destinationGrant: swappedChosen.value.destinationGrant }))
     assert.equal(swapped.error.code, "verification_failed", "replaced source media must fail verified-handle opening before FFmpeg")
     host.dispose()
-    console.log("Verified: G06A public HostPort capabilities/preflight/destination/start/cancel seam, opaque paths, immutable snapshots, real PNG output, and prior-destination preservation.")
+    console.log("Verified: G06A public HostPort capabilities/preflight/destination/start/cancel seam, opaque paths, immutable snapshots, real PNG output, and owned-partial cleanup.")
 }
 
 run().catch((error) => {

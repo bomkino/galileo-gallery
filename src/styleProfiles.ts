@@ -33,10 +33,11 @@ const common: Partial<ReelSettings> = {
 function profile(value: Omit<StyleProfile, "settings"> & { settings?: Partial<ReelSettings> }): StyleProfile {
     const orbit = ["orbit-ring", "proximity-orbit", "spin-image-orbit", "zoetrope", "the-orrery"].includes(value.id)
     const labels = value.directionLabels ?? (orbit ? ["Counterclockwise", "Clockwise"] : ["Forward", "Reverse"])
-    return { ...value, directionLabels: labels, axisControl: value.id === "cms-slideshow", settings: { ...common, repeatCount: value.loopCount, ...value.settings } }
+    return { ...value, directionLabels: labels, axisControl: value.axisControl ?? value.id === "cms-slideshow", settings: { ...common, repeatCount: value.loopCount, ...value.settings } }
 }
 
 const profiles = [
+    profile({ id: "quiet-carousel", recommendedItems: 8, cycleBaseMs: 12000, loopCount: 5, directional: true, axisControl: true, focusBehavior: "pause", supportsSpotlight: false, supportsFinale: false, focusLabel: "Focus well", bestFor: "Source-faithful case-study sequences", transparentReady: true, settings: { axis: "horizontal", slideHeight: 52, gap: 42, paceMs: 800, sway: 12, imageFit: "contain" } }),
     profile({ id: "opening-reel", recommendedItems: 14, cycleBaseMs: 11600, loopCount: 5, directional: true, focusBehavior: "center", supportsSpotlight: true, supportsFinale: true, focusLabel: "Center stage", bestFor: "Ceremonial deck reveals and chapter openings", transparentReady: true, settings: { slideHeight: 44, gap: 30, radius: 3, paceMs: 230, heroSize: 70, finaleSize: 84, direction: "forward", canvasPose: 62 } }),
     profile({ id: "swipe-stack", recommendedItems: 4, cycleBaseMs: 7600, loopCount: 5, directional: true, focusBehavior: "lift", supportsSpotlight: true, supportsFinale: true, focusLabel: "Top card", bestFor: "Tactile case-study beats", transparentReady: true, settings: { slideHeight: 42, gap: 42, radius: 8, paceMs: 540, tilt: 28, heroSize: 52, finaleSize: 58 } }),
     profile({ id: "spiral-image-vortex", recommendedItems: 6, cycleBaseMs: 9000, loopCount: 5, directional: true, focusBehavior: "depth", supportsSpotlight: true, supportsFinale: true, focusLabel: "Near pass", bestFor: "Energetic transitions and graphic swarms", transparentReady: true, settings: { slideHeight: 24, gap: 6, radius: 8, paceMs: 500, heroSize: 36 } }),
@@ -70,16 +71,49 @@ const profiles = [
 
 export const STYLE_PROFILES: Record<string, StyleProfile> = Object.fromEntries(profiles.map((item) => [item.id, item]))
 
-export function styleProfile(id: string | undefined): StyleProfile {
+const VITRINE_V2_PROFILE = profile({
+    id: "vitrine",
+    recommendedItems: 8,
+    cycleBaseMs: 44_000,
+    loopCount: 3,
+    directional: true,
+    focusBehavior: "pause",
+    supportsSpotlight: true,
+    supportsFinale: true,
+    focusLabel: "Museum hold",
+    bestFor: "One readable object at a time",
+    transparentReady: true,
+    settings: {
+        playKind: "loop",
+        slideHeight: 62,
+        gap: 24,
+        radius: 0,
+        shadow: 0,
+        paceMs: 1_760,
+        holdMs: 3_740,
+        tilt: 5,
+        sway: 18,
+        direction: "forward",
+        transitionDirection: "left",
+        showHint: true,
+        spotlightsEnabled: false,
+        finaleEnabled: true,
+        heroSize: 62,
+        finaleSize: 62,
+    },
+})
+
+export function styleProfile(id: string | undefined, sceneVersion = 1): StyleProfile {
+    if (id === "vitrine" && sceneVersion === 2) return VITRINE_V2_PROFILE
     return STYLE_PROFILES[id ?? ""] ?? STYLE_PROFILES["opening-reel"]
 }
 
-export function styleSettings(id: string | undefined): ReelSettings {
-    return { ...DEFAULT_SETTINGS, ...styleProfile(id).settings }
+export function styleSettings(id: string | undefined, sceneVersion = 1): ReelSettings {
+    return { ...DEFAULT_SETTINGS, ...styleProfile(id, sceneVersion).settings }
 }
 
-export function styleCycleDuration(id: string, itemCount: number, settings: ReelSettings): number {
-    const value = styleProfile(id)
+export function styleCycleDuration(id: string, itemCount: number, settings: ReelSettings, sceneVersion = 1): number {
+    const value = styleProfile(id, sceneVersion)
     const countScale = Math.max(0.65, itemCount / Math.max(1, value.recommendedItems))
     const defaultPace = Math.max(1, Number(value.settings.paceMs ?? DEFAULT_SETTINGS.paceMs))
     const paceScale = Math.max(0.25, Math.min(4, settings.paceMs / defaultPace))

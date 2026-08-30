@@ -30,4 +30,10 @@ assert.deepEqual(exportCycleClock(twentyFiveRepeats, 24_000), { timeMs: 0, durat
 const clampedRepeats = { ...request, config: { settings: { playKind: "repeat", repeatCount: 1_001 } }, durationMs: 999_600 }
 assert.deepEqual(exportCycleClock(clampedRepeats, 999_000), { timeMs: 0, durationMs: 600, terminal: true })
 
+const vitrineRepeat = { ...request, config: { styleId: "vitrine", sceneVersion: 2, settings: { playKind: "repeat", repeatCount: 3 } } }
+assert.deepEqual(exportCycleClock(vitrineRepeat, 0), { timeMs: 0, durationMs: 1_000, terminal: true })
+assert.deepEqual(exportCycleClock(vitrineRepeat, 999), { timeMs: 999, durationMs: 1_000, terminal: true })
+assert.deepEqual(exportCycleClock(vitrineRepeat, 1_000), { timeMs: 0, durationMs: 1_000, terminal: true })
+assert.deepEqual(exportCycleClock(vitrineRepeat, 2_599), { timeMs: 599, durationMs: 1_000, terminal: true })
+
 console.log("Verified: frozen repeat/finale export clocks preserve cycle, terminal pose, and preview parity boundaries.")

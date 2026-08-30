@@ -3,6 +3,8 @@ import { hydrateHostAudio, validateHostAudioIntent } from "./audio/audioHost.ts"
 import { compileAudioTimeline, defaultAudioIntent, type RationalTime } from "./audio/audioTimeline.ts"
 import { mixAudioChunk } from "./audio/audioMixer.ts"
 import { createHostPCMProvider } from "./audio/hostPcmProvider.ts"
+import { supportsSceneVersion, supportsVerifiedPngFrames } from "./styleRegistry.ts"
+import { validateVitrineRuntimeConfig, VITRINE_MAX_ITEMS } from "./vitrineConfig.ts"
 
 const unavailable = async () => {
     throw new Error("This action is available in the Galileo desktop app.")
@@ -35,10 +37,15 @@ function validateHostConfig(value: unknown): ReelConfig {
     if (config.schemaVersion !== 2 || typeof config.styleId !== "string" || !config.settings || !Array.isArray(config.items) || config.items.length > 256) {
         throw new Error("Host Project is invalid.")
     }
+    if (!supportsSceneVersion(config.styleId, config.sceneVersion ?? 1)) throw new Error("Host Project Scene version is unsupported.")
     if (!config.items.every((item) => item && typeof item.id === "string" && ["image", "video"].includes(item.type) && /^reel-media:\/\/grant\/[a-f0-9]{64}$/.test(item.url))) {
         throw new Error("Host media authority is invalid.")
     }
     const normalized = config as ReelConfig
+    if (normalized.styleId === "vitrine" && normalized.sceneVersion === 2) {
+        if (normalized.items.length > VITRINE_MAX_ITEMS) throw new Error("Host Vitrine Project is invalid.")
+        try { validateVitrineRuntimeConfig(normalized) } catch { throw new Error("Host Vitrine Project is invalid.") }
+    }
     validateHostAudioIntent(normalized.audio, normalized.items)
     return normalized
 }
@@ -84,20 +91,54 @@ function pcm16Base64(interleaved: Float32Array) {
     return btoa(binary)
 }
 
-async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort) {
-    await Promise.all(config.items.map((item) => new Promise<void>((resolve, reject) => {
+function projectOpenCancelled(): Error {
+    const error = new Error("Project open cancelled.")
+    error.name = "AbortError"
+    return error
+}
+
+async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort, signal: AbortSignal) {
+    let cursor = 0
+    let stopped = signal.aborted
+    let firstFailure: unknown = null
+    const activeStops = new Set<() => void>()
+    const stop = () => {
+        stopped = true
+        for (const activeStop of [...activeStops]) activeStop()
+    }
+    signal.addEventListener("abort", stop, { once: true })
+    const hydrateOne = (item: ReelConfig["items"][number]) => new Promise<void>((resolve, reject) => {
+        if (stopped) { reject(projectOpenCancelled()); return }
         const media = item.type === "video" ? document.createElement("video") : new Image()
+        let finished = false
         const timeout = window.setTimeout(() => finish(new Error(`Timed out hydrating ${item.name}.`)), 15_000)
         const finish = (error?: Error) => {
+            if (finished) return
+            finished = true
             window.clearTimeout(timeout)
+            activeStops.delete(cancel)
+            if (error) {
+                if (firstFailure === null) firstFailure = error
+                stop()
+            }
             media.removeAttribute("src")
-            if (media instanceof HTMLMediaElement) media.load()
-            if (error) reject(error)
-            else resolve()
+            if (media instanceof HTMLMediaElement) {
+                if (media instanceof HTMLVideoElement) {
+                    media.onloadeddata = null
+                    media.onerror = null
+                }
+                media.pause()
+                media.load()
+                window.requestAnimationFrame(() => window.requestAnimationFrame(() => error ? reject(error) : resolve()))
+                return
+            }
+            if (error) reject(error); else resolve()
         }
+        const cancel = () => finish(projectOpenCancelled())
+        activeStops.add(cancel)
         if (media instanceof HTMLVideoElement) {
-            media.preload = "metadata"
-            media.onloadedmetadata = () => finish()
+            media.preload = "auto"
+            media.onloadeddata = () => finish()
             media.onerror = () => finish(new Error(`Could not hydrate ${item.name}.`))
             media.src = item.url
             media.load()
@@ -105,14 +146,35 @@ async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort) {
             media.src = item.url
             media.decode().then(() => finish(), () => finish(new Error(`Could not hydrate ${item.name}.`)))
         }
-    })))
-    await hydrateHostAudio(config.audio)
-    for (const source of config.audio?.sources ?? []) {
-        if (source.role !== "source-video" || !source.url) continue
-        const prepared = await host.prepareVideoAudio(source.url, sourceDurationUs(source.sampleFrames, source.sampleRate))
-        if (prepared.sampleRate !== source.sampleRate || prepared.channels !== source.channels || prepared.sampleFrames !== source.sampleFrames) {
-            throw new Error(`Could not hydrate ${source.name ?? source.id}.`)
+    })
+    const workers = Array.from({ length: Math.min(2, config.items.length) }, async () => {
+        while (!stopped && cursor < config.items.length) {
+            const item = config.items[cursor++]
+            try {
+                await hydrateOne(item)
+            } catch (error) {
+                if (firstFailure === null) firstFailure = error
+                stop()
+            }
         }
+    })
+    try {
+        await Promise.allSettled(workers)
+        if (signal.aborted) throw projectOpenCancelled()
+        if (firstFailure !== null) throw firstFailure
+        await hydrateHostAudio(config.audio, signal)
+        for (const source of config.audio?.sources ?? []) {
+            if (signal.aborted) throw projectOpenCancelled()
+            if (source.role !== "source-video" || !source.url) continue
+            const prepared = await host.prepareVideoAudio(source.url, sourceDurationUs(source.sampleFrames, source.sampleRate))
+            if (signal.aborted) throw projectOpenCancelled()
+            if (prepared.sampleRate !== source.sampleRate || prepared.channels !== source.channels || prepared.sampleFrames !== source.sampleFrames) {
+                throw new Error(`Could not hydrate ${source.name ?? source.id}.`)
+            }
+        }
+    } finally {
+        signal.removeEventListener("abort", stop)
+        stop()
     }
 }
 
@@ -121,25 +183,44 @@ export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
     let exportCancelled = false
     let hostExportAllocated = false
     let exportAudioController: AbortController | null = null
+    let projectOpenController: AbortController | null = null
     return {
         ...browserAPI,
         platform: host.platform,
         pickMedia: () => host.chooseMedia(),
         saveProject: (config) => host.saveProject(config),
         openProject: async () => {
-            const candidate = await host.beginProjectOpen()
-            if ("cancelled" in candidate || "failure" in candidate) return candidate
+            if (projectOpenController) throw new Error("A Project open is already running.")
+            const controller = new AbortController()
+            projectOpenController = controller
+            let operationId: string | null = null
             try {
+                const candidate = await host.beginProjectOpen()
+                if ("cancelled" in candidate || "failure" in candidate) return candidate
+                operationId = candidate.operationId
+                if (controller.signal.aborted) {
+                    await host.discardProjectOpen(operationId).catch(() => undefined)
+                    return { cancelled: true }
+                }
                 const config = validateHostConfig(candidate.config)
-                await hydrateHostConfig(config, host)
-                await host.acceptProjectOpen(candidate.operationId)
+                await hydrateHostConfig(config, host, controller.signal)
+                if (controller.signal.aborted) return { cancelled: true }
+                await host.acceptProjectOpen(operationId)
                 return { config }
             } catch (error) {
-                await host.discardProjectOpen(candidate.operationId).catch(() => undefined)
+                if (operationId) await host.discardProjectOpen(operationId).catch(() => undefined)
+                if (controller.signal.aborted || (error instanceof Error && error.name === "AbortError")) return { cancelled: true }
                 throw error
+            } finally {
+                if (projectOpenController === controller) projectOpenController = null
             }
         },
-        cancelProjectOpen: () => host.cancelProjectOpen(),
+        cancelProjectOpen: async () => {
+            const local = projectOpenController
+            local?.abort()
+            const result = await host.cancelProjectOpen()
+            return { cancelled: Boolean(local) || result.cancelled }
+        },
         exportReel: async (request) => {
             if (exportOwned || hostExportAllocated) throw new Error("An export is already running or still owned by the host.")
             if (!["png-frames", "mp4"].includes(request.format)) throw new Error("This Linux host slice supports verified PNG Frames and opaque H.264/AAC MP4.")
@@ -151,20 +232,33 @@ export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
                 const capability = capabilities.formats.find((candidate) => candidate.id === capabilityId)
                 if (!capability) throw new Error(`${request.format === "png-frames" ? "PNG Frames" : "H.264/AAC"} is unavailable on this host.`)
                 if (!capability.available) throw new Error(capability.consequence)
+                if (request.format === "png-frames" && (!supportsVerifiedPngFrames(request.config.styleId, request.config.sceneVersion ?? 1)
+                    || !("sceneVersions" in capability)
+                    || !capability.sceneVersions.some((scene) => scene.id === request.config.styleId && scene.versions.some((version) => version === (request.config.sceneVersion ?? 1))))) {
+                    throw new Error("Verified PNG Frames currently support Quiet Carousel v1 and Vitrine v2 only.")
+                }
                 if (request.format === "mp4" && (!("sceneIds" in capability) || !capability.sceneIds.includes(request.config.styleId as "quiet-carousel"))) {
                     throw new Error("Verified H.264/AAC currently supports Quiet Carousel only. Choose PNG Frames for this Scene.")
                 }
                 if (exportCancelled) return { cancelled: true }
                 const date = new Date().toISOString().slice(0, 10)
                 if (request.format === "png-frames") {
+                    const vitrineClock = request.config.styleId === "vitrine" && request.config.sceneVersion === 2
+                        ? validateVitrineRuntimeConfig(request.config)
+                        : null
+                    if (vitrineClock && (request.durationMs !== vitrineClock.durationMs
+                        || request.cycleDurationMs !== vitrineClock.cycleDurationMs
+                        || request.finalCycleDurationMs !== vitrineClock.finalCycleDurationMs)) {
+                        throw new Error("Vitrine export clocks do not match the immutable Project Timeline.")
+                    }
                     const preflight = await host.preflightPngFrames({
                         config: request.config,
                         width: request.width,
                         height: request.height,
                         fps: request.fps,
                         durationMs: request.durationMs,
-                        cycleDurationMs: request.cycleDurationMs ?? request.durationMs,
-                        finalCycleDurationMs: request.finalCycleDurationMs ?? request.cycleDurationMs ?? request.durationMs,
+                        cycleDurationMs: vitrineClock ? request.cycleDurationMs as number : request.cycleDurationMs ?? request.durationMs,
+                        finalCycleDurationMs: vitrineClock ? request.finalCycleDurationMs as number : request.finalCycleDurationMs ?? request.cycleDurationMs ?? request.durationMs,
                         transparent: request.config.settings.backgroundStyle === "transparent",
                     })
                     hostExportAllocated = true

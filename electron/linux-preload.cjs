@@ -106,8 +106,11 @@ function cancelledAudio(value) {
 function exportCapabilities(value) {
     if (!ownExact(value, ["version", "formats"]) || value.version !== 1 || !Array.isArray(value.formats) || value.formats.length !== 2) throw new Error("Host returned invalid export capabilities.")
     const [png, h264] = value.formats
-    if (!ownExact(png, ["id", "available", "alpha", "audio", "consequence"]) || png.id !== "png-frames"
+    if (!ownExact(png, ["id", "available", "alpha", "audio", "sceneVersions", "consequence"]) || png.id !== "png-frames"
         || png.available !== true || png.alpha !== true || png.audio !== false || typeof png.consequence !== "string" || png.consequence.length < 1 || png.consequence.length > 512
+        || !Array.isArray(png.sceneVersions) || png.sceneVersions.length !== 2
+        || !ownExact(png.sceneVersions[0], ["id", "versions"]) || png.sceneVersions[0].id !== "quiet-carousel" || !Array.isArray(png.sceneVersions[0].versions) || png.sceneVersions[0].versions.length !== 1 || png.sceneVersions[0].versions[0] !== 1
+        || !ownExact(png.sceneVersions[1], ["id", "versions"]) || png.sceneVersions[1].id !== "vitrine" || !Array.isArray(png.sceneVersions[1].versions) || png.sceneVersions[1].versions.length !== 1 || png.sceneVersions[1].versions[0] !== 2
         || !ownExact(h264, ["id", "available", "alpha", "audio", "sceneIds", "consequence"]) || h264.id !== "mp4-h264-aac"
         || typeof h264.available !== "boolean" || h264.alpha !== false || h264.audio !== true
         || !Array.isArray(h264.sceneIds) || h264.sceneIds.length !== 1 || h264.sceneIds[0] !== "quiet-carousel"
