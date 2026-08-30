@@ -91,6 +91,7 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
     const readyRef = React.useRef(false)
     const frameProofRef = React.useRef<"none" | "decoded" | "presented">("none")
     const prewarmRef = React.useRef(prewarm)
+    const kickedPlaybackRateRef = React.useRef<number | null>(null)
     const loadedSourceRef = React.useRef<string | null>(null)
     const desiredRef = React.useRef<VideoTarget | null>(null)
     const activeRef = React.useRef<VideoSeekOperation | null>(null)
@@ -99,6 +100,11 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
     const pumpRef = React.useRef<() => void>(() => undefined)
     prewarmRef.current = prewarm
     const sampledTimeMs = Math.floor(Math.max(0, timeMs) * fps / 1_000 + 1e-9) * 1_000 / fps
+    const restorePlaybackRate = React.useCallback((video?: HTMLVideoElement | null) => {
+        if (!video || kickedPlaybackRateRef.current === null) return
+        video.playbackRate = kickedPlaybackRateRef.current
+        kickedPlaybackRateRef.current = null
+    }, [])
     const cancelFrameConfirmation = React.useCallback((video?: HTMLVideoElement | null) => {
         const frameVideo = video as (HTMLVideoElement & { cancelVideoFrameCallback?: (id: number) => void }) | null | undefined
         if (frameCallbackRef.current !== null) frameVideo?.cancelVideoFrameCallback?.(frameCallbackRef.current)
@@ -107,9 +113,9 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
         animationFrameRef.current = null
         if (video) {
             video.pause()
-            video.playbackRate = 1
+            restorePlaybackRate(video)
         }
-    }, [])
+    }, [restorePlaybackRate])
     const schedulePump = React.useCallback(() => {
         if (pumpFrameRef.current !== null) return
         const frameId = requestAnimationFrame(() => {
@@ -130,10 +136,20 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
         let seekComplete = decodedAtTarget
         let presentedMediaTime: number | null = null
         const finishFrame = (proof: "decoded" | "presented") => {
-            if (isCurrent() && seekComplete && !video.seeking && Number.isFinite(presentedMediaTime)
-                && Math.abs(video.currentTime - operation.target) <= targetTolerance) {
+            if (isCurrent() && seekComplete && !video.seeking && Number.isFinite(presentedMediaTime)) {
+                const frameMatches = proof === "decoded"
+                    ? Math.abs(video.currentTime - operation.target) <= targetTolerance
+                    : (presentedMediaTime as number) >= 0
+                        && (presentedMediaTime as number) <= operation.target + 0.0001
+                if (!frameMatches) {
+                    video.pause()
+                    restorePlaybackRate(video)
+                    activeRef.current = null
+                    schedulePump()
+                    return false
+                }
                 video.pause()
-                video.playbackRate = 1
+                restorePlaybackRate(video)
                 activeRef.current = null
                 confirmedRef.current = { source: operation.source, target: operation.target, mediaTime: presentedMediaTime as number }
                 setHasPresented(true)
@@ -187,9 +203,10 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
                 const secondFrame = requestAnimationFrame(() => {
                     if (animationFrameRef.current === secondFrame) animationFrameRef.current = null
                     if (!isCurrent() || !seekComplete || frameCallbackRef.current === null || !video.paused) return
+                    if (kickedPlaybackRateRef.current === null) kickedPlaybackRateRef.current = video.playbackRate
                     video.playbackRate = 0.25
                     void video.play().catch(() => {
-                        if (isCurrent()) video.playbackRate = 1
+                        if (isCurrent()) restorePlaybackRate(video)
                     })
                 })
                 animationFrameRef.current = secondFrame
@@ -239,8 +256,7 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
         video.addEventListener("seeked", onSeeked, { once: true })
         seekCleanupRef.current = () => video.removeEventListener("seeked", onSeeked)
         video.currentTime = operation.target
-        if (!prewarmRef.current) armFrameCallback()
-    }, [cancelFrameConfirmation, fps, schedulePump])
+    }, [cancelFrameConfirmation, fps, restorePlaybackRate, schedulePump])
     const startSeek = React.useCallback((video: HTMLVideoElement, request: VideoTarget) => {
         if (activeRef.current || loadedSourceRef.current !== request.source || ref.current !== video) return
         const operation = { ...request, epoch: epochRef.current }

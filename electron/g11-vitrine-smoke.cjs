@@ -294,11 +294,13 @@ async function settle(window) {
             const frameValue = decoded ? video.dataset.storyDecodedTime : video.dataset.storyPresentedTime
             const target = Number(targetValue)
             const presented = Number(frameValue)
-            if (video.seeking || targetValue === '' || frameValue === ''
+            if (video.seeking || !video.paused || !video.muted || Math.abs(video.playbackRate - 1) > 0.0001
+                || targetValue === '' || frameValue === ''
                 || !Number.isFinite(target) || !Number.isFinite(presented)
                 || presented > target + 0.0001 || target - presented >= 1 / 12 + 0.0001) {
                 throw new Error('Vitrine fixture video did not prove the exact requested source frame: ' + JSON.stringify({
                     ready: video.dataset.storyReady, proof: video.dataset.storyFrameProof, target, presented, seeking: video.seeking,
+                    paused: video.paused, muted: video.muted, playbackRate: video.playbackRate,
                 }))
             }
         }
@@ -818,7 +820,10 @@ async function continuousVideoHandoffEvidence(window) {
                 if (incoming.dataset.storyFrameProof === 'presented' && presentedValue !== '' && targetValue !== '' && Number.isFinite(presented) && Number.isFinite(target)
                     && (presentedTimes.length === 0 || Math.abs(presentedTimes.at(-1) - presented) > 0.0001)) {
                     presentedTimes.push(presented)
-                    presentedFrames.push({ target, presented, seeking: incoming.seeking, ready: incoming.dataset.storyReady, proof: incoming.dataset.storyFrameProof })
+                    presentedFrames.push({
+                        target, presented, seeking: incoming.seeking, ready: incoming.dataset.storyReady, proof: incoming.dataset.storyFrameProof,
+                        paused: incoming.paused, muted: incoming.muted, playbackRate: incoming.playbackRate,
+                    })
                 }
             }
             if (Number(document.querySelector('.timeline').value) >= 0.44) break
@@ -833,7 +838,8 @@ async function continuousVideoHandoffEvidence(window) {
     await settle(window)
     if (!result.guardReadyBefore || !result.sawIncoming || result.hiddenIncomingFrames !== 0 || result.maxDecoders > 2
         || result.presentedTimes.length < 2 || result.presentedTimes.some((value, index) => index > 0 && value <= result.presentedTimes[index - 1])
-        || result.presentedFrames.some((frame) => frame.proof !== 'presented' || frame.seeking || frame.presented > frame.target + 0.0001 || frame.target - frame.presented >= 1 / 12 + 0.0001)) {
+        || result.presentedFrames.some((frame) => frame.proof !== 'presented' || frame.seeking || !frame.paused || !frame.muted
+            || Math.abs(frame.playbackRate - 1) > 0.0001 || frame.presented > frame.target + 0.0001 || frame.target - frame.presented >= 1 / 12 + 0.0001)) {
         throw new Error(`G11 continuous video handoff was not prewarmed and continuously presentable: ${JSON.stringify(result)}`)
     }
     return result
@@ -857,6 +863,7 @@ async function sourceVideoSeekBurstEvidence(window) {
         return video ? {
             ready: video.dataset.storyReady, proof: video.dataset.storyFrameProof, target: video.dataset.storyTargetTime,
             presented: video.dataset.storyPresentedTime, seeking: video.seeking,
+            paused: video.paused, muted: video.muted, playbackRate: video.playbackRate,
         } : null
     })()`)
     await settle(window)
@@ -864,6 +871,7 @@ async function sourceVideoSeekBurstEvidence(window) {
     const plane = scene.planes.find((candidate) => candidate.id === "vitrine-portrait")
     const expectedTarget = Math.floor(0.42 * 2_000 * 24 / 1_000 + 1e-9) / 24
     if (!plane || plane.mediaTag !== "VIDEO" || plane.storyReady !== "true" || plane.storySeeking
+        || !plane.storyPaused || !plane.storyMuted || Math.abs(plane.storyPlaybackRate - 1) > 0.0001
         || Math.abs(plane.storyTargetTime - expectedTarget) > 0.0001
         || plane.storyProof !== "presented" || plane.storyPresentedTime > plane.storyTargetTime + 0.0001
         || plane.storyTargetTime - plane.storyPresentedTime >= 1 / 12 + 0.0001) {
@@ -872,6 +880,7 @@ async function sourceVideoSeekBurstEvidence(window) {
     return { sequence, interim, final: {
         target: plane.storyTargetTime, presented: plane.storyPresentedTime,
         seeking: plane.storySeeking, ready: plane.storyReady, proof: plane.storyProof,
+        paused: plane.storyPaused, muted: plane.storyMuted, playbackRate: plane.storyPlaybackRate,
     } }
 }
 
@@ -963,6 +972,9 @@ const sceneExpression = `(() => {
                 storyPresentedTime: media?.dataset.storyPresentedTime === undefined || media?.dataset.storyPresentedTime === "" ? null : Number(media.dataset.storyPresentedTime),
                 storyTargetTime: media?.dataset.storyTargetTime === undefined || media?.dataset.storyTargetTime === "" ? null : Number(media.dataset.storyTargetTime),
                 storySeeking: media?.tagName === "VIDEO" ? media.seeking : null,
+                storyPaused: media?.tagName === "VIDEO" ? media.paused : null,
+                storyMuted: media?.tagName === "VIDEO" ? media.muted : null,
+                storyPlaybackRate: media?.tagName === "VIDEO" ? media.playbackRate : null,
                 shadow: getComputedStyle(plane).boxShadow,
                 transform: plane.style.transform,
                 failed: Boolean(plane.querySelector('[data-media-failed="true"]')),
