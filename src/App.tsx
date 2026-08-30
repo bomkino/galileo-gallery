@@ -405,10 +405,22 @@ async function waitForExportFrameImages(expectVitrineMetrics = false) {
             const height = Number.parseFloat(style.height)
             const expected = Math.min(width, height)
             const committed = Number(stage.dataset.vitrineShortEdge)
+            const compensation = Number(stage.dataset.vitrineMetricCompensation)
             const cssValue = Number.parseFloat(style.getPropertyValue("--vitrine-short-edge"))
+            const expectsPlacard = stage.dataset.vitrinePlacardExpected === "true"
+            const placard = stage.querySelector<HTMLElement>(".vitrine-placard")
+            const placardStyle = placard ? getComputedStyle(placard) : null
+            const consumedGap = placardStyle ? Number.parseFloat(placardStyle.columnGap) : Number.NaN
+            const placardStateReady = expectsPlacard
+                ? Boolean(placardStyle && Number.isFinite(consumedGap) && Math.abs(consumedGap - expected * 0.0234375) <= 0.001)
+                : !placard
+            const transparentShadowReady = !placardStyle || document.documentElement.dataset.exportTransparent !== "true" || placardStyle.boxShadow === "none"
             vitrineMetricsReady = Number.isFinite(expected) && expected > 0
                 && Math.abs(committed - expected) <= 0.001
+                && Number.isFinite(compensation) && compensation > 0
                 && Math.abs(cssValue - expected) <= 0.001
+                && placardStateReady
+                && transparentShadowReady
         }
         if (vitrineMetricsReady && videos.every((video) => video.dataset.storyReady === "true" && !video.seeking)) return
     }

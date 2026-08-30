@@ -425,21 +425,21 @@ export function vitrineTimeline(config: ReelConfig, fps = 30, mediaCount = confi
 
 export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames, terminal = false, cataloguePreview = false, reducedMotion, exportMode = false, inspectionItemId = null }: Props) {
     const ref = React.useRef<HTMLDivElement>(null)
-    const metricCache = React.useRef<{ width: number; height: number; placard: HTMLElement | null; label: HTMLElement | null; caption: HTMLElement | null }>({
-        width: Number.NaN, height: Number.NaN, placard: null, label: null, caption: null,
-    })
-    const syncMetrics = React.useCallback(() => {
+    const metricFrame = React.useRef<number | null>(null)
+    const clearMetricReadiness = React.useCallback(() => {
         const element = ref.current
         if (!element) return
+        delete element.dataset.vitrineShortEdge
+        delete element.dataset.vitrineMetricCompensation
+    }, [])
+    const syncMetrics = React.useCallback(() => {
+        const element = ref.current
+        if (!element || !element.isConnected) return
         const style = getComputedStyle(element)
         const width = Number.parseFloat(style.width)
         const height = Number.parseFloat(style.height)
-        const placard = element.querySelector<HTMLElement>(".vitrine-placard")
-        const label = placard?.querySelector<HTMLElement>("span") ?? null
-        const caption = placard?.querySelector<HTMLElement>("strong") ?? null
         if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) {
-            delete element.dataset.vitrineShortEdge
-            metricCache.current = { width: Number.NaN, height: Number.NaN, placard: null, label: null, caption: null }
+            clearMetricReadiness()
             return
         }
         const shortEdge = Math.min(width, height)
@@ -452,12 +452,6 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
             labelFont: shortEdge * 0.0390625,
             captionFont: shortEdge * 0.0546875,
         }
-        const consumedGap = placard ? Number.parseFloat(getComputedStyle(placard).columnGap) : Number.NaN
-        const cached = metricCache.current
-        if (width === cached.width && height === cached.height && placard === cached.placard
-            && label === cached.label && caption === cached.caption && element.dataset.vitrineShortEdge
-            && (!placard || Math.abs(consumedGap - values.gap) <= 0.001)) return
-
         const metrics = [
             ["--vitrine-short-edge", shortEdge],
             ["--vitrine-placard-gap", values.gap],
@@ -469,26 +463,77 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
             ["--vitrine-placard-caption-size", values.captionFont],
         ] as const
         for (const [name, value] of metrics) element.style.setProperty(name, `${value}px`)
-        if (placard && (!label || !caption)) {
-            delete element.dataset.vitrineShortEdge
-            metricCache.current = { width, height, placard, label, caption }
+
+        const expectsPlacard = element.dataset.vitrinePlacardExpected === "true"
+        const placard = element.querySelector<HTMLElement>(".vitrine-placard")
+        if (!expectsPlacard) {
+            if (placard) {
+                clearMetricReadiness()
+                return
+            }
+            element.dataset.vitrineMetricCompensation = "1"
+            element.dataset.vitrineShortEdge = String(shortEdge)
             return
         }
-        if (placard && label && caption) {
-            placard.style.gap = `${values.gap}px`
-            placard.style.padding = `${values.gap}px ${values.paddingX}px`
-            placard.style.borderWidth = `${values.border}px`
-            placard.style.boxShadow = `0 ${values.shadowY}px ${values.shadowBlur}px rgba(0, 0, 0, .12)`
-            label.style.fontSize = `${values.labelFont}px`
-            caption.style.fontSize = `${values.captionFont}px`
+        const label = placard?.querySelector<HTMLElement>("span") ?? null
+        const caption = placard?.querySelector<HTMLElement>("strong") ?? null
+        if (!placard || !placard.isConnected || !element.contains(placard) || !label || !caption) {
+            clearMetricReadiness()
+            return
         }
-        metricCache.current = { width, height, placard, label, caption }
+
+        const applyPlacardMetrics = (factor: number) => {
+            placard.style.gap = `${values.gap * factor}px`
+            placard.style.padding = `${values.gap * factor}px ${values.paddingX * factor}px`
+            placard.style.borderWidth = `${values.border}px`
+            placard.style.boxShadow = `0 ${values.shadowY * factor}px ${values.shadowBlur * factor}px rgba(0, 0, 0, .12)`
+            label.style.fontSize = `${values.labelFont * factor}px`
+            caption.style.fontSize = `${values.captionFont * factor}px`
+        }
+        let compensation = 1
+        applyPlacardMetrics(compensation)
+        for (let pass = 0; pass < 2; pass += 1) {
+            if (element !== ref.current || !element.isConnected || !placard.isConnected || !element.contains(placard)) {
+                clearMetricReadiness()
+                return
+            }
+            const actual = Number.parseFloat(getComputedStyle(placard).columnGap)
+            if (Number.isFinite(actual) && actual > 0 && Math.abs(actual - values.gap) <= 0.001) break
+            const correction = Number.isFinite(actual) && actual > 0 ? values.gap / actual : Number.NaN
+            const nextCompensation = compensation * correction
+            if (!Number.isFinite(correction) || correction < 0.25 || correction > 4
+                || !Number.isFinite(nextCompensation) || nextCompensation < 0.25 || nextCompensation > 4) {
+                clearMetricReadiness()
+                return
+            }
+            compensation = nextCompensation
+            applyPlacardMetrics(compensation)
+        }
+        const verifiedGap = Number.parseFloat(getComputedStyle(placard).columnGap)
+        if (element !== ref.current || !element.isConnected || !placard.isConnected || !element.contains(placard)
+            || !Number.isFinite(verifiedGap) || Math.abs(verifiedGap - values.gap) > 0.001) {
+            clearMetricReadiness()
+            return
+        }
+        element.dataset.vitrineMetricCompensation = String(compensation)
         element.dataset.vitrineShortEdge = String(shortEdge)
-    }, [])
+    }, [clearMetricReadiness])
+    const scheduleMetrics = React.useCallback(() => {
+        clearMetricReadiness()
+        if (metricFrame.current !== null) cancelAnimationFrame(metricFrame.current)
+        metricFrame.current = requestAnimationFrame(() => {
+            metricFrame.current = null
+            syncMetrics()
+        })
+    }, [clearMetricReadiness, syncMetrics])
     const placardRef = React.useCallback((node: HTMLDivElement | null) => {
-        metricCache.current = { ...metricCache.current, placard: null, label: null, caption: null }
-        if (node) syncMetrics()
-    }, [syncMetrics])
+        clearMetricReadiness()
+        if (!node) {
+            scheduleMetrics()
+            return
+        }
+        scheduleMetrics()
+    }, [clearMetricReadiness, scheduleMetrics])
     const [systemReducedMotion, setSystemReducedMotion] = React.useState(() => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false)
     React.useEffect(() => {
         const query = window.matchMedia?.("(prefers-reduced-motion: reduce)")
@@ -518,13 +563,28 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
     const logicalWidth = Math.max(1, config.settings.canvasWidth)
     const logicalHeight = Math.max(1, config.settings.canvasHeight)
     React.useLayoutEffect(() => {
-        syncMetrics()
         const element = ref.current
         if (!element) return
-        const observer = new ResizeObserver(syncMetrics)
+        scheduleMetrics()
+        const observer = new ResizeObserver(scheduleMetrics)
         observer.observe(element)
-        return () => observer.disconnect()
-    }, [logicalWidth, logicalHeight, syncMetrics])
+        const interfaceScale = element.closest<HTMLElement>("[data-interface-scale]")
+        const scaleObserver = interfaceScale ? new MutationObserver(scheduleMetrics) : null
+        if (interfaceScale && scaleObserver) scaleObserver.observe(interfaceScale, {
+            attributes: true,
+            attributeFilter: ["data-interface-scale"],
+            subtree: false,
+        })
+        return () => {
+            if (metricFrame.current !== null) {
+                cancelAnimationFrame(metricFrame.current)
+                metricFrame.current = null
+            }
+            observer.disconnect()
+            scaleObserver?.disconnect()
+            clearMetricReadiness()
+        }
+    }, [logicalWidth, logicalHeight, clearMetricReadiness, scheduleMetrics])
     const { designWidth, designHeight, projectScale } = vitrineDesignSpace(logicalWidth, logicalHeight)
     const effectiveReducedMotion = reducedMotion ?? (!exportMode && systemReducedMotion)
     const evaluated = evaluateVitrine({
@@ -563,7 +623,7 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
         }] : []),
         ...evaluated.planes.map((plane) => ({ plane, guard: false })),
     ]
-    return <div className={`vitrine-stage ${transparent ? "is-transparent" : ""}`} data-product-scene="vitrine" data-scene-version="2" data-evaluator-hash={evaluated.stateHash} data-vitrine-phrase={evaluated.phrase} data-current-id={evaluated.currentId ?? ""} data-incoming-id={evaluated.incomingId ?? ""} data-semantic-id={semanticId ?? ""} data-vitrine-inspection={inspectedSource?.item.id ?? ""} data-transition-progress={evaluated.transitionProgress} data-logical-width={logicalWidth} data-logical-height={logicalHeight} ref={ref} style={{ background } as React.CSSProperties}>
+    return <div className={`vitrine-stage ${transparent ? "is-transparent" : ""}`} data-product-scene="vitrine" data-scene-version="2" data-evaluator-hash={evaluated.stateHash} data-vitrine-phrase={evaluated.phrase} data-current-id={evaluated.currentId ?? ""} data-incoming-id={evaluated.incomingId ?? ""} data-semantic-id={semanticId ?? ""} data-vitrine-inspection={inspectedSource?.item.id ?? ""} data-vitrine-placard-expected={evaluated.placard ? "true" : "false"} data-transition-progress={evaluated.transitionProgress} data-logical-width={logicalWidth} data-logical-height={logicalHeight} ref={ref} style={{ background } as React.CSSProperties}>
         <div className="vitrine-logical-stage" style={{ width: "100%", height: "100%", transform: "none" } as React.CSSProperties}>
             <div className="vitrine-field" aria-hidden="true" />
             {renderPlanes.map(({ plane, guard }) => {

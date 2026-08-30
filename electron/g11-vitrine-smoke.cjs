@@ -311,9 +311,23 @@ async function settle(window) {
             const style = stage ? getComputedStyle(stage) : null
             const expected = style ? Math.min(parseFloat(style.width), parseFloat(style.height)) : Number.NaN
             const applied = Number(stage?.dataset.vitrineShortEdge)
+            const compensation = Number(stage?.dataset.vitrineMetricCompensation)
             const cssValue = style ? parseFloat(style.getPropertyValue('--vitrine-short-edge')) : Number.NaN
-            if (Number.isFinite(expected) && expected > 0 && Math.abs(applied - expected) <= 0.001 && Math.abs(cssValue - expected) <= 0.001) break
-            if (performance.now() >= layoutDeadline) throw new Error('Vitrine authored metrics did not reach the rendered stage: ' + JSON.stringify({ expected, applied, cssValue }))
+            const expectsPlacard = stage?.dataset.vitrinePlacardExpected === 'true'
+            const placard = stage?.querySelector('.vitrine-placard')
+            const placardStyle = placard ? getComputedStyle(placard) : null
+            const consumedGap = placardStyle ? parseFloat(placardStyle.columnGap) : Number.NaN
+            const placardStateReady = expectsPlacard
+                ? Boolean(placardStyle && Number.isFinite(consumedGap) && Math.abs(consumedGap - expected * 0.0234375) <= 0.001)
+                : !placard
+            const transparentShadowReady = !placardStyle || document.documentElement.dataset.exportTransparent !== 'true' || placardStyle.boxShadow === 'none'
+            if (Number.isFinite(expected) && expected > 0 && Math.abs(applied - expected) <= 0.001
+                && Number.isFinite(compensation) && compensation > 0
+                && Math.abs(cssValue - expected) <= 0.001 && placardStateReady && transparentShadowReady) break
+            if (performance.now() >= layoutDeadline) throw new Error('Vitrine authored metrics did not reach the rendered stage: ' + JSON.stringify({
+                expected, applied, compensation, cssValue, expectsPlacard, placardPresent: Boolean(placard),
+                consumedGap, placardStateReady, transparentShadowReady, shadow: placardStyle?.boxShadow ?? null,
+            }))
             await new Promise((resolve) => requestAnimationFrame(resolve))
         }
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))))
@@ -958,6 +972,8 @@ const sceneExpression = `(() => {
     const placardLabel = placard?.querySelector('span')
     const placardCaption = placard?.querySelector('strong')
     const placardStyle = placard ? getComputedStyle(placard) : null
+    const placardExpected = stage.dataset.vitrinePlacardExpected === 'true'
+    if (placardExpected !== Boolean(placard)) throw new Error('Vitrine Placard expected-state and current DOM diverged.')
     const transparentExport = document.documentElement.dataset.exportTransparent === 'true'
     const shadowPixels = placardStyle?.boxShadow.match(/-?\\d*\\.?\\d+px/g)?.map((value) => parseFloat(value)) ?? []
     if (placardStyle && transparentExport && placardStyle.boxShadow !== 'none') throw new Error('Vitrine Placard shadow contaminated transparent export.')
@@ -998,6 +1014,9 @@ const sceneExpression = `(() => {
         transitionProgress: Number(stage.dataset.transitionProgress),
         interfaceScale: Number(document.querySelector('[data-interface-scale]')?.dataset.interfaceScale ?? 100),
         systemReducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+        placardExpected,
+        transparentExport,
+        placardShadow: placardStyle?.boxShadow ?? null,
         exportMarker: {
             frameId: document.documentElement.dataset.exportFrameId ?? null,
             timeMs: document.documentElement.dataset.exportTimeMs ?? null,
@@ -1016,6 +1035,7 @@ const sceneExpression = `(() => {
             designViewportWidth,
             designViewportHeight,
             renderedShortEdge,
+            metricCompensation: Number(stage.dataset.vitrineMetricCompensation),
             authoredMetrics,
             projectScale,
             viewportPerspective: parseFloat(logicalStyle.perspective),
@@ -1178,6 +1198,9 @@ function observeExportFrames(targetFrames) {
     }
     ipcMain.on("export:frame-ready", listener)
     return {
+        cancel() {
+            ipcMain.removeListener("export:frame-ready", listener)
+        },
         async finish() {
             ipcMain.removeListener("export:frame-ready", listener)
             await Promise.all(pending.map((entry) => entry.promise))
@@ -1931,11 +1954,40 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
 
     await clickText(window, ".inspector-top button", "Export")
     await until(window, "document.querySelector('.export-panel')", "Export panel")
+    await window.webContents.executeJavaScript(`(() => {
+        const rate = [...document.querySelectorAll('.compact-controls > div')].find((candidate) => candidate.querySelector('.field-label')?.textContent.trim() === 'Frame rate')
+        ;[...rate.querySelectorAll('button')].find((candidate) => candidate.textContent.trim() === '24')?.click()
+    })()`)
     const blockedAlphaTruth = await window.webContents.executeJavaScript(`(() => {
         const card = [...document.querySelectorAll('.format-cards button')].find((button) => button.textContent.includes('PNG Frames'))
         return { disabled: card?.disabled ?? false, text: card?.textContent.replace(/\\s+/g, ' ').trim() ?? '', exportDisabled: document.querySelector('.export-button')?.disabled ?? false }
     })()`)
     if (blockedAlphaTruth.disabled || blockedAlphaTruth.exportDisabled || !blockedAlphaTruth.text.includes("Verified sequence")) throw new Error("G11 explicitly-authored Placard was incorrectly blocked from transparent export.")
+    const primaryDestination = process.env.REEL_G11_PNG_DESTINATION
+    const placardDestination = path.join(evidenceRoot, "vitrine-" + mode + "-placard-visible-frames")
+    if (!primaryDestination || evidenceFs.existsSync(placardDestination)) throw new Error("G11 visible-Placard export destination is unsafe.")
+    const placardObserver = observeExportFrames(new Set([0, 18, 47]))
+    let placardExportProbes = null
+    process.env.REEL_G11_PNG_DESTINATION = placardDestination
+    try {
+        await clickText(window, ".export-button", "Export verified PNG Frames")
+        await until(window, "document.querySelector('.export-success strong')?.textContent.includes('PNG Frames verified')", "visible Placard PNG Frames", 120_000)
+        placardExportProbes = await placardObserver.finish()
+    } finally {
+        placardObserver.cancel()
+        process.env.REEL_G11_PNG_DESTINATION = primaryDestination
+    }
+    if (!placardExportProbes || Object.values(placardExportProbes).some((probe) => !probe.transparentExport
+        || !probe.placardExpected || probe.placard === null || probe.placardShadow !== "none")) {
+        throw new Error("G11 transparent export window did not prove a current visible Placard with its shadow suppressed.")
+    }
+    const placardManifestBytes = stableFileBytes(path.join(placardDestination, "manifest.json"), 5_000_000)
+    const placardManifest = JSON.parse(placardManifestBytes)
+    if (placardManifest.format !== "galileo-gallery-png-frames" || placardManifest.scene?.id !== "vitrine"
+        || placardManifest.scene?.version !== 2 || placardManifest.fps !== 24 || placardManifest.durationMs !== 2_000
+        || placardManifest.frameCount !== 48 || placardManifest.frames.length !== 48 || placardManifest.alpha !== true) {
+        throw new Error("G11 visible-Placard transparent export manifest is wrong.")
+    }
     await clickText(window, ".inspector-top button", "Look")
     await chooseSegment(window, "Placard", "Clean")
     await scrub(window, 0.375)
@@ -1951,12 +2003,14 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
     if (formatTruth[0]?.disabled || !formatTruth[0]?.text.includes("Verified sequence") || !formatTruth[1]?.disabled || !formatTruth[1]?.text.includes("Quiet Carousel only")) throw new Error("G11 export capability UI is false.")
     const observer = observeExportFrames(new Set([0, 6, 15, 18, 24, 47]))
     await clickText(window, ".export-button", "Export verified PNG Frames")
+    await until(window, "!document.querySelector('.export-success') || document.querySelector('.export-progress')", "isolated export restart", 5_000)
     await until(window, "document.querySelector('.export-success strong')?.textContent.includes('PNG Frames verified')", "verified PNG Frames", 120_000)
     const exportProbes = await observer.finish()
     if (mode === "save" && !normalizedParity(exchange, exportProbes[18])) throw new Error("G11 preview and PNG export do not share Project-canvas evaluator geometry.")
     if (exportProbes[6]?.phrase !== "readable-hold" || exportProbes[15]?.phrase !== "readable-hold"
         || exportProbes[18]?.phrase !== "exchange" || exportProbes[24]?.planes[0]?.id !== "vitrine-portrait") throw new Error("G11 exported boundary phrases are wrong.")
     if (Object.values(exportProbes).some((probe) => probe.phrase === "reduced-motion-settled")) throw new Error("Reduced motion leaked into deterministic export.")
+    if (Object.values(exportProbes).some((probe) => !probe.transparentExport || probe.placardExpected)) throw new Error("G11 isolated export window did not prove its transparent Clean state.")
     if (Object.values(exportProbes).some((probe) => probe.placard !== null)) throw new Error("Placard contaminated the isolated transparent alpha proof.")
 
     const manifestPath = path.join(destination, "manifest.json")
@@ -2013,7 +2067,20 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         presentation: { initial: presentationInitial, final: presentationFinal },
         preview: { holdA, exchange, semanticHandoff, holdB, terminalVideo, continuousVideoHandoff, sourceVideoSeekBurst, reducedTransport, scales: scaleEvidence, cleanAlpha: cleanAlphaPreview, reducedMotionExpected: mode === "reopen" },
         controls: { causal: controlEvidence, interaction: interactionEvidence, libraryKeyboard, decoderEvidence, targets: targetEvidence, canvasResolutions: canvasResolutionEvidence, design: { ...designTruth, keyboard: backgroundKeyboard }, expert: expertTruth, presets: presetTruth, blockedAlpha: blockedAlphaTruth, formats: formatTruth },
-        export: { placardVisible: false, probes: exportProbes, manifestSha256: sha256(manifestBytes), frameHashes: manifest.frames.map((frame) => frame.sha256), artwork },
+        export: {
+            placardVisible: false,
+            visiblePlacardProof: {
+                probes: placardExportProbes,
+                manifestSha256: sha256(placardManifestBytes),
+                frameHashes: placardManifest.frames.map((frame) => frame.sha256),
+                transparentWindow: true,
+                shadowSuppressed: true,
+            },
+            probes: exportProbes,
+            manifestSha256: sha256(manifestBytes),
+            frameHashes: manifest.frames.map((frame) => frame.sha256),
+            artwork,
+        },
         screenshots,
     }
     assertNoPrivateEvidence(receipt)
