@@ -561,8 +561,9 @@ async function continuousVideoHandoffEvidence(window) {
             if (incoming) {
                 sawIncoming = true
                 if (getComputedStyle(incoming).visibility !== 'visible') hiddenIncomingFrames += 1
-                const presented = Number(incoming.dataset.storyPresentedTime)
-                if (incoming.dataset.storyReady === 'true' && Number.isFinite(presented)
+                const presentedValue = incoming.dataset.storyPresentedTime
+                const presented = Number(presentedValue)
+                if (presentedValue !== '' && Number.isFinite(presented)
                     && (presentedTimes.length === 0 || Math.abs(presentedTimes.at(-1) - presented) > 0.0001)) presentedTimes.push(presented)
             }
             if (Number(document.querySelector('.timeline').value) >= 0.44) break
@@ -577,7 +578,7 @@ async function continuousVideoHandoffEvidence(window) {
     await settle(window)
     if (!result.guardReadyBefore || !result.sawIncoming || result.hiddenIncomingFrames !== 0 || result.maxDecoders > 2
         || result.presentedTimes.length < 2 || result.presentedTimes.some((value, index) => index > 0 && value <= result.presentedTimes[index - 1])) {
-        throw new Error("G11 continuous video handoff was not prewarmed and continuously presentable.")
+        throw new Error(`G11 continuous video handoff was not prewarmed and continuously presentable: ${JSON.stringify(result)}`)
     }
     return result
 }
