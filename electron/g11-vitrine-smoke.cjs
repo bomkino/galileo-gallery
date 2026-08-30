@@ -477,16 +477,17 @@ async function libraryKeyboardEvidence(window) {
     assert.deepEqual(voiceOverChord, { order: ["vitrine-square", "vitrine-portrait"], focused: "vitrine-square", selected: "vitrine-square" }, "Control+Option VoiceOver navigation must not reorder or consume library focus")
     const retired = await window.webContents.executeJavaScript(`(async () => {
         const deadline = performance.now() + 2_000
-        while (performance.now() < deadline && !window.__g11RetiredVideos.every((video) => !video.getAttribute('src') && !video.currentSrc)) {
+        const released = (video) => !video.hasAttribute('src') && video.paused && video.readyState === HTMLMediaElement.HAVE_NOTHING && video.networkState === HTMLMediaElement.NETWORK_EMPTY
+        while (performance.now() < deadline && !window.__g11RetiredVideos.every(released)) {
             await new Promise((resolve) => requestAnimationFrame(resolve))
         }
         const states = window.__g11RetiredVideos.map((video) => ({
             hasSourceAttribute: video.hasAttribute('src'), hasCurrentSource: Boolean(video.currentSrc),
             paused: video.paused, readyState: video.readyState, networkState: video.networkState,
         }))
-        return { count: states.length, allCleared: states.every((state) => !state.hasSourceAttribute && !state.hasCurrentSource), states }
+        return { count: states.length, allCleared: states.every((state) => !state.hasSourceAttribute && state.paused && state.readyState === 0 && state.networkState === 0), states }
     })()`)
-    if (retired.count < 1 || !retired.allCleared) throw new Error(`G11 source-video handoff did not release the retired decoder source: ${JSON.stringify(retired)}`)
+    if (retired.count < 1 || !retired.allCleared) throw new Error(`G11 source-video handoff did not release the retired decoder: ${JSON.stringify(retired)}`)
     await window.webContents.executeJavaScript("window.__g11VideoObserver.disconnect()")
     return { next, previous, movedLater, movedEarlier, voiceOverChord, retired }
 }
