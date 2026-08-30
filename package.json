@@ -25,6 +25,7 @@
     "verify:quiet-carousel": "node --experimental-strip-types scripts/verify-quiet-carousel.mjs",
     "verify:vitrine": "node --experimental-strip-types scripts/verify-vitrine.mjs",
     "verify:scene-parity": "node --experimental-strip-types scripts/verify-scene-parity.mjs",
+    "verify:scene-convergence": "node --experimental-strip-types scripts/verify-scene-convergence.mjs",
     "verify:audio": "node --experimental-strip-types scripts/verify-audio.mjs",
     "verify:interface-scale": "node --experimental-strip-types scripts/verify-interface-scale.mjs",
     "verify:g02-renderer": "npm run build && npm run prepare:electron && REEL_USER_DATA_DIR=./artifacts/g02-runtime REEL_G02_RENDERER_OUTPUT=./artifacts/g02 electron . && node scripts/verify-g02-renderer-artifacts.cjs ./artifacts/g02",

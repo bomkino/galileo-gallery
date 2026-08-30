@@ -3,6 +3,7 @@ import { createPortal } from "react-dom"
 import OpeningReel from "./OpeningReel"
 import ExpertControls, { type ExpertPreset, type ExpertTab } from "./ExpertControls"
 import ProductSceneRenderer, { isAuthoredVitrine, productSceneDuration } from "./scenes/ProductSceneRenderer"
+import { paritySceneContract } from "./scenes/parityRegistry"
 import { minimumVitrineFixedDuration, VITRINE_MIN_EXCHANGE_MS, VITRINE_MIN_HOLD_MS, vitrineStoryTimeMs } from "./scenes/vitrine"
 import { assertVitrineV2Settings, exclusiveVitrineOpening, firstEligibleVitrineItem, isVitrineV2, reconcileVitrineConfig, VITRINE_MAX_DURATION_MS, VITRINE_MAX_ITEMS } from "./vitrineConfig"
 import QuietCarouselRenderer, { quietCarouselTimeline } from "./scenes/QuietCarouselRenderer"
@@ -27,6 +28,7 @@ import type {
     PosterFrame,
     ReelConfig,
     ReelSettings,
+    SceneParameterValue,
     SelectedMedia,
     TimelineMode,
 } from "./types"
@@ -62,6 +64,7 @@ function normalizeConfig(value: Partial<ReelConfig> | null | undefined): ReelCon
         timelineMode: value?.timelineMode ?? "automatic",
         timelineFixedDurationMs: value?.timelineFixedDurationMs ?? 0,
         timelineSegments: value?.timelineSegments ?? [],
+        sceneParameters: value?.sceneParameters && !Array.isArray(value.sceneParameters) ? { ...value.sceneParameters } : {},
         audio: value?.audio ?? defaultAudioIntent(),
     }
     return reconcileVitrineConfig(config)
@@ -706,6 +709,7 @@ function AppView() {
     const activeVariants = sceneVariants(config.styleId)
     const activeProfile = styleProfile(config.styleId, config.sceneVersion ?? 1)
     const authoredVitrine = isAuthoredVitrine(config)
+    const activeParityContract = authoredVitrine ? null : paritySceneContract(config.styleId)
     const reducedVitrinePreview = authoredVitrine && systemReducedMotion
     const verifiedPngScene = usesLinuxHostPort && supportsVerifiedPngFrames(config.styleId, config.sceneVersion ?? 1)
     const directedPaceScale = authoredVitrine && config.timelineMode === "directed"
@@ -1173,6 +1177,17 @@ function AppView() {
         })
     }
 
+    const updateSceneParameter = (parameter: string, value: SceneParameterValue) => {
+        setConfig((current) => ({
+            ...current,
+            sceneParameters: { ...(current.sceneParameters ?? {}), [parameter]: value },
+        }))
+    }
+
+    const resetSceneParameters = () => {
+        setConfig((current) => ({ ...current, sceneParameters: {} }))
+    }
+
     const updateTimelineMode = (mode: TimelineMode) => {
         setConfig((current) => {
             const mediaCount = Math.max(1, current.items.filter((item) => !item.muted).length)
@@ -1259,6 +1274,7 @@ function AppView() {
             })
             return {
                 ...current,
+                ...(preset === "original" ? { sceneParameters: {} } : {}),
                 settings: preset === "original"
                     ? applyStyleDefaults(current.settings, current.styleId, current.sceneVersion ?? 1)
                     : {
@@ -1414,6 +1430,7 @@ function AppView() {
             schemaVersion: 2,
             styleId: style.id,
             sceneVersion,
+            sceneParameters: {},
             settings,
             ...(style.id === "vitrine" && sceneVersion === 2 ? { timelineMode: "automatic" as const, timelineFixedDurationMs: 0, timelineSegments: [] } : {}),
         })
@@ -1835,6 +1852,10 @@ function AppView() {
                             isVitrineV2={authoredVitrine}
                             vitrineHoldMinimum={vitrineHoldMinimum}
                             vitrineExchangeMinimum={vitrineExchangeMinimum}
+                            sceneControls={activeParityContract?.controls}
+                            sceneParameters={config.sceneParameters}
+                            onSceneParameter={updateSceneParameter}
+                            onResetSceneParameters={resetSceneParameters}
                         />
                     </div>
                 ) : (

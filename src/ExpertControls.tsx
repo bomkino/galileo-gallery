@@ -1,5 +1,6 @@
 import * as React from "react"
-import type { BackgroundStyle, MediaItem, MotionPreset, ReelSettings } from "./types"
+import type { ParityControl } from "./scenes/paritySupport/types.ts"
+import type { BackgroundStyle, MediaItem, MotionPreset, ReelSettings, SceneParameterValue } from "./types"
 import type { StyleProfile } from "./styleProfiles"
 
 export type ExpertTab = "slides" | "frame" | "story" | "timing" | "look"
@@ -24,6 +25,10 @@ type Props = {
     isVitrineV2?: boolean
     vitrineHoldMinimum?: number
     vitrineExchangeMinimum?: number
+    sceneControls?: readonly ParityControl[]
+    sceneParameters?: Record<string, SceneParameterValue>
+    onSceneParameter?: (parameter: string, value: SceneParameterValue) => void
+    onResetSceneParameters?: () => void
 }
 
 function ControlGroup({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
@@ -59,7 +64,7 @@ function Range({
     onBegin?: () => void
     onEnd?: () => void
 }) {
-    const progress = Math.min(100, Math.max(0, ((value - min) / Math.max(1, max - min)) * 100))
+    const progress = Math.min(100, Math.max(0, ((value - min) / Math.max(Number.EPSILON, max - min)) * 100))
     const shiftArrow = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (!event.shiftKey || !["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp"].includes(event.key)) return
         event.preventDefault()
@@ -198,6 +203,34 @@ export default function ExpertControls(props: Props) {
     return (
         <div className="expert-panel">
             <Presets onPreset={props.onPreset} defaultsOnly={props.isVitrineV2} />
+            {props.sceneControls?.length ? (
+                <ControlGroup eyebrow="Scene-native" title="Authored controls">
+                    {props.sceneControls.map((control) => {
+                        const value = props.sceneParameters?.[control.parameter] ?? control.default
+                        if (control.type === "range") return <Range
+                            key={control.id}
+                            label={control.label}
+                            value={Number(value)}
+                            min={control.min ?? 0}
+                            max={control.max ?? 1}
+                            step={control.step ?? 1}
+                            suffix={control.unit ?? ""}
+                            onChange={(next) => props.onSceneParameter?.(control.parameter, next)}
+                        />
+                        const options = control.options ?? [control.default]
+                        return <label className="expert-field" key={control.id}>
+                            <span>{control.label}</span>
+                            <select value={String(value)} onChange={(event) => {
+                                const selected = options.find((option) => String(option) === event.target.value)
+                                if (selected !== undefined) props.onSceneParameter?.(control.parameter, selected)
+                            }}>
+                                {options.map((option) => <option value={String(option)} key={String(option)}>{String(option)}</option>)}
+                            </select>
+                        </label>
+                    })}
+                    <button type="button" className="button quiet" onClick={props.onResetSceneParameters}>Reset Scene controls</button>
+                </ControlGroup>
+            ) : null}
             <div className="expert-tabs" role="group" aria-label="Motion fine controls">
                 {(["slides", "frame", "story", "timing", "look"] as ExpertTab[]).map((tab) => (
                     <button type="button" aria-pressed={props.tab === tab} className={props.tab === tab ? "is-active" : ""} onClick={() => props.onTab(tab)} key={tab}>{tab}</button>

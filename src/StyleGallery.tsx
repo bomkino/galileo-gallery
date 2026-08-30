@@ -68,7 +68,7 @@ export default function StyleGallery({ currentStyleId, onChoose, onClose }: Prop
                     </button>
                 })}
             </main>
-            <footer className="style-gallery-footer"><span>{visible.length} scenes</span><p>Pick freely. Frames stay with you; merged scenes expose their original behaviors as presets.</p></footer>
+            <footer className="style-gallery-footer"><span>{visible.length} scenes</span><p>Pick freely. Frames stay with you; every Scene keeps its own identity and controls.</p></footer>
         </div>
     )
 }

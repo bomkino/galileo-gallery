@@ -6,6 +6,7 @@ export type PosterFrame = "first" | "last" | "none"
 export type CanvasPreset = "fullHD" | "fourK" | "square" | "portrait" | "vertical" | "presentation" | "cinema" | "custom"
 export type BackgroundStyle = "solid" | "gradient" | "halo" | "paper" | "transparent"
 export type TimelineMode = "automatic" | "fixed-duration" | "directed"
+export type SceneParameterValue = number | string | boolean
 
 export type VisualTimelineSegment = {
     id: string
@@ -109,6 +110,7 @@ export type ReelConfig = {
     timelineMode?: TimelineMode
     timelineFixedDurationMs?: number
     timelineSegments?: VisualTimelineSegment[]
+    sceneParameters?: Record<string, SceneParameterValue>
     audio?: AudioTimelineIntent
 }
 
@@ -215,7 +217,12 @@ export type PortableGalleryProjectV2 = {
     engineVersion: 1
     media: PortableGalleryMedia[]
     canvas: PortableGalleryCanvas
-    scene: { id: string; version: 1 | 2; parameters: PortableGallerySceneParameters }
+    scene: {
+        id: string
+        version: 1 | 2
+        parameters: PortableGallerySceneParameters
+        authoredParameters?: Record<string, SceneParameterValue>
+    }
     look: { id: string; version: 1; parameters: PortableGalleryLookParameters }
     timeline: PortableGalleryTimeline
     audio: {

@@ -1,4 +1,4 @@
-import type { MediaItem, ReelConfig } from "../../types"
+import type { MediaItem, ReelConfig, SceneParameterValue } from "../../types"
 
 export type ParityControl = {
     id: string
@@ -83,7 +83,7 @@ export function parityItems(config: ReelConfig, recommendedItems: number): Media
 }
 
 export function authoredParameters(config: ReelConfig, defaults: Readonly<Record<string, number | string | boolean>>) {
-    const candidate = (config as ReelConfig & { sceneParameters?: Record<string, unknown> }).sceneParameters
+    const candidate: Record<string, SceneParameterValue> | undefined = config.sceneParameters
     return { ...defaults, ...(candidate ?? {}) }
 }
 

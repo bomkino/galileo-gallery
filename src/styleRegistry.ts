@@ -104,25 +104,15 @@ const QUIET_CAROUSEL_SCENE: SceneDefinition = {
 
 export const ALL_STYLE_VARIANTS = variants
 
-export const GALLERY_STYLES: SceneDefinition[] = [
-    ["opening", "Opening Reel", "Reels", "Ceremonial river", "#ff8a68", "opening-reel", ["opening-reel"]],
-    ["stack", "Stack", "Carousels", "Swipe, calm, and hero deck physics", "#df9bff", "swipe-stack", ["swipe-stack", "the-stack", "hero-deck-object"]],
-    ["orbit", "Orbit", "Orbits", "Ring, proximity, ellipse, and zoetrope", "#6ccfee", "orbit-ring", ["orbit-ring", "proximity-orbit", "spin-image-orbit", "zoetrope"]],
-    ["spiral", "Spiral Vortex", "Orbits", "A continuous helical flight", "#7ea7ff", "spiral-image-vortex", ["spiral-image-vortex"]],
-    ["vitrine", "Vitrine", "Objects", "One source at rest, then one restrained exchange", "#f4c67a", "vitrine", ["vitrine"]],
-    ["ribbon", "Ribbon", "Reels", "Two-lane filmstrip or wave", "#67d4c0", "filmstrip-river", ["filmstrip-river", "wave-ticker"]],
-    ["contact-table", "Contact Table", "Editorial", "Strip, sheet, or illuminated table", "#f3a45f", "deck-contact-strip", ["deck-contact-strip", "contact-sheet", "light-table"]],
-    ["deck-river", "Deck River", "Reels", "Continuous corridor or chapter reveal", "#6e9fff", "deck-river", ["deck-river", "deck-river-loader"]],
-    ["shelf", "Shelf", "Objects", "Collected frames on one baseline", "#d5a46f", "the-shelf", ["the-shelf"]],
-    ["compare", "Before / After", "Editorial", "A reversible comparison sweep", "#ff826c", "before-after-slider", ["before-after-slider"]],
-    ["fan", "Fan", "Objects", "Open fan or dealer's pick", "#e996ff", "slide-fan", ["slide-fan", "dealers-fan"]],
-    ["assembly", "Assembly", "Editorial", "Slide anatomy or authored build", "#ee8f70", "slide-anatomy-object", ["slide-anatomy-object", "the-build"]],
-    ["coverflow", "Coverflow", "Carousels", "Classic restrained depth browsing", "#829cff", "coverflow-gallery", ["coverflow-gallery"]],
-    ["scatter", "Scatter", "Objects", "Quiet drift or lively prints", "#d891b8", "drift-deck", ["drift-deck", "image-scatter-gallery"]],
-    ["orrery", "Orrery", "Orbits", "A nested slide solar system", "#f1bd68", "the-orrery", ["the-orrery"]],
-    ["hang", "The Hang", "Objects", "A suspended spatial gallery", "#76c6a7", "the-hang", ["the-hang"]],
-    ["cms", "CMS Slideshow", "Carousels", "Horizontal or vertical autoplay", "#f3a56e", "cms-slideshow", ["cms-slideshow"]],
-].map(([id, name, category, description, accent, defaultStyleId, styleIds]) => ({ id, name, category, description, accent, defaultStyleId, styleIds } as SceneDefinition))
+export const GALLERY_STYLES: SceneDefinition[] = variants.map((style) => ({
+    id: style.id,
+    name: style.name === style.presetName ? style.name : `${style.name} — ${style.presetName}`,
+    category: style.category,
+    description: style.description,
+    accent: style.accent,
+    defaultStyleId: style.id,
+    styleIds: [style.id],
+}))
 
 export function galleryStyle(id: string | undefined): StyleDefinition {
     if (id === undefined) return ALL_STYLE_VARIANTS[0]
@@ -150,7 +140,7 @@ export function supportsVerifiedPngFrames(styleId: string, version = 1) {
 export function galleryScene(styleId: string | undefined): SceneDefinition {
     if (styleId === QUIET_CAROUSEL_STYLE.id) return QUIET_CAROUSEL_SCENE
     const style = galleryStyle(styleId)
-    return GALLERY_STYLES.find((scene) => scene.id === style.familyId) ?? GALLERY_STYLES[0]
+    return GALLERY_STYLES.find((scene) => scene.id === style.id) ?? GALLERY_STYLES[0]
 }
 
 export function sceneVariants(styleId: string | undefined): StyleDefinition[] {

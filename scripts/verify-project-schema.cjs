@@ -207,6 +207,29 @@ async function run() {
         })
         assert.equal(canonicalProjectJSON(reopenedSave.project), canonicalProjectJSON(manifest))
 
+        const authoredConfig = {
+            ...config,
+            sceneParameters: { frameScale: 0.61, direction: "reverse", placardVisibility: true },
+        }
+        const authoredPath = path.join(root, "authored-scene-parameters.galileo")
+        const authoredSaved = await savePortableProjectArchive({
+            config: authoredConfig,
+            outputPath: authoredPath,
+            tempRoot: root,
+            mediaPathFromURL: (url) => url,
+        })
+        assert.deepEqual(authoredSaved.project.scene.authoredParameters, authoredConfig.sceneParameters)
+        const authoredOpened = await openPortableProjectArchive({
+            sourcePath: authoredPath,
+            stagingParent: roots.staging,
+            openedProjectsRoot: roots.opened,
+            mediaURLFromPath: (filePath) => filePath,
+        })
+        assert.deepEqual(authoredOpened.config.sceneParameters, authoredConfig.sceneParameters)
+        const invalidAuthoredParameters = structuredClone(authoredSaved.project)
+        invalidAuthoredParameters.scene.authoredParameters.frameScale = { nested: "forbidden" }
+        assert.throws(() => validatePortableProject(invalidAuthoredParameters), (error) => error?.code === "scene_invalid")
+
         const vitrineConfig = {
             ...config,
             styleId: "vitrine",

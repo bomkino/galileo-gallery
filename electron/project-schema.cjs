@@ -321,6 +321,9 @@ function portableProjectFromConfig(config, media, audioAssets = []) {
             id: config.styleId,
             version: config.sceneVersion ?? 1,
             parameters: settingsSubset(config.settings, SCENE_PARAMETER_KEYS),
+            ...(isRecord(config.sceneParameters) && Object.keys(config.sceneParameters).length > 0
+                ? { authoredParameters: canonicalize(config.sceneParameters) }
+                : {}),
         },
         look: {
             id: `gallery-look.${config.settings.backgroundStyle}`,
@@ -461,7 +464,10 @@ function validateCanvas(canvas) {
 }
 
 function validateScene(scene) {
-    exactKeys(scene, ["id", "version", "parameters"], "scene_invalid", "Scene")
+    const sceneKeys = Object.hasOwn(scene, "authoredParameters")
+        ? ["id", "version", "parameters", "authoredParameters"]
+        : ["id", "version", "parameters"]
+    exactKeys(scene, sceneKeys, "scene_invalid", "Scene")
     stringValue(scene.id, "scene_invalid", "Scene id", { pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, max: 120 })
     numberValue(scene.version, "scene_invalid", "Scene version", 1, 1_000, true)
     if (!Object.hasOwn(SUPPORTED_SCENE_VERSIONS, scene.id)) fail("scene_invalid", "This Project names an unsupported Gallery Scene.")
@@ -482,6 +488,19 @@ function validateScene(scene) {
         numberValue(scene.parameters.slideHeight, "scene_invalid", "Vitrine presentation scale", 42, 78)
         numberValue(scene.parameters.tilt, "scene_invalid", "Vitrine object turn", 0, 9)
         numberValue(scene.parameters.sway, "scene_invalid", "Vitrine transition depth", 8, 30)
+    }
+    if (Object.hasOwn(scene, "authoredParameters")) {
+        const authored = record(scene.authoredParameters, "scene_invalid", "Authored Scene parameters")
+        const keys = Object.keys(authored)
+        if (keys.length > 64) fail("scene_invalid", "Authored Scene parameters exceed the supported count.")
+        for (const key of keys) {
+            stringValue(key, "scene_invalid", "Authored Scene parameter key", { pattern: /^[A-Za-z][A-Za-z0-9-]*$/, max: 80 })
+            const value = authored[key]
+            if (typeof value === "number") numberValue(value, "scene_invalid", key, -1_000_000_000, 1_000_000_000)
+            else if (typeof value === "string") stringValue(value, "scene_invalid", key, { allowEmpty: true, max: 120 })
+            else if (typeof value === "boolean") booleanValue(value, "scene_invalid", key)
+            else fail("scene_invalid", `Authored Scene parameter ${key} has an unsupported value.`)
+        }
     }
 }
 
@@ -787,6 +806,7 @@ function configFromPortableProject(project, urls, audioURLs = {}) {
         timelineMode: project.timeline.mode,
         timelineFixedDurationMs: project.timeline.fixedDurationMs,
         timelineSegments: project.timeline.segments,
+        ...(project.scene.authoredParameters ? { sceneParameters: project.scene.authoredParameters } : {}),
         audio: {
             id: project.audio.id,
             version: project.audio.version,
