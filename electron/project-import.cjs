@@ -473,6 +473,7 @@ async function rejectUnsupportedProjectArchive(options) {
 module.exports = {
     PROJECT_IMPORT_LIMITS,
     ProjectImportError,
+    assertStagingSpace,
     cleanupAbandonedProjectImports,
     normalizeArchivePath,
     publicProjectImportFailure,

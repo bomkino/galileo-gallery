@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
 import { DEFAULT_SETTINGS } from "../src/defaults.ts"
+import { defaultAudioIntent } from "../src/audio/audioTimeline.ts"
 import { createHostBackedAPI } from "../src/runtime.ts"
 
 function deferred() {
@@ -171,7 +172,79 @@ async function run() {
     assert.equal(vitrineIntent.finalCycleDurationMs, 2_160)
     assert.equal(vitrineIntent.config, vitrineConfig)
 
-    console.log("Verified: renderer host adapter owns one workflow, translates cancellation, and rejects missing, mismatched, or invalid Vitrine clocks before host preflight.")
+    const priorGlobals = Object.fromEntries(["window", "document", "Image", "HTMLMediaElement", "HTMLVideoElement"].map((key) => [key, globalThis[key]]))
+    class FakeHTMLMediaElement {
+        constructor(mode) { this.mode = mode; this.source = ""; this.loadCalls = 0; this.pauseCalls = 0 }
+        set src(value) { this.source = value }
+        get src() { return this.source }
+        removeAttribute(name) { if (name === "src") this.source = "" }
+        pause() { this.pauseCalls += 1 }
+        load() {
+            this.loadCalls += 1
+            if (!this.source) return
+            queueMicrotask(() => this.mode === "error" ? this.onerror?.() : this.onloadeddata?.())
+        }
+    }
+    class FakeHTMLVideoElement extends FakeHTMLMediaElement {}
+    let videoMode = "loaded"
+    const videos = []
+    globalThis.HTMLMediaElement = FakeHTMLMediaElement
+    globalThis.HTMLVideoElement = FakeHTMLVideoElement
+    globalThis.Image = class {}
+    globalThis.document = { createElement: (tag) => {
+        assert.equal(tag, "video")
+        const video = new FakeHTMLVideoElement(videoMode)
+        videos.push(video)
+        return video
+    } }
+    globalThis.window = {
+        setTimeout: globalThis.setTimeout.bind(globalThis),
+        clearTimeout: globalThis.clearTimeout.bind(globalThis),
+        requestAnimationFrame: (callback) => globalThis.setImmediate(callback),
+    }
+    try {
+        const videoConfig = {
+            ...vitrineConfig,
+            audio: defaultAudioIntent(),
+            items: [{ ...vitrineConfig.items[0], id: "edition-video", name: "Edition Video.mp4", type: "video", url: `reel-media://grant/${"6".repeat(64)}` }],
+        }
+        let accepts = 0
+        let discards = 0
+        const openHost = (mode) => baseHost({
+            beginProjectOpen: async () => ({ operationId: "7".repeat(32), candidateGeneration: 2, config: videoConfig }),
+            acceptProjectOpen: async () => {
+                accepts += 1
+                const video = videos.at(-1)
+                assert.equal(video.source, "", "candidate video authority must be released before accept")
+                assert.equal(video.pauseCalls, 1)
+                assert.equal(video.loadCalls, 2)
+                return { generation: 2 }
+            },
+            discardProjectOpen: async () => { discards += 1; return { discarded: true } },
+            prepareVideoAudio: async () => { throw new Error("no source-video audio expected") },
+            mode,
+        })
+        videoMode = "error"
+        await assert.rejects(createHostBackedAPI(openHost("error")).openProject(), /Could not hydrate Edition Video/)
+        assert.equal(accepts, 0, "corrupt Vitrine video must not replace the prior Project")
+        assert.equal(discards, 1, "corrupt Vitrine video candidate must be discarded")
+        assert.equal(videos.at(-1).source, "")
+        assert.equal(videos.at(-1).pauseCalls, 1)
+        assert.equal(videos.at(-1).loadCalls, 2)
+
+        videoMode = "loaded"
+        const opened = await createHostBackedAPI(openHost("loaded")).openProject()
+        assert.equal(opened.config, videoConfig)
+        assert.equal(accepts, 1)
+        assert.equal(discards, 1)
+    } finally {
+        for (const [key, value] of Object.entries(priorGlobals)) {
+            if (value === undefined) delete globalThis[key]
+            else globalThis[key] = value
+        }
+    }
+
+    console.log("Verified: renderer host adapter owns one workflow, rejects invalid Vitrine clocks, and accepts only decoded, released Project candidates.")
 }
 
 run().catch((error) => { console.error(error); process.exitCode = 1 })

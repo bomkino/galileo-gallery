@@ -94,22 +94,29 @@ function pcm16Base64(interleaved: Float32Array) {
 async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort) {
     let cursor = 0
     const hydrateOne = (item: ReelConfig["items"][number]) => new Promise<void>((resolve, reject) => {
-        if (config.styleId === "vitrine" && config.sceneVersion === 2 && item.type === "video") {
-            resolve()
-            return
-        }
         const media = item.type === "video" ? document.createElement("video") : new Image()
+        let finished = false
         const timeout = window.setTimeout(() => finish(new Error(`Timed out hydrating ${item.name}.`)), 15_000)
         const finish = (error?: Error) => {
+            if (finished) return
+            finished = true
             window.clearTimeout(timeout)
             media.removeAttribute("src")
-            if (media instanceof HTMLMediaElement) media.load()
-            if (error) reject(error)
-            else resolve()
+            if (media instanceof HTMLMediaElement) {
+                if (media instanceof HTMLVideoElement) {
+                    media.onloadeddata = null
+                    media.onerror = null
+                }
+                media.pause()
+                media.load()
+                window.requestAnimationFrame(() => window.requestAnimationFrame(() => error ? reject(error) : resolve()))
+                return
+            }
+            if (error) reject(error); else resolve()
         }
         if (media instanceof HTMLVideoElement) {
-            media.preload = "metadata"
-            media.onloadedmetadata = () => finish()
+            media.preload = "auto"
+            media.onloadeddata = () => finish()
             media.onerror = () => finish(new Error(`Could not hydrate ${item.name}.`))
             media.src = item.url
             media.load()

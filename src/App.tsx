@@ -1497,6 +1497,7 @@ function AppView() {
                         </button>
                     ) : (
                         <div className="media-list">
+                            <p className="visually-hidden" id="media-reorder-help">Use Alt plus an arrow key to move the focused frame earlier or later in the sequence.</p>
                             {config.items.map((item, index) => (
                                 <article
                                     className={`media-row ${dragIndex === index ? "is-dragging" : ""} ${selectedItemId === item.id ? "is-selected" : ""}`}
@@ -1515,9 +1516,20 @@ function AppView() {
                                         type="button"
                                         tabIndex={selectedItemId === item.id ? 0 : -1}
                                         aria-label={`${item.name}, item ${index + 1} of ${config.items.length}`}
+                                        aria-describedby="media-reorder-help"
+                                        aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown Alt+ArrowLeft Alt+ArrowRight"
                                         data-library-item={item.id}
                                         onClick={() => inspectLibraryItem(item.id)}
                                         onKeyDown={(event) => {
+                                            if (event.altKey && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+                                                event.preventDefault()
+                                                const nextIndex = index + (["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1)
+                                                if (nextIndex < 0 || nextIndex >= config.items.length) return
+                                                moveItem(index, nextIndex)
+                                                setSaveNotice(`${item.name} moved to position ${nextIndex + 1} of ${config.items.length}`)
+                                                requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-library-item="${CSS.escape(item.id)}"]`)?.focus())
+                                                return
+                                            }
                                             if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return
                                             event.preventDefault()
                                             const nextIndex = event.key === "Home" ? 0 : event.key === "End" ? config.items.length - 1
@@ -1758,9 +1770,9 @@ function AppView() {
                                 options={[{ value: "dark", label: "Night" }, { value: "light", label: "Paper" }]}
                                 onChange={(value) => updateSettings("theme", value)}
                             /> : null}
-                            <div className="background-style-grid">
+                            <div className="background-style-grid" role="group" aria-label="Room background">
                                 {((authoredVitrine ? ["solid", "transparent"] : ["solid", "gradient", "halo", "paper", "transparent"]) as BackgroundStyle[]).map((style) => (
-                                    <button type="button" className={config.settings.backgroundStyle === style ? "is-active" : ""} onClick={() => updateSettings("backgroundStyle", style)} key={style}>
+                                    <button type="button" aria-pressed={config.settings.backgroundStyle === style} className={config.settings.backgroundStyle === style ? "is-active" : ""} onClick={() => updateSettings("backgroundStyle", style)} key={style}>
                                         <i data-style={style} /><span>{style}</span>
                                     </button>
                                 ))}

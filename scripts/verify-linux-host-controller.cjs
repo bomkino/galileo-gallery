@@ -30,6 +30,7 @@ const mainFrame = { url: "gallery-app://app/index.html" }
 const sender = { id: 71, mainFrame }
 const event = { sender, senderFrame: mainFrame }
 let openCount = 0
+let saveCount = 0
 
 const host = createLinuxHostController({
     owner: "window-71",
@@ -44,7 +45,10 @@ const host = createLinuxHostController({
     },
     decodeAudio: ({ startFrame, frameCount }) => ({ sampleRate: 48_000, channels: 1, startFrame, frameCount, samples: Array.from({ length: frameCount }, () => 0) }),
     audioWaveform: ({ buckets }) => ({ sampleRate: 48_000, channels: 1, sampleFrames: 4, buckets: Array.from({ length: buckets }, () => ({ minimum: -0.5, maximum: 0.5, rms: 0.25 })) }),
-    saveProject: ({ config, mediaPath: resolve }) => ({ itemCount: config.items.length, resolved: resolve(config.items[0].url) === mediaPath }),
+    saveProject: ({ config, mediaPath: resolve }) => {
+        saveCount += 1
+        return { itemCount: config.items.length, resolved: resolve(config.items[0].url) === mediaPath }
+    },
     openProject: async ({ generation, grantMedia, signal }) => {
         openCount += 1
         if (signal.aborted) return { cancelled: true }
@@ -99,6 +103,12 @@ async function run() {
     assert.equal(oversizedDecode.error.code, "invalid_request")
     const saved = await host.handle(event, envelope("project.save", { config: { items: [{ url: chosen.value[0].mediaURL }] } }))
     assert.deepEqual(saved.value, { itemCount: 1, resolved: true })
+    assert.equal(saveCount, 1)
+    const oversizedVitrine = await host.handle(event, envelope("project.save", { config: {
+        styleId: "vitrine", sceneVersion: 2, items: Array.from({ length: 128 }, (_, index) => ({ id: `vitrine-${index}`, url: chosen.value[0].mediaURL })),
+    } }, 1, "request-vitrine-save-quota"))
+    assert.equal(oversizedVitrine.error.code, "invalid_request")
+    assert.equal(saveCount, 1, "invalid Vitrine save must be rejected before host persistence")
 
     const begun = await host.handle(event, envelope("project.open.begin"))
     assert.equal(begun.ok, true)

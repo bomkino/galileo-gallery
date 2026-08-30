@@ -269,9 +269,9 @@ async function focusSegment(window, label, option) {
     if (!focused) throw new Error(`Could not focus segment ${label} / ${option}.`)
 }
 
-async function keyboardInput(window, keyCode) {
-    window.webContents.sendInputEvent({ type: "keyDown", keyCode })
-    window.webContents.sendInputEvent({ type: "keyUp", keyCode })
+async function keyboardInput(window, keyCode, modifiers = []) {
+    window.webContents.sendInputEvent({ type: "keyDown", keyCode, modifiers })
+    window.webContents.sendInputEvent({ type: "keyUp", keyCode, modifiers })
     await settle(window)
 }
 
@@ -444,6 +444,30 @@ async function libraryKeyboardEvidence(window) {
     assert.equal(previous.scene.currentId, "vitrine-square")
     assert.equal(previous.scene.inspectionId, "vitrine-square")
     assert.equal(previous.scene.status, "Showing Signal square, item 1 of 2")
+    await keyboardInput(window, "Down", ["alt"])
+    const movedLater = await window.webContents.executeJavaScript(`({
+        order: [...document.querySelectorAll('[data-library-item]')].map((item) => item.dataset.libraryItem),
+        focused: document.activeElement?.dataset.libraryItem ?? null,
+        selected: document.querySelector('.media-row.is-selected [data-library-item]')?.dataset.libraryItem ?? null,
+        notice: document.querySelector('.autosave-status')?.textContent.trim() ?? null,
+        shortcuts: document.activeElement?.getAttribute('aria-keyshortcuts') ?? null,
+    })`)
+    assert.deepEqual(movedLater.order, ["vitrine-portrait", "vitrine-square"])
+    assert.equal(movedLater.focused, "vitrine-square")
+    assert.equal(movedLater.selected, "vitrine-square")
+    assert.match(movedLater.notice, /moved to position 2 of 2/)
+    assert.equal(movedLater.shortcuts, "Alt+ArrowUp Alt+ArrowDown Alt+ArrowLeft Alt+ArrowRight")
+    await keyboardInput(window, "Up", ["alt"])
+    const movedEarlier = await window.webContents.executeJavaScript(`({
+        order: [...document.querySelectorAll('[data-library-item]')].map((item) => item.dataset.libraryItem),
+        focused: document.activeElement?.dataset.libraryItem ?? null,
+        selected: document.querySelector('.media-row.is-selected [data-library-item]')?.dataset.libraryItem ?? null,
+        notice: document.querySelector('.autosave-status')?.textContent.trim() ?? null,
+    })`)
+    assert.deepEqual(movedEarlier.order, ["vitrine-square", "vitrine-portrait"])
+    assert.equal(movedEarlier.focused, "vitrine-square")
+    assert.equal(movedEarlier.selected, "vitrine-square")
+    assert.match(movedEarlier.notice, /moved to position 1 of 2/)
     const retired = await window.webContents.executeJavaScript(`(async () => {
         const deadline = performance.now() + 2_000
         while (performance.now() < deadline && !window.__g11RetiredVideos.every((video) => !video.getAttribute('src') && !video.currentSrc)) {
@@ -457,7 +481,7 @@ async function libraryKeyboardEvidence(window) {
     })()`)
     if (retired.count < 1 || !retired.allCleared) throw new Error(`G11 source-video handoff did not release the retired decoder source: ${JSON.stringify(retired)}`)
     await window.webContents.executeJavaScript("window.__g11VideoObserver.disconnect()")
-    return { next, previous, retired }
+    return { next, previous, movedLater, movedEarlier, retired }
 }
 
 async function documentBoundaryEvidence(window) {
@@ -1060,8 +1084,16 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
     await setScale(window, 100)
     const presentationFinal = await presentationState(window)
 
-    const designTruth = await window.webContents.executeJavaScript(`({ motionGrid: Boolean(document.querySelector('.motion-grid')), backgrounds: [...document.querySelectorAll('.background-style-grid button')].map((button) => button.textContent.trim()) })`)
-    if (designTruth.motionGrid || designTruth.backgrounds.join(",") !== "solid,transparent") throw new Error("G11 Design exposed noncausal Vitrine controls.")
+    const designTruth = await window.webContents.executeJavaScript(`({
+        motionGrid: Boolean(document.querySelector('.motion-grid')),
+        backgroundGroup: document.querySelector('.background-style-grid')?.getAttribute('aria-label') ?? null,
+        backgrounds: [...document.querySelectorAll('.background-style-grid button')].map((button) => ({ label: button.textContent.trim(), pressed: button.getAttribute('aria-pressed') })),
+    })`)
+    if (designTruth.motionGrid || designTruth.backgroundGroup !== "Room background"
+        || designTruth.backgrounds.map((entry) => entry.label).join(",") !== "solid,transparent"
+        || designTruth.backgrounds.filter((entry) => entry.pressed === "true").map((entry) => entry.label).join(",") !== "transparent") {
+        throw new Error("G11 Design exposed noncausal or inaccessible Vitrine background controls.")
+    }
     await clickText(window, ".inspector-top button", "Expert")
     const expertTruth = {}
     for (const tab of ["frame", "story", "timing", "look"]) {

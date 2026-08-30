@@ -194,6 +194,17 @@ async function run() {
             ratio: item.ratio, aspectMode: item.aspectMode, ratioW: item.ratioW, ratioH: item.ratioH,
             fit: item.fit, crop: item.crop, focal: item.focal, caption: item.caption ?? "", spotlight: item.spotlight, muted: item.muted,
         })), "Vitrine v2 manifest must preserve distinct per-frame fit/crop/focal intent")
+        let oversizedVitrineResolverCalls = 0
+        await assert.rejects(savePortableProjectArchive({
+            config: {
+                ...vitrineConfig,
+                items: Array.from({ length: 128 }, (_, index) => ({ ...vitrineConfig.items[index % vitrineConfig.items.length], id: `vitrine-quota-${index}` })),
+            },
+            outputPath: path.join(root, "vitrine-too-many.galileo"),
+            tempRoot: root,
+            mediaPathFromURL: () => { oversizedVitrineResolverCalls += 1; throw new Error("Vitrine quota rejection reached media authority.") },
+        }), (error) => error?.code === "scene_invalid")
+        assert.equal(oversizedVitrineResolverCalls, 0, "Vitrine item quota must reject before resolving or reading media")
         const vitrineOpened = await openPortableProjectArchive({ sourcePath: vitrinePath, stagingParent: roots.staging, openedProjectsRoot: roots.opened, mediaURLFromPath: (filePath) => filePath })
         assert.equal(vitrineOpened.config.styleId, "vitrine")
         assert.equal(vitrineOpened.config.sceneVersion, 2)
@@ -328,6 +339,20 @@ async function run() {
             }),
             (error) => error?.code === "entry_too_large"
         )
+        assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
+        const mediaBytes = mediaPaths.reduce((total, mediaPath) => total + fs.statSync(mediaPath).size, 0)
+        const stagingBeforeAggregateRejection = fs.readdirSync(root).filter((entry) => entry.startsWith("galileo-gallery-save-"))
+        await assert.rejects(
+            savePortableProjectArchive({
+                config,
+                outputPath: quotaDestination,
+                tempRoot: root,
+                mediaPathFromURL: (url) => url,
+                limits: { totalExpandedBytes: mediaBytes - 1 },
+            }),
+            (error) => error?.code === "expanded_size_exceeded"
+        )
+        assert.deepEqual(fs.readdirSync(root).filter((entry) => entry.startsWith("galileo-gallery-save-")), stagingBeforeAggregateRejection, "aggregate rejection must happen before staging")
         assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
         await assert.rejects(
             savePortableProjectArchive({
