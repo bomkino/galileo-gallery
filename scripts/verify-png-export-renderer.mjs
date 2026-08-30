@@ -171,6 +171,11 @@ async function run() {
     assert.equal(vitrineIntent.cycleDurationMs, 2_160)
     assert.equal(vitrineIntent.finalCycleDurationMs, 2_160)
     assert.equal(vitrineIntent.config, vitrineConfig)
+    const normalizedVitrineConfig = { ...vitrineConfig, sceneParameters: {} }
+    assert.deepEqual(await vitrineApi.exportReel({ ...vitrineRequest, config: normalizedVitrineConfig }), {})
+    assert.equal(vitrinePreflights, 2)
+    assert.deepEqual(vitrineIntent.config, vitrineConfig, "verified Vitrine host snapshot must omit unrelated authored Scene parameters")
+    assert.equal(Object.hasOwn(vitrineIntent.config, "sceneParameters"), false)
 
     const priorGlobals = Object.fromEntries(["window", "document", "Image", "HTMLMediaElement", "HTMLVideoElement"].map((key) => [key, globalThis[key]]))
     class FakeHTMLMediaElement {

@@ -50,6 +50,12 @@ function validateHostConfig(value: unknown): ReelConfig {
     return normalized
 }
 
+function configForVerifiedHostExport(config: ReelConfig): ReelConfig {
+    if (!Object.prototype.hasOwnProperty.call(config, "sceneParameters")) return config
+    const { sceneParameters: _authoredSceneParameters, ...supportedConfig } = config
+    return supportedConfig
+}
+
 function gcd(left: number, right: number) {
     let a = Math.abs(left)
     let b = Math.abs(right)
@@ -242,6 +248,7 @@ export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
                 }
                 if (exportCancelled) return { cancelled: true }
                 const date = new Date().toISOString().slice(0, 10)
+                const hostConfig = configForVerifiedHostExport(request.config)
                 if (request.format === "png-frames") {
                     const vitrineClock = request.config.styleId === "vitrine" && request.config.sceneVersion === 2
                         ? validateVitrineRuntimeConfig(request.config)
@@ -252,7 +259,7 @@ export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
                         throw new Error("Vitrine export clocks do not match the immutable Project Timeline.")
                     }
                     const preflight = await host.preflightPngFrames({
-                        config: request.config,
+                        config: hostConfig,
                         width: request.width,
                         height: request.height,
                         fps: request.fps,
@@ -279,7 +286,7 @@ export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
                         throw new Error("Authored audio exceeds the verified 64× story-work bound. Reduce overlapping clips before H.264/AAC export.")
                     }
                     const preflight = await host.preflightH264({
-                        config: request.config,
+                        config: hostConfig,
                         width: request.width,
                         height: request.height,
                         fps: request.fps,
