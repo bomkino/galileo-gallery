@@ -198,12 +198,19 @@ async function presentationState(window) {
 
 async function setScale(window, target) {
     await window.webContents.executeJavaScript(`(async () => {
+        const readSavedScale = () => {
+            const raw = localStorage.getItem(${JSON.stringify(PRESENTATION_KEY)})
+            return raw ? JSON.parse(raw)?.interfaceScale ?? null : null
+        }
         const deadline = performance.now() + 10_000
         while (performance.now() < deadline) {
             const current = Number(document.querySelector('[data-interface-scale]')?.dataset.interfaceScale)
-            if (current === ${target}) break
+            const saved = readSavedScale()
+            if (current === ${target} && saved === ${target}) break
             const control = document.querySelector('.interface-scale-control')
-            const button = control?.querySelector(current < ${target} ? 'button:last-child' : 'button:first-child')
+            const button = current === ${target}
+                ? control?.querySelector(${target} < 200 ? 'button:last-child' : 'button:first-child')
+                : control?.querySelector(current < ${target} ? 'button:last-child' : 'button:first-child')
             if (!button || button.disabled) throw new Error('Interface Scale control is missing or disabled before target.')
             button.click()
             await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
@@ -211,13 +218,11 @@ async function setScale(window, target) {
         const persistenceDeadline = performance.now() + 2_000
         while (performance.now() < persistenceDeadline) {
             const current = Number(document.querySelector('[data-interface-scale]')?.dataset.interfaceScale)
-            const saved = JSON.parse(localStorage.getItem(${JSON.stringify(PRESENTATION_KEY)}))
-            if (current === ${target} && saved?.interfaceScale === ${target}) return
+            if (current === ${target} && readSavedScale() === ${target}) return
             await new Promise((resolve) => requestAnimationFrame(resolve))
         }
         const current = Number(document.querySelector('[data-interface-scale]')?.dataset.interfaceScale)
-        const saved = JSON.parse(localStorage.getItem(${JSON.stringify(PRESENTATION_KEY)}))
-        throw new Error('Interface Scale did not persist: ' + JSON.stringify({ target: ${target}, current, saved: saved?.interfaceScale ?? null }))
+        throw new Error('Interface Scale did not persist: ' + JSON.stringify({ target: ${target}, current, saved: readSavedScale() }))
     })()`)
     await settle(window)
 }
