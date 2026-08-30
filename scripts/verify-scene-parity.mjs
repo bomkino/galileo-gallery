@@ -19,6 +19,8 @@ const settings = {
   canvasHeight: 540,
   paceMs: 1000,
   direction: "forward",
+  transitionDirection: "left",
+  playKind: "repeat",
   axis: "horizontal",
   imageFit: "contain",
   slideHeight: 44,
