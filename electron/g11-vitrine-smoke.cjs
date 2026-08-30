@@ -892,17 +892,21 @@ const sceneExpression = `(() => {
     const stageBox = stage.getBoundingClientRect()
     const logicalWidth = Number(stage.dataset.logicalWidth)
     const logicalHeight = Number(stage.dataset.logicalHeight)
+    const stageStyle = getComputedStyle(stage)
     const logicalStyle = getComputedStyle(logical)
+    const designStyle = getComputedStyle(design)
     const designWidth = Number(design.dataset.designWidth)
     const designHeight = Number(design.dataset.designHeight)
     if (!Number.isFinite(designWidth) || designWidth <= 0 || !Number.isFinite(designHeight) || designHeight <= 0) throw new Error('Vitrine design-space metadata is invalid.')
     const projectScale = logicalWidth / designWidth
     const verticalProjectScale = logicalHeight / designHeight
     if (Math.abs(projectScale - verticalProjectScale) > 0.000000001) throw new Error('Vitrine design-space scale is nonuniform.')
-    const designViewportWidth = design.clientWidth
-    const designViewportHeight = design.clientHeight
-    if (designViewportWidth <= 0 || designViewportHeight <= 0) throw new Error('Vitrine rendered design overlay is empty.')
-    if (designViewportWidth !== stage.clientWidth || designViewportHeight !== stage.clientHeight || getComputedStyle(design).transform !== 'none') throw new Error('Vitrine rendered design overlay left the stage viewport.')
+    const stageLayoutWidth = parseFloat(stageStyle.width)
+    const stageLayoutHeight = parseFloat(stageStyle.height)
+    const designViewportWidth = parseFloat(designStyle.width)
+    const designViewportHeight = parseFloat(designStyle.height)
+    if (![stageLayoutWidth, stageLayoutHeight, designViewportWidth, designViewportHeight].every((value) => Number.isFinite(value) && value > 0)) throw new Error('Vitrine rendered design overlay is empty.')
+    if (Math.abs(designViewportWidth - stageLayoutWidth) > 0.001 || Math.abs(designViewportHeight - stageLayoutHeight) > 0.001 || designStyle.transform !== 'none') throw new Error('Vitrine rendered design overlay left the stage viewport.')
     const minimumRenderedDimension = Math.min(designViewportWidth, designViewportHeight)
     const normalizedBox = (element) => {
         const box = element.getBoundingClientRect()
@@ -936,6 +940,8 @@ const sceneExpression = `(() => {
         stage: {
             clientWidth: stage.clientWidth,
             clientHeight: stage.clientHeight,
+            layoutWidth: stageLayoutWidth,
+            layoutHeight: stageLayoutHeight,
             visualWidth: stageBox.width,
             visualHeight: stageBox.height,
             logicalWidth,
@@ -946,7 +952,7 @@ const sceneExpression = `(() => {
             designViewportHeight,
             projectScale,
             viewportPerspective: parseFloat(logicalStyle.perspective),
-            perspective: parseFloat(logicalStyle.perspective) * logicalWidth / stage.clientWidth,
+            perspective: parseFloat(logicalStyle.perspective) * logicalWidth / stageLayoutWidth,
         },
         planes: [...stage.querySelectorAll('.vitrine-plane')].map((plane) => {
             const media = plane.querySelector('.vitrine-media')
@@ -1717,7 +1723,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         const sample = scaleEvidence[scale]
         if (sample.currentId !== exchange.currentId || sample.incomingId !== exchange.incomingId) throw new Error("Interface Scale changed Vitrine semantics.")
         if (Math.abs(sample.stage.perspective / sample.stage.logicalWidth - 1.46) > 0.0001) throw new Error(`Vitrine perspective is not Project-canvas relative: ${JSON.stringify({ scale, stage: sample.stage, ratio: sample.stage.perspective / sample.stage.logicalWidth })}`)
-        if (Math.abs(sample.stage.visualWidth / sample.stage.clientWidth - scale / 100) > 0.035) throw new Error("Interface Scale visual/logical geometry is wrong.")
+        if (Math.abs(sample.stage.visualWidth / sample.stage.layoutWidth - scale / 100) > 0.035) throw new Error("Interface Scale visual/logical geometry is wrong.")
         if (!normalizedParity(exchange, sample)) throw new Error("Interface Scale changed normalized Vitrine geometry.")
         if (sample.placard !== exchange.placard || !normalizedBoxParity(exchange.placardBox, sample.placardBox)) throw new Error("Interface Scale changed normalized Vitrine Placard geometry.")
     }
