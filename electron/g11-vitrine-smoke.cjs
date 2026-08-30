@@ -1086,8 +1086,20 @@ const sceneExpression = `(() => {
     }
 })()`
 
+async function executeSceneExpression(window) {
+    const result = await window.webContents.executeJavaScript(`(() => {
+        try {
+            return { ok: true, value: ${sceneExpression} }
+        } catch (error) {
+            return { ok: false, error: String(error?.stack ?? error) }
+        }
+    })()`)
+    if (!result?.ok) throw new Error(`G11 renderer scene probe failed: ${result?.error ?? "unknown renderer error"}`)
+    return result.value
+}
+
 async function readScene(window) {
-    return window.webContents.executeJavaScript(sceneExpression)
+    return executeSceneExpression(window)
 }
 
 function normalizedParity(left, right, tolerance = 0.006) {
@@ -1146,7 +1158,7 @@ function observeExportFrames(targetFrames) {
             failures.push(`missing export window for ${frameIndex}`)
             return
         }
-        const promise = exportWindow.webContents.executeJavaScript(sceneExpression).then((value) => {
+        const promise = executeSceneExpression(exportWindow).then((value) => {
             if (value.exportMarker.frameId !== payload.frameId) throw new Error(`Export frame marker raced for ${payload.frameId}.`)
             const expectedTimeMs = frameIndex * 1_000 / 24
             if (value.exportMarker.timeMs !== String(expectedTimeMs)) {
