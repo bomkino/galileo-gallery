@@ -105,6 +105,10 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
         if (animationFrameRef.current !== null) cancelAnimationFrame(animationFrameRef.current)
         frameCallbackRef.current = null
         animationFrameRef.current = null
+        if (video) {
+            video.pause()
+            video.playbackRate = 1
+        }
     }, [])
     const schedulePump = React.useCallback(() => {
         if (pumpFrameRef.current !== null) return
@@ -129,6 +133,7 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
             if (isCurrent() && seekComplete && !video.seeking && Number.isFinite(presentedMediaTime)
                 && Math.abs(video.currentTime - operation.target) <= targetTolerance) {
                 video.pause()
+                video.playbackRate = 1
                 activeRef.current = null
                 confirmedRef.current = { source: operation.source, target: operation.target, mediaTime: presentedMediaTime as number }
                 setHasPresented(true)
@@ -171,6 +176,26 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
             })
             animationFrameRef.current = firstFrame
         }
+        const schedulePresentationKick = () => {
+            if (animationFrameRef.current !== null) return
+            const firstFrame = requestAnimationFrame(() => {
+                if (animationFrameRef.current !== firstFrame) return
+                if (!isCurrent()) {
+                    animationFrameRef.current = null
+                    return
+                }
+                const secondFrame = requestAnimationFrame(() => {
+                    if (animationFrameRef.current === secondFrame) animationFrameRef.current = null
+                    if (!isCurrent() || !seekComplete || frameCallbackRef.current === null || !video.paused) return
+                    video.playbackRate = 0.25
+                    void video.play().catch(() => {
+                        if (isCurrent()) video.playbackRate = 1
+                    })
+                })
+                animationFrameRef.current = secondFrame
+            })
+            animationFrameRef.current = firstFrame
+        }
         const armFrameCallback = () => {
             if (!isCurrent() || !frameVideo.requestVideoFrameCallback || frameCallbackRef.current !== null) return
             const callbackId = frameVideo.requestVideoFrameCallback((_now, metadata) => {
@@ -196,6 +221,7 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
                 return
             }
             if (frameCallbackRef.current === null) armFrameCallback()
+            schedulePresentationKick()
         }
         if (decodedAtTarget) {
             if (!isCurrent() || video.seeking || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA
@@ -204,8 +230,10 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
                 schedulePump()
                 return
             }
-            if (typeof frameVideo.requestVideoFrameCallback === "function") armFrameCallback()
-            else schedulePaintFallback()
+            if (typeof frameVideo.requestVideoFrameCallback === "function") {
+                armFrameCallback()
+                schedulePresentationKick()
+            } else schedulePaintFallback()
             return
         }
         video.addEventListener("seeked", onSeeked, { once: true })
