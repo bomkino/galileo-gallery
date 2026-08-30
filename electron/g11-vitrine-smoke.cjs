@@ -1686,10 +1686,31 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
     await setCanvasDimensions(window, 7_680, 5_120)
     await scrub(window, 0.375)
     const maximumCanvas = await readScene(window)
-    if (maximumCanvas.stage.logicalWidth !== 7_680 || maximumCanvas.stage.logicalHeight !== 5_120
-        || !normalizedParity(exchange, maximumCanvas) || !normalizedPlacardParity(exchange, maximumCanvas)
-        || !placardChildrenContained(maximumCanvas)) {
-        throw new Error("Vitrine Placard lost normalized Project-canvas geometry at maximum resolution.")
+    const maximumCanvasChecks = {
+        logicalWidth: maximumCanvas.stage.logicalWidth === 7_680,
+        logicalHeight: maximumCanvas.stage.logicalHeight === 5_120,
+        planeParity: normalizedParity(exchange, maximumCanvas),
+        placardParity: normalizedPlacardParity(exchange, maximumCanvas),
+        placardChildrenContained: placardChildrenContained(maximumCanvas),
+    }
+    if (Object.values(maximumCanvasChecks).some((passed) => !passed)) {
+        throw new Error(`Vitrine Placard lost normalized Project-canvas geometry at maximum resolution: ${JSON.stringify({
+            checks: maximumCanvasChecks,
+            fixture: {
+                stage: exchange.stage,
+                placard: exchange.placard,
+                placardBox: exchange.placardBox,
+                placardChildren: exchange.placardChildren,
+                placardMetrics: exchange.placardMetrics,
+            },
+            maximum: {
+                stage: maximumCanvas.stage,
+                placard: maximumCanvas.placard,
+                placardBox: maximumCanvas.placardBox,
+                placardChildren: maximumCanvas.placardChildren,
+                placardMetrics: maximumCanvas.placardMetrics,
+            },
+        })}`)
     }
     await setCanvasDimensions(window, 96, 64)
     await scrub(window, 0.375)
