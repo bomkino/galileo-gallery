@@ -88,7 +88,9 @@
     transform: translateX(-50%);
     color: #24211d;
     background: rgba(248, 244, 235, .96);
-    border: var(--vitrine-placard-border, 2.5px) solid rgba(36, 33, 29, .18);
+    border: 0;
+    outline: var(--vitrine-placard-border, 2.5px) solid rgba(36, 33, 29, .18);
+    outline-offset: calc(-1 * var(--vitrine-placard-border, 2.5px));
     box-shadow: 0 var(--vitrine-placard-shadow-y, 10px) var(--vitrine-placard-shadow-blur, 30px) rgba(0, 0, 0, .12);
     font-family: Inter, ui-sans-serif, system-ui, sans-serif;
     pointer-events: none;

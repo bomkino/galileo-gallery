@@ -485,7 +485,8 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
         const applyPlacardMetrics = (factor: number) => {
             placard.style.gap = `${values.gap * factor}px`
             placard.style.padding = `${values.gap * factor}px ${values.paddingX * factor}px`
-            placard.style.borderWidth = `${values.border}px`
+            placard.style.borderWidth = "0"
+            placard.style.outlineWidth = `${values.border}px`
             placard.style.boxShadow = `0 ${values.shadowY * factor}px ${values.shadowBlur * factor}px rgba(0, 0, 0, .12)`
             label.style.fontSize = `${values.labelFont * factor}px`
             caption.style.fontSize = `${values.captionFont * factor}px`
