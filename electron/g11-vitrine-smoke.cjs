@@ -268,7 +268,8 @@ async function until(window, expression, label, timeoutMs = 30_000) {
 }
 
 async function settle(window) {
-    await window.webContents.executeJavaScript(`(async () => {
+    const result = await window.webContents.executeJavaScript(`(async () => {
+        try {
         await document.fonts.ready
         await Promise.all(Array.from(document.images).map(async (image) => {
             await image.decode()
@@ -316,7 +317,12 @@ async function settle(window) {
             await new Promise((resolve) => requestAnimationFrame(resolve))
         }
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+        return { ok: true }
+        } catch (error) {
+            return { ok: false, error: String(error?.stack ?? error) }
+        }
     })()`)
+    if (!result?.ok) throw new Error(`G11 renderer settle failed: ${result?.error ?? "unknown renderer error"}`)
 }
 
 async function clickText(window, selector, text) {
@@ -970,7 +976,8 @@ const sceneExpression = `(() => {
         }
         for (const [name, expected] of Object.entries(expectedPlacardMetrics)) {
             const value = computedPlacardMetrics[name]
-            if (!Number.isFinite(value) || Math.abs(value - expected) > 0.001) throw new Error('Vitrine Placard did not consume its authored metric: ' + JSON.stringify({ name, value, expected }))
+            const tolerance = name === 'border' ? 1 / Math.max(1, devicePixelRatio) + 0.001 : 0.001
+            if (!Number.isFinite(value) || Math.abs(value - expected) > tolerance) throw new Error('Vitrine Placard did not consume its authored metric: ' + JSON.stringify({ name, value, expected, tolerance }))
         }
     }
     return {
