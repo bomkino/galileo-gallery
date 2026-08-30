@@ -1,0 +1,255 @@
+{
+  "$schema": "atelier-local://scene-test-vectors/v1",
+  "runtime": false,
+  "sceneId": "before-after-slider",
+  "tolerance": {
+    "number": 1e-06,
+    "pixelHash": "exact"
+  },
+  "canonicalTimes": [
+    0,
+    0.04,
+    0.08076923076923077,
+    0.21,
+    0.35,
+    0.4125,
+    0.475,
+    0.6096153846153847,
+    0.7442307692307693,
+    0.8067307692307693,
+    0.8692307692307693,
+    0.93,
+    1
+  ],
+  "vectors": [
+    {
+      "id": "exact-pair",
+      "fixture": "aligned-pair",
+      "t": 0.5,
+      "expect": {
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRectEquality": true,
+        "fitEquality": true
+      }
+    },
+    {
+      "id": "zero",
+      "fixture": "zero",
+      "t": 0.5,
+      "expect": {
+        "apply": "fail",
+        "code": "minimum-items"
+      }
+    },
+    {
+      "id": "one",
+      "fixture": "one",
+      "t": 0.5,
+      "expect": {
+        "apply": "missing-pair",
+        "duplicates": 0,
+        "preservedCount": 1
+      }
+    },
+    {
+      "id": "extras",
+      "fixture": "extra-four",
+      "t": 0.5,
+      "expect": {
+        "consumedCount": 2,
+        "preservedExtraCount": 2,
+        "silentConsumption": false
+      }
+    },
+    {
+      "id": "seam",
+      "fixture": "aligned-pair",
+      "samples": [
+        0,
+        1
+      ],
+      "expect": {
+        "splitEqual": true,
+        "velocity": 0
+      }
+    },
+    {
+      "id": "turn-max",
+      "fixture": "aligned-pair",
+      "t": 0.35,
+      "expect": {
+        "split": 0.88,
+        "velocity": 0,
+        "phase": "max-hold"
+      }
+    },
+    {
+      "id": "turn-min",
+      "fixture": "aligned-pair",
+      "t": 0.7442307692307693,
+      "expect": {
+        "split": 0.12,
+        "velocity": 0,
+        "phase": "min-hold"
+      }
+    },
+    {
+      "id": "manual-parity",
+      "fixture": "aligned-pair",
+      "automaticT": 0.21,
+      "expect": {
+        "manualSameSplitGeometryEqual": true
+      }
+    },
+    {
+      "id": "keyboard",
+      "fixture": "aligned-pair",
+      "initial": 0.18,
+      "events": [
+        "ArrowRight",
+        "PageUp",
+        "Home",
+        "End"
+      ],
+      "expect": {
+        "steps": [
+          0.01,
+          0.1,
+          "min",
+          "max"
+        ],
+        "focusVisible": true,
+        "ariaRole": "slider"
+      }
+    },
+    {
+      "id": "failed-before",
+      "fixture": "failed-before",
+      "t": 0.5,
+      "expect": {
+        "beforeId": "before-source",
+        "beforePlaceholder": true,
+        "afterUnderBeforeLabel": false
+      }
+    },
+    {
+      "id": "failed-after",
+      "fixture": "failed-after",
+      "t": 0.5,
+      "expect": {
+        "afterId": "after-source",
+        "afterPlaceholder": true,
+        "beforeUnderAfterLabel": false
+      }
+    },
+    {
+      "id": "mixed-dimensions",
+      "fixture": "different-dimensions",
+      "times": [
+        0,
+        0.5,
+        1
+      ],
+      "expect": {
+        "contentRectEquality": true,
+        "centreEquality": true,
+        "fit": "contain"
+      }
+    },
+    {
+      "id": "alpha-edge",
+      "fixture": "alpha-edge",
+      "backgrounds": [
+        "black",
+        "white",
+        "red",
+        "blue",
+        "checker"
+      ],
+      "expect": {
+        "diagnosticOnly": true,
+        "transparentOutput": false
+      }
+    },
+    {
+      "id": "reduced",
+      "fixture": "aligned-pair",
+      "times": [
+        0.1,
+        0.5,
+        0.9
+      ],
+      "reducedMotion": true,
+      "expect": {
+        "split": 0.18,
+        "velocity": 0,
+        "manualAccess": true
+      }
+    },
+    {
+      "id": "reverse",
+      "fixture": "aligned-pair",
+      "samples": [
+        0.1,
+        0.3,
+        0.6,
+        0.9
+      ],
+      "expect": {
+        "reverseEqualsForwardAtOneMinusT": true
+      }
+    },
+    {
+      "id": "preview-scrub-capture",
+      "fixture": "aligned-pair",
+      "samples": [
+        0,
+        0.08076923076923077,
+        0.35,
+        0.475,
+        0.7442307692307693,
+        0.8692307692307693,
+        1
+      ],
+      "expect": {
+        "canonicalEvaluatorIdentity": true
+      }
+    },
+    {
+      "id": "opaque-capability",
+      "request": {
+        "background": "transparent"
+      },
+      "expect": {
+        "available": false,
+        "consequence": "Before / After currently requires an opaque comparison background. Transparent export is unavailable until alpha-comparison semantics are defined."
+      }
+    },
+    {
+      "id": "fixed-duration-floor",
+      "fixture": "aligned-pair",
+      "intent": {
+        "mode": "fixed-duration",
+        "durationMs": 2000
+      },
+      "expect": {
+        "issueCode": "duration-below-readable-minimum",
+        "compiledDurationMs": 3600,
+        "segmentsRespectIndividualMinima": true
+      }
+    },
+    {
+      "id": "manual-null-is-absent",
+      "fixture": "aligned-pair",
+      "t": 0.2,
+      "manualSplit": null,
+      "expect": {
+        "automaticPathPreserved": true,
+        "notCoercedToMinimum": true
+      }
+    }
+  ]
+}

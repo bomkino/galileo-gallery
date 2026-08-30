@@ -1,0 +1,7 @@
+{
+  "sceneId": "before-after-slider",
+  "source": "canonical/04-t-0_35.png",
+  "method": "autocontrast-grayscale-median3-binary-threshold",
+  "threshold": 158,
+  "output": "SILHOUETTE.png"
+}

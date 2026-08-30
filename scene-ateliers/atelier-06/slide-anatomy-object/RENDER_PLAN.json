@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "slide-anatomy-object",
+  "previewRenderer": "DOM/CSS",
+  "exportRenderer": "DOM/CSS",
+  "currentProof": "actual-browser DOM/CSS 3D inspection prototype",
+  "reason": "one source plus bounded accessible apparatus planes",
+  "alternativesRejected": [
+    "one generic Scene engine",
+    "WebGL because premium",
+    "renderer-owned story clock"
+  ],
+  "fidelityRisks": [
+    "Imported artwork must remain source-clean."
+  ],
+  "performanceRisks": [
+    "visible: 1 source + bounded apparatus; pixels/DPR/video bounds unmeasured"
+  ],
+  "passes": [
+    {
+      "id": "scene-output",
+      "owns": "Scene-native presentation only",
+      "lifecycle": "create on mount; dispose on unmount",
+      "cacheKey": "slide-anatomy-object:source-hash:canvas-preset:renderer-version",
+      "invalidators": [
+        "source replacement",
+        "canvas preset",
+        "Scene-owned geometry control"
+      ],
+      "fallback": "source-native prototype renderer"
+    }
+  ],
+  "contextLoss": {
+    "behaviour": "retain semantic state; dispose and reconstruct presentation resources; use source-native fallback",
+    "humanApprovalRequired": "Product/orchestrator"
+  },
+  "storyClockOwner": "Timeline/Project semantic evaluator",
+  "productDecision": "pending"
+}

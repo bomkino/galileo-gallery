@@ -1,0 +1,236 @@
+{
+  "canonicalTimes": [
+    0,
+    0.04,
+    0.08076923076923077,
+    0.21,
+    0.35,
+    0.4125,
+    0.475,
+    0.6096153846153847,
+    0.7442307692307693,
+    0.8067307692307693,
+    0.8692307692307693,
+    0.93,
+    1
+  ],
+  "commands": [
+    "node prototype/check.cjs",
+    "CHROMIUM_BIN=<chromium> python prototype/capture.py --output ../evidence",
+    "python prototype/verify_evidence.py ../evidence"
+  ],
+  "files": [
+    {
+      "bytes": 88738,
+      "path": "DIAGNOSTICS.json",
+      "sha256": "14cd36d4767c449152729373f976f022358edb777c3e26c55850628e28f59ff2"
+    },
+    {
+      "bytes": 1310,
+      "path": "README.md",
+      "sha256": "f9ad61e100bc1a7d6b87af48c407e9bae4d94fc7d79ff101fbca5a4647f1fafd"
+    },
+    {
+      "bytes": 6318,
+      "path": "REAL_SPEED_FRAMES.sha256",
+      "sha256": "a9e922b6079373baeebee71cabd7bba6a3e102e94269b575c60eab735bb07911"
+    },
+    {
+      "bytes": 4650,
+      "path": "SILHOUETTE.png",
+      "sha256": "5ec073c2fec9111fd69abd92349505e8794b644cdd9095fdfa073950ae1ad75c"
+    },
+    {
+      "bytes": 191,
+      "path": "SILHOUETTE_SOURCE.json",
+      "sha256": "2e7720c508de93e044e7c331e4fc50696b4eccb0c8ac284f15a08a73a9c92fd7"
+    },
+    {
+      "bytes": 3127,
+      "path": "STORY_STATE_DIAGRAM.svg",
+      "sha256": "a80d2ac0b8d88bc68cf9c5c3067615caab80195d825f9ccbdfe90ac9a426bedf"
+    },
+    {
+      "bytes": 109211,
+      "path": "UI_JOURNEY.png",
+      "sha256": "90f80ca5af12f94f7cc1646a1e514d2b7345cad53c3f388c415baf3c6c5be04f"
+    },
+    {
+      "bytes": 772,
+      "path": "VISUAL_INSPECTION.md",
+      "sha256": "15e52dcf88cdaadf82663c548cc0d672e02a1b0b4ed47695431b7dd5847e31d9"
+    },
+    {
+      "bytes": 60995,
+      "path": "alpha-diagnostics/black.png",
+      "sha256": "772b9deb793804a95468c30129889ac2cca03f38e6262d63c1d64a902b699af4"
+    },
+    {
+      "bytes": 66484,
+      "path": "alpha-diagnostics/blue.png",
+      "sha256": "3580ac9f33de6a246f2ff0dddc89f8948bc50baf8f0899b5b2ca3bb4ed083a46"
+    },
+    {
+      "bytes": 73328,
+      "path": "alpha-diagnostics/checker.png",
+      "sha256": "78eb253f80c798a0e416c07a840fafed4cf47b830e889696cc47485532606086"
+    },
+    {
+      "bytes": 66274,
+      "path": "alpha-diagnostics/red.png",
+      "sha256": "fb06b0ce75784064c634b317adfaeb609ce90a4cc93ccae44dd8a5302fc77af2"
+    },
+    {
+      "bytes": 65449,
+      "path": "alpha-diagnostics/white.png",
+      "sha256": "d4f06284ce18f98061850adc55c9e036f7db60c45e9ed43b16e6a41bb66f35a7"
+    },
+    {
+      "bytes": 40208,
+      "path": "before-after-real-speed.mp4",
+      "sha256": "cca769e96b581766d41fb4e7e6f98eeda0114f60979acd1424fa5a40cb119f41"
+    },
+    {
+      "bytes": 60733,
+      "path": "canonical/00-t-0.png",
+      "sha256": "0322e540c4f146ed6fdb2d2922ab778bcae00d64082436b5d9881b2d4803b4d2"
+    },
+    {
+      "bytes": 60733,
+      "path": "canonical/01-t-0_04.png",
+      "sha256": "0322e540c4f146ed6fdb2d2922ab778bcae00d64082436b5d9881b2d4803b4d2"
+    },
+    {
+      "bytes": 60733,
+      "path": "canonical/02-t-0_08076923076923077.png",
+      "sha256": "0322e540c4f146ed6fdb2d2922ab778bcae00d64082436b5d9881b2d4803b4d2"
+    },
+    {
+      "bytes": 61257,
+      "path": "canonical/03-t-0_21.png",
+      "sha256": "c1dfc44ce8a7648483516bc1ae065ab4c182a0404c29ea34ffd87dbe735e2e9d"
+    },
+    {
+      "bytes": 55876,
+      "path": "canonical/04-t-0_35.png",
+      "sha256": "ba7aebb3753f37b3cf894e39b70afc120b3927f2f5f6afbc77470e9b596e16b9"
+    },
+    {
+      "bytes": 55876,
+      "path": "canonical/05-t-0_4125.png",
+      "sha256": "ba7aebb3753f37b3cf894e39b70afc120b3927f2f5f6afbc77470e9b596e16b9"
+    },
+    {
+      "bytes": 55876,
+      "path": "canonical/06-t-0_475.png",
+      "sha256": "ba7aebb3753f37b3cf894e39b70afc120b3927f2f5f6afbc77470e9b596e16b9"
+    },
+    {
+      "bytes": 61705,
+      "path": "canonical/07-t-0_6096153846153847.png",
+      "sha256": "912ff551c265e3593566f079fd2bf2b9d299fee59e1c3a716399ee6e6034ae10"
+    },
+    {
+      "bytes": 59515,
+      "path": "canonical/08-t-0_7442307692307693.png",
+      "sha256": "3cf45659556c495398f72aeb6509779d9fb9b373a76ef88a9cb9e4f73b7e68ba"
+    },
+    {
+      "bytes": 59515,
+      "path": "canonical/09-t-0_8067307692307693.png",
+      "sha256": "3cf45659556c495398f72aeb6509779d9fb9b373a76ef88a9cb9e4f73b7e68ba"
+    },
+    {
+      "bytes": 59515,
+      "path": "canonical/10-t-0_8692307692307693.png",
+      "sha256": "3cf45659556c495398f72aeb6509779d9fb9b373a76ef88a9cb9e4f73b7e68ba"
+    },
+    {
+      "bytes": 59123,
+      "path": "canonical/11-t-0_93.png",
+      "sha256": "ec7f3ac7e1b185326a1cd1adff198208dcbbfe9ef3f75e33864fcb0034e7873c"
+    },
+    {
+      "bytes": 60733,
+      "path": "canonical/12-t-1.png",
+      "sha256": "0322e540c4f146ed6fdb2d2922ab778bcae00d64082436b5d9881b2d4803b4d2"
+    },
+    {
+      "bytes": 35242,
+      "path": "fixtures/aligned-pair.png",
+      "sha256": "a0117d785b1c664c14a851ce87cea80b9927fbadc7ef4d9f97eb5d3acb3de077"
+    },
+    {
+      "bytes": 63385,
+      "path": "fixtures/alpha-edge.png",
+      "sha256": "7c764e427b816e0306d223f3fa5d93a5c9e178e0cdae98fa599cad7bdda3466b"
+    },
+    {
+      "bytes": 43742,
+      "path": "fixtures/both-failed.png",
+      "sha256": "468c1e1594c9425d4df3130febc28e68ed3edb72b65ec17a7c6e2c8df193ffe9"
+    },
+    {
+      "bytes": 63898,
+      "path": "fixtures/different-dimensions.png",
+      "sha256": "e4860ac917e5a91f53979ec3b355e40171a8311e480464f0be869da21bbb6677"
+    },
+    {
+      "bytes": 31609,
+      "path": "fixtures/different-ratios.png",
+      "sha256": "17e36eb9d1596264e32ffce4ea7870a5a9f86423e428e1b3a5acef7419fe7397"
+    },
+    {
+      "bytes": 35242,
+      "path": "fixtures/extra-four.png",
+      "sha256": "a0117d785b1c664c14a851ce87cea80b9927fbadc7ef4d9f97eb5d3acb3de077"
+    },
+    {
+      "bytes": 38672,
+      "path": "fixtures/failed-after.png",
+      "sha256": "605cd86f0797d3ca8666da394c5da9d44a9c9094f843ae6aa6215ed68f74cf75"
+    },
+    {
+      "bytes": 39834,
+      "path": "fixtures/failed-before.png",
+      "sha256": "0a26b46da11cb5b8f864e9457a99fc7ea74ffc277917c4ba30de0989ec67ea72"
+    },
+    {
+      "bytes": 36984,
+      "path": "fixtures/keyboard-focus.png",
+      "sha256": "70c5d6ec47453ea327a30aa1a3a14f77a0a71539f6ce3c2139c07ebbc4375752"
+    },
+    {
+      "bytes": 13727,
+      "path": "fixtures/one.png",
+      "sha256": "8431144a3cc3c53f8902000398dd4f5ad4baf2240b17dc00abbe765fdf698a65"
+    },
+    {
+      "bytes": 36424,
+      "path": "fixtures/video-pair.png",
+      "sha256": "c599c83f66474dac2a17a8ceff2f269ac3000149a725080dc587f286a0d4849a"
+    },
+    {
+      "bytes": 55855,
+      "path": "ratios/16x9.png",
+      "sha256": "ad92bb81174b3f5d4022af14eae83ddf581e063f3ef170abf97945f01ec7b973"
+    },
+    {
+      "bytes": 33876,
+      "path": "ratios/1x1.png",
+      "sha256": "8a33638d62cd2355fb4d37ee7c6166e7d293afda1509b3229f5ecbf8fdb8302d"
+    },
+    {
+      "bytes": 35361,
+      "path": "ratios/4x5.png",
+      "sha256": "b44d82884e01566990c6ad53e8159e2f200221b0ac50847ad7f183dd4c7447c7"
+    },
+    {
+      "bytes": 39850,
+      "path": "ratios/9x16.png",
+      "sha256": "d89372143128b06b5d8e02c2c2ffd93160f744d69c38a0dcc1cb39e2fa338b97"
+    }
+  ],
+  "runner": "prototype/capture.py",
+  "sceneId": "before-after-slider"
+}

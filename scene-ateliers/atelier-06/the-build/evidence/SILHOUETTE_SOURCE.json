@@ -1,0 +1,7 @@
+{
+  "sceneId": "the-build",
+  "source": "canonical/08-t-0.400000000000.png",
+  "method": "autocontrast-grayscale-median3-binary-threshold",
+  "threshold": 186,
+  "output": "SILHOUETTE.png"
+}

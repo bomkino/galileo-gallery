@@ -1,0 +1,97 @@
+{
+  "$schema": "atelier-local://scene-capability-and-controls/v1",
+  "runtime": false,
+  "sceneId": "slide-anatomy-object",
+  "candidateVersion": "0.1",
+  "sourceModel": "flat-source",
+  "futureContractTicket": "AT06-CONTRACT-SOURCE-ROLES",
+  "capability": {
+    "minimumItems": 1,
+    "ordinaryItems": 1,
+    "maximumConsumedItems": 1,
+    "extraMedia": "preserved-not-consumed",
+    "transparentOutput": true,
+    "sourceVideo": "project-story-time",
+    "reverse": "exact path reversal"
+  },
+  "controls": [
+    {
+      "id": "separation-depth",
+      "label": "Separation depth",
+      "type": "range",
+      "default": 0.58,
+      "min": 0.2,
+      "max": 0.9,
+      "step": 0.01,
+      "unit": "normalized depth span",
+      "resetValue": 0.58,
+      "persistence": "Scene parameter; exact decimal round-trip.",
+      "evaluatorConsequence": "Scales per-plane z offsets around the source plane.",
+      "renderConsequence": "Changes depth legibility without changing source pixels or lateral positions.",
+      "causalTest": "At inspection hold, far-plane z span changes monotonically; resolved pose remains zero."
+    },
+    {
+      "id": "lateral-spread",
+      "label": "Lateral spread",
+      "type": "range",
+      "default": 0.52,
+      "min": 0.18,
+      "max": 0.82,
+      "step": 0.01,
+      "unit": "normalized frame width",
+      "resetValue": 0.52,
+      "persistence": "Scene parameter; exact decimal round-trip.",
+      "evaluatorConsequence": "Scales authored x/y plane offsets.",
+      "renderConsequence": "Changes silhouette separation; source plane remains intact.",
+      "causalTest": "At t=0.5, maximum x/y offset changes; t=0 and t=1 stay exact zero."
+    },
+    {
+      "id": "perspective",
+      "label": "Perspective",
+      "type": "range",
+      "default": 0.34,
+      "min": 0.0,
+      "max": 0.6,
+      "step": 0.01,
+      "unit": "normalized view tilt",
+      "resetValue": 0.34,
+      "persistence": "Scene parameter; exact decimal round-trip.",
+      "evaluatorConsequence": "Scales bounded stage rotateX/rotateY values.",
+      "renderConsequence": "Changes depth readability only; no camera translation or source deformation.",
+      "causalTest": "Stage rotation changes while all local plane path vectors and source hash remain invariant."
+    },
+    {
+      "id": "inspection-hold",
+      "label": "Inspection hold",
+      "type": "range",
+      "default": 2100,
+      "min": 1200,
+      "max": 5000,
+      "step": 100,
+      "unit": "ms",
+      "resetValue": 2100,
+      "persistence": "Scene parameter; integer millisecond round-trip.",
+      "evaluatorConsequence": "Changes compiled exact-separated hold duration.",
+      "renderConsequence": "Changes dwell only; full-separated pose is unchanged.",
+      "causalTest": "Hold boundary state remains progress 1 and velocity 0 while duration changes exactly."
+    },
+    {
+      "id": "label-visibility",
+      "label": "Labels",
+      "type": "choice",
+      "default": "known-structure",
+      "options": [
+        "known-structure",
+        "numbers-only",
+        "hidden"
+      ],
+      "step": null,
+      "unit": null,
+      "resetValue": "known-structure",
+      "persistence": "Scene parameter; exact string round-trip.",
+      "evaluatorConsequence": "Declares label presentation state; structure list stays accessible.",
+      "renderConsequence": "Shows Project-known names, numbered markers, or no visual labels.",
+      "causalTest": "Only label DOM changes; plane poses and source hashes remain identical."
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "$schema": "atelier-local://scene-test-vectors/v1",
+  "runtime": false,
+  "$schemaStatus": "atelier-local-proposal-not-runtime",
+  "sceneId": "the-build",
+  "defaultDurationMs": 11600,
+  "minimumReadableDurationMs": 7900,
+  "canonicalNormalizedTimes": [
+    0,
+    0.05172413793103448,
+    0.14655172413793102,
+    0.1896551724137931,
+    0.28448275862068967,
+    0.33620689655172414,
+    0.4827586206896552,
+    0.5517241379310345,
+    0.6293103448275862,
+    0.7155172413793104,
+    0.8879310344827587,
+    1
+  ],
+  "vectors": [
+    {
+      "id": "seam-start",
+      "time": 0,
+      "fixture": "one-caption",
+      "expected": {
+        "apply": "ok",
+        "phaseId": "empty-stage-hold",
+        "frameProgress": 0,
+        "guideProgress": 0,
+        "sourceReveal": 0,
+        "cursorOpacity": 0
+      }
+    },
+    {
+      "id": "frame-boundary",
+      "time": 0.14655172413793102,
+      "fixture": "one-caption",
+      "expected": {
+        "phaseId": "frame-hold",
+        "frameProgress": 1,
+        "guideProgress": 0,
+        "sourceReveal": 0,
+        "velocity": 0
+      }
+    },
+    {
+      "id": "guides-boundary",
+      "time": 0.28448275862068967,
+      "fixture": "one-caption",
+      "expected": {
+        "phaseId": "guides-hold",
+        "frameProgress": 1,
+        "guideProgress": 1,
+        "sourceReveal": 0,
+        "guideCount": 4
+      }
+    },
+    {
+      "id": "source-boundary",
+      "time": 0.4827586206896552,
+      "fixture": "one-caption",
+      "expected": {
+        "phaseId": "source-hold",
+        "sourceReveal": 1,
+        "guideProgress": 1,
+        "sourceOpacity": 1,
+        "sourceFilter": "none",
+        "sourceBlend": "normal"
+      }
+    },
+    {
+      "id": "cleanup-boundary",
+      "time": 0.7155172413793104,
+      "fixture": "one-caption",
+      "expected": {
+        "phaseId": "resolved-hold",
+        "sourceReveal": 1,
+        "guideProgress": 0,
+        "cursorOpacity": 0,
+        "resolvedProgress": 1
+      }
+    },
+    {
+      "id": "seam-end",
+      "time": 1,
+      "fixture": "one-caption",
+      "expected": {
+        "phaseId": "seam",
+        "frameProgress": 0,
+        "guideProgress": 0,
+        "sourceReveal": 0,
+        "cursorOpacity": 0,
+        "structurallyEqualToStart": true
+      }
+    },
+    {
+      "id": "extra-media-preserved",
+      "time": 0.5,
+      "fixture": "extra-three",
+      "expected": {
+        "consumedCount": 1,
+        "preservedExtraCount": 2,
+        "preservedExtraIds": [
+          "extra-source-02",
+          "extra-source-03"
+        ]
+      }
+    },
+    {
+      "id": "explicit-stages-blocked",
+      "time": 0.5,
+      "fixture": "explicit-stages-proposal",
+      "expected": {
+        "apply": "blocked-proposal",
+        "code": "source-role-contract-required",
+        "requiredContract": "AT06-CONTRACT-AUTHORED-STAGES"
+      }
+    },
+    {
+      "id": "zero-items-fail",
+      "time": 0.5,
+      "fixture": "zero",
+      "expected": {
+        "apply": "fail",
+        "code": "minimum-items"
+      }
+    },
+    {
+      "id": "fixed-duration-too-short",
+      "intent": {
+        "mode": "fixed-duration",
+        "durationMs": 2000
+      },
+      "expected": {
+        "issueCode": "duration-below-readable-minimum",
+        "compiledDurationMs": 7900
+      }
+    },
+    {
+      "id": "directed-middle-protected",
+      "intent": {
+        "mode": "directed",
+        "durationMs": 7000
+      },
+      "expected": {
+        "issueCode": "duration-below-readable-minimum",
+        "frameRequestedPaceScale": 2,
+        "sourceRequestedPaceScale": 1,
+        "deconstructRequestedPaceScale": 2,
+        "compiledDurationMs": 7900
+      }
+    },
+    {
+      "id": "reduced-resolved",
+      "time": 0.8,
+      "fixture": "one-caption",
+      "reducedMotion": true,
+      "expected": {
+        "phaseId": "reduced-resolved",
+        "frameProgress": 1,
+        "guideProgress": 0,
+        "sourceReveal": 1,
+        "cursorOpacity": 0
+      }
+    },
+    {
+      "id": "no-caption-omits-beat",
+      "fixture": "one-no-caption",
+      "intent": {
+        "mode": "automatic"
+      },
+      "expected": {
+        "compiledDurationMs": 10700,
+        "minimumReadableDurationMs": 7300,
+        "captionBeatPresent": false,
+        "captionProgressAlways": 0
+      }
+    },
+    {
+      "id": "concise-caption-causal",
+      "fixture": "one-caption",
+      "controls": {
+        "build-detail": "concise"
+      },
+      "intent": {
+        "mode": "automatic"
+      },
+      "expected": {
+        "captionBeatPresent": true,
+        "captionBeatDurationMs": 800,
+        "captionProgressContinuous": true
+      }
+    }
+  ],
+  "noCaptionDurationMs": 10700,
+  "noCaptionMinimumReadableDurationMs": 7300
+}

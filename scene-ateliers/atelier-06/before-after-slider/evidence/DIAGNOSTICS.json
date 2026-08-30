@@ -1,0 +1,3321 @@
+{
+  "canonical": {
+    "0": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "18",
+        "role": "input",
+        "valueText": "18 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 0,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.18
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "initial-hold",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.18,
+        "velocity": 0
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    },
+    "0.04": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "18",
+        "role": "input",
+        "valueText": "18 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 0.040000000000000036,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.18
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "initial-hold",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.18,
+        "velocity": 0
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    },
+    "0.08076923076923077": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "18",
+        "role": "input",
+        "valueText": "18 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 0.0807692307692307,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.18000002094203185
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "sweep-to-max",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.18000002094203185,
+        "velocity": 0.00016322995884638077
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    },
+    "0.21": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "51",
+        "role": "input",
+        "valueText": "51 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 0.20999999999999996,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.511557128347431
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "sweep-to-max",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.511557128347431,
+        "velocity": 4.912914269809246
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    },
+    "0.35": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "88",
+        "role": "input",
+        "valueText": "88 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 0.3500000000000001,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.88
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "max-hold",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.88,
+        "velocity": 0
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    },
+    "0.4125": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "88",
+        "role": "input",
+        "valueText": "88 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 0.4125000000000001,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.88
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "max-hold",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.88,
+        "velocity": 0
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    },
+    "0.475": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "88",
+        "role": "input",
+        "valueText": "88 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 0.4750000000000001,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.8799662011436743
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "sweep-to-min",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.8799662011436743,
+        "velocity": -0.022732138737642422
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    },
+    "0.6096153846153847": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "47",
+        "role": "input",
+        "valueText": "47 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 0.6096153846153847,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.4697283221598471
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "sweep-to-min",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.4697283221598471,
+        "velocity": -5.323149195323954
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    },
+    "0.7442307692307693": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "12",
+        "role": "input",
+        "valueText": "12 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 0.7442307692307693,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.12
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "min-hold",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.12,
+        "velocity": 0
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    },
+    "0.8067307692307693": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "12",
+        "role": "input",
+        "valueText": "12 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 0.8067307692307693,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.12
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "min-hold",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.12,
+        "velocity": 0
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    },
+    "0.8692307692307693": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "12",
+        "role": "input",
+        "valueText": "12 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 0.8692307692307693,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.12012269830751483
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "return-to-initial",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.12012269830751483,
+        "velocity": 0.042121729627447146
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    },
+    "0.93": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "15",
+        "role": "input",
+        "valueText": "15 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 0.9300000000000002,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.14968923284333285
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "return-to-initial",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.14968923284333285,
+        "velocity": 0.8079617228584096
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    },
+    "1": {
+      "accessibility": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "18",
+        "role": "input",
+        "valueText": "18 percent of Before visible"
+      },
+      "compiled": {
+        "controls": {
+          "comparisonChrome": "labels-handle",
+          "initialSplit": 0.18,
+          "sweepDurationMs": 1400,
+          "sweepRange": {
+            "max": 0.88,
+            "min": 0.12
+          },
+          "turnaroundHoldMs": 650
+        },
+        "durationMs": 5200,
+        "issues": [],
+        "minimumDurationMs": 3600,
+        "mode": "automatic",
+        "sceneId": "before-after-slider",
+        "segments": [
+          {
+            "achievedPaceScale": 1.0047846889952152,
+            "base": 420,
+            "durationMs": 418,
+            "end": 0.08038461538461539,
+            "endMs": 418,
+            "group": "opening",
+            "id": "initial-hold",
+            "index": 0,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 420,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.3471153846153846,
+            "endMs": 1805,
+            "group": "opening",
+            "id": "sweep-to-max",
+            "index": 1,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.08038461538461539,
+            "startMs": 418
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.47057692307692306,
+            "endMs": 2447,
+            "group": "middle",
+            "id": "max-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.3471153846153846,
+            "startMs": 1805
+          },
+          {
+            "achievedPaceScale": 1.0093727469358327,
+            "base": 1400,
+            "durationMs": 1387,
+            "end": 0.7373076923076923,
+            "endMs": 3834,
+            "group": "middle",
+            "id": "sweep-to-min",
+            "index": 3,
+            "kind": "move",
+            "min": 900,
+            "paceScale": 1,
+            "preferred": 1400,
+            "requestedPaceScale": 1,
+            "start": 0.47057692307692306,
+            "startMs": 2447
+          },
+          {
+            "achievedPaceScale": 1.0124610591900312,
+            "base": 650,
+            "durationMs": 642,
+            "end": 0.8607692307692307,
+            "endMs": 4476,
+            "group": "middle",
+            "id": "min-hold",
+            "index": 4,
+            "kind": "hold",
+            "min": 360,
+            "paceScale": 1,
+            "preferred": 650,
+            "requestedPaceScale": 1,
+            "start": 0.7373076923076923,
+            "startMs": 3834
+          },
+          {
+            "achievedPaceScale": 0.9392265193370166,
+            "base": 680,
+            "durationMs": 724,
+            "end": 1,
+            "endMs": 5200,
+            "group": "finale",
+            "id": "return-to-initial",
+            "index": 5,
+            "kind": "move",
+            "min": 720,
+            "paceScale": 1,
+            "preferred": 680,
+            "requestedPaceScale": 1,
+            "start": 0.8607692307692307,
+            "startMs": 4476
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 2,
+        "panes": 2,
+        "sliders": 1
+      },
+      "evaluation": {
+        "alignment": "center",
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "chrome": "labels-handle",
+        "consumedCount": 2,
+        "consumedIds": [
+          "before-source",
+          "after-source"
+        ],
+        "contentRect": {
+          "height": 1,
+          "width": 1,
+          "x": 0,
+          "y": 0
+        },
+        "fit": "contain",
+        "normalizedTime": 1,
+        "panes": {
+          "after": {
+            "clip": {
+              "left": 0,
+              "right": 1
+            },
+            "failed": false,
+            "id": "after-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "after"
+          },
+          "before": {
+            "clip": {
+              "left": 0,
+              "right": 0.18
+            },
+            "failed": false,
+            "id": "before-source",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "side": "before"
+          }
+        },
+        "phase": "seam",
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "reducedMotion": false,
+        "sceneId": "before-after-slider",
+        "split": 0.18,
+        "velocity": 0
+      },
+      "mediaStyles": [
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        },
+        {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "objectFit": "contain",
+          "objectPosition": "50% 50%",
+          "opacity": "1"
+        }
+      ],
+      "rects": {
+        "after": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "before": {
+          "height": 869.59375,
+          "width": 1558.390625,
+          "x": 180.796875,
+          "y": 105.203125
+        },
+        "comparison": {
+          "height": 885.59375,
+          "width": 1574.390625,
+          "x": 172.796875,
+          "y": 97.203125
+        }
+      },
+      "sceneId": "before-after-slider",
+      "sourceHashes": {
+        "after": "cb653f3f",
+        "before": "46373618"
+      }
+    }
+  },
+  "keyboard": [
+    {
+      "aria": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "52",
+        "role": "input",
+        "valueText": "52 percent of Before visible"
+      },
+      "key": "ArrowRight",
+      "split": 0.52
+    },
+    {
+      "aria": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "62",
+        "role": "input",
+        "valueText": "62 percent of Before visible"
+      },
+      "key": "PageUp",
+      "split": 0.62
+    },
+    {
+      "aria": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "12",
+        "role": "input",
+        "valueText": "12 percent of Before visible"
+      },
+      "key": "Home",
+      "split": 0.12
+    },
+    {
+      "aria": {
+        "label": "Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.",
+        "max": "88",
+        "min": "12",
+        "now": "88",
+        "role": "input",
+        "valueText": "88 percent of Before visible"
+      },
+      "key": "End",
+      "split": 0.88
+    }
+  ],
+  "lifecycle": {
+    "after": {
+      "canvases": 2,
+      "panes": 2,
+      "sliders": 1
+    },
+    "before": {
+      "canvases": 2,
+      "panes": 2,
+      "sliders": 1
+    },
+    "disposed": {
+      "canvases": 0
+    },
+    "stateEqual": true
+  },
+  "limitations": [
+    "Opaque-only candidate; alpha backgrounds are diagnostic composites, not transparent-output proof."
+  ],
+  "manualParity": {
+    "automaticSplit": 0.511557128347431,
+    "manualSplit": 0.511557128347431,
+    "rectsEqual": true,
+    "sourceHashesEqual": true
+  },
+  "registration": {
+    "after": {
+      "height": 574.390625,
+      "width": 1033.59375,
+      "x": 123.203125,
+      "y": 72.796875
+    },
+    "before": {
+      "height": 574.390625,
+      "width": 1033.59375,
+      "x": 123.203125,
+      "y": 72.796875
+    },
+    "equal": true,
+    "styles": [
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      }
+    ]
+  },
+  "sceneId": "before-after-slider",
+  "sourceContamination": {
+    "allStable": true,
+    "samples": [
+      {
+        "fixture": "aligned-pair",
+        "hashes": {
+          "after": "cb653f3f",
+          "before": "46373618"
+        },
+        "t": 0
+      },
+      {
+        "fixture": "aligned-pair",
+        "hashes": {
+          "after": "cb653f3f",
+          "before": "46373618"
+        },
+        "t": 0.25
+      },
+      {
+        "fixture": "aligned-pair",
+        "hashes": {
+          "after": "cb653f3f",
+          "before": "46373618"
+        },
+        "t": 0.5
+      },
+      {
+        "fixture": "aligned-pair",
+        "hashes": {
+          "after": "cb653f3f",
+          "before": "46373618"
+        },
+        "t": 0.75
+      },
+      {
+        "fixture": "aligned-pair",
+        "hashes": {
+          "after": "cb653f3f",
+          "before": "46373618"
+        },
+        "t": 1
+      },
+      {
+        "fixture": "alpha-edge",
+        "hashes": {
+          "after": "d9b1d21b",
+          "before": "9f7e5f22"
+        },
+        "t": 0
+      },
+      {
+        "fixture": "alpha-edge",
+        "hashes": {
+          "after": "d9b1d21b",
+          "before": "9f7e5f22"
+        },
+        "t": 0.25
+      },
+      {
+        "fixture": "alpha-edge",
+        "hashes": {
+          "after": "d9b1d21b",
+          "before": "9f7e5f22"
+        },
+        "t": 0.5
+      },
+      {
+        "fixture": "alpha-edge",
+        "hashes": {
+          "after": "d9b1d21b",
+          "before": "9f7e5f22"
+        },
+        "t": 0.75
+      },
+      {
+        "fixture": "alpha-edge",
+        "hashes": {
+          "after": "d9b1d21b",
+          "before": "9f7e5f22"
+        },
+        "t": 1
+      },
+      {
+        "fixture": "failed-before",
+        "hashes": {
+          "after": "cb653f3f"
+        },
+        "t": 0
+      },
+      {
+        "fixture": "failed-before",
+        "hashes": {
+          "after": "cb653f3f"
+        },
+        "t": 0.25
+      },
+      {
+        "fixture": "failed-before",
+        "hashes": {
+          "after": "cb653f3f"
+        },
+        "t": 0.5
+      },
+      {
+        "fixture": "failed-before",
+        "hashes": {
+          "after": "cb653f3f"
+        },
+        "t": 0.75
+      },
+      {
+        "fixture": "failed-before",
+        "hashes": {
+          "after": "cb653f3f"
+        },
+        "t": 1
+      },
+      {
+        "fixture": "failed-after",
+        "hashes": {
+          "before": "46373618"
+        },
+        "t": 0
+      },
+      {
+        "fixture": "failed-after",
+        "hashes": {
+          "before": "46373618"
+        },
+        "t": 0.25
+      },
+      {
+        "fixture": "failed-after",
+        "hashes": {
+          "before": "46373618"
+        },
+        "t": 0.5
+      },
+      {
+        "fixture": "failed-after",
+        "hashes": {
+          "before": "46373618"
+        },
+        "t": 0.75
+      },
+      {
+        "fixture": "failed-after",
+        "hashes": {
+          "before": "46373618"
+        },
+        "t": 1
+      }
+    ]
+  }
+}

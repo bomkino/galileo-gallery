@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-build",
+  "atelier": 6,
+  "sourceArchive": "06_EDITORIAL_BUILDS_SOL_5_6_PRO_HANDOFF_2026-08-28(1).zip",
+  "sourceArchiveSha256": "5ada71018556c76f34ca49bae76de3308be3368c09bc72846bff045594b84f08",
+  "sourceRoot": "06_EDITORIAL_BUILDS_SOL_5_6_PRO_HANDOFF_2026-08-28/01_ATELIER_PACKET/scene-ateliers/atelier-06/the-build",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/scene-core.js",
+    "sha256": "b609cd99deeb81c05facca76afa09ae9b56b66506de1412779e748cb72d9ac22",
+    "rendererOwnsStoryClock": false
+  },
+  "controlCount": 5,
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "catalogueRegistration": "no",
+  "release": "no",
+  "claimBoundary": "Parity candidate packet; no Product integration or human acceptance.",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/the-build.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  },
+  "currentFiles": {
+    "sceneContractSha256": "69ac451f7a5a9392a8151220a4fa254fe9c696319e1af47b41fcaa8c602db804",
+    "controlContractSha256": "da6479089e3ced76e5b91cf838c12810f024e40bd3c6588dd36ca048e6498c89",
+    "acceptanceMatrixSha256": "b153c07887ad1709a23863e19e0b401d6c4c771853a1b5c33d50de1f2e12ab35",
+    "evidenceBindingsSha256": "9f53496696de17bff626cca34158b4f3c2df281db57bcf7ff4404262e02addc4"
+  }
+}

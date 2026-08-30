@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0.0",
+  "atelier": 6,
+  "scenes": [
+    {
+      "sceneId": "before-after-slider",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "light-table",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "slide-anatomy-object",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "the-build",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    }
+  ]
+}

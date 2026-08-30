@@ -1,0 +1,207 @@
+{
+  "canonicalTimes": [
+    0,
+    0.0625,
+    0.1,
+    0.1875,
+    0.25,
+    0.375,
+    0.5,
+    0.625,
+    0.75,
+    0.78,
+    0.85,
+    0.92,
+    0.96875,
+    1
+  ],
+  "commands": [
+    "node prototype/check.cjs",
+    "CHROMIUM_BIN=<chromium> python prototype/capture.py --output ../evidence",
+    "python prototype/verify_evidence.py ../evidence"
+  ],
+  "files": [
+    {
+      "bytes": 92539,
+      "path": "DIAGNOSTICS.json",
+      "sha256": "1e1602ff3692cd770929cc91b884ae7f0a8495a77cdf67e6c0462e020405fbdc"
+    },
+    {
+      "bytes": 1426,
+      "path": "README.md",
+      "sha256": "aac728e5acd4c8d92d6cda7f625e297b335c42bcf1e79ecf5896ba608a05bc94"
+    },
+    {
+      "bytes": 12150,
+      "path": "REAL_SPEED_FRAMES.sha256",
+      "sha256": "e06d70a49646204376c048cdf4c1d92de2c306cef5cd9d22d3fc1e1f1118f8e6"
+    },
+    {
+      "bytes": 5421,
+      "path": "SILHOUETTE.png",
+      "sha256": "98a735bff96200d318a55de26959c7ef824537e40d03cb62ae83e93dda71ed1b"
+    },
+    {
+      "bytes": 185,
+      "path": "SILHOUETTE_SOURCE.json",
+      "sha256": "b426195285c68f55b630fba68106f3dab6203a116fa41171b1e78e777869b3f7"
+    },
+    {
+      "bytes": 2126,
+      "path": "STORY_STATE_DIAGRAM.svg",
+      "sha256": "e85ee81f88703f6787ac2d099da3d713ce6d11898a91c4b6ab3db10bb9a2ff77"
+    },
+    {
+      "bytes": 239879,
+      "path": "UI_JOURNEY.png",
+      "sha256": "76855cbe70ab93e21a82f34484cf04b6430e7a9619acc656bb55978a1e51413d"
+    },
+    {
+      "bytes": 744,
+      "path": "VISUAL_INSPECTION.md",
+      "sha256": "b827db821c34df2f8e8b28bc2386308c27e245e032ddaff276650c612ed8334a"
+    },
+    {
+      "bytes": 321896,
+      "path": "canonical/00-t-0.png",
+      "sha256": "e355b19cfe274c465c25d561ba92ada54f7201ee2941286cece59642ccac920e"
+    },
+    {
+      "bytes": 316265,
+      "path": "canonical/01-t-0_0625.png",
+      "sha256": "4d67e4ffae0f82d72566184f635e7edab8960dc9436008ee1d0d9b8083858ca6"
+    },
+    {
+      "bytes": 315742,
+      "path": "canonical/02-t-0_1.png",
+      "sha256": "eab4d0c01b63b9a96c026bc5f94cc936a73f8e2929245a579914fa79c91aa4b4"
+    },
+    {
+      "bytes": 336897,
+      "path": "canonical/03-t-0_1875.png",
+      "sha256": "06c32ef18f60f061db5da6d9d3c15fe2bcc7aef5c6b9ec4e0137cffcf10f45d4"
+    },
+    {
+      "bytes": 327030,
+      "path": "canonical/04-t-0_25.png",
+      "sha256": "2e71d2a31a5e8584085c2c483f889701524767ddebf29c3f7959e494329ae989"
+    },
+    {
+      "bytes": 339185,
+      "path": "canonical/05-t-0_375.png",
+      "sha256": "e3c33538fa7629d63184feaecaad1c1b8427620c93529b6de9fe8b228e694802"
+    },
+    {
+      "bytes": 341519,
+      "path": "canonical/06-t-0_5.png",
+      "sha256": "5484cecae1a5ae39e655b3e95a03aecf5ce0c9c3fc490525981e170edb242d19"
+    },
+    {
+      "bytes": 339799,
+      "path": "canonical/07-t-0_625.png",
+      "sha256": "e3d8e5599c4ff7aa959b4ef4de434a902a0f52a93313c39e8b108b3fd44aae36"
+    },
+    {
+      "bytes": 326072,
+      "path": "canonical/08-t-0_75.png",
+      "sha256": "1e8edad6efadcc3290048dd0bdc7d7e5786134874494d1330448bda14533b6cf"
+    },
+    {
+      "bytes": 316693,
+      "path": "canonical/09-t-0_78.png",
+      "sha256": "0bc97e00805ed65e3105f2e5640d41c8a949232f8a2475dcce061a7157779470"
+    },
+    {
+      "bytes": 327040,
+      "path": "canonical/10-t-0_85.png",
+      "sha256": "0469df7aa315b70dfa382dbeab2fef5a507726e5a9590b7ef17ac664e1e57c5d"
+    },
+    {
+      "bytes": 320600,
+      "path": "canonical/11-t-0_92.png",
+      "sha256": "936225a3aa20f48b2d3beb07b3d6b95e4043120dcdfd326bbf40ed6a6317a826"
+    },
+    {
+      "bytes": 325644,
+      "path": "canonical/12-t-0_96875.png",
+      "sha256": "5366db4db03c7fde2e9c6de5a905cbe693efadc80df930b5c518fafca5d5159a"
+    },
+    {
+      "bytes": 323149,
+      "path": "canonical/13-t-1.png",
+      "sha256": "7614aba3e2afe1f8c413813b4bb483ecc6baf20c0514e0d49400542035f5bae4"
+    },
+    {
+      "bytes": 203895,
+      "path": "fixtures/colour-chart-six.png",
+      "sha256": "ab98d4a7cfc7e4f6c9d2eb9308e331d2266b1d1a2137bbd353300195b8452ebe"
+    },
+    {
+      "bytes": 221222,
+      "path": "fixtures/failed-six.png",
+      "sha256": "baf935fe0b69f5cb801c327926bfa85a3e877be2b13c62b515575b14400a9dcb"
+    },
+    {
+      "bytes": 179207,
+      "path": "fixtures/five.png",
+      "sha256": "18b3b3ed56f760500249154412651ee5f19252eddfc276e094117cb925f2b159"
+    },
+    {
+      "bytes": 301225,
+      "path": "fixtures/many-24.png",
+      "sha256": "f1472dc4758a2f4182c4be4c2619737da08d0149f5e4f20ce0485f1a2dafd8a4"
+    },
+    {
+      "bytes": 109095,
+      "path": "fixtures/one.png",
+      "sha256": "7b0a64dedcbe0f81f1d88806e2a3c41b64de96ac5862ca176aaa2a4504eb72e5"
+    },
+    {
+      "bytes": 203789,
+      "path": "fixtures/ordinary-six.png",
+      "sha256": "3375bd8ba07755bbf3b679695d9ed22e5ed4c17f7f7bbca4a40a7aac2573d3ce"
+    },
+    {
+      "bytes": 198138,
+      "path": "fixtures/reduced-motion.png",
+      "sha256": "3eafde7c906a649b96ab05f415e59616a7b68e60f0c127a35a5ac94bf5deb48c"
+    },
+    {
+      "bytes": 152996,
+      "path": "fixtures/two.png",
+      "sha256": "6b4d20cc934459c3355dbaaf8c3e4db24c0c6ad043811855b1ee4b23fe369e36"
+    },
+    {
+      "bytes": 203615,
+      "path": "fixtures/video-six.png",
+      "sha256": "400ed0c8bf3dae6f233c94c07b5f93d145d2c8a925f6ea6b720bedd8c347b572"
+    },
+    {
+      "bytes": 186507,
+      "path": "light-table-real-speed.mp4",
+      "sha256": "b648def8d83b8bc33ed7809b517ac50a113aaedee3095b1fa54c9f5be1c08e8b"
+    },
+    {
+      "bytes": 341302,
+      "path": "ratios/16x9.png",
+      "sha256": "ad88c8795c7a2704f5a2f7255a05a6aa2beb276df3337a46fa1fa4446e15e996"
+    },
+    {
+      "bytes": 218608,
+      "path": "ratios/1x1.png",
+      "sha256": "06c235f4fc39b32aeecc89d7083885eb91daabc152866942e30627a944d546ca"
+    },
+    {
+      "bytes": 255430,
+      "path": "ratios/4x5.png",
+      "sha256": "326342e869f45a412d91ca4c194f36e93ffc067cd48a529a88e83eb4b0783a2f"
+    },
+    {
+      "bytes": 303764,
+      "path": "ratios/9x16.png",
+      "sha256": "14ab2da4d6ebc1ec41fc3e9dc21c7208c1f0932dffdaa602ac7c30482475f009"
+    }
+  ],
+  "runner": "prototype/capture.py",
+  "sceneId": "light-table"
+}

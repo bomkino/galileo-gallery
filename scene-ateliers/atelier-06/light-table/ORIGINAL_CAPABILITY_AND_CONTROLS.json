@@ -1,0 +1,96 @@
+{
+  "$schema": "atelier-local://scene-capability-and-controls/v1",
+  "runtime": false,
+  "sceneId": "light-table",
+  "candidateVersion": "0.1",
+  "capability": {
+    "minimumItems": 1,
+    "ordinaryItems": 6,
+    "maximumVisibleItems": 24,
+    "transparentOutput": false,
+    "transparentCapabilityCopy": "Light Table needs an opaque illuminated surface. Transparent export is unavailable for this Scene. Choose another Scene to preserve alpha.",
+    "sourceVideo": "project-story-time",
+    "reverse": "sample evaluator at 1-t",
+    "reducedMotion": "static topology and authored focus indication"
+  },
+  "controls": [
+    {
+      "id": "table-spread",
+      "label": "Table spread",
+      "type": "range",
+      "default": 0.72,
+      "min": 0.52,
+      "max": 0.92,
+      "step": 0.01,
+      "unit": "normalized stage fraction",
+      "resetValue": 0.72,
+      "persistence": "Scene parameter; exact decimal round-trip.",
+      "evaluatorConsequence": "Scales slot offsets from stage centre without changing source frame size or crop.",
+      "renderConsequence": "Changes occupied table rectangle and perimeter negative space.",
+      "causalTest": "At t=0.5, source-3 centre moves at least 5% of stage width between 0.52 and 0.92 while its media checksum remains unchanged."
+    },
+    {
+      "id": "overlap",
+      "label": "Overlap",
+      "type": "range",
+      "default": 0.1,
+      "min": 0.0,
+      "max": 0.22,
+      "step": 0.01,
+      "unit": "maximum projected frame-area fraction",
+      "resetValue": 0.1,
+      "persistence": "Scene parameter; exact decimal round-trip.",
+      "evaluatorConsequence": "Moves neighbouring stable slots toward or away from their shared midpoint under deterministic collision bounds.",
+      "renderConsequence": "Changes physical contact between frames; never changes z-order or source visibility floor.",
+      "causalTest": "Ordinary-six total pair intersection increases monotonically and no frame loses more than 22% projected area."
+    },
+    {
+      "id": "underlight-strength",
+      "label": "Under-light",
+      "type": "range",
+      "default": 0.42,
+      "min": 0.0,
+      "max": 0.7,
+      "step": 0.01,
+      "unit": "linear light amplitude",
+      "resetValue": 0.42,
+      "persistence": "Scene parameter; exact decimal round-trip.",
+      "evaluatorConsequence": "Scales only frame-exterior light geometry; source state is invariant.",
+      "renderConsequence": "Changes halo opacity behind frames and table luminance within measured bounds.",
+      "causalTest": "Source canvas hashes are identical at 0.00 and 0.70; outside-frame luminance differs."
+    },
+    {
+      "id": "focus-behaviour",
+      "label": "Focus",
+      "type": "choice",
+      "default": "route",
+      "options": [
+        "route",
+        "loupe-only",
+        "none"
+      ],
+      "step": null,
+      "unit": null,
+      "resetValue": "route",
+      "persistence": "Scene parameter; exact string round-trip.",
+      "evaluatorConsequence": "Selects ordered automatic route, final-only loupe, or no automatic focus.",
+      "renderConsequence": "Changes frame lift, outline, and under-light emphasis only.",
+      "causalTest": "At review midpoint, route has one focus index, loupe-only has none before finale, and none never raises a frame."
+    },
+    {
+      "id": "nudge-restraint",
+      "label": "Nudge restraint",
+      "type": "range",
+      "default": 0.28,
+      "min": 0.0,
+      "max": 0.6,
+      "step": 0.01,
+      "unit": "normalized restraint amplitude",
+      "resetValue": 0.28,
+      "persistence": "Scene parameter; exact decimal round-trip.",
+      "evaluatorConsequence": "Scales seam-safe periodic translation and rotation around stable slots.",
+      "renderConsequence": "Changes handling breath without changing topology, overlap ceiling, or media treatment.",
+      "causalTest": "At canonical t=0.375, at least one frame offset changes; t=0 and t=1 remain identical."
+    }
+  ]
+}

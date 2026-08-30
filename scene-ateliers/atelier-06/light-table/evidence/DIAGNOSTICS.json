@@ -1,0 +1,3395 @@
+{
+  "accessibility": {
+    "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+    "pressed": [
+      "false",
+      "false",
+      "false",
+      "false",
+      "false",
+      "false"
+    ],
+    "roles": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "tabIndices": [
+      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ]
+  },
+  "boundedMany": {
+    "intersectionCount": 6,
+    "maxOcclusionFraction": 0.1613867935593112,
+    "outOfBoundsCount": 0
+  },
+  "canonical": {
+    "0": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": null,
+        "focusWeight": 0,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -3.904898714341307,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.3281456349780103,
+            "y": 0.37224150416284196,
+            "z": 1
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 2.280908627323493,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.5027828314175526,
+            "y": 0.33236868633085775,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 4.349036348374215,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.6693201544987922,
+            "y": 0.40732971818553404,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 3.2928265448772644,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.3469385941142304,
+            "y": 0.6241390165752164,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -2.8920002587912905,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.512000197383764,
+            "y": 0.5898493227453795,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.5930731094978645,
+            "scale": 1,
+            "sourceIndex": 5,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.18000000000000005,
+            "x": 0.6710748565658734,
+            "y": 0.6365122911632407,
+            "z": 6
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.4270435675557332,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0,
+        "phase": "wake",
+        "phaseSeam": true,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "0.0625": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": null,
+        "focusWeight": 0,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -3.8000307290895816,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.32325868749790504,
+            "y": 0.38262716443657574,
+            "z": 1
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 2.40418298425635,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.5077299531564123,
+            "y": 0.34201405797916007,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 4.399433920447842,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.6608679190321917,
+            "y": 0.4162990944540608,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 3.274574873189973,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.3513897135679258,
+            "y": 0.6330320298480312,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -2.915292549622794,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.5051266512714875,
+            "y": 0.5976023532236212,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.440255805733252,
+            "scale": 1,
+            "sourceIndex": 5,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.18000000000000005,
+            "x": 0.6774079134024383,
+            "y": 0.6449095539158717,
+            "z": 6
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.42847385134547267,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0.0625,
+        "phase": "wake",
+        "phaseSeam": false,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "0.1": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": 0,
+        "focusWeight": 3.3458275650297207e-29,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 3.3458275650297207e-29,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -3.7508697109518203,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.32901543189713733,
+            "y": 0.3734974379497905,
+            "z": 101
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 2.3929747199562863,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.5011543849073933,
+            "y": 0.3328641864135516,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 4.407999906835127,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.6647898475271802,
+            "y": 0.40632024737784356,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 3.1812961724073534,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.34521550759441305,
+            "y": 0.6234456628733279,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -2.950588290938963,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.5106158593509912,
+            "y": 0.5873235843709314,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.3004791221901582,
+            "scale": 1,
+            "sourceIndex": 5,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.18000000000000005,
+            "x": 0.6736705596250152,
+            "y": 0.635144627463025,
+            "z": 6
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.42793904978704655,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0.10000000000000009,
+        "phase": "review",
+        "phaseSeam": false,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "0.1875": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": 0,
+        "focusWeight": 1,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 1,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -3.6929557367813595,
+            "scale": 1.055,
+            "sourceIndex": 0,
+            "underlight": 0.42,
+            "underlightExpansion": 0.053000000000000005,
+            "width": 0.29,
+            "x": 0.32892062375015485,
+            "y": 0.36002389038135807,
+            "z": 101
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 2.1483395499451667,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.4982511580288438,
+            "y": 0.3325952348377726,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 4.36273826155115,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.6655553043508995,
+            "y": 0.40397945441992333,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 2.8604556020016916,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.34403509073217714,
+            "y": 0.6223544998274466,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -3.0817647258336844,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.5125975052519861,
+            "y": 0.5858526687476504,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.025787839514517,
+            "scale": 1,
+            "sourceIndex": 5,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.18000000000000005,
+            "x": 0.6765165093116656,
+            "y": 0.6340410144922969,
+            "z": 6
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.42484609981906635,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0.1875,
+        "phase": "review",
+        "phaseSeam": false,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "0.25": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": 1,
+        "focusWeight": 1,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -3.707049926666567,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.32836488832656563,
+            "y": 0.3703118398371581,
+            "z": 1
+          },
+          {
+            "failed": false,
+            "focusWeight": 1,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 1.9190913726765075,
+            "scale": 1.055,
+            "sourceIndex": 1,
+            "underlight": 0.42,
+            "underlightExpansion": 0.053000000000000005,
+            "width": 0.29,
+            "x": 0.4972171685824474,
+            "y": 0.32003603830138017,
+            "z": 102
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 4.2812316120008775,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.6686650832168346,
+            "y": 0.402972745814466,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 2.7071734551227356,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.343591663786773,
+            "y": 0.6214805814994963,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -3.199600731458998,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.514726202616236,
+            "y": 0.5862983892546206,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.0069268905021356,
+            "scale": 1,
+            "sourceIndex": 5,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.18000000000000005,
+            "x": 0.6746352460988303,
+            "y": 0.6335009167316406,
+            "z": 6
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.44525075773833866,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0.25,
+        "phase": "review",
+        "phaseSeam": false,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "0.375": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": 2,
+        "focusWeight": 1,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -3.860099780585654,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.3264334355295613,
+            "y": 0.36925511346818707,
+            "z": 1
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 1.850728925545041,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.4996904046165038,
+            "y": 0.3303919823226081,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 1,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 4.052054811113846,
+            "scale": 1.055,
+            "sourceIndex": 2,
+            "underlight": 0.42,
+            "underlightExpansion": 0.053000000000000005,
+            "width": 0.22500000000000003,
+            "x": 0.6675032053456328,
+            "y": 0.3926298895602952,
+            "z": 103
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 2.9045190353251322,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.34395656286929605,
+            "y": 0.6200686185306141,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -3.4175063801195233,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.515809058513515,
+            "y": 0.5894396223914639,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.3947214468283335,
+            "scale": 1,
+            "sourceIndex": 5,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.18000000000000005,
+            "x": 0.6712040244175806,
+            "y": 0.6333688767187238,
+            "z": 6
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.4546650321039285,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0.375,
+        "phase": "review",
+        "phaseSeam": false,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "0.5": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": 3,
+        "focusWeight": 1,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -4.095101285658693,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.32441116502198963,
+            "y": 0.37224150416284196,
+            "z": 1
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 2.2809086273234924,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.5027828314175526,
+            "y": 0.32888571366914227,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 3.8509636516257846,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.6647598455012077,
+            "y": 0.40732971818553404,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 1,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 3.2928265448772644,
+            "scale": 1.055,
+            "sourceIndex": 3,
+            "underlight": 0.42,
+            "underlightExpansion": 0.053000000000000005,
+            "width": 0.16875000000000004,
+            "x": 0.3457078058857697,
+            "y": 0.6077578154247837,
+            "z": 104
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -3.50799974120871,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.512000197383764,
+            "y": 0.5898493227453795,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.5930731094978645,
+            "scale": 1,
+            "sourceIndex": 5,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.18000000000000005,
+            "x": 0.6763683434341267,
+            "y": 0.6344841888367593,
+            "z": 6
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.43211382337193677,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0.5,
+        "phase": "review",
+        "phaseSeam": false,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "0.625": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": 4,
+        "focusWeight": 1,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -4.274393747391987,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.323482695440399,
+            "y": 0.373298230531813,
+            "z": 1
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 2.349271074454959,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.5003095953834962,
+            "y": 0.32839958408960557,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 3.795754607491467,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.6698014200708652,
+            "y": 0.40567257443970484,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 3.095480964674868,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.34781953842815494,
+            "y": 0.6207302364261726,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 1,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -3.418071031105238,
+            "scale": 1.055,
+            "sourceIndex": 4,
+            "underlight": 0.42,
+            "underlightExpansion": 0.053000000000000005,
+            "width": 0.12656250000000002,
+            "x": 0.510917341486485,
+            "y": 0.5747080896085363,
+            "z": 105
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.2052785531716665,
+            "scale": 1,
+            "sourceIndex": 5,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.18000000000000005,
+            "x": 0.6724961151217557,
+            "y": 0.6361935183732811,
+            "z": 6
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.4236976401660599,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0.625,
+        "phase": "review",
+        "phaseSeam": false,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "0.75": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": 5,
+        "focusWeight": 1,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -4.292950073333433,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.3241919116734343,
+            "y": 0.3703118398371581,
+            "z": 1
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 1.9190913726765073,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.4972171685824474,
+            "y": 0.32921836169861984,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 3.9187683879991217,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.6654149167831653,
+            "y": 0.402972745814466,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 2.7071734551227356,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.3490547362132271,
+            "y": 0.6224162505005039,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -3.2003992685410023,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.514726202616236,
+            "y": 0.5862983892546206,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 1,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.0069268905021356,
+            "scale": 1.055,
+            "sourceIndex": 5,
+            "underlight": 0.42,
+            "underlightExpansion": 0.053000000000000005,
+            "width": 0.18000000000000005,
+            "x": 0.6728079539011698,
+            "y": 0.6254955632683594,
+            "z": 106
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 10,
+          "maxOcclusionFraction": 0.44941080062466365,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0.75,
+        "phase": "review",
+        "phaseSeam": false,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "0.78": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": 5,
+        "focusWeight": 0,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -4.269940918209947,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.3245787540628403,
+            "y": 0.36963540841191134,
+            "z": 1
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 1.8400326094393349,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.49729861912170575,
+            "y": 0.3295696380962252,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 3.968643256440518,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.664446128981617,
+            "y": 0.4029338078174462,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 2.692587876718381,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.3491216665552695,
+            "y": 0.6228184414808123,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -3.1426787999976926,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.5155308683539981,
+            "y": 0.5869258409105991,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.0623768043860586,
+            "scale": 1,
+            "sourceIndex": 5,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.18000000000000005,
+            "x": 0.6743683791361714,
+            "y": 0.6376501994221185,
+            "z": 6
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.4132090209883195,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0.78,
+        "phase": "final-inspection",
+        "phaseSeam": false,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "0.85": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": 5,
+        "focusWeight": 1,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -4.181102454645901,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.32568792866788254,
+            "y": 0.36905590605020955,
+            "z": 1
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 1.8070252800437139,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.4988456150926068,
+            "y": 0.33051104585420427,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 4.099760438832457,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.6653736225370394,
+            "y": 0.4039822166221565,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 2.8187038275926466,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.3488947788019435,
+            "y": 0.6236145047732382,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -3.019285309442612,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.5161105406490089,
+            "y": 0.5888241276290688,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 1,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.299520877809842,
+            "scale": 1.055,
+            "sourceIndex": 5,
+            "underlight": 0.42,
+            "underlightExpansion": 0.053000000000000005,
+            "width": 0.18000000000000005,
+            "x": 0.6765211347613704,
+            "y": 0.6257101527861862,
+            "z": 106
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.4511962081623731,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0.8500000000000001,
+        "phase": "final-inspection",
+        "phaseSeam": false,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "0.92": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": 5,
+        "focusWeight": 0,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -4.057791882253276,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.32690949706714867,
+            "y": 0.37008679660406174,
+            "z": 1
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 1.9864691607805827,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.5012297156115417,
+            "y": 0.3314745630770306,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 4.230923220709255,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.6688050485719074,
+            "y": 0.40587833929010864,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 3.0762870641974946,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.34817840157982377,
+            "y": 0.6240934349068593,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -2.9302901184136076,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.5146979733213819,
+            "y": 0.5901783533597934,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.5370123876578852,
+            "scale": 1,
+            "sourceIndex": 5,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.18000000000000005,
+            "x": 0.6744672528316673,
+            "y": 0.6373490776311551,
+            "z": 6
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.421323154147384,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0.9199999999999999,
+        "phase": "final-inspection",
+        "phaseSeam": false,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "0.96875": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": 5,
+        "focusWeight": 0.10547955753281724,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -3.963877783019799,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.327702702901974,
+            "y": 0.3713944437298772,
+            "z": 1
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 2.1717458676771293,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.5024525239651055,
+            "y": 0.3320603734414438,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 4.308894651226048,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.6698387270385537,
+            "y": 0.4069643816844097,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 3.2339974681007937,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.3474596657683211,
+            "y": 0.6241881947827687,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -2.8979962808827286,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.5130399393111316,
+            "y": 0.5902368295572047,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 0.10547955753281724,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.6070125757853702,
+            "scale": 1.005801375664305,
+            "sourceIndex": 5,
+            "underlight": 0.13446907476447525,
+            "underlightExpansion": 0.03689863203559071,
+            "width": 0.18000000000000005,
+            "x": 0.6720285078389872,
+            "y": 0.6356167102036829,
+            "z": 106
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.42919311643775615,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 0.96875,
+        "phase": "return",
+        "phaseSeam": false,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    },
+    "1": {
+      "accessibility": {
+        "groupLabel": "Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus.",
+        "pressed": [
+          "false",
+          "false",
+          "false",
+          "false",
+          "false",
+          "false"
+        ],
+        "roles": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "tabIndices": [
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      },
+      "dom": {
+        "canvases": 6,
+        "items": 6,
+        "underlights": 6
+      },
+      "evaluation": {
+        "apply": "ok",
+        "capability": {
+          "transparentOutput": false
+        },
+        "controls": {
+          "focusBehaviour": "route",
+          "nudgeRestraint": 0.28,
+          "overlap": 0.1,
+          "tableSpread": 0.72,
+          "underlightStrength": 0.42
+        },
+        "focusIndex": null,
+        "focusWeight": 0,
+        "frames": [
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-01",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.7777777777777777,
+            "rotation": -3.904898714341307,
+            "scale": 1,
+            "sourceIndex": 0,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.3281456349780103,
+            "y": 0.37224150416284196,
+            "z": 1
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-02",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1.3333333333333333,
+            "rotation": 2.280908627323493,
+            "scale": 1,
+            "sourceIndex": 1,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.29,
+            "x": 0.5027828314175526,
+            "y": 0.33236868633085775,
+            "z": 2
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-03",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 1,
+            "rotation": 4.349036348374215,
+            "scale": 1,
+            "sourceIndex": 2,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.22500000000000003,
+            "x": 0.6693201544987922,
+            "y": 0.40732971818553404,
+            "z": 3
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-04",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.75,
+            "rotation": 3.2928265448772644,
+            "scale": 1,
+            "sourceIndex": 3,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.16875000000000004,
+            "x": 0.3469385941142304,
+            "y": 0.6241390165752164,
+            "z": 4
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-05",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.5625,
+            "rotation": -2.8920002587912905,
+            "scale": 1,
+            "sourceIndex": 4,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.12656250000000002,
+            "x": 0.512000197383764,
+            "y": 0.5898493227453795,
+            "z": 5
+          },
+          {
+            "failed": false,
+            "focusWeight": 0,
+            "id": "light-source-06",
+            "kind": "image",
+            "media": {
+              "blend": "normal",
+              "filter": "none",
+              "opacity": 1
+            },
+            "ratio": 0.8,
+            "rotation": 1.5930731094978645,
+            "scale": 1,
+            "sourceIndex": 5,
+            "underlight": 0.10079999999999999,
+            "underlightExpansion": 0.035,
+            "width": 0.18000000000000005,
+            "x": 0.6710748565658734,
+            "y": 0.6365122911632407,
+            "z": 6
+          }
+        ],
+        "layout": "ordinary",
+        "layoutMetrics": {
+          "intersectionCount": 9,
+          "maxOcclusionFraction": 0.4270435675557332,
+          "outOfBoundsCount": 0
+        },
+        "normalizedTime": 1,
+        "phase": "seam",
+        "phaseSeam": true,
+        "reducedMotion": false,
+        "sceneId": "light-table"
+      },
+      "mediaStyles": {
+        "light-source-01": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-02": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-03": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-04": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-05": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        },
+        "light-source-06": {
+          "filter": "none",
+          "mixBlendMode": "normal",
+          "opacity": "1"
+        }
+      },
+      "sourceHashes": {
+        "light-source-01": "4062618c",
+        "light-source-02": "1c5932ba",
+        "light-source-03": "a4617f5f",
+        "light-source-04": "4e0e023a",
+        "light-source-05": "abef644c",
+        "light-source-06": "c578c301"
+      }
+    }
+  },
+  "lifecycle": {
+    "after": {
+      "canvases": 6,
+      "items": 6,
+      "underlights": 6
+    },
+    "before": {
+      "canvases": 6,
+      "items": 6,
+      "underlights": 6
+    },
+    "disposed": {
+      "canvases": 0,
+      "items": 0
+    },
+    "remountStateEqual": true
+  },
+  "limitations": [],
+  "luminance": {
+    "0": 226.91329380035998,
+    "0.0625": 226.86764185484626,
+    "0.1": 226.88104329028874,
+    "0.1875": 226.67059213280967,
+    "0.25": 226.71279391178663,
+    "0.375": 226.86746234545433,
+    "0.5": 226.94939487267047,
+    "0.625": 226.76052663105185,
+    "0.75": 226.67796229708912,
+    "0.78": 226.79731772946832,
+    "0.85": 226.75168837120486,
+    "0.92": 226.79114418820677,
+    "0.96875": 226.88133501429118,
+    "1": 226.9051349292131
+  },
+  "luminanceSummary": {
+    "maximum": 226.94939487267047,
+    "minimum": 226.67059213280967,
+    "pass": true,
+    "range255": 0.27880273986079374,
+    "threshold255": 8
+  },
+  "sceneId": "light-table",
+  "sourceContamination": {
+    "allIdentical": true,
+    "samples": [
+      {
+        "hashes": {
+          "light-source-01": "4062618c",
+          "light-source-02": "1c5932ba",
+          "light-source-03": "a4617f5f",
+          "light-source-04": "4e0e023a",
+          "light-source-05": "abef644c",
+          "light-source-06": "c578c301"
+        },
+        "strength": 0,
+        "t": 0
+      },
+      {
+        "hashes": {
+          "light-source-01": "4062618c",
+          "light-source-02": "1c5932ba",
+          "light-source-03": "a4617f5f",
+          "light-source-04": "4e0e023a",
+          "light-source-05": "abef644c",
+          "light-source-06": "c578c301"
+        },
+        "strength": 0,
+        "t": 0.25
+      },
+      {
+        "hashes": {
+          "light-source-01": "4062618c",
+          "light-source-02": "1c5932ba",
+          "light-source-03": "a4617f5f",
+          "light-source-04": "4e0e023a",
+          "light-source-05": "abef644c",
+          "light-source-06": "c578c301"
+        },
+        "strength": 0,
+        "t": 0.5
+      },
+      {
+        "hashes": {
+          "light-source-01": "4062618c",
+          "light-source-02": "1c5932ba",
+          "light-source-03": "a4617f5f",
+          "light-source-04": "4e0e023a",
+          "light-source-05": "abef644c",
+          "light-source-06": "c578c301"
+        },
+        "strength": 0,
+        "t": 0.75
+      },
+      {
+        "hashes": {
+          "light-source-01": "4062618c",
+          "light-source-02": "1c5932ba",
+          "light-source-03": "a4617f5f",
+          "light-source-04": "4e0e023a",
+          "light-source-05": "abef644c",
+          "light-source-06": "c578c301"
+        },
+        "strength": 0,
+        "t": 1
+      },
+      {
+        "hashes": {
+          "light-source-01": "4062618c",
+          "light-source-02": "1c5932ba",
+          "light-source-03": "a4617f5f",
+          "light-source-04": "4e0e023a",
+          "light-source-05": "abef644c",
+          "light-source-06": "c578c301"
+        },
+        "strength": 0.7,
+        "t": 0
+      },
+      {
+        "hashes": {
+          "light-source-01": "4062618c",
+          "light-source-02": "1c5932ba",
+          "light-source-03": "a4617f5f",
+          "light-source-04": "4e0e023a",
+          "light-source-05": "abef644c",
+          "light-source-06": "c578c301"
+        },
+        "strength": 0.7,
+        "t": 0.25
+      },
+      {
+        "hashes": {
+          "light-source-01": "4062618c",
+          "light-source-02": "1c5932ba",
+          "light-source-03": "a4617f5f",
+          "light-source-04": "4e0e023a",
+          "light-source-05": "abef644c",
+          "light-source-06": "c578c301"
+        },
+        "strength": 0.7,
+        "t": 0.5
+      },
+      {
+        "hashes": {
+          "light-source-01": "4062618c",
+          "light-source-02": "1c5932ba",
+          "light-source-03": "a4617f5f",
+          "light-source-04": "4e0e023a",
+          "light-source-05": "abef644c",
+          "light-source-06": "c578c301"
+        },
+        "strength": 0.7,
+        "t": 0.75
+      },
+      {
+        "hashes": {
+          "light-source-01": "4062618c",
+          "light-source-02": "1c5932ba",
+          "light-source-03": "a4617f5f",
+          "light-source-04": "4e0e023a",
+          "light-source-05": "abef644c",
+          "light-source-06": "c578c301"
+        },
+        "strength": 0.7,
+        "t": 1
+      }
+    ]
+  }
+}

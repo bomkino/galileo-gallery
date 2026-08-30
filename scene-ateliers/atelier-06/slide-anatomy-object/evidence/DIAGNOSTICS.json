@@ -1,0 +1,3535 @@
+{
+  "accessibility": {
+    "before": {
+      "structure": [
+        "Backing",
+        "Source frame",
+        "Frame edge",
+        "Safe area",
+        "Caption"
+      ],
+      "targetHidden": false,
+      "targetLabel": "Inspect planes",
+      "targetPressed": "false"
+    },
+    "resolved": {
+      "structure": [
+        "Backing",
+        "Source frame",
+        "Frame edge",
+        "Safe area",
+        "Caption"
+      ],
+      "targetHidden": false,
+      "targetLabel": "Inspect planes",
+      "targetPressed": "false"
+    },
+    "separated": {
+      "structure": [
+        "Backing",
+        "Source frame",
+        "Frame edge",
+        "Safe area",
+        "Caption"
+      ],
+      "targetHidden": false,
+      "targetLabel": "Resolve source",
+      "targetPressed": "true"
+    }
+  },
+  "alpha": {
+    "nonZeroRgbUnderZeroAlpha": 0,
+    "partialAlphaPixels": 305786,
+    "pass": true,
+    "zeroAlphaPixels": 521053
+  },
+  "canonical": {
+    "0": {
+      "accessibility": {
+        "structure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "targetHidden": false,
+        "targetLabel": "Inspect planes",
+        "targetPressed": "false"
+      },
+      "compiled": {
+        "controls": {
+          "inspectionHoldMs": 2100,
+          "labelVisibility": "known-structure",
+          "lateralSpread": 0.52,
+          "perspective": 0.34,
+          "separationDepth": 0.58
+        },
+        "durationMs": 7000,
+        "issues": [],
+        "minimumDurationMs": 5100,
+        "mode": "automatic",
+        "sceneId": "slide-anatomy-object",
+        "segments": [
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 0.1,
+            "endMs": 700,
+            "group": "opening",
+            "id": "resolved-entry",
+            "index": 0,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.35,
+            "endMs": 2450,
+            "group": "opening",
+            "id": "separate",
+            "index": 1,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.1,
+            "startMs": 700
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 2100,
+            "durationMs": 2100,
+            "end": 0.65,
+            "endMs": 4550,
+            "group": "middle",
+            "id": "inspection-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 2100,
+            "paceScale": 1,
+            "preferred": 2100,
+            "requestedPaceScale": 1,
+            "start": 0.35,
+            "startMs": 2450
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.9,
+            "endMs": 6300,
+            "group": "finale",
+            "id": "return",
+            "index": 3,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.65,
+            "startMs": 4550
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 1,
+            "endMs": 7000,
+            "group": "finale",
+            "id": "resolved-finale",
+            "index": 4,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0.9,
+            "startMs": 6300
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 1,
+        "labels": 5,
+        "planes": 5
+      },
+      "evaluation": {
+        "accessibleStructure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "apply": "ok",
+        "consumedCount": 1,
+        "consumedId": "anatomy-source-01",
+        "labelVisibility": "known-structure",
+        "normalizedTime": 0,
+        "phase": "resolved-entry",
+        "planes": [
+          {
+            "id": "backing",
+            "label": "Backing",
+            "opacity": 1,
+            "rotation": -0.0,
+            "sourceOwned": false,
+            "x": -0.0,
+            "y": 0,
+            "z": -0.0,
+            "zOrder": 1
+          },
+          {
+            "id": "source-frame",
+            "label": "Source frame",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": true,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 2
+          },
+          {
+            "id": "frame-edge",
+            "label": "Frame edge",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": false,
+            "x": 0,
+            "y": -0.0,
+            "z": 0,
+            "zOrder": 3
+          },
+          {
+            "id": "safe-area",
+            "label": "Safe area",
+            "opacity": 1,
+            "rotation": -0.0,
+            "sourceOwned": false,
+            "x": -0.0,
+            "y": -0.0,
+            "z": 0,
+            "zOrder": 4
+          },
+          {
+            "id": "caption",
+            "label": "Caption",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": false,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 5
+          }
+        ],
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "sceneId": "slide-anatomy-object",
+        "separationProgress": 0,
+        "source": {
+          "caption": "Project caption",
+          "failed": false,
+          "id": "anatomy-source-01",
+          "kind": "image",
+          "media": {
+            "blend": "normal",
+            "filter": "none",
+            "opacity": 1
+          }
+        },
+        "sourceModel": "flat-source",
+        "stage": {
+          "rotateX": -0.0,
+          "rotateY": 0
+        },
+        "transparentOutput": true,
+        "velocity": 0
+      },
+      "mediaStyle": {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      "planeTransforms": {
+        "backing": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "caption": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "frame-edge": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "safe-area": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "source-frame": "translate3d(0%, 0%, 0px) rotateZ(0deg)"
+      },
+      "sceneId": "slide-anatomy-object",
+      "sourceHash": "b0060ad0",
+      "sourceInitialHash": "b0060ad0"
+    },
+    "0.05": {
+      "accessibility": {
+        "structure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "targetHidden": false,
+        "targetLabel": "Inspect planes",
+        "targetPressed": "false"
+      },
+      "compiled": {
+        "controls": {
+          "inspectionHoldMs": 2100,
+          "labelVisibility": "known-structure",
+          "lateralSpread": 0.52,
+          "perspective": 0.34,
+          "separationDepth": 0.58
+        },
+        "durationMs": 7000,
+        "issues": [],
+        "minimumDurationMs": 5100,
+        "mode": "automatic",
+        "sceneId": "slide-anatomy-object",
+        "segments": [
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 0.1,
+            "endMs": 700,
+            "group": "opening",
+            "id": "resolved-entry",
+            "index": 0,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.35,
+            "endMs": 2450,
+            "group": "opening",
+            "id": "separate",
+            "index": 1,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.1,
+            "startMs": 700
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 2100,
+            "durationMs": 2100,
+            "end": 0.65,
+            "endMs": 4550,
+            "group": "middle",
+            "id": "inspection-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 2100,
+            "paceScale": 1,
+            "preferred": 2100,
+            "requestedPaceScale": 1,
+            "start": 0.35,
+            "startMs": 2450
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.9,
+            "endMs": 6300,
+            "group": "finale",
+            "id": "return",
+            "index": 3,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.65,
+            "startMs": 4550
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 1,
+            "endMs": 7000,
+            "group": "finale",
+            "id": "resolved-finale",
+            "index": 4,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0.9,
+            "startMs": 6300
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 1,
+        "labels": 5,
+        "planes": 5
+      },
+      "evaluation": {
+        "accessibleStructure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "apply": "ok",
+        "consumedCount": 1,
+        "consumedId": "anatomy-source-01",
+        "labelVisibility": "known-structure",
+        "normalizedTime": 0.050000000000000044,
+        "phase": "resolved-entry",
+        "planes": [
+          {
+            "id": "backing",
+            "label": "Backing",
+            "opacity": 1,
+            "rotation": -0.0,
+            "sourceOwned": false,
+            "x": -0.0,
+            "y": 0,
+            "z": -0.0,
+            "zOrder": 1
+          },
+          {
+            "id": "source-frame",
+            "label": "Source frame",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": true,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 2
+          },
+          {
+            "id": "frame-edge",
+            "label": "Frame edge",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": false,
+            "x": 0,
+            "y": -0.0,
+            "z": 0,
+            "zOrder": 3
+          },
+          {
+            "id": "safe-area",
+            "label": "Safe area",
+            "opacity": 1,
+            "rotation": -0.0,
+            "sourceOwned": false,
+            "x": -0.0,
+            "y": -0.0,
+            "z": 0,
+            "zOrder": 4
+          },
+          {
+            "id": "caption",
+            "label": "Caption",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": false,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 5
+          }
+        ],
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "sceneId": "slide-anatomy-object",
+        "separationProgress": 0,
+        "source": {
+          "caption": "Project caption",
+          "failed": false,
+          "id": "anatomy-source-01",
+          "kind": "image",
+          "media": {
+            "blend": "normal",
+            "filter": "none",
+            "opacity": 1
+          }
+        },
+        "sourceModel": "flat-source",
+        "stage": {
+          "rotateX": -0.0,
+          "rotateY": 0
+        },
+        "transparentOutput": true,
+        "velocity": 0
+      },
+      "mediaStyle": {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      "planeTransforms": {
+        "backing": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "caption": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "frame-edge": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "safe-area": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "source-frame": "translate3d(0%, 0%, 0px) rotateZ(0deg)"
+      },
+      "sceneId": "slide-anatomy-object",
+      "sourceHash": "b0060ad0",
+      "sourceInitialHash": "b0060ad0"
+    },
+    "0.1": {
+      "accessibility": {
+        "structure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "targetHidden": false,
+        "targetLabel": "Inspect planes",
+        "targetPressed": "false"
+      },
+      "compiled": {
+        "controls": {
+          "inspectionHoldMs": 2100,
+          "labelVisibility": "known-structure",
+          "lateralSpread": 0.52,
+          "perspective": 0.34,
+          "separationDepth": 0.58
+        },
+        "durationMs": 7000,
+        "issues": [],
+        "minimumDurationMs": 5100,
+        "mode": "automatic",
+        "sceneId": "slide-anatomy-object",
+        "segments": [
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 0.1,
+            "endMs": 700,
+            "group": "opening",
+            "id": "resolved-entry",
+            "index": 0,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.35,
+            "endMs": 2450,
+            "group": "opening",
+            "id": "separate",
+            "index": 1,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.1,
+            "startMs": 700
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 2100,
+            "durationMs": 2100,
+            "end": 0.65,
+            "endMs": 4550,
+            "group": "middle",
+            "id": "inspection-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 2100,
+            "paceScale": 1,
+            "preferred": 2100,
+            "requestedPaceScale": 1,
+            "start": 0.35,
+            "startMs": 2450
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.9,
+            "endMs": 6300,
+            "group": "finale",
+            "id": "return",
+            "index": 3,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.65,
+            "startMs": 4550
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 1,
+            "endMs": 7000,
+            "group": "finale",
+            "id": "resolved-finale",
+            "index": 4,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0.9,
+            "startMs": 6300
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 1,
+        "labels": 5,
+        "planes": 5
+      },
+      "evaluation": {
+        "accessibleStructure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "apply": "ok",
+        "consumedCount": 1,
+        "consumedId": "anatomy-source-01",
+        "labelVisibility": "known-structure",
+        "normalizedTime": 0.10000000000000009,
+        "phase": "separate",
+        "planes": [
+          {
+            "id": "backing",
+            "label": "Backing",
+            "opacity": 1,
+            "rotation": -2.3055738795844254e-46,
+            "sourceOwned": false,
+            "x": -2.881967349480532e-47,
+            "y": 1.7291804096883193e-47,
+            "z": -2.1430013624342417e-46,
+            "zOrder": 1
+          },
+          {
+            "id": "source-frame",
+            "label": "Source frame",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": true,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 2
+          },
+          {
+            "id": "frame-edge",
+            "label": "Frame edge",
+            "opacity": 1,
+            "rotation": 1.9213115663203547e-46,
+            "sourceOwned": false,
+            "x": 2.689836192848497e-47,
+            "y": -1.3449180964242484e-47,
+            "z": 1.6072510218256811e-46,
+            "zOrder": 3
+          },
+          {
+            "id": "safe-area",
+            "label": "Safe area",
+            "opacity": 1,
+            "rotation": -1.5370492530562838e-46,
+            "sourceOwned": false,
+            "x": -1.9213115663203548e-47,
+            "y": -2.3055738795844254e-47,
+            "z": 2.8930518392862263e-46,
+            "zOrder": 4
+          },
+          {
+            "id": "caption",
+            "label": "Caption",
+            "opacity": 1,
+            "rotation": 2.3055738795844254e-46,
+            "sourceOwned": false,
+            "x": 2.881967349480532e-47,
+            "y": 2.3055738795844254e-47,
+            "z": 4.1788526567467714e-46,
+            "zOrder": 5
+          }
+        ],
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "sceneId": "slide-anatomy-object",
+        "separationProgress": 3.694829935231451e-46,
+        "source": {
+          "caption": "Project caption",
+          "failed": false,
+          "id": "anatomy-source-01",
+          "kind": "image",
+          "media": {
+            "blend": "normal",
+            "filter": "none",
+            "opacity": 1
+          }
+        },
+        "sourceModel": "flat-source",
+        "stage": {
+          "rotateX": -1.507490613574432e-45,
+          "rotateY": 1.8843632669680405e-45
+        },
+        "transparentOutput": true,
+        "velocity": 1.331202777560457e-29
+      },
+      "mediaStyle": {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      "planeTransforms": {
+        "backing": "translate3d(-2.88197e-45%, 1.72918e-45%, -4.7146e-44px) rotateZ(-2.30557e-46deg)",
+        "caption": "translate3d(2.88197e-45%, 2.30557e-45%, 9.19348e-44px) rotateZ(2.30557e-46deg)",
+        "frame-edge": "translate3d(2.68984e-45%, -1.34492e-45%, 3.53595e-44px) rotateZ(1.92131e-46deg)",
+        "safe-area": "translate3d(-1.92131e-45%, -2.30557e-45%, 6.36471e-44px) rotateZ(-1.53705e-46deg)",
+        "source-frame": "translate3d(0%, 0%, 0px) rotateZ(0deg)"
+      },
+      "sceneId": "slide-anatomy-object",
+      "sourceHash": "b0060ad0",
+      "sourceInitialHash": "b0060ad0"
+    },
+    "0.225": {
+      "accessibility": {
+        "structure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "targetHidden": false,
+        "targetLabel": "Inspect planes",
+        "targetPressed": "false"
+      },
+      "compiled": {
+        "controls": {
+          "inspectionHoldMs": 2100,
+          "labelVisibility": "known-structure",
+          "lateralSpread": 0.52,
+          "perspective": 0.34,
+          "separationDepth": 0.58
+        },
+        "durationMs": 7000,
+        "issues": [],
+        "minimumDurationMs": 5100,
+        "mode": "automatic",
+        "sceneId": "slide-anatomy-object",
+        "segments": [
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 0.1,
+            "endMs": 700,
+            "group": "opening",
+            "id": "resolved-entry",
+            "index": 0,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.35,
+            "endMs": 2450,
+            "group": "opening",
+            "id": "separate",
+            "index": 1,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.1,
+            "startMs": 700
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 2100,
+            "durationMs": 2100,
+            "end": 0.65,
+            "endMs": 4550,
+            "group": "middle",
+            "id": "inspection-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 2100,
+            "paceScale": 1,
+            "preferred": 2100,
+            "requestedPaceScale": 1,
+            "start": 0.35,
+            "startMs": 2450
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.9,
+            "endMs": 6300,
+            "group": "finale",
+            "id": "return",
+            "index": 3,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.65,
+            "startMs": 4550
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 1,
+            "endMs": 7000,
+            "group": "finale",
+            "id": "resolved-finale",
+            "index": 4,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0.9,
+            "startMs": 6300
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 1,
+        "labels": 5,
+        "planes": 5
+      },
+      "evaluation": {
+        "accessibleStructure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "apply": "ok",
+        "consumedCount": 1,
+        "consumedId": "anatomy-source-01",
+        "labelVisibility": "known-structure",
+        "normalizedTime": 0.2250000000000001,
+        "phase": "separate",
+        "planes": [
+          {
+            "id": "backing",
+            "label": "Backing",
+            "opacity": 1,
+            "rotation": -0.31200000000000055,
+            "sourceOwned": false,
+            "x": -0.03900000000000007,
+            "y": 0.023400000000000042,
+            "z": -0.2900000000000005,
+            "zOrder": 1
+          },
+          {
+            "id": "source-frame",
+            "label": "Source frame",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": true,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 2
+          },
+          {
+            "id": "frame-edge",
+            "label": "Frame edge",
+            "opacity": 1,
+            "rotation": 0.26000000000000045,
+            "sourceOwned": false,
+            "x": 0.036400000000000064,
+            "y": -0.018200000000000032,
+            "z": 0.21750000000000036,
+            "zOrder": 3
+          },
+          {
+            "id": "safe-area",
+            "label": "Safe area",
+            "opacity": 1,
+            "rotation": -0.20800000000000038,
+            "sourceOwned": false,
+            "x": -0.026000000000000047,
+            "y": -0.031200000000000054,
+            "z": 0.39150000000000074,
+            "zOrder": 4
+          },
+          {
+            "id": "caption",
+            "label": "Caption",
+            "opacity": 1,
+            "rotation": 0.31200000000000055,
+            "sourceOwned": false,
+            "x": 0.03900000000000007,
+            "y": 0.031200000000000054,
+            "z": 0.565500000000001,
+            "zOrder": 5
+          }
+        ],
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "sceneId": "slide-anatomy-object",
+        "separationProgress": 0.5000000000000009,
+        "source": {
+          "caption": "Project caption",
+          "failed": false,
+          "id": "anatomy-source-01",
+          "kind": "image",
+          "media": {
+            "blend": "normal",
+            "filter": "none",
+            "opacity": 1
+          }
+        },
+        "sourceModel": "flat-source",
+        "stage": {
+          "rotateX": -2.0400000000000036,
+          "rotateY": 2.5500000000000047
+        },
+        "transparentOutput": true,
+        "velocity": 7.500000000000001
+      },
+      "mediaStyle": {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      "planeTransforms": {
+        "backing": "translate3d(-3.9%, 2.34%, -63.8px) rotateZ(-0.312deg)",
+        "caption": "translate3d(3.9%, 3.12%, 124.41px) rotateZ(0.312deg)",
+        "frame-edge": "translate3d(3.64%, -1.82%, 47.85px) rotateZ(0.26deg)",
+        "safe-area": "translate3d(-2.6%, -3.12%, 86.13px) rotateZ(-0.208deg)",
+        "source-frame": "translate3d(0%, 0%, 0px) rotateZ(0deg)"
+      },
+      "sceneId": "slide-anatomy-object",
+      "sourceHash": "b0060ad0",
+      "sourceInitialHash": "b0060ad0"
+    },
+    "0.35": {
+      "accessibility": {
+        "structure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "targetHidden": false,
+        "targetLabel": "Inspect planes",
+        "targetPressed": "false"
+      },
+      "compiled": {
+        "controls": {
+          "inspectionHoldMs": 2100,
+          "labelVisibility": "known-structure",
+          "lateralSpread": 0.52,
+          "perspective": 0.34,
+          "separationDepth": 0.58
+        },
+        "durationMs": 7000,
+        "issues": [],
+        "minimumDurationMs": 5100,
+        "mode": "automatic",
+        "sceneId": "slide-anatomy-object",
+        "segments": [
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 0.1,
+            "endMs": 700,
+            "group": "opening",
+            "id": "resolved-entry",
+            "index": 0,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.35,
+            "endMs": 2450,
+            "group": "opening",
+            "id": "separate",
+            "index": 1,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.1,
+            "startMs": 700
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 2100,
+            "durationMs": 2100,
+            "end": 0.65,
+            "endMs": 4550,
+            "group": "middle",
+            "id": "inspection-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 2100,
+            "paceScale": 1,
+            "preferred": 2100,
+            "requestedPaceScale": 1,
+            "start": 0.35,
+            "startMs": 2450
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.9,
+            "endMs": 6300,
+            "group": "finale",
+            "id": "return",
+            "index": 3,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.65,
+            "startMs": 4550
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 1,
+            "endMs": 7000,
+            "group": "finale",
+            "id": "resolved-finale",
+            "index": 4,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0.9,
+            "startMs": 6300
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 1,
+        "labels": 5,
+        "planes": 5
+      },
+      "evaluation": {
+        "accessibleStructure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "apply": "ok",
+        "consumedCount": 1,
+        "consumedId": "anatomy-source-01",
+        "labelVisibility": "known-structure",
+        "normalizedTime": 0.3500000000000001,
+        "phase": "inspection-hold",
+        "planes": [
+          {
+            "id": "backing",
+            "label": "Backing",
+            "opacity": 1,
+            "rotation": -0.624,
+            "sourceOwned": false,
+            "x": -0.078,
+            "y": 0.0468,
+            "z": -0.58,
+            "zOrder": 1
+          },
+          {
+            "id": "source-frame",
+            "label": "Source frame",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": true,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 2
+          },
+          {
+            "id": "frame-edge",
+            "label": "Frame edge",
+            "opacity": 1,
+            "rotation": 0.52,
+            "sourceOwned": false,
+            "x": 0.0728,
+            "y": -0.0364,
+            "z": 0.43499999999999994,
+            "zOrder": 3
+          },
+          {
+            "id": "safe-area",
+            "label": "Safe area",
+            "opacity": 1,
+            "rotation": -0.41600000000000004,
+            "sourceOwned": false,
+            "x": -0.052000000000000005,
+            "y": -0.0624,
+            "z": 0.783,
+            "zOrder": 4
+          },
+          {
+            "id": "caption",
+            "label": "Caption",
+            "opacity": 1,
+            "rotation": 0.624,
+            "sourceOwned": false,
+            "x": 0.078,
+            "y": 0.0624,
+            "z": 1.131,
+            "zOrder": 5
+          }
+        ],
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "sceneId": "slide-anatomy-object",
+        "separationProgress": 1,
+        "source": {
+          "caption": "Project caption",
+          "failed": false,
+          "id": "anatomy-source-01",
+          "kind": "image",
+          "media": {
+            "blend": "normal",
+            "filter": "none",
+            "opacity": 1
+          }
+        },
+        "sourceModel": "flat-source",
+        "stage": {
+          "rotateX": -4.08,
+          "rotateY": 5.1000000000000005
+        },
+        "transparentOutput": true,
+        "velocity": 0
+      },
+      "mediaStyle": {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      "planeTransforms": {
+        "backing": "translate3d(-7.8%, 4.68%, -127.6px) rotateZ(-0.624deg)",
+        "caption": "translate3d(7.8%, 6.24%, 248.82px) rotateZ(0.624deg)",
+        "frame-edge": "translate3d(7.28%, -3.64%, 95.7px) rotateZ(0.52deg)",
+        "safe-area": "translate3d(-5.2%, -6.24%, 172.26px) rotateZ(-0.416deg)",
+        "source-frame": "translate3d(0%, 0%, 0px) rotateZ(0deg)"
+      },
+      "sceneId": "slide-anatomy-object",
+      "sourceHash": "b0060ad0",
+      "sourceInitialHash": "b0060ad0"
+    },
+    "0.45": {
+      "accessibility": {
+        "structure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "targetHidden": false,
+        "targetLabel": "Inspect planes",
+        "targetPressed": "false"
+      },
+      "compiled": {
+        "controls": {
+          "inspectionHoldMs": 2100,
+          "labelVisibility": "known-structure",
+          "lateralSpread": 0.52,
+          "perspective": 0.34,
+          "separationDepth": 0.58
+        },
+        "durationMs": 7000,
+        "issues": [],
+        "minimumDurationMs": 5100,
+        "mode": "automatic",
+        "sceneId": "slide-anatomy-object",
+        "segments": [
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 0.1,
+            "endMs": 700,
+            "group": "opening",
+            "id": "resolved-entry",
+            "index": 0,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.35,
+            "endMs": 2450,
+            "group": "opening",
+            "id": "separate",
+            "index": 1,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.1,
+            "startMs": 700
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 2100,
+            "durationMs": 2100,
+            "end": 0.65,
+            "endMs": 4550,
+            "group": "middle",
+            "id": "inspection-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 2100,
+            "paceScale": 1,
+            "preferred": 2100,
+            "requestedPaceScale": 1,
+            "start": 0.35,
+            "startMs": 2450
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.9,
+            "endMs": 6300,
+            "group": "finale",
+            "id": "return",
+            "index": 3,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.65,
+            "startMs": 4550
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 1,
+            "endMs": 7000,
+            "group": "finale",
+            "id": "resolved-finale",
+            "index": 4,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0.9,
+            "startMs": 6300
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 1,
+        "labels": 5,
+        "planes": 5
+      },
+      "evaluation": {
+        "accessibleStructure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "apply": "ok",
+        "consumedCount": 1,
+        "consumedId": "anatomy-source-01",
+        "labelVisibility": "known-structure",
+        "normalizedTime": 0.44999999999999996,
+        "phase": "inspection-hold",
+        "planes": [
+          {
+            "id": "backing",
+            "label": "Backing",
+            "opacity": 1,
+            "rotation": -0.624,
+            "sourceOwned": false,
+            "x": -0.078,
+            "y": 0.0468,
+            "z": -0.58,
+            "zOrder": 1
+          },
+          {
+            "id": "source-frame",
+            "label": "Source frame",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": true,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 2
+          },
+          {
+            "id": "frame-edge",
+            "label": "Frame edge",
+            "opacity": 1,
+            "rotation": 0.52,
+            "sourceOwned": false,
+            "x": 0.0728,
+            "y": -0.0364,
+            "z": 0.43499999999999994,
+            "zOrder": 3
+          },
+          {
+            "id": "safe-area",
+            "label": "Safe area",
+            "opacity": 1,
+            "rotation": -0.41600000000000004,
+            "sourceOwned": false,
+            "x": -0.052000000000000005,
+            "y": -0.0624,
+            "z": 0.783,
+            "zOrder": 4
+          },
+          {
+            "id": "caption",
+            "label": "Caption",
+            "opacity": 1,
+            "rotation": 0.624,
+            "sourceOwned": false,
+            "x": 0.078,
+            "y": 0.0624,
+            "z": 1.131,
+            "zOrder": 5
+          }
+        ],
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "sceneId": "slide-anatomy-object",
+        "separationProgress": 1,
+        "source": {
+          "caption": "Project caption",
+          "failed": false,
+          "id": "anatomy-source-01",
+          "kind": "image",
+          "media": {
+            "blend": "normal",
+            "filter": "none",
+            "opacity": 1
+          }
+        },
+        "sourceModel": "flat-source",
+        "stage": {
+          "rotateX": -4.08,
+          "rotateY": 5.1000000000000005
+        },
+        "transparentOutput": true,
+        "velocity": 0
+      },
+      "mediaStyle": {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      "planeTransforms": {
+        "backing": "translate3d(-7.8%, 4.68%, -127.6px) rotateZ(-0.624deg)",
+        "caption": "translate3d(7.8%, 6.24%, 248.82px) rotateZ(0.624deg)",
+        "frame-edge": "translate3d(7.28%, -3.64%, 95.7px) rotateZ(0.52deg)",
+        "safe-area": "translate3d(-5.2%, -6.24%, 172.26px) rotateZ(-0.416deg)",
+        "source-frame": "translate3d(0%, 0%, 0px) rotateZ(0deg)"
+      },
+      "sceneId": "slide-anatomy-object",
+      "sourceHash": "b0060ad0",
+      "sourceInitialHash": "b0060ad0"
+    },
+    "0.5": {
+      "accessibility": {
+        "structure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "targetHidden": false,
+        "targetLabel": "Inspect planes",
+        "targetPressed": "false"
+      },
+      "compiled": {
+        "controls": {
+          "inspectionHoldMs": 2100,
+          "labelVisibility": "known-structure",
+          "lateralSpread": 0.52,
+          "perspective": 0.34,
+          "separationDepth": 0.58
+        },
+        "durationMs": 7000,
+        "issues": [],
+        "minimumDurationMs": 5100,
+        "mode": "automatic",
+        "sceneId": "slide-anatomy-object",
+        "segments": [
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 0.1,
+            "endMs": 700,
+            "group": "opening",
+            "id": "resolved-entry",
+            "index": 0,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.35,
+            "endMs": 2450,
+            "group": "opening",
+            "id": "separate",
+            "index": 1,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.1,
+            "startMs": 700
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 2100,
+            "durationMs": 2100,
+            "end": 0.65,
+            "endMs": 4550,
+            "group": "middle",
+            "id": "inspection-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 2100,
+            "paceScale": 1,
+            "preferred": 2100,
+            "requestedPaceScale": 1,
+            "start": 0.35,
+            "startMs": 2450
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.9,
+            "endMs": 6300,
+            "group": "finale",
+            "id": "return",
+            "index": 3,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.65,
+            "startMs": 4550
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 1,
+            "endMs": 7000,
+            "group": "finale",
+            "id": "resolved-finale",
+            "index": 4,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0.9,
+            "startMs": 6300
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 1,
+        "labels": 5,
+        "planes": 5
+      },
+      "evaluation": {
+        "accessibleStructure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "apply": "ok",
+        "consumedCount": 1,
+        "consumedId": "anatomy-source-01",
+        "labelVisibility": "known-structure",
+        "normalizedTime": 0.5,
+        "phase": "inspection-hold",
+        "planes": [
+          {
+            "id": "backing",
+            "label": "Backing",
+            "opacity": 1,
+            "rotation": -0.624,
+            "sourceOwned": false,
+            "x": -0.078,
+            "y": 0.0468,
+            "z": -0.58,
+            "zOrder": 1
+          },
+          {
+            "id": "source-frame",
+            "label": "Source frame",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": true,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 2
+          },
+          {
+            "id": "frame-edge",
+            "label": "Frame edge",
+            "opacity": 1,
+            "rotation": 0.52,
+            "sourceOwned": false,
+            "x": 0.0728,
+            "y": -0.0364,
+            "z": 0.43499999999999994,
+            "zOrder": 3
+          },
+          {
+            "id": "safe-area",
+            "label": "Safe area",
+            "opacity": 1,
+            "rotation": -0.41600000000000004,
+            "sourceOwned": false,
+            "x": -0.052000000000000005,
+            "y": -0.0624,
+            "z": 0.783,
+            "zOrder": 4
+          },
+          {
+            "id": "caption",
+            "label": "Caption",
+            "opacity": 1,
+            "rotation": 0.624,
+            "sourceOwned": false,
+            "x": 0.078,
+            "y": 0.0624,
+            "z": 1.131,
+            "zOrder": 5
+          }
+        ],
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "sceneId": "slide-anatomy-object",
+        "separationProgress": 1,
+        "source": {
+          "caption": "Project caption",
+          "failed": false,
+          "id": "anatomy-source-01",
+          "kind": "image",
+          "media": {
+            "blend": "normal",
+            "filter": "none",
+            "opacity": 1
+          }
+        },
+        "sourceModel": "flat-source",
+        "stage": {
+          "rotateX": -4.08,
+          "rotateY": 5.1000000000000005
+        },
+        "transparentOutput": true,
+        "velocity": 0
+      },
+      "mediaStyle": {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      "planeTransforms": {
+        "backing": "translate3d(-7.8%, 4.68%, -127.6px) rotateZ(-0.624deg)",
+        "caption": "translate3d(7.8%, 6.24%, 248.82px) rotateZ(0.624deg)",
+        "frame-edge": "translate3d(7.28%, -3.64%, 95.7px) rotateZ(0.52deg)",
+        "safe-area": "translate3d(-5.2%, -6.24%, 172.26px) rotateZ(-0.416deg)",
+        "source-frame": "translate3d(0%, 0%, 0px) rotateZ(0deg)"
+      },
+      "sceneId": "slide-anatomy-object",
+      "sourceHash": "b0060ad0",
+      "sourceInitialHash": "b0060ad0"
+    },
+    "0.65": {
+      "accessibility": {
+        "structure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "targetHidden": false,
+        "targetLabel": "Inspect planes",
+        "targetPressed": "false"
+      },
+      "compiled": {
+        "controls": {
+          "inspectionHoldMs": 2100,
+          "labelVisibility": "known-structure",
+          "lateralSpread": 0.52,
+          "perspective": 0.34,
+          "separationDepth": 0.58
+        },
+        "durationMs": 7000,
+        "issues": [],
+        "minimumDurationMs": 5100,
+        "mode": "automatic",
+        "sceneId": "slide-anatomy-object",
+        "segments": [
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 0.1,
+            "endMs": 700,
+            "group": "opening",
+            "id": "resolved-entry",
+            "index": 0,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.35,
+            "endMs": 2450,
+            "group": "opening",
+            "id": "separate",
+            "index": 1,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.1,
+            "startMs": 700
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 2100,
+            "durationMs": 2100,
+            "end": 0.65,
+            "endMs": 4550,
+            "group": "middle",
+            "id": "inspection-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 2100,
+            "paceScale": 1,
+            "preferred": 2100,
+            "requestedPaceScale": 1,
+            "start": 0.35,
+            "startMs": 2450
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.9,
+            "endMs": 6300,
+            "group": "finale",
+            "id": "return",
+            "index": 3,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.65,
+            "startMs": 4550
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 1,
+            "endMs": 7000,
+            "group": "finale",
+            "id": "resolved-finale",
+            "index": 4,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0.9,
+            "startMs": 6300
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 1,
+        "labels": 5,
+        "planes": 5
+      },
+      "evaluation": {
+        "accessibleStructure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "apply": "ok",
+        "consumedCount": 1,
+        "consumedId": "anatomy-source-01",
+        "labelVisibility": "known-structure",
+        "normalizedTime": 0.6499999999999999,
+        "phase": "inspection-hold",
+        "planes": [
+          {
+            "id": "backing",
+            "label": "Backing",
+            "opacity": 1,
+            "rotation": -0.624,
+            "sourceOwned": false,
+            "x": -0.078,
+            "y": 0.0468,
+            "z": -0.58,
+            "zOrder": 1
+          },
+          {
+            "id": "source-frame",
+            "label": "Source frame",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": true,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 2
+          },
+          {
+            "id": "frame-edge",
+            "label": "Frame edge",
+            "opacity": 1,
+            "rotation": 0.52,
+            "sourceOwned": false,
+            "x": 0.0728,
+            "y": -0.0364,
+            "z": 0.43499999999999994,
+            "zOrder": 3
+          },
+          {
+            "id": "safe-area",
+            "label": "Safe area",
+            "opacity": 1,
+            "rotation": -0.41600000000000004,
+            "sourceOwned": false,
+            "x": -0.052000000000000005,
+            "y": -0.0624,
+            "z": 0.783,
+            "zOrder": 4
+          },
+          {
+            "id": "caption",
+            "label": "Caption",
+            "opacity": 1,
+            "rotation": 0.624,
+            "sourceOwned": false,
+            "x": 0.078,
+            "y": 0.0624,
+            "z": 1.131,
+            "zOrder": 5
+          }
+        ],
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "sceneId": "slide-anatomy-object",
+        "separationProgress": 1,
+        "source": {
+          "caption": "Project caption",
+          "failed": false,
+          "id": "anatomy-source-01",
+          "kind": "image",
+          "media": {
+            "blend": "normal",
+            "filter": "none",
+            "opacity": 1
+          }
+        },
+        "sourceModel": "flat-source",
+        "stage": {
+          "rotateX": -4.08,
+          "rotateY": 5.1000000000000005
+        },
+        "transparentOutput": true,
+        "velocity": 0
+      },
+      "mediaStyle": {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      "planeTransforms": {
+        "backing": "translate3d(-7.8%, 4.68%, -127.6px) rotateZ(-0.624deg)",
+        "caption": "translate3d(7.8%, 6.24%, 248.82px) rotateZ(0.624deg)",
+        "frame-edge": "translate3d(7.28%, -3.64%, 95.7px) rotateZ(0.52deg)",
+        "safe-area": "translate3d(-5.2%, -6.24%, 172.26px) rotateZ(-0.416deg)",
+        "source-frame": "translate3d(0%, 0%, 0px) rotateZ(0deg)"
+      },
+      "sceneId": "slide-anatomy-object",
+      "sourceHash": "b0060ad0",
+      "sourceInitialHash": "b0060ad0"
+    },
+    "0.775": {
+      "accessibility": {
+        "structure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "targetHidden": false,
+        "targetLabel": "Inspect planes",
+        "targetPressed": "false"
+      },
+      "compiled": {
+        "controls": {
+          "inspectionHoldMs": 2100,
+          "labelVisibility": "known-structure",
+          "lateralSpread": 0.52,
+          "perspective": 0.34,
+          "separationDepth": 0.58
+        },
+        "durationMs": 7000,
+        "issues": [],
+        "minimumDurationMs": 5100,
+        "mode": "automatic",
+        "sceneId": "slide-anatomy-object",
+        "segments": [
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 0.1,
+            "endMs": 700,
+            "group": "opening",
+            "id": "resolved-entry",
+            "index": 0,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.35,
+            "endMs": 2450,
+            "group": "opening",
+            "id": "separate",
+            "index": 1,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.1,
+            "startMs": 700
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 2100,
+            "durationMs": 2100,
+            "end": 0.65,
+            "endMs": 4550,
+            "group": "middle",
+            "id": "inspection-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 2100,
+            "paceScale": 1,
+            "preferred": 2100,
+            "requestedPaceScale": 1,
+            "start": 0.35,
+            "startMs": 2450
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.9,
+            "endMs": 6300,
+            "group": "finale",
+            "id": "return",
+            "index": 3,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.65,
+            "startMs": 4550
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 1,
+            "endMs": 7000,
+            "group": "finale",
+            "id": "resolved-finale",
+            "index": 4,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0.9,
+            "startMs": 6300
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 1,
+        "labels": 5,
+        "planes": 5
+      },
+      "evaluation": {
+        "accessibleStructure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "apply": "ok",
+        "consumedCount": 1,
+        "consumedId": "anatomy-source-01",
+        "labelVisibility": "known-structure",
+        "normalizedTime": 0.7749999999999999,
+        "phase": "return",
+        "planes": [
+          {
+            "id": "backing",
+            "label": "Backing",
+            "opacity": 1,
+            "rotation": -0.31200000000000055,
+            "sourceOwned": false,
+            "x": -0.03900000000000007,
+            "y": 0.023400000000000042,
+            "z": -0.2900000000000005,
+            "zOrder": 1
+          },
+          {
+            "id": "source-frame",
+            "label": "Source frame",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": true,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 2
+          },
+          {
+            "id": "frame-edge",
+            "label": "Frame edge",
+            "opacity": 1,
+            "rotation": 0.26000000000000045,
+            "sourceOwned": false,
+            "x": 0.036400000000000064,
+            "y": -0.018200000000000032,
+            "z": 0.21750000000000036,
+            "zOrder": 3
+          },
+          {
+            "id": "safe-area",
+            "label": "Safe area",
+            "opacity": 1,
+            "rotation": -0.20800000000000038,
+            "sourceOwned": false,
+            "x": -0.026000000000000047,
+            "y": -0.031200000000000054,
+            "z": 0.39150000000000074,
+            "zOrder": 4
+          },
+          {
+            "id": "caption",
+            "label": "Caption",
+            "opacity": 1,
+            "rotation": 0.31200000000000055,
+            "sourceOwned": false,
+            "x": 0.03900000000000007,
+            "y": 0.031200000000000054,
+            "z": 0.565500000000001,
+            "zOrder": 5
+          }
+        ],
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "sceneId": "slide-anatomy-object",
+        "separationProgress": 0.5000000000000009,
+        "source": {
+          "caption": "Project caption",
+          "failed": false,
+          "id": "anatomy-source-01",
+          "kind": "image",
+          "media": {
+            "blend": "normal",
+            "filter": "none",
+            "opacity": 1
+          }
+        },
+        "sourceModel": "flat-source",
+        "stage": {
+          "rotateX": -2.0400000000000036,
+          "rotateY": 2.5500000000000047
+        },
+        "transparentOutput": true,
+        "velocity": -7.499999999999999
+      },
+      "mediaStyle": {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      "planeTransforms": {
+        "backing": "translate3d(-3.9%, 2.34%, -63.8px) rotateZ(-0.312deg)",
+        "caption": "translate3d(3.9%, 3.12%, 124.41px) rotateZ(0.312deg)",
+        "frame-edge": "translate3d(3.64%, -1.82%, 47.85px) rotateZ(0.26deg)",
+        "safe-area": "translate3d(-2.6%, -3.12%, 86.13px) rotateZ(-0.208deg)",
+        "source-frame": "translate3d(0%, 0%, 0px) rotateZ(0deg)"
+      },
+      "sceneId": "slide-anatomy-object",
+      "sourceHash": "b0060ad0",
+      "sourceInitialHash": "b0060ad0"
+    },
+    "0.9": {
+      "accessibility": {
+        "structure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "targetHidden": false,
+        "targetLabel": "Inspect planes",
+        "targetPressed": "false"
+      },
+      "compiled": {
+        "controls": {
+          "inspectionHoldMs": 2100,
+          "labelVisibility": "known-structure",
+          "lateralSpread": 0.52,
+          "perspective": 0.34,
+          "separationDepth": 0.58
+        },
+        "durationMs": 7000,
+        "issues": [],
+        "minimumDurationMs": 5100,
+        "mode": "automatic",
+        "sceneId": "slide-anatomy-object",
+        "segments": [
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 0.1,
+            "endMs": 700,
+            "group": "opening",
+            "id": "resolved-entry",
+            "index": 0,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.35,
+            "endMs": 2450,
+            "group": "opening",
+            "id": "separate",
+            "index": 1,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.1,
+            "startMs": 700
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 2100,
+            "durationMs": 2100,
+            "end": 0.65,
+            "endMs": 4550,
+            "group": "middle",
+            "id": "inspection-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 2100,
+            "paceScale": 1,
+            "preferred": 2100,
+            "requestedPaceScale": 1,
+            "start": 0.35,
+            "startMs": 2450
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.9,
+            "endMs": 6300,
+            "group": "finale",
+            "id": "return",
+            "index": 3,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.65,
+            "startMs": 4550
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 1,
+            "endMs": 7000,
+            "group": "finale",
+            "id": "resolved-finale",
+            "index": 4,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0.9,
+            "startMs": 6300
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 1,
+        "labels": 5,
+        "planes": 5
+      },
+      "evaluation": {
+        "accessibleStructure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "apply": "ok",
+        "consumedCount": 1,
+        "consumedId": "anatomy-source-01",
+        "labelVisibility": "known-structure",
+        "normalizedTime": 0.8999999999999999,
+        "phase": "return",
+        "planes": [
+          {
+            "id": "backing",
+            "label": "Backing",
+            "opacity": 1,
+            "rotation": -8.313350008393172e-16,
+            "sourceOwned": false,
+            "x": -1.0391687510491465e-16,
+            "y": 6.235012506294879e-17,
+            "z": -7.7271522513910885e-16,
+            "zOrder": 1
+          },
+          {
+            "id": "source-frame",
+            "label": "Source frame",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": true,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 2
+          },
+          {
+            "id": "frame-edge",
+            "label": "Frame edge",
+            "opacity": 1,
+            "rotation": 6.927791673660977e-16,
+            "sourceOwned": false,
+            "x": 9.698908343125368e-17,
+            "y": -4.849454171562684e-17,
+            "z": 5.795364188543316e-16,
+            "zOrder": 3
+          },
+          {
+            "id": "safe-area",
+            "label": "Safe area",
+            "opacity": 1,
+            "rotation": -5.542233338928782e-16,
+            "sourceOwned": false,
+            "x": -6.927791673660978e-17,
+            "y": -8.313350008393171e-17,
+            "z": 1.0431655539377972e-15,
+            "zOrder": 4
+          },
+          {
+            "id": "caption",
+            "label": "Caption",
+            "opacity": 1,
+            "rotation": 8.313350008393172e-16,
+            "sourceOwned": false,
+            "x": 1.0391687510491465e-16,
+            "y": 8.313350008393171e-17,
+            "z": 1.5067946890212624e-15,
+            "zOrder": 5
+          }
+        ],
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "sceneId": "slide-anatomy-object",
+        "separationProgress": 1.3322676295501878e-15,
+        "source": {
+          "caption": "Project caption",
+          "failed": false,
+          "id": "anatomy-source-01",
+          "kind": "image",
+          "media": {
+            "blend": "normal",
+            "filter": "none",
+            "opacity": 1
+          }
+        },
+        "sourceModel": "flat-source",
+        "stage": {
+          "rotateX": -5.4356519285647665e-15,
+          "rotateY": 6.794564910705958e-15
+        },
+        "transparentOutput": true,
+        "velocity": -2.3665827156630332e-29
+      },
+      "mediaStyle": {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      "planeTransforms": {
+        "backing": "translate3d(-1.03917e-14%, 6.23501e-15%, -1.69997e-13px) rotateZ(-8.31335e-16deg)",
+        "caption": "translate3d(1.03917e-14%, 8.31335e-15%, 3.31495e-13px) rotateZ(8.31335e-16deg)",
+        "frame-edge": "translate3d(9.69891e-15%, -4.84945e-15%, 1.27498e-13px) rotateZ(6.92779e-16deg)",
+        "safe-area": "translate3d(-6.92779e-15%, -8.31335e-15%, 2.29496e-13px) rotateZ(-5.54223e-16deg)",
+        "source-frame": "translate3d(0%, 0%, 0px) rotateZ(0deg)"
+      },
+      "sceneId": "slide-anatomy-object",
+      "sourceHash": "b0060ad0",
+      "sourceInitialHash": "b0060ad0"
+    },
+    "0.95": {
+      "accessibility": {
+        "structure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "targetHidden": false,
+        "targetLabel": "Inspect planes",
+        "targetPressed": "false"
+      },
+      "compiled": {
+        "controls": {
+          "inspectionHoldMs": 2100,
+          "labelVisibility": "known-structure",
+          "lateralSpread": 0.52,
+          "perspective": 0.34,
+          "separationDepth": 0.58
+        },
+        "durationMs": 7000,
+        "issues": [],
+        "minimumDurationMs": 5100,
+        "mode": "automatic",
+        "sceneId": "slide-anatomy-object",
+        "segments": [
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 0.1,
+            "endMs": 700,
+            "group": "opening",
+            "id": "resolved-entry",
+            "index": 0,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.35,
+            "endMs": 2450,
+            "group": "opening",
+            "id": "separate",
+            "index": 1,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.1,
+            "startMs": 700
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 2100,
+            "durationMs": 2100,
+            "end": 0.65,
+            "endMs": 4550,
+            "group": "middle",
+            "id": "inspection-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 2100,
+            "paceScale": 1,
+            "preferred": 2100,
+            "requestedPaceScale": 1,
+            "start": 0.35,
+            "startMs": 2450
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.9,
+            "endMs": 6300,
+            "group": "finale",
+            "id": "return",
+            "index": 3,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.65,
+            "startMs": 4550
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 1,
+            "endMs": 7000,
+            "group": "finale",
+            "id": "resolved-finale",
+            "index": 4,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0.9,
+            "startMs": 6300
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 1,
+        "labels": 5,
+        "planes": 5
+      },
+      "evaluation": {
+        "accessibleStructure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "apply": "ok",
+        "consumedCount": 1,
+        "consumedId": "anatomy-source-01",
+        "labelVisibility": "known-structure",
+        "normalizedTime": 0.95,
+        "phase": "resolved-finale",
+        "planes": [
+          {
+            "id": "backing",
+            "label": "Backing",
+            "opacity": 1,
+            "rotation": -0.0,
+            "sourceOwned": false,
+            "x": -0.0,
+            "y": 0,
+            "z": -0.0,
+            "zOrder": 1
+          },
+          {
+            "id": "source-frame",
+            "label": "Source frame",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": true,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 2
+          },
+          {
+            "id": "frame-edge",
+            "label": "Frame edge",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": false,
+            "x": 0,
+            "y": -0.0,
+            "z": 0,
+            "zOrder": 3
+          },
+          {
+            "id": "safe-area",
+            "label": "Safe area",
+            "opacity": 1,
+            "rotation": -0.0,
+            "sourceOwned": false,
+            "x": -0.0,
+            "y": -0.0,
+            "z": 0,
+            "zOrder": 4
+          },
+          {
+            "id": "caption",
+            "label": "Caption",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": false,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 5
+          }
+        ],
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "sceneId": "slide-anatomy-object",
+        "separationProgress": 0,
+        "source": {
+          "caption": "Project caption",
+          "failed": false,
+          "id": "anatomy-source-01",
+          "kind": "image",
+          "media": {
+            "blend": "normal",
+            "filter": "none",
+            "opacity": 1
+          }
+        },
+        "sourceModel": "flat-source",
+        "stage": {
+          "rotateX": -0.0,
+          "rotateY": 0
+        },
+        "transparentOutput": true,
+        "velocity": 0
+      },
+      "mediaStyle": {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      "planeTransforms": {
+        "backing": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "caption": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "frame-edge": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "safe-area": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "source-frame": "translate3d(0%, 0%, 0px) rotateZ(0deg)"
+      },
+      "sceneId": "slide-anatomy-object",
+      "sourceHash": "b0060ad0",
+      "sourceInitialHash": "b0060ad0"
+    },
+    "1": {
+      "accessibility": {
+        "structure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "targetHidden": false,
+        "targetLabel": "Inspect planes",
+        "targetPressed": "false"
+      },
+      "compiled": {
+        "controls": {
+          "inspectionHoldMs": 2100,
+          "labelVisibility": "known-structure",
+          "lateralSpread": 0.52,
+          "perspective": 0.34,
+          "separationDepth": 0.58
+        },
+        "durationMs": 7000,
+        "issues": [],
+        "minimumDurationMs": 5100,
+        "mode": "automatic",
+        "sceneId": "slide-anatomy-object",
+        "segments": [
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 0.1,
+            "endMs": 700,
+            "group": "opening",
+            "id": "resolved-entry",
+            "index": 0,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0,
+            "startMs": 0
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.35,
+            "endMs": 2450,
+            "group": "opening",
+            "id": "separate",
+            "index": 1,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.1,
+            "startMs": 700
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 2100,
+            "durationMs": 2100,
+            "end": 0.65,
+            "endMs": 4550,
+            "group": "middle",
+            "id": "inspection-hold",
+            "index": 2,
+            "kind": "hold",
+            "min": 2100,
+            "paceScale": 1,
+            "preferred": 2100,
+            "requestedPaceScale": 1,
+            "start": 0.35,
+            "startMs": 2450
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 1750,
+            "durationMs": 1750,
+            "end": 0.9,
+            "endMs": 6300,
+            "group": "finale",
+            "id": "return",
+            "index": 3,
+            "kind": "move",
+            "min": 1000,
+            "paceScale": 1,
+            "preferred": 1750,
+            "requestedPaceScale": 1,
+            "start": 0.65,
+            "startMs": 4550
+          },
+          {
+            "achievedPaceScale": 1,
+            "base": 700,
+            "durationMs": 700,
+            "end": 1,
+            "endMs": 7000,
+            "group": "finale",
+            "id": "resolved-finale",
+            "index": 4,
+            "kind": "hold",
+            "min": 500,
+            "paceScale": 1,
+            "preferred": 700,
+            "requestedPaceScale": 1,
+            "start": 0.9,
+            "startMs": 6300
+          }
+        ]
+      },
+      "dom": {
+        "canvases": 1,
+        "labels": 5,
+        "planes": 5
+      },
+      "evaluation": {
+        "accessibleStructure": [
+          "Backing",
+          "Source frame",
+          "Frame edge",
+          "Safe area",
+          "Caption"
+        ],
+        "apply": "ok",
+        "consumedCount": 1,
+        "consumedId": "anatomy-source-01",
+        "labelVisibility": "known-structure",
+        "normalizedTime": 1,
+        "phase": "seam",
+        "planes": [
+          {
+            "id": "backing",
+            "label": "Backing",
+            "opacity": 1,
+            "rotation": -0.0,
+            "sourceOwned": false,
+            "x": -0.0,
+            "y": 0,
+            "z": -0.0,
+            "zOrder": 1
+          },
+          {
+            "id": "source-frame",
+            "label": "Source frame",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": true,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 2
+          },
+          {
+            "id": "frame-edge",
+            "label": "Frame edge",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": false,
+            "x": 0,
+            "y": -0.0,
+            "z": 0,
+            "zOrder": 3
+          },
+          {
+            "id": "safe-area",
+            "label": "Safe area",
+            "opacity": 1,
+            "rotation": -0.0,
+            "sourceOwned": false,
+            "x": -0.0,
+            "y": -0.0,
+            "z": 0,
+            "zOrder": 4
+          },
+          {
+            "id": "caption",
+            "label": "Caption",
+            "opacity": 1,
+            "rotation": 0,
+            "sourceOwned": false,
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "zOrder": 5
+          }
+        ],
+        "preservedExtraCount": 0,
+        "preservedExtraIds": [],
+        "sceneId": "slide-anatomy-object",
+        "separationProgress": 0,
+        "source": {
+          "caption": "Project caption",
+          "failed": false,
+          "id": "anatomy-source-01",
+          "kind": "image",
+          "media": {
+            "blend": "normal",
+            "filter": "none",
+            "opacity": 1
+          }
+        },
+        "sourceModel": "flat-source",
+        "stage": {
+          "rotateX": -0.0,
+          "rotateY": 0
+        },
+        "transparentOutput": true,
+        "velocity": 0
+      },
+      "mediaStyle": {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      "planeTransforms": {
+        "backing": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "caption": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "frame-edge": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "safe-area": "translate3d(0%, 0%, 0px) rotateZ(0deg)",
+        "source-frame": "translate3d(0%, 0%, 0px) rotateZ(0deg)"
+      },
+      "sceneId": "slide-anatomy-object",
+      "sourceHash": "b0060ad0",
+      "sourceInitialHash": "b0060ad0"
+    }
+  },
+  "lifecycle": {
+    "after": {
+      "canvases": 1,
+      "labels": 5,
+      "planes": 5
+    },
+    "before": {
+      "canvases": 1,
+      "labels": 5,
+      "planes": 5
+    },
+    "disposed": {
+      "canvases": 0,
+      "planes": 0
+    },
+    "stateEqual": true
+  },
+  "limitations": [
+    "Explicit ordered layers remain blocked behind AT06-CONTRACT-SOURCE-ROLES."
+  ],
+  "reversal": {
+    "allExactWithinTolerance": true,
+    "maxPoseDelta": 6.794564910705958e-15,
+    "samples": [
+      {
+        "maxPoseDelta": 6.794564910705958e-15,
+        "outwardPhase": "separate",
+        "outwardTime": 0.1,
+        "progress": 0,
+        "returnPhase": "return",
+        "returnTime": 0.9
+      },
+      {
+        "maxPoseDelta": 1.0408340855860843e-15,
+        "outwardPhase": "separate",
+        "outwardTime": 0.13125,
+        "progress": 0.125,
+        "returnPhase": "return",
+        "returnTime": 0.86875
+      },
+      {
+        "maxPoseDelta": 1.887379141862766e-15,
+        "outwardPhase": "separate",
+        "outwardTime": 0.1625,
+        "progress": 0.25,
+        "returnPhase": "return",
+        "returnTime": 0.8375
+      },
+      {
+        "maxPoseDelta": 0.0,
+        "outwardPhase": "separate",
+        "outwardTime": 0.22499999999999998,
+        "progress": 0.5,
+        "returnPhase": "return",
+        "returnTime": 0.775
+      },
+      {
+        "maxPoseDelta": 1.7763568394002505e-15,
+        "outwardPhase": "separate",
+        "outwardTime": 0.2875,
+        "progress": 0.75,
+        "returnPhase": "return",
+        "returnTime": 0.7125
+      },
+      {
+        "maxPoseDelta": 8.881784197001252e-16,
+        "outwardPhase": "separate",
+        "outwardTime": 0.31875,
+        "progress": 0.875,
+        "returnPhase": "return",
+        "returnTime": 0.68125
+      },
+      {
+        "maxPoseDelta": 0.0,
+        "outwardPhase": "inspection-hold",
+        "outwardTime": 0.35,
+        "progress": 1,
+        "returnPhase": "inspection-hold",
+        "returnTime": 0.65
+      }
+    ]
+  },
+  "sceneId": "slide-anatomy-object",
+  "sourceFidelity": {
+    "allExact": true,
+    "mediaStyles": [
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      },
+      {
+        "filter": "none",
+        "mixBlendMode": "normal",
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "opacity": "1"
+      }
+    ],
+    "samples": [
+      {
+        "fixture": "one-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0
+      },
+      {
+        "fixture": "one-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.05
+      },
+      {
+        "fixture": "one-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.1
+      },
+      {
+        "fixture": "one-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.225
+      },
+      {
+        "fixture": "one-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.35
+      },
+      {
+        "fixture": "one-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.45
+      },
+      {
+        "fixture": "one-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.5
+      },
+      {
+        "fixture": "one-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.65
+      },
+      {
+        "fixture": "one-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.775
+      },
+      {
+        "fixture": "one-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.9
+      },
+      {
+        "fixture": "one-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.95
+      },
+      {
+        "fixture": "one-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 1
+      },
+      {
+        "fixture": "one-no-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0
+      },
+      {
+        "fixture": "one-no-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.05
+      },
+      {
+        "fixture": "one-no-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.1
+      },
+      {
+        "fixture": "one-no-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.225
+      },
+      {
+        "fixture": "one-no-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.35
+      },
+      {
+        "fixture": "one-no-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.45
+      },
+      {
+        "fixture": "one-no-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.5
+      },
+      {
+        "fixture": "one-no-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.65
+      },
+      {
+        "fixture": "one-no-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.775
+      },
+      {
+        "fixture": "one-no-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.9
+      },
+      {
+        "fixture": "one-no-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.95
+      },
+      {
+        "fixture": "one-no-caption",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 1
+      },
+      {
+        "fixture": "transparent-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0
+      },
+      {
+        "fixture": "transparent-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.05
+      },
+      {
+        "fixture": "transparent-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.1
+      },
+      {
+        "fixture": "transparent-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.225
+      },
+      {
+        "fixture": "transparent-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.35
+      },
+      {
+        "fixture": "transparent-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.45
+      },
+      {
+        "fixture": "transparent-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.5
+      },
+      {
+        "fixture": "transparent-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.65
+      },
+      {
+        "fixture": "transparent-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.775
+      },
+      {
+        "fixture": "transparent-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.9
+      },
+      {
+        "fixture": "transparent-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.95
+      },
+      {
+        "fixture": "transparent-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 1
+      },
+      {
+        "fixture": "video-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0
+      },
+      {
+        "fixture": "video-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.05
+      },
+      {
+        "fixture": "video-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.1
+      },
+      {
+        "fixture": "video-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.225
+      },
+      {
+        "fixture": "video-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.35
+      },
+      {
+        "fixture": "video-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.45
+      },
+      {
+        "fixture": "video-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.5
+      },
+      {
+        "fixture": "video-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.65
+      },
+      {
+        "fixture": "video-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.775
+      },
+      {
+        "fixture": "video-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.9
+      },
+      {
+        "fixture": "video-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 0.95
+      },
+      {
+        "fixture": "video-source",
+        "hash": "b0060ad0",
+        "initial": "b0060ad0",
+        "time": 1
+      }
+    ]
+  },
+  "sourceModel": "flat-source"
+}

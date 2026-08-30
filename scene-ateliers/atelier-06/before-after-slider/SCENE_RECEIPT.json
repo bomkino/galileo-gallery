@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "before-after-slider",
+  "atelier": 6,
+  "sourceArchive": "06_EDITORIAL_BUILDS_SOL_5_6_PRO_HANDOFF_2026-08-28(1).zip",
+  "sourceArchiveSha256": "5ada71018556c76f34ca49bae76de3308be3368c09bc72846bff045594b84f08",
+  "sourceRoot": "06_EDITORIAL_BUILDS_SOL_5_6_PRO_HANDOFF_2026-08-28/01_ATELIER_PACKET/scene-ateliers/atelier-06/before-after-slider",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/scene-core.js",
+    "sha256": "38a70fa0f11e4104d81fa2a2cd8bc5123c2a44c68cb065267af75ff3af8a1176",
+    "rendererOwnsStoryClock": false
+  },
+  "controlCount": 5,
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "catalogueRegistration": "no",
+  "release": "no",
+  "claimBoundary": "Parity candidate packet; no Product integration or human acceptance.",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/before-after-slider.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  },
+  "currentFiles": {
+    "sceneContractSha256": "6e9a9f08a55c091c4bbc5f330726990e9c26ea29a91a000da979a25657b85475",
+    "controlContractSha256": "63ac994474984e3c8bfec496c1d5c2e18ab0e05d244fb6ef4d8ab59633454908",
+    "acceptanceMatrixSha256": "e44621a433ec9f04e56b457cdb7c5060af18619bda4c520e77b0e5c2f83b92dd",
+    "evidenceBindingsSha256": "7eeb3c0aa1a49b45da695eac7447845a648d8a51b58bbae6bc5574472fc512a8"
+  }
+}

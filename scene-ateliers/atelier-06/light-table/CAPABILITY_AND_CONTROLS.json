@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "light-table",
+  "sourceContractSha256": "32c1b8b42ceb04ac87f218bcc0a2523097c7753bbdbe536aae5570df1cfbbef6",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.light-table.table-spread",
+      "sceneLocalId": "table-spread",
+      "parameter": "table-spread",
+      "owner": "Scene",
+      "label": "Table spread",
+      "valueModel": "number",
+      "unit": "normalized stage fraction",
+      "default": 0.72,
+      "range": {
+        "minimum": 0.52,
+        "maximum": 0.92,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.72,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "light-table:table-spread",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Scales slot offsets from stage centre without changing source frame size or crop.",
+      "acceptanceRow": "control:scene.light-table.table-spread",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.light-table.overlap",
+      "sceneLocalId": "overlap",
+      "parameter": "overlap",
+      "owner": "Scene",
+      "label": "Overlap",
+      "valueModel": "number",
+      "unit": "maximum projected frame-area fraction",
+      "default": 0.1,
+      "range": {
+        "minimum": 0.0,
+        "maximum": 0.22,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.1,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "light-table:overlap",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Moves neighbouring stable slots toward or away from their shared midpoint under deterministic collision bounds.",
+      "acceptanceRow": "control:scene.light-table.overlap",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "look.world.underlight-strength",
+      "sceneLocalId": "underlight-strength",
+      "parameter": "underlight-strength",
+      "owner": "Look",
+      "label": "Under-light",
+      "valueModel": "number",
+      "unit": "linear light amplitude",
+      "default": 0.42,
+      "range": {
+        "minimum": 0.0,
+        "maximum": 0.7,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.42,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "light-table:underlight-strength",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Scales only frame-exterior light geometry; source state is invariant.",
+      "acceptanceRow": "control:look.world.underlight-strength",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.light-table.focus-behaviour",
+      "sceneLocalId": "focus-behaviour",
+      "parameter": "focus-behaviour",
+      "owner": "Scene",
+      "label": "Focus",
+      "valueModel": "enum",
+      "unit": null,
+      "default": "route",
+      "range": null,
+      "options": [
+        "route",
+        "loupe-only",
+        "none"
+      ],
+      "resetValue": "route",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "light-table:focus-behaviour",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Selects ordered automatic route, final-only loupe, or no automatic focus.",
+      "acceptanceRow": "control:scene.light-table.focus-behaviour",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.light-table.nudge-restraint",
+      "sceneLocalId": "nudge-restraint",
+      "parameter": "nudge-restraint",
+      "owner": "Scene",
+      "label": "Nudge restraint",
+      "valueModel": "number",
+      "unit": "normalized restraint amplitude",
+      "default": 0.28,
+      "range": {
+        "minimum": 0.0,
+        "maximum": 0.6,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.28,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "light-table:nudge-restraint",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Scales seam-safe periodic translation and rotation around stable slots.",
+      "acceptanceRow": "control:scene.light-table.nudge-restraint",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

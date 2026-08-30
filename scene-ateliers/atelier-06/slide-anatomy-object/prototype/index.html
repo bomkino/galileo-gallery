@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Slide Anatomy — Atelier 06</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="app">
+    <header class="prototype-heading">
+      <div>
+        <p class="eyebrow">Atelier 06 · Editorial builds</p>
+        <h1>Slide Anatomy</h1>
+        <p class="dek">One intact source. Known presentation scaffolds separate for inspection, then return along the exact same path.</p>
+      </div>
+      <p class="capability-note"><strong>Flat-source honesty.</strong> Gallery does not infer typography, image, texture, brand, or semantic layers from pixels. Explicit authored layers require <code>AT06-CONTRACT-SOURCE-ROLES</code>.</p>
+    </header>
+
+    <section class="stage-shell" aria-labelledby="stage-title">
+      <h2 id="stage-title" class="visually-hidden">Deterministic Slide Anatomy inspection</h2>
+      <div id="stage" class="stage" data-canvas="16:9">
+        <div id="object" class="object" aria-describedby="structure"></div>
+        <div id="proposal" class="proposal" hidden></div>
+        <ol id="structure" class="visually-hidden"></ol>
+        <button type="button" id="inspection-target" class="inspection-target" aria-pressed="false">Inspect planes</button>
+      </div>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+    </section>
+
+    <form id="controls" class="controls" aria-label="Slide Anatomy prototype controls" onsubmit="return false">
+      <fieldset class="control-section transport-section">
+        <legend>Story time</legend>
+        <div class="button-row"><button type="button" id="play">Play</button><button type="button" id="pause" disabled>Pause</button><button type="button" id="reset" class="quiet">Reset</button></div>
+        <label class="wide-control" for="time"><span>Scrub</span><input id="time" type="range" min="0" max="1" step="0.001" value="0"><output id="time-output" for="time">0.000</output></label>
+        <label for="mode"><span>Timeline</span><select id="mode"><option value="automatic">Automatic</option><option value="fixed-duration">Fixed duration</option><option value="directed">Directed rhythm</option></select></label>
+        <label for="duration"><span>Requested duration</span><span class="input-with-unit"><input id="duration" type="number" min="1000" max="60000" step="100" value="7000"><span>ms</span></span></label>
+        <output id="duration-output" class="compiled-output" for="mode duration hold">Compiled 7.0 s</output>
+      </fieldset>
+
+      <fieldset class="control-section">
+        <legend>Source & canvas</legend>
+        <label for="fixture"><span>Fixture</span><select id="fixture"><option value="one-caption">One source + caption</option><option value="one-no-caption">One source</option><option value="extra-three">One + extras</option><option value="explicit-many-proposal">Explicit-layer proposal</option><option value="transparent-source">Transparent source</option><option value="failed-source">Failed source</option><option value="video-source">Source video</option></select></label>
+        <label for="ratio"><span>Canvas</span><select id="ratio"><option value="16:9">16:9</option><option value="9:16">9:16</option><option value="1:1">1:1</option><option value="4:5">4:5</option></select></label>
+        <label for="direction"><span>Playback</span><select id="direction"><option value="forward">Forward</option><option value="reverse">Reverse</option></select></label>
+        <label class="toggle" for="reduced"><input id="reduced" type="checkbox"><span>Reduced motion</span></label>
+        <label class="toggle" for="debug"><input id="debug" type="checkbox"><span>Debug geometry</span></label>
+      </fieldset>
+
+      <fieldset class="control-section scene-controls">
+        <legend>Scene controls</legend>
+        <label for="depth"><span>Separation depth</span><input id="depth" type="range" min="0.20" max="0.90" step="0.01" value="0.58"><output id="depth-output" for="depth">58%</output></label>
+        <label for="spread"><span>Lateral spread</span><input id="spread" type="range" min="0.18" max="0.82" step="0.01" value="0.52"><output id="spread-output" for="spread">52%</output></label>
+        <label for="perspective"><span>Perspective</span><input id="perspective" type="range" min="0" max="0.60" step="0.01" value="0.34"><output id="perspective-output" for="perspective">34%</output></label>
+        <label for="hold"><span>Inspection hold</span><input id="hold" type="range" min="1200" max="5000" step="100" value="2100"><output id="hold-output" for="hold">2.10 s</output></label>
+        <label for="labels"><span>Labels</span><select id="labels"><option value="known-structure">Known structure</option><option value="numbers-only">Numbers only</option><option value="hidden">Hidden</option></select></label>
+      </fieldset>
+    </form>
+  </main>
+  <script src="scene-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

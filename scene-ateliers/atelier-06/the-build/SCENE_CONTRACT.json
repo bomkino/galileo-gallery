@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-build",
+  "displayName": "The Build",
+  "family": "editorial-builds",
+  "atelier": 6,
+  "candidateVersion": "parity-1",
+  "identity": {
+    "promise": "A source presentation accumulates through explicit, readable apparatus beats, clears its scaffolding, and resolves into the untouched finished frame without claiming how the imported artwork was designed.",
+    "antiMotion": "Never infer hidden layers, design decisions, palette trials, typography trials, approval history, authorship, or process knowledge from flattened pixels; never hide unreadable beats inside ornamental speed.",
+    "topology": "additive presentation apparatus beats, source placement, cleanup, exact resolved frame",
+    "focusGrammar": "readability of each Project-known build beat",
+    "finaleGrammar": "untouched finished source with scaffolding absent, then honest deconstruction seam"
+  },
+  "sourcePolicy": {
+    "minimum": 1,
+    "recommended": 1,
+    "maximum": 1,
+    "identityAndOrder": "must survive failure, replacement, reverse and recycling"
+  },
+  "canvasSupport": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:5"
+  ],
+  "orientation": "additive presentation planes",
+  "timeline": "automatic, fixed-duration, directed; forward/reverse",
+  "alphaPolicy": "transparent output supported; raw alpha proof quality scored separately",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/scene-core.js",
+    "sha256": "b609cd99deeb81c05facca76afa09ae9b56b66506de1412779e748cb72d9ac22",
+    "rendererOwnsStoryClock": false
+  },
+  "prototypeEntrypoint": "prototype/index.html",
+  "controlsRef": "CAPABILITY_AND_CONTROLS.json",
+  "acceptanceRef": "ACCEPTANCE_MATRIX.json",
+  "programme": {
+    "state": "G10C preflight candidate; blocked behind G10A and G10B; separate identity unresolved",
+    "pressureGate": "G10C",
+    "gateStatus": "blocked"
+  },
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/the-build.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  }
+}

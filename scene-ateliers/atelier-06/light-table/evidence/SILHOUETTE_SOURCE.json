@@ -1,0 +1,7 @@
+{
+  "sceneId": "light-table",
+  "source": "fixtures/ordinary-six.png",
+  "method": "autocontrast-grayscale-median3-binary-threshold",
+  "threshold": 159,
+  "output": "SILHOUETTE.png"
+}

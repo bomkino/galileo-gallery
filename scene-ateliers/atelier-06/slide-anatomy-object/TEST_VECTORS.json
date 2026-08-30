@@ -1,0 +1,250 @@
+{
+  "$schema": "atelier-local://scene-test-vectors/v1",
+  "runtime": false,
+  "sceneId": "slide-anatomy-object",
+  "sourceModel": "flat-source",
+  "tolerance": {
+    "number": 1e-06,
+    "pixelHash": "exact",
+    "zeroAlphaRgb": 0
+  },
+  "canonicalTimes": [
+    0,
+    0.05,
+    0.1,
+    0.225,
+    0.35,
+    0.45,
+    0.5,
+    0.65,
+    0.775,
+    0.9,
+    0.95,
+    1
+  ],
+  "vectors": [
+    {
+      "id": "zero",
+      "fixture": "zero",
+      "t": 0.5,
+      "expect": {
+        "apply": "fail",
+        "code": "minimum-items"
+      }
+    },
+    {
+      "id": "ordinary-flat",
+      "fixture": "one-caption",
+      "t": 0.5,
+      "expect": {
+        "consumedCount": 1,
+        "planeIds": [
+          "backing",
+          "source-frame",
+          "frame-edge",
+          "safe-area",
+          "caption"
+        ],
+        "inferredSemantics": false
+      }
+    },
+    {
+      "id": "no-caption",
+      "fixture": "one-no-caption",
+      "t": 0.5,
+      "expect": {
+        "planeIds": [
+          "backing",
+          "source-frame",
+          "frame-edge",
+          "safe-area"
+        ],
+        "captionInvented": false
+      }
+    },
+    {
+      "id": "extras",
+      "fixture": "extra-three",
+      "t": 0.5,
+      "expect": {
+        "consumedCount": 1,
+        "preservedExtraCount": 2,
+        "layersFromExtras": false
+      }
+    },
+    {
+      "id": "explicit-many-proposal",
+      "fixture": "explicit-many-proposal",
+      "t": 0.5,
+      "expect": {
+        "apply": "blocked-proposal",
+        "requiredContract": "AT06-CONTRACT-SOURCE-ROLES"
+      }
+    },
+    {
+      "id": "seam",
+      "fixture": "one-caption",
+      "samples": [
+        0,
+        1
+      ],
+      "expect": {
+        "poseEquality": true,
+        "sourceHashEquality": true
+      }
+    },
+    {
+      "id": "exact-reversal",
+      "fixture": "one-caption",
+      "progressSamples": [
+        0,
+        0.125,
+        0.25,
+        0.5,
+        0.75,
+        0.875,
+        1
+      ],
+      "expect": {
+        "outwardReturnPoseEquality": true
+      }
+    },
+    {
+      "id": "inspection-hold",
+      "fixture": "one-caption",
+      "times": [
+        0.35,
+        0.5,
+        0.65
+      ],
+      "expect": {
+        "progress": 1,
+        "velocity": 0
+      }
+    },
+    {
+      "id": "resolved-final",
+      "fixture": "transparent-source",
+      "t": 0.95,
+      "expect": {
+        "separationProgress": 0,
+        "sourceState": {
+          "opacity": 1,
+          "filter": "none",
+          "blend": "normal"
+        },
+        "sourceHash": "import-exact"
+      }
+    },
+    {
+      "id": "transparent",
+      "fixture": "transparent-source",
+      "backgrounds": [
+        "black",
+        "white",
+        "red",
+        "blue",
+        "checker"
+      ],
+      "expect": {
+        "transparentOutput": true,
+        "zeroRgbUnderZeroAlpha": true
+      }
+    },
+    {
+      "id": "failed-source",
+      "fixture": "failed-source",
+      "t": 0.5,
+      "expect": {
+        "sourceId": "anatomy-source-01",
+        "failedIdentityPreserved": true,
+        "substitution": false
+      }
+    },
+    {
+      "id": "source-video",
+      "fixture": "video-source",
+      "t": 0.5,
+      "expect": {
+        "videoClock": "project-story-time",
+        "sceneClockCreated": false
+      }
+    },
+    {
+      "id": "reduced",
+      "fixture": "one-caption",
+      "times": [
+        0.2,
+        0.5,
+        0.8
+      ],
+      "reducedMotion": true,
+      "expect": {
+        "continuousTravel": false,
+        "discreteStates": true
+      }
+    },
+    {
+      "id": "control-depth",
+      "fixture": "one-caption",
+      "t": 0.5,
+      "compare": {
+        "separation-depth": [
+          0.2,
+          0.9
+        ]
+      },
+      "expect": {
+        "zSpanMonotonic": true,
+        "sourceHashInvariant": true
+      }
+    },
+    {
+      "id": "control-labels",
+      "fixture": "one-caption",
+      "t": 0.5,
+      "compare": {
+        "label-visibility": [
+          "known-structure",
+          "numbers-only",
+          "hidden"
+        ]
+      },
+      "expect": {
+        "posesInvariant": true,
+        "accessibleStructureInvariant": true
+      }
+    },
+    {
+      "id": "preview-scrub-capture",
+      "fixture": "one-caption",
+      "samples": [
+        0,
+        0.1,
+        0.35,
+        0.65,
+        0.9,
+        1
+      ],
+      "expect": {
+        "canonicalEvaluatorIdentity": true
+      }
+    },
+    {
+      "id": "max-hold-readable-floor",
+      "fixture": "one-caption",
+      "controls": {
+        "inspection-hold": 5000
+      },
+      "intent": {
+        "mode": "fixed-duration",
+        "durationMs": 1000
+      },
+      "expect": {
+        "issueCode": "duration-below-readable-minimum",
+        "compiledDurationMs": 8000,
+        "segmentsPositiveContiguous": true
+      }
+    }
+  ]
+}

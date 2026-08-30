@@ -1,0 +1,7 @@
+{
+  "sceneId": "slide-anatomy-object",
+  "source": "canonical/06-t-0_5.png",
+  "method": "autocontrast-grayscale-median3-binary-threshold",
+  "threshold": 177,
+  "output": "SILHOUETTE.png"
+}

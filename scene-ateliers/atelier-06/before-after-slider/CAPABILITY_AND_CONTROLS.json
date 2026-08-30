@@ -1,0 +1,164 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "before-after-slider",
+  "sourceContractSha256": "bbe38f5e396d9f0cc97033362e01b1af8af0a4d6ee4aa6010cb4602d6a3edae3",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.before-after-slider.initial-split",
+      "sceneLocalId": "initial-split",
+      "parameter": "initial-split",
+      "owner": "Scene",
+      "label": "Initial split",
+      "valueModel": "number",
+      "unit": "normalized width",
+      "default": 0.18,
+      "range": {
+        "minimum": 0.05,
+        "maximum": 0.95,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.18,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "before-after-slider:initial-split",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Sets automatic seam/start value and reduced-motion static value; clamped inside sweep range.",
+      "acceptanceRow": "control:scene.before-after-slider.initial-split",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.before-after-slider.sweep-range",
+      "sceneLocalId": "sweep-range",
+      "parameter": "sweep-range",
+      "owner": "Scene",
+      "label": "Sweep range",
+      "valueModel": "range-pair",
+      "unit": "normalized width",
+      "default": {
+        "min": 0.12,
+        "max": 0.88
+      },
+      "range": {
+        "minimum": 0.04,
+        "maximum": 0.96,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": {
+        "min": 0.12,
+        "max": 0.88
+      },
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "before-after-slider:sweep-range",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Defines automatic extrema and ARIA/manual Home/End bounds.",
+      "acceptanceRow": "control:scene.before-after-slider.sweep-range",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "timeline.segment.sweep-duration",
+      "sceneLocalId": "sweep-duration",
+      "parameter": "sweep-duration",
+      "owner": "Timeline",
+      "label": "Sweep duration",
+      "valueModel": "number",
+      "unit": "ms per long sweep",
+      "default": 1400,
+      "range": {
+        "minimum": 800,
+        "maximum": 4000,
+        "step": 50
+      },
+      "options": null,
+      "resetValue": 1400,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "before-after-slider:sweep-duration",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Allocates travel segments before normalized compilation.",
+      "acceptanceRow": "control:timeline.segment.sweep-duration",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "timeline.hold.turnaround",
+      "sceneLocalId": "turnaround-hold",
+      "parameter": "turnaround-hold",
+      "owner": "Timeline",
+      "label": "Turnaround hold",
+      "valueModel": "number",
+      "unit": "ms",
+      "default": 650,
+      "range": {
+        "minimum": 300,
+        "maximum": 2400,
+        "step": 50
+      },
+      "options": null,
+      "resetValue": 650,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "before-after-slider:turnaround-hold",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Sets exact zero-velocity min/max holds.",
+      "acceptanceRow": "control:timeline.hold.turnaround",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.before-after-slider.comparison-chrome",
+      "sceneLocalId": "comparison-chrome",
+      "parameter": "comparison-chrome",
+      "owner": "Scene",
+      "label": "Comparison chrome",
+      "valueModel": "enum",
+      "unit": null,
+      "default": "labels-handle",
+      "range": null,
+      "options": [
+        "labels-handle",
+        "handle",
+        "clean"
+      ],
+      "resetValue": "labels-handle",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "before-after-slider:comparison-chrome",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "No motion consequence; declares presentation visibility state.",
+      "acceptanceRow": "control:scene.before-after-slider.comparison-chrome",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "before-after-slider",
+  "previewRenderer": "Canvas 2D",
+  "exportRenderer": "Canvas 2D",
+  "currentProof": "actual-browser DOM/Canvas comparison prototype",
+  "reason": "registered clipping and divider need precise 2D compositing",
+  "alternativesRejected": [
+    "one generic Scene engine",
+    "WebGL because premium",
+    "renderer-owned story clock"
+  ],
+  "fidelityRisks": [
+    "Imported artwork must remain source-clean."
+  ],
+  "performanceRisks": [
+    "visible: exactly 2; pixels/DPR/video bounds unmeasured"
+  ],
+  "passes": [
+    {
+      "id": "scene-output",
+      "owns": "Scene-native presentation only",
+      "lifecycle": "create on mount; dispose on unmount",
+      "cacheKey": "before-after-slider:source-hash:canvas-preset:renderer-version",
+      "invalidators": [
+        "source replacement",
+        "canvas preset",
+        "Scene-owned geometry control"
+      ],
+      "fallback": "source-native prototype renderer"
+    }
+  ],
+  "contextLoss": {
+    "behaviour": "retain semantic state; dispose and reconstruct presentation resources; use source-native fallback",
+    "humanApprovalRequired": "Product/orchestrator"
+  },
+  "storyClockOwner": "Timeline/Project semantic evaluator",
+  "productDecision": "pending"
+}

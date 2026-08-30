@@ -1,0 +1,9 @@
+{
+  "atelier": 6,
+  "archive": "06_EDITORIAL_BUILDS_SOL_5_6_PRO_HANDOFF_2026-08-28(1).zip",
+  "archiveSha256": "5ada71018556c76f34ca49bae76de3308be3368c09bc72846bff045594b84f08",
+  "sourceRoot": "06_EDITORIAL_BUILDS_SOL_5_6_PRO_HANDOFF_2026-08-28/01_ATELIER_PACKET/scene-ateliers/atelier-06/slide-anatomy-object",
+  "sourceRootFileCount": 56,
+  "charterSha256": "261f328cc81de154d71718b27274f39ed735142ac68130c65317fab74dfece21",
+  "normalisation": "Original authored files copied. Original control JSON preserved. Canonical parity contracts added."
+}

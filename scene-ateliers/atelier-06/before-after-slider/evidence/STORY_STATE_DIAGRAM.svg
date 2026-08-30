@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="420" viewBox="0 0 1600 420">
+<rect width="100%" height="100%" fill="#f7f5ef"/>
+<text x="70" y="62" font-family="ui-monospace,monospace" font-size="28" font-weight="700" fill="#171815">before-after-slider</text>
+<text x="70" y="100" font-family="ui-monospace,monospace" font-size="18" fill="#555650">One registered frame · one divider scalar · reversible path</text>
+<rect x="70.0" y="150" width="226.7" height="92" rx="8" fill="#ffffff" stroke="#171815" stroke-width="2"/>
+<text x="183.3" y="196.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">Initial split</text>
+<line x1="299.7" y1="196.0" x2="308.7" y2="196.0" stroke="#171815" stroke-width="2"/>
+<path d="M 308.7 190.0 L 316.7 196.0 L 308.7 202.0" fill="none" stroke="#171815" stroke-width="2"/>
+<rect x="316.7" y="150" width="226.7" height="92" rx="8" fill="#ffffff" stroke="#171815" stroke-width="2"/>
+<text x="430.0" y="196.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">Sweep to max</text>
+<line x1="546.3" y1="196.0" x2="555.3" y2="196.0" stroke="#171815" stroke-width="2"/>
+<path d="M 555.3 190.0 L 563.3 196.0 L 555.3 202.0" fill="none" stroke="#171815" stroke-width="2"/>
+<rect x="563.3" y="150" width="226.7" height="92" rx="8" fill="#ffffff" stroke="#171815" stroke-width="2"/>
+<text x="676.7" y="196.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">Max hold</text>
+<line x1="793.0" y1="196.0" x2="802.0" y2="196.0" stroke="#171815" stroke-width="2"/>
+<path d="M 802.0 190.0 L 810.0 196.0 L 802.0 202.0" fill="none" stroke="#171815" stroke-width="2"/>
+<rect x="810.0" y="150" width="226.7" height="92" rx="8" fill="#ffffff" stroke="#171815" stroke-width="2"/>
+<text x="923.3" y="196.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">Sweep to min</text>
+<line x1="1039.7" y1="196.0" x2="1048.7" y2="196.0" stroke="#171815" stroke-width="2"/>
+<path d="M 1048.7 190.0 L 1056.7 196.0 L 1048.7 202.0" fill="none" stroke="#171815" stroke-width="2"/>
+<rect x="1056.7" y="150" width="226.7" height="92" rx="8" fill="#ffffff" stroke="#171815" stroke-width="2"/>
+<text x="1170.0" y="196.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">Min hold</text>
+<line x1="1286.3" y1="196.0" x2="1295.3" y2="196.0" stroke="#171815" stroke-width="2"/>
+<path d="M 1295.3 190.0 L 1303.3 196.0 L 1295.3 202.0" fill="none" stroke="#171815" stroke-width="2"/>
+<rect x="1303.3" y="150" width="226.7" height="92" rx="8" fill="#ffffff" stroke="#171815" stroke-width="2"/>
+<text x="1416.7" y="184.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">Return to</text>
+<text x="1416.7" y="209.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">initial</text>
+<text x="70" y="330" font-family="ui-monospace,monospace" font-size="16" fill="#555650">Pure story time · exact boundaries · preview/scrub/fixed-step evaluator parity</text>
+</svg>

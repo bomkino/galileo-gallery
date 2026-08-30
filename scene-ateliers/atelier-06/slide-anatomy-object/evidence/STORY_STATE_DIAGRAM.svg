@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="420" viewBox="0 0 1600 420">
+<rect width="100%" height="100%" fill="#f7f5ef"/>
+<text x="70" y="62" font-family="ui-monospace,monospace" font-size="28" font-weight="700" fill="#171815">slide-anatomy-object</text>
+<text x="70" y="100" font-family="ui-monospace,monospace" font-size="18" fill="#555650">Analytical separation · inspection · exact return</text>
+<rect x="70.0" y="150" width="276.0" height="92" rx="8" fill="#ffffff" stroke="#171815" stroke-width="2"/>
+<text x="208.0" y="196.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">Resolved</text>
+<line x1="349.0" y1="196.0" x2="358.0" y2="196.0" stroke="#171815" stroke-width="2"/>
+<path d="M 358.0 190.0 L 366.0 196.0 L 358.0 202.0" fill="none" stroke="#171815" stroke-width="2"/>
+<rect x="366.0" y="150" width="276.0" height="92" rx="8" fill="#ffffff" stroke="#171815" stroke-width="2"/>
+<text x="504.0" y="196.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">Separate planes</text>
+<line x1="645.0" y1="196.0" x2="654.0" y2="196.0" stroke="#171815" stroke-width="2"/>
+<path d="M 654.0 190.0 L 662.0 196.0 L 654.0 202.0" fill="none" stroke="#171815" stroke-width="2"/>
+<rect x="662.0" y="150" width="276.0" height="92" rx="8" fill="#ffffff" stroke="#171815" stroke-width="2"/>
+<text x="800.0" y="196.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">Inspection hold</text>
+<line x1="941.0" y1="196.0" x2="950.0" y2="196.0" stroke="#171815" stroke-width="2"/>
+<path d="M 950.0 190.0 L 958.0 196.0 L 950.0 202.0" fill="none" stroke="#171815" stroke-width="2"/>
+<rect x="958.0" y="150" width="276.0" height="92" rx="8" fill="#ffffff" stroke="#171815" stroke-width="2"/>
+<text x="1096.0" y="184.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">Exact reverse</text>
+<text x="1096.0" y="209.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">path</text>
+<line x1="1237.0" y1="196.0" x2="1246.0" y2="196.0" stroke="#171815" stroke-width="2"/>
+<path d="M 1246.0 190.0 L 1254.0 196.0 L 1246.0 202.0" fill="none" stroke="#171815" stroke-width="2"/>
+<rect x="1254.0" y="150" width="276.0" height="92" rx="8" fill="#ffffff" stroke="#171815" stroke-width="2"/>
+<text x="1392.0" y="196.0" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#171815">Resolved</text>
+<text x="70" y="330" font-family="ui-monospace,monospace" font-size="16" fill="#555650">Pure story time · exact boundaries · preview/scrub/fixed-step evaluator parity</text>
+</svg>

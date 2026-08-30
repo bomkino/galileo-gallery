@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "light-table",
+  "displayName": "Contact Table / Light Table",
+  "family": "editorial-builds",
+  "atelier": 6,
+  "candidateVersion": "parity-1",
+  "identity": {
+    "promise": "Prints rest on an illuminated review surface; attention moves by measured under-light, small physical nudges, and a source-safe loupe route while every artwork pixel remains untouched.",
+    "antiMotion": "Never become a flying scatter field, shuffled carousel, automatic collage generator, or glow effect painted through the artwork.",
+    "topology": "opaque illuminated surface with stable source slots, small nudges and exterior under-light",
+    "focusGrammar": "loupe/inspection route without changing artwork pixels",
+    "finaleGrammar": "neutral table or explicit final inspection"
+  },
+  "sourcePolicy": {
+    "minimum": 1,
+    "recommended": 6,
+    "maximum": 24,
+    "identityAndOrder": "must survive failure, replacement, reverse and recycling"
+  },
+  "canvasSupport": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:5"
+  ],
+  "orientation": "2D table",
+  "timeline": "automatic, fixed-duration, directed; forward/reverse",
+  "alphaPolicy": "opaque-only candidate by explicit Scene identity/capability decision",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/scene-core.js",
+    "sha256": "58cb28c0a6d44b3334ef0c25bc02f902dd1383270fe194f4145f2f34c1eccbf8",
+    "rendererOwnsStoryClock": false
+  },
+  "prototypeEntrypoint": "prototype/index.html",
+  "controlsRef": "CAPABILITY_AND_CONTROLS.json",
+  "acceptanceRef": "ACCEPTANCE_MATRIX.json",
+  "programme": {
+    "state": "pre-G11 candidate packet; human verdict pending",
+    "pressureGate": null,
+    "gateStatus": "candidate"
+  },
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/light-table.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "atelier": 6,
+  "sourceArchive": "06_EDITORIAL_BUILDS_SOL_5_6_PRO_HANDOFF_2026-08-28(1).zip",
+  "sourceArchiveSha256": "5ada71018556c76f34ca49bae76de3308be3368c09bc72846bff045594b84f08",
+  "sceneCount": 4,
+  "controlCount": 20,
+  "productIntegration": "no",
+  "humanAcceptance": "pending",
+  "originalReplayCommands": 1,
+  "originalReplayPassed": 1,
+  "browserJourneys": 4,
+  "browserPassed": 4,
+  "nativeControlBindings": 20
+}

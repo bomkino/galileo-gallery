@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Before / After — Atelier 06</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="app">
+    <header class="prototype-heading">
+      <div>
+        <p class="eyebrow">Atelier 06 · Editorial builds</p>
+        <h1>Before / After</h1>
+        <p class="dek">Two aligned sources. One reversible divider. Manual input, scrub, playback, and capture share the same split value.</p>
+      </div>
+      <p class="capability-note"><strong>Exactly two sources.</strong> One source becomes an honest missing-pair state. Extra Project media stays preserved.</p>
+    </header>
+
+    <section class="stage-shell" aria-labelledby="stage-title">
+      <h2 id="stage-title" class="visually-hidden">Deterministic Before and After comparison</h2>
+      <div id="stage" class="stage" role="group" aria-label="Before and after comparison">
+        <div id="comparison" class="comparison">
+          <div class="pane after-pane" data-side="after"></div>
+          <div class="pane before-pane" data-side="before"></div>
+          <div id="alignment" class="alignment" aria-hidden="true"></div>
+          <div id="labels" class="labels" aria-hidden="true"><span>Before</span><span>After</span></div>
+          <input id="slider" class="slider" type="range" min="12" max="88" step="1" value="18" aria-label="Comparison divider. Arrow keys adjust by one percent; Page Up and Page Down adjust by ten percent; Home and End move to the authored limits.">
+          <div id="divider" class="divider" aria-hidden="true"><i></i></div>
+        </div>
+        <div id="missing" class="missing" hidden></div>
+      </div>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+    </section>
+
+    <form id="controls" class="controls" aria-label="Before and After prototype controls" onsubmit="return false">
+      <fieldset class="control-section transport-section">
+        <legend>Story time</legend>
+        <div class="button-row"><button type="button" id="play">Play</button><button type="button" id="pause" disabled>Pause</button><button type="button" id="reset" class="quiet">Reset</button></div>
+        <label class="wide-control" for="time"><span>Scrub</span><input id="time" type="range" min="0" max="1" step="0.001" value="0"><output id="time-output" for="time">0.000</output></label>
+        <label for="mode"><span>Timeline</span><select id="mode"><option value="automatic">Automatic</option><option value="fixed-duration">Fixed duration</option><option value="directed">Directed rhythm</option></select></label>
+        <label for="duration"><span>Requested duration</span><span class="input-with-unit"><input id="duration" type="number" min="1000" max="60000" step="100" value="5200"><span>ms</span></span></label>
+        <output id="duration-output" class="compiled-output" for="mode duration">Compiled 5.2 s</output>
+      </fieldset>
+
+      <fieldset class="control-section">
+        <legend>Pair & canvas</legend>
+        <label for="fixture"><span>Fixture</span><select id="fixture"><option value="aligned-pair">Aligned pair</option><option value="one">One source</option><option value="extra-four">Two + extras</option><option value="failed-before">Failed before</option><option value="failed-after">Failed after</option><option value="both-failed">Both failed</option><option value="different-dimensions">Different dimensions</option><option value="different-ratios">Different ratios</option><option value="alpha-edge">Alpha edges</option><option value="video-pair">Video pair</option></select></label>
+        <label for="ratio"><span>Canvas</span><select id="ratio"><option value="16:9">16:9</option><option value="9:16">9:16</option><option value="1:1">1:1</option><option value="4:5">4:5</option></select></label>
+        <label for="direction"><span>Playback</span><select id="direction"><option value="forward">Forward</option><option value="reverse">Reverse</option></select></label>
+        <label class="toggle" for="reduced"><input id="reduced" type="checkbox"><span>Reduced motion</span></label>
+        <label class="toggle" for="debug"><input id="debug" type="checkbox"><span>Alignment grid</span></label>
+      </fieldset>
+
+      <fieldset class="control-section scene-controls">
+        <legend>Scene controls</legend>
+        <label for="initial"><span>Initial split</span><input id="initial" type="range" min="0.05" max="0.95" step="0.01" value="0.18"><output id="initial-output" for="initial">18%</output></label>
+        <div class="range-pair" role="group" aria-label="Sweep range">
+          <span>Sweep range</span>
+          <label for="minimum"><span>Min</span><input id="minimum" type="range" min="0.04" max="0.80" step="0.01" value="0.12"><output id="minimum-output" for="minimum">12%</output></label>
+          <label for="maximum"><span>Max</span><input id="maximum" type="range" min="0.20" max="0.96" step="0.01" value="0.88"><output id="maximum-output" for="maximum">88%</output></label>
+        </div>
+        <label for="sweep"><span>Sweep duration</span><input id="sweep" type="range" min="800" max="4000" step="50" value="1400"><output id="sweep-output" for="sweep">1.40 s</output></label>
+        <label for="hold"><span>Turnaround hold</span><input id="hold" type="range" min="300" max="2400" step="50" value="650"><output id="hold-output" for="hold">0.65 s</output></label>
+        <label for="chrome"><span>Presentation</span><select id="chrome"><option value="labels-handle">Labels + handle</option><option value="handle">Handle only</option><option value="clean">Clean divider</option></select></label>
+      </fieldset>
+    </form>
+  </main>
+  <script src="scene-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

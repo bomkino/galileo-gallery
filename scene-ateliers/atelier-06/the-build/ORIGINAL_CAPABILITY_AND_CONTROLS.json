@@ -1,0 +1,106 @@
+{
+  "$schema": "atelier-local://scene-capability-and-controls/v1",
+  "runtime": false,
+  "$schemaStatus": "atelier-local-proposal-not-runtime",
+  "sceneId": "the-build",
+  "candidateVersion": "0.1",
+  "sceneVersion": 1,
+  "capabilities": {
+    "ordinarySourceModel": "flat-source-presentation-build",
+    "minimumItems": 1,
+    "ordinaryItems": 1,
+    "maximumConsumedItems": 1,
+    "extraItems": "preserve-unconsumed",
+    "explicitAuthoredStages": "blocked-pending-AT06-CONTRACT-AUTHORED-STAGES",
+    "transparentCanvas": true,
+    "reverse": "honest-presentation-deconstruction",
+    "reducedMotion": "discrete-readable-states",
+    "sourceVideoClock": "product-story-time-only",
+    "audio": "product-owned-unchanged"
+  },
+  "controls": [
+    {
+      "id": "build-detail",
+      "type": "choice",
+      "default": "regular",
+      "options": [
+        "concise",
+        "regular",
+        "detailed"
+      ],
+      "resetValue": "regular",
+      "evaluatorConsequence": "Changes the active beat table and guide/caption apparatus inclusion while preserving the same source and resolved state.",
+      "renderConsequence": "Concise omits intermediate apparatus holds; detailed adds one extra Project-known alignment checkpoint.",
+      "causalTest": "Compilers for all three values produce different named segment tables, while source hash and terminal resolved output remain equal.",
+      "label": "Build detail",
+      "step": null,
+      "unit": null,
+      "persistence": "Chooses a declared subset of Project-known apparatus beats. It never creates semantic artwork layers."
+    },
+    {
+      "id": "guide-density",
+      "type": "choice",
+      "default": "standard",
+      "options": [
+        "minimal",
+        "standard",
+        "technical"
+      ],
+      "resetValue": "standard",
+      "evaluatorConsequence": "Returns 2, 4, or 8 guide lines with stable normalized coordinates.",
+      "renderConsequence": "Changes guide count and positions; never samples or modifies source pixels.",
+      "causalTest": "Guide array length and coordinates change; source media treatment and hash remain exact.",
+      "label": "Guide density",
+      "step": null,
+      "unit": null,
+      "persistence": "Selects bounded canvas/frame guide geometry only."
+    },
+    {
+      "id": "cursor-visibility",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        "off",
+        "causal"
+      ],
+      "resetValue": "off",
+      "evaluatorConsequence": "When causal, cursor visibility and normalized position exist only during source-window placement; otherwise opacity is zero.",
+      "renderConsequence": "Draws one presentation cursor outside source pixels and removes it before cleanup/finale.",
+      "causalTest": "Cursor samples are zero outside source-window; enabling it does not change any other state.",
+      "label": "Cursor visibility",
+      "step": null,
+      "unit": null,
+      "persistence": "Allows one deterministic pointer only when it explains the declared source-placement operation."
+    },
+    {
+      "id": "per-beat-hold",
+      "type": "range",
+      "default": 600,
+      "min": 420,
+      "max": 1600,
+      "step": 20,
+      "unit": "ms",
+      "resetValue": 600,
+      "evaluatorConsequence": "Recompiles named intermediate hold spans without changing their state values.",
+      "renderConsequence": "Changes time spent on frame, guide, and source-placement holds.",
+      "causalTest": "Increasing the value increases compiled duration and hold segment durations exactly; boundary state remains unchanged.",
+      "label": "Per-beat hold",
+      "persistence": "Minimum readable hold used for intermediate apparatus decisions."
+    },
+    {
+      "id": "finale-hold",
+      "type": "range",
+      "default": 2000,
+      "min": 1200,
+      "max": 5000,
+      "step": 50,
+      "unit": "ms",
+      "resetValue": 2000,
+      "evaluatorConsequence": "Changes only the resolved-hold segment duration.",
+      "renderConsequence": "Extends the clean finished frame without retaining guides or cursor.",
+      "causalTest": "Resolved-hold duration changes exactly; resolved source hash, media treatment, and seam remain equal.",
+      "label": "Finale hold",
+      "persistence": "Readable source-faithful resolved-frame hold."
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Light Table — Atelier 06</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="app">
+    <header class="prototype-heading">
+      <div>
+        <p class="eyebrow">Atelier 06 · Editorial builds</p>
+        <h1>Light Table</h1>
+        <p class="dek">An illuminated review surface. Light stays behind the frame; source pixels remain untouched.</p>
+      </div>
+      <p class="capability-note"><strong>Opaque output.</strong> The review surface is identity-critical; this prototype does not fake alpha.</p>
+    </header>
+
+    <section class="stage-shell" aria-labelledby="stage-title">
+      <h2 id="stage-title" class="visually-hidden">Deterministic Light Table preview</h2>
+      <div id="stage" class="stage" role="group" aria-label="Illuminated review surface. Use arrow keys to move between prints; Enter or Space pins focus."></div>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+    </section>
+
+    <form id="controls" class="controls" aria-label="Light Table prototype controls" onsubmit="return false">
+      <fieldset class="control-section transport-section">
+        <legend>Story time</legend>
+        <div class="button-row">
+          <button type="button" id="play">Play</button>
+          <button type="button" id="pause" disabled>Pause</button>
+          <button type="button" id="reset" class="quiet">Reset</button>
+        </div>
+        <label class="wide-control" for="time"><span>Scrub</span><input id="time" type="range" min="0" max="1" step="0.001" value="0"><output id="time-output" for="time">0.000</output></label>
+        <label for="mode"><span>Timeline</span><select id="mode"><option value="automatic">Automatic</option><option value="fixed-duration">Fixed duration</option><option value="directed">Directed rhythm</option></select></label>
+        <label for="duration"><span>Requested duration</span><span class="input-with-unit"><input id="duration" type="number" min="1000" max="60000" step="100" value="10000"><span>ms</span></span></label>
+        <output id="duration-output" class="compiled-output" for="mode duration">Compiled 10.0 s</output>
+      </fieldset>
+
+      <fieldset class="control-section">
+        <legend>Fixture & canvas</legend>
+        <label for="fixture"><span>Sources</span><select id="fixture"><option value="one">1 · inspection</option><option value="two">2 · bilateral</option><option value="five">5 · contract conflict</option><option value="ordinary-six" selected>6 · recommended</option><option value="many-12">12 · many</option><option value="many-24">24 · upper bound</option><option value="failed-six">6 · failed source</option><option value="video-six">6 · source video</option><option value="colour-chart-six">6 · colour chart</option></select></label>
+        <label for="ratio"><span>Canvas</span><select id="ratio"><option value="16:9">16:9</option><option value="9:16">9:16</option><option value="1:1">1:1</option><option value="4:5">4:5</option></select></label>
+        <label class="toggle" for="reduced"><input id="reduced" type="checkbox"><span>Reduced motion</span></label>
+        <label class="toggle" for="debug"><input id="debug" type="checkbox"><span>Debug geometry</span></label>
+      </fieldset>
+
+      <fieldset class="control-section scene-controls">
+        <legend>Scene controls</legend>
+        <label for="spread"><span>Table spread</span><input id="spread" type="range" min="0.52" max="0.92" step="0.01" value="0.72"><output id="spread-output" for="spread">0.72</output></label>
+        <label for="overlap"><span>Overlap</span><input id="overlap" type="range" min="0" max="0.22" step="0.01" value="0.10"><output id="overlap-output" for="overlap">0.10</output></label>
+        <label for="underlight"><span>Under-light</span><input id="underlight" type="range" min="0" max="0.70" step="0.01" value="0.42"><output id="underlight-output" for="underlight">0.42</output></label>
+        <label for="focus"><span>Focus behaviour</span><select id="focus"><option value="route">Review route</option><option value="loupe-only">Manual loupe only</option><option value="none">No focus</option></select></label>
+        <label for="nudge"><span>Nudge restraint</span><input id="nudge" type="range" min="0" max="0.60" step="0.01" value="0.28"><output id="nudge-output" for="nudge">0.28</output></label>
+      </fieldset>
+    </form>
+  </main>
+  <script src="scene-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

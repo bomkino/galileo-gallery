@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "slide-anatomy-object",
+  "sourceContractSha256": "c18e81261588238dbe3722f794e717061f16a1826bb893c9113254486f035de8",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.slide-anatomy-object.separation-depth",
+      "sceneLocalId": "separation-depth",
+      "parameter": "separation-depth",
+      "owner": "Scene",
+      "label": "Separation depth",
+      "valueModel": "number",
+      "unit": "normalized depth span",
+      "default": 0.58,
+      "range": {
+        "minimum": 0.2,
+        "maximum": 0.9,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.58,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "slide-anatomy-object:separation-depth",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Scales per-plane z offsets around the source plane.",
+      "acceptanceRow": "control:scene.slide-anatomy-object.separation-depth",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.slide-anatomy-object.lateral-spread",
+      "sceneLocalId": "lateral-spread",
+      "parameter": "lateral-spread",
+      "owner": "Scene",
+      "label": "Lateral spread",
+      "valueModel": "number",
+      "unit": "normalized frame width",
+      "default": 0.52,
+      "range": {
+        "minimum": 0.18,
+        "maximum": 0.82,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.52,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "slide-anatomy-object:lateral-spread",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Scales authored x/y plane offsets.",
+      "acceptanceRow": "control:scene.slide-anatomy-object.lateral-spread",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.slide-anatomy-object.perspective",
+      "sceneLocalId": "perspective",
+      "parameter": "perspective",
+      "owner": "Scene",
+      "label": "Perspective",
+      "valueModel": "number",
+      "unit": "normalized view tilt",
+      "default": 0.34,
+      "range": {
+        "minimum": 0.0,
+        "maximum": 0.6,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.34,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "slide-anatomy-object:perspective",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Scales bounded stage rotateX/rotateY values.",
+      "acceptanceRow": "control:scene.slide-anatomy-object.perspective",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "timeline.hold.inspection",
+      "sceneLocalId": "inspection-hold",
+      "parameter": "inspection-hold",
+      "owner": "Timeline",
+      "label": "Inspection hold",
+      "valueModel": "number",
+      "unit": "ms",
+      "default": 2100,
+      "range": {
+        "minimum": 1200,
+        "maximum": 5000,
+        "step": 100
+      },
+      "options": null,
+      "resetValue": 2100,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "slide-anatomy-object:inspection-hold",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes compiled exact-separated hold duration.",
+      "acceptanceRow": "control:timeline.hold.inspection",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.slide-anatomy-object.label-visibility",
+      "sceneLocalId": "label-visibility",
+      "parameter": "label-visibility",
+      "owner": "Scene",
+      "label": "Labels",
+      "valueModel": "enum",
+      "unit": null,
+      "default": "known-structure",
+      "range": null,
+      "options": [
+        "known-structure",
+        "numbers-only",
+        "hidden"
+      ],
+      "resetValue": "known-structure",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "slide-anatomy-object:label-visibility",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Declares label presentation state; structure list stays accessible.",
+      "acceptanceRow": "control:scene.slide-anatomy-object.label-visibility",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

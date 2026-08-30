@@ -1,0 +1,157 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "the-build",
+  "sourceContractSha256": "8e4c8f7c1b03ddc20d81bfe52166316563b9465509df21abc6fc832ccfef89a7",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.the-build.build-detail",
+      "sceneLocalId": "build-detail",
+      "parameter": "build-detail",
+      "owner": "Scene",
+      "label": "Build detail",
+      "valueModel": "enum",
+      "unit": null,
+      "default": "regular",
+      "range": null,
+      "options": [
+        "concise",
+        "regular",
+        "detailed"
+      ],
+      "resetValue": "regular",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-build:build-detail",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes the active beat table and guide/caption apparatus inclusion while preserving the same source and resolved state.",
+      "acceptanceRow": "control:scene.the-build.build-detail",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-build.guide-density",
+      "sceneLocalId": "guide-density",
+      "parameter": "guide-density",
+      "owner": "Scene",
+      "label": "Guide density",
+      "valueModel": "enum",
+      "unit": null,
+      "default": "standard",
+      "range": null,
+      "options": [
+        "minimal",
+        "standard",
+        "technical"
+      ],
+      "resetValue": "standard",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-build:guide-density",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Returns 2, 4, or 8 guide lines with stable normalized coordinates.",
+      "acceptanceRow": "control:scene.the-build.guide-density",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.the-build.cursor-visibility",
+      "sceneLocalId": "cursor-visibility",
+      "parameter": "cursor-visibility",
+      "owner": "Scene",
+      "label": "Cursor visibility",
+      "valueModel": "enum",
+      "unit": null,
+      "default": "off",
+      "range": null,
+      "options": [
+        "off",
+        "causal"
+      ],
+      "resetValue": "off",
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-build:cursor-visibility",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "When causal, cursor visibility and normalized position exist only during source-window placement; otherwise opacity is zero.",
+      "acceptanceRow": "control:scene.the-build.cursor-visibility",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "timeline.hold.per-beat",
+      "sceneLocalId": "per-beat-hold",
+      "parameter": "per-beat-hold",
+      "owner": "Timeline",
+      "label": "Per-beat hold",
+      "valueModel": "number",
+      "unit": "ms",
+      "default": 600,
+      "range": {
+        "minimum": 420,
+        "maximum": 1600,
+        "step": 20
+      },
+      "options": null,
+      "resetValue": 600,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-build:per-beat-hold",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Recompiles named intermediate hold spans without changing their state values.",
+      "acceptanceRow": "control:timeline.hold.per-beat",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "timeline.hold.finale",
+      "sceneLocalId": "finale-hold",
+      "parameter": "finale-hold",
+      "owner": "Timeline",
+      "label": "Finale hold",
+      "valueModel": "number",
+      "unit": "ms",
+      "default": 2000,
+      "range": {
+        "minimum": 1200,
+        "maximum": 5000,
+        "step": 50
+      },
+      "options": null,
+      "resetValue": 2000,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "the-build:finale-hold",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "Changes only the resolved-hold segment duration.",
+      "acceptanceRow": "control:timeline.hold.finale",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

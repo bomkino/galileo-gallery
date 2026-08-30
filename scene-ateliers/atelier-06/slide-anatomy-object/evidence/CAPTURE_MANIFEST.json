@@ -1,0 +1,215 @@
+{
+  "canonicalTimes": [
+    0,
+    0.05,
+    0.1,
+    0.225,
+    0.35,
+    0.45,
+    0.5,
+    0.65,
+    0.775,
+    0.9,
+    0.95,
+    1
+  ],
+  "commands": [
+    "node prototype/check.cjs",
+    "CHROMIUM_BIN=<chromium> python prototype/capture.py --output ../evidence",
+    "python prototype/verify_evidence.py ../evidence"
+  ],
+  "files": [
+    {
+      "bytes": 93760,
+      "path": "DIAGNOSTICS.json",
+      "sha256": "1b06be1fabffe9e37efd9dd3fcc30d86d477ea5ecb727001b27f9c205cdf3c95"
+    },
+    {
+      "bytes": 1447,
+      "path": "README.md",
+      "sha256": "97934b447d7006557e964b98603e9de595e082d71d6d1a71507d6e0468285316"
+    },
+    {
+      "bytes": 8505,
+      "path": "REAL_SPEED_FRAMES.sha256",
+      "sha256": "57dee759f338b8a17174aaa8e6a8facdc54db1f73983276816e68809998af4f4"
+    },
+    {
+      "bytes": 5265,
+      "path": "SILHOUETTE.png",
+      "sha256": "8906a73d64ee72434937e051a116b63c5f27f0d59bd1975e2b5bd9ea7dd510bd"
+    },
+    {
+      "bytes": 191,
+      "path": "SILHOUETTE_SOURCE.json",
+      "sha256": "81137b9e562a73dc45a5ff320f61dc6770a60c1f2b50c4eed56a18f78f9591eb"
+    },
+    {
+      "bytes": 2690,
+      "path": "STORY_STATE_DIAGRAM.svg",
+      "sha256": "d972d10d03d4d7bbe57ffd0dba05bde8d87c0ddd474839fe1323f5a41d945e3b"
+    },
+    {
+      "bytes": 198769,
+      "path": "UI_JOURNEY.png",
+      "sha256": "61ee60f31440fcbf2d024bff18304645089c2183c1a045b6e9832f6e97adfd5b"
+    },
+    {
+      "bytes": 833,
+      "path": "VISUAL_INSPECTION.md",
+      "sha256": "28602d1f6c24c7b3d1202a37f9b3f3b95fdb30ff1a0271443022a4a24da35e5d"
+    },
+    {
+      "bytes": 89907,
+      "path": "alpha-composites/black.png",
+      "sha256": "eac5f69cbb563155818b19051fd48973a913e8f1f88681862062ad1c891c36c2"
+    },
+    {
+      "bytes": 99631,
+      "path": "alpha-composites/blue.png",
+      "sha256": "288519a9a50f92beadc4090a23ab91b3f5a3315c48a5243c3174945222197fe3"
+    },
+    {
+      "bytes": 106455,
+      "path": "alpha-composites/checker.png",
+      "sha256": "a7a58956a8580416ebd2ee48afebc4d4d66302f0ad7f61676f5604a9523f2f9e"
+    },
+    {
+      "bytes": 101515,
+      "path": "alpha-composites/red.png",
+      "sha256": "54d75736831fc0a24d0dcff32873710f1b3f56ea70a64f88d104dd46c7478a4a"
+    },
+    {
+      "bytes": 117246,
+      "path": "alpha-composites/straight-alpha.png",
+      "sha256": "49e04680583f5c2e2a55d3a7f45a8bf00cb3ce9acc4b19545aae7b80017b32e6"
+    },
+    {
+      "bytes": 96038,
+      "path": "alpha-composites/white.png",
+      "sha256": "ee3c609da8f7c5e7e5685a5b8fdeecf761a5ccd710c00478563e475f2bff1257"
+    },
+    {
+      "bytes": 72086,
+      "path": "canonical/00-t-0.png",
+      "sha256": "1a1bc1a11bc683f858420500675e1c90b8a471c5ba6f6c85be3f3a69e00514f2"
+    },
+    {
+      "bytes": 72086,
+      "path": "canonical/01-t-0_05.png",
+      "sha256": "1a1bc1a11bc683f858420500675e1c90b8a471c5ba6f6c85be3f3a69e00514f2"
+    },
+    {
+      "bytes": 72086,
+      "path": "canonical/02-t-0_1.png",
+      "sha256": "1a1bc1a11bc683f858420500675e1c90b8a471c5ba6f6c85be3f3a69e00514f2"
+    },
+    {
+      "bytes": 149056,
+      "path": "canonical/03-t-0_225.png",
+      "sha256": "d2089d0f5503ada5093dab7ecdb6f6f809fcbdf6c5becc134f334a2b4a1ddc71"
+    },
+    {
+      "bytes": 178857,
+      "path": "canonical/04-t-0_35.png",
+      "sha256": "59892c88eae45001f8359883133229f4465196621906a0c780be8307856e0b31"
+    },
+    {
+      "bytes": 178857,
+      "path": "canonical/05-t-0_45.png",
+      "sha256": "59892c88eae45001f8359883133229f4465196621906a0c780be8307856e0b31"
+    },
+    {
+      "bytes": 178857,
+      "path": "canonical/06-t-0_5.png",
+      "sha256": "59892c88eae45001f8359883133229f4465196621906a0c780be8307856e0b31"
+    },
+    {
+      "bytes": 178857,
+      "path": "canonical/07-t-0_65.png",
+      "sha256": "59892c88eae45001f8359883133229f4465196621906a0c780be8307856e0b31"
+    },
+    {
+      "bytes": 149056,
+      "path": "canonical/08-t-0_775.png",
+      "sha256": "d2089d0f5503ada5093dab7ecdb6f6f809fcbdf6c5becc134f334a2b4a1ddc71"
+    },
+    {
+      "bytes": 72128,
+      "path": "canonical/09-t-0_9.png",
+      "sha256": "cc7ff17541e572c63804a7c015a084dbbc81597dad0c8bf7651f7adfb0483789"
+    },
+    {
+      "bytes": 72086,
+      "path": "canonical/10-t-0_95.png",
+      "sha256": "1a1bc1a11bc683f858420500675e1c90b8a471c5ba6f6c85be3f3a69e00514f2"
+    },
+    {
+      "bytes": 72086,
+      "path": "canonical/11-t-1.png",
+      "sha256": "1a1bc1a11bc683f858420500675e1c90b8a471c5ba6f6c85be3f3a69e00514f2"
+    },
+    {
+      "bytes": 26946,
+      "path": "fixtures/explicit-many-proposal.png",
+      "sha256": "d2ea309eeadf466a011fb6d053535db6e7fe33b5ad22f28621d14de33bc93a4f"
+    },
+    {
+      "bytes": 117246,
+      "path": "fixtures/extra-three.png",
+      "sha256": "49e04680583f5c2e2a55d3a7f45a8bf00cb3ce9acc4b19545aae7b80017b32e6"
+    },
+    {
+      "bytes": 254207,
+      "path": "fixtures/failed-source.png",
+      "sha256": "04877a8f59da4de83bb6c3a702694eb9833ef3eb38e891e11131fb26832d086e"
+    },
+    {
+      "bytes": 117246,
+      "path": "fixtures/one-caption.png",
+      "sha256": "49e04680583f5c2e2a55d3a7f45a8bf00cb3ce9acc4b19545aae7b80017b32e6"
+    },
+    {
+      "bytes": 110438,
+      "path": "fixtures/one-no-caption.png",
+      "sha256": "c5a885d23bbbf8ee03920e7803b950d636841efc41d2ba1eb4e4560c0684282c"
+    },
+    {
+      "bytes": 117246,
+      "path": "fixtures/transparent-source.png",
+      "sha256": "49e04680583f5c2e2a55d3a7f45a8bf00cb3ce9acc4b19545aae7b80017b32e6"
+    },
+    {
+      "bytes": 119780,
+      "path": "fixtures/video-source.png",
+      "sha256": "3471d3a3beaed08be9e1c42601ecd2d78b4ebe2e5472295735ffca07d3eaa735"
+    },
+    {
+      "bytes": 178857,
+      "path": "ratios/16x9.png",
+      "sha256": "59892c88eae45001f8359883133229f4465196621906a0c780be8307856e0b31"
+    },
+    {
+      "bytes": 114188,
+      "path": "ratios/1x1.png",
+      "sha256": "c8ff295a546551a564b1e64a12b694ecffdbe2e51c414335b53539b43575d440"
+    },
+    {
+      "bytes": 116682,
+      "path": "ratios/4x5.png",
+      "sha256": "e6ef115a139c69dd826447ac4a3a1697692ccde7b96ab119a0d0a6ba8cbfd151"
+    },
+    {
+      "bytes": 129074,
+      "path": "ratios/9x16.png",
+      "sha256": "57e61c684a0e376e75bea644a0270114e8264f0d1853adb4fcb3b5941ac17dea"
+    },
+    {
+      "bytes": 142406,
+      "path": "slide-anatomy-real-speed.mp4",
+      "sha256": "0559922474faae5bb234b9f7278baa7fd3ad2cf48ed525213ac300ee762f4bb5"
+    }
+  ],
+  "runner": "prototype/capture.py",
+  "sceneId": "slide-anatomy-object"
+}

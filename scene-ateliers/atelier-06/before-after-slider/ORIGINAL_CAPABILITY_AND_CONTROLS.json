@@ -1,0 +1,100 @@
+{
+  "$schema": "atelier-local://scene-capability-and-controls/v1",
+  "runtime": false,
+  "sceneId": "before-after-slider",
+  "candidateVersion": "0.1",
+  "capability": {
+    "minimumItems": 2,
+    "maximumConsumedItems": 2,
+    "extraMedia": "preserved-not-consumed",
+    "transparentOutput": false,
+    "manualAccess": true,
+    "sourceVideo": "shared-project-story-time"
+  },
+  "controls": [
+    {
+      "id": "initial-split",
+      "label": "Initial split",
+      "type": "range",
+      "default": 0.18,
+      "min": 0.05,
+      "max": 0.95,
+      "step": 0.01,
+      "unit": "normalized width",
+      "resetValue": 0.18,
+      "persistence": "Scene parameter; exact decimal round-trip.",
+      "evaluatorConsequence": "Sets automatic seam/start value and reduced-motion static value; clamped inside sweep range.",
+      "renderConsequence": "Moves divider and before clip to the same scalar.",
+      "causalTest": "At t=0 and t=1, split equals the authored value; media rectangles remain unchanged."
+    },
+    {
+      "id": "sweep-range",
+      "label": "Sweep range",
+      "type": "range-pair",
+      "default": {
+        "min": 0.12,
+        "max": 0.88
+      },
+      "min": 0.04,
+      "max": 0.96,
+      "step": 0.01,
+      "unit": "normalized width",
+      "resetValue": {
+        "min": 0.12,
+        "max": 0.88
+      },
+      "persistence": "One coherent object with ordered min/max; exact decimal round-trip.",
+      "evaluatorConsequence": "Defines automatic extrema and ARIA/manual Home/End bounds.",
+      "renderConsequence": "Limits clip and handle travel without changing content rectangle.",
+      "causalTest": "Max/min holds equal exact bounds and both turnaround velocities equal zero."
+    },
+    {
+      "id": "sweep-duration",
+      "label": "Sweep duration",
+      "type": "range",
+      "default": 1400,
+      "min": 800,
+      "max": 4000,
+      "step": 50,
+      "unit": "ms per long sweep",
+      "resetValue": 1400,
+      "persistence": "Scene parameter; integer millisecond round-trip.",
+      "evaluatorConsequence": "Allocates travel segments before normalized compilation.",
+      "renderConsequence": "Changes divider speed only; holds and source state remain invariant.",
+      "causalTest": "Doubling value halves peak split velocity within tolerance while extrema remain equal."
+    },
+    {
+      "id": "turnaround-hold",
+      "label": "Turnaround hold",
+      "type": "range",
+      "default": 650,
+      "min": 300,
+      "max": 2400,
+      "step": 50,
+      "unit": "ms",
+      "resetValue": 650,
+      "persistence": "Scene parameter; integer millisecond round-trip.",
+      "evaluatorConsequence": "Sets exact zero-velocity min/max holds.",
+      "renderConsequence": "Changes dwell only; no source or handle styling changes.",
+      "causalTest": "Boundary samples remain exact extrema and hold duration changes by requested amount."
+    },
+    {
+      "id": "comparison-chrome",
+      "label": "Comparison chrome",
+      "type": "choice",
+      "default": "labels-handle",
+      "options": [
+        "labels-handle",
+        "handle",
+        "clean"
+      ],
+      "step": null,
+      "unit": null,
+      "resetValue": "labels-handle",
+      "persistence": "Scene parameter; exact string round-trip.",
+      "evaluatorConsequence": "No motion consequence; declares presentation visibility state.",
+      "renderConsequence": "Shows labels and handle, handle only, or divider only.",
+      "causalTest": "DOM visibility matches option while split and source hashes remain identical."
+    }
+  ]
+}
