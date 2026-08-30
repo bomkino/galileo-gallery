@@ -218,8 +218,8 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
             const callbackId = frameVideo.requestVideoFrameCallback((_now, metadata) => {
                 if (frameCallbackRef.current === callbackId) frameCallbackRef.current = null
                 if (!isCurrent()) return
-                if (!seekComplete) return
                 if (Number.isFinite(metadata.mediaTime)) presentedMediaTime = metadata.mediaTime
+                if (!seekComplete) return
                 finishFrame("presented")
             })
             frameCallbackRef.current = callbackId
@@ -229,8 +229,13 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
             if (!isCurrent()) return
             seekComplete = true
             if (prewarmRef.current && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+                cancelFrameConfirmation(video)
                 presentedMediaTime = video.currentTime
                 finishFrame("decoded")
+                return
+            }
+            if (Number.isFinite(presentedMediaTime)) {
+                finishFrame("presented")
                 return
             }
             if (!frameVideo.requestVideoFrameCallback) {
@@ -256,6 +261,7 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
         video.addEventListener("seeked", onSeeked, { once: true })
         seekCleanupRef.current = () => video.removeEventListener("seeked", onSeeked)
         video.currentTime = operation.target
+        if (frameCallbackRef.current === null) armFrameCallback()
     }, [cancelFrameConfirmation, fps, restorePlaybackRate, schedulePump])
     const startSeek = React.useCallback((video: HTMLVideoElement, request: VideoTarget) => {
         if (activeRef.current || loadedSourceRef.current !== request.source || ref.current !== video) return
