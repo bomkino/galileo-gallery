@@ -394,6 +394,21 @@ async function setRange(window, label, value) {
     await settle(window)
 }
 
+async function setCanvasDimensions(window, width, height) {
+    for (const [label, value] of [["Width", width], ["Height", height]]) {
+        await window.webContents.executeJavaScript(`(() => {
+            const field = [...document.querySelectorAll('.canvas-dimensions label')].find((candidate) => candidate.querySelector('span')?.textContent.trim() === ${JSON.stringify(label)})
+            const input = field?.querySelector('input[type="number"]')
+            if (!input) throw new Error('Missing canvas dimension: ${label}')
+            const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
+            setter.call(input, ${JSON.stringify(String(value))})
+            input.dispatchEvent(new Event('input', { bubbles: true }))
+            input.dispatchEvent(new Event('change', { bubbles: true }))
+        })()`)
+        await settle(window)
+    }
+}
+
 async function chooseSegment(window, label, option) {
     await window.webContents.executeJavaScript(`(() => {
         const row = [...document.querySelectorAll('.playback-direction')].find((candidate) => candidate.querySelector(':scope > span')?.textContent.trim() === ${JSON.stringify(label)})
@@ -870,6 +885,11 @@ const sceneExpression = `(() => {
             height: box.height / stageBox.height,
         }
     }
+    const placard = stage.querySelector('.vitrine-placard')
+    const placardLabel = placard?.querySelector('span')
+    const placardCaption = placard?.querySelector('strong')
+    const placardStyle = placard ? getComputedStyle(placard) : null
+    const minimumLogicalDimension = Math.min(logicalWidth, logicalHeight)
     return {
         scene: stage.dataset.productScene,
         version: Number(stage.dataset.sceneVersion),
@@ -941,8 +961,22 @@ const sceneExpression = `(() => {
                 failed: Boolean(plane.querySelector('[data-media-failed="true"]')),
             }
         }),
-        placard: stage.querySelector('.vitrine-placard')?.dataset.mediaId ?? null,
-        placardBox: stage.querySelector('.vitrine-placard') ? normalizedBox(stage.querySelector('.vitrine-placard')) : null,
+        placard: placard?.dataset.mediaId ?? null,
+        placardBox: placard ? normalizedBox(placard) : null,
+        placardChildren: placardLabel && placardCaption ? {
+            label: normalizedBox(placardLabel),
+            caption: normalizedBox(placardCaption),
+        } : null,
+        placardMetrics: placard && placardLabel && placardCaption && placardStyle ? {
+            labelFont: parseFloat(getComputedStyle(placardLabel).fontSize) / minimumLogicalDimension,
+            captionFont: parseFloat(getComputedStyle(placardCaption).fontSize) / minimumLogicalDimension,
+            gap: parseFloat(placardStyle.columnGap) / minimumLogicalDimension,
+            paddingTop: parseFloat(placardStyle.paddingTop) / minimumLogicalDimension,
+            paddingRight: parseFloat(placardStyle.paddingRight) / minimumLogicalDimension,
+            paddingBottom: parseFloat(placardStyle.paddingBottom) / minimumLogicalDimension,
+            paddingLeft: parseFloat(placardStyle.paddingLeft) / minimumLogicalDimension,
+            border: parseFloat(placardStyle.borderTopWidth) / minimumLogicalDimension,
+        } : null,
         status: stage.querySelector('[role="status"]')?.textContent.trim() ?? null,
         background: getComputedStyle(stage).backgroundColor,
     }
@@ -968,6 +1002,26 @@ function normalizedParity(left, right, tolerance = 0.006) {
         }
     }
     return true
+}
+
+function normalizedBoxParity(left, right, tolerance = 0.006) {
+    return Boolean(left && right && ["left", "top", "width", "height"].every((key) => Math.abs(left[key] - right[key]) <= tolerance))
+}
+
+function placardChildrenContained(scene, tolerance = 0.001) {
+    if (!scene?.placardBox || !scene?.placardChildren) return false
+    return Object.values(scene.placardChildren).every((box) => box.left >= scene.placardBox.left - tolerance
+        && box.top >= scene.placardBox.top - tolerance
+        && box.left + box.width <= scene.placardBox.left + scene.placardBox.width + tolerance
+        && box.top + box.height <= scene.placardBox.top + scene.placardBox.height + tolerance)
+}
+
+function normalizedPlacardParity(left, right, tolerance = 0.0001) {
+    return Boolean(left?.placard && left.placard === right?.placard && normalizedBoxParity(left.placardBox, right.placardBox)
+        && left.placardChildren && right.placardChildren
+        && Object.keys(left.placardChildren).every((key) => normalizedBoxParity(left.placardChildren[key], right.placardChildren[key]))
+        && left.placardMetrics && right.placardMetrics
+        && Object.keys(left.placardMetrics).every((key) => Math.abs(left.placardMetrics[key] - right.placardMetrics[key]) <= tolerance))
 }
 
 function observeExportFrames(targetFrames) {
@@ -1212,7 +1266,7 @@ async function causalControls(window) {
     assert(placard.placard && placard.placardBox && placard.placardBox.width > 0 && placard.placardBox.height > 0)
     if (placard.placardBox.left < -0.001 || placard.placardBox.top < -0.001
         || placard.placardBox.left + placard.placardBox.width > 1.001 || placard.placardBox.top + placard.placardBox.height > 1.001
-        || placard.placardBox.width > 0.7 || placard.placardBox.height > 0.22) throw new Error("G11 Placard escaped or overwhelmed the Project canvas.")
+        || placard.placardBox.width > 0.55 || placard.placardBox.height > 0.22) throw new Error("G11 Placard escaped or overwhelmed the Project canvas.")
     assertSamePose(baseline, placard)
     await chooseSegment(window, "Placard", "Clean")
 
@@ -1602,9 +1656,32 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         if (Math.abs(sample.stage.perspective / sample.stage.logicalWidth - 1.46) > 0.0001) throw new Error("Vitrine perspective is not Project-canvas relative.")
         if (Math.abs(sample.stage.visualWidth / sample.stage.clientWidth - scale / 100) > 0.035) throw new Error("Interface Scale visual/logical geometry is wrong.")
         if (!normalizedParity(exchange, sample)) throw new Error("Interface Scale changed normalized Vitrine geometry.")
+        if (sample.placard !== exchange.placard || !normalizedBoxParity(exchange.placardBox, sample.placardBox)) throw new Error("Interface Scale changed normalized Vitrine Placard geometry.")
     }
     await setScale(window, 105)
     await setScale(window, 100)
+    if (!placardChildrenContained(exchange)) throw new Error("Vitrine Placard content escaped its frame at fixture resolution.")
+
+    await clickText(window, ".inspector-top button", "Export")
+    await until(window, "document.querySelector('.canvas-dimensions')", "custom canvas dimensions")
+    await setCanvasDimensions(window, 7_680, 5_120)
+    await scrub(window, 0.375)
+    const maximumCanvas = await readScene(window)
+    if (maximumCanvas.stage.logicalWidth !== 7_680 || maximumCanvas.stage.logicalHeight !== 5_120
+        || !normalizedParity(exchange, maximumCanvas) || !normalizedPlacardParity(exchange, maximumCanvas)
+        || !placardChildrenContained(maximumCanvas)) {
+        throw new Error("Vitrine Placard lost normalized Project-canvas geometry at maximum resolution.")
+    }
+    await setCanvasDimensions(window, 96, 64)
+    await scrub(window, 0.375)
+    const restoredCanvas = await readScene(window)
+    if (restoredCanvas.stage.logicalWidth !== 96 || restoredCanvas.stage.logicalHeight !== 64
+        || !normalizedParity(exchange, restoredCanvas) || !normalizedPlacardParity(exchange, restoredCanvas)
+        || !placardChildrenContained(restoredCanvas)) {
+        throw new Error("Vitrine Placard did not restore exact fixture-resolution geometry.")
+    }
+    const canvasResolutionEvidence = { fixture: exchange, maximum: maximumCanvas, restored: restoredCanvas }
+    await clickText(window, ".inspector-top button", "Look")
     const presentationFinal = await presentationState(window)
 
     const designTruth = await window.webContents.executeJavaScript(`({
@@ -1720,7 +1797,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         },
         presentation: { initial: presentationInitial, final: presentationFinal },
         preview: { holdA, exchange, semanticHandoff, holdB, terminalVideo, continuousVideoHandoff, sourceVideoSeekBurst, reducedTransport, scales: scaleEvidence, cleanAlpha: cleanAlphaPreview, reducedMotionExpected: mode === "reopen" },
-        controls: { causal: controlEvidence, interaction: interactionEvidence, libraryKeyboard, decoderEvidence, targets: targetEvidence, design: { ...designTruth, keyboard: backgroundKeyboard }, expert: expertTruth, presets: presetTruth, blockedAlpha: blockedAlphaTruth, formats: formatTruth },
+        controls: { causal: controlEvidence, interaction: interactionEvidence, libraryKeyboard, decoderEvidence, targets: targetEvidence, canvasResolutions: canvasResolutionEvidence, design: { ...designTruth, keyboard: backgroundKeyboard }, expert: expertTruth, presets: presetTruth, blockedAlpha: blockedAlphaTruth, formats: formatTruth },
         export: { placardVisible: false, probes: exportProbes, manifestSha256: sha256(manifestBytes), frameHashes: manifest.frames.map((frame) => frame.sha256), artwork },
         screenshots,
     }

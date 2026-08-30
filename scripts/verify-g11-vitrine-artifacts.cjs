@@ -238,7 +238,7 @@ for (const [index, receipt] of receipts.entries()) {
         const placardBox = receipt.controls.causal.placard.placardBox
         assert(placardBox.left >= -0.001 && placardBox.top >= -0.001
             && placardBox.left + placardBox.width <= 1.001 && placardBox.top + placardBox.height <= 1.001
-            && placardBox.width > 0 && placardBox.width <= 0.7 && placardBox.height > 0 && placardBox.height <= 0.22)
+            && placardBox.width > 0 && placardBox.width <= 0.55 && placardBox.height > 0 && placardBox.height <= 0.22)
         assert.deepEqual(receipt.controls.causal.restoredRhythm, { exchangeMs: 1_760, holdMs: 3_740 })
         assert.deepEqual(receipt.controls.causal.compactExportRhythm, { exchangeMs: 320, holdMs: 680 })
         assert.deepEqual(receipt.controls.causal.compactExportTimeline, { mode: "fixed-duration", fixedDurationMs: 2_000, activeOption: "Fixed", exactDurationMs: 2_000 })
@@ -331,6 +331,28 @@ for (const [index, receipt] of receipts.entries()) {
         assert(Math.abs(sample.stage.visualWidth / sample.stage.clientWidth - scale / 100) < 0.035)
         assert.equal(receipt.controls.targets[scale].length, 5)
         for (const target of receipt.controls.targets[scale]) assert(target.width >= 43.75 && target.height >= 43.75)
+        assert.equal(sample.placard, receipt.preview.exchange.placard)
+        for (const key of ["left", "top", "width", "height"]) assert(Math.abs(sample.placardBox[key] - receipt.preview.exchange.placardBox[key]) <= 0.006)
+    }
+    const canvasResolutions = receipt.controls.canvasResolutions
+    assert.deepEqual(Object.keys(canvasResolutions), ["fixture", "maximum", "restored"])
+    assert.deepEqual([canvasResolutions.fixture.stage.logicalWidth, canvasResolutions.fixture.stage.logicalHeight], [96, 64])
+    assert.deepEqual([canvasResolutions.maximum.stage.logicalWidth, canvasResolutions.maximum.stage.logicalHeight], [7_680, 5_120])
+    assert.deepEqual([canvasResolutions.restored.stage.logicalWidth, canvasResolutions.restored.stage.logicalHeight], [96, 64])
+    for (const sample of [canvasResolutions.fixture, canvasResolutions.maximum, canvasResolutions.restored]) {
+        assert.equal(sample.placard, receipt.preview.exchange.placard)
+        for (const child of Object.values(sample.placardChildren)) {
+            assert(child.left >= sample.placardBox.left - 0.001 && child.top >= sample.placardBox.top - 0.001)
+            assert(child.left + child.width <= sample.placardBox.left + sample.placardBox.width + 0.001)
+            assert(child.top + child.height <= sample.placardBox.top + sample.placardBox.height + 0.001)
+        }
+    }
+    for (const sample of [canvasResolutions.maximum, canvasResolutions.restored]) {
+        for (const key of ["left", "top", "width", "height"]) assert(Math.abs(sample.placardBox[key] - canvasResolutions.fixture.placardBox[key]) <= 0.006)
+        for (const childKey of ["label", "caption"]) {
+            for (const key of ["left", "top", "width", "height"]) assert(Math.abs(sample.placardChildren[childKey][key] - canvasResolutions.fixture.placardChildren[childKey][key]) <= 0.006)
+        }
+        for (const key of Object.keys(canvasResolutions.fixture.placardMetrics)) assert(Math.abs(sample.placardMetrics[key] - canvasResolutions.fixture.placardMetrics[key]) <= 0.0001)
     }
     assert.equal(receipt.controls.design.motionGrid, false)
     assert.equal(receipt.controls.design.backgroundGroup, "Room background")
