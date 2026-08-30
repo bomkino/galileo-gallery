@@ -938,7 +938,7 @@ const sceneExpression = `(() => {
             designHeight,
             projectScale,
             viewportPerspective: parseFloat(logicalStyle.perspective),
-            perspective: parseFloat(logicalStyle.perspective) * logicalWidth / logical.clientWidth,
+            perspective: parseFloat(logicalStyle.perspective) * logicalWidth / stage.clientWidth,
         },
         planes: [...stage.querySelectorAll('.vitrine-plane')].map((plane) => {
             const media = plane.querySelector('.vitrine-media')
@@ -1708,7 +1708,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         screenshots[`scale${scale}`] = await capture(window, evidenceRoot, `vitrine-${mode}-scale-${scale}`)
         const sample = scaleEvidence[scale]
         if (sample.currentId !== exchange.currentId || sample.incomingId !== exchange.incomingId) throw new Error("Interface Scale changed Vitrine semantics.")
-        if (Math.abs(sample.stage.perspective / sample.stage.logicalWidth - 1.46) > 0.0001) throw new Error("Vitrine perspective is not Project-canvas relative.")
+        if (Math.abs(sample.stage.perspective / sample.stage.logicalWidth - 1.46) > 0.0001) throw new Error(`Vitrine perspective is not Project-canvas relative: ${JSON.stringify({ scale, stage: sample.stage, ratio: sample.stage.perspective / sample.stage.logicalWidth })}`)
         if (Math.abs(sample.stage.visualWidth / sample.stage.clientWidth - scale / 100) > 0.035) throw new Error("Interface Scale visual/logical geometry is wrong.")
         if (!normalizedParity(exchange, sample)) throw new Error("Interface Scale changed normalized Vitrine geometry.")
         if (sample.placard !== exchange.placard || !normalizedBoxParity(exchange.placardBox, sample.placardBox)) throw new Error("Interface Scale changed normalized Vitrine Placard geometry.")
