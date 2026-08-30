@@ -36,4 +36,9 @@ assert.deepEqual(exportCycleClock(vitrineRepeat, 999), { timeMs: 999, durationMs
 assert.deepEqual(exportCycleClock(vitrineRepeat, 1_000), { timeMs: 0, durationMs: 1_000, terminal: true })
 assert.deepEqual(exportCycleClock(vitrineRepeat, 2_599), { timeMs: 599, durationMs: 1_000, terminal: true })
 
+const shelfRepeat = { ...request, config: { styleId: "the-shelf", sceneVersion: 2, settings: { playKind: "repeat", repeatCount: 3 } } }
+assert.deepEqual(exportCycleClock(shelfRepeat, 0), { timeMs: 0, durationMs: 1_000, terminal: true })
+assert.deepEqual(exportCycleClock(shelfRepeat, 1_000), { timeMs: 0, durationMs: 1_000, terminal: true })
+assert.deepEqual(exportCycleClock(shelfRepeat, 2_599), { timeMs: 599, durationMs: 1_000, terminal: true })
+
 console.log("Verified: frozen repeat/finale export clocks preserve cycle, terminal pose, and preview parity boundaries.")

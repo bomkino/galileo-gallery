@@ -6,6 +6,7 @@ const SNAPSHOT_ID = /^[a-f0-9]{32}$/
 const DESTINATION_GRANT = /^[a-f0-9]{64}$/
 const MAX_DECODED_VIDEO_BYTES = 2 * 1024 * 1024 * 1024
 const MAX_VITRINE_DURATION_MS = 24 * 60 * 60 * 1000
+const MAX_SHELF_DURATION_MS = 24 * 60 * 60 * 1000
 const CANVAS_PRESET_DIMENSIONS = Object.freeze({
     fullHD: Object.freeze([1920, 1080]),
     fourK: Object.freeze([3840, 2160]),
@@ -82,7 +83,7 @@ function safeFocal(value) {
     return { x: value.x, y: value.y }
 }
 
-function safeItem(item, ids) {
+function safeItem(item, ids, sceneId, settings) {
     if (!onlyAllowedKeys(item, ITEM_KEYS)
         || !safeText(item.id, 200, /^[^/\\\u0000-\u001f]+$/) || ids.has(item.id)
         || !safeText(item.name, 512, /^[^/\\\u0000-\u001f]+$/)
@@ -94,6 +95,9 @@ function safeItem(item, ids) {
         || !["contain", "cover"].includes(item.fit ?? "contain")
         || (item.caption !== undefined && (typeof item.caption !== "string" || item.caption.length > 4_000))
         || typeof item.spotlight !== "boolean" || typeof item.muted !== "boolean") throw new HostPortError("invalid_request")
+    if (sceneId === "the-shelf" && (item.aspectMode !== "auto" || !finiteNumber(item.ratio, 0.2, 4))) {
+        throw new HostPortError("invalid_request")
+    }
     ids.add(item.id)
     return {
         id: item.id,
@@ -104,7 +108,7 @@ function safeItem(item, ids) {
         aspectMode: item.aspectMode ?? "auto",
         ratioW: item.ratioW ?? 16,
         ratioH: item.ratioH ?? 9,
-        fit: item.fit ?? "contain",
+        fit: item.fit ?? (sceneId === "the-shelf" ? settings.imageFit : "contain"),
         crop: safeCrop(item.crop),
         focal: safeFocal(item.focal),
         ...(item.caption ? { caption: item.caption } : {}),
@@ -163,6 +167,26 @@ function safeSettings(settings, sceneId) {
         const centerBump = settings.centerBump ?? 0
         if (!finiteNumber(paceMs, 180, 4_000) || !finiteNumber(slideHeight, 24, 78) || !finiteNumber(gap, 0, 240) || !finiteNumber(centerBump, 0, 40)) throw new HostPortError("invalid_request")
         return { ...common, paceMs, slideHeight, gap, centerBump }
+    }
+    if (sceneId === "the-shelf") {
+        const paceMs = settings.paceMs
+        const slideHeight = settings.slideHeight
+        const gap = settings.gap
+        const tilt = settings.tilt
+        const centerBump = settings.centerBump
+        const theme = settings.theme
+        if (!integer(settings.canvasWidth, 64, 7_680) || !integer(settings.canvasHeight, 64, 7_680)
+            || !["contain", "cover"].includes(settings.imageFit) || typeof settings.loopVideos !== "boolean"
+            || settings.axis !== "horizontal" || settings.ratioMode !== "auto"
+            || !["forward", "reverse"].includes(settings.direction)
+            || !["once", "repeat", "loop"].includes(settings.playKind) || !integer(settings.repeatCount, 1, 1_000)
+            || !finiteNumber(paceMs, 180, 8_000) || !finiteNumber(slideHeight, 28, 58)
+            || !finiteNumber(gap, 8, 120) || !finiteNumber(tilt, 0, 6) || !finiteNumber(centerBump, 3, 14)
+            || typeof settings.spotlightsEnabled !== "boolean" || typeof settings.finaleEnabled !== "boolean"
+            || !["dark", "light"].includes(theme) || !["solid", "transparent"].includes(backgroundStyle)) {
+            throw new HostPortError("invalid_request")
+        }
+        return { ...common, paceMs, slideHeight, gap, tilt, centerBump, spotlightsEnabled: settings.spotlightsEnabled, finaleEnabled: settings.finaleEnabled, theme }
     }
     const transitionDirection = settings.transitionDirection
     const holdMs = settings.holdMs
@@ -263,17 +287,95 @@ function validatedVitrineClock(config) {
     return { cycleDurationMs, finalCycleDurationMs, durationMs }
 }
 
+function automaticShelfDuration(mediaCount, paceMs) {
+    return Math.min(42_000, Math.max(8_000, Math.max(1, mediaCount) * paceMs))
+}
+
+function validatedShelfClock(config) {
+    const settings = config.settings
+    if (!settings || settings.axis !== "horizontal" || settings.ratioMode !== "auto"
+        || !["forward", "reverse"].includes(settings.direction)
+        || !["contain", "cover"].includes(settings.imageFit)
+        || !["once", "repeat", "loop"].includes(settings.playKind)
+        || !integer(settings.repeatCount, 1, 1_000)
+        || typeof settings.loopVideos !== "boolean"
+        || typeof settings.spotlightsEnabled !== "boolean"
+        || typeof settings.finaleEnabled !== "boolean"
+        || !["dark", "light"].includes(settings.theme)
+        || !["solid", "transparent"].includes(settings.backgroundStyle)
+        || !finiteNumber(settings.slideHeight, 28, 58)
+        || !finiteNumber(settings.gap, 8, 120)
+        || !finiteNumber(settings.tilt, 0, 6)
+        || !finiteNumber(settings.centerBump, 3, 14)
+        || !finiteNumber(settings.paceMs, 180, 8_000)) throw new HostPortError("invalid_request")
+    for (const item of config.items) {
+        if (item.aspectMode !== "auto" || !finiteNumber(item.ratio, 0.2, 4)
+            || !["contain", "cover"].includes(item.fit)
+            || typeof item.spotlight !== "boolean" || typeof item.muted !== "boolean") {
+            throw new HostPortError("invalid_request")
+        }
+    }
+    const spotlightMarkers = config.items.filter((item) => item.spotlight)
+    if (spotlightMarkers.length > 1 || spotlightMarkers.some((item) => item.muted)
+        || (settings.spotlightsEnabled && spotlightMarkers.length !== 1)
+        || (!settings.spotlightsEnabled && spotlightMarkers.length !== 0)) throw new HostPortError("invalid_request")
+
+    const baseCycleMs = automaticShelfDuration(config.items.length, settings.paceMs)
+    const mode = config.timelineMode ?? "automatic"
+    const fixedDurationMs = config.timelineFixedDurationMs ?? 0
+    const segments = config.timelineSegments ?? []
+    if (!["automatic", "fixed-duration", "directed"].includes(mode) || !Array.isArray(segments)) throw new HostPortError("invalid_request")
+    let cycleDurationMs
+    if (mode === "automatic") {
+        if (fixedDurationMs !== 0 || segments.length !== 0) throw new HostPortError("invalid_request")
+        cycleDurationMs = baseCycleMs
+    } else if (mode === "fixed-duration") {
+        if (!finiteNumber(fixedDurationMs, 1_000, MAX_SHELF_DURATION_MS) || segments.length !== 0) throw new HostPortError("invalid_request")
+        cycleDurationMs = fixedDurationMs
+    } else {
+        if (fixedDurationMs !== 0 || segments.length < 1 || segments.length > 64) throw new HostPortError("invalid_request")
+        const ids = new Set()
+        cycleDurationMs = 0
+        for (const segment of segments) {
+            if (!ownExact(segment, ["id", "kind", "cycles", "paceScale", "durationMs"])
+                || !safeText(segment.id, 120, /^[a-z0-9]+(?:-[a-z0-9]+)*$/) || ids.has(segment.id)
+                || !["cycle", "hold"].includes(segment.kind)
+                || !integer(segment.cycles, 0, 1_000)
+                || !finiteNumber(segment.paceScale, 0.05, 20)
+                || !finiteNumber(segment.durationMs, 0, MAX_SHELF_DURATION_MS)
+                || (segment.kind === "cycle" && segment.cycles < 1)
+                || (segment.kind === "hold" && segment.cycles !== 0)) throw new HostPortError("invalid_request")
+            ids.add(segment.id)
+            const durationMs = segment.durationMs > 0
+                ? segment.durationMs
+                : segment.kind === "hold"
+                    ? Math.max(250, settings.paceMs)
+                    : baseCycleMs * segment.cycles / segment.paceScale
+            if (!finiteNumber(durationMs, 1, MAX_SHELF_DURATION_MS)) throw new HostPortError("invalid_request")
+            cycleDurationMs += durationMs
+        }
+        if (!finiteNumber(cycleDurationMs, 1, MAX_SHELF_DURATION_MS)) throw new HostPortError("invalid_request")
+    }
+    const finalCycleDurationMs = cycleDurationMs
+    const durationMs = settings.playKind === "repeat" ? cycleDurationMs * settings.repeatCount : cycleDurationMs
+    if (!finiteNumber(durationMs, 1, MAX_SHELF_DURATION_MS)) throw new HostPortError("invalid_request")
+    return { cycleDurationMs, finalCycleDurationMs, durationMs }
+}
+
 function validatedScene(config) {
     if (!config || typeof config !== "object" || Array.isArray(config) || config.schemaVersion !== 2) throw new HostPortError("unsupported_capability")
     if (!plainRecord(config)) throw new HostPortError("invalid_request")
     const version = config.sceneVersion ?? 1
-    const supported = (config.styleId === "quiet-carousel" && version === 1) || (config.styleId === "vitrine" && version === 2)
+    const supported = (config.styleId === "quiet-carousel" && version === 1)
+        || (config.styleId === "vitrine" && version === 2)
+        || (config.styleId === "the-shelf" && version === 2)
     if (!supported) throw new HostPortError("unsupported_capability")
     if (!onlyAllowedKeys(config, CONFIG_KEYS)) throw new HostPortError("invalid_request")
-    const maximumItems = config.styleId === "vitrine" ? 127 : 256
+    const maximumItems = ["vitrine", "the-shelf"].includes(config.styleId) ? 127 : 256
     if (!Array.isArray(config.items) || config.items.length < 1 || config.items.length > maximumItems) throw new HostPortError("invalid_request")
+    const settings = safeSettings(config.settings, config.styleId)
     const ids = new Set()
-    const items = config.items.map((item) => safeItem(item, ids))
+    const items = config.items.map((item) => safeItem(item, ids, config.styleId, settings))
     const timelineMode = config.timelineMode ?? "automatic"
     const timelineFixedDurationMs = config.timelineFixedDurationMs ?? 0
     const timelineSegments = safeTimelineSegments(config.timelineSegments)
@@ -283,13 +385,16 @@ function validatedScene(config) {
         styleId: config.styleId,
         ...(version === 1 ? {} : { sceneVersion: version }),
         items,
-        settings: safeSettings(config.settings, config.styleId),
+        settings,
         timelineMode,
         timelineFixedDurationMs,
         timelineSegments,
     }
     if (config.styleId === "vitrine") {
         return { id: config.styleId, version, clock: validatedVitrineClock(safeConfig), config: safeConfig }
+    }
+    if (config.styleId === "the-shelf") {
+        return { id: config.styleId, version, clock: validatedShelfClock(safeConfig), config: safeConfig }
     }
     return { id: config.styleId, version, config: safeConfig }
 }
@@ -316,6 +421,7 @@ function reachableVideoIndexes(config) {
 function createPngFramesSnapshot(intent, randomBytes = crypto.randomBytes) {
     if (!ownExact(intent, ["config", "width", "height", "fps", "durationMs", "cycleDurationMs", "finalCycleDurationMs", "transparent"])) throw new HostPortError("invalid_request")
     const scene = validatedScene(intent.config)
+    if (scene.id === "the-shelf" && scene.config.items.some((item) => item.type === "video")) throw new HostPortError("unsupported_capability")
     if (!integer(intent.width, 64, 7680) || !integer(intent.height, 64, 7680) || !integer(intent.fps, 1, 120)
         || typeof intent.durationMs !== "number" || !Number.isFinite(intent.durationMs) || intent.durationMs < 1 || intent.durationMs > 24 * 60 * 60 * 1000
         || typeof intent.cycleDurationMs !== "number" || !Number.isFinite(intent.cycleDurationMs) || intent.cycleDurationMs < 1 || intent.cycleDurationMs > intent.durationMs
@@ -326,7 +432,9 @@ function createPngFramesSnapshot(intent, randomBytes = crypto.randomBytes) {
         || intent.finalCycleDurationMs !== scene.clock.finalCycleDurationMs)) throw new HostPortError("invalid_request")
     if (intent.width !== scene.config.settings.canvasWidth || intent.height !== scene.config.settings.canvasHeight) throw new HostPortError("invalid_request")
     if (intent.transparent !== (scene.config.settings.backgroundStyle === "transparent")) throw new HostPortError("invalid_request")
-    const frameCount = Math.max(1, Math.round(intent.durationMs * intent.fps / 1000))
+    const frameCount = Math.max(1, scene.id === "the-shelf"
+        ? Math.ceil(intent.durationMs * intent.fps / 1000)
+        : Math.round(intent.durationMs * intent.fps / 1000))
     if (frameCount > 216_000 || intent.width * intent.height * frameCount > 100_000_000_000) throw new HostPortError("resource_limit")
     if (scene.id !== "vitrine") {
         const videoCount = reachableVideoIndexes(scene.config).length
@@ -365,8 +473,9 @@ function pngFramesCapabilities() {
             alpha: true,
             audio: false,
             sceneVersions: Object.freeze([
-                Object.freeze({ id: "quiet-carousel", versions: Object.freeze([1]) }),
-                Object.freeze({ id: "vitrine", versions: Object.freeze([2]) }),
+                Object.freeze({ id: "quiet-carousel", versions: Object.freeze([1]), video: true }),
+                Object.freeze({ id: "vitrine", versions: Object.freeze([2]), video: true }),
+                Object.freeze({ id: "the-shelf", versions: Object.freeze([2]), video: false }),
             ]),
             consequence: "PNG Frames preserve straight alpha when requested and never contain audio; Project audio intent is unchanged.",
         })]),

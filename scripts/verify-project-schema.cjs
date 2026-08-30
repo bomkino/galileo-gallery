@@ -104,19 +104,24 @@ function audioFixture(presenterPath, soundtrackPath) {
 async function expectFailure(code, archivePath, roots, priorProject) {
     const beforeBytes = fs.readFileSync(archivePath)
     let currentProject = priorProject
+    let mediaAuthorityCalls = 0
     await assert.rejects(
         async () => {
             const opened = await openPortableProjectArchive({
                 sourcePath: archivePath,
                 stagingParent: roots.staging,
                 openedProjectsRoot: roots.opened,
-                mediaURLFromPath: (filePath) => filePath,
+                mediaURLFromPath: (filePath) => {
+                    mediaAuthorityCalls += 1
+                    return filePath
+                },
             })
             currentProject = opened.config
         },
         (error) => error?.code === code
     )
     assert.strictEqual(currentProject, priorProject, `${code} replaced the prior Project`)
+    assert.equal(mediaAuthorityCalls, 0, `${code} reached promoted-media authority`)
     assert.deepEqual(fs.readFileSync(archivePath), beforeBytes, `${code} changed the source archive`)
     assert.deepEqual(fs.existsSync(roots.staging) ? fs.readdirSync(roots.staging) : [], [], `${code} left staging residue`)
 }
@@ -329,6 +334,186 @@ async function run() {
         assert.throws(() => validatePortableProject(prototypeName), (error) => error?.code === "scene_invalid")
         const customPrototype = Object.assign(Object.create({ inherited: true }), structuredClone(vitrineSaved.project))
         assert.throws(() => validatePortableProject(customPrototype), (error) => error?.code === "manifest_invalid")
+
+        const shelfConfig = {
+            ...config,
+            styleId: "the-shelf",
+            sceneVersion: 2,
+            items: config.items.map((item, index) => ({
+                ...item,
+                aspectMode: "auto",
+                ratioW: index === 0 ? 4 : 9,
+                ratioH: index === 0 ? 3 : 16,
+                fit: index === 0 ? "cover" : "contain",
+                crop: index === 0
+                    ? { x: 0.1, y: 0, width: 0.8, height: 1 }
+                    : { x: 0, y: 0.2, width: 1, height: 0.6 },
+                focal: index === 0 ? { x: 0.25, y: 0.4 } : { x: 0.75, y: 0.6 },
+                spotlight: false,
+            })),
+            settings: {
+                ...config.settings,
+                ratioMode: "auto",
+                axis: "horizontal",
+                direction: "forward",
+                playKind: "loop",
+                repeatCount: 1,
+                slideHeight: 42,
+                gap: 34,
+                tilt: 2.5,
+                centerBump: 8,
+                paceMs: 1_650,
+                imageFit: "contain",
+                spotlightsEnabled: false,
+                finaleEnabled: true,
+                theme: "dark",
+                backgroundStyle: "solid",
+            },
+        }
+        const shelfPath = path.join(root, "shelf-v2.galileo")
+        const shelfSaved = await savePortableProjectArchive({ config: shelfConfig, outputPath: shelfPath, tempRoot: root, mediaPathFromURL: (url) => url })
+        assert.deepEqual(shelfSaved.project.scene, { id: "the-shelf", version: 2, parameters: shelfSaved.project.scene.parameters })
+        assert.deepEqual(shelfSaved.project.media.map((entry) => entry.id), shelfConfig.items.map((item) => item.id), "Shelf media order must remain Project order")
+        assert.deepEqual(shelfSaved.project.media.map((entry) => entry.sha256), mediaPaths.map((file) => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex")))
+        assert.deepEqual(shelfSaved.project.media.map((entry) => entry.frame), shelfConfig.items.map((item) => ({
+            ratio: item.ratio, aspectMode: "auto", ratioW: item.ratioW, ratioH: item.ratioH,
+            fit: item.fit, crop: item.crop, focal: item.focal, caption: item.caption ?? "", spotlight: false, muted: item.muted,
+        })), "Shelf v2 must preserve ordered natural-ratio frame and fit/crop/focal intent")
+        assert.equal(shelfSaved.project.canvas.ratioMode, "auto")
+        assert.equal(shelfSaved.project.timeline.axis, "horizontal")
+        assert.equal(shelfSaved.project.look.parameters.theme, "dark")
+
+        const cropInvariant = structuredClone(shelfSaved.project)
+        Object.assign(cropInvariant.media[0].frame, { ratio: 4, crop: { x: 0.8, y: 0, width: 0.2, height: 1 } })
+        assert.equal(validatePortableProject(cropInvariant).media[0].frame.ratio, 4, "Shelf crop must not alter or rescue natural-ratio plane geometry")
+        for (const ratio of [0.2, 4]) {
+            const boundary = structuredClone(shelfSaved.project)
+            boundary.media[0].frame.ratio = ratio
+            assert.equal(validatePortableProject(boundary).media[0].frame.ratio, ratio)
+        }
+
+        const fixedShelf = structuredClone(shelfSaved.project)
+        Object.assign(fixedShelf.timeline, { mode: "fixed-duration", fixedDurationMs: 1_000, segments: [], playKind: "once" })
+        assert.equal(validatePortableProject(fixedShelf).timeline.fixedDurationMs, 1_000)
+        const transparentLightReverseShelf = structuredClone(shelfSaved.project)
+        transparentLightReverseShelf.look.id = "gallery-look.transparent"
+        Object.assign(transparentLightReverseShelf.look.parameters, { backgroundStyle: "transparent", theme: "light" })
+        transparentLightReverseShelf.timeline.direction = "reverse"
+        assert.equal(validatePortableProject(transparentLightReverseShelf).timeline.direction, "reverse")
+        const maximumFixedShelf = structuredClone(fixedShelf)
+        maximumFixedShelf.timeline.fixedDurationMs = 24 * 60 * 60 * 1_000
+        assert.equal(validatePortableProject(maximumFixedShelf).timeline.fixedDurationMs, 24 * 60 * 60 * 1_000)
+        const directedShelf = structuredClone(shelfSaved.project)
+        Object.assign(directedShelf.timeline, {
+            mode: "directed",
+            fixedDurationMs: 0,
+            segments: [
+                { id: "walk-twice", kind: "cycle", cycles: 2, paceScale: 2, durationMs: 0 },
+                { id: "edition-hold", kind: "hold", cycles: 0, paceScale: 1, durationMs: 0 },
+            ],
+            playKind: "once",
+        })
+        assert.equal(validatePortableProject(directedShelf).timeline.segments.length, 2)
+
+        const maximumShelf = structuredClone(shelfSaved.project)
+        maximumShelf.media = Array.from({ length: 127 }, (_, index) => {
+            const source = structuredClone(shelfSaved.project.media[index % shelfSaved.project.media.length])
+            const extension = source.signature === "png" ? ".png" : ".webp"
+            source.id = `shelf-frame-${String(index + 1).padStart(3, "0")}`
+            source.archivePath = `project/media/${String(index + 1).padStart(4, "0")}-${source.sha256.slice(0, 16)}${extension}`
+            source.frame.spotlight = false
+            return source
+        })
+        assert.equal(validatePortableProject(maximumShelf).media.length, 127)
+        const oversizedShelf = structuredClone(maximumShelf)
+        const last = structuredClone(oversizedShelf.media.at(-1))
+        last.id = "shelf-frame-128"
+        last.archivePath = `project/media/0128-${last.sha256.slice(0, 16)}${last.signature === "png" ? ".png" : ".webp"}`
+        oversizedShelf.media.push(last)
+        assert.throws(() => validatePortableProject(oversizedShelf), (error) => error?.code === "scene_invalid")
+
+        const shelfInvalidCases = [
+            ["scene_invalid", (project) => { project.scene.version = 1 }],
+            ["future_version_unsupported", (project) => { project.scene.version = 3 }],
+            ["scene_invalid", (project) => { project.scene.parameters.slideHeight = 27.99 }],
+            ["scene_invalid", (project) => { project.scene.parameters.gap = 121 }],
+            ["scene_invalid", (project) => { project.scene.parameters.tilt = 6.01 }],
+            ["scene_invalid", (project) => { project.scene.parameters.centerBump = 2.99 }],
+            ["scene_invalid", (project) => { project.scene.parameters.shelfMagic = 1 }],
+            ["scene_invalid", (project) => { project.media[0].frame.spotlight = true }],
+            ["canvas_invalid", (project) => { project.canvas.ratioMode = "fixed" }],
+            ["manifest_invalid", (project) => { project.media[0].frame.aspectMode = "custom" }],
+            ["manifest_invalid", (project) => { project.media[0].frame.ratio = 0.199 }],
+            ["manifest_invalid", (project) => { project.media[0].frame.ratio = 4.001; project.media[0].frame.crop = { x: 0, y: 0, width: 0.2, height: 1 } }],
+            ["manifest_invalid", (project) => { delete project.media[0].frame.focal }],
+            ["timeline_invalid", (project) => { project.timeline.axis = "vertical" }],
+            ["timeline_invalid", (project) => { project.timeline.paceMs = 179 }],
+            ["timeline_invalid", (project) => { project.timeline.paceMs = 8_001 }],
+            ["timeline_invalid", (project) => { Object.assign(project.timeline, { mode: "fixed-duration", fixedDurationMs: 24 * 60 * 60 * 1_000, segments: [], playKind: "repeat", repeatCount: 2 }) }],
+            ["timeline_invalid", (project) => { Object.assign(project.timeline, { mode: "directed", fixedDurationMs: 0, segments: [{ id: "unbounded", kind: "cycle", cycles: 1_000, paceScale: 0.05, durationMs: 0 }], playKind: "once" }) }],
+            ["look_invalid", (project) => { project.look.parameters.theme = "auto" }],
+            ["look_invalid", (project) => { project.look.id = "gallery-look.gradient"; project.look.parameters.backgroundStyle = "gradient" }],
+        ]
+        for (const [code, mutate] of shelfInvalidCases) {
+            const invalidShelf = structuredClone(shelfSaved.project)
+            mutate(invalidShelf)
+            assert.throws(() => validatePortableProject(invalidShelf), (error) => error?.code === code)
+        }
+
+        const emptyShelfDestination = path.join(root, "shelf-invalid-preserves-prior.galileo")
+        fs.writeFileSync(emptyShelfDestination, "known-prior-shelf-project-bytes")
+        let emptyShelfResolverCalls = 0
+        await expectSaveFailureBeforeStaging({
+            config: { ...shelfConfig, items: [] },
+            outputPath: emptyShelfDestination,
+            tempRoot: root,
+            mediaPathFromURL: () => { emptyShelfResolverCalls += 1; throw new Error("Empty Shelf reached media authority.") },
+        }, "scene_invalid", "Empty Shelf")
+        assert.equal(emptyShelfResolverCalls, 0)
+        assert.equal(fs.readFileSync(emptyShelfDestination, "utf8"), "known-prior-shelf-project-bytes")
+        let oversizedShelfResolverCalls = 0
+        await expectSaveFailureBeforeStaging({
+            config: {
+                ...shelfConfig,
+                items: Array.from({ length: 128 }, (_, index) => ({ ...shelfConfig.items[index % shelfConfig.items.length], id: `shelf-save-${index}` })),
+            },
+            outputPath: path.join(root, "shelf-too-many.galileo"),
+            tempRoot: root,
+            mediaPathFromURL: () => { oversizedShelfResolverCalls += 1; throw new Error("Oversized Shelf reached media authority.") },
+        }, "scene_invalid", "Oversized Shelf")
+        assert.equal(oversizedShelfResolverCalls, 0)
+        for (const [sceneVersion, code] of [[1, "scene_invalid"], [3, "future_version_unsupported"]]) {
+            let versionedShelfResolverCalls = 0
+            await expectSaveFailureBeforeStaging({
+                config: { ...shelfConfig, sceneVersion },
+                outputPath: path.join(root, `shelf-version-${sceneVersion}.galileo`),
+                tempRoot: root,
+                mediaPathFromURL: () => { versionedShelfResolverCalls += 1; throw new Error("Unsupported Shelf version reached media authority.") },
+            }, code, `Shelf version ${sceneVersion}`)
+            assert.equal(versionedShelfResolverCalls, 0)
+        }
+
+        const shelfOpened = await openPortableProjectArchive({ sourcePath: shelfPath, stagingParent: roots.staging, openedProjectsRoot: roots.opened, mediaURLFromPath: (filePath) => filePath })
+        assert.equal(shelfOpened.config.styleId, "the-shelf")
+        assert.equal(shelfOpened.config.sceneVersion, 2)
+        assert.equal(shelfOpened.config.settings.ratioMode, "auto")
+        assert.deepEqual(shelfOpened.config.items.map((item) => ({ id: item.id, ratio: item.ratio, aspectMode: item.aspectMode, fit: item.fit, crop: item.crop, focal: item.focal })), shelfConfig.items.map((item) => ({ id: item.id, ratio: item.ratio, aspectMode: item.aspectMode, fit: item.fit, crop: item.crop, focal: item.focal })))
+        const shelfReopenPath = path.join(root, "shelf-v2-reopened.galileo")
+        const shelfReopened = await savePortableProjectArchive({ config: shelfOpened.config, outputPath: shelfReopenPath, tempRoot: root, mediaPathFromURL: (url) => url })
+        assert.equal(canonicalProjectJSON(shelfReopened.project), canonicalProjectJSON(shelfSaved.project), "Shelf save/open/reopen must preserve canonical portable truth")
+
+        const shelfPriorProject = Object.freeze({ identity: "known-prior-shelf-project", revision: 2 })
+        for (const [index, [code, mutate]] of [
+            ["wrong_product", (project) => { project.product = "pitchdog-drift" }],
+            ["future_version_unsupported", (project) => { project.schemaVersion = 99 }],
+            ["scene_invalid", (project) => { project.scene.version = 1 }],
+            ["future_version_unsupported", (project) => { project.scene.version = 3 }],
+            ["manifest_invalid", (project) => { project.media[0].frame.aspectMode = "global" }],
+        ].entries()) {
+            const target = path.join(root, `shelf-pre-authority-${index}-${code}.galileo`)
+            rewriteArchive(shelfPath, target, (project) => { mutate(project); return project }, (zip, project) => zip.deleteFile(project.media[0].archivePath))
+            await expectFailure(code, target, roots, shelfPriorProject)
+        }
 
         const mediaBytes = mediaPaths.reduce((total, mediaPath) => total + fs.statSync(mediaPath).size, 0)
         const presenterPath = writePcm16Wav(path.join(root, "private-presenter.wav"), 4_800)

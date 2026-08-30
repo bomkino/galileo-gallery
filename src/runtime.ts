@@ -1,8 +1,10 @@
-import type { GalleryHostPort, ReelAPI, ReelConfig } from "./types.ts"
+import type { GalleryHostPort, ProjectImportFailureCode, ReelAPI, ReelConfig } from "./types.ts"
 import { hydrateHostAudio, validateHostAudioIntent } from "./audio/audioHost.ts"
 import { compileAudioTimeline, defaultAudioIntent, type RationalTime } from "./audio/audioTimeline.ts"
 import { mixAudioChunk } from "./audio/audioMixer.ts"
 import { createHostPCMProvider } from "./audio/hostPcmProvider.ts"
+import { admitShelfVideos } from "./shelfVideoAdmission.ts"
+import { isShelfV2, validateShelfRuntimeConfig } from "./shelfConfig.ts"
 import { supportsSceneVersion, supportsVerifiedPngFrames } from "./styleRegistry.ts"
 import { validateVitrineRuntimeConfig, VITRINE_MAX_ITEMS } from "./vitrineConfig.ts"
 
@@ -10,7 +12,18 @@ const unavailable = async () => {
     throw new Error("This action is available in the Galileo desktop app.")
 }
 
-const browserAPI: ReelAPI = {
+export type TwoPhaseProjectOpenResult =
+    | { cancelled: true }
+    | { failure: { code: ProjectImportFailureCode; message: string } }
+    | { config: ReelConfig; operationId: string }
+
+export type TwoPhaseReelAPI = Omit<ReelAPI, "openProject"> & {
+    openProject(): Promise<TwoPhaseProjectOpenResult>
+    acceptProjectOpen(operationId: string): Promise<void>
+    discardProjectOpen(operationId: string): Promise<void>
+}
+
+const browserAPI: TwoPhaseReelAPI = {
     platform: "darwin",
     pickMedia: async () => [],
     getDroppedFile: async (file) => ({ accepted: false, name: file.name || "Dropped item", reason: "unavailable" }),
@@ -22,6 +35,8 @@ const browserAPI: ReelAPI = {
     createVideoProxy: async (url) => url,
     saveProject: async () => ({ cancelled: true }),
     openProject: async () => ({ cancelled: true }),
+    acceptProjectOpen: async () => undefined,
+    discardProjectOpen: async () => undefined,
     cancelProjectOpen: async () => ({ cancelled: false }),
     saveTemplate: async () => ({ cancelled: true }),
     openTemplate: async () => ({ cancelled: true }),
@@ -37,7 +52,7 @@ function validateHostConfig(value: unknown): ReelConfig {
     if (config.schemaVersion !== 2 || typeof config.styleId !== "string" || !config.settings || !Array.isArray(config.items) || config.items.length > 256) {
         throw new Error("Host Project is invalid.")
     }
-    if (!supportsSceneVersion(config.styleId, config.sceneVersion ?? 1)) throw new Error("Host Project Scene version is unsupported.")
+    if (!supportsSceneVersion(config.styleId, config.sceneVersion ?? 1) && !isShelfV2(config as ReelConfig)) throw new Error("Host Project Scene version is unsupported.")
     if (!config.items.every((item) => item && typeof item.id === "string" && ["image", "video"].includes(item.type) && /^reel-media:\/\/grant\/[a-f0-9]{64}$/.test(item.url))) {
         throw new Error("Host media authority is invalid.")
     }
@@ -45,6 +60,9 @@ function validateHostConfig(value: unknown): ReelConfig {
     if (normalized.styleId === "vitrine" && normalized.sceneVersion === 2) {
         if (normalized.items.length > VITRINE_MAX_ITEMS) throw new Error("Host Vitrine Project is invalid.")
         try { validateVitrineRuntimeConfig(normalized) } catch { throw new Error("Host Vitrine Project is invalid.") }
+    }
+    if (isShelfV2(normalized)) {
+        try { validateShelfRuntimeConfig(normalized) } catch { throw new Error("Host Shelf Project is invalid.") }
     }
     validateHostAudioIntent(normalized.audio, normalized.items)
     return normalized
@@ -147,9 +165,11 @@ async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort, sign
             media.decode().then(() => finish(), () => finish(new Error(`Could not hydrate ${item.name}.`)))
         }
     })
-    const workers = Array.from({ length: Math.min(2, config.items.length) }, async () => {
-        while (!stopped && cursor < config.items.length) {
-            const item = config.items[cursor++]
+    const strictlyAdmittedShelf = isShelfV2(config)
+    const legacyHydrationItems = strictlyAdmittedShelf ? config.items.filter((item) => item.type !== "video") : config.items
+    const workers = Array.from({ length: Math.min(2, legacyHydrationItems.length) }, async () => {
+        while (!stopped && cursor < legacyHydrationItems.length) {
+            const item = legacyHydrationItems[cursor++]
             try {
                 await hydrateOne(item)
             } catch (error) {
@@ -162,6 +182,7 @@ async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort, sign
         await Promise.allSettled(workers)
         if (signal.aborted) throw projectOpenCancelled()
         if (firstFailure !== null) throw firstFailure
+        if (strictlyAdmittedShelf) await admitShelfVideos(config.items, { signal })
         await hydrateHostAudio(config.audio, signal)
         for (const source of config.audio?.sources ?? []) {
             if (signal.aborted) throw projectOpenCancelled()
@@ -178,48 +199,88 @@ async function hydrateHostConfig(config: ReelConfig, host: GalleryHostPort, sign
     }
 }
 
-export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
+function exactProjectOpenOperation(value: unknown) {
+    if (typeof value !== "string" || !/^[a-f0-9]{32}$/.test(value)) throw new Error("Host Project open authority is invalid.")
+    return value
+}
+
+export function createHostBackedAPI(host: GalleryHostPort): TwoPhaseReelAPI {
     let exportOwned = false
     let exportCancelled = false
     let hostExportAllocated = false
     let exportAudioController: AbortController | null = null
-    let projectOpenController: AbortController | null = null
+    let projectOpenWorkflow: { controller: AbortController; operationId: string | null } | null = null
     return {
         ...browserAPI,
         platform: host.platform,
         pickMedia: () => host.chooseMedia(),
         saveProject: (config) => host.saveProject(config),
         openProject: async () => {
-            if (projectOpenController) throw new Error("A Project open is already running.")
-            const controller = new AbortController()
-            projectOpenController = controller
-            let operationId: string | null = null
+            if (projectOpenWorkflow) throw new Error("A Project open is already running.")
+            const workflow = { controller: new AbortController(), operationId: null as string | null }
+            projectOpenWorkflow = workflow
             try {
                 const candidate = await host.beginProjectOpen()
-                if ("cancelled" in candidate || "failure" in candidate) return candidate
-                operationId = candidate.operationId
-                if (controller.signal.aborted) {
-                    await host.discardProjectOpen(operationId).catch(() => undefined)
+                if ("cancelled" in candidate || "failure" in candidate) {
+                    if (projectOpenWorkflow === workflow) projectOpenWorkflow = null
+                    return candidate
+                }
+                workflow.operationId = exactProjectOpenOperation(candidate.operationId)
+                if (workflow.controller.signal.aborted) {
+                    await host.discardProjectOpen(workflow.operationId).catch(() => undefined)
+                    if (projectOpenWorkflow === workflow) projectOpenWorkflow = null
                     return { cancelled: true }
                 }
                 const config = validateHostConfig(candidate.config)
-                await hydrateHostConfig(config, host, controller.signal)
-                if (controller.signal.aborted) return { cancelled: true }
-                await host.acceptProjectOpen(operationId)
-                return { config }
+                await hydrateHostConfig(config, host, workflow.controller.signal)
+                if (workflow.controller.signal.aborted) {
+                    await host.discardProjectOpen(workflow.operationId).catch(() => undefined)
+                    if (projectOpenWorkflow === workflow) projectOpenWorkflow = null
+                    return { cancelled: true }
+                }
+                return { config, operationId: workflow.operationId }
             } catch (error) {
-                if (operationId) await host.discardProjectOpen(operationId).catch(() => undefined)
-                if (controller.signal.aborted || (error instanceof Error && error.name === "AbortError")) return { cancelled: true }
+                if (workflow.operationId) await host.discardProjectOpen(workflow.operationId).catch(() => undefined)
+                if (projectOpenWorkflow === workflow) projectOpenWorkflow = null
+                if (workflow.controller.signal.aborted || (error instanceof Error && error.name === "AbortError")) return { cancelled: true }
+                throw error
+            }
+        },
+        acceptProjectOpen: async (operationId) => {
+            const exact = exactProjectOpenOperation(operationId)
+            const workflow = projectOpenWorkflow
+            if (!workflow || workflow.operationId !== exact) throw new Error("Project open authority is no longer active.")
+            try {
+                await host.acceptProjectOpen(exact)
+            } catch (error) {
+                await host.discardProjectOpen(exact).catch(() => host.cancelProjectOpen().catch(() => undefined))
                 throw error
             } finally {
-                if (projectOpenController === controller) projectOpenController = null
+                if (projectOpenWorkflow === workflow) projectOpenWorkflow = null
+            }
+        },
+        discardProjectOpen: async (operationId) => {
+            const exact = exactProjectOpenOperation(operationId)
+            const workflow = projectOpenWorkflow
+            if (!workflow || workflow.operationId !== exact) throw new Error("Project open authority is no longer active.")
+            try {
+                await host.discardProjectOpen(exact)
+            } catch (error) {
+                await host.cancelProjectOpen().catch(() => undefined)
+                throw error
+            } finally {
+                if (projectOpenWorkflow === workflow) projectOpenWorkflow = null
             }
         },
         cancelProjectOpen: async () => {
-            const local = projectOpenController
-            local?.abort()
-            const result = await host.cancelProjectOpen()
-            return { cancelled: Boolean(local) || result.cancelled }
+            const workflow = projectOpenWorkflow
+            workflow?.controller.abort()
+            try {
+                const result = await host.cancelProjectOpen()
+                return { cancelled: Boolean(workflow) || result.cancelled }
+            } finally {
+                if (projectOpenWorkflow === workflow) projectOpenWorkflow = null
+            }
         },
         exportReel: async (request) => {
             if (exportOwned || hostExportAllocated) throw new Error("An export is already running or still owned by the host.")
@@ -232,10 +293,17 @@ export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
                 const capability = capabilities.formats.find((candidate) => candidate.id === capabilityId)
                 if (!capability) throw new Error(`${request.format === "png-frames" ? "PNG Frames" : "H.264/AAC"} is unavailable on this host.`)
                 if (!capability.available) throw new Error(capability.consequence)
-                if (request.format === "png-frames" && (!supportsVerifiedPngFrames(request.config.styleId, request.config.sceneVersion ?? 1)
-                    || !("sceneVersions" in capability)
-                    || !capability.sceneVersions.some((scene) => scene.id === request.config.styleId && scene.versions.some((version) => version === (request.config.sceneVersion ?? 1))))) {
-                    throw new Error("Verified PNG Frames currently support Quiet Carousel v1 and Vitrine v2 only.")
+                if (request.format === "png-frames") {
+                    const sceneCapability = "sceneVersions" in capability
+                        ? capability.sceneVersions.find((scene) => scene.id === request.config.styleId && scene.versions.some((version) => version === (request.config.sceneVersion ?? 1)))
+                        : undefined
+                    if (!supportsVerifiedPngFrames(request.config.styleId, request.config.sceneVersion ?? 1) || !sceneCapability) {
+                        throw new Error("Verified PNG Frames currently support Quiet Carousel v1, Vitrine v2, and image-only Shelf v2.")
+                    }
+                    if (request.config.styleId === "the-shelf") {
+                        if (!("video" in sceneCapability) || sceneCapability.video !== false) throw new Error("Host Shelf PNG capabilities are invalid.")
+                        if (request.config.items.some((item) => item.type === "video")) throw new Error("Verified Shelf PNG Frames currently support still images only.")
+                    }
                 }
                 if (request.format === "mp4" && (!("sceneIds" in capability) || !capability.sceneIds.includes(request.config.styleId as "quiet-carousel"))) {
                     throw new Error("Verified H.264/AAC currently supports Quiet Carousel only. Choose PNG Frames for this Scene.")
@@ -243,13 +311,15 @@ export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
                 if (exportCancelled) return { cancelled: true }
                 const date = new Date().toISOString().slice(0, 10)
                 if (request.format === "png-frames") {
-                    const vitrineClock = request.config.styleId === "vitrine" && request.config.sceneVersion === 2
+                    const productClock = request.config.styleId === "vitrine" && request.config.sceneVersion === 2
                         ? validateVitrineRuntimeConfig(request.config)
-                        : null
-                    if (vitrineClock && (request.durationMs !== vitrineClock.durationMs
-                        || request.cycleDurationMs !== vitrineClock.cycleDurationMs
-                        || request.finalCycleDurationMs !== vitrineClock.finalCycleDurationMs)) {
-                        throw new Error("Vitrine export clocks do not match the immutable Project Timeline.")
+                        : isShelfV2(request.config)
+                            ? validateShelfRuntimeConfig(request.config)
+                            : null
+                    if (productClock && (request.durationMs !== productClock.durationMs
+                        || request.cycleDurationMs !== productClock.cycleDurationMs
+                        || request.finalCycleDurationMs !== productClock.finalCycleDurationMs)) {
+                        throw new Error(`${request.config.styleId === "the-shelf" ? "Shelf" : "Vitrine"} export clocks do not match the immutable Project Timeline.`)
                     }
                     const preflight = await host.preflightPngFrames({
                         config: request.config,
@@ -257,8 +327,8 @@ export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
                         height: request.height,
                         fps: request.fps,
                         durationMs: request.durationMs,
-                        cycleDurationMs: vitrineClock ? request.cycleDurationMs as number : request.cycleDurationMs ?? request.durationMs,
-                        finalCycleDurationMs: vitrineClock ? request.finalCycleDurationMs as number : request.finalCycleDurationMs ?? request.cycleDurationMs ?? request.durationMs,
+                        cycleDurationMs: productClock ? request.cycleDurationMs as number : request.cycleDurationMs ?? request.durationMs,
+                        finalCycleDurationMs: productClock ? request.finalCycleDurationMs as number : request.finalCycleDurationMs ?? request.cycleDurationMs ?? request.durationMs,
                         transparent: request.config.settings.backgroundStyle === "transparent",
                     })
                     hostExportAllocated = true
@@ -347,6 +417,84 @@ export function createHostBackedAPI(host: GalleryHostPort): ReelAPI {
     }
 }
 
-export function ensureReelAPI(): ReelAPI {
-    return window.reelAPI ?? (window.galleryHost ? createHostBackedAPI(window.galleryHost) : browserAPI)
+type LegacyProjectOpenBridge = ReelAPI & {
+    acceptProjectOpen(operationId: string): Promise<unknown>
+    discardProjectOpen(operationId: string): Promise<unknown>
+}
+
+export function createLegacyBackedAPI(api: LegacyProjectOpenBridge): TwoPhaseReelAPI {
+    let workflow: { controller: AbortController; operationId: string | null } | null = null
+    return {
+        ...api,
+        openProject: async () => {
+            if (workflow) throw new Error("A Project open is already running.")
+            const active = { controller: new AbortController(), operationId: null as string | null }
+            workflow = active
+            try {
+                const candidate = await api.openProject() as unknown as TwoPhaseProjectOpenResult
+                if ("cancelled" in candidate || "failure" in candidate) {
+                    if (workflow === active) workflow = null
+                    return candidate
+                }
+                active.operationId = exactProjectOpenOperation(candidate.operationId)
+                if (!candidate.config || typeof candidate.config !== "object" || Array.isArray(candidate.config)) throw new Error("Project candidate is invalid.")
+                if (isShelfV2(candidate.config)) {
+                    validateShelfRuntimeConfig(candidate.config)
+                    await admitShelfVideos(candidate.config.items, { signal: active.controller.signal })
+                }
+                if (active.controller.signal.aborted) {
+                    await api.discardProjectOpen(active.operationId).catch(() => undefined)
+                    if (workflow === active) workflow = null
+                    return { cancelled: true }
+                }
+                return candidate
+            } catch (error) {
+                if (active.operationId) await api.discardProjectOpen(active.operationId).catch(() => undefined)
+                if (workflow === active) workflow = null
+                if (active.controller.signal.aborted || (error instanceof Error && error.name === "AbortError")) return { cancelled: true }
+                throw error
+            }
+        },
+        acceptProjectOpen: async (operationId) => {
+            const exact = exactProjectOpenOperation(operationId)
+            const active = workflow
+            if (!active || active.operationId !== exact) throw new Error("Project open authority is no longer active.")
+            try {
+                await api.acceptProjectOpen(exact)
+            } catch (error) {
+                await api.discardProjectOpen(exact).catch(() => api.cancelProjectOpen().catch(() => undefined))
+                throw error
+            } finally {
+                if (workflow === active) workflow = null
+            }
+        },
+        discardProjectOpen: async (operationId) => {
+            const exact = exactProjectOpenOperation(operationId)
+            const active = workflow
+            if (!active || active.operationId !== exact) throw new Error("Project open authority is no longer active.")
+            try {
+                await api.discardProjectOpen(exact)
+            } catch (error) {
+                await api.cancelProjectOpen().catch(() => undefined)
+                throw error
+            } finally {
+                if (workflow === active) workflow = null
+            }
+        },
+        cancelProjectOpen: async () => {
+            const active = workflow
+            active?.controller.abort()
+            try {
+                const result = await api.cancelProjectOpen()
+                return { cancelled: Boolean(active) || result.cancelled }
+            } finally {
+                if (workflow === active) workflow = null
+            }
+        },
+    }
+}
+
+export function ensureReelAPI(): TwoPhaseReelAPI {
+    if (window.galleryHost) return createHostBackedAPI(window.galleryHost)
+    return window.reelAPI ? createLegacyBackedAPI(window.reelAPI as LegacyProjectOpenBridge) : browserAPI
 }

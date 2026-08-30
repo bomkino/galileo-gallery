@@ -312,7 +312,7 @@ export type ProjectImportFailureCode =
 export type ProjectOpenResult =
     | { cancelled: true }
     | { failure: { code: ProjectImportFailureCode; message: string } }
-    | { config: ReelConfig; sourcePath?: string }
+    | { config: ReelConfig; operationId: string }
 
 export interface ReelAPI {
     platform: "darwin" | "win32" | "linux"
@@ -326,6 +326,8 @@ export interface ReelAPI {
     createVideoProxy(url: string): Promise<string>
     saveProject(config: ReelConfig): Promise<{ cancelled?: boolean; outputPath?: string }>
     openProject(): Promise<ProjectOpenResult>
+    acceptProjectOpen(operationId: string): Promise<unknown>
+    discardProjectOpen(operationId: string): Promise<unknown>
     cancelProjectOpen(): Promise<{ cancelled: boolean }>
     saveTemplate(settings: ReelSettings): Promise<{ cancelled?: boolean; outputPath?: string }>
     openTemplate(): Promise<{ cancelled?: boolean; settings?: Partial<ReelSettings>; sourcePath?: string }>
@@ -346,7 +348,7 @@ export interface GalleryHostPort {
     audioWaveform(url: string, buckets: number): Promise<{ sampleRate: number; channels: 1 | 2; sampleFrames: number; buckets: Array<{ minimum: number; maximum: number; rms: number }> }>
     cancelAudio(): Promise<{ cancelled: number }>
     exportCapabilities(): Promise<{ version: 1; formats: Array<
-        | { id: "png-frames"; available: true; alpha: true; audio: false; sceneVersions: [{ id: "quiet-carousel"; versions: [1] }, { id: "vitrine"; versions: [2] }]; consequence: string }
+        | { id: "png-frames"; available: true; alpha: true; audio: false; sceneVersions: [{ id: "quiet-carousel"; versions: [1]; video: true }, { id: "vitrine"; versions: [2]; video: true }, { id: "the-shelf"; versions: [2]; video: false }]; consequence: string }
         | { id: "mp4-h264-aac"; available: boolean; alpha: false; audio: true; sceneIds: ["quiet-carousel"]; consequence: string }
     > }>
     preflightPngFrames(intent: { config: ReelConfig; width: number; height: number; fps: number; durationMs: number; cycleDurationMs: number; finalCycleDurationMs: number; transparent: boolean }): Promise<{ snapshotId: string; format: "png-frames"; width: number; height: number; fps: number; durationMs: number; frameCount: number; alpha: boolean; audio: "none"; consequence: string }>

@@ -660,15 +660,16 @@ function createLinuxHostController(options) {
                 if (!pending || pending.operationId !== envelope.payload.operationId) throw new HostPortError("conflict")
                 const previousGeneration = generation
                 const previousRoot = currentResourceRoot
+                const candidate = pending
                 cancelAudioWork()
                 cancelExportWork()
                 clearPreparedExport()
-                if (previousRoot) removeResourceRoot(previousRoot)
-                generation = pending.generation
-                currentResourceRoot = pending.resourceRoot
+                generation = candidate.generation
+                currentResourceRoot = candidate.resourceRoot
                 pending = null
                 state = "ready"
                 revokeGeneration(previousGeneration)
+                safeRemove(previousRoot)
                 return { generation }
             }
             case "project.open.discard":

@@ -103,7 +103,11 @@ async function run() {
         consequence: pngFramesCapabilities().formats[0].consequence,
     })
     assert.equal(pngFramesCapabilities().formats[0].audio, false)
-    assert.deepEqual(pngFramesCapabilities().formats[0].sceneVersions, [{ id: "quiet-carousel", versions: [1] }, { id: "vitrine", versions: [2] }])
+    assert.deepEqual(pngFramesCapabilities().formats[0].sceneVersions, [
+        { id: "quiet-carousel", versions: [1], video: true },
+        { id: "vitrine", versions: [2], video: true },
+        { id: "the-shelf", versions: [2], video: false },
+    ])
     assert.throws(() => createPngFramesSnapshot({ ...intent, width: 65 }), (error) => error.code === "invalid_request", "export dimensions must match Project canvas")
     assert.throws(() => createPngFramesSnapshot({
         ...intent,
@@ -318,6 +322,267 @@ async function run() {
         cycleDurationMs: maximumDuration,
         finalCycleDurationMs: maximumDuration,
     }), (error) => error.code === "invalid_request")
+
+    const shelfItems = Array.from({ length: 3 }, (_, index) => ({
+        ...snapshot.config.items[0],
+        id: `shelf-edition-${index + 1}`,
+        name: `Shelf Edition ${index + 1}`,
+        ratio: [0.8, 1, 16 / 9][index],
+        aspectMode: "auto",
+        fit: index === 1 ? "cover" : "contain",
+        crop: index === 1 ? { x: 0.1, y: 0.2, width: 0.8, height: 0.6 } : { x: 0, y: 0, width: 1, height: 1 },
+        focal: index === 1 ? { x: 0.25, y: 0.75 } : { x: 0.5, y: 0.5 },
+        spotlight: false,
+        muted: false,
+    }))
+    const shelfConfig = {
+        ...snapshot.config,
+        styleId: "the-shelf",
+        sceneVersion: 2,
+        timelineMode: "automatic",
+        timelineFixedDurationMs: 0,
+        timelineSegments: [],
+        items: shelfItems,
+        settings: {
+            ...snapshot.config.settings,
+            canvasWidth: 64,
+            canvasHeight: 64,
+            ratioMode: "auto",
+            imageFit: "contain",
+            loopVideos: true,
+            axis: "horizontal",
+            direction: "reverse",
+            playKind: "repeat",
+            repeatCount: 2,
+            backgroundStyle: "transparent",
+            paceMs: 3_000,
+            slideHeight: 42,
+            gap: 34,
+            tilt: 2.5,
+            centerBump: 8,
+            spotlightsEnabled: false,
+            finaleEnabled: true,
+            theme: "dark",
+        },
+    }
+    const shelfIntent = {
+        ...intent,
+        config: shelfConfig,
+        fps: 1,
+        durationMs: 18_000,
+        cycleDurationMs: 9_000,
+        finalCycleDurationMs: 9_000,
+        transparent: true,
+    }
+    const shelfSnapshot = createPngFramesSnapshot(shelfIntent, () => Buffer.alloc(16, 9))
+    assert.deepEqual(shelfSnapshot.scene, { id: "the-shelf", version: 2 })
+    assert.equal(shelfSnapshot.frameCount, 18)
+    assert.equal(shelfSnapshot.alpha, true, "transparent Shelf must allocate a straight-alpha frame plan")
+    assert.deepEqual(shelfSnapshot.config.items[1].crop, shelfItems[1].crop, "Shelf crop intent must survive immutable snapshotting without changing plane ratio")
+    assert.equal(shelfSnapshot.config.items[1].ratio, 1)
+    assert.equal(shelfSnapshot.config.items[1].aspectMode, "auto")
+    assert.equal(Object.hasOwn(shelfSnapshot.config, "audio"), false)
+
+    const solidShelf = createPngFramesSnapshot({
+        ...shelfIntent,
+        config: { ...shelfConfig, settings: { ...shelfConfig.settings, backgroundStyle: "solid" } },
+        transparent: false,
+    })
+    assert.equal(solidShelf.alpha, false, "solid Shelf must causally produce an opaque PNG plan")
+    for (const candidate of [
+        { ...shelfIntent, transparent: false },
+        { ...shelfIntent, config: { ...shelfConfig, settings: { ...shelfConfig.settings, backgroundStyle: "solid" } } },
+    ]) assert.throws(() => createPngFramesSnapshot(candidate), (error) => error.code === "invalid_request", "Shelf alpha intent must exactly match its clean Look")
+
+    for (const key of ["durationMs", "cycleDurationMs", "finalCycleDurationMs"]) {
+        assert.throws(() => createPngFramesSnapshot({ ...shelfIntent, [key]: shelfIntent[key] + 1 }), (error) => error.code === "invalid_request", `Shelf ${key} must match the compiled Timeline`)
+    }
+    const fourItemShelfConfig = { ...shelfConfig, items: [...shelfItems, { ...shelfItems[0], id: "shelf-edition-4", name: "Shelf Edition 4" }] }
+    assert.throws(() => createPngFramesSnapshot({ ...shelfIntent, config: fourItemShelfConfig }), (error) => error.code === "invalid_request", "ordered media count must causally change the Shelf clock")
+    assert.equal(createPngFramesSnapshot({
+        ...shelfIntent,
+        config: fourItemShelfConfig,
+        durationMs: 24_000,
+        cycleDurationMs: 12_000,
+        finalCycleDurationMs: 12_000,
+    }).cycleDurationMs, 12_000)
+    const fasterShelfConfig = { ...shelfConfig, settings: { ...shelfConfig.settings, paceMs: 3_500 } }
+    assert.throws(() => createPngFramesSnapshot({ ...shelfIntent, config: fasterShelfConfig }), (error) => error.code === "invalid_request", "walking pace must causally change the Shelf clock")
+    assert.equal(createPngFramesSnapshot({
+        ...shelfIntent,
+        config: fasterShelfConfig,
+        durationMs: 21_000,
+        cycleDurationMs: 10_500,
+        finalCycleDurationMs: 10_500,
+    }).cycleDurationMs, 10_500)
+    assert.equal(createPngFramesSnapshot({
+        ...shelfIntent,
+        config: { ...shelfConfig, items: shelfItems.map((item, index) => ({ ...item, muted: index === 1 })) },
+    }).cycleDurationMs, 9_000, "muted Shelf frames remain ordered geometry and must remain in the cycle clock")
+
+    const spotlightShelfConfig = {
+        ...shelfConfig,
+        items: shelfItems.map((item, index) => ({ ...item, spotlight: index === 1 })),
+        settings: { ...shelfConfig.settings, spotlightsEnabled: true },
+    }
+    assert.equal(createPngFramesSnapshot({ ...shelfIntent, config: spotlightShelfConfig }).config.items[1].spotlight, true)
+    for (const config of [
+        { ...spotlightShelfConfig, items: spotlightShelfConfig.items.map((item, index) => ({ ...item, muted: index === 1 })) },
+        { ...spotlightShelfConfig, items: spotlightShelfConfig.items.map((item) => ({ ...item, spotlight: true })) },
+        { ...shelfConfig, items: shelfItems.map((item, index) => ({ ...item, spotlight: index === 0 })) },
+    ]) assert.throws(() => createPngFramesSnapshot({ ...shelfIntent, config }), (error) => error.code === "invalid_request", "Shelf Spotlight intent must be exclusive and eligible")
+
+    const { aspectMode: _aspectMode, ...shelfWithoutAspectMode } = shelfItems[0]
+    for (const items of [
+        [{ ...shelfItems[0], aspectMode: "global" }, ...shelfItems.slice(1)],
+        [shelfWithoutAspectMode, ...shelfItems.slice(1)],
+        [{ ...shelfItems[0], ratio: 0.1999 }, ...shelfItems.slice(1)],
+        [{ ...shelfItems[0], ratio: 4.0001 }, ...shelfItems.slice(1)],
+        [{ ...shelfItems[0], fit: "stretch" }, ...shelfItems.slice(1)],
+        [{ ...shelfItems[0], crop: { x: 0.8, y: 0, width: 0.3, height: 1 } }, ...shelfItems.slice(1)],
+        [{ ...shelfItems[0], focal: { x: -0.01, y: 0.5 } }, ...shelfItems.slice(1)],
+        [shelfItems[0], { ...shelfItems[1], id: shelfItems[0].id }, shelfItems[2]],
+    ]) assert.throws(() => createPngFramesSnapshot({ ...shelfIntent, config: { ...shelfConfig, items } }), (error) => error.code === "invalid_request", "Shelf must reject altered natural-ratio or frame intent")
+
+    for (const settings of [
+        { ...shelfConfig.settings, ratioMode: "fixed" },
+        { ...shelfConfig.settings, axis: "vertical" },
+        { ...shelfConfig.settings, theme: "auto" },
+        { ...shelfConfig.settings, backgroundStyle: "gradient" },
+        { ...shelfConfig.settings, paceMs: 179 },
+        { ...shelfConfig.settings, paceMs: 8_001 },
+        { ...shelfConfig.settings, slideHeight: 27.99 },
+        { ...shelfConfig.settings, slideHeight: 58.01 },
+        { ...shelfConfig.settings, gap: 7.99 },
+        { ...shelfConfig.settings, gap: 120.01 },
+        { ...shelfConfig.settings, tilt: -0.01 },
+        { ...shelfConfig.settings, tilt: 6.01 },
+        { ...shelfConfig.settings, centerBump: 2.99 },
+        { ...shelfConfig.settings, centerBump: 14.01 },
+        { ...shelfConfig.settings, repeatCount: 1.5 },
+        { ...shelfConfig.settings, loopVideos: "yes" },
+        { ...shelfConfig.settings, spotlightsEnabled: "yes" },
+        { ...shelfConfig.settings, finaleEnabled: 1 },
+    ]) assert.throws(() => createPngFramesSnapshot({ ...shelfIntent, config: { ...shelfConfig, settings } }), (error) => error.code === "invalid_request", "Shelf settings must remain inside the authored v2 domain")
+
+    const oneItemShelfConfig = {
+        ...shelfConfig,
+        items: [shelfItems[0]],
+        settings: { ...shelfConfig.settings, paceMs: 180, playKind: "loop", repeatCount: 1 },
+    }
+    assert.equal(createPngFramesSnapshot({
+        ...shelfIntent,
+        config: oneItemShelfConfig,
+        durationMs: 8_000,
+        cycleDurationMs: 8_000,
+        finalCycleDurationMs: 8_000,
+    }).cycleDurationMs, 8_000, "automatic Shelf must clamp its lower cycle to 8 seconds")
+    const fixedShelfConfig = { ...oneItemShelfConfig, timelineMode: "fixed-duration", timelineFixedDurationMs: 1_000 }
+    assert.equal(createPngFramesSnapshot({
+        ...shelfIntent,
+        config: fixedShelfConfig,
+        durationMs: 1_000,
+        cycleDurationMs: 1_000,
+        finalCycleDurationMs: 1_000,
+    }).cycleDurationMs, 1_000, "fixed Shelf duration must be independent from the automatic clamp")
+    const fractionalFixedShelfConfig = { ...fixedShelfConfig, timelineFixedDurationMs: 1_001 }
+    assert.equal(createPngFramesSnapshot({
+        ...shelfIntent,
+        config: fractionalFixedShelfConfig,
+        durationMs: 1_001,
+        cycleDurationMs: 1_001,
+        finalCycleDurationMs: 1_001,
+    }).frameCount, 2, "Shelf frame plan must use compileShelfTimeline's ceiling at a partial terminal frame")
+    const shelfVideoConfig = {
+        ...oneItemShelfConfig,
+        items: [{ ...oneItemShelfConfig.items[0], type: "video", name: "Shelf Video" }],
+    }
+    assert.throws(() => createPngFramesSnapshot({
+        ...shelfIntent,
+        config: shelfVideoConfig,
+        fps: 30,
+        durationMs: 8_000,
+        cycleDurationMs: 8_000,
+        finalCycleDurationMs: 8_000,
+    }), (error) => error.code === "unsupported_capability", "Shelf video PNG export must fail closed as an explicit image-only capability")
+
+    const directedShelfConfig = {
+        ...oneItemShelfConfig,
+        timelineMode: "directed",
+        timelineSegments: [
+            { id: "two-walks", kind: "cycle", cycles: 2, paceScale: 2, durationMs: 0 },
+            { id: "settle", kind: "hold", cycles: 0, paceScale: 1, durationMs: 0 },
+        ],
+    }
+    const directedShelfIntent = { ...shelfIntent, config: directedShelfConfig, durationMs: 8_250, cycleDurationMs: 8_250, finalCycleDurationMs: 8_250 }
+    const directedShelfSnapshot = createPngFramesSnapshot(directedShelfIntent)
+    assert.equal(directedShelfSnapshot.cycleDurationMs, 8_250, "zero-duration Shelf segments must compile from exact pace and automatic cycle intent")
+    assert.deepEqual(directedShelfSnapshot.config.timelineSegments.map((segment) => segment.durationMs), [0, 0], "immutable intent must remain authored while renderer and host compile it identically")
+    const fractionalShelfConfig = {
+        ...oneItemShelfConfig,
+        timelineMode: "directed",
+        timelineSegments: [{ id: "fractional-walk", kind: "cycle", cycles: 1, paceScale: 7, durationMs: 0 }],
+    }
+    const fractionalDuration = 8_000 / 7
+    assert.equal(createPngFramesSnapshot({
+        ...shelfIntent,
+        config: fractionalShelfConfig,
+        durationMs: fractionalDuration,
+        cycleDurationMs: fractionalDuration,
+        finalCycleDurationMs: fractionalDuration,
+    }).cycleDurationMs, fractionalDuration)
+    assert.throws(() => createPngFramesSnapshot({
+        ...shelfIntent,
+        config: fractionalShelfConfig,
+        durationMs: fractionalDuration + Number.EPSILON * fractionalDuration,
+        cycleDurationMs: fractionalDuration,
+        finalCycleDurationMs: fractionalDuration,
+    }), (error) => error.code === "invalid_request", "Shelf clock comparison must not round a directed Timeline")
+
+    for (const config of [
+        { ...oneItemShelfConfig, timelineMode: "automatic", timelineFixedDurationMs: 1_000 },
+        { ...oneItemShelfConfig, timelineMode: "fixed-duration", timelineFixedDurationMs: 999 },
+        { ...oneItemShelfConfig, timelineMode: "fixed-duration", timelineFixedDurationMs: 1_000, timelineSegments: [{ id: "extra", kind: "hold", cycles: 0, paceScale: 1, durationMs: 250 }] },
+        { ...oneItemShelfConfig, timelineMode: "directed", timelineSegments: [] },
+        { ...directedShelfConfig, timelineSegments: [{ id: "bad-cycle", kind: "cycle", cycles: 0, paceScale: 1, durationMs: 1_000 }] },
+        { ...directedShelfConfig, timelineSegments: [{ id: "bad-hold", kind: "hold", cycles: 1, paceScale: 1, durationMs: 1_000 }] },
+        { ...directedShelfConfig, timelineSegments: [{ id: "same", kind: "hold", cycles: 0, paceScale: 1, durationMs: 250 }, { id: "same", kind: "hold", cycles: 0, paceScale: 1, durationMs: 250 }] },
+        { ...directedShelfConfig, timelineSegments: [{ id: "extra-key", kind: "hold", cycles: 0, paceScale: 1, durationMs: 250, private: true }] },
+        { ...directedShelfConfig, timelineSegments: [{ id: "first", kind: "hold", cycles: 0, paceScale: 1, durationMs: maximumDuration }, { id: "second", kind: "hold", cycles: 0, paceScale: 1, durationMs: maximumDuration }] },
+    ]) assert.throws(() => createPngFramesSnapshot({ ...directedShelfIntent, config }), (error) => error.code === "invalid_request", "Shelf Timeline normalization must fail closed")
+
+    const maximumShelfItems = Array.from({ length: 127 }, (_, index) => ({ ...shelfItems[0], id: `shelf-max-${index + 1}`, name: `Shelf Max ${index + 1}` }))
+    const maximumShelfConfig = {
+        ...shelfConfig,
+        items: maximumShelfItems,
+        settings: { ...shelfConfig.settings, playKind: "loop", repeatCount: 1 },
+    }
+    assert.equal(createPngFramesSnapshot({
+        ...shelfIntent,
+        config: maximumShelfConfig,
+        durationMs: 42_000,
+        cycleDurationMs: 42_000,
+        finalCycleDurationMs: 42_000,
+    }).config.items.length, 127, "automatic Shelf must clamp its upper cycle to 42 seconds")
+    assert.throws(() => createPngFramesSnapshot({
+        ...shelfIntent,
+        config: { ...maximumShelfConfig, items: [...maximumShelfItems, { ...shelfItems[0], id: "shelf-max-128", name: "Shelf Max 128" }] },
+        durationMs: 42_000,
+        cycleDurationMs: 42_000,
+        finalCycleDurationMs: 42_000,
+    }), (error) => error.code === "invalid_request")
+    assert.throws(() => createPngFramesSnapshot({
+        ...shelfIntent,
+        config: { ...fixedShelfConfig, timelineFixedDurationMs: maximumDuration, settings: { ...fixedShelfConfig.settings, playKind: "repeat", repeatCount: 2 } },
+        durationMs: maximumDuration,
+        cycleDurationMs: maximumDuration,
+        finalCycleDurationMs: maximumDuration,
+    }), (error) => error.code === "invalid_request", "Shelf repeat playback must remain inside the 24-hour bound")
+    for (const config of [
+        { ...shelfConfig, sceneVersion: 1 },
+        (() => { const { sceneVersion: _sceneVersion, ...withoutVersion } = shelfConfig; return withoutVersion })(),
+    ]) assert.throws(() => createPngFramesSnapshot({ ...shelfIntent, config }), (error) => error.code === "unsupported_capability", "Shelf PNG admission requires explicit v2 identity")
+
     assert.throws(() => createPngFramesSnapshot({ ...intent, transparent: false }), (error) => error.code === "invalid_request", "alpha intent must match the Project background")
     assert.throws(() => createPngFramesSnapshot({
         ...intent,
@@ -575,7 +840,7 @@ async function run() {
           fs.rmSync(temporary, { recursive: true, force: true })
       }
     }
-    console.log("Verified: G06A immutable rounded frame plan, real PNG integrity/alpha/hash manifest, no-audio consequence, exclusive new-target publication, destination-race containment, cancellation, cleanup, and prior-destination preservation.")
+    console.log("Verified: immutable scene-authoritative PNG frame plans, exact Vitrine/Shelf clocks, image-only Shelf natural-ratio and alpha admission, real PNG integrity/hash manifests, no-audio consequence, exclusive publication, race containment, cancellation, cleanup, and prior-destination preservation.")
 }
 
 run().catch((error) => {

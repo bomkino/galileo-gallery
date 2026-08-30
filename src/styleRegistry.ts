@@ -65,7 +65,7 @@ const variants: StyleDefinition[] = [
     { id: "proximity-orbit", name: "Orbit", presetName: "Proximity", source: "ProximityOrbit.tsx", mode: "orbit", category: "Orbits", description: "Slides orbit with coherent depth, scale, light, and occlusion.", accent: "#79d6ba", minItems: 4, familyId: "orbit" },
     { id: "spin-image-orbit", name: "Orbit", presetName: "Wide Ellipse", source: "SpinImageOrbit.tsx", mode: "orbit", category: "Orbits", description: "Slides orbit with coherent depth, scale, light, and occlusion.", accent: "#75bfff", minItems: 5, familyId: "orbit" },
     { id: "zoetrope", name: "Orbit", presetName: "Zoetrope", source: "Zoetrope.tsx", mode: "zoetrope", category: "Reels", description: "Slides orbit with coherent depth, scale, light, and occlusion.", accent: "#ffcb66", minItems: 6, familyId: "orbit" },
-    { id: "the-shelf", name: "Shelf", presetName: "Collected Editions", source: "TheShelf.tsx", mode: "shelf", category: "Objects", description: "Frames glide along a shelf with a stable baseline and measured perspective.", accent: "#d5a46f", minItems: 4, familyId: "shelf" },
+    { id: "the-shelf", name: "Shelf", presetName: "Collected Editions", source: "ShelfRenderer.tsx", mode: "shelf", category: "Objects", description: "Source-faithful frames walk one stable baseline with measured, identity-stable lean.", accent: "#d5a46f", minItems: 1, familyId: "shelf" },
     { id: "before-after-slider", name: "Before / After", presetName: "Auto Sweep", source: "BeforeAfterSlider.tsx", mode: "compare", category: "Editorial", description: "A reversible comparison sweep with gentle turnarounds and no hard reset.", accent: "#ff826c", minItems: 2, familyId: "compare" },
     { id: "slide-fan", name: "Fan", presetName: "Open Fan", source: "SlideFan.tsx", mode: "fan", category: "Objects", description: "A card fan that opens, selects, and settles around a shared hinge.", accent: "#e996ff", minItems: 4, familyId: "fan" },
     { id: "dealers-fan", name: "Fan", presetName: "Dealer's Pick", source: "DealersFan.tsx", mode: "fan", category: "Objects", description: "A card fan that opens, selects, and settles around a shared hinge.", accent: "#d8a1ff", minItems: 5, familyId: "fan" },
@@ -134,17 +134,20 @@ export function galleryStyle(id: string | undefined): StyleDefinition {
 
 export function latestSceneVersion(styleId: string) {
     if (styleId !== QUIET_CAROUSEL_STYLE.id && !ALL_STYLE_VARIANTS.some((candidate) => candidate.id === styleId)) throw new Error(`Unsupported Gallery Scene: ${styleId}`)
-    return styleId === "vitrine" ? 2 : 1
+    return styleId === "vitrine" || styleId === "the-shelf" ? 2 : 1
 }
 
 export function supportsSceneVersion(styleId: string, version = 1) {
     if (styleId === "quiet-carousel") return version === 1
     if (!ALL_STYLE_VARIANTS.some((candidate) => candidate.id === styleId)) return false
+    if (styleId === "the-shelf") return version === 2
     return styleId === "vitrine" ? version === 1 || version === 2 : version === 1
 }
 
 export function supportsVerifiedPngFrames(styleId: string, version = 1) {
-    return (styleId === "quiet-carousel" && version === 1) || (styleId === "vitrine" && version === 2)
+    return (styleId === "quiet-carousel" && version === 1)
+        || (styleId === "vitrine" && version === 2)
+        || (styleId === "the-shelf" && version === 2)
 }
 
 export function galleryScene(styleId: string | undefined): SceneDefinition {

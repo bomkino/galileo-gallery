@@ -103,8 +103,41 @@ const VITRINE_V2_PROFILE = profile({
     },
 })
 
+const SHELF_V2_PROFILE = profile({
+    id: "the-shelf",
+    recommendedItems: 8,
+    cycleBaseMs: 8_000,
+    loopCount: 3,
+    directional: true,
+    directionLabels: ["Left", "Right"],
+    focusBehavior: "lift",
+    supportsSpotlight: true,
+    supportsFinale: true,
+    focusLabel: "Shelf lift",
+    bestFor: "Source-faithful collected work and editions",
+    transparentReady: true,
+    settings: {
+        ratioMode: "auto",
+        imageFit: "contain",
+        axis: "horizontal",
+        direction: "forward",
+        playKind: "loop",
+        repeatCount: 3,
+        slideHeight: 42,
+        gap: 34,
+        tilt: 2.5,
+        centerBump: 8,
+        paceMs: 1_650,
+        radius: 0,
+        shadow: 0,
+        spotlightsEnabled: false,
+        finaleEnabled: true,
+    },
+})
+
 export function styleProfile(id: string | undefined, sceneVersion = 1): StyleProfile {
     if (id === "vitrine" && sceneVersion === 2) return VITRINE_V2_PROFILE
+    if (id === "the-shelf" && sceneVersion === 2) return SHELF_V2_PROFILE
     return STYLE_PROFILES[id ?? ""] ?? STYLE_PROFILES["opening-reel"]
 }
 

@@ -162,6 +162,11 @@ async function readMetrics(window) {
                 autosave: optionalRect('.autosave-status'),
                 scale: rect('.interface-scale-control'),
             },
+            scrollGutters: {
+                library: getComputedStyle(document.querySelector('.library-scroll')).scrollbarGutter,
+                studio: getComputedStyle(document.querySelector('.studio')).scrollbarGutter,
+                inspector: getComputedStyle(document.querySelector('.inspector-scroll')).scrollbarGutter,
+            },
             targets: {
                 primary: rect('.title-actions .button.primary'),
                 icon: rect('.icon-button'),
@@ -171,6 +176,12 @@ async function readMetrics(window) {
                 format: rect('.format-cards button'),
                 export: rect('.export-button'),
                 timeline: rect('.timeline'),
+            },
+            icons: {
+                titleAction: rect('.title-actions > .button.quiet svg'),
+                library: rect('.icon-button svg'),
+                addMedia: rect('.add-media svg'),
+                transport: rect('.transport-play svg'),
             },
             focus: { outlineStyle: focusStyle.outlineStyle, outlineWidth: focusStyle.outlineWidth },
             preview: {
@@ -204,6 +215,7 @@ async function verifyCatalogueVocabulary(window) {
         const input = document.querySelector('.style-search input')
         const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
         const initial = input.value
+        const current = Array.from(document.querySelectorAll('.style-card[aria-pressed="true"]')).map((card) => card.dataset.styleId)
         setValue.call(input, 'no-scene-can-match-this-query')
         input.dispatchEvent(new Event('input', { bubbles: true }))
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
@@ -213,12 +225,46 @@ async function verifyCatalogueVocabulary(window) {
             search: document.querySelector('.style-search span')?.textContent?.trim(),
             empty: document.querySelector('.style-gallery-empty strong')?.textContent?.trim(),
             footer: document.querySelector('.style-gallery-footer span')?.textContent?.trim(),
+            current,
         }
         setValue.call(input, initial)
         input.dispatchEvent(new Event('input', { bubbles: true }))
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
         return result
     })()`)
+}
+
+async function verifySceneCardPressFeedback(window) {
+    const point = await window.webContents.executeJavaScript(`(() => {
+        const card = document.querySelector('.style-card')
+        if (!card) throw new Error('Scene card is missing.')
+        card.style.transition = 'none'
+        card.__g08Blocker = (event) => event.stopImmediatePropagation()
+        card.addEventListener('click', card.__g08Blocker, { capture: true })
+        const box = card.getBoundingClientRect()
+        return { x: Math.round((box.left + box.right) / 2), y: Math.round((box.top + box.bottom) / 2) }
+    })()`)
+    window.webContents.sendInputEvent({ type: "mouseMove", x: point.x, y: point.y })
+    await delay(30)
+    const hoverTransform = await window.webContents.executeJavaScript(`getComputedStyle(document.querySelector('.style-card')).transform`)
+    window.webContents.sendInputEvent({ type: "mouseDown", x: point.x, y: point.y, button: "left", clickCount: 1 })
+    await delay(30)
+    const pressed = await window.webContents.executeJavaScript(`(() => {
+        const card = document.querySelector('.style-card')
+        return { active: card.matches(':active'), transform: getComputedStyle(card).transform, boxShadow: getComputedStyle(card).boxShadow }
+    })()`)
+    window.webContents.sendInputEvent({ type: "mouseUp", x: 1, y: 1, button: "left", clickCount: 1 })
+    window.webContents.sendInputEvent({ type: "mouseMove", x: 1, y: 1 })
+    await window.webContents.executeJavaScript(`(() => {
+        const card = document.querySelector('.style-card')
+        card.style.removeProperty('transition')
+        card.removeEventListener('click', card.__g08Blocker, { capture: true })
+        delete card.__g08Blocker
+    })()`)
+    if (!pressed.active || pressed.transform === hoverTransform || pressed.transform === "none") {
+        throw new Error("Scene card hover suppresses its physical press feedback.")
+    }
+    return { hoverTransform, ...pressed }
 }
 
 async function verifyTooltipBehavior(window) {
@@ -280,20 +326,25 @@ async function verifyTooltipBehavior(window) {
 async function verifyLinearIndeterminateProgress(window) {
     const result = await window.webContents.executeJavaScript(`(() => {
         const fixture = document.createElement('div')
-        fixture.innerHTML = '<div class="export-progress is-preparing"><div><span></span></div></div><div class="launch-progress"><span></span></div>'
+        fixture.innerHTML = '<div class="export-progress is-preparing"><div><span></span></div></div><div class="launch-progress"><span></span></div><span class="processing-bar"><i></i></span>'
         document.body.append(fixture)
         const exportStyle = getComputedStyle(fixture.querySelector('.export-progress span'))
         const launchStyle = getComputedStyle(fixture.querySelector('.launch-progress span'))
+        const processingStyle = getComputedStyle(fixture.querySelector('.processing-bar i'))
         const value = {
             exportName: exportStyle.animationName,
             exportTiming: exportStyle.animationTimingFunction,
             launchName: launchStyle.animationName,
             launchTiming: launchStyle.animationTimingFunction,
+            processingName: processingStyle.animationName,
+            processingTiming: processingStyle.animationTimingFunction,
         }
         fixture.remove()
         return value
     })()`)
-    if (result.exportName === "none" || result.exportTiming !== "linear" || result.launchName === "none" || result.launchTiming !== "linear") {
+    if (result.exportName === "none" || result.exportTiming !== "linear"
+        || result.launchName === "none" || result.launchTiming !== "linear"
+        || result.processingName === "none" || result.processingTiming !== "linear") {
         throw new Error("Indeterminate progress motion is not linear.")
     }
     return result
@@ -364,6 +415,10 @@ async function readCatalogueMetrics(window) {
                 clientHeight: shell.clientHeight,
                 scrollHeight: shell.scrollHeight,
             },
+            header: {
+                icon: rect('.style-gallery-header > .galileo-app-icon'),
+                copy: rect('.style-gallery-header > :nth-child(2)'),
+            },
             targets: {
                 scaleButton: rect('.interface-scale-control button'),
                 category: rect('.style-category-pills button'),
@@ -372,6 +427,22 @@ async function readCatalogueMetrics(window) {
             },
         }
     })()`)
+}
+
+function targetFloor(interfaceScale) {
+    return interfaceScale < 100 ? 44 : 44 * interfaceScale / 100
+}
+
+function assertTargetFloor(label, targets, interfaceScale) {
+    const floor = targetFloor(interfaceScale)
+    const undersized = Object.entries(targets).find(([, target]) => target.width + 0.2 < floor || target.height + 0.2 < floor)
+    if (undersized) throw new Error(`${label} has ${undersized[0]} below its ${floor}px physical target floor.`)
+}
+
+function rectSeparation(first, second) {
+    const horizontal = Math.max(first.left - second.right, second.left - first.right, 0)
+    const vertical = Math.max(first.top - second.bottom, second.top - first.bottom, 0)
+    return Math.max(horizontal, vertical)
 }
 
 async function scrollCatalogueToBottom(window) {
@@ -486,10 +557,15 @@ function assertInvariant(metrics) {
         if (value.header.autosave && value.header.autosave.right > value.header.scale.left - 1) {
             throw new Error(`${key} lets autosave overlap Interface Scale.`)
         }
-        const physicalTargetFloor = value.interfaceScale < 100 ? 44 : 44 * value.interfaceScale / 100
-        if (Object.values(value.targets).some((target) => target.height + 0.2 < physicalTargetFloor)) {
-            throw new Error(`${key} has a primary target below its ${physicalTargetFloor}px physical floor.`)
-        }
+        assertTargetFloor(key, value.targets, value.interfaceScale)
+        if (Object.values(value.scrollGutters).some((gutter) => !gutter.includes("stable"))) throw new Error(`${key} can jump when a rail scrollbar appears.`)
+        const ratio = value.interfaceScale / 100
+        const badIcon = Object.entries(value.icons).find(([, icon]) => {
+            const logicalWidth = icon.width / ratio
+            const logicalHeight = icon.height / ratio
+            return logicalWidth < 21.5 || logicalWidth > 24.5 || logicalHeight < 21.5 || logicalHeight > 24.5 || Math.abs(logicalWidth - logicalHeight) > 0.2
+        })
+        if (badIcon) throw new Error(`${key} has an incoherent ${badIcon[0]} icon size.`)
         if (value.focus.outlineStyle === "none" || parseFloat(value.focus.outlineWidth) < 2) throw new Error(`${key} lacks visible keyboard focus.`)
         if (!value.projectDocument) throw new Error(`${key} has no durable Project state to compare.`)
     }
@@ -505,9 +581,11 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
         || !catalogueVocabulary.summary?.includes("curated Scenes")
         || catalogueVocabulary.search !== "Search Scenes"
         || catalogueVocabulary.empty !== "No Scenes found."
-        || !catalogueVocabulary.footer?.endsWith("Scenes")) {
+        || !catalogueVocabulary.footer?.endsWith("Scenes")
+        || catalogueVocabulary.current.length !== 1) {
         throw new Error("The catalogue does not use the Product Scene vocabulary consistently.")
     }
+    const sceneCardPress = await verifySceneCardPressFeedback(window)
     const captures = { catalogue100: await capture(window, outputDirectory, "gallery-catalogue-100") }
 
     // Keyboard, persisted reload, and a real StorageEvent all converge without StrictMode leaks.
@@ -536,11 +614,10 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
         const key = `minimum-${scale}`
         catalogueMetrics[key] = await readCatalogueMetrics(window)
         const value = catalogueMetrics[key]
-        const physicalTargetFloor = scale < 100 ? 44 : 44 * scale / 100
         if (value.shell.scrollWidth > value.shell.clientWidth + 1) throw new Error(`${key} has horizontally clipped catalogue content.`)
-        if (Object.values(value.targets).some((target) => target.height + 0.2 < physicalTargetFloor)) {
-            throw new Error(`${key} has a catalogue target below its ${physicalTargetFloor}px physical floor.`)
-        }
+        assertTargetFloor(key, value.targets, scale)
+        const headerGap = rectSeparation(value.header.icon, value.header.copy)
+        if (headerGap + 0.5 < 18 * scale / 100) throw new Error(`${key} lets the Gallery mark crowd its headline.`)
         captures[`catalogue-${key}-top`] = await capture(window, outputDirectory, `gallery-catalogue-${key}-top`)
         catalogueReachability[key] = await scrollCatalogueToBottom(window)
         captures[`catalogue-${key}-bottom`] = await capture(window, outputDirectory, `gallery-catalogue-${key}-bottom`)
@@ -665,6 +742,7 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
         host,
         workflow,
         catalogueVocabulary,
+        sceneCardPress,
         sceneVocabulary,
         formatTruth,
         tooltipBehavior,

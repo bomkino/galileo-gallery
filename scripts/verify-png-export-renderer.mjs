@@ -1,7 +1,12 @@
 import assert from "node:assert/strict"
+import { createRequire } from "node:module"
 import { DEFAULT_SETTINGS } from "../src/defaults.ts"
 import { defaultAudioIntent } from "../src/audio/audioTimeline.ts"
-import { createHostBackedAPI } from "../src/runtime.ts"
+import { createHostBackedAPI, createLegacyBackedAPI } from "../src/runtime.ts"
+import { compileShelfTimeline } from "../src/scenes/shelf.ts"
+
+const require = createRequire(import.meta.url)
+const { createPngFramesSnapshot } = require("../electron/png-export-contract.cjs")
 
 function deferred() {
     let resolve
@@ -15,7 +20,14 @@ const request = {
     width: 64, height: 64, fps: 10, durationMs: 150, format: "png-frames", posterFrame: "none", quality: "master",
 }
 
-const pngCapability = { id: "png-frames", available: true, alpha: true, audio: false, sceneVersions: [{ id: "quiet-carousel", versions: [1] }, { id: "vitrine", versions: [2] }], consequence: "No audio." }
+const pngCapability = {
+    id: "png-frames",
+    available: true,
+    alpha: true,
+    audio: false,
+    sceneVersions: [{ id: "quiet-carousel", versions: [1], video: true }, { id: "vitrine", versions: [2], video: true }, { id: "the-shelf", versions: [2], video: false }],
+    consequence: "No audio.",
+}
 
 const vitrineConfig = {
     schemaVersion: 2,
@@ -65,6 +77,68 @@ const vitrineRequest = {
     durationMs: 2_160,
     cycleDurationMs: 2_160,
     finalCycleDurationMs: 2_160,
+    format: "png-frames",
+    posterFrame: "none",
+    quality: "master",
+}
+
+const shelfItems = Array.from({ length: 3 }, (_, index) => ({
+    id: `shelf-edition-${index + 1}`,
+    name: `Shelf Edition ${index + 1}.png`,
+    type: "image",
+    url: `reel-media://grant/${String(index + 7).repeat(64)}`,
+    ratio: [0.8, 1, 16 / 9][index],
+    aspectMode: "auto",
+    ratioW: 1,
+    ratioH: 1,
+    fit: index === 1 ? "cover" : "contain",
+    crop: index === 1 ? { x: 0.1, y: 0.2, width: 0.8, height: 0.6 } : { x: 0, y: 0, width: 1, height: 1 },
+    focal: index === 1 ? { x: 0.25, y: 0.75 } : { x: 0.5, y: 0.5 },
+    caption: `Shelf edition ${index + 1}`,
+    spotlight: false,
+    muted: false,
+}))
+
+const shelfConfig = {
+    schemaVersion: 2,
+    styleId: "the-shelf",
+    sceneVersion: 2,
+    timelineMode: "automatic",
+    timelineFixedDurationMs: 0,
+    timelineSegments: [],
+    items: shelfItems,
+    settings: {
+        ...DEFAULT_SETTINGS,
+        canvasPreset: "custom",
+        canvasWidth: 64,
+        canvasHeight: 64,
+        ratioMode: "auto",
+        imageFit: "contain",
+        loopVideos: true,
+        axis: "horizontal",
+        direction: "reverse",
+        playKind: "repeat",
+        repeatCount: 2,
+        backgroundStyle: "transparent",
+        paceMs: 3_000,
+        slideHeight: 42,
+        gap: 34,
+        tilt: 2.5,
+        centerBump: 8,
+        spotlightsEnabled: false,
+        finaleEnabled: true,
+        theme: "dark",
+    },
+}
+
+const shelfRequest = {
+    config: shelfConfig,
+    width: 64,
+    height: 64,
+    fps: 10,
+    durationMs: 18_000,
+    cycleDurationMs: 9_000,
+    finalCycleDurationMs: 9_000,
     format: "png-frames",
     posterFrame: "none",
     quality: "master",
@@ -172,6 +246,109 @@ async function run() {
     assert.equal(vitrineIntent.finalCycleDurationMs, 2_160)
     assert.equal(vitrineIntent.config, vitrineConfig)
 
+    let shelfPreflights = 0
+    const shelfIntents = []
+    const shelfApi = createHostBackedAPI(baseHost({
+        preflightPngFrames: async (intent) => {
+            shelfPreflights += 1
+            shelfIntents.push(intent)
+            return { snapshotId: "8".repeat(32), format: "png-frames", width: 64, height: 64, fps: 10, durationMs: intent.durationMs, frameCount: Math.round(intent.durationMs / 100), alpha: intent.transparent, audio: "none", consequence: "No audio." }
+        },
+    }))
+    const { cycleDurationMs: _shelfCycle, ...shelfWithoutCycle } = shelfRequest
+    await assert.rejects(shelfApi.exportReel(shelfWithoutCycle), /Shelf export clocks do not match/, "Shelf cycle clock must be explicit")
+    for (const patch of [
+        { durationMs: 18_001 },
+        { cycleDurationMs: 9_001 },
+        { finalCycleDurationMs: 9_001 },
+    ]) await assert.rejects(shelfApi.exportReel({ ...shelfRequest, ...patch }), /Shelf export clocks do not match/)
+    assert.equal(shelfPreflights, 0, "mismatched Shelf clocks must not cross the renderer-to-host boundary")
+    await assert.rejects(shelfApi.exportReel({
+        ...shelfRequest,
+        config: { ...shelfConfig, settings: { ...shelfConfig.settings, paceMs: 3_500 } },
+    }), /Shelf export clocks do not match/, "a causal Shelf pace change must invalidate the stale export clock")
+    assert.equal(shelfPreflights, 0)
+    await assert.rejects(shelfApi.exportReel({
+        ...shelfRequest,
+        config: { ...shelfConfig, items: shelfItems.map((item, index) => index === 0 ? { ...item, aspectMode: "global" } : item) },
+    }), /natural ratio/, "Shelf PNG export must reject non-natural frame geometry locally")
+    assert.equal(shelfPreflights, 0)
+    await assert.rejects(shelfApi.exportReel({
+        ...shelfRequest,
+        config: { ...shelfConfig, items: shelfItems.map((item, index) => index === 0 ? { ...item, type: "video" } : item) },
+    }), /still images only/, "Shelf video export must fail closed before allocating a host snapshot")
+    assert.equal(shelfPreflights, 0)
+    let dishonestShelfPreflights = 0
+    const dishonestShelfApi = createHostBackedAPI(baseHost({
+        exportCapabilities: async () => ({
+            version: 1,
+            formats: [{ ...pngCapability, sceneVersions: pngCapability.sceneVersions.map((scene) => scene.id === "the-shelf" ? { ...scene, video: true } : scene) }],
+        }),
+        preflightPngFrames: async () => { dishonestShelfPreflights += 1; throw new Error("must not run") },
+    }))
+    await assert.rejects(dishonestShelfApi.exportReel(shelfRequest), /capabilities are invalid/, "renderer must reject a host that overstates Shelf video support")
+    assert.equal(dishonestShelfPreflights, 0)
+    assert.deepEqual(await shelfApi.exportReel(shelfRequest), {})
+    assert.equal(shelfPreflights, 1)
+    assert.equal(shelfIntents[0].config, shelfConfig)
+    assert.equal(shelfIntents[0].durationMs, 18_000)
+    assert.equal(shelfIntents[0].cycleDurationMs, 9_000)
+    assert.equal(shelfIntents[0].finalCycleDurationMs, 9_000)
+    assert.equal(shelfIntents[0].transparent, true, "transparent Shelf must reach host preflight as an alpha request")
+    const solidShelfConfig = { ...shelfConfig, settings: { ...shelfConfig.settings, backgroundStyle: "solid" } }
+    assert.deepEqual(await shelfApi.exportReel({ ...shelfRequest, config: solidShelfConfig }), {})
+    assert.equal(shelfPreflights, 2)
+    assert.equal(shelfIntents[1].transparent, false, "solid Shelf must causally reach host preflight as opaque")
+    assert.equal(shelfIntents[1].config, solidShelfConfig)
+
+    const shelfCompilerParityCases = [
+        { mode: "automatic", count: 1, paceMs: 180, fixedDurationMs: 0, segments: [], playKind: "loop", repeatCount: 1, fps: 1 },
+        { mode: "automatic", count: 3, paceMs: 3_500, fixedDurationMs: 0, segments: [], playKind: "repeat", repeatCount: 2, fps: 24 },
+        { mode: "automatic", count: 127, paceMs: 8_000, fixedDurationMs: 0, segments: [], playKind: "once", repeatCount: 1, fps: 1 },
+        { mode: "fixed-duration", count: 2, paceMs: 333.3, fixedDurationMs: 1_001, segments: [], playKind: "once", repeatCount: 1, fps: 1 },
+        {
+            mode: "directed", count: 3, paceMs: 180, fixedDurationMs: 0, playKind: "once", repeatCount: 1, fps: 30,
+            segments: [{ id: "two-walks", kind: "cycle", cycles: 2, paceScale: 2, durationMs: 0 }, { id: "short-hold", kind: "hold", cycles: 0, paceScale: 1, durationMs: 0 }],
+        },
+        {
+            mode: "directed", count: 3, paceMs: 777.7, fixedDurationMs: 0, playKind: "repeat", repeatCount: 2, fps: 60,
+            segments: [
+                { id: "fractional-walk", kind: "cycle", cycles: 3, paceScale: 7, durationMs: 0 },
+                { id: "pace-hold", kind: "hold", cycles: 0, paceScale: 1, durationMs: 0 },
+                { id: "literal-walk", kind: "cycle", cycles: 1, paceScale: 0.05, durationMs: 333.25 },
+            ],
+        },
+    ]
+    for (const candidate of shelfCompilerParityCases) {
+        const timeline = compileShelfTimeline({
+            mode: candidate.mode,
+            direction: "reverse",
+            mediaCount: candidate.count,
+            paceMs: candidate.paceMs,
+            fixedDurationMs: candidate.fixedDurationMs,
+            segments: candidate.segments,
+            fps: candidate.fps,
+        })
+        const config = {
+            ...shelfConfig,
+            timelineMode: candidate.mode,
+            timelineFixedDurationMs: candidate.fixedDurationMs,
+            timelineSegments: candidate.segments,
+            items: Array.from({ length: candidate.count }, (_, index) => ({ ...shelfItems[index % shelfItems.length], id: `parity-${candidate.mode}-${index}`, name: `Parity ${index}` })),
+            settings: { ...shelfConfig.settings, paceMs: candidate.paceMs, playKind: candidate.playKind, repeatCount: candidate.repeatCount },
+        }
+        const durationMs = candidate.playKind === "repeat" ? timeline.durationMs * candidate.repeatCount : timeline.durationMs
+        const snapshot = createPngFramesSnapshot({
+            config, width: 64, height: 64, fps: candidate.fps, durationMs,
+            cycleDurationMs: timeline.durationMs, finalCycleDurationMs: timeline.durationMs, transparent: true,
+        })
+        assert.deepEqual(
+            { durationMs: snapshot.durationMs, cycleDurationMs: snapshot.cycleDurationMs, finalCycleDurationMs: snapshot.finalCycleDurationMs, frameCount: snapshot.frameCount },
+            { durationMs, cycleDurationMs: timeline.durationMs, finalCycleDurationMs: timeline.durationMs, frameCount: Math.max(1, Math.ceil(durationMs / 1_000 * candidate.fps)) },
+            `host Shelf clock diverged from compileShelfTimeline for ${candidate.mode}`,
+        )
+    }
+
     const priorGlobals = Object.fromEntries(["window", "document", "Image", "HTMLMediaElement", "HTMLVideoElement"].map((key) => [key, globalThis[key]]))
     class FakeHTMLMediaElement {
         constructor(mode) { this.mode = mode; this.source = ""; this.loadCalls = 0; this.pauseCalls = 0 }
@@ -186,7 +363,31 @@ async function run() {
             queueMicrotask(() => this.mode === "error" ? this.onerror?.() : this.onloadeddata?.())
         }
     }
-    class FakeHTMLVideoElement extends FakeHTMLMediaElement {}
+    class FakeHTMLVideoElement extends FakeHTMLMediaElement {
+        constructor(mode) {
+            super(mode)
+            this.readyState = 2
+            this.videoWidth = 1920
+            this.videoHeight = 1080
+            this.frameCallback = null
+            this.removeCalls = 0
+        }
+        requestVideoFrameCallback(callback) { this.frameCallback = callback; return 1 }
+        cancelVideoFrameCallback() {}
+        play() { return Promise.resolve() }
+        remove() { this.removeCalls += 1 }
+        load() {
+            this.loadCalls += 1
+            if (!this.source) return
+            if (this.mode === "pending") return
+            if (this.mode === "frame") {
+                const callback = this.frameCallback
+                queueMicrotask(() => callback?.(10, { mediaTime: 0 }))
+                return
+            }
+            queueMicrotask(() => this.mode === "error" ? this.onerror?.() : this.onloadeddata?.())
+        }
+    }
     let videoMode = "loaded"
     const videoModes = []
     const videos = []
@@ -276,10 +477,97 @@ async function run() {
         videoModes.length = 0
 
         videoMode = "loaded"
-        const opened = await createHostBackedAPI(openHost("loaded")).openProject()
+        const openedApi = createHostBackedAPI(openHost("loaded"))
+        const opened = await openedApi.openProject()
         assert.equal(opened.config, videoConfig)
+        assert.equal(accepts, 0, "renderer caller must retain the baseline/epoch decision before acceptance")
+        await openedApi.acceptProjectOpen(opened.operationId)
         assert.equal(accepts, 1)
         assert.equal(discards, 2)
+
+        const shelfConfig = {
+            ...vitrineConfig,
+            styleId: "the-shelf",
+            sceneVersion: 2,
+            timelineMode: "automatic",
+            timelineFixedDurationMs: 0,
+            timelineSegments: [],
+            settings: {
+                ...DEFAULT_SETTINGS,
+                axis: "horizontal",
+                ratioMode: "auto",
+                direction: "forward",
+                playKind: "once",
+                repeatCount: 1,
+                imageFit: "contain",
+                spotlightsEnabled: false,
+                finaleEnabled: false,
+                slideHeight: 44,
+                gap: 30,
+                tilt: 2.5,
+                centerBump: 5,
+            },
+            audio: defaultAudioIntent(),
+            items: [{
+                ...vitrineConfig.items[0],
+                id: "shelf-video",
+                name: "Shelf Video.mp4",
+                type: "video",
+                url: `reel-media://grant/${"a".repeat(64)}`,
+                aspectMode: "auto",
+                fit: "contain",
+                spotlight: false,
+                muted: false,
+            }],
+        }
+        let shelfAccepts = 0
+        let shelfDiscards = 0
+        videoMode = "frame"
+        const shelfStart = videos.length
+        const shelfHost = openHost("frame", shelfConfig, {
+            acceptProjectOpen: async () => {
+                shelfAccepts += 1
+                const decoder = videos[shelfStart]
+                assert.equal(decoder.source, "", "Shelf decoder must release candidate authority before host acceptance")
+                assert.equal(decoder.pauseCalls, 1)
+                assert.equal(decoder.loadCalls, 2)
+                assert.equal(decoder.removeCalls, 1)
+                return { generation: 2 }
+            },
+            discardProjectOpen: async () => { shelfDiscards += 1; return { discarded: true } },
+        })
+        const shelfApi = createHostBackedAPI(shelfHost)
+        const shelfOpened = await shelfApi.openProject()
+        assert.equal(shelfOpened.config, shelfConfig)
+        assert.equal(shelfAccepts, 0, "Shelf admission must finish while prior-generation authority is still live")
+        await shelfApi.acceptProjectOpen(shelfOpened.operationId)
+        assert.equal(shelfAccepts, 1)
+        assert.equal(shelfDiscards, 0)
+
+        let legacyAccepts = 0
+        let legacyDiscards = 0
+        const legacyStart = videos.length
+        videoMode = "frame"
+        const legacyApi = createLegacyBackedAPI({
+            platform: "darwin",
+            openProject: async () => ({ config: shelfConfig, operationId: "b".repeat(32) }),
+            acceptProjectOpen: async () => {
+                legacyAccepts += 1
+                const decoder = videos[legacyStart]
+                assert.equal(decoder.source, "")
+                assert.equal(decoder.pauseCalls, 1)
+                assert.equal(decoder.loadCalls, 2)
+                assert.equal(decoder.removeCalls, 1)
+            },
+            discardProjectOpen: async () => { legacyDiscards += 1 },
+            cancelProjectOpen: async () => ({ cancelled: true }),
+        })
+        const legacyCandidate = await legacyApi.openProject()
+        assert.equal(legacyCandidate.config, shelfConfig)
+        assert.equal(legacyAccepts, 0)
+        await legacyApi.acceptProjectOpen(legacyCandidate.operationId)
+        assert.equal(legacyAccepts, 1)
+        assert.equal(legacyDiscards, 0)
     } finally {
         for (const [key, value] of Object.entries(priorGlobals)) {
             if (value === undefined) delete globalThis[key]
@@ -287,7 +575,7 @@ async function run() {
         }
     }
 
-    console.log("Verified: renderer host adapter owns one workflow, rejects invalid Vitrine clocks, and accepts only decoded, released Project candidates.")
+    console.log("Verified: renderer host adapter owns one workflow, preserves Vitrine behavior, admits exact image-only Shelf PNG/alpha clocks, and accepts Shelf Projects only after original-source frame admission and decoder retirement.")
 }
 
 run().catch((error) => { console.error(error); process.exitCode = 1 })

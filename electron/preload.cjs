@@ -1,5 +1,10 @@
 const { contextBridge, ipcRenderer, webUtils } = require("electron")
 
+function projectOpenOperationId(value) {
+    if (typeof value !== "string" || !/^[a-f0-9]{32}$/.test(value)) throw new Error("Project open operation is invalid.")
+    return value
+}
+
 contextBridge.exposeInMainWorld("reelAPI", {
     platform: process.platform,
     pickMedia: () => ipcRenderer.invoke("media:pick"),
@@ -10,6 +15,8 @@ contextBridge.exposeInMainWorld("reelAPI", {
     createVideoProxy: (url) => ipcRenderer.invoke("media:create-video-proxy", url),
     saveProject: (config) => ipcRenderer.invoke("project:save", config),
     openProject: () => ipcRenderer.invoke("project:open"),
+    acceptProjectOpen: (operationId) => ipcRenderer.invoke("project:accept-open", projectOpenOperationId(operationId)),
+    discardProjectOpen: (operationId) => ipcRenderer.invoke("project:discard-open", projectOpenOperationId(operationId)),
     cancelProjectOpen: () => ipcRenderer.invoke("project:cancel-open"),
     saveTemplate: (settings) => ipcRenderer.invoke("template:save", settings),
     openTemplate: () => ipcRenderer.invoke("template:open"),

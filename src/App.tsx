@@ -1,16 +1,20 @@
 import * as React from "react"
-import { createPortal } from "react-dom"
+import { createPortal, flushSync } from "react-dom"
 import OpeningReel from "./OpeningReel"
 import ExpertControls, { type ExpertPreset, type ExpertTab } from "./ExpertControls"
 import ProductSceneRenderer, { isAuthoredVitrine, productSceneDuration } from "./scenes/ProductSceneRenderer"
 import { minimumVitrineFixedDuration, VITRINE_MIN_EXCHANGE_MS, VITRINE_MIN_HOLD_MS, vitrineStoryTimeMs } from "./scenes/vitrine"
 import { assertVitrineV2Settings, exclusiveVitrineOpening, firstEligibleVitrineItem, isVitrineV2, reconcileVitrineConfig, VITRINE_MAX_DURATION_MS, VITRINE_MAX_ITEMS } from "./vitrineConfig"
+import { assertShelfV2Settings, exclusiveShelfSpotlight, isShelfV2 } from "./shelfConfig"
+import { SHELF_MAX_DURATION_MS, SHELF_MAX_ITEMS } from "./scenes/shelf"
+import { productUndoKeys, reconcileProductSceneConfig, resetShelfSourceGeometry, type ProductUndoEntry, type ProductUndoKey } from "./productSceneRuntime"
 import QuietCarouselRenderer, { quietCarouselTimeline } from "./scenes/QuietCarouselRenderer"
 import StyleGallery from "./StyleGallery"
 import { ensureReelAPI } from "./runtime"
+import { admitShelfVideos } from "./shelfVideoAdmission"
 import { exportCycleClock } from "./exportClock"
 import { defaultAudioIntent } from "./audio/audioTimeline"
-import { projectConfigAfterOpen, projectOpenNotice } from "./projectOpen"
+import { admitShelfMediaItems, applyProjectOpenTransaction, createProjectMutationLane, projectOpenNotice, withDecoderAdmissionGate } from "./projectOpen"
 import { styleProfile, styleSettings } from "./styleProfiles"
 import { placeholderItems, studioTimeline } from "./timeline"
 import { GALLERY_STYLES, galleryScene, galleryStyle, latestSceneVersion, sceneVariants, supportsSceneVersion, supportsVerifiedPngFrames, type StyleDefinition } from "./styleRegistry"
@@ -44,6 +48,14 @@ function normalizeConfig(value: Partial<ReelConfig> | null | undefined): ReelCon
     const styleId = value?.styleId ?? "opening-reel"
     const sceneVersion = value?.sceneVersion ?? 1
     if (!supportsSceneVersion(styleId, sceneVersion)) throw new Error(`Unsupported Gallery Scene version: ${styleId} v${sceneVersion}`)
+    const strictShelf = styleId === "the-shelf" && sceneVersion === 2
+    if (strictShelf && (value?.settings?.ratioMode !== "auto" || value.settings.axis !== "horizontal"
+        || !["dark", "light"].includes(value.settings.theme ?? "")
+        || !["solid", "transparent"].includes(value.settings.backgroundStyle ?? "")
+        || !Array.isArray(value.items) || value.items.length < 1 || value.items.length > SHELF_MAX_ITEMS
+        || value.items.some((item) => item.aspectMode !== "auto"))) {
+        throw new Error("Saved Shelf v2 Project geometry or room intent is invalid.")
+    }
     const config = {
         schemaVersion: 2,
         styleId,
@@ -51,7 +63,7 @@ function normalizeConfig(value: Partial<ReelConfig> | null | undefined): ReelCon
         items: Array.isArray(value?.items)
             ? value.items.map((item) => ({
                   ...item,
-                  aspectMode: item.aspectMode ?? "auto",
+                  aspectMode: strictShelf ? item.aspectMode : item.aspectMode ?? "auto",
                   ratioW: item.ratioW ?? 16,
                   ratioH: item.ratioH ?? 9,
                   fit: item.fit ?? (styleId === "vitrine" && sceneVersion === 2 ? "contain" : value?.settings?.imageFit ?? "contain"),
@@ -65,7 +77,7 @@ function normalizeConfig(value: Partial<ReelConfig> | null | undefined): ReelCon
         timelineSegments: value?.timelineSegments ?? [],
         audio: value?.audio ?? defaultAudioIntent(),
     }
-    return reconcileVitrineConfig(config)
+    return reconcileProductSceneConfig(config)
 }
 
 function applyStyleDefaults(current: ReelSettings, styleId: string, sceneVersion = 1): ReelSettings {
@@ -78,7 +90,7 @@ function applyStyleDefaults(current: ReelSettings, styleId: string, sceneVersion
         imageFit: current.imageFit,
         autoplayVideos: current.autoplayVideos,
         loopVideos: current.loopVideos,
-        ratioMode: current.ratioMode,
+        ratioMode: styleId === "the-shelf" && sceneVersion === 2 ? "auto" : current.ratioMode,
         fixedRatio: current.fixedRatio,
         customRatioWidth: current.customRatioWidth,
         customRatioHeight: current.customRatioHeight,
@@ -90,19 +102,29 @@ function applyStyleDefaults(current: ReelSettings, styleId: string, sceneVersion
     }
 }
 
-function readLocalProject() {
+type LocalProjectRead = {
+    config: ReelConfig
+    savedAt: number
+    pendingShelf?: { config: ReelConfig; savedAt: number }
+}
+
+function readLocalProject(): LocalProjectRead {
+    const empty = normalizeConfig(null)
     try {
         const saved = localStorage.getItem(LOCAL_PROJECT_KEY)
         if (saved) {
+            const config = normalizeConfig(JSON.parse(saved) as Partial<ReelConfig>)
+            const savedAt = Number(localStorage.getItem(LOCAL_SAVED_AT_KEY)) || 0
+            if (isShelfV2(config)) return { config: empty, savedAt, pendingShelf: { config, savedAt } }
             return {
-                config: normalizeConfig(JSON.parse(saved) as Partial<ReelConfig>),
-                savedAt: Number(localStorage.getItem(LOCAL_SAVED_AT_KEY)) || 0,
+                config,
+                savedAt,
             }
         }
     } catch {
         // A disk recovery snapshot gets a chance after mount.
     }
-    return { config: normalizeConfig(null), savedAt: 0 }
+    return { config: empty, savedAt: 0 }
 }
 
 function savedTimeLabel(savedAt: number | null) {
@@ -135,9 +157,6 @@ const MOTION_BASES: Record<Exclude<MotionPreset, "custom">, Pick<ReelSettings, "
 }
 
 type InspectorTab = "design" | "expert" | "export"
-type VitrineUndoKey = "slideHeight" | "tilt" | "sway" | "transitionDirection" | "showHint"
-type VitrineUndoEntry = { key: VitrineUndoKey; value: ReelSettings[VitrineUndoKey] }
-const VITRINE_UNDO_KEYS = new Set<keyof ReelSettings>(["slideHeight", "tilt", "sway", "transitionDirection", "showHint"])
 
 function clamp(value: number, min: number, max: number) {
     return Math.min(max, Math.max(min, value))
@@ -300,6 +319,10 @@ async function hydrateMedia(media: SelectedMedia[], createVideoPreviews = true):
     return { items: results.filter((item): item is MediaItem => item != null), failures }
 }
 
+async function admitShelfItems(items: MediaItem[]): Promise<MediaItem[]> {
+    return admitShelfMediaItems(items, (sources) => admitShelfVideos(sources))
+}
+
 function sourceItems(items: MediaItem[]) {
     const source = items.length > 0 ? items : placeholderItems()
     return source.map((item) => {
@@ -394,7 +417,7 @@ function nextPaint() {
 }
 
 async function waitForExportFrameImages(expectVitrineMetrics = false) {
-    const images = Array.from(document.querySelectorAll<HTMLImageElement>("img.orl-export-frame, img.galileo-media, .qc-export-stage img, img.product-export-media"))
+    const images = Array.from(document.querySelectorAll<HTMLImageElement>("img.orl-export-frame, img.galileo-media, .qc-export-stage img, img.product-export-media, .shelf-stage img.shelf-media"))
     await Promise.all(images.map(async (image) => {
         try {
             await image.decode()
@@ -649,7 +672,7 @@ function RangeControl({
 
 function AppView() {
     const initialProject = React.useRef(readLocalProject())
-    const [config, setConfig] = React.useState<ReelConfig>(initialProject.current.config)
+    const [config, setConfigState] = React.useState<ReelConfig>(initialProject.current.config)
     const [inspector, setInspector] = React.useState<InspectorTab>("design")
     const [expertTab, setExpertTab] = React.useState<ExpertTab>("slides")
     const [fps, setFps] = React.useState(30)
@@ -678,14 +701,55 @@ function AppView() {
     const [showStyleGallery, setShowStyleGallery] = React.useState(true)
     const [saveNotice, setSaveNotice] = React.useState<string | null>(null)
     const [projectOpening, setProjectOpening] = React.useState(false)
+    const [decoderAdmissionGated, setDecoderAdmissionGated] = React.useState(false)
+    const projectOpeningRef = React.useRef(false)
+    const projectOpenExclusiveRef = React.useRef(false)
+    const projectOpenCommitRef = React.useRef(false)
+    const projectOpenCancelRequestedRef = React.useRef(false)
     const [documentVisible, setDocumentVisible] = React.useState(() => document.visibilityState !== "hidden")
     const [systemReducedMotion, setSystemReducedMotion] = React.useState(() => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false)
     const configRef = React.useRef(config)
+    const configEpochRef = React.useRef(0)
+    const [projectMutationLane] = React.useState(createProjectMutationLane)
     const hiddenAtRef = React.useRef<number | null>(null)
     const videoProxyJobs = React.useRef(new Set<string>())
     const playbackShapeRef = React.useRef("")
-    const vitrineUndoStackRef = React.useRef<VitrineUndoEntry[]>([])
-    const vitrineTransactionRef = React.useRef<VitrineUndoEntry | null>(null)
+    const productUndoStackRef = React.useRef<ProductUndoEntry[]>([])
+    const productTransactionRef = React.useRef<ProductUndoEntry | null>(null)
+    const recoveryWriteBlockRef = React.useRef<{ config: ReelConfig; epoch: number } | null>(null)
+
+    const applyConfig = React.useCallback((recipe: ReelConfig | ((current: ReelConfig) => ReelConfig)) => {
+        if (projectOpenExclusiveRef.current && !projectOpenCommitRef.current) {
+            setSaveNotice("Finish opening the Project before making another change.")
+            return false
+        }
+        try {
+            const current = configRef.current
+            const candidate = typeof recipe === "function" ? recipe(current) : recipe
+            const next = reconcileProductSceneConfig(candidate)
+            configRef.current = next
+            configEpochRef.current += 1
+            setConfigState(next)
+            return true
+        } catch (error) {
+            setSaveNotice(error instanceof Error ? error.message : "That Project change was rejected.")
+            return false
+        }
+    }, [])
+
+    const runWithDecoderAdmissionGate = React.useCallback(<T,>(work: () => Promise<T>) => withDecoderAdmissionGate({
+        unmount: () => flushSync(() => setDecoderAdmissionGated(true)),
+        paint: nextPaint,
+        remount: () => flushSync(() => setDecoderAdmissionGated(false)),
+    }, work), [])
+
+    const recoveryWritesAllowed = React.useCallback((candidate: ReelConfig) => {
+        const blocked = recoveryWriteBlockRef.current
+        if (!blocked) return true
+        if (candidate === blocked.config && configEpochRef.current === blocked.epoch) return false
+        recoveryWriteBlockRef.current = null
+        return true
+    }, [])
 
     const output = canvasOutput(config.settings)
     const timeline = React.useMemo(
@@ -709,7 +773,7 @@ function AppView() {
         ? duration * (repeatCount - 1) + finalCycleDuration
         : duration
     const terminalCycle = config.settings.playKind === "once"
-        || (isAuthoredVitrine(config) && config.settings.playKind === "repeat")
+        || ((isAuthoredVitrine(config) || isShelfV2(config)) && config.settings.playKind === "repeat")
         || (config.settings.playKind === "repeat" && playIteration === repeatCount)
     const activeCycleDuration = terminalCycle && config.settings.playKind === "repeat" ? finalCycleDuration : duration
     const liveSlides = React.useMemo(() => sourceItems(config.items), [config.items])
@@ -720,8 +784,11 @@ function AppView() {
     const activeVariants = sceneVariants(config.styleId)
     const activeProfile = styleProfile(config.styleId, config.sceneVersion ?? 1)
     const authoredVitrine = isAuthoredVitrine(config)
-    const reducedVitrinePreview = authoredVitrine && systemReducedMotion
-    const verifiedPngScene = usesLinuxHostPort && supportsVerifiedPngFrames(config.styleId, config.sceneVersion ?? 1)
+    const authoredShelf = isShelfV2(config)
+    const authoredProductScene = authoredVitrine || authoredShelf
+    const reducedProductPreview = authoredProductScene && systemReducedMotion
+    const shelfPngVideoBlocked = authoredShelf && config.items.some((item) => item.type === "video")
+    const verifiedPngScene = usesLinuxHostPort && supportsVerifiedPngFrames(config.styleId, config.sceneVersion ?? 1) && !shelfPngVideoBlocked
     const directedPaceScale = authoredVitrine && config.timelineMode === "directed"
         ? Math.max(1, ...(config.timelineSegments ?? []).filter((segment) => segment.kind === "cycle" && segment.durationMs === 0).map((segment) => segment.paceScale))
         : 1
@@ -751,57 +818,62 @@ function AppView() {
         setInspectionItemId(null)
         setReelKey((key) => key + 1)
         setStartedAt(performance.now())
-        setPreviewStarted(!isOpeningReel && !freezePreview && !reducedVitrinePreview)
+        setPreviewStarted(!isOpeningReel && !freezePreview && !reducedProductPreview)
         setScrubPaused(false)
         setIsScrubbing(false)
         setPlayhead(0)
         setPlayIteration(1)
-    }, [isOpeningReel, freezePreview, reducedVitrinePreview])
+    }, [isOpeningReel, freezePreview, reducedProductPreview])
 
     const updateUndoDepth = React.useCallback(() => {
-        document.documentElement.dataset.vitrineUndoDepth = String(vitrineUndoStackRef.current.length)
+        const depth = String(productUndoStackRef.current.length)
+        document.documentElement.dataset.productSceneUndoDepth = depth
+        document.documentElement.dataset.vitrineUndoDepth = depth
     }, [])
-    const clearVitrineUndo = React.useCallback(() => {
-        vitrineTransactionRef.current = null
-        vitrineUndoStackRef.current = []
+    const clearProductUndo = React.useCallback(() => {
+        productTransactionRef.current = null
+        productUndoStackRef.current = []
         updateUndoDepth()
     }, [updateUndoDepth])
-    const beginVitrineSetting = React.useCallback((key: keyof ReelSettings) => {
-        if (!VITRINE_UNDO_KEYS.has(key) || !isVitrineV2(configRef.current) || vitrineTransactionRef.current) return
-        const undoKey = key as VitrineUndoKey
-        vitrineTransactionRef.current = { key: undoKey, value: configRef.current.settings[undoKey] }
+    const beginProductSetting = React.useCallback((key: keyof ReelSettings) => {
+        const keys = productUndoKeys(configRef.current)
+        if (!keys?.has(key) || productTransactionRef.current) return
+        const undoKey = key as ProductUndoKey
+        productTransactionRef.current = { key: undoKey, value: configRef.current.settings[undoKey] }
     }, [])
-    const endVitrineSetting = React.useCallback((key: keyof ReelSettings) => {
-        const transaction = vitrineTransactionRef.current
+    const endProductSetting = React.useCallback((key: keyof ReelSettings) => {
+        const transaction = productTransactionRef.current
         if (!transaction || transaction.key !== key) return
-        vitrineTransactionRef.current = null
+        productTransactionRef.current = null
         if (transaction.value !== configRef.current.settings[key]) {
-            vitrineUndoStackRef.current.push(transaction)
-            if (vitrineUndoStackRef.current.length > 100) vitrineUndoStackRef.current.shift()
+            productUndoStackRef.current.push(transaction)
+            if (productUndoStackRef.current.length > 100) productUndoStackRef.current.shift()
             updateUndoDepth()
         }
     }, [updateUndoDepth])
-    const undoVitrineSetting = React.useCallback(() => {
-        vitrineTransactionRef.current = null
-        const previous = vitrineUndoStackRef.current.pop()
+    const undoProductSetting = React.useCallback(() => {
+        productTransactionRef.current = null
+        const previous = productUndoStackRef.current.pop()
         if (!previous) return false
-        if (!isVitrineV2(configRef.current)) {
-            clearVitrineUndo()
+        if (!productUndoKeys(configRef.current)?.has(previous.key)) {
+            clearProductUndo()
             return false
         }
-        const next = reconcileVitrineConfig({
-            ...configRef.current,
-            settings: { ...configRef.current.settings, [previous.key]: previous.value },
-        })
-        configRef.current = next
-        setConfig(next)
-        setSaveNotice("Vitrine control change undone.")
+        const sceneName = isShelfV2(configRef.current) ? "Shelf" : "Vitrine"
+        if (!applyConfig((current) => ({ ...current, settings: { ...current.settings, [previous.key]: previous.value } }))) {
+            productUndoStackRef.current.push(previous)
+            updateUndoDepth()
+            return false
+        }
+        setSaveNotice(`${sceneName} control change undone.`)
         updateUndoDepth()
         restart()
-        const groupLabel = previous.key === "transitionDirection" ? "Exchange direction" : previous.key === "showHint" ? "Placard" : null
+        const groupLabel = previous.key === "transitionDirection" ? "Exchange direction" : previous.key === "showHint" ? "Placard" : previous.key === "direction" ? "Direction" : null
         if (groupLabel) requestAnimationFrame(() => document.querySelector<HTMLElement>(`.segment[aria-label="${groupLabel}"] button[aria-pressed="true"]`)?.focus())
         return true
-    }, [clearVitrineUndo, restart, updateUndoDepth])
+    }, [applyConfig, clearProductUndo, restart, updateUndoDepth])
+
+    React.useEffect(() => updateUndoDepth(), [updateUndoDepth])
 
     const playbackShape = [
         config.settings.axis,
@@ -832,7 +904,7 @@ function AppView() {
 
     const transportAction = React.useCallback(() => {
         setInspectionItemId(null)
-        if (reducedVitrinePreview) {
+        if (reducedProductPreview) {
             setPreviewStarted(false)
             setScrubPaused(true)
             return
@@ -844,7 +916,7 @@ function AppView() {
         setScrubPaused(false)
         setStartedAt(performance.now() - playhead * duration)
         setPreviewStarted(true)
-    }, [duration, isOpeningReel, playhead, reducedVitrinePreview, restart, scrubPaused])
+    }, [duration, isOpeningReel, playhead, reducedProductPreview, restart, scrubPaused])
 
     const beginScrub = React.useCallback(() => {
         setInspectionItemId(null)
@@ -876,14 +948,10 @@ function AppView() {
             setScrubPaused(false)
             setReelKey((key) => key + 1)
             setStartedAt(performance.now())
-            setPreviewStarted(!isOpeningReel && !reducedVitrinePreview)
+            setPreviewStarted(!isOpeningReel && !reducedProductPreview)
             setPlayhead(0)
         }
-    }, [config.settings.canvasPose, isOpeningReel, reducedVitrinePreview])
-
-    React.useEffect(() => {
-        configRef.current = config
-    }, [config])
+    }, [config.settings.canvasPose, isOpeningReel, reducedProductPreview])
 
     React.useEffect(() => {
         const query = window.matchMedia?.("(prefers-reduced-motion: reduce)")
@@ -900,7 +968,7 @@ function AppView() {
     }, [config.settings.backgroundStyle, format, usesLinuxHostPort, verifiedH264Audio, verifiedH264Scene])
 
     React.useEffect(() => {
-        if (authoredVitrine) return
+        if (!recoveryReady || authoredProductScene) return
         const missing = config.items.filter((item) => {
             const jobKey = `${item.id}:${item.url}`
             return item.type === "video" && !item.previewUrl && !videoProxyJobs.current.has(jobKey)
@@ -912,8 +980,11 @@ function AppView() {
             setProcessingMedia((count) => count + 1)
             reelAPI
                 .createVideoProxy(item.url)
-                .then((previewUrl) => {
-                    setConfig((current) => ({
+                .then((previewUrl) => projectMutationLane.run(async () => {
+                    const current = configRef.current
+                    if (isVitrineV2(current) || isShelfV2(current)
+                        || !current.items.some((currentItem) => currentItem.id === item.id && currentItem.url === item.url)) return
+                    applyConfig((current) => ({
                         ...current,
                         items: current.items.map((currentItem) =>
                             currentItem.id === item.id && currentItem.url === item.url
@@ -921,14 +992,14 @@ function AppView() {
                                 : currentItem
                         ),
                     }))
-                })
+                }))
                 .catch(() => setSaveNotice(`Could not prepare ${item.name} for preview.`))
                 .finally(() => {
                     videoProxyJobs.current.delete(jobKey)
                     setProcessingMedia((count) => Math.max(0, count - 1))
                 })
         })
-    }, [authoredVitrine, config.items, playIteration, previewPose, processingMedia, showStyleGallery])
+    }, [applyConfig, authoredProductScene, config.items, playIteration, previewPose, processingMedia, projectMutationLane, recoveryReady, showStyleGallery])
 
     React.useEffect(() => {
         if (!selectedItemId && config.items[0]) setSelectedItemId(config.items[0].id)
@@ -951,37 +1022,64 @@ function AppView() {
 
     React.useEffect(() => {
         let alive = true
-        reelAPI
-            .loadRecovery()
-            .then((snapshot) => {
-                if (!alive || !snapshot) return
-                if (snapshot.savedAt > initialProject.current.savedAt) {
-                    clearVitrineUndo()
-                    setConfig(normalizeConfig(snapshot.config))
-                    setLastSavedAt(snapshot.savedAt)
+        void (async () => {
+            let diskRecovery: Awaited<ReturnType<typeof reelAPI.loadRecovery>> = null
+            try {
+                diskRecovery = await reelAPI.loadRecovery()
+            } catch {
+                // Local autosave remains available if recovery file is unavailable.
+            }
+
+            let candidate = initialProject.current.pendingShelf
+            if (diskRecovery && diskRecovery.savedAt > initialProject.current.savedAt) {
+                try {
+                    candidate = { config: normalizeConfig(diskRecovery.config), savedAt: diskRecovery.savedAt }
+                } catch {
+                    // Invalid disk recovery cannot displace a valid local candidate or current Project.
+                }
+            }
+            if (!candidate || !alive) return
+
+            await projectMutationLane.run(async () => {
+                if (!alive) return
+                const baseline = configRef.current
+                const recoveryEpoch = configEpochRef.current
+                try {
+                    const restore = async () => {
+                        const recovered = isShelfV2(candidate.config)
+                            ? normalizeConfig({ ...candidate.config, items: await admitShelfItems(candidate.config.items) })
+                            : candidate.config
+                        if (!alive || configRef.current !== baseline || configEpochRef.current !== recoveryEpoch) return
+                        clearProductUndo()
+                        if (applyConfig(recovered)) setLastSavedAt(candidate.savedAt)
+                    }
+                    if (isShelfV2(candidate.config)) await runWithDecoderAdmissionGate(restore)
+                    else await restore()
+                } catch {
+                    if (isShelfV2(candidate.config) && alive && configRef.current === baseline && configEpochRef.current === recoveryEpoch) {
+                        recoveryWriteBlockRef.current = { config: baseline, epoch: recoveryEpoch }
+                    }
+                    // Failed Shelf admission preserves current Project and leaves recovery available for next launch.
                 }
             })
-            .catch(() => {
-                // Local autosave remains available if recovery file is unavailable.
-            })
-            .finally(() => {
-                if (alive) setRecoveryReady(true)
-            })
+        })().finally(() => {
+            if (alive) setRecoveryReady(true)
+        })
         return () => {
             alive = false
         }
-    }, [clearVitrineUndo])
+    }, [applyConfig, clearProductUndo, projectMutationLane, runWithDecoderAdmissionGate])
 
     React.useEffect(() => {
-        if (!recoveryReady) return
+        if (!recoveryReady || !recoveryWritesAllowed(config)) return
         const savedAt = Date.now()
         localStorage.setItem(LOCAL_PROJECT_KEY, JSON.stringify(config))
         localStorage.setItem(LOCAL_SAVED_AT_KEY, String(savedAt))
         setLastSavedAt(savedAt)
-    }, [config, recoveryReady])
+    }, [config, recoveryReady, recoveryWritesAllowed])
 
     React.useEffect(() => {
-        if (!recoveryReady) return
+        if (!recoveryReady || !recoveryWritesAllowed(config)) return
         let alive = true
         const timer = window.setTimeout(async () => {
             const savedAt = Date.now()
@@ -996,12 +1094,13 @@ function AppView() {
             alive = false
             window.clearTimeout(timer)
         }
-    }, [config, recoveryReady])
+    }, [config, recoveryReady, recoveryWritesAllowed])
 
     React.useEffect(() => {
         if (!recoveryReady) return
         let alive = true
         const checkpoint = async () => {
+            if (!recoveryWritesAllowed(configRef.current)) return
             const savedAt = Date.now()
             try {
                 await reelAPI.saveRecovery({ config: configRef.current, savedAt })
@@ -1016,7 +1115,7 @@ function AppView() {
             alive = false
             window.clearInterval(interval)
         }
-    }, [recoveryReady])
+    }, [recoveryReady, recoveryWritesAllowed])
 
     React.useEffect(() => {
         if (!recoveryReady) return
@@ -1053,7 +1152,7 @@ function AppView() {
 
     React.useEffect(() => {
         let raf = 0
-        if (reducedVitrinePreview || !previewStarted) {
+        if (reducedProductPreview || !previewStarted) {
             if (!scrubPaused && !freezePreview && !isScrubbing) setPlayhead(0)
             return
         }
@@ -1085,7 +1184,7 @@ function AppView() {
         }
         raf = requestAnimationFrame(tick)
         return () => cancelAnimationFrame(raf)
-    }, [startedAt, duration, finalCycleDuration, playbackDuration, repeatCount, reelKey, previewStarted, config.settings.playKind, documentVisible, freezePreview, isScrubbing, scrubPaused, reducedVitrinePreview])
+    }, [startedAt, duration, finalCycleDuration, playbackDuration, repeatCount, reelKey, previewStarted, config.settings.playKind, documentVisible, freezePreview, isScrubbing, scrubPaused, reducedProductPreview])
 
     React.useEffect(
         () =>
@@ -1102,7 +1201,7 @@ function AppView() {
             const target = event.target as HTMLElement | null
             const textEditing = Boolean(target && (target.tagName === "TEXTAREA" || target.isContentEditable
                 || (target.tagName === "INPUT" && (target as HTMLInputElement).type !== "range")))
-            if (!textEditing && (event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === "z" && undoVitrineSetting()) {
+            if (!textEditing && (event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === "z" && undoProductSetting()) {
                 event.preventDefault()
                 return
             }
@@ -1114,27 +1213,51 @@ function AppView() {
         }
         window.addEventListener("keydown", onKey)
         return () => window.removeEventListener("keydown", onKey)
-    }, [transportAction, undoVitrineSetting])
+    }, [transportAction, undoProductSetting])
 
-    const addMedia = async (media?: SelectedMedia[]) => {
-        const picked = media ?? (await reelAPI.pickMedia())
-        if (!picked.length) return
-        if (isVitrineV2(configRef.current) && configRef.current.items.length + picked.length > VITRINE_MAX_ITEMS) {
-            setSaveNotice(`Vitrine supports at most ${VITRINE_MAX_ITEMS} ordered media items. Nothing was added.`)
-            return
-        }
-        const videoCount = picked.filter((item) => item.type === "video").length
-        if (videoCount) setProcessingMedia((count) => count + videoCount)
-        try {
-            const hydrated = await hydrateMedia(picked, !isVitrineV2(configRef.current))
-            if (hydrated.items.length) setConfig(reconcileVitrineConfig({ ...configRef.current, items: [...configRef.current.items, ...hydrated.items] }))
-            if (hydrated.failures.length) setSaveNotice(`${hydrated.items.length} added · ${hydrated.failures.length} could not be prepared`)
-            restart()
-        } catch (error) {
-            setSaveNotice(error instanceof Error ? error.message : "Could not prepare that media.")
-        } finally {
-            if (videoCount) setProcessingMedia((count) => Math.max(0, count - videoCount))
-        }
+    const addMedia = async (media?: SelectedMedia[], expectedEpoch = configEpochRef.current): Promise<{ committed: number; rejected: number } | null> => {
+        if (projectOpeningRef.current || isExporting) return null
+        return projectMutationLane.run(async () => {
+            if (projectOpeningRef.current || isExporting) return null
+            const picked = media ?? (await reelAPI.pickMedia())
+            if (!picked.length) return { committed: 0, rejected: 0 }
+            if (configEpochRef.current !== expectedEpoch) {
+                setSaveNotice("Project changed while media was being chosen. Nothing was added.")
+                return null
+            }
+            const baseline = configRef.current
+            if (isVitrineV2(baseline) && baseline.items.length + picked.length > VITRINE_MAX_ITEMS) {
+                setSaveNotice(`Vitrine supports at most ${VITRINE_MAX_ITEMS} ordered media items. Nothing was added.`)
+                return null
+            }
+            if (isShelfV2(baseline) && baseline.items.length + picked.length > SHELF_MAX_ITEMS) {
+                setSaveNotice(`Shelf supports at most ${SHELF_MAX_ITEMS} ordered media items. Nothing was added.`)
+                return null
+            }
+            const videoCount = picked.filter((item) => item.type === "video").length
+            if (videoCount) setProcessingMedia((count) => count + videoCount)
+            try {
+                const prepare = async () => {
+                    const hydrated = await hydrateMedia(picked, !isVitrineV2(baseline) && !isShelfV2(baseline))
+                    let preparedItems = hydrated.items
+                    if (isShelfV2(baseline)) preparedItems = await admitShelfItems(preparedItems)
+                    if (configEpochRef.current !== expectedEpoch || configRef.current !== baseline) {
+                        setSaveNotice("Project changed while media was being prepared. Nothing was added.")
+                        return null
+                    }
+                    if (preparedItems.length && !applyConfig({ ...baseline, items: [...baseline.items, ...preparedItems] })) return null
+                    if (hydrated.failures.length) setSaveNotice(`${preparedItems.length} added · ${hydrated.failures.length} could not be prepared`)
+                    if (preparedItems.length) restart()
+                    return { committed: preparedItems.length, rejected: hydrated.failures.length }
+                }
+                return isShelfV2(baseline) ? await runWithDecoderAdmissionGate(prepare) : await prepare()
+            } catch (error) {
+                setSaveNotice(error instanceof Error ? error.message : "Could not prepare that media.")
+                return null
+            } finally {
+                if (videoCount) setProcessingMedia((count) => Math.max(0, count - videoCount))
+            }
+        })
     }
 
     const inspectLibraryItem = React.useCallback((id: string) => {
@@ -1148,60 +1271,69 @@ function AppView() {
 
     const updateSettings = <K extends keyof ReelSettings>(key: K, value: ReelSettings[K]) => {
         const before = configRef.current
-        const undoable = isVitrineV2(before) && VITRINE_UNDO_KEYS.has(key) && before.settings[key] !== value
-        if (undoable && !vitrineTransactionRef.current) {
-            vitrineUndoStackRef.current.push({ key: key as VitrineUndoKey, value: before.settings[key as VitrineUndoKey] })
-            if (vitrineUndoStackRef.current.length > 100) vitrineUndoStackRef.current.shift()
+        if (before.settings[key] === value) return
+        const undoKey = key as ProductUndoKey
+        const undoable = Boolean(productUndoKeys(before)?.has(key))
+        const settings = (() => {
+            if (key === "motionPreset") {
+                const preset = value as MotionPreset
+                return preset === "custom"
+                    ? { ...before.settings, motionPreset: preset }
+                    : { ...before.settings, ...MOTION_BASES[preset], motionPreset: preset }
+            }
+            if (["launchMs", "arrivalMs", "growMs", "exitMs"].includes(key)) {
+                const base = before.settings.motionPreset === "custom"
+                    ? {}
+                    : MOTION_BASES[before.settings.motionPreset]
+                return { ...before.settings, ...base, [key]: value, motionPreset: "custom" as const }
+            }
+            return { ...before.settings, [key]: value }
+        })()
+        let next = { ...before, settings }
+        if (isVitrineV2(before) && key === "spotlightsEnabled" && value === true && !before.items.some((item) => item.spotlight && !item.muted)) {
+            const opening = firstEligibleVitrineItem(before.items)
+            if (opening) next = { ...next, items: exclusiveVitrineOpening(before.items, opening.id) }
+        }
+        if (isShelfV2(before) && key === "spotlightsEnabled" && value === true && !before.items.some((item) => item.spotlight && !item.muted)) {
+            const opening = before.items.find((item) => !item.muted)
+            if (opening) next = { ...next, items: exclusiveShelfSpotlight(before.items, opening.id) }
+        }
+        if (isVitrineV2(before) && before.timelineMode === "fixed-duration" && ["holdMs", "paceMs"].includes(key)) {
+            next = {
+                ...next,
+                timelineFixedDurationMs: Math.max(before.timelineFixedDurationMs ?? 0, minimumVitrineFixedDuration(Math.max(1, before.items.filter((item) => !item.muted).length), settings.holdMs, settings.paceMs)),
+            }
+        }
+        if (!applyConfig(next)) return
+        if (undoable && !productTransactionRef.current) {
+            productUndoStackRef.current.push({ key: undoKey, value: before.settings[undoKey] })
+            if (productUndoStackRef.current.length > 100) productUndoStackRef.current.shift()
             updateUndoDepth()
         }
-        setConfig((current) => {
-            const settings = (() => {
-                if (key === "motionPreset") {
-                    const preset = value as MotionPreset
-                    return preset === "custom"
-                        ? { ...current.settings, motionPreset: preset }
-                        : { ...current.settings, ...MOTION_BASES[preset], motionPreset: preset }
-                }
-                if (["launchMs", "arrivalMs", "growMs", "exitMs"].includes(key)) {
-                    const base = current.settings.motionPreset === "custom"
-                        ? {}
-                        : MOTION_BASES[current.settings.motionPreset]
-                    return { ...current.settings, ...base, [key]: value, motionPreset: "custom" as const }
-                }
-                return { ...current.settings, [key]: value }
-            })()
-            let next = { ...current, settings }
-            if (isVitrineV2(current) && key === "spotlightsEnabled" && value === true && !current.items.some((item) => item.spotlight && !item.muted)) {
-                const opening = firstEligibleVitrineItem(current.items)
-                if (opening) next = { ...next, items: exclusiveVitrineOpening(current.items, opening.id) }
-            }
-            if (current.styleId === "vitrine" && current.sceneVersion === 2 && current.timelineMode === "fixed-duration" && ["holdMs", "paceMs"].includes(key)) {
-                next = {
-                    ...next,
-                    timelineFixedDurationMs: Math.max(current.timelineFixedDurationMs ?? 0, minimumVitrineFixedDuration(Math.max(1, current.items.filter((item) => !item.muted).length), settings.holdMs, settings.paceMs)),
-                }
-            }
-            const reconciled = reconcileVitrineConfig(next)
-            configRef.current = reconciled
-            return reconciled
-        })
     }
 
     const updateTimelineMode = (mode: TimelineMode) => {
-        setConfig((current) => {
-            const mediaCount = Math.max(1, current.items.filter((item) => !item.muted).length)
-            if (mode === "automatic") return reconcileVitrineConfig({ ...current, timelineMode: mode, timelineFixedDurationMs: 0, timelineSegments: [] })
-            if (mode === "fixed-duration") return reconcileVitrineConfig({
+        const current = configRef.current
+        if (!isVitrineV2(current) && !isShelfV2(current)) return
+        const mediaCount = Math.max(1, current.items.filter((item) => !item.muted).length)
+        let applied = false
+        if (mode === "automatic") {
+            applied = applyConfig({ ...current, timelineMode: mode, timelineFixedDurationMs: 0, timelineSegments: [] })
+        } else if (mode === "fixed-duration") {
+            applied = applyConfig({
                 ...current,
                 timelineMode: mode,
-                timelineFixedDurationMs: Math.max(current.timelineFixedDurationMs ?? 0, mediaCount * (current.settings.holdMs + current.settings.paceMs), minimumVitrineFixedDuration(mediaCount, current.settings.holdMs, current.settings.paceMs)),
+                timelineFixedDurationMs: isShelfV2(current)
+                    ? Math.max(1_000, current.timelineFixedDurationMs ?? 0)
+                    : Math.max(current.timelineFixedDurationMs ?? 0, mediaCount * (current.settings.holdMs + current.settings.paceMs), minimumVitrineFixedDuration(mediaCount, current.settings.holdMs, current.settings.paceMs)),
                 timelineSegments: [],
             })
-            return reconcileVitrineConfig({
+        } else {
+            applied = applyConfig({
                 ...current,
                 timelineMode: mode,
                 timelineFixedDurationMs: 0,
-                settings: {
+                settings: isShelfV2(current) ? current.settings : {
                     ...current.settings,
                     holdMs: Math.max(current.settings.holdMs, VITRINE_MIN_HOLD_MS * 2),
                     paceMs: Math.max(current.settings.paceMs, VITRINE_MIN_EXCHANGE_MS * 2),
@@ -1212,12 +1344,12 @@ function AppView() {
                     { id: "fast-finale", kind: "cycle", cycles: 1, paceScale: 2, durationMs: 0 },
                 ],
             })
-        })
-        restart()
+        }
+        if (applied) restart()
     }
 
     const setCanvasPreset = (preset: CanvasPreset) => {
-        setConfig((current) => {
+        const applied = applyConfig((current) => {
             const dimensions = preset === "custom" ? null : CANVAS_PRESETS[preset]
             return {
                 ...current,
@@ -1228,7 +1360,7 @@ function AppView() {
                 },
             }
         })
-        restart()
+        if (applied) restart()
     }
 
     const updateItem = (id: string, patch: Partial<MediaItem>) => {
@@ -1237,7 +1369,23 @@ function AppView() {
             setSaveNotice("Vitrine needs one eligible opening/finale object. This frame was kept in the story.")
             return
         }
-        setConfig((source) => {
+        applyConfig((source) => {
+            if (isShelfV2(source)) {
+                let items = source.items.map((item) => (item.id === id ? { ...item, ...patch } : item))
+                let settings = source.settings
+                if (patch.spotlight === true) {
+                    items = exclusiveShelfSpotlight(items, id)
+                    settings = { ...settings, spotlightsEnabled: true }
+                } else if (patch.spotlight === false && source.items.find((item) => item.id === id)?.spotlight) {
+                    items = exclusiveShelfSpotlight(items, null)
+                    settings = { ...settings, spotlightsEnabled: false }
+                } else if (patch.muted === true && source.items.find((item) => item.id === id)?.spotlight) {
+                    const replacement = items.find((item) => !item.muted)
+                    items = exclusiveShelfSpotlight(items, replacement?.id ?? null)
+                    settings = { ...settings, spotlightsEnabled: Boolean(replacement) }
+                }
+                return { ...source, settings, items }
+            }
             if (!isVitrineV2(source)) return { ...source, items: source.items.map((item) => (item.id === id ? { ...item, ...patch } : item)) }
             let items = source.items.map((item) => (item.id === id ? { ...item, ...patch } : item))
             let settings = source.settings
@@ -1252,7 +1400,7 @@ function AppView() {
                 items = exclusiveVitrineOpening(items, replacement?.id ?? null)
                 settings = { ...settings, spotlightsEnabled: Boolean(replacement) }
             }
-            return reconcileVitrineConfig({ ...source, settings, items })
+            return { ...source, settings, items }
         })
     }
 
@@ -1262,8 +1410,21 @@ function AppView() {
             velvet: { motionPreset: "velvet", paceMs: 300, holdMs: 1200, finaleGrowMs: 1000, finaleHoldMs: 3200, tilt: 8, sway: 55 },
             mixed: { ratioMode: "auto", imageFit: "contain", paddingUnit: "percent", paddingTop: 1.2, paddingRight: 1.2, paddingBottom: 1.2, paddingLeft: 1.2, gap: 36, slideHeight: 46 },
         }
-        if (isVitrineV2(configRef.current)) clearVitrineUndo()
-        setConfig((current) => {
+        if (productUndoKeys(configRef.current)) clearProductUndo()
+        const applied = applyConfig((current) => {
+            if (isShelfV2(current)) return resetShelfSourceGeometry({
+                ...current,
+                settings: {
+                    ...applyStyleDefaults(current.settings, current.styleId, 2),
+                    ratioMode: "auto",
+                    axis: "horizontal",
+                    theme: current.settings.theme === "light" ? "light" : "dark",
+                    backgroundStyle: current.settings.backgroundStyle === "transparent" ? "transparent" : "solid",
+                },
+                timelineMode: "automatic",
+                timelineFixedDurationMs: 0,
+                timelineSegments: [],
+            })
             if (isVitrineV2(current)) return reconcileVitrineConfig({
                 ...current,
                 settings: applyStyleDefaults(current.settings, current.styleId, 2),
@@ -1282,37 +1443,47 @@ function AppView() {
                     },
             }
         })
-        restart()
+        if (applied) restart()
     }
 
     const removeItem = (id: string) => {
-        setConfig((current) => {
+        if (isShelfV2(configRef.current) && configRef.current.items.length <= 1) {
+            setSaveNotice("Shelf needs at least one ordered media item. The last edition was kept.")
+            return
+        }
+        const applied = applyConfig((current) => {
             let items = current.items.filter((item) => item.id !== id)
+            if (isShelfV2(current)) {
+                const marker = items.find((item) => item.spotlight && !item.muted)
+                if (current.settings.spotlightsEnabled && !marker) items = exclusiveShelfSpotlight(items, items.find((item) => !item.muted)?.id ?? null)
+                return { ...current, items }
+            }
             if (!isVitrineV2(current) || items.length === 0) return { ...current, items }
             if (items.every((item) => item.muted)) items = items.map((item, index) => index === 0 ? { ...item, muted: false } : item)
             const marker = items.find((item) => item.spotlight && !item.muted)
             if (current.settings.spotlightsEnabled && !marker) items = exclusiveVitrineOpening(items, firstEligibleVitrineItem(items)?.id ?? null)
             return reconcileVitrineConfig({ ...current, items })
         })
-        restart()
+        if (applied) restart()
     }
 
     const moveItem = (from: number, to: number) => {
         if (from === to) return
-        setConfig((current) => {
+        const applied = applyConfig((current) => {
             const items = [...current.items]
             const [item] = items.splice(from, 1)
             items.splice(to, 0, item)
             return { ...current, items }
         })
-        restart()
+        if (applied) restart()
     }
 
     const exportReel = async () => {
         if (isExporting) return
+        const exportConfig = configRef.current
         const requestedFormat = format
         if (usesLinuxHostPort && requestedFormat === "png-frames" && !verifiedPngScene) {
-            setProgress({ exportId: "failed", phase: "error", progress: 0, message: "Verified PNG Frames currently support Quiet Carousel v1 and Vitrine v2 only." })
+            setProgress({ exportId: "failed", phase: "error", progress: 0, message: shelfPngVideoBlocked ? "Verified Shelf PNG Frames currently support still images only." : "Verified PNG Frames currently support Quiet Carousel v1, Vitrine v2, and image-only Shelf v2." })
             return
         }
         if (usesLinuxHostPort && requestedFormat === "mp4" && (!verifiedH264Scene || !verifiedH264Audio)) {
@@ -1326,7 +1497,7 @@ function AppView() {
         setProgress({ exportId: "png-pending", phase: "preparing", progress: 0, message: "Creating an immutable export snapshot…" })
         try {
             const result = await reelAPI.exportReel({
-                config: { ...config, settings: { ...config.settings, repeatCount } },
+                config: { ...exportConfig, settings: { ...exportConfig.settings, repeatCount } },
                 width: output.width,
                 height: output.height,
                 fps,
@@ -1350,7 +1521,7 @@ function AppView() {
 
     const saveProject = async () => {
         try {
-            const result = await reelAPI.saveProject(config)
+            const result = await reelAPI.saveProject(configRef.current)
             if (!result.cancelled) setSaveNotice("Project saved · media included")
         } catch (error) {
             setSaveNotice(error instanceof Error ? error.message : "Project save failed")
@@ -1358,34 +1529,63 @@ function AppView() {
     }
 
     const openProject = async () => {
-        if (projectOpening) return
+        if (projectOpeningRef.current) return
+        projectOpeningRef.current = true
+        projectOpenCancelRequestedRef.current = false
         setProjectOpening(true)
         setSaveNotice("Opening project…")
         try {
-            const result = await reelAPI.openProject()
-            const imported = projectConfigAfterOpen(configRef.current, result)
-            setSaveNotice(projectOpenNotice(result))
-            if (imported === configRef.current) return
-            const next = normalizeConfig(imported)
-            clearVitrineUndo()
-            setConfig(next)
+            const application = await projectMutationLane.run(() => runWithDecoderAdmissionGate(async () => {
+                projectOpenExclusiveRef.current = true
+                try {
+                    return await applyProjectOpenTransaction({
+                        current: () => ({ config: configRef.current, epoch: configEpochRef.current }),
+                        open: () => projectOpenCancelRequestedRef.current ? Promise.resolve({ cancelled: true as const }) : reelAPI.openProject(),
+                        normalize: normalizeConfig,
+                        cancelled: () => projectOpenCancelRequestedRef.current,
+                        stillCurrent: (baseline, epoch) => configRef.current === baseline && configEpochRef.current === epoch,
+                        accept: (operationId) => reelAPI.acceptProjectOpen(operationId),
+                        discard: (operationId) => reelAPI.discardProjectOpen(operationId),
+                        commit: (next) => {
+                            projectOpenCommitRef.current = true
+                            try { return applyConfig(next) } finally { projectOpenCommitRef.current = false }
+                        },
+                    })
+                } finally {
+                    projectOpenExclusiveRef.current = false
+                }
+            }))
+            if (application.state === "cancelled" || application.state === "failure") {
+                setSaveNotice(projectOpenNotice(application.result))
+                return
+            }
+            if (application.state === "stale") {
+                setSaveNotice("Project changed while opening. The opened candidate was not applied.")
+                return
+            }
+            const next = application.config
+            clearProductUndo()
+            setSaveNotice("Project opened")
             setSelectedItemId(next.items[0]?.id ?? null)
             setInspectionItemId(null)
             restart()
         } catch (error) {
             setSaveNotice(error instanceof Error ? error.message : "Project open failed")
         } finally {
+            projectOpeningRef.current = false
+            projectOpenCancelRequestedRef.current = false
             setProjectOpening(false)
         }
     }
 
     const cancelProjectOpen = async () => {
+        projectOpenCancelRequestedRef.current = true
         await reelAPI.cancelProjectOpen()
     }
 
     const saveTemplate = async () => {
         try {
-            const result = await reelAPI.saveTemplate(config.settings)
+            const result = await reelAPI.saveTemplate(configRef.current.settings)
             if (!result.cancelled) setSaveNotice("Template saved")
         } catch (error) {
             setSaveNotice(error instanceof Error ? error.message : "Template save failed")
@@ -1393,54 +1593,106 @@ function AppView() {
     }
 
     const openTemplate = async () => {
-        try {
-            const result = await reelAPI.openTemplate()
-            if (!result.settings) return
-            const current = configRef.current
-            const settings = { ...styleSettings(current.styleId, current.sceneVersion ?? 1), ...result.settings }
-            if (isVitrineV2(current)) assertVitrineV2Settings(settings)
-            clearVitrineUndo()
-            setConfig(reconcileVitrineConfig({ ...current, settings }))
-            setSaveNotice("Template applied")
-            restart()
-        } catch (error) {
-            setSaveNotice(error instanceof Error ? error.message : "Template open failed")
-        }
+        if (projectOpeningRef.current) return
+        await projectMutationLane.run(async () => {
+            const baseline = configRef.current
+            const templateEpoch = configEpochRef.current
+            try {
+                const result = await reelAPI.openTemplate()
+                if (!result.settings) return
+                if (configEpochRef.current !== templateEpoch || configRef.current !== baseline) {
+                    setSaveNotice("Project changed while the template was opening. Nothing was applied.")
+                    return
+                }
+                const settings = { ...styleSettings(baseline.styleId, baseline.sceneVersion ?? 1), ...result.settings }
+                if (isVitrineV2(baseline)) assertVitrineV2Settings(settings)
+                if (isShelfV2(baseline)) assertShelfV2Settings(settings)
+                if (!applyConfig({ ...baseline, settings })) return
+                clearProductUndo()
+                setSaveNotice("Template applied")
+                restart()
+            } catch (error) {
+                setSaveNotice(error instanceof Error ? error.message : "Template open failed")
+            }
+        })
     }
 
     const finaleId = config.settings.finaleEnabled
         ? [...config.items].reverse().find((item) => !item.muted)?.id
         : undefined
 
-    const chooseStyle = (style: StyleDefinition) => {
-        const current = configRef.current
-        const sceneVersion = latestSceneVersion(style.id)
-        if (style.id === "vitrine" && sceneVersion === 2 && current.items.length > VITRINE_MAX_ITEMS) {
-            setSaveNotice(`Vitrine supports at most ${VITRINE_MAX_ITEMS} ordered media items. Remove ${current.items.length - VITRINE_MAX_ITEMS} before choosing it.`)
-            return
+    const chooseStyle = async (style: StyleDefinition) => {
+        if (projectOpeningRef.current || isExporting) return
+        try {
+            await projectMutationLane.run(async () => {
+                if (projectOpeningRef.current || isExporting) return
+                const current = configRef.current
+                const styleEpoch = configEpochRef.current
+                const sceneVersion = latestSceneVersion(style.id)
+                if (style.id === "vitrine" && sceneVersion === 2 && current.items.length < 1) {
+                    setSaveNotice("Add at least one photo or video before choosing Vitrine.")
+                    setShowStyleGallery(false)
+                    return
+                }
+                if (style.id === "vitrine" && sceneVersion === 2 && current.items.length > VITRINE_MAX_ITEMS) {
+                    setSaveNotice(`Vitrine supports at most ${VITRINE_MAX_ITEMS} ordered media items. Remove ${current.items.length - VITRINE_MAX_ITEMS} before choosing it.`)
+                    setShowStyleGallery(false)
+                    return
+                }
+                if (style.id === "the-shelf" && sceneVersion === 2 && current.items.length < 1) {
+                    setSaveNotice("Add at least one photo or video before choosing Shelf.")
+                    setShowStyleGallery(false)
+                    return
+                }
+                if (style.id === "the-shelf" && sceneVersion === 2 && current.items.length > SHELF_MAX_ITEMS) {
+                    setSaveNotice(`Shelf supports at most ${SHELF_MAX_ITEMS} ordered media items. Remove ${current.items.length - SHELF_MAX_ITEMS} before choosing it.`)
+                    setShowStyleGallery(false)
+                    return
+                }
+                const defaults = applyStyleDefaults(current.settings, style.id, sceneVersion)
+                const settings = style.id === "vitrine" && sceneVersion === 2
+                    ? { ...defaults, axis: "horizontal" as const, backgroundStyle: defaults.backgroundStyle === "transparent" ? "transparent" as const : "solid" as const }
+                    : style.id === "the-shelf" && sceneVersion === 2
+                        ? {
+                            ...defaults,
+                            ratioMode: "auto" as const,
+                            axis: "horizontal" as const,
+                            theme: defaults.theme === "light" ? "light" as const : "dark" as const,
+                            backgroundStyle: defaults.backgroundStyle === "transparent" ? "transparent" as const : "solid" as const,
+                        }
+                    : defaults
+                let candidate = normalizeConfig({
+                    ...current,
+                    schemaVersion: 2,
+                    styleId: style.id,
+                    sceneVersion,
+                    settings,
+                    ...(style.id === "the-shelf" && sceneVersion === 2 ? { items: current.items.map((item) => ({ ...item, aspectMode: "auto" as const })) } : {}),
+                    ...((style.id === "vitrine" || style.id === "the-shelf") && sceneVersion === 2 ? { timelineMode: "automatic" as const, timelineFixedDurationMs: 0, timelineSegments: [] } : {}),
+                })
+                const admitAndCommit = async () => {
+                    if (isShelfV2(candidate)) candidate = normalizeConfig({ ...candidate, items: await admitShelfItems(candidate.items) })
+                    if (configRef.current !== current || configEpochRef.current !== styleEpoch) {
+                        setSaveNotice("Project changed while Shelf media was being admitted. Nothing was applied.")
+                        return
+                    }
+                    if (!applyConfig(candidate)) return
+                    clearProductUndo()
+                    setInspectionItemId(null)
+                    setShowStyleGallery(false)
+                    setReelKey((key) => key + 1)
+                    setStartedAt(performance.now())
+                    setPreviewStarted(style.id !== "opening-reel")
+                    setScrubPaused(false)
+                    setPlayhead(0)
+                    setPlayIteration(1)
+                }
+                if (isShelfV2(candidate)) await runWithDecoderAdmissionGate(admitAndCommit)
+                else await admitAndCommit()
+            })
+        } catch (error) {
+            setSaveNotice(error instanceof Error ? error.message : "Could not prepare Shelf media.")
         }
-        const defaults = applyStyleDefaults(current.settings, style.id, sceneVersion)
-        const settings = style.id === "vitrine" && sceneVersion === 2
-            ? { ...defaults, axis: "horizontal" as const, backgroundStyle: defaults.backgroundStyle === "transparent" ? "transparent" as const : "solid" as const }
-            : defaults
-        const candidate = reconcileVitrineConfig({
-            ...current,
-            schemaVersion: 2,
-            styleId: style.id,
-            sceneVersion,
-            settings,
-            ...(style.id === "vitrine" && sceneVersion === 2 ? { timelineMode: "automatic" as const, timelineFixedDurationMs: 0, timelineSegments: [] } : {}),
-        })
-        clearVitrineUndo()
-        setInspectionItemId(null)
-        setConfig(candidate)
-        setShowStyleGallery(false)
-        setReelKey((key) => key + 1)
-        setStartedAt(performance.now())
-        setPreviewStarted(style.id !== "opening-reel")
-        setScrubPaused(false)
-        setPlayhead(0)
-        setPlayIteration(1)
     }
 
     if (showStyleGallery) {
@@ -1467,14 +1719,20 @@ function AppView() {
             onDrop={async (event) => {
                 event.preventDefault()
                 setDropping(false)
+                if (projectOpeningRef.current || isExporting) {
+                    setSaveNotice("Finish the current Project operation before adding media.")
+                    return
+                }
+                const dropEpoch = configEpochRef.current
                 const results: DroppedMediaResult[] = await Promise.all(
                     Array.from(event.dataTransfer.files).map(reelAPI.getDroppedFile)
                 )
                 const media = results.flatMap((result) => result.accepted ? [result.media] : [])
                 const rejected = results.filter((result) => !result.accepted)
-                await addMedia(media)
-                if (rejected.length) {
-                    setSaveNotice(`${media.length ? `${media.length} added · ` : ""}${rejected.length} unsupported ${rejected.length === 1 ? "item" : "items"} skipped`)
+                const admitted = await addMedia(media, dropEpoch)
+                if (admitted && (rejected.length || admitted.rejected)) {
+                    const rejectedCount = rejected.length + admitted.rejected
+                    setSaveNotice(`${admitted.committed ? `${admitted.committed} added · ` : ""}${rejectedCount} unsupported ${rejectedCount === 1 ? "item" : "items"} skipped`)
                 }
             }}
         >
@@ -1491,7 +1749,7 @@ function AppView() {
                 </div>
                 <div className="title-actions">
                     <InterfaceScaleControl />
-                    <button className="button quiet" type="button" onClick={() => setShowStyleGallery(true)}>
+                    <button className="button quiet" type="button" disabled={projectOpening || Boolean(isExporting)} onClick={() => setShowStyleGallery(true)}>
                         <Icon name="spark" /> Scenes
                     </button>
                     <details className="project-menu">
@@ -1500,7 +1758,7 @@ function AppView() {
                             <button type="button" disabled={projectOpening || Boolean(isExporting)} onClick={(event) => { void openProject(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Open project</button>
                             <button type="button" onClick={(event) => { void saveProject(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Save project <small>media + progress</small></button>
                             <span />
-                            <button type="button" onClick={(event) => { void openTemplate(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Apply template</button>
+                            <button type="button" disabled={projectOpening || Boolean(isExporting) || processingMedia > 0} onClick={(event) => { void openTemplate(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Apply template</button>
                             <button type="button" onClick={(event) => { void saveTemplate(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Save template <small>settings only</small></button>
                         </div>
                     </details>
@@ -1524,13 +1782,13 @@ function AppView() {
                         <span className="eyebrow">01 · Sequence</span>
                         <h2>Slides</h2>
                     </div>
-                    <button className="icon-button" type="button" aria-label="Add media" onClick={() => addMedia()}>
+                    <button className="icon-button" type="button" aria-label="Add media" disabled={projectOpening || Boolean(isExporting)} onClick={() => void addMedia()}>
                         <Icon name="plus" />
                     </button>
                 </div>
                 <div className="library-scroll">
                     {config.items.length === 0 ? (
-                        <button className="empty-library" type="button" onClick={() => addMedia()}>
+                        <button className="empty-library" type="button" disabled={projectOpening || Boolean(isExporting)} onClick={() => void addMedia()}>
                             <span className="empty-orbit"><Icon name="film" size={23} /></span>
                             <strong>Bring your frames</strong>
                             <span>Drop photos, GIFs, or videos here. Add one file or many.</span>
@@ -1583,7 +1841,7 @@ function AppView() {
                                     >
                                         <span className="drag-handle"><Icon name="grip" /></span>
                                         <div className="media-thumb">
-                                            {item.type === "video" && authoredVitrine ? (
+                                            {item.type === "video" && (authoredProductScene || decoderAdmissionGated) ? (
                                                 <div className="deferred-video-thumbnail" aria-label="Video thumbnail deferred"><Icon name="film" size={20} /></div>
                                             ) : item.type === "video" ? (
                                                 <video src={item.previewUrl ?? item.url} muted autoPlay loop playsInline preload="auto" />
@@ -1596,20 +1854,20 @@ function AppView() {
                                             <strong title={item.name}>{item.name}</strong>
                                             <div>
                                                 {finaleId === item.id ? <span className="finale-pill">Finale</span> : null}
-                                                {item.muted ? <span>Beat skipped</span> : item.spotlight ? <span>{authoredVitrine ? "Opening" : "Spotlight"}</span> : <span>{item.type}</span>}
+                                                {item.muted ? <span>Beat skipped</span> : item.spotlight ? <span>{authoredProductScene ? "Opening" : "Spotlight"}</span> : <span>{item.type}</span>}
                                             </div>
                                         </div>
                                     </button>
                                     <div className="media-actions">
-                                        {activeProfile.supportsSpotlight && (!authoredVitrine || config.settings.playKind !== "loop") ? <Tooltip text={item.spotlight ? `Remove ${authoredVitrine ? "opening object" : activeProfile.focusLabel.toLowerCase()}. Frame returns to normal flow.` : authoredVitrine ? "Use as the finite presentation's opening object." : `${activeProfile.focusLabel}. Uses this Scene's ${activeProfile.focusBehavior} beat without leaving the canvas.`}><button
+                                        {activeProfile.supportsSpotlight && (!authoredProductScene || config.settings.playKind !== "loop") ? <Tooltip text={item.spotlight ? `Remove ${authoredProductScene ? "opening object" : activeProfile.focusLabel.toLowerCase()}. Frame returns to normal flow.` : authoredProductScene ? "Use as the finite presentation's opening object." : `${activeProfile.focusLabel}. Uses this Scene's ${activeProfile.focusBehavior} beat without leaving the canvas.`}><button
                                             type="button"
                                             className={item.spotlight ? "is-active" : ""}
-                                            aria-label={item.spotlight ? `Remove ${authoredVitrine ? "opening object" : "spotlight"}` : `Make ${authoredVitrine ? "opening object" : "spotlight"}`}
+                                            aria-label={item.spotlight ? `Remove ${authoredProductScene ? "opening object" : "spotlight"}` : `Make ${authoredProductScene ? "opening object" : "spotlight"}`}
                                             onClick={() => updateItem(item.id, { spotlight: !item.spotlight })}
                                         >
                                             <Icon name="spark" />
                                         </button></Tooltip> : null}
-                                        {!authoredVitrine || config.settings.playKind !== "loop" ? <Tooltip text="Skip story beat. Frame stays in the Project, but cannot become the finite opening or finale."><button
+                                        {!authoredProductScene || config.settings.playKind !== "loop" ? <Tooltip text="Skip story beat. Frame stays in the Project, but cannot become the finite opening or finale."><button
                                             type="button"
                                             className={item.muted ? "is-active danger" : ""}
                                             aria-label={item.muted ? "Include as story beat" : "Skip as story beat"}
@@ -1617,7 +1875,7 @@ function AppView() {
                                         >
                                             <Icon name="skip" />
                                         </button></Tooltip> : null}
-                                        <Tooltip text="Remove frame from this project."><button type="button" aria-label="Remove frame" onClick={() => removeItem(item.id)}>
+                                        <Tooltip text={authoredShelf && config.items.length <= 1 ? "Shelf needs one ordered media item." : "Remove frame from this project."}><button type="button" aria-label="Remove frame" disabled={authoredShelf && config.items.length <= 1} onClick={() => removeItem(item.id)}>
                                             <Icon name="trash" />
                                         </button></Tooltip>
                                     </div>
@@ -1626,7 +1884,7 @@ function AppView() {
                         </div>
                     )}
                 </div>
-                <button className="add-media" type="button" onClick={() => addMedia()}>
+                <button className="add-media" type="button" disabled={projectOpening || Boolean(isExporting)} onClick={() => void addMedia()}>
                     <Icon name="plus" /> Add photos or videos
                 </button>
             </aside>
@@ -1638,12 +1896,14 @@ function AppView() {
                 </div>
                 <div className={`stage-shell ${config.settings.backgroundStyle === "transparent" ? "is-transparent" : ""}`} style={{ ...previewStyle, aspectRatio: `${output.width} / ${output.height}` }}>
                     <div className="stage" key={reelKey} onClick={!isOpeningReel ? transportAction : undefined}>
-                        {config.styleId === "quiet-carousel" ? (
+                        {decoderAdmissionGated ? (
+                            <div data-decoder-admission-gate="true" aria-hidden="true" />
+                        ) : config.styleId === "quiet-carousel" ? (
                             <QuietCarouselRenderer config={config} timeMs={previewPose * activeCycleDuration} fps={fps} />
                         ) : isOpeningReel ? (
                             <Reel {...liveReelProps} staticPose={isStaticPreview} onPlaybackStart={handlePlaybackStart} />
                         ) : (
-                            <ProductSceneRenderer config={config} timeMs={previewPose * activeCycleDuration} durationMs={activeCycleDuration} fps={fps} terminal={terminalCycle} reducedMotion={reducedVitrinePreview} inspectionItemId={inspectionItemId} />
+                            <ProductSceneRenderer config={config} timeMs={previewPose * activeCycleDuration} durationMs={activeCycleDuration} fps={fps} terminal={terminalCycle} reducedMotion={reducedProductPreview} inspectionItemId={inspectionItemId} />
                         )}
                     </div>
                     {processingMedia > 0 ? (
@@ -1700,7 +1960,7 @@ function AppView() {
                             </div>
                             <p>{activeStyle.description}</p>
                             <p className="profile-guidance">Best for {activeProfile.bestFor.toLowerCase()}. {activeProfile.transparentReady ? "Ready for transparent overlays." : "Best with its authored room tone."}</p>
-                            {activeVariants.length > 1 ? <label className="scene-preset-select"><span>Scene preset</span><select value={activeStyle.id} onChange={(event) => chooseStyle(galleryStyle(event.target.value))}>{activeVariants.map((variant) => <option value={variant.id} key={variant.id}>{variant.presetName} · {variant.source.replace(".tsx", "")}</option>)}</select></label> : null}
+                            {activeVariants.length > 1 ? <label className="scene-preset-select"><span>Scene preset</span><select value={activeStyle.id} onChange={(event) => { void chooseStyle(galleryStyle(event.target.value)) }}>{activeVariants.map((variant) => <option value={variant.id} key={variant.id}>{variant.presetName} · {variant.source.replace(".tsx", "")}</option>)}</select></label> : null}
                             <button type="button" className="button quiet" onClick={() => setShowStyleGallery(true)}>Browse all {GALLERY_STYLES.length} Scenes</button>
                         </section>
                         <section className="control-section">
@@ -1726,7 +1986,7 @@ function AppView() {
                                 <span className="eyebrow">Rhythm</span>
                                 <h3>Motion feel</h3>
                             </div>
-                            {!authoredVitrine ? <div className="motion-grid">
+                            {!authoredProductScene ? <div className="motion-grid">
                                 {(["cut", "magnetic", "velvet", "dream"] as MotionPreset[]).map((preset) => (
                                     <button
                                         type="button"
@@ -1739,7 +1999,7 @@ function AppView() {
                                 ))}
                             </div> : null}
                             {authoredVitrine && config.settings.playKind === "once" ? <p className="preset-note">Finite entry, opening hold, selected finale exchange, finale hold, and exit use Vitrine's authored phrase.</p> : <>
-                                <RangeControl label={authoredVitrine ? "Loop exchange" : isOpeningReel ? "River pace" : "Motion pace"} value={config.settings.paceMs} min={authoredVitrine ? vitrineExchangeMinimum : 60} max={authoredVitrine ? 1800 : 8000} step={authoredVitrine ? 20 : 10} suffix="ms" onChange={(value) => updateSettings("paceMs", value)} />
+                                <RangeControl label={authoredVitrine ? "Loop exchange" : authoredShelf ? "Walking pace" : isOpeningReel ? "River pace" : "Motion pace"} value={config.settings.paceMs} min={authoredVitrine ? vitrineExchangeMinimum : authoredShelf ? 180 : 60} max={authoredVitrine ? 1800 : 8000} step={authoredVitrine ? 20 : 10} suffix="ms" onChange={(value) => updateSettings("paceMs", value)} />
                                 {authoredVitrine ? <RangeControl label="Loop readable hold" value={config.settings.holdMs} min={vitrineHoldMinimum} max={6000} step={10} suffix="ms" onChange={(value) => updateSettings("holdMs", value)} /> : null}
                             </>}
                         </section>
@@ -1755,19 +2015,19 @@ function AppView() {
                                 onChange={(value) => updateSettings("playKind", value)}
                             />
                             {config.settings.playKind === "repeat" ? <RangeControl label="Loop count" value={config.settings.repeatCount} min={1} max={1000} suffix="×" onChange={(value) => updateSettings("repeatCount", Math.round(value))} /> : null}
-                            {authoredVitrine ? <div className="playback-direction">
+                            {authoredProductScene ? <div className="playback-direction">
                                 <span>Timeline</span>
-                                <Segment label="Timeline mode" value={config.timelineMode ?? "automatic"} options={config.settings.playKind === "loop" ? [{ value: "automatic", label: "Auto" }, { value: "fixed-duration", label: "Fixed" }, { value: "directed", label: "Directed" }] : [{ value: "automatic", label: "Auto" }, { value: "fixed-duration", label: "Fixed" }]} onChange={updateTimelineMode} />
+                                <Segment label="Timeline mode" value={config.timelineMode ?? "automatic"} options={authoredShelf || config.settings.playKind === "loop" ? [{ value: "automatic", label: "Auto" }, { value: "fixed-duration", label: "Fixed" }, { value: "directed", label: "Directed" }] : [{ value: "automatic", label: "Auto" }, { value: "fixed-duration", label: "Fixed" }]} onChange={updateTimelineMode} />
                             </div> : null}
-                            {authoredVitrine && config.timelineMode === "fixed-duration" ? <RangeControl label="Exact duration" value={Math.max(config.timelineFixedDurationMs ?? 0, vitrineFixedMinimum)} min={vitrineFixedMinimum} max={VITRINE_MAX_DURATION_MS} step={1} suffix="ms" onChange={(value) => setConfig((current) => reconcileVitrineConfig({ ...current, timelineFixedDurationMs: value }))} /> : null}
-                            {authoredVitrine && config.timelineMode === "directed" ? <p className="preset-note">Fast ×2 → regular ×1 → fast ×1. Holds remain still; every exchange uses the same evaluator.</p> : null}
+                            {authoredProductScene && config.timelineMode === "fixed-duration" ? <RangeControl label="Exact duration" value={Math.max(config.timelineFixedDurationMs ?? 0, authoredShelf ? 1_000 : vitrineFixedMinimum)} min={authoredShelf ? 1_000 : vitrineFixedMinimum} max={authoredShelf ? SHELF_MAX_DURATION_MS : VITRINE_MAX_DURATION_MS} step={1} suffix="ms" onChange={(value) => applyConfig((current) => ({ ...current, timelineFixedDurationMs: value }))} /> : null}
+                            {authoredProductScene && config.timelineMode === "directed" ? <p className="preset-note">Fast ×2 → regular ×1 → fast ×1. Holds remain still; every exchange uses the same evaluator.</p> : null}
                             {activeProfile.axisControl ? <div className="playback-direction">
                                 <span>Axis</span>
                                 <Segment value={config.settings.axis} options={[{ value: "horizontal", label: "Horizontal" }, { value: "vertical", label: "Vertical" }]} onChange={(value) => updateSettings("axis", value)} />
                             </div> : null}
                             {activeProfile.directional && !authoredVitrine ? <div className="playback-direction">
                                 <span>Direction</span>
-                                <Segment value={config.settings.direction} options={[{ value: "forward", label: directionLabels[0] }, { value: "reverse", label: directionLabels[1] }]} onChange={(value) => updateSettings("direction", value)} />
+                                <Segment label="Direction" value={config.settings.direction} options={[{ value: "forward", label: directionLabels[0] }, { value: "reverse", label: directionLabels[1] }]} onChange={(value) => updateSettings("direction", value)} />
                             </div> : null}
                             {authoredVitrine ? <div className="playback-direction">
                                 <span>Story order</span>
@@ -1781,9 +2041,9 @@ function AppView() {
                                 <h3>Scale & presence</h3>
                             </div>
                             {authoredVitrine ? <>
-                                <RangeControl label="Presentation scale · height cap" value={config.settings.slideHeight} min={42} max={78} suffix="%" onBegin={() => beginVitrineSetting("slideHeight")} onEnd={() => endVitrineSetting("slideHeight")} onChange={(value) => updateSettings("slideHeight", value)} />
-                                <RangeControl label="Object turn" value={config.settings.tilt} min={0} max={9} step={0.25} suffix="°" onBegin={() => beginVitrineSetting("tilt")} onEnd={() => endVitrineSetting("tilt")} onChange={(value) => updateSettings("tilt", value)} />
-                                <RangeControl label="Transition depth" value={config.settings.sway} min={8} max={30} suffix="%" onBegin={() => beginVitrineSetting("sway")} onEnd={() => endVitrineSetting("sway")} onChange={(value) => updateSettings("sway", value)} />
+                                <RangeControl label="Presentation scale · height cap" value={config.settings.slideHeight} min={42} max={78} suffix="%" onBegin={() => beginProductSetting("slideHeight")} onEnd={() => endProductSetting("slideHeight")} onChange={(value) => updateSettings("slideHeight", value)} />
+                                <RangeControl label="Object turn" value={config.settings.tilt} min={0} max={9} step={0.25} suffix="°" onBegin={() => beginProductSetting("tilt")} onEnd={() => endProductSetting("tilt")} onChange={(value) => updateSettings("tilt", value)} />
+                                <RangeControl label="Transition depth" value={config.settings.sway} min={8} max={30} suffix="%" onBegin={() => beginProductSetting("sway")} onEnd={() => endProductSetting("sway")} onChange={(value) => updateSettings("sway", value)} />
                                 <div className="playback-direction"><span>Exchange direction</span><Segment label="Exchange direction" value={config.settings.transitionDirection} options={[{ value: "left", label: "Left" }, { value: "right", label: "Right" }]} onChange={(value) => updateSettings("transitionDirection", value)} /></div>
                                 {config.settings.playKind !== "loop" ? <>
                                     <div className="playback-direction"><span>Opening object</span><Segment value={config.settings.spotlightsEnabled ? "marked" : "first"} options={[{ value: "marked", label: "Marked" }, { value: "first", label: "First" }]} onChange={(value) => updateSettings("spotlightsEnabled", value === "marked")} /></div>
@@ -1791,6 +2051,16 @@ function AppView() {
                                 </> : <p className="preset-note">Opening and finale choices are saved for Once/Repeat; Forever uses the ordered loop only.</p>}
                                 <div className="playback-direction"><span>Placard</span><Segment label="Placard" value={config.settings.showHint ? "on" : "off"} options={[{ value: "on", label: "Visible" }, { value: "off", label: "Clean" }]} onChange={(value) => updateSettings("showHint", value === "on")} /></div>
                                 <p className="preset-note">Artwork stays opacity 1, filter none, and normal blend through holds and exchanges.</p>
+                            </> : authoredShelf ? <>
+                                {config.settings.playKind !== "loop" ? <>
+                                    <div className="playback-direction"><span>Opening edition</span><Segment value={config.settings.spotlightsEnabled ? "marked" : "first"} options={[{ value: "marked", label: "Marked" }, { value: "first", label: "First" }]} onChange={(value) => updateSettings("spotlightsEnabled", value === "marked")} /></div>
+                                    <div className="playback-direction"><span>Finite finale</span><Segment value={config.settings.finaleEnabled ? "on" : "off"} options={[{ value: "on", label: "Last frame" }, { value: "off", label: "Opening frame" }]} onChange={(value) => updateSettings("finaleEnabled", value === "on")} /></div>
+                                </> : <p className="preset-note">Opening and finale choices stay saved while Forever walks the unbroken shelf.</p>}
+                                <RangeControl label="Card height" value={config.settings.slideHeight} min={28} max={58} step={1} suffix="%" onBegin={() => beginProductSetting("slideHeight")} onEnd={() => endProductSetting("slideHeight")} onChange={(value) => updateSettings("slideHeight", value)} />
+                                <RangeControl label="Breathing room" value={config.settings.gap} min={8} max={120} step={1} suffix="px" onBegin={() => beginProductSetting("gap")} onEnd={() => endProductSetting("gap")} onChange={(value) => updateSettings("gap", value)} />
+                                <RangeControl label="Edition lean" value={config.settings.tilt} min={0} max={6} step={0.25} suffix="°" onBegin={() => beginProductSetting("tilt")} onEnd={() => endProductSetting("tilt")} onChange={(value) => updateSettings("tilt", value)} />
+                                <RangeControl label="Shelf lift" value={config.settings.centerBump} min={3} max={14} step={0.5} suffix="%" onBegin={() => beginProductSetting("centerBump")} onEnd={() => endProductSetting("centerBump")} onChange={(value) => updateSettings("centerBump", value)} />
+                                <p className="preset-note">Natural source geometry stays fixed. Fit, crop, and focal point change pixels inside the plane only.</p>
                             </> : <>
                                 {activeProfile.supportsSpotlight ? <Segment value={config.settings.spotlightsEnabled ? "on" : "off"} options={[{ value: "on", label: `${activeProfile.focusLabel} on` }, { value: "off", label: "Off" }]} onChange={(value) => updateSettings("spotlightsEnabled", value === "on")} /> : null}
                                 {activeProfile.supportsFinale ? <Segment value={config.settings.finaleEnabled ? "on" : "off"} options={[{ value: "on", label: "Final beat on" }, { value: "off", label: "Off" }]} onChange={(value) => updateSettings("finaleEnabled", value === "on")} /> : null}
@@ -1814,13 +2084,13 @@ function AppView() {
                                 onChange={(value) => updateSettings("theme", value)}
                             /> : null}
                             <div className="background-style-grid" role="group" aria-label="Room background">
-                                {((authoredVitrine ? ["solid", "transparent"] : ["solid", "gradient", "halo", "paper", "transparent"]) as BackgroundStyle[]).map((style) => (
+                                {((authoredProductScene ? ["solid", "transparent"] : ["solid", "gradient", "halo", "paper", "transparent"]) as BackgroundStyle[]).map((style) => (
                                     <button type="button" aria-pressed={config.settings.backgroundStyle === style} className={config.settings.backgroundStyle === style ? "is-active" : ""} onClick={() => updateSettings("backgroundStyle", style)} key={style}>
                                         <i data-style={style} /><span>{style}</span>
                                     </button>
                                 ))}
                             </div>
-                            {!authoredVitrine ? <RangeControl label="Grid ink" value={config.settings.gridStrength} min={0} max={20} step={0.5} suffix="%" onChange={(value) => updateSettings("gridStrength", value)} /> : <p className="preset-note">Solid room or clean transparency. Authored Looks arrive in G10D without touching artwork pixels.</p>}
+                            {!authoredProductScene ? <RangeControl label="Grid ink" value={config.settings.gridStrength} min={0} max={20} step={0.5} suffix="%" onChange={(value) => updateSettings("gridStrength", value)} /> : <p className="preset-note">Solid room or clean transparency. Authored Looks arrive in G10D without touching artwork pixels.</p>}
                         </section>
                     </div>
                 ) : inspector === "expert" ? (
@@ -1838,8 +2108,8 @@ function AppView() {
                             selectedItemId={selectedItemId}
                             onSelectItem={setSelectedItemId}
                             onSetting={updateSettings}
-                            onSettingStart={beginVitrineSetting}
-                            onSettingEnd={endVitrineSetting}
+                            onSettingStart={beginProductSetting}
+                            onSettingEnd={endProductSetting}
                             onItem={updateItem}
                             onPreset={applyExpertPreset}
                             freezePreview={freezePreview}
@@ -1847,6 +2117,7 @@ function AppView() {
                             isOpeningReel={isOpeningReel}
                             profile={activeProfile}
                             isVitrineV2={authoredVitrine}
+                            isShelfV2={authoredShelf}
                             vitrineHoldMinimum={vitrineHoldMinimum}
                             vitrineExchangeMinimum={vitrineExchangeMinimum}
                         />
@@ -1865,7 +2136,7 @@ function AppView() {
                             <span className="field-label">Format</span>
                             <div className="format-cards">
                                 {(usesLinuxHostPort ? [
-                                    ["png-frames", "PNG Frames", verifiedPngScene ? "Verified sequence · straight alpha" : "Quiet Carousel v1 or Vitrine v2 only"],
+                                    ["png-frames", "PNG Frames", verifiedPngScene ? "Verified sequence · straight alpha" : shelfPngVideoBlocked ? "Shelf video export not yet verified" : "Quiet Carousel, Vitrine, or image-only Shelf"],
                                     ["mp4", "MP4", !verifiedH264Scene ? "Quiet Carousel only · use PNG Frames" : !verifiedH264Audio ? "Needs 48 kHz stereo audio · use PNG Frames" : "Verified H.264 · AAC · opaque"],
                                 ] : [
                                     ["mp4", "MP4", "H.264 · universal"],
@@ -1882,7 +2153,7 @@ function AppView() {
                             {format === "premiere" ? (
                                 <p className="preset-note">{config.settings.backgroundStyle === "transparent" ? "Transparency uses ProRes 4444. Master uses ProRes 4444 XQ for compositing." : "Optimized: ProRes 422 LT. High: ProRes 422. Master: ProRes 422 HQ."}</p>
                             ) : null}
-                            {format === "png-frames" ? <p className="preset-note">{verifiedPngScene || !usesLinuxHostPort ? "PNG Frames preserve straight alpha when requested and never contain audio. Project audio stays unchanged." : "Choose Quiet Carousel v1 or Vitrine v2 for verified PNG Frames."}</p> : null}
+                            {format === "png-frames" ? <p className="preset-note">{verifiedPngScene || !usesLinuxHostPort ? "PNG Frames preserve straight alpha when requested and never contain audio. Project audio stays unchanged." : shelfPngVideoBlocked ? "Verified Shelf PNG Frames currently support still images only." : "Choose Quiet Carousel v1, Vitrine v2, or image-only Shelf v2 for verified PNG Frames."}</p> : null}
                             {usesLinuxHostPort && format === "mp4" ? <p className="preset-note">H.264/AAC is a verified opaque BT.709 MP4 with the authored mix when the Project audio master is 48 kHz stereo.</p> : null}
                             {config.settings.backgroundStyle === "transparent" ? <p className="preset-note">{usesLinuxHostPort ? verifiedPngScene ? "Transparent export uses verified PNG Frames. MP4 remains opaque." : "This Scene has no verified transparent export yet." : "Transparent export: Premiere or WebM. Social platforms flatten transparency; use this for compositing."}</p> : null}
                         </section>
@@ -1934,7 +2205,7 @@ function AppView() {
                         </section>
                         <section className="export-summary">
                             <div><span>Runtime</span><strong>{formatDuration(playbackDuration)}</strong></div>
-                            <div><span>Frames</span><strong>{Math.max(1, Math.round((playbackDuration / 1000) * fps)).toLocaleString()}</strong></div>
+                            <div><span>Frames</span><strong>{Math.max(1, authoredShelf && usesLinuxHostPort && format === "png-frames" ? Math.ceil((playbackDuration / 1000) * fps) : Math.round((playbackDuration / 1000) * fps)).toLocaleString()}</strong></div>
                             <div><span>Quality</span><strong>{config.settings.exportQuality === "master" ? "Master" : config.settings.exportQuality === "high" ? "High" : "Optimized"}</strong></div>
                         </section>
 

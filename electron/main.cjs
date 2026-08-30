@@ -25,7 +25,6 @@ const {
     writeFileSafely,
 } = require("./file-operations.cjs")
 const {
-    ProjectImportError,
     publicProjectImportFailure,
 } = require("./project-import.cjs")
 const {
@@ -41,12 +40,14 @@ const { createH264ExportRuntime } = require("./h264-export-runtime.cjs")
 const { cleanupH264AudioResidue, createH264AudioStage } = require("./h264-audio-stage.cjs")
 const { cleanupG06PrivateFrameCache, createG06PrivateFrameCache } = require("./g06-private-frame-cache.cjs")
 const { runG06FFmpeg } = require("./g06-ffmpeg-runner.cjs")
+const { assertLegacyExportScene } = require("./legacy-export-contract.cjs")
 const {
     createAppProtocolHandler,
     installSessionSecurity,
     installWindowSecurity,
 } = require("./linux-protocols.cjs")
 const { createLinuxHostController, verifyOpenedMediaSource } = require("./linux-host-controller.cjs")
+const { createLegacyProjectOpenController } = require("./legacy-project-open-controller.cjs")
 const { HostPortError } = require("./linux-host-port.cjs")
 let ffmpegStatic = null
 try {
@@ -82,7 +83,7 @@ if (!app.requestSingleInstanceLock()) app.quit()
 
 let mainWindow = null
 let activeExport = null
-let activeProjectImport = null
+let legacyProjectOpenController = null
 const linuxHostControllers = new Map()
 const securityDecisions = Object.create(null)
 const G03_SESSION_PARTITION = "persist:galileo-gallery-g03"
@@ -96,7 +97,7 @@ function developmentRendererOrigin() {
 }
 
 function linuxHostMode() {
-    return process.platform === "linux" && (Boolean(process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT) || (app.isPackaged && packagedBuildIdentity().profile === "g03-linux-host-port"))
+    return process.platform === "linux" && (Boolean(process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT || process.env.REEL_SHELF_RENDERER_OUTPUT) || (app.isPackaged && packagedBuildIdentity().profile === "g03-linux-host-port"))
 }
 
 function packagedBuildIdentity() {
@@ -125,6 +126,21 @@ function cleanupOpenedProjectResidue() {
             if (stat.isDirectory() && !stat.isSymbolicLink()) fs.rmSync(target, { recursive: true, force: true })
         } catch {}
     }
+}
+
+function removeOpenedProjectResourceRoot(resourceRoot) {
+    const parent = path.resolve(app.getPath("userData"), "opened-project-media")
+    const target = path.resolve(resourceRoot)
+    if (path.dirname(target) !== parent || !/^open-[a-f0-9-]{36}$/.test(path.basename(target))) {
+        throw new Error("Refused to retire a non-owned Project resource root.")
+    }
+    let stat
+    try { stat = fs.lstatSync(target) } catch (error) {
+        if (error?.code === "ENOENT") return
+        throw error
+    }
+    if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error("Refused to retire an unsafe Project resource root.")
+    fs.rmSync(target, { recursive: true, force: false })
 }
 
 let audioGrantStaging = null
@@ -163,7 +179,7 @@ function rendererURL(exportMode = false) {
     const query = new URLSearchParams()
     if (exportMode) query.set("export", "1")
     if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT) query.set("tracer", "quiet-carousel")
-    if (process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT) query.set("host", "linux")
+    if (process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT || process.env.REEL_SHELF_RENDERER_OUTPUT) query.set("host", "linux")
     const suffix = query.size ? `?${query}` : ""
     const developmentOrigin = developmentRendererOrigin()
     if (developmentOrigin) {
@@ -639,7 +655,9 @@ async function prepareExportVideoFrames(request, exportState, resolveMediaPath =
             request.durationMs,
             Math.max(request.cycleDurationMs || request.durationMs, request.finalCycleDurationMs || 0)
         )
-        const decodeFrames = Math.max(1, Math.round(request.fps * decodeDurationMs / 1000))
+        const decodeFrames = Math.max(1, request.config.styleId === "the-shelf" && request.config.sceneVersion === 2
+            ? Math.ceil(request.fps * decodeDurationMs / 1000)
+            : Math.round(request.fps * decodeDurationMs / 1000))
         const estimatedBytes = opened
             ? decodeFrames * (request.width * request.height * 4 + request.height + 1024 * 1024)
             : request.width * request.height * 4 * request.fps * (decodeDurationMs / 1000) * 0.12
@@ -928,6 +946,19 @@ function createMainWindow() {
         })
     }
     mainWindow = new BrowserWindow(windowOptions)
+    if (!linuxHostMode()) {
+        legacyProjectOpenController = createLegacyProjectOpenController({
+            webContentsId: mainWindow.webContents.id,
+            developmentOrigin: developmentRendererOrigin(),
+            openProject: ({ signal }) => openPortableProject(undefined, signal),
+            removeResourceRoot: removeOpenedProjectResourceRoot,
+            onError: () => recordSecurityDecision("opened-project-cleanup-refused"),
+        })
+        mainWindow.webContents.on("did-start-navigation", (_event, _url, _isInPlace, isMainFrame) => {
+            if (isMainFrame) legacyProjectOpenController?.abandon()
+        })
+        mainWindow.webContents.on("render-process-gone", () => legacyProjectOpenController?.abandon())
+    }
     if (linuxHostMode()) {
         const webContentsId = mainWindow.webContents.id
         const host = createLinuxHostController({
@@ -975,10 +1006,13 @@ function createMainWindow() {
     }
     installWindowSecurity(mainWindow, { developmentOrigin: developmentRendererOrigin(), onDecision: recordSecurityDecision })
     mainWindow.loadURL(rendererURL())
-    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT) {
+    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT || process.env.REEL_SHELF_RENDERER_OUTPUT) {
         mainWindow.webContents.once("did-finish-load", async () => {
             try {
-                if (process.env.REEL_G11_RENDERER_OUTPUT) {
+                if (process.env.REEL_SHELF_RENDERER_OUTPUT) {
+                    const { runShelfRendererSmoke } = require("./shelf-renderer-smoke.cjs")
+                    await runShelfRendererSmoke(mainWindow, path.resolve(process.env.REEL_SHELF_RENDERER_OUTPUT), process.env.REEL_SHELF_RENDERER_MODE ?? "normal")
+                } else if (process.env.REEL_G11_RENDERER_OUTPUT) {
                     const { runG11VitrineSmoke } = require("./g11-vitrine-smoke.cjs")
                     await runG11VitrineSmoke(mainWindow, path.resolve(process.env.REEL_G11_RENDERER_OUTPUT), process.env.REEL_G11_RENDERER_MODE ?? "save")
                 } else if (process.env.REEL_G08_RENDERER_OUTPUT) {
@@ -1099,6 +1133,8 @@ function createMainWindow() {
         videoAudioRuntime = null
         pngFramesRuntime = null
         h264ExportRuntime = null
+        legacyProjectOpenController?.dispose()
+        legacyProjectOpenController = null
         mainWindow = null
     })
 }
@@ -1286,6 +1322,7 @@ function cancelActiveExport() {
 }
 
 async function runExport(request, outputPath) {
+    assertLegacyExportScene(request)
     const exportId = `export-${Date.now().toString(36)}`
     const state = { exportId, cancelled: false, process: null, window: null }
     const posterPath = request.posterFrame && request.posterFrame !== "none"
@@ -1428,8 +1465,8 @@ async function runExport(request, outputPath) {
 }
 
 app.whenReady().then(async () => {
+    try { cleanupOpenedProjectResidue() } catch { recordSecurityDecision("opened-project-cleanup-refused") }
     if (linuxHostMode()) {
-        try { cleanupOpenedProjectResidue() } catch { recordSecurityDecision("opened-project-cleanup-refused") }
         try { audioStaging().cleanupResidue() } catch { recordSecurityDecision("audio-staging-cleanup-refused") }
         try { cleanupH264AudioResidue(h264AudioRoot()) } catch { recordSecurityDecision("h264-audio-cleanup-refused") }
         try {
@@ -1497,23 +1534,10 @@ app.whenReady().then(async () => {
     ipcMain.handle("media:from-path", (_event, filePath) => droppedPathResult(filePath))
     ipcMain.handle("media:create-video-proxy", (_event, url) => createVideoProxy(url))
     ipcMain.handle("project:save", (_event, config) => savePortableProject(config))
-    ipcMain.handle("project:open", async () => {
-        if (activeProjectImport) {
-            return { failure: publicProjectImportFailure(new ProjectImportError("import_conflict")) }
-        }
-        const controller = new AbortController()
-        activeProjectImport = controller
-        try {
-            return await openPortableProject(undefined, controller.signal)
-        } finally {
-            if (activeProjectImport === controller) activeProjectImport = null
-        }
-    })
-    ipcMain.handle("project:cancel-open", () => {
-        if (!activeProjectImport) return { cancelled: false }
-        activeProjectImport.abort()
-        return { cancelled: true }
-    })
+    ipcMain.handle("project:open", (event) => legacyProjectOpenController?.begin(event) ?? Promise.reject(new Error("Project host unavailable.")))
+    ipcMain.handle("project:accept-open", (event, operationId) => legacyProjectOpenController?.accept(event, operationId) ?? Promise.reject(new Error("Project host unavailable.")))
+    ipcMain.handle("project:discard-open", (event, operationId) => legacyProjectOpenController?.discard(event, operationId) ?? Promise.reject(new Error("Project host unavailable.")))
+    ipcMain.handle("project:cancel-open", (event) => legacyProjectOpenController?.cancel(event) ?? { cancelled: false })
     ipcMain.handle("template:save", (_event, settings) => saveSettingsTemplate(settings))
     ipcMain.handle("template:open", () => openSettingsTemplate())
     ipcMain.handle("recovery:load", () => {
@@ -1536,6 +1560,7 @@ app.whenReady().then(async () => {
     })
     ipcMain.handle("export:reveal", (_event, filePath) => shell.showItemInFolder(filePath))
     ipcMain.handle("export:start", async (_event, request) => {
+        assertLegacyExportScene(request)
         if (activeExport) throw new Error("An export is already running.")
         const extension = request.format === "mp4" ? "mp4" : request.format === "premiere" ? "mov" : "webm"
         let outputPath = request.outputPath

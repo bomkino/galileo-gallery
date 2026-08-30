@@ -34,7 +34,7 @@ const SUPPORTED_SCENE_VERSIONS = Object.freeze({
     "proximity-orbit": Object.freeze([1]),
     "spin-image-orbit": Object.freeze([1]),
     zoetrope: Object.freeze([1]),
-    "the-shelf": Object.freeze([1]),
+    "the-shelf": Object.freeze([2]),
     "before-after-slider": Object.freeze([1]),
     "slide-fan": Object.freeze([1]),
     "dealers-fan": Object.freeze([1]),
@@ -617,6 +617,66 @@ function validateVitrineV2Project(project) {
     if (totalDurationMs > 24 * 60 * 60 * 1000) fail("timeline_invalid", "Vitrine playback exceeds the supported duration.")
 }
 
+function automaticShelfDuration(mediaCount, paceMs) {
+    return Math.min(42_000, Math.max(8_000, Math.max(1, mediaCount) * paceMs))
+}
+
+function validateShelfV2Project(project) {
+    if (project.scene.id !== "the-shelf" || project.scene.version !== 2) return
+    if (project.media.length < 1 || project.media.length > 127) fail("scene_invalid", "Shelf supports 1 to 127 ordered media items.")
+    if (project.canvas.ratioMode !== "auto") fail("canvas_invalid", "Shelf canvas ratio intent must remain independent from natural frame ratios.")
+    for (const entry of project.media) {
+        if (!hasExactKeys(entry.frame, FRAME_INTENT_KEYS)) fail("manifest_invalid", "Shelf v2 requires explicit per-frame fit, crop, and focal intent.")
+        if (entry.frame.aspectMode !== "auto") fail("manifest_invalid", "Shelf v2 requires each frame to use its natural source ratio.")
+        numberValue(entry.frame.ratio, "manifest_invalid", "Shelf natural frame ratio", 0.2, 4)
+        // Crop and focal intent affect pixels inside the natural-ratio plane. They never alter Shelf geometry.
+    }
+
+    numberValue(project.scene.parameters.slideHeight, "scene_invalid", "Shelf card height", 28, 58)
+    numberValue(project.scene.parameters.gap, "scene_invalid", "Shelf gap", 8, 120)
+    numberValue(project.scene.parameters.tilt, "scene_invalid", "Shelf lean amount", 0, 6)
+    numberValue(project.scene.parameters.centerBump, "scene_invalid", "Shelf Spotlight lift", 3, 14)
+    if (project.timeline.axis !== "horizontal") fail("timeline_invalid", "Shelf uses one fixed horizontal baseline.")
+    if (!["solid", "transparent"].includes(project.look.parameters.backgroundStyle)) {
+        fail("look_invalid", "Shelf v2 supports a solid field or clean transparency only.")
+    }
+    if (!["dark", "light"].includes(project.look.parameters.theme)) fail("look_invalid", "Shelf v2 requires an explicit dark or light clean Look.")
+
+    const spotlightMarkers = project.media.filter((entry) => entry.frame.spotlight)
+    if (spotlightMarkers.length > 1
+        || spotlightMarkers.some((entry) => entry.frame.muted)
+        || (project.scene.parameters.spotlightsEnabled && spotlightMarkers.length !== 1)
+        || (!project.scene.parameters.spotlightsEnabled && spotlightMarkers.length !== 0)) {
+        fail("scene_invalid", "Shelf Spotlight intent is inconsistent.")
+    }
+
+    const paceMs = numberValue(project.timeline.paceMs, "timeline_invalid", "Shelf walking pace", 180, 8_000)
+    const baseCycleMs = automaticShelfDuration(project.media.length, paceMs)
+    let cycleDurationMs = baseCycleMs
+    if (project.timeline.mode === "fixed-duration") cycleDurationMs = project.timeline.fixedDurationMs
+    if (project.timeline.mode === "directed") {
+        cycleDurationMs = 0
+        for (const segment of project.timeline.segments) {
+            const durationMs = segment.durationMs > 0
+                ? segment.durationMs
+                : segment.kind === "hold"
+                    ? Math.max(250, paceMs)
+                    : baseCycleMs * segment.cycles / segment.paceScale
+            if (!Number.isFinite(durationMs) || durationMs < 1 || durationMs > 24 * 60 * 60 * 1_000) {
+                fail("timeline_invalid", "A directed Shelf segment duration is invalid.")
+            }
+            cycleDurationMs += durationMs
+        }
+    }
+    if (!Number.isFinite(cycleDurationMs) || cycleDurationMs < 1 || cycleDurationMs > 24 * 60 * 60 * 1_000) {
+        fail("timeline_invalid", "Shelf Timeline exceeds the supported duration.")
+    }
+    const totalDurationMs = project.timeline.playKind === "repeat" ? cycleDurationMs * project.timeline.repeatCount : cycleDurationMs
+    if (!Number.isFinite(totalDurationMs) || totalDurationMs > 24 * 60 * 60 * 1_000) {
+        fail("timeline_invalid", "Shelf playback exceeds the supported duration.")
+    }
+}
+
 function greatestCommonDivisor(left, right) {
     let a = Math.abs(left)
     let b = Math.abs(right)
@@ -748,6 +808,7 @@ function validatePortableProject(input) {
     validateLook(input.look)
     validateTimeline(input.timeline, input.scene)
     validateVitrineV2Project(input)
+    validateShelfV2Project(input)
     validateAudio(input.audio, input.media)
     exactKeys(input.exportIntent, ["quality"], "manifest_invalid", "Export intent")
     stringValue(input.exportIntent.quality, "manifest_invalid", "Export quality", { values: ["master", "high", "optimized"] })

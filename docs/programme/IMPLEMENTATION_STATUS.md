@@ -4,7 +4,7 @@ Updated: 30 August 2026
 
 Repository start: `bomkino/galileo-gallery@2762043bb733aa28a6c63fe26564504b9f257564`
 
-Task branch: `codex/g11-vitrine-v2`
+Task branch: `codex/g11-scenes-integration`
 
 ## G01A — safe archive import boundary
 
@@ -163,9 +163,9 @@ Final CI run `33281906705` passed Ubuntu, macOS, Windows, G02 renderer, and G08 
 and contains 21 screenshots plus progress and final machine receipts. Exact reviewed tree:
 `99fc1f3ddf623ede05651e314dc49847f7f74e97`.
 
-## G11 — Vitrine v2 Product Scene
+## G11 — Vitrine v2 and Shelf v2 Product Scenes
 
-State: **engineering-complete in source and a sandboxed packaged-directory Linux x64 Electron journey; exact target platforms and human acceptance remain unclaimed**
+State: **Vitrine engineering-complete in source and a sandboxed packaged-directory Linux x64 Electron journey; Shelf implemented and tested in source with packaged CI pending; exact target platforms and human acceptance remain unclaimed**
 
 Implemented and proved:
 
@@ -193,16 +193,38 @@ Exact implementation tree: `9c6c0dd8d6ac3e9e3f9ce4cb9ad6aeb4b82e4cee`.
 
 Full evidence: `docs/programme/evidence/G11_EVIDENCE_RECEIPT.md`.
 
+### Shelf v2
+
+Shelf v2 is integrated and source-tested with a portable v2 Project contract, natural-ratio ordered
+image/video planes, automatic/fixed/directed Timeline behavior, five persisted causal controls, bounded
+video-admission and renderer-lifecycle contracts, and image-only PNG Frames source support.
+
+The packaged normal/reduced Linux x64 Electron harness, including sparse-VFR, short-source, stale-frame,
+decoder-ownership, save/open containment, and image-only PNG journeys, is authored but has not run in the
+present root container. Packaged CI remains pending. No Shelf package, artifact, screenshot, VFR,
+decoder-bound, generated-PNG, or target-platform evidence is claimed. Shelf Projects containing video
+cannot export PNG Frames, and Shelf video export remains unsupported. Human acceptance is unclaimed.
+
+Exact Shelf closure commit: `bf4598da0ce79ad9f0579f94b6ba43475bc5a83e`; tree:
+`7ac34074099ea4dd29549a7d127365cd1b248df0`.
+
+Source receipt: `docs/programme/evidence/G11_SHELF_EVIDENCE_RECEIPT.md`.
+
 ## Known unsafe or unproved surfaces
 
 - legacy non-G03 package paths still exist and are not release candidates;
 - decoded video/audio/proxy/export cache budgets and eviction beyond G03 media reads;
 - exact Garuda and Apple-Silicon target behaviour;
 - human interaction, visual, motion, and audio acceptance.
+- Shelf packaged renderer/save-reopen/VFR/decoder/PNG evidence remains pending; its image-only PNG
+  package harness is authored but unrun, and Shelf video export is unsupported.
 
 Current frontier: **three disjoint clean-room Scene lanes under one serial catalogue owner**. The repaired
 handoff is validated evidence input only: 29 candidates, 139 controls, and 43 pending human decisions.
-Quiet Carousel and Vitrine v2 are the only individually authored end-to-end engineering-verified Product
-Scenes. Shelf v2 and Light Table v2 are active in isolated task worktrees; Zoetrope v2 is dependency-ready
-for the third implementation slot. Registered IDs are not counted as completion. G04 remains deferred
-until an Apple-Silicon runner is available.
+Quiet Carousel and Vitrine v2 remain the only individually authored, end-to-end engineering-verified
+Product Scenes. Shelf v2 is source-integrated and source-tested with packaged CI pending; it is not yet
+counted as end-to-end engineering-verified. Light Table v2 now has a pinned evaluator and preview-renderer
+engine on the integration branch, but its serial catalogue, portable Project, control, export, and package
+seams remain incomplete. Zoetrope v2 remains dependency-ready for the third implementation slot.
+Registered IDs are not counted as completion. G04 remains deferred until an Apple-Silicon runner is
+available.

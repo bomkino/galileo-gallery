@@ -3,7 +3,7 @@ import type { ExportRequest } from "./types.ts"
 export function exportCycleClock(request: ExportRequest, timeMs: number) {
     const cycleDuration = request.cycleDurationMs ?? request.durationMs
     const repeats = Math.min(1000, Math.max(1, Math.round(request.config.settings.repeatCount)))
-    if (request.config.styleId === "vitrine" && request.config.sceneVersion === 2 && request.config.settings.playKind === "repeat") {
+    if (["vitrine", "the-shelf"].includes(request.config.styleId) && request.config.sceneVersion === 2 && request.config.settings.playKind === "repeat") {
         return { timeMs: timeMs % Math.max(1, cycleDuration), durationMs: cycleDuration, terminal: true }
     }
     if (request.config.settings.playKind === "repeat" && request.finalCycleDurationMs) {

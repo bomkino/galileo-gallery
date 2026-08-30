@@ -238,6 +238,7 @@ function createGrantRegistry(options = {}) {
                     "content-type": grant.mime,
                     "content-length": String(length),
                     "accept-ranges": "bytes",
+                    "access-control-allow-origin": "*",
                     ...(range.partial ? { "content-range": `bytes ${range.start}-${range.end}/${stats.size}` } : {}),
                 }),
             }
@@ -292,6 +293,7 @@ function createGrantRegistry(options = {}) {
                     "content-length": String(length),
                     "accept-ranges": "bytes",
                     "cache-control": "no-store",
+                    "access-control-allow-origin": "*",
                     ...(range.partial ? { "content-range": `bytes ${range.start}-${range.end}/${stats.size}` } : {}),
                 }),
             }

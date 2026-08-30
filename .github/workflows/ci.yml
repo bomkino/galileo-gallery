@@ -318,6 +318,26 @@ jobs:
           REEL_G11_ARTIFACTS="$root" \
           REEL_G11_EXECUTABLE="$executable" \
           xvfb-run -a node scripts/run-g11-renderer.cjs
+      - name: Run packaged Shelf normal and forced-reduced journeys
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_sha="$GITHUB_SHA"
+          source_tree="$(git rev-parse HEAD^{tree})"
+          executable="$PWD/release/g03/linux-unpacked/galileo-gallery"
+          app_asar="$PWD/release/g03/linux-unpacked/resources/app.asar"
+          root="$PWD/artifacts/shelf"
+          test -x "$executable"
+          test -f "$app_asar"
+          mkdir -p "$root"
+          GALLERY_SOURCE_SHA="$source_sha" \
+          GALLERY_SOURCE_TREE="$source_tree" \
+          SHELF_EXPECTED_EXECUTABLE_SHA="$(sha256sum "$executable" | cut -d' ' -f1)" \
+          SHELF_EXPECTED_APP_ASAR_SHA="$(sha256sum "$app_asar" | cut -d' ' -f1)" \
+          REEL_SHELF_ARTIFACTS="$root" \
+          REEL_SHELF_EXECUTABLE="$executable" \
+          xvfb-run -a node scripts/run-shelf-renderer.cjs
       - name: Re-run packaged PNG cancellation after G11 runtime changes
         shell: bash
         run: |
@@ -343,6 +363,12 @@ jobs:
           name: g11-vitrine-positive-and-failure-evidence
           path: artifacts/g11/
           if-no-files-found: error
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: g11-shelf-normal-reduced-and-failure-evidence
+          path: artifacts/shelf/
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v6
         if: success()
         with:

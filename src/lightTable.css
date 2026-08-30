@@ -1,0 +1,157 @@
+.light-table-stage {
+    --light-table-surface: #e8e6de;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    contain: layout paint size style;
+    isolation: isolate;
+    background: var(--light-table-surface);
+    color: #171816;
+}
+
+.light-table-plane {
+    position: absolute;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+    opacity: 1;
+    filter: none;
+    mix-blend-mode: normal;
+    background: transparent;
+    transform-origin: 50% 50%;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.light-table-underlight,
+.light-table-frame,
+.light-table-focus-ring {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+}
+
+.light-table-underlight {
+    z-index: 0;
+    border-radius: 9%;
+    background: radial-gradient(ellipse at 50% 52%, rgba(255, 247, 189, .9) 0%, rgba(255, 226, 139, .48) 44%, rgba(255, 215, 112, 0) 76%);
+    filter: blur(var(--light-table-underlight-blur, 12px));
+    transform-origin: 50% 50%;
+}
+
+.light-table-frame {
+    z-index: 1;
+    box-sizing: border-box;
+    margin: 0;
+    overflow: visible;
+    border: var(--light-table-hairline, 1px) solid rgba(23, 24, 22, .32);
+    border-radius: 2px;
+    opacity: 1;
+    filter: none;
+    mix-blend-mode: normal;
+    background: #f6f3e9;
+    box-shadow: 0 var(--light-table-hairline, 1px) 0 rgba(255, 255, 255, .8), 0 var(--light-table-shadow-y, 10px) var(--light-table-shadow-blur, 28px) rgba(31, 32, 29, .18);
+}
+
+.light-table-media-window {
+    position: absolute;
+    inset: var(--light-table-frame-inset, 3px);
+    overflow: hidden;
+    border-radius: 1px;
+    opacity: 1;
+    filter: none;
+    mix-blend-mode: normal;
+    background: #171816;
+}
+
+.light-table-media,
+.light-table-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    opacity: 1;
+    filter: none;
+    mix-blend-mode: normal;
+}
+
+.light-table-media {
+    background: transparent;
+}
+
+.light-table-placeholder {
+    position: relative;
+    display: grid;
+    align-content: end;
+    justify-items: start;
+    gap: 4px;
+    box-sizing: border-box;
+    padding: clamp(6px, 1.2vw, 16px);
+    color: rgba(255, 255, 255, .86);
+    background: linear-gradient(135deg, #202421, #50534d);
+}
+
+.light-table-placeholder::before {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background: linear-gradient(90deg, transparent 0 32%, rgba(255, 255, 255, .08) 32% 34%, transparent 34% 66%, rgba(255, 255, 255, .08) 66% 68%, transparent 68%);
+    pointer-events: none;
+}
+
+.light-table-placeholder.is-failed {
+    background: #3d403b;
+}
+
+.light-table-placeholder span,
+.light-table-placeholder strong {
+    position: relative;
+    z-index: 1;
+}
+
+.light-table-placeholder span {
+    font: 650 clamp(6px, .7vw, 10px)/1.1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .08em;
+}
+
+.light-table-placeholder strong {
+    font: 700 clamp(15px, 2.4vw, 36px)/.9 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.light-table-focus-ring {
+    z-index: 2;
+    inset: calc(var(--light-table-focus-gap, 7px) * -1);
+    border: var(--light-table-focus-width, 2px) solid rgba(30, 31, 28, .88);
+    border-radius: 5px;
+    opacity: 0;
+    box-shadow: 0 0 0 var(--light-table-focus-width, 2px) rgba(255, 244, 178, .72);
+}
+
+.light-table-plane:focus-visible .light-table-focus-ring {
+    opacity: 1 !important;
+    border-color: #171816;
+    box-shadow: 0 0 0 var(--light-table-focus-mid, 4px) #fff4a6, 0 0 0 var(--light-table-focus-outer, 7px) rgba(23, 24, 22, .82);
+}
+
+.light-table-plane.is-failed .light-table-frame {
+    border-style: dashed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .light-table-stage,
+    .light-table-plane,
+    .light-table-underlight,
+    .light-table-frame,
+    .light-table-focus-ring {
+        animation: none !important;
+        transition: none !important;
+    }
+}

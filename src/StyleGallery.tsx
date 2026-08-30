@@ -31,6 +31,7 @@ export default function StyleGallery({ currentStyleId, onChoose, onClose }: Prop
         (category === "All" || style.category === category) &&
         `${style.name} ${style.description} ${style.styleIds.map((id) => galleryStyle(id).presetName).join(" ")}`.toLowerCase().includes(query.trim().toLowerCase())
     )
+    const currentSceneId = galleryScene(currentStyleId).id
 
     return (
         <div className="style-gallery-shell">
@@ -61,7 +62,8 @@ export default function StyleGallery({ currentStyleId, onChoose, onClose }: Prop
                 {visible.map((scene) => {
                     const style = galleryStyle(scene.defaultStyleId)
                     const presetCount = scene.styleIds.length
-                    return <button type="button" aria-label={`${scene.name}. ${scene.description}`} data-style-id={style.id} className={`style-card ${galleryScene(currentStyleId).id === scene.id ? "is-current" : ""}`} onClick={() => onChoose(style)} key={scene.id}>
+                    const isCurrent = currentSceneId === scene.id
+                    return <button type="button" aria-label={`${scene.name}. ${scene.description}`} aria-pressed={isCurrent} data-style-id={style.id} className={`style-card ${isCurrent ? "is-current" : ""}`} onClick={() => onChoose(style)} key={scene.id}>
                         <Miniature scene={scene} />
                         <span><strong>{scene.name}</strong><small>{presetCount > 1 ? `${presetCount} presets` : scene.category}</small></span>
                         <p>{scene.description}<em>{styleProfile(style.id, latestSceneVersion(style.id)).bestFor}</em></p>
