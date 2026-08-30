@@ -528,9 +528,9 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
                     <VitrineMedia item={item} source={source} index={originalSourceIndex} timeMs={sourceTimeMs} loop={config.settings.loopVideos} fps={fps} fit={evaluated.render.fit} exportMode={exportMode} prewarm={guard} />
                 </figure>
             })}
-            <div className="vitrine-design-overlay" style={{ width: designWidth, height: designHeight, transform: `scale(${projectScale})` }}>
-                {evaluated.placard ? <div className="vitrine-placard" data-media-id={evaluated.placard.mediaId}><span>Vitrine</span><strong>{evaluated.placard.caption}</strong></div> : null}
-            </div>
+        </div>
+        <div className="vitrine-design-overlay" style={{ width: designWidth, height: designHeight, transform: `scale(${size.width / designWidth}, ${size.height / designHeight})` }}>
+            {evaluated.placard ? <div className="vitrine-placard" data-media-id={evaluated.placard.mediaId}><span>Vitrine</span><strong>{evaluated.placard.caption}</strong></div> : null}
         </div>
         <div className="vitrine-status" role="status" aria-live="polite" aria-atomic="true">{currentLabel ? `Showing ${currentLabel}, item ${semanticIndex + 1} of ${allSourceItems.length}` : "Vitrine is empty"}</div>
     </div>

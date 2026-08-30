@@ -887,7 +887,7 @@ async function sourceVideoSeekBurstEvidence(window) {
 const sceneExpression = `(() => {
     const stage = document.querySelector('.vitrine-stage')
     const logical = stage?.querySelector('.vitrine-logical-stage')
-    const design = logical?.querySelector('.vitrine-design-overlay')
+    const design = stage?.querySelector('.vitrine-design-overlay')
     if (!stage || !logical || !design) throw new Error('Vitrine stage is missing.')
     const stageBox = stage.getBoundingClientRect()
     const logicalWidth = Number(stage.dataset.logicalWidth)
@@ -1734,6 +1734,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
             checks: maximumCanvasChecks,
             fixture: {
                 stage: exchange.stage,
+                planes: exchange.planes.map(({ id, role, normalizedPose, box, mediaGeometry }) => ({ id, role, normalizedPose, box, mediaGeometry })),
                 placard: exchange.placard,
                 placardBox: exchange.placardBox,
                 placardChildren: exchange.placardChildren,
@@ -1741,6 +1742,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
             },
             maximum: {
                 stage: maximumCanvas.stage,
+                planes: maximumCanvas.planes.map(({ id, role, normalizedPose, box, mediaGeometry }) => ({ id, role, normalizedPose, box, mediaGeometry })),
                 placard: maximumCanvas.placard,
                 placardBox: maximumCanvas.placardBox,
                 placardChildren: maximumCanvas.placardChildren,
