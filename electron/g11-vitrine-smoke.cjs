@@ -6,6 +6,9 @@ const zlib = require("node:zlib")
 const { spawnSync } = require("node:child_process")
 const { BrowserWindow, ipcMain, session } = require("electron")
 const { inspectPng } = require("./png-frames-runtime.cjs")
+const evidenceFs = (() => {
+    try { return require("original-fs") } catch { return fs }
+})()
 
 const PRESENTATION_KEY = "galileo-gallery:local-presentation:v1"
 const PROJECT_KEY = "galileo-gallery-project-v1"
@@ -23,7 +26,7 @@ function capturePathAuthority(resolved) {
     let current = root
     for (const part of resolved.slice(root.length).split(path.sep).filter(Boolean).slice(0, -1)) {
         current = path.join(current, part)
-        const stat = fs.lstatSync(current)
+        const stat = evidenceFs.lstatSync(current)
         if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error("G11 evidence ancestor is not an exact directory.")
         chain.push({ path: current, dev: stat.dev, ino: stat.ino })
     }
@@ -32,30 +35,31 @@ function capturePathAuthority(resolved) {
 
 function verifyPathAuthority(resolved, chain) {
     for (const expected of chain) {
-        const stat = fs.lstatSync(expected.path)
+        const stat = evidenceFs.lstatSync(expected.path)
         if (!stat.isDirectory() || stat.isSymbolicLink() || stat.dev !== expected.dev || stat.ino !== expected.ino) throw new Error("G11 evidence ancestor changed during read.")
     }
-    if (fs.realpathSync.native(resolved) !== resolved) throw new Error("G11 package evidence path contains a symbolic link.")
+    const realpath = evidenceFs.realpathSync.native ?? evidenceFs.realpathSync
+    if (realpath(resolved) !== resolved) throw new Error("G11 package evidence path contains a symbolic link.")
 }
 
 function readEvidenceFile(file, maximumBytes = Number.MAX_SAFE_INTEGER, includeBytes = false) {
     const resolved = path.resolve(file)
     const authority = capturePathAuthority(resolved)
     verifyPathAuthority(resolved, authority)
-    const linked = fs.lstatSync(resolved)
+    const linked = evidenceFs.lstatSync(resolved)
     if (!linked.isFile() || linked.isSymbolicLink() || linked.size < 1 || linked.size > maximumBytes) throw new Error("G11 package evidence target is not a bounded regular file.")
-    const descriptor = fs.openSync(resolved, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0))
+    const descriptor = evidenceFs.openSync(resolved, evidenceFs.constants.O_RDONLY | (evidenceFs.constants.O_NOFOLLOW ?? 0))
     const hash = crypto.createHash("sha256")
     const buffer = Buffer.allocUnsafe(1024 * 1024)
     const chunks = []
     let bytes = 0
     let before
     try {
-        before = fs.fstatSync(descriptor)
+        before = evidenceFs.fstatSync(descriptor)
         if (!before.isFile() || before.dev !== linked.dev || before.ino !== linked.ino || before.size !== linked.size
             || before.mtimeMs !== linked.mtimeMs || before.ctimeMs !== linked.ctimeMs) throw new Error("G11 package evidence target changed before hashing.")
         for (;;) {
-            const count = fs.readSync(descriptor, buffer, 0, buffer.length, null)
+            const count = evidenceFs.readSync(descriptor, buffer, 0, buffer.length, null)
             if (!count) break
             const chunk = buffer.subarray(0, count)
             hash.update(chunk)
@@ -63,8 +67,8 @@ function readEvidenceFile(file, maximumBytes = Number.MAX_SAFE_INTEGER, includeB
             bytes += count
             if (bytes > maximumBytes) throw new Error("G11 evidence file exceeds its byte bound.")
         }
-        const after = fs.fstatSync(descriptor)
-        const finalLink = fs.lstatSync(resolved)
+        const after = evidenceFs.fstatSync(descriptor)
+        const finalLink = evidenceFs.lstatSync(resolved)
         if (before.dev !== after.dev || before.ino !== after.ino || before.size !== after.size || before.mtimeMs !== after.mtimeMs || before.ctimeMs !== after.ctimeMs
             || finalLink.dev !== before.dev || finalLink.ino !== before.ino || finalLink.size !== before.size || finalLink.mtimeMs !== before.mtimeMs || finalLink.ctimeMs !== before.ctimeMs
             || bytes !== before.size) {
@@ -72,7 +76,7 @@ function readEvidenceFile(file, maximumBytes = Number.MAX_SAFE_INTEGER, includeB
         }
         verifyPathAuthority(resolved, authority)
     } finally {
-        fs.closeSync(descriptor)
+        evidenceFs.closeSync(descriptor)
     }
     return { evidence: { bytes, sha256: hash.digest("hex"), uid: before.uid, mode: before.mode & 0o7777 }, bytes: includeBytes ? Buffer.concat(chunks, bytes) : null }
 }
