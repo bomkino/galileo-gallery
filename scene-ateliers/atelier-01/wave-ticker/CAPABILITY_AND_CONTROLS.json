@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "wave-ticker",
+  "sourceContractSha256": "4572d27885694d0476fa09ae71460fb551bac56dd0e2d9bce76759f56448f7af",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.wave-ticker.framescale",
+      "sceneLocalId": "frameScale",
+      "parameter": "frameScale",
+      "owner": "Scene",
+      "label": "Frame size",
+      "valueModel": "number",
+      "unit": "cross-axis-fraction",
+      "default": 0.23,
+      "range": {
+        "minimum": 0.14,
+        "maximum": 0.32,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.23,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "wave-ticker:frameScale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "frame-size; track-capacity",
+      "acceptanceRow": "control:scene.wave-ticker.framescale",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.wave-ticker.gap",
+      "sceneLocalId": "gap",
+      "parameter": "gap",
+      "owner": "Scene",
+      "label": "Minimum gap",
+      "valueModel": "number",
+      "unit": "minimum-design-pixels-at-1080-cross-axis",
+      "default": 38,
+      "range": {
+        "minimum": 0,
+        "maximum": 180,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 38,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "wave-ticker:gap",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "minimum-source-spacing; closed-track-extent",
+      "acceptanceRow": "control:scene.wave-ticker.gap",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.wave-ticker.amplitude",
+      "sceneLocalId": "amplitude",
+      "parameter": "amplitude",
+      "owner": "Scene",
+      "label": "Amplitude",
+      "valueModel": "number",
+      "unit": "cross-axis-fraction",
+      "default": 0.15,
+      "range": {
+        "minimum": 0.04,
+        "maximum": 0.24,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.15,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "wave-ticker:amplitude",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "crest-height; path-slope",
+      "acceptanceRow": "control:scene.wave-ticker.amplitude",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.wave-ticker.wavelength",
+      "sceneLocalId": "wavelength",
+      "parameter": "wavelength",
+      "owner": "Scene",
+      "label": "Wavelength",
+      "valueModel": "number",
+      "unit": "major-axis-fraction",
+      "default": 0.52,
+      "range": {
+        "minimum": 0.3,
+        "maximum": 0.9,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.52,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "wave-ticker:wavelength",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "wave-period; integer-wave-count; closed-track-length",
+      "acceptanceRow": "control:scene.wave-ticker.wavelength",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.wave-ticker.tangentinfluence",
+      "sceneLocalId": "tangentInfluence",
+      "parameter": "tangentInfluence",
+      "owner": "Scene",
+      "label": "Tangent follow",
+      "valueModel": "number",
+      "unit": "fraction",
+      "default": 0.22,
+      "range": {
+        "minimum": 0,
+        "maximum": 0.45,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.22,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "wave-ticker:tangentInfluence",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "card-rotation",
+      "acceptanceRow": "control:scene.wave-ticker.tangentinfluence",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

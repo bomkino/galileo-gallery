@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "deck-river-loader",
+  "sourceContractSha256": "703e7310e2cc93f376c838f7cf8a2ca58f01ce485423e55fff5f94047d4f62fe",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.deck-river-loader.framescale",
+      "sceneLocalId": "frameScale",
+      "parameter": "frameScale",
+      "owner": "Scene",
+      "label": "Corridor frame size",
+      "valueModel": "number",
+      "unit": "short-axis-fraction",
+      "default": 0.24,
+      "range": {
+        "minimum": 0.16,
+        "maximum": 0.38,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.24,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "deck-river-loader:frameScale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "corridor-frame-size; projected-bounds",
+      "acceptanceRow": "control:scene.deck-river-loader.framescale",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.deck-river-loader.depthspacing",
+      "sceneLocalId": "depthSpacing",
+      "parameter": "depthSpacing",
+      "owner": "Scene",
+      "label": "Depth spacing",
+      "valueModel": "number",
+      "unit": "world-scale",
+      "default": 1.0,
+      "range": {
+        "minimum": 0.65,
+        "maximum": 1.6,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 1.0,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "deck-river-loader:depthSpacing",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "entry-depth; source-spacing; travel-distance",
+      "acceptanceRow": "control:scene.deck-river-loader.depthspacing",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.deck-river-loader.lanespread",
+      "sceneLocalId": "laneSpread",
+      "parameter": "laneSpread",
+      "owner": "Scene",
+      "label": "Corridor width",
+      "valueModel": "number",
+      "unit": "world-units",
+      "default": 3.0,
+      "range": {
+        "minimum": 1.4,
+        "maximum": 4.4,
+        "step": 0.05
+      },
+      "options": null,
+      "resetValue": 3.0,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "deck-river-loader:laneSpread",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "distant-corridor-lanes",
+      "acceptanceRow": "control:scene.deck-river-loader.lanespread",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.deck-river-loader.nearpass",
+      "sceneLocalId": "nearPass",
+      "parameter": "nearPass",
+      "owner": "Scene",
+      "label": "Camera clearance",
+      "valueModel": "number",
+      "unit": "world-units",
+      "default": 1.9,
+      "range": {
+        "minimum": 0.9,
+        "maximum": 2.4,
+        "step": 0.05
+      },
+      "options": null,
+      "resetValue": 1.9,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "deck-river-loader:nearPass",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "camera-comfort-radius; acquire-pose",
+      "acceptanceRow": "control:scene.deck-river-loader.nearpass",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.deck-river-loader.arrivalscale",
+      "sceneLocalId": "arrivalScale",
+      "parameter": "arrivalScale",
+      "owner": "Scene",
+      "label": "Arrival size",
+      "valueModel": "number",
+      "unit": "short-axis-fraction",
+      "default": 0.66,
+      "range": {
+        "minimum": 0.42,
+        "maximum": 0.82,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.66,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "deck-river-loader:arrivalScale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "arrival-size; takeover-start",
+      "acceptanceRow": "control:scene.deck-river-loader.arrivalscale",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

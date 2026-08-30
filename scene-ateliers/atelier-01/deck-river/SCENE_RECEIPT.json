@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "deck-river",
+  "atelier": 1,
+  "sourceArchive": "ATELIER01_LINEAR_WORLDS_PARITY_HANDOFF(1).zip",
+  "sourceArchiveSha256": "5529d371947bc011e3cea7d1a7fcb17b9d2532fed625d541b6ede3c3e919013c",
+  "sourceRoot": "ATELIER01_LINEAR_WORLDS_PARITY_HANDOFF/PACKET/scene-ateliers/atelier-01/deck-river",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.js",
+    "sha256": "658d56bdb973fb6a81bd0bafe8a1dc1c6748c6cf642b3e22bb85919346e46f68",
+    "rendererOwnsStoryClock": false
+  },
+  "controlCount": 5,
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "catalogueRegistration": "no",
+  "release": "no",
+  "claimBoundary": "Parity candidate packet; no Product integration or human acceptance.",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/deck-river.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  },
+  "currentFiles": {
+    "sceneContractSha256": "b8232a8940ed9152fad66c38adddab1ad4747d625c5f0b584bb6d89fa75ff61f",
+    "controlContractSha256": "8d47ef64fd533a6d30324ade061af5ddf24a983e6e51c9e9bc97c1ee7ce29f84",
+    "acceptanceMatrixSha256": "01f0b7359484253b2e5d43e6e5c41251aedfc468927bcb11002d8b041c8490d9",
+    "evidenceBindingsSha256": "b1a3bdb4fe691ccdee714e5c42c25317c0de4d439a4ea1fee033410e7cb3e245"
+  }
+}

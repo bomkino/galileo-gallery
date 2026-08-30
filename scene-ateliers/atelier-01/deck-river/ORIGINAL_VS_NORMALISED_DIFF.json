@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "deck-river",
+  "originalArchive": "ATELIER01_LINEAR_WORLDS_PARITY_HANDOFF(1).zip",
+  "preservedOriginalFiles": "all source-tree files byte-copied; see ORIGINAL_TO_FINAL_MAP.json",
+  "addedFiles": [
+    "SCENE_CONTRACT.json",
+    "CAPABILITY_AND_CONTROLS.json",
+    "ACCEPTANCE_MATRIX.json",
+    "RENDER_PLAN.json",
+    "WORKLOAD_ENVELOPE.json",
+    "INTERACTION_TRACES.json",
+    "ORIGINAL_SOURCE_LOCATOR.json",
+    "SCENE_RECEIPT.json",
+    "SCENE_RECEIPT.md",
+    "PARITY_NORMALISATION.md",
+    "EVIDENCE_BINDINGS.json",
+    "ORIGINAL_VS_NORMALISED_DIFF.json"
+  ],
+  "modifiedDerivedFiles": [
+    "CAPABILITY_AND_CONTROLS.json",
+    "SCENE_CONTRACT.json",
+    "ACCEPTANCE_MATRIX.json"
+  ],
+  "preservedOriginalControlContract": "ORIGINAL_CAPABILITY_AND_CONTROLS.json",
+  "controlCount": 5,
+  "controlAuthorityCorrections": [],
+  "evaluatorChanged": false,
+  "prototypeChoreographyChanged": false,
+  "sourceEvidenceChanged": false,
+  "productIntegration": "no",
+  "humanVerdict": "pending",
+  "parityEvidenceAdded": [],
+  "evidenceBindingUpdated": true
+}

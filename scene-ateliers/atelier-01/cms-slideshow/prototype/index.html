@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quiet Carousel — isolated atelier prototype</title>
+  <link rel="stylesheet" href="prototype.css">
+</head>
+<body>
+  <main>
+    <header class="masthead">
+      <div class="title-block">
+        <p class="eyebrow">ATELIER 01 · GENERATED FIXTURES · VERDICT PENDING</p>
+        <h1>Quiet Carousel</h1>
+        <p class="motion-sentence">Source frames travel continuously through a calm central focus well, retaining generous negative space and an invisible seam.</p>
+      </div>
+      <div class="status-block">
+        <output id="status">Preparing deterministic study…</output>
+        <span class="status-caption">Visible status; animation is not announced every frame</span>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <section class="stage-panel" aria-label="Motion study stage">
+        <div class="transport" role="group" aria-label="Playback and story time">
+          <div class="transport-buttons">
+            <button id="play" type="button" aria-pressed="false">Play</button>
+            <button id="restart" type="button">Restart</button>
+          </div>
+          <span class="sr-only" aria-hidden="true"></span>
+          <label class="scrub-control" for="scrub">
+            <span>Story time</span>
+            <input id="scrub" type="range" min="0" max="8000" step="1" value="0">
+            <output id="timeValue" for="scrub">0.000 s</output>
+          </label>
+        </div>
+        <div id="landmarks" class="landmarks" role="group" aria-label="Named poses"></div>
+        <div id="stage" class="stage is-checker">
+          <canvas id="canvas" role="img" aria-label="Generated motion study canvas">Generated fixture preview.</canvas>
+        </div>
+        <p class="stage-note">Candidate v2 study. Frame fit belongs to source intent; background belongs to Look. Scene controls only geometry.</p>
+      </section>
+
+      <aside class="inspector" aria-label="Human review controls">
+        <h2>Review workbench</h2>
+        <fieldset>
+          <legend>Context</legend>
+          <div class="context-grid">
+            <label class="control" for="count"><span>Items</span><select id="count"><option value="0">0 · empty</option><option value="1">1</option><option value="2">2</option><option value="8" selected>8 · preferred</option><option value="32">32 · many</option></select></label>
+            <label class="control" for="canvasPreset"><span>Canvas</span><select id="canvasPreset"><option>16:9</option><option>9:16</option><option>1:1</option><option>4:5</option></select></label>
+            <label class="control" for="direction"><span>Direction</span><select id="direction"><option value="forward">Forward</option><option value="reverse">Reverse</option></select></label>
+            <label class="control" for="composite"><span>Composite</span><select id="composite"><option value="checker">Checker</option><option value="black">Black</option><option value="white">White</option><option value="red">Red</option><option value="blue">Blue</option></select></label>
+            <label class="toggle-control" for="reduced"><input id="reduced" type="checkbox"><span>Reduced motion</span></label>
+            <label class="toggle-control" for="silhouette"><input id="silhouette" type="checkbox"><span>Silhouette test</span></label>
+          </div>
+          <div id="extraControls"></div>
+        </fieldset>
+        <fieldset>
+          <legend>Scene geometry</legend>
+          <div id="sceneControls"></div>
+        </fieldset>
+        <div class="inspector-actions">
+          <button id="resetScene" type="button">Reset Scene defaults</button>
+        </div>
+        <details>
+          <summary>Human review cues</summary>
+          <ol class="review-cues"><li>Does the focus well feel calm rather than coverflow-like?</li><li>Does one-item breathing help or distract?</li><li>Does portrait recomposition feel authored?</li><li>Do sparse counts retain enough negative space?</li></ol>
+        </details>
+        <p class="boundary">Not Product integration. Generated fixtures only. Human verdict remains pending.</p>
+      </aside>
+    </div>
+    <p id="announcement" class="sr-only" aria-live="polite"></p>
+  </main>
+  <script src="evaluator.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

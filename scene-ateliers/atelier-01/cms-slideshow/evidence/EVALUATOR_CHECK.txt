@@ -1,0 +1,1 @@
+{"scene":"quiet-carousel","pass":true,"controlsTested":3,"fitOwner":"media-intent","seam":"exact-visual","storyTime":"unwrapped"}

@@ -1,0 +1,9 @@
+{
+  "atelier": 1,
+  "archive": "ATELIER01_LINEAR_WORLDS_PARITY_HANDOFF(1).zip",
+  "archiveSha256": "5529d371947bc011e3cea7d1a7fcb17b9d2532fed625d541b6ede3c3e919013c",
+  "sourceRoot": "ATELIER01_LINEAR_WORLDS_PARITY_HANDOFF/PACKET/scene-ateliers/atelier-01/deck-river",
+  "sourceRootFileCount": 110,
+  "charterSha256": "f7e1c5b60af7475e360fc0449e65c9640a0ba8780e7cce407c6d6461ae2b3ae5",
+  "normalisation": "Original authored files copied. Original control JSON preserved. Canonical parity contracts added."
+}

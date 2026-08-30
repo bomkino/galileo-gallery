@@ -1,0 +1,144 @@
+{
+  "scene": {
+    "catalogueId": "wave-ticker",
+    "candidateVersion": 1,
+    "displayName": "Ribbon — Wave",
+    "verdict": "pending"
+  },
+  "capabilities": {
+    "topology": "one-closed-C1-wave-path",
+    "axisPolicy": "landscape-horizontal-portrait-vertical",
+    "cardOrientation": "bounded-partial-tangent-follow",
+    "directions": [
+      "forward",
+      "reverse"
+    ],
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "prototypeTimelineCoverage": {
+      "automatic": "chartered and compiled by the isolated prototype",
+      "fixed-duration": "chartered and compiled as an integer cycle count at exact requested duration",
+      "directed": "chartered as Product Timeline input; this isolated Scene evaluator consumes compiled phase/hold intent rather than duplicating the shared segment compiler"
+    },
+    "loopSeam": true,
+    "derivativeContinuousAtSeam": true,
+    "mixedRatios": true,
+    "transparentLook": true,
+    "sourceVideoStoryTime": true,
+    "failedMediaOrderPreserved": true,
+    "reducedMotion": "frozen wave landmarks",
+    "recommendedMediaCount": 8,
+    "maximumEvaluatedMediaCount": 256
+  },
+  "controls": [
+    {
+      "id": "frameScale",
+      "label": "Frame size",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "cross-axis-fraction",
+      "minimum": 0.14,
+      "maximum": 0.32,
+      "step": 0.01,
+      "default": 0.23,
+      "causes": [
+        "frame-size",
+        "track-capacity"
+      ]
+    },
+    {
+      "id": "gap",
+      "label": "Minimum gap",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "minimum-design-pixels-at-1080-cross-axis",
+      "minimum": 0,
+      "maximum": 180,
+      "step": 1,
+      "default": 38,
+      "causes": [
+        "minimum-source-spacing",
+        "closed-track-extent"
+      ]
+    },
+    {
+      "id": "amplitude",
+      "label": "Amplitude",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "cross-axis-fraction",
+      "minimum": 0.04,
+      "maximum": 0.24,
+      "step": 0.01,
+      "default": 0.15,
+      "causes": [
+        "crest-height",
+        "path-slope"
+      ]
+    },
+    {
+      "id": "wavelength",
+      "label": "Wavelength",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "major-axis-fraction",
+      "minimum": 0.3,
+      "maximum": 0.9,
+      "step": 0.01,
+      "default": 0.52,
+      "causes": [
+        "wave-period",
+        "integer-wave-count",
+        "closed-track-length"
+      ]
+    },
+    {
+      "id": "tangentInfluence",
+      "label": "Tangent follow",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "fraction",
+      "minimum": 0,
+      "maximum": 0.45,
+      "step": 0.01,
+      "default": 0.22,
+      "causes": [
+        "card-rotation"
+      ]
+    }
+  ],
+  "timelineOwned": [
+    "direction",
+    "paceMs",
+    "cycleCount",
+    "holds",
+    "finale",
+    "storyTime"
+  ],
+  "lookOwned": [
+    "background",
+    "grain",
+    "vignette",
+    "world-treatment"
+  ],
+  "mediaOwned": [
+    "ratio",
+    "fit-intent",
+    "source-alpha",
+    "source-video-duration"
+  ],
+  "unsupportedSceneControls": [
+    "random-phase",
+    "per-card-bob",
+    "jitter",
+    "spring",
+    "brightness",
+    "opacity",
+    "blur",
+    "tint",
+    "wave-speed-independent-of-cards"
+  ]
+}

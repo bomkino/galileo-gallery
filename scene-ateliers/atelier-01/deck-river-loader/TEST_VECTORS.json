@@ -1,0 +1,132 @@
+{
+  "schema": "galileo-scene-atelier-test-vectors",
+  "version": 2,
+  "scene": "deck-river-loader",
+  "fixturePolicy": "generated-only",
+  "verdict": "pending",
+  "execution": {
+    "primary": "prototype/check.cjs",
+    "crossScene": "../tools/verify-gauntlet.cjs",
+    "browserInteraction": "../tools/verify-browser-ui.py"
+  },
+  "vectors": [
+    {
+      "id": "finite-not-loop",
+      "purpose": "The end is an authored takeover, not the start pose.",
+      "input": {
+        "timeMs": [
+          "start",
+          "duration",
+          "duration+1000"
+        ]
+      },
+      "assertions": [
+        "start≠end",
+        "visual pose clamps after duration",
+        "storyTimeMs remains global"
+      ]
+    },
+    {
+      "id": "timeline-mode-validation",
+      "purpose": "Fixed and directed modes reject unreadable durations.",
+      "input": {
+        "minimumDurationMs": 3500
+      },
+      "assertions": [
+        "too-short fixed duration throws",
+        "directed segments below minima throw",
+        "valid directed segment durations sum exactly"
+      ]
+    },
+    {
+      "id": "target-momentum-inheritance",
+      "purpose": "Acquire-to-arrival matches position and size derivatives.",
+      "input": {
+        "boundary": "acquireEnd"
+      },
+      "assertions": [
+        "x/y/width/height left and right derivatives remain within tolerance"
+      ]
+    },
+    {
+      "id": "supporting-frame-clearance",
+      "purpose": "Non-targets are never deleted at acquire.",
+      "input": {
+        "targetSourceIndex": 0
+      },
+      "assertions": [
+        "supporting frames still exist immediately after acquire",
+        "supporting frames continue corridor motion",
+        "all clear physically before arrival hold"
+      ]
+    },
+    {
+      "id": "visual-hold-story-time",
+      "purpose": "Hold freezes geometry without freezing source time.",
+      "input": {
+        "stage": "arrival-hold"
+      },
+      "assertions": [
+        "target x/y/width/height stay equal across hold samples",
+        "storyTimeMs advances"
+      ]
+    },
+    {
+      "id": "reverse-mirror",
+      "purpose": "Reverse mirrors corridor side, not phrase order or source bytes.",
+      "input": {},
+      "assertions": [
+        "forward/reverse target positions mirror around stage centre",
+        "stage sequence stays equal"
+      ]
+    },
+    {
+      "id": "all-scene-controls-causal",
+      "purpose": "All five Scene controls change declared output.",
+      "input": {
+        "controls": [
+          "frameScale",
+          "depthSpacing",
+          "laneSpread",
+          "nearPass",
+          "arrivalScale"
+        ]
+      },
+      "assertions": [
+        "corridor dimensions/depth/width/clearance and arrival size respond"
+      ]
+    },
+    {
+      "id": "count-target-canvas-matrix",
+      "purpose": "0/1/2/many, explicit targets and portrait remain finite.",
+      "input": {
+        "counts": [
+          0,
+          1,
+          2,
+          8,
+          32,
+          127,
+          256
+        ]
+      },
+      "assertions": [
+        "empty target=-1",
+        "explicit valid target is preserved",
+        "all numeric output finite"
+      ]
+    },
+    {
+      "id": "reduced-motion",
+      "purpose": "Reduced motion presents the static selected arrival.",
+      "input": {
+        "reducedMotion": true
+      },
+      "assertions": [
+        "one visible target",
+        "velocity=0",
+        "no corridor/grow/takeover animation"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "browser": "Chromium 144.0.7559.96 built on Debian GNU/Linux 13 (trixie)",
+  "playwrightPython": "1.57.0",
+  "python": "3.13.5",
+  "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+  "headless": true,
+  "networkLoadedCode": false,
+  "canvasRecording": "HTMLCanvasElement.captureStream(30) + MediaRecorder",
+  "sandboxNote": "Chromium launched with --no-sandbox because this container runs as root; this is isolated prototype evidence, not packaged-app evidence."
+}

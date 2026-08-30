@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "cms-slideshow",
+  "displayName": "Quiet Carousel",
+  "family": "linear-worlds",
+  "atelier": 1,
+  "candidateVersion": "parity-1",
+  "identity": {
+    "promise": "Source frames travel continuously through a calm, central focus well, retaining one-item breathing, modest geometric depth, generous negative space, and an invisible loop seam.",
+    "antiMotion": "Never snap, fan, orbit, wave, stack, tilt into coverflow, pulse for attention, dim neighbouring artwork, or turn the focus well into a spotlight effect.",
+    "topology": "one-dimensional closed track through a central focus well",
+    "focusGrammar": "calm central aperture; modest geometric scale falloff",
+    "finaleGrammar": "optional parked frame at the aperture; exact loop seam"
+  },
+  "sourcePolicy": {
+    "minimum": 1,
+    "recommended": 8,
+    "maximum": 256,
+    "identityAndOrder": "must survive failure, replacement, reverse and recycling"
+  },
+  "canvasSupport": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:5"
+  ],
+  "orientation": "horizontal, vertical",
+  "timeline": "automatic, fixed-duration, directed; forward/reverse",
+  "alphaPolicy": "transparent output supported; raw alpha proof quality scored separately",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.js",
+    "sha256": "f9e4396771cb499d71dd1579df268801e9d45cd0529c5de23c096c8ad2ff3134",
+    "rendererOwnsStoryClock": false
+  },
+  "prototypeEntrypoint": "prototype/index.html",
+  "controlsRef": "CAPABILITY_AND_CONTROLS.json",
+  "acceptanceRef": "ACCEPTANCE_MATRIX.json",
+  "programme": {
+    "state": "legacy-ID migration candidate to quiet-carousel; human/Product migration decision pending",
+    "pressureGate": null,
+    "gateStatus": "candidate"
+  },
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/cms-slideshow.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "3/3",
+    "humanVerdict": "pending"
+  }
+}

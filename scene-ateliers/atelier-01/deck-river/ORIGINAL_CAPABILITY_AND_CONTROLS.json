@@ -1,0 +1,156 @@
+{
+  "scene": {
+    "catalogueId": "deck-river",
+    "candidateVersion": 1,
+    "displayName": "Deck River — Continuous",
+    "verdict": "pending"
+  },
+  "capabilities": {
+    "topology": "closed-depth-corridor",
+    "camera": "fixed",
+    "pathRegions": [
+      "approach",
+      "camera-bypass",
+      "recede",
+      "far-return"
+    ],
+    "pathParameterization": "periodic cubic Hermite sampled to a 768-point arc-length lookup table",
+    "directions": [
+      "forward",
+      "reverse"
+    ],
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "prototypeTimelineCoverage": {
+      "automatic": "chartered and compiled by the isolated prototype",
+      "fixed-duration": "chartered and compiled as an integer cycle count at exact requested duration",
+      "directed": "chartered as Product Timeline input; this isolated Scene evaluator consumes compiled phase/hold intent rather than duplicating the shared segment compiler"
+    },
+    "loopSeam": true,
+    "hiddenRecycleTeleport": false,
+    "equalArcSpacing": true,
+    "cameraFacingArtwork": true,
+    "mixedRatios": true,
+    "transparentLook": true,
+    "sourceVideoStoryTime": true,
+    "failedMediaOrderPreserved": true,
+    "reducedMotion": "five discrete corridor landmarks",
+    "recommendedMediaCount": 8,
+    "maximumEvaluatedMediaCount": 256
+  },
+  "controls": [
+    {
+      "id": "frameScale",
+      "label": "Frame size",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "short-axis-fraction",
+      "minimum": 0.18,
+      "maximum": 0.48,
+      "step": 0.01,
+      "default": 0.27,
+      "causes": [
+        "projected-frame-size",
+        "visible-window"
+      ]
+    },
+    {
+      "id": "depthSpacing",
+      "label": "Depth spacing",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "world-scale",
+      "minimum": 0.65,
+      "maximum": 1.6,
+      "step": 0.01,
+      "default": 1.0,
+      "causes": [
+        "corridor-depth",
+        "path-length",
+        "world-speed-at-fixed-duration"
+      ]
+    },
+    {
+      "id": "laneSpread",
+      "label": "Corridor width",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "world-units",
+      "minimum": 1.4,
+      "maximum": 4.2,
+      "step": 0.05,
+      "default": 3.1,
+      "causes": [
+        "approach-lateral-position",
+        "recede-lateral-position"
+      ]
+    },
+    {
+      "id": "nearPass",
+      "label": "Camera clearance",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "world-units",
+      "minimum": 0.9,
+      "maximum": 2.4,
+      "step": 0.05,
+      "default": 1.9,
+      "causes": [
+        "closest-readable-lateral-position",
+        "comfort-radius"
+      ]
+    },
+    {
+      "id": "visibleDepth",
+      "label": "Corridor length",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "world-units",
+      "minimum": 7.0,
+      "maximum": 18.0,
+      "step": 0.25,
+      "default": 14.5,
+      "causes": [
+        "far-clip",
+        "mounted-window"
+      ]
+    }
+  ],
+  "timelineOwned": [
+    "direction",
+    "paceMs",
+    "cycleCount",
+    "holds",
+    "finale",
+    "storyTime"
+  ],
+  "lookOwned": [
+    "background",
+    "room",
+    "ground",
+    "grain",
+    "vignette",
+    "world-treatment"
+  ],
+  "mediaOwned": [
+    "ratio",
+    "fit-intent",
+    "source-alpha",
+    "source-video-duration"
+  ],
+  "unsupportedSceneControls": [
+    "brightness",
+    "opacity",
+    "blur",
+    "haze",
+    "camera-motion",
+    "roll",
+    "yaw",
+    "random-sway",
+    "lane-count",
+    "light"
+  ]
+}

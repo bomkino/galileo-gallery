@@ -1,0 +1,9 @@
+{
+  "atelier": 1,
+  "archive": "ATELIER01_LINEAR_WORLDS_PARITY_HANDOFF(1).zip",
+  "archiveSha256": "5529d371947bc011e3cea7d1a7fcb17b9d2532fed625d541b6ede3c3e919013c",
+  "sourceRoot": "ATELIER01_LINEAR_WORLDS_PARITY_HANDOFF/PACKET/scene-ateliers/atelier-01/wave-ticker",
+  "sourceRootFileCount": 110,
+  "charterSha256": "eabd195260e1edaa5d864e346f32d7efa2760f348a56e4fb3b20ab633b36ffd6",
+  "normalisation": "Original authored files copied. Original control JSON preserved. Canonical parity contracts added."
+}

@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "filmstrip-river",
+  "sourceContractSha256": "a870f6bf3f6b8e99c9bdb2c9fa897249b3335bcbb02a473c423e8380656d2b0e",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.filmstrip-river.framescale",
+      "sceneLocalId": "frameScale",
+      "parameter": "frameScale",
+      "owner": "Scene",
+      "label": "Frame size",
+      "valueModel": "number",
+      "unit": "cross-axis-fraction",
+      "default": 0.28,
+      "range": {
+        "minimum": 0.16,
+        "maximum": 0.36,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.28,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "filmstrip-river:frameScale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "frame-size; lane-capacity",
+      "acceptanceRow": "control:scene.filmstrip-river.framescale",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.filmstrip-river.gap",
+      "sceneLocalId": "gap",
+      "parameter": "gap",
+      "owner": "Scene",
+      "label": "Minimum gap",
+      "valueModel": "number",
+      "unit": "minimum-design-pixels-at-1080-cross-axis",
+      "default": 30,
+      "range": {
+        "minimum": 0,
+        "maximum": 160,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 30,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "filmstrip-river:gap",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "minimum-material-spacing; shared-track-extent",
+      "acceptanceRow": "control:scene.filmstrip-river.gap",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.filmstrip-river.laneseparation",
+      "sceneLocalId": "laneSeparation",
+      "parameter": "laneSeparation",
+      "owner": "Scene",
+      "label": "Lane separation",
+      "valueModel": "number",
+      "unit": "cross-axis-fraction",
+      "default": 0.38,
+      "range": {
+        "minimum": 0.25,
+        "maximum": 0.58,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.38,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "filmstrip-river:laneSeparation",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "lane-baselines; inter-lane-clearance",
+      "acceptanceRow": "control:scene.filmstrip-river.laneseparation",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.filmstrip-river.lanephase",
+      "sceneLocalId": "lanePhase",
+      "parameter": "lanePhase",
+      "owner": "Scene",
+      "label": "Lane offset",
+      "valueModel": "number",
+      "unit": "cycle-fraction",
+      "default": 0.5,
+      "range": {
+        "minimum": 0,
+        "maximum": 1,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.5,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "filmstrip-river:lanePhase",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "counter-lane-phase; canonical-rhythm",
+      "acceptanceRow": "control:scene.filmstrip-river.lanephase",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

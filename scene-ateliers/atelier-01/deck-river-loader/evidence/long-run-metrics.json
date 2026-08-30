@@ -1,0 +1,26 @@
+{
+  "observation": "one complete real-time phrase plus 250 ms",
+  "requestedWallTimeMs": 9490,
+  "domNodesBefore": 127,
+  "domNodesAfter": 127,
+  "performanceBefore": {
+    "Documents": 2,
+    "Frames": 1,
+    "Nodes": 2752,
+    "LayoutCount": 0,
+    "RecalcStyleCount": 0,
+    "JSHeapUsedSize": 4506984,
+    "JSHeapTotalSize": 8470528
+  },
+  "performanceAfter": {
+    "Documents": 1,
+    "Frames": 1,
+    "Nodes": 760,
+    "LayoutCount": 0,
+    "RecalcStyleCount": 0,
+    "JSHeapUsedSize": 3466204,
+    "JSHeapTotalSize": 4800512
+  },
+  "frameObjectsAfter": 8,
+  "claim": "bounded observation only; not a production heap-soak verdict"
+}

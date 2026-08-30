@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "deck-river-loader",
+  "traces": [
+    {
+      "id": "trace:scene.deck-river-loader.framescale",
+      "operation": "control-change",
+      "controlId": "scene.deck-river-loader.framescale",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:scene.deck-river-loader.depthspacing",
+      "operation": "control-change",
+      "controlId": "scene.deck-river-loader.depthspacing",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:scene.deck-river-loader.lanespread",
+      "operation": "control-change",
+      "controlId": "scene.deck-river-loader.lanespread",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:scene.deck-river-loader.nearpass",
+      "operation": "control-change",
+      "controlId": "scene.deck-river-loader.nearpass",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:scene.deck-river-loader.arrivalscale",
+      "operation": "control-change",
+      "controlId": "scene.deck-river-loader.arrivalscale",
+      "precondition": "prototype mounted; control applicable",
+      "steps": [
+        "focus control",
+        "change one legal step",
+        "dispatch input/change",
+        "verify source/native output or explicit disabled reason",
+        "reset and compare state"
+      ],
+      "expected": "Causal output changes; reset reproduces authored default.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:keyboard",
+      "operation": "keyboard-navigation",
+      "precondition": "review shell loaded",
+      "steps": [
+        "Tab through shell",
+        "verify visible focus",
+        "activate Scene",
+        "inspect controls"
+      ],
+      "expected": "Logical order and visible focus.",
+      "automatedStatus": "pending fresh browser journey"
+    },
+    {
+      "id": "trace:remount",
+      "operation": "remount-disposal",
+      "precondition": "Scene mounted",
+      "steps": [
+        "mount Scene",
+        "switch away",
+        "return"
+      ],
+      "expected": "At most two active iframes; semantic state reconstructs from contract.",
+      "automatedStatus": "pending fresh browser journey"
+    }
+  ]
+}

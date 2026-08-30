@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "deck-river",
+  "displayName": "Deck River / Continuous",
+  "family": "linear-worlds",
+  "atelier": 1,
+  "candidateVersion": "parity-1",
+  "identity": {
+    "promise": "Frames approach, pass the viewer, and recede through one fixed-camera depth corridor whose offstage return closes beyond the visible frustum.",
+    "antiMotion": "Never fake depth with brightness, opacity, blur, random sway, per-card bob, independent z scaling, or a teleport from near plane back to the distance.",
+    "topology": "fixed-camera perspective corridor with approach, near pass, recede, offstage far return",
+    "focusGrammar": "geometric near passage; no spotlight effect",
+    "finaleGrammar": "optional target parked at near landmark; circulation otherwise loops"
+  },
+  "sourcePolicy": {
+    "minimum": 1,
+    "recommended": 8,
+    "maximum": 256,
+    "identityAndOrder": "must survive failure, replacement, reverse and recycling"
+  },
+  "canvasSupport": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:5"
+  ],
+  "orientation": "fixed-camera depth corridor",
+  "timeline": "automatic, fixed-duration, directed; forward/reverse",
+  "alphaPolicy": "transparent output supported; raw alpha proof quality scored separately",
+  "semanticAuthority": {
+    "type": "Scene-native evaluator or declared semantic frame model",
+    "path": "prototype/evaluator.js",
+    "sha256": "658d56bdb973fb6a81bd0bafe8a1dc1c6748c6cf642b3e22bb85919346e46f68",
+    "rendererOwnsStoryClock": false
+  },
+  "prototypeEntrypoint": "prototype/index.html",
+  "controlsRef": "CAPABILITY_AND_CONTROLS.json",
+  "acceptanceRef": "ACCEPTANCE_MATRIX.json",
+  "programme": {
+    "state": "pre-G11 candidate packet; human verdict pending",
+    "pressureGate": null,
+    "gateStatus": "candidate"
+  },
+  "status": {
+    "chartered": "candidate",
+    "prototyped": "yes",
+    "evaluatorTested": "yes — canonical original verifier replay passed",
+    "browserTested": "yes — Chromium shell/adapter journey passed",
+    "evidenceComplete": "current mechanically; visual/motion human verdict pending",
+    "humanReviewed": "pending",
+    "productIntegrated": "no",
+    "catalogueRegistered": "no",
+    "packaged": "candidate packet in orchestrator handoff",
+    "released": "no"
+  },
+  "humanVerdict": "pending",
+  "productIntegration": "no",
+  "verification": {
+    "originalReplaySummary": "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "browserReceipt": "07_VALIDATION/browser-receipts/deck-river.json",
+    "browserStatus": "pass",
+    "nativeControlBindings": "5/5",
+    "humanVerdict": "pending"
+  }
+}

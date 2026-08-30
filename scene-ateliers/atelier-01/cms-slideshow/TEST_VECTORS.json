@@ -1,0 +1,125 @@
+{
+  "schema": "galileo-scene-atelier-test-vectors",
+  "version": 2,
+  "scene": "cms-slideshow",
+  "fixturePolicy": "generated-only",
+  "verdict": "pending",
+  "execution": {
+    "primary": "prototype/check.cjs",
+    "crossScene": "../tools/verify-gauntlet.cjs",
+    "browserInteraction": "../tools/verify-browser-ui.py"
+  },
+  "vectors": [
+    {
+      "id": "deterministic-equality",
+      "purpose": "Equal inputs return deep-equal output.",
+      "input": {
+        "count": 8,
+        "canvas": [
+          960,
+          540
+        ],
+        "timeMs": 2960
+      },
+      "assertions": [
+        "phase, geometry, frame identity and render state are deep-equal"
+      ]
+    },
+    {
+      "id": "exact-visual-seam-unwrapped-story-time",
+      "purpose": "Visual loop closes while source story time remains global.",
+      "input": {
+        "timeMs": [
+          0,
+          8000,
+          16000
+        ]
+      },
+      "assertions": [
+        "visual state at 0 and 8000 is deep-equal",
+        "storyTimeMs at 16000 remains 16000 rather than modulo-wrapping"
+      ]
+    },
+    {
+      "id": "media-fit-owner",
+      "purpose": "Fit intent never changes Scene geometry.",
+      "input": {
+        "fitIntent": [
+          "contain",
+          "cover"
+        ]
+      },
+      "assertions": [
+        "frame geometry is equal",
+        "render fit reflects media intent"
+      ]
+    },
+    {
+      "id": "all-scene-controls-causal",
+      "purpose": "Every exposed Scene control changes declared geometry.",
+      "input": {
+        "controls": [
+          "frameScale",
+          "gap",
+          "focusDepth"
+        ]
+      },
+      "assertions": [
+        "frameScale changes dimensions",
+        "gap changes anchors/loop extent",
+        "focusDepth changes scale falloff"
+      ]
+    },
+    {
+      "id": "source-treatment-invariants",
+      "purpose": "Clean output never treats artwork.",
+      "input": {},
+      "assertions": [
+        "opacity=1",
+        "filter=none",
+        "blend=normal"
+      ]
+    },
+    {
+      "id": "count-canvas-direction-matrix",
+      "purpose": "Edge counts and canvas families remain finite and bounded.",
+      "input": {
+        "counts": [
+          0,
+          1,
+          2,
+          8,
+          32,
+          127,
+          256
+        ],
+        "canvases": [
+          "16:9",
+          "9:16",
+          "1:1",
+          "4:5"
+        ],
+        "directions": [
+          "forward",
+          "reverse"
+        ]
+      },
+      "assertions": [
+        "frame count equals source count",
+        "all numeric output finite",
+        "vertical recomposes rather than rotates"
+      ]
+    },
+    {
+      "id": "reduced-motion",
+      "purpose": "Reduced motion selects a static source landmark.",
+      "input": {
+        "reducedMotion": true
+      },
+      "assertions": [
+        "velocity=0",
+        "one-item breathing disabled"
+      ]
+    }
+  ]
+}

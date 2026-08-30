@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0.0",
+  "sceneId": "cms-slideshow",
+  "sourceContractSha256": "c36c204eb1419029a6ba8d321b10be35a6af0b46832e3fcbc5fed423ee3cac78",
+  "ownershipModel": [
+    "Scene",
+    "Timeline",
+    "Look",
+    "Frame/Media Intent",
+    "Project",
+    "Review-only"
+  ],
+  "controls": [
+    {
+      "canonicalSemanticId": "scene.cms-slideshow.framescale",
+      "sceneLocalId": "frameScale",
+      "parameter": "frameScale",
+      "owner": "Scene",
+      "label": "Frame size",
+      "valueModel": "number",
+      "unit": "cross-axis-fraction",
+      "default": 0.52,
+      "range": {
+        "minimum": 0.24,
+        "maximum": 0.78,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.52,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "cms-slideshow:frameScale",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "frame-width; frame-height; visible-window",
+      "acceptanceRow": "control:scene.cms-slideshow.framescale",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.cms-slideshow.gap",
+      "sceneLocalId": "gap",
+      "parameter": "gap",
+      "owner": "Scene",
+      "label": "Minimum gap",
+      "valueModel": "number",
+      "unit": "minimum-design-pixels-at-1080-cross-axis",
+      "default": 42,
+      "range": {
+        "minimum": 0,
+        "maximum": 240,
+        "step": 1
+      },
+      "options": null,
+      "resetValue": 42,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "cms-slideshow:gap",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "minimum-anchor-clearance; loop-extent",
+      "acceptanceRow": "control:scene.cms-slideshow.gap",
+      "keyframeableLater": true
+    },
+    {
+      "canonicalSemanticId": "scene.cms-slideshow.focusdepth",
+      "sceneLocalId": "focusDepth",
+      "parameter": "focusDepth",
+      "owner": "Scene",
+      "label": "Focus depth",
+      "valueModel": "number",
+      "unit": "fraction",
+      "default": 0.12,
+      "range": {
+        "minimum": 0,
+        "maximum": 0.24,
+        "step": 0.01
+      },
+      "options": null,
+      "resetValue": 0.12,
+      "liveBehaviour": "Apply live through the Scene-native adapter; commit one undo transaction on change end.",
+      "undoTransaction": "cms-slideshow:focusDepth",
+      "keyboardInteraction": "Arrow keys adjust one step; Shift+Arrow ten steps where numeric; Space toggles boolean.",
+      "touchInteraction": "Direct manipulation with at least 44 CSS px target.",
+      "conditionalApplicability": "Always unless the active fixture or Scene-native prototype explicitly reports unsupported.",
+      "disabledStateReason": "Disabled when the adapter cannot safely bind the original control or the active fixture makes it inapplicable.",
+      "evaluatorOutputAffected": "geometric-scale-falloff; z-order",
+      "acceptanceRow": "control:scene.cms-slideshow.focusdepth",
+      "keyframeableLater": true
+    }
+  ],
+  "serializationPolicy": {
+    "Scene": [
+      "scene.*"
+    ],
+    "Timeline": [
+      "timeline.*"
+    ],
+    "Look": [
+      "look.*"
+    ],
+    "reviewOnlyExcluded": true
+  },
+  "humanVerdict": "pending"
+}

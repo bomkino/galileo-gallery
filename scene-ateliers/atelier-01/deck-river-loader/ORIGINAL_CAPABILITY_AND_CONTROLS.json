@@ -1,0 +1,162 @@
+{
+  "scene": {
+    "catalogueId": "deck-river-loader",
+    "candidateVersion": 1,
+    "displayName": "Deck River — Chapter Reveal",
+    "verdict": "pending"
+  },
+  "capabilities": {
+    "topology": "finite-open-corridor-to-arrival",
+    "camera": "fixed",
+    "portable": true,
+    "loopSeam": false,
+    "phraseStages": [
+      "distant-entry",
+      "accelerating-corridor",
+      "target-acquire",
+      "straighten-grow-arrival",
+      "arrival-hold",
+      "composed-takeover"
+    ],
+    "directions": [
+      "forward",
+      "reverse"
+    ],
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "prototypeTimelineCoverage": {
+      "automatic": "compiled with bounded media-count duration and last-unmuted target",
+      "fixed-duration": "validated exact duration; requests below the six-stage minimum are rejected",
+      "directed": "validated explicit segment durations and target source; named stage order cannot collapse"
+    },
+    "minimumDurationMs": 3500,
+    "visualSkipRole": "timeline-landmark-only",
+    "positionAndSizeMomentumInherited": true,
+    "supportingFramesClearPhysically": true,
+    "mixedRatios": true,
+    "transparentLook": true,
+    "sourceVideoStoryTime": true,
+    "failedMediaOrderPreserved": true,
+    "reducedMotion": "immediate static arrival",
+    "recommendedMediaCount": 8,
+    "maximumEvaluatedMediaCount": 256
+  },
+  "controls": [
+    {
+      "id": "frameScale",
+      "label": "Corridor frame size",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "short-axis-fraction",
+      "minimum": 0.16,
+      "maximum": 0.38,
+      "step": 0.01,
+      "default": 0.24,
+      "causes": [
+        "corridor-frame-size",
+        "projected-bounds"
+      ]
+    },
+    {
+      "id": "depthSpacing",
+      "label": "Depth spacing",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "world-scale",
+      "minimum": 0.65,
+      "maximum": 1.6,
+      "step": 0.01,
+      "default": 1.0,
+      "causes": [
+        "entry-depth",
+        "source-spacing",
+        "travel-distance"
+      ]
+    },
+    {
+      "id": "laneSpread",
+      "label": "Corridor width",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "world-units",
+      "minimum": 1.4,
+      "maximum": 4.4,
+      "step": 0.05,
+      "default": 3.0,
+      "causes": [
+        "distant-corridor-lanes"
+      ]
+    },
+    {
+      "id": "nearPass",
+      "label": "Camera clearance",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "world-units",
+      "minimum": 0.9,
+      "maximum": 2.4,
+      "step": 0.05,
+      "default": 1.9,
+      "causes": [
+        "camera-comfort-radius",
+        "acquire-pose"
+      ]
+    },
+    {
+      "id": "arrivalScale",
+      "label": "Arrival size",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "short-axis-fraction",
+      "minimum": 0.42,
+      "maximum": 0.82,
+      "step": 0.01,
+      "default": 0.66,
+      "causes": [
+        "arrival-size",
+        "takeover-start"
+      ]
+    }
+  ],
+  "timelineOwned": [
+    "mode",
+    "duration",
+    "direction",
+    "targetSourceIndex",
+    "segmentDurations",
+    "landmarks",
+    "holds",
+    "visualSkip",
+    "storyTime"
+  ],
+  "lookOwned": [
+    "background",
+    "room",
+    "ground",
+    "grain",
+    "vignette",
+    "handoff-treatment"
+  ],
+  "mediaOwned": [
+    "ratio",
+    "fit-intent",
+    "source-alpha",
+    "source-video-duration"
+  ],
+  "unsupportedSceneControls": [
+    "visit-state",
+    "session-state",
+    "query-override",
+    "portal-target",
+    "loader-progress",
+    "audio-mute",
+    "skip-audio",
+    "brightness",
+    "opacity",
+    "blur",
+    "random-sway"
+  ]
+}

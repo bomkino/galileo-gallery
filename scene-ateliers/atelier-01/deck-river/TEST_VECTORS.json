@@ -1,0 +1,118 @@
+{
+  "schema": "galileo-scene-atelier-test-vectors",
+  "version": 2,
+  "scene": "deck-river",
+  "fixturePolicy": "generated-only",
+  "verdict": "pending",
+  "execution": {
+    "primary": "prototype/check.cjs",
+    "crossScene": "../tools/verify-gauntlet.cjs",
+    "browserInteraction": "../tools/verify-browser-ui.py"
+  },
+  "vectors": [
+    {
+      "id": "deterministic-equality",
+      "purpose": "Equal inputs return equal world and projected poses.",
+      "input": {
+        "count": 8,
+        "canvas": [
+          960,
+          540
+        ]
+      },
+      "assertions": [
+        "deep equality"
+      ]
+    },
+    {
+      "id": "closed-path-no-hidden-teleport",
+      "purpose": "Near and far hidden joins remain continuous.",
+      "input": {
+        "samples": 400
+      },
+      "assertions": [
+        "maximum adjacent world step stays within the continuous-path envelope",
+        "seam epsilon has no 2.2-world-unit jump"
+      ]
+    },
+    {
+      "id": "arc-length-spacing",
+      "purpose": "Source phase offsets represent equal world distance.",
+      "input": {
+        "count": 8
+      },
+      "assertions": [
+        "cyclic pathDistance increments equal 1/count",
+        "sampled world speed has no stall/outlier at authored joins"
+      ]
+    },
+    {
+      "id": "fixed-camera-source-respect",
+      "purpose": "Depth comes from projection only.",
+      "input": {},
+      "assertions": [
+        "camera.fixed=true",
+        "yaw=0",
+        "opacity=1",
+        "filter=none",
+        "blend=normal"
+      ]
+    },
+    {
+      "id": "camera-clearance",
+      "purpose": "Near passage remains outside the protected centre.",
+      "input": {},
+      "assertions": [
+        "near visible frames stay outside the central comfort radius",
+        "near plane is never crossed while visible"
+      ]
+    },
+    {
+      "id": "all-scene-controls-causal",
+      "purpose": "All five controls change their declared output.",
+      "input": {
+        "controls": [
+          "frameScale",
+          "depthSpacing",
+          "laneSpread",
+          "nearPass",
+          "visibleDepth"
+        ]
+      },
+      "assertions": [
+        "dimensions/path/worldX/clearance/visible window respond"
+      ]
+    },
+    {
+      "id": "count-canvas-direction-matrix",
+      "purpose": "0/1/2/many and portrait remain bounded.",
+      "input": {
+        "counts": [
+          0,
+          1,
+          2,
+          8,
+          24,
+          64,
+          127,
+          256
+        ]
+      },
+      "assertions": [
+        "finite output",
+        "bounded frame allocation",
+        "reverse traverses the same path"
+      ]
+    },
+    {
+      "id": "reduced-motion",
+      "purpose": "Five corridor landmarks replace continuous travel.",
+      "input": {
+        "reducedMotion": true
+      },
+      "assertions": [
+        "velocity=0"
+      ]
+    }
+  ]
+}

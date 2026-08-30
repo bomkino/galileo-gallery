@@ -1,0 +1,835 @@
+{
+  "schemaVersion": "1.1.0",
+  "sceneId": "deck-river-loader",
+  "sourceArchive": "ATELIER01_LINEAR_WORLDS_PARITY_HANDOFF(1).zip",
+  "sourceEvaluatorSha256": "4e6e45c9c45b9aac139b2e490b8ed920377885538f7f379f2c248dddfb0ad831",
+  "evidenceCount": 102,
+  "files": [
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/CAPTURE_MANIFEST.json",
+      "sha256": "d978479a0d1722ebc18d078dd559fd9cedfa561f00bcbe185c2659ff938ddfcd",
+      "byteSize": 16991,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/EVALUATOR_CHECK.txt",
+      "sha256": "baaf1fc297874442b4d43530c1316eeaa7c3246ff3c34d16d9ff21c983743e6a",
+      "byteSize": 166,
+      "proofClass": "prose/limitations",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/README.md",
+      "sha256": "a6adf5048936bc2a7aa0a9639e9ebde5952499d6522fe351755106a2cb80b83c",
+      "byteSize": 2505,
+      "proofClass": "prose/limitations",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/alpha-stats.json",
+      "sha256": "08c7267702387970672469500f42765237e8ab53a15610baeba2bc60d59de152",
+      "byteSize": 168,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/alpha-transparent.png",
+      "sha256": "ad26dafeecf1c2e906a473b062195320b249f28a2199274b91bab42d64b248f0",
+      "byteSize": 18201,
+      "proofClass": "raw-alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/browser-runtime.json",
+      "sha256": "b56297dc2095a4560b7e43267c6797a04ff5adc99ed165c7aeeacebd8dc800ab",
+      "byteSize": 470,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/canonical-poses-vertical.png",
+      "sha256": "291472bf28c3c5b6ee6929e92049bf1e0cadcd7c096e7abaaa41dbef63c42a6e",
+      "byteSize": 33743,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/canonical-poses.png",
+      "sha256": "90eafe5b960dce6083da752b712fb766051e420a7ba208ea407f6d8cb831339c",
+      "byteSize": 31070,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/chapter-landmarks/accelerating-corridor.png",
+      "sha256": "beb0f06b3bcfcc240174625bb9d662eb98f810c2547f8cfb426f335a66065413",
+      "byteSize": 17713,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/chapter-landmarks/arrival-hold.png",
+      "sha256": "f1d38cba64182cfee28a3d44b698992841a4df3939b2dcf804ed61da9a8fb935",
+      "byteSize": 16962,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/chapter-landmarks/composed-takeover.png",
+      "sha256": "927e4f9e09da8342958fa4e15d8ee491361441232a256944a717c18b05371f76",
+      "byteSize": 16960,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/chapter-landmarks/distant-entry.png",
+      "sha256": "577c45e0e206a91a78bf0fe2c0df995bf0b971dc6d73d282b75c6a8911c0e74d",
+      "byteSize": 17787,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/chapter-landmarks/end.png",
+      "sha256": "ec867ba3b22c4d2e905dc6a67d5b96e10e9f1c9ff69311d80deb86659c6e93a2",
+      "byteSize": 16908,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/chapter-landmarks/straighten-grow-arrival.png",
+      "sha256": "ebddb4915fad30f4108bd272d94e64a327f014b0dcbbccb2cca619e898300362",
+      "byteSize": 14052,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/chapter-landmarks/target-acquire.png",
+      "sha256": "a7ac7858f73939c070d91d305696dda8028eb4110e2cdd3e7a3e0fe3368f650d",
+      "byteSize": 19292,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/clip-contact-sheet.png",
+      "sha256": "4a848c974513cf2f3a4175bfa09670567d4dfc854890294bf328c3862ded284e",
+      "byteSize": 68930,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/clip-metrics.json",
+      "sha256": "80c786c7c83dd97301f661ca7f70cdaac630a36cb23d1b8eac2e3498982a2c3a",
+      "byteSize": 612,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/composites/alpha-over-black.png",
+      "sha256": "e1a45d459f6d7a0ca565810a08c3ecfd590048b99d99b0ece17d862666f418ed",
+      "byteSize": 9550,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/composites/alpha-over-blue.png",
+      "sha256": "9e877ee986f8dc2a1bda86dd2a7918fcc61f68a9aa81033ab011d1065be21ecf",
+      "byteSize": 9511,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/composites/alpha-over-checker.png",
+      "sha256": "0d3aa0bca4852ee81cb5e5d732580b9e5c675352d83e073c06433a163ca5873b",
+      "byteSize": 11211,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/composites/alpha-over-red.png",
+      "sha256": "f4ba5a086293abc644879f95f930de20f7500ce9e312c8e5e70ff1dabfe28bf8",
+      "byteSize": 9568,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/composites/alpha-over-white.png",
+      "sha256": "5fca58e6e5485cf49fe6c0a8e66b92fe6892da606df6d445e3b72c025933209a",
+      "byteSize": 9577,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/controls/arrivalScale-max.png",
+      "sha256": "4da79a17f536b37c3ec532d0047481d00a75546b33052443308acadc3283d030",
+      "byteSize": 18458,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/controls/arrivalScale-min.png",
+      "sha256": "4da79a17f536b37c3ec532d0047481d00a75546b33052443308acadc3283d030",
+      "byteSize": 18458,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/controls/depthSpacing-max.png",
+      "sha256": "c884ac279911a2fcc0a8cbdfc8c2b8ea4a49f79a9ee92dcc1131e56f3835d667",
+      "byteSize": 18298,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/controls/depthSpacing-min.png",
+      "sha256": "78538b3e6a0f30c2a65291ade22b32481b04771d6683f9d2dcb7db109676333c",
+      "byteSize": 18478,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/controls/frameScale-max.png",
+      "sha256": "e77e502b5230489e723d6783e869ff2ae98e2e60120ee763dc5ad2a43c907e97",
+      "byteSize": 18470,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/controls/frameScale-min.png",
+      "sha256": "a6d2f806f2e43541a355e14705a5f3b13b900fa9d68d103c9fc9bb1233db53c4",
+      "byteSize": 18618,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/controls/laneSpread-max.png",
+      "sha256": "fcb0b7e4020b0b17ccf7a1f6be924ae390ee2ebe550b5dfde7dcf53d44543245",
+      "byteSize": 17990,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/controls/laneSpread-min.png",
+      "sha256": "34bf02ec9f684bf700b2a23442ae7a49382c7441356295cf7b2d2fce4c746132",
+      "byteSize": 19268,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/controls/nearPass-max.png",
+      "sha256": "d2baadfbebb589b92322a1f5321ca4369f41a563bbdc450e8b4a786ee272dc07",
+      "byteSize": 19563,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/controls/nearPass-min.png",
+      "sha256": "040cdccb2bbf6b98fcb4b8ea584e42ac1a7b4281f6328fc67ddf264a7b9e90e8",
+      "byteSize": 17123,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/empty-state.png",
+      "sha256": "d1a8fb8f123765887216f4ffa1dca37b95aca9899d2d20c69504275aab9bc4f0",
+      "byteSize": 12286,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/failed-media.png",
+      "sha256": "331599125b26faf0e37125104a8b5dac1284b3157455cd8c2a5da0c3de15c515",
+      "byteSize": 17755,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/horizontal/frame-000000.png",
+      "sha256": "577c45e0e206a91a78bf0fe2c0df995bf0b971dc6d73d282b75c6a8911c0e74d",
+      "byteSize": 17787,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/horizontal/frame-001155.png",
+      "sha256": "95e3094f37bae2c8970cbc729967db7db9f10782138d9625421d6c977b39a871",
+      "byteSize": 17680,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/horizontal/frame-002310.png",
+      "sha256": "4c43b1aa01e550f54396225b8afdbdf85a890f82e35215243c66774e493a65b7",
+      "byteSize": 17656,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/horizontal/frame-003465.png",
+      "sha256": "971dcba0402c510f6166759c8e50aa8271ec537c82ff79516a209e7271cf0915",
+      "byteSize": 18518,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/horizontal/frame-004620.png",
+      "sha256": "dc6f3957297e61ae9bb0af464e10fa392e2ef1583696ee01931acd27f1bb10b9",
+      "byteSize": 20982,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/horizontal/frame-006930.png",
+      "sha256": "ad88ffddac07dc91aaa71d2686efac966c8b6db107272037c3009bd939c0f4e3",
+      "byteSize": 14224,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/horizontal/frame-009240.png",
+      "sha256": "ec867ba3b22c4d2e905dc6a67d5b96e10e9f1c9ff69311d80deb86659c6e93a2",
+      "byteSize": 16908,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/long-run-metrics.json",
+      "sha256": "3fe423e40c12c8eaa4817881c4b01b47ca610f262b22539fc7a362391f557aad",
+      "byteSize": 638,
+      "proofClass": "machine-readable receipt/vector",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/mixed-alpha.png",
+      "sha256": "ad26dafeecf1c2e906a473b062195320b249f28a2199274b91bab42d64b248f0",
+      "byteSize": 18201,
+      "proofClass": "alpha/composite",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-real-speed.webm",
+      "sha256": "bd0af1ce495a727c7bf0a70b01906ee4077a2d8eaac7f75ee9ecddd7fb62ea9f",
+      "byteSize": 1122707,
+      "proofClass": "real-speed encoded motion",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0000.png",
+      "sha256": "577c45e0e206a91a78bf0fe2c0df995bf0b971dc6d73d282b75c6a8911c0e74d",
+      "byteSize": 17787,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0001.png",
+      "sha256": "173f4da12d51d9ad0c2fcda52f9efcb8c9267c2a769b621adfc4de0ff1b278a5",
+      "byteSize": 17736,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0002.png",
+      "sha256": "a8a183509e62d12e7534e2303253c05d2eff9775b3f85df3fcbea6c9c59a5b7c",
+      "byteSize": 17646,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0003.png",
+      "sha256": "039ef33706e3675d00617ab7fa66f5cfb45114c981920e0a68fb4d00ae2d91a2",
+      "byteSize": 17731,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0004.png",
+      "sha256": "980f19468ab017568caea0c546b6235be7949137a0244d0c41d6f446069279f8",
+      "byteSize": 17671,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0005.png",
+      "sha256": "69bf418724655cb34013019e8c7bacc213f954c53c2cee4ee95b5c6c1fe0bc0a",
+      "byteSize": 17707,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0006.png",
+      "sha256": "9210d8b0cd48bd91f37fc3231efd775cff19bcd72992da78c12cd115b624bfa8",
+      "byteSize": 17712,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0007.png",
+      "sha256": "1dd49cccdb5d92d58ce46669935947c7c5bb28a03db18d5f85f3e602da546ca6",
+      "byteSize": 17649,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0008.png",
+      "sha256": "ef77ea27eab242d0a862745743d0ffc7d345cb1b34900b47a7b006bdb757f29a",
+      "byteSize": 17633,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0009.png",
+      "sha256": "e6f4b37b5dceda577f18d5debe1476db5a0f03959cd1123eac71d14769c4302d",
+      "byteSize": 17680,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0010.png",
+      "sha256": "7d36b4be92caf5ed40a4637d4b29cc7e1bc54dcc50b8b120d6180f34002184a7",
+      "byteSize": 17720,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0011.png",
+      "sha256": "5acf0cae807ed0555356b81cd66138c49c6bcbb02078a6b2ac4a1293f15fcb62",
+      "byteSize": 17742,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0012.png",
+      "sha256": "ca56ce3dc846bbff00a4b8ef43ca9af3f3ea6c25f0ae3a0ddd0644874acb805c",
+      "byteSize": 17656,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0013.png",
+      "sha256": "4ff922b3a88e569b5db5aa3e0dad0cb08b23f0196cd597e49a134a6e0f9bbebf",
+      "byteSize": 17796,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0014.png",
+      "sha256": "4d71d6738b43f44e22fe5a0415318849554572ef5c7f3364bd91e76316cc8fde",
+      "byteSize": 17673,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0015.png",
+      "sha256": "3268f2739d8aac72fd2a9e2ba2354aa3352914d0eb40f139843d367f6cca3867",
+      "byteSize": 17706,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0016.png",
+      "sha256": "a8d69cd975ee3c072fdc4ee6d330f09d55a5280771025502c8df2c84f3f9679a",
+      "byteSize": 17607,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0017.png",
+      "sha256": "87d12b1483d95cfbed6389e33018727228e47bcb8c027b3e220bae69ee9b5084",
+      "byteSize": 17672,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0018.png",
+      "sha256": "eb400f0537c611fd462dc2cd780c007b2a1fd09f1281ec11bc9d49954ba2143d",
+      "byteSize": 17667,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0019.png",
+      "sha256": "6303e3204ad1461a03562701e314312718f24b1eb61691e60fda5d757b5f99b3",
+      "byteSize": 17658,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0020.png",
+      "sha256": "c4162ac5a2b84f10c5136fac9d90ed7be2a1d8f3522cf36b154b62b98d978a6d",
+      "byteSize": 17726,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0021.png",
+      "sha256": "d19006d2f4efef3e3d995c06de9a977f3d45a12a2edbf6204665267862dc8a3f",
+      "byteSize": 17802,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0022.png",
+      "sha256": "1c2305421f347be7a9c46ca41b1a664d4198c65ec284436df9b85ee0f733edb2",
+      "byteSize": 17700,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0023.png",
+      "sha256": "538dd8c95153b205566cf44c6390a93b2c1512bcd337d11e0ff5f0caf8080d20",
+      "byteSize": 17573,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0024.png",
+      "sha256": "15fd93832f4138ec33c3ad475d85e6395102fc5ddc139945c25f5fb5e44b28da",
+      "byteSize": 17795,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0025.png",
+      "sha256": "5a902f54476fbb2328d100a3cd3135c0ad9f76191fde7e9d076b3b9ce7de33fe",
+      "byteSize": 17683,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0026.png",
+      "sha256": "15c5f00f39e28dff7cb618ea05fe67a622de55112c2c595ace8380da3c905aeb",
+      "byteSize": 17576,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0027.png",
+      "sha256": "b6e4585b4d505f3ed331b5324c271dc037c989d6daf08135ee2981a02d1a5753",
+      "byteSize": 17661,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0028.png",
+      "sha256": "c3d84475c86498e618623a0d49b76f54c6bf47c4d5c1362553ae3ece6dad8006",
+      "byteSize": 17562,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0029.png",
+      "sha256": "1e6016e85c5920bfe50af29974a968a25de7cdb9fcdb4b071d29b1e1572a072f",
+      "byteSize": 17748,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0030.png",
+      "sha256": "fc5ab9c8afc8e488d72a4038086de3608a41fa936f372ddbd04186921e2a42e1",
+      "byteSize": 17676,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0031.png",
+      "sha256": "35b0907523106483962c9166b92a18f158b8837ea93d99ce8137ad567e8022ea",
+      "byteSize": 17575,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0032.png",
+      "sha256": "aa6e5357e65c5d9bb445459243fd26ea58c297efd272bd69cf993743a23ea022",
+      "byteSize": 17707,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0033.png",
+      "sha256": "d13c29983b7892475e05b376f961a240a935e6332e6423d8a7744fb2718ad5e8",
+      "byteSize": 17618,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0034.png",
+      "sha256": "a9e85ef24d7c36afb866588ec1f43d7f9bf49d3114a9229d8d3f55d6c3bbb08c",
+      "byteSize": 17688,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0035.png",
+      "sha256": "7934acdaaa575f3bc456b322cd21cf5bf668b2bcafa73bf76d6c97e6f64f9522",
+      "byteSize": 17608,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0036.png",
+      "sha256": "ebc3d57436acf97710cb8480d3e30a57b7d114cc9234bdc377230dda7e3390c4",
+      "byteSize": 17650,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0037.png",
+      "sha256": "4743b512e4849ba3807ddef737e15856a8ad390f9595209bde01921a7482e581",
+      "byteSize": 17564,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0038.png",
+      "sha256": "9ef408ea8442dcc93aea021c4cf7a65302e1dc61eb833886af3b6771c40512d9",
+      "byteSize": 17624,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0039.png",
+      "sha256": "337519379a8b7325e2aec579d0bba1dc9bb8bb43bc614bb4a5b5b6da993e6029",
+      "byteSize": 17662,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0040.png",
+      "sha256": "63bee0497b7afd1511a5acbf153ec8a4a3aafa0109516aae662b553ee5fea5db",
+      "byteSize": 17638,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0041.png",
+      "sha256": "ddfb6ca8ac12b66077eae2a5db622757455f75a58c8b9fe742957198d589bdd0",
+      "byteSize": 17695,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0042.png",
+      "sha256": "e892fdaefff69984876055bcdf00689a7166aeea67dbdbf64d7b0c90f483bb93",
+      "byteSize": 17554,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0043.png",
+      "sha256": "885620aa3bf5b3d6c40ee3b84064de331225bd199967ff6ebb747424d67dc7a7",
+      "byteSize": 17791,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0044.png",
+      "sha256": "58572bba35cbd1bbb95c65924e4b27c938416fbb534cea16f6dd5e9cf6f6605b",
+      "byteSize": 17579,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0045.png",
+      "sha256": "0d863018041fa911fdac25311891c463c95e7aec847f705eff3ed11c42a4f7cd",
+      "byteSize": 17644,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0046.png",
+      "sha256": "dd7f89fb2683698e4150aa71d430c3dfc7f679330d69c0cd5e75b0568b268591",
+      "byteSize": 17685,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/motion-sequence-30fps/frame-0047.png",
+      "sha256": "f8db407d379d4af6ca4c38639d31d6655495957c3bfca7526714c6af87455ca1",
+      "byteSize": 17653,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/review-workbench-control-variant.png",
+      "sha256": "d6a4a5377e247b0d5f498db718c83f9ea42b4d566637d0e8c5189287a843e5bb",
+      "byteSize": 181437,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/review-workbench-narrow.png",
+      "sha256": "4c91917def5f73214bd2ae1116f67601c192e06ff44d07058c5339449504d763",
+      "byteSize": 165133,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/review-workbench-wide.png",
+      "sha256": "fe1609c6371499e2baa4f0e0ed5ce5a394dbade4b309cfe51b9ba738b64731a9",
+      "byteSize": 179791,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/silhouettes/silhouette-01.png",
+      "sha256": "2073d879a8e6e92d34adff9741e1833d99a498a31b36f9eab308b38bbc34fb37",
+      "byteSize": 13223,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/silhouettes/silhouette-02.png",
+      "sha256": "f99ecdc9fae680c6a7969faa156b3cf6c88b8d2b8b05cd6558ed628249c8b6c1",
+      "byteSize": 13185,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/source-video.png",
+      "sha256": "7c14e1ff0d6f4067daef8a1bfc60c25e4f73ca03890d60101f0bb18e8301ecc4",
+      "byteSize": 23513,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/vertical/frame-000000.png",
+      "sha256": "117d03c355c5f48715878916f23ea25ef8fa4ec8293ddccc1f0d540d95a4a4cf",
+      "byteSize": 20966,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/vertical/frame-002310.png",
+      "sha256": "38b2e3160beb7977415ef3b1a06dc69509dd1c347855b622f4817bbbf7a3a14e",
+      "byteSize": 21080,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/vertical/frame-004620.png",
+      "sha256": "f9331b4a126cb48133393a4b91b07518bd7f32ea19bb85ce6a559f8c3b00e932",
+      "byteSize": 21295,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    },
+    {
+      "path": "03_NORMALISED_ATELIERS/atelier-01/deck-river-loader/evidence/vertical/frame-006930.png",
+      "sha256": "f85aecf8a395b1ee3e534634c1ff269c1636755658bb2dd7a6f45b2848c59fed",
+      "byteSize": 15267,
+      "proofClass": "still/fixed-step frame",
+      "source": "immutable atelier handoff",
+      "freshness": "source-current; unchanged in normalised copy"
+    }
+  ],
+  "validationBindings": [
+    "07_VALIDATION/browser-receipts/deck-river-loader.json",
+    "07_VALIDATION/alpha-receipts/deck-river-loader.json",
+    "07_VALIDATION/test-results/ORIGINAL_REPLAY_SUMMARY.json",
+    "07_VALIDATION/resource-receipts/RESOURCE_LIFECYCLE_SUMMARY.json",
+    "07_VALIDATION/evidence-manifests/VIDEO_EVIDENCE_RECEIPT.json"
+  ],
+  "claimBoundary": "Evidence proves declared mechanics by proof class. Static images do not prove motion; encoded clips do not restore omitted raw frame ledgers; human verdict remains pending.",
+  "humanVerdict": "pending",
+  "productIntegration": "no"
+}

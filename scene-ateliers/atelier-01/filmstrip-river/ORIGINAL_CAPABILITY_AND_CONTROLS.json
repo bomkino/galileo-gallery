@@ -1,0 +1,133 @@
+{
+  "scene": {
+    "catalogueId": "filmstrip-river",
+    "candidateVersion": 1,
+    "displayName": "Ribbon — Two-lane Filmstrip",
+    "verdict": "pending"
+  },
+  "capabilities": {
+    "topology": "two-closed-material-lanes",
+    "laneCount": 2,
+    "laneRelationship": "equal-real-speed-counter-flow",
+    "trackResolution": "mixed-ratio parity streams normalized to one shared metric extent",
+    "axisPolicy": "landscape-horizontal-portrait-vertical",
+    "directions": [
+      "forward",
+      "reverse"
+    ],
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "prototypeTimelineCoverage": {
+      "automatic": "chartered and compiled by the isolated prototype",
+      "fixed-duration": "chartered and compiled as an integer cycle count at exact requested duration",
+      "directed": "chartered as Product Timeline input; this isolated Scene evaluator consumes compiled phase/hold intent rather than duplicating the shared segment compiler"
+    },
+    "loopSeam": true,
+    "mixedRatios": true,
+    "transparentLook": true,
+    "sourceVideoStoryTime": true,
+    "failedMediaOrderPreserved": true,
+    "reducedMotion": "frozen lane landmarks",
+    "recommendedMediaCount": 8,
+    "maximumEvaluatedMediaCount": 256
+  },
+  "controls": [
+    {
+      "id": "frameScale",
+      "label": "Frame size",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "cross-axis-fraction",
+      "minimum": 0.16,
+      "maximum": 0.36,
+      "step": 0.01,
+      "default": 0.28,
+      "causes": [
+        "frame-size",
+        "lane-capacity"
+      ]
+    },
+    {
+      "id": "gap",
+      "label": "Minimum gap",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "minimum-design-pixels-at-1080-cross-axis",
+      "minimum": 0,
+      "maximum": 160,
+      "step": 1,
+      "default": 30,
+      "causes": [
+        "minimum-material-spacing",
+        "shared-track-extent"
+      ]
+    },
+    {
+      "id": "laneSeparation",
+      "label": "Lane separation",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "cross-axis-fraction",
+      "minimum": 0.25,
+      "maximum": 0.58,
+      "step": 0.01,
+      "default": 0.38,
+      "causes": [
+        "lane-baselines",
+        "inter-lane-clearance"
+      ]
+    },
+    {
+      "id": "lanePhase",
+      "label": "Lane offset",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "cycle-fraction",
+      "minimum": 0,
+      "maximum": 1,
+      "step": 0.01,
+      "default": 0.5,
+      "causes": [
+        "counter-lane-phase",
+        "canonical-rhythm"
+      ]
+    }
+  ],
+  "timelineOwned": [
+    "direction",
+    "paceMs",
+    "cycleCount",
+    "holds",
+    "finale",
+    "storyTime"
+  ],
+  "lookOwned": [
+    "background",
+    "grain",
+    "vignette",
+    "material-surface"
+  ],
+  "mediaOwned": [
+    "ratio",
+    "fit-intent",
+    "source-alpha",
+    "source-video-duration"
+  ],
+  "unsupportedSceneControls": [
+    "lane-count",
+    "tilt",
+    "random-offset",
+    "bob",
+    "jitter",
+    "sprockets",
+    "film-dirt",
+    "grain",
+    "tint",
+    "brightness",
+    "border",
+    "caption"
+  ]
+}

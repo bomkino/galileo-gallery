@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0.0",
+  "atelier": 1,
+  "scenes": [
+    {
+      "sceneId": "cms-slideshow",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "deck-river",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "deck-river-loader",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "filmstrip-river",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    },
+    {
+      "sceneId": "wave-ticker",
+      "chartered": "candidate",
+      "prototyped": "yes",
+      "evaluatorTested": "yes",
+      "browserTested": "yes",
+      "evidenceComplete": "mechanically current; human verdict pending",
+      "humanReviewed": "pending",
+      "productIntegrated": "no",
+      "catalogueRegistered": "no",
+      "packaged": "candidate packet",
+      "released": "no"
+    }
+  ]
+}

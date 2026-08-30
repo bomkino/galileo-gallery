@@ -1,0 +1,1 @@
+{"scene":"wave-ticker","pass":true,"seam":"C1-position-and-tangent","path":"integer-wavelength-closure","randomBob":false}

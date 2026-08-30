@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "atelier": 1,
+  "sourceArchive": "ATELIER01_LINEAR_WORLDS_PARITY_HANDOFF(1).zip",
+  "sourceArchiveSha256": "5529d371947bc011e3cea7d1a7fcb17b9d2532fed625d541b6ede3c3e919013c",
+  "sceneCount": 5,
+  "controlCount": 22,
+  "productIntegration": "no",
+  "humanAcceptance": "pending",
+  "originalReplayCommands": 1,
+  "originalReplayPassed": 1,
+  "browserJourneys": 5,
+  "browserPassed": 5,
+  "nativeControlBindings": 22
+}

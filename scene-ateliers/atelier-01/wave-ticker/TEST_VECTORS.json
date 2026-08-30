@@ -1,0 +1,109 @@
+{
+  "schema": "galileo-scene-atelier-test-vectors",
+  "version": 2,
+  "scene": "wave-ticker",
+  "fixturePolicy": "generated-only",
+  "verdict": "pending",
+  "execution": {
+    "primary": "prototype/check.cjs",
+    "crossScene": "../tools/verify-gauntlet.cjs",
+    "browserInteraction": "../tools/verify-browser-ui.py"
+  },
+  "vectors": [
+    {
+      "id": "integer-wavelength-closure",
+      "purpose": "The closed extent contains an integer number of wavelengths.",
+      "input": {},
+      "assertions": [
+        "extent/wavelength is an integer",
+        "start/end position matches"
+      ]
+    },
+    {
+      "id": "C1-seam",
+      "purpose": "Position and tangent remain continuous across the seam.",
+      "input": {
+        "epsilonMs": 0.1
+      },
+      "assertions": [
+        "x/y deltas are bounded",
+        "rotation/tangent delta is bounded"
+      ]
+    },
+    {
+      "id": "stationary-path",
+      "purpose": "Cards move through one fixed path.",
+      "input": {},
+      "assertions": [
+        "path metadata remains unchanged over story time",
+        "no per-card random phase/bob"
+      ]
+    },
+    {
+      "id": "hold-at-crest",
+      "purpose": "A selected source can hold at the centre crest.",
+      "input": {
+        "holdSourceIndex": 3
+      },
+      "assertions": [
+        "target position≈0",
+        "velocity=0"
+      ]
+    },
+    {
+      "id": "all-scene-controls-causal",
+      "purpose": "All five Scene controls change declared output.",
+      "input": {
+        "controls": [
+          "frameScale",
+          "gap",
+          "amplitude",
+          "wavelength",
+          "tangentInfluence"
+        ]
+      },
+      "assertions": [
+        "dimensions/spacing/crest height/period/rotation respond"
+      ]
+    },
+    {
+      "id": "rotation-bound",
+      "purpose": "Typography protection survives extreme controls.",
+      "input": {},
+      "assertions": [
+        "absolute rotation ≤10°"
+      ]
+    },
+    {
+      "id": "count-canvas-direction-matrix",
+      "purpose": "Sparse virtual instances and portrait recomposition remain bounded.",
+      "input": {
+        "counts": [
+          0,
+          1,
+          2,
+          8,
+          32,
+          127,
+          256
+        ]
+      },
+      "assertions": [
+        "visible source exists for non-empty input",
+        "allocation ≤48 instances per source",
+        "portrait uses a vertical major axis"
+      ]
+    },
+    {
+      "id": "source-treatment-and-reduced-motion",
+      "purpose": "Artwork remains clean and reduced motion is static.",
+      "input": {},
+      "assertions": [
+        "opacity=1",
+        "filter=none",
+        "blend=normal",
+        "reduced velocity=0"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "scene": {
+    "legacyCatalogueId": "cms-slideshow",
+    "canonicalCandidateId": "quiet-carousel",
+    "candidateVersion": 2,
+    "displayName": "Quiet Carousel",
+    "verdict": "pending"
+  },
+  "capabilities": {
+    "topology": "closed-linear-focus-track",
+    "axes": [
+      "horizontal",
+      "vertical"
+    ],
+    "directions": [
+      "forward",
+      "reverse"
+    ],
+    "timelineModes": [
+      "automatic",
+      "fixed-duration",
+      "directed"
+    ],
+    "prototypeTimelineCoverage": {
+      "automatic": "chartered and compiled by the isolated prototype",
+      "fixed-duration": "chartered and compiled as an integer cycle count at exact requested duration",
+      "directed": "chartered as Product Timeline input; this isolated Scene evaluator consumes compiled phase/hold intent rather than duplicating the shared segment compiler"
+    },
+    "loopSeam": true,
+    "oneItemIdentity": true,
+    "mixedRatios": true,
+    "transparentLook": true,
+    "sourceVideoStoryTime": true,
+    "failedMediaOrderPreserved": true,
+    "reducedMotion": "discrete-focus-landmarks",
+    "recommendedMediaCount": 8,
+    "maximumEvaluatedMediaCount": 256
+  },
+  "controls": [
+    {
+      "id": "frameScale",
+      "label": "Frame size",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "cross-axis-fraction",
+      "minimum": 0.24,
+      "maximum": 0.78,
+      "step": 0.01,
+      "default": 0.52,
+      "causes": [
+        "frame-width",
+        "frame-height",
+        "visible-window"
+      ]
+    },
+    {
+      "id": "gap",
+      "label": "Minimum gap",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "minimum-design-pixels-at-1080-cross-axis",
+      "minimum": 0,
+      "maximum": 240,
+      "step": 1,
+      "default": 42,
+      "causes": [
+        "minimum-anchor-clearance",
+        "loop-extent"
+      ]
+    },
+    {
+      "id": "focusDepth",
+      "label": "Focus depth",
+      "owner": "scene",
+      "kind": "number",
+      "unit": "fraction",
+      "minimum": 0,
+      "maximum": 0.24,
+      "step": 0.01,
+      "default": 0.12,
+      "causes": [
+        "geometric-scale-falloff",
+        "z-order"
+      ]
+    }
+  ],
+  "timelineOwned": [
+    "axis",
+    "direction",
+    "paceMs",
+    "cycleCount",
+    "holds",
+    "finale",
+    "storyTime"
+  ],
+  "lookOwned": [
+    "background",
+    "ground",
+    "grain",
+    "grid",
+    "vignette",
+    "world-treatment"
+  ],
+  "mediaOwned": [
+    "ratio",
+    "fit-intent",
+    "focal-intent",
+    "source-video-duration",
+    "source-alpha"
+  ],
+  "unsupportedSceneControls": [
+    "background",
+    "fit",
+    "brightness",
+    "opacity",
+    "blur",
+    "tilt",
+    "caption",
+    "indicator",
+    "snap",
+    "lane-count"
+  ]
+}

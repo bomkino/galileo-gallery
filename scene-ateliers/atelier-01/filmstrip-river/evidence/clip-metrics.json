@@ -1,0 +1,24 @@
+{
+  "programs": [],
+  "stream_groups": [],
+  "streams": [
+    {
+      "codec_name": "vp9",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "30/1",
+      "avg_frame_rate": "30/1",
+      "nb_read_frames": "247"
+    }
+  ],
+  "format": {
+    "size": "2134593"
+  },
+  "analysis": {
+    "packetDurationSeconds": 8.267,
+    "decodedFrames": 247,
+    "measuredAverageFps": 29.877828,
+    "nominalCanvasCaptureFps": 30,
+    "rateNote": "WebM/MediaRecorder may report unreliable r_frame_rate for variable-duration packets; measuredAverageFps uses decoded frame count divided by final packet end time."
+  }
+}

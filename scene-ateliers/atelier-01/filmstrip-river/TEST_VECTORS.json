@@ -1,0 +1,118 @@
+{
+  "schema": "galileo-scene-atelier-test-vectors",
+  "version": 2,
+  "scene": "filmstrip-river",
+  "fixturePolicy": "generated-only",
+  "verdict": "pending",
+  "execution": {
+    "primary": "prototype/check.cjs",
+    "crossScene": "../tools/verify-gauntlet.cjs",
+    "browserInteraction": "../tools/verify-browser-ui.py"
+  },
+  "vectors": [
+    {
+      "id": "exactly-two-lanes",
+      "purpose": "Lane count remains identity, not a control.",
+      "input": {
+        "counts": [
+          1,
+          2,
+          8,
+          32
+        ]
+      },
+      "assertions": [
+        "only lane 0 and lane 1 exist",
+        "one source produces render instances without inventing media identity"
+      ]
+    },
+    {
+      "id": "equal-real-speed",
+      "purpose": "Mixed-ratio lanes share one normalized metric extent.",
+      "input": {
+        "count": 8,
+        "mixedRatios": true
+      },
+      "assertions": [
+        "absolute lane pixel speeds are equal",
+        "signs oppose",
+        "reported direction metadata matches actual motion"
+      ]
+    },
+    {
+      "id": "exact-seam",
+      "purpose": "Both metric tracks close exactly.",
+      "input": {
+        "timeMs": [
+          0,
+          8000
+        ]
+      },
+      "assertions": [
+        "deep visual equality"
+      ]
+    },
+    {
+      "id": "hold-alignment",
+      "purpose": "A target source aligns to its assigned lane gate.",
+      "input": {
+        "holdSourceIndex": 3
+      },
+      "assertions": [
+        "velocity=0",
+        "a target render instance is centred on the major axis"
+      ]
+    },
+    {
+      "id": "all-scene-controls-causal",
+      "purpose": "All four Scene controls change their declared output.",
+      "input": {
+        "controls": [
+          "frameScale",
+          "gap",
+          "laneSeparation",
+          "lanePhase"
+        ]
+      },
+      "assertions": [
+        "dimensions/spacing/baselines/counter-lane offset respond"
+      ]
+    },
+    {
+      "id": "count-canvas-direction-matrix",
+      "purpose": "Sparse and many fixtures stay visible and bounded.",
+      "input": {
+        "counts": [
+          0,
+          1,
+          2,
+          8,
+          32,
+          127,
+          256
+        ],
+        "canvases": [
+          "16:9",
+          "9:16",
+          "1:1",
+          "4:5"
+        ]
+      },
+      "assertions": [
+        "portrait becomes two vertical columns",
+        "frame allocation remains bounded"
+      ]
+    },
+    {
+      "id": "source-treatment-and-reduced-motion",
+      "purpose": "No nostalgia treatment or substitute animation.",
+      "input": {},
+      "assertions": [
+        "opacity=1",
+        "filter=none",
+        "blend=normal",
+        "reduced velocity=0"
+      ]
+    }
+  ]
+}
