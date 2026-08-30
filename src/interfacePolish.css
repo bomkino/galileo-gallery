@@ -147,7 +147,7 @@
 .button.compact { min-width: 104px; }
 .button > svg,
 .add-media > svg,
-.transport-play > svg { width: var(--control-icon); height: var(--control-icon); }
+.transport-play > svg { width: var(--control-icon); height: var(--control-icon); flex: 0 0 var(--control-icon); }
 .icon-button > svg,
 .empty-orbit > svg,
 .export-mark > svg { width: var(--control-icon-large); height: var(--control-icon-large); }

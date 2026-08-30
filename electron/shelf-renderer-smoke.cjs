@@ -805,7 +805,7 @@ async function imageOnlyPngEvidence(window, projectPath, destination, evidenceRo
 }
 
 async function playbackControlEvidence(window) {
-    await clickText(window, ".inspector-top button", "Motion")
+    await clickText(window, ".inspector-top button", "Look")
     await until(window, "document.querySelector('.segment[aria-label=\"Direction\"]')", "Shelf playback controls")
     const evidence = await window.webContents.executeJavaScript(`(() => {
         const active = (label) => document.querySelector('.segment[aria-label="' + label + '"] button[aria-pressed="true"]')?.textContent.trim() ?? null
