@@ -88,7 +88,7 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         animationFrameRef.current = null
     }, [])
     const confirmPresentedFrame = React.useCallback((video: HTMLVideoElement, revision: number, target: number) => {
-        if (revision !== revisionRef.current || Math.abs(video.currentTime - target) > 0.0005) return
+        if (revision !== revisionRef.current || (!video.seeking && Math.abs(video.currentTime - target) > 0.0005)) return
         cancelFrameConfirmation(video)
         const frameVideo = video as HTMLVideoElement & {
             requestVideoFrameCallback?: (handler: (_now: number, metadata: { mediaTime: number }) => void) => number
@@ -104,17 +104,22 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
             }
             return false
         }
-        if (frameVideo.requestVideoFrameCallback) {
-            frameCallbackRef.current = frameVideo.requestVideoFrameCallback((_now, metadata) => {
-                frameCallbackRef.current = null
-                markReady(metadata.mediaTime)
-            })
-        } else {
+        const requestConfirmation = () => {
+            if (revision !== revisionRef.current || Math.abs(targetRef.current - target) > 0.0005
+                || (!video.seeking && Math.abs(video.currentTime - target) > 0.0005)) return
+            if (frameVideo.requestVideoFrameCallback) {
+                frameCallbackRef.current = frameVideo.requestVideoFrameCallback((_now, metadata) => {
+                    frameCallbackRef.current = null
+                    if (!markReady(metadata.mediaTime)) requestConfirmation()
+                })
+                return
+            }
             animationFrameRef.current = requestAnimationFrame(() => {
                 animationFrameRef.current = null
-                markReady(video.currentTime)
+                if (!markReady(video.currentTime)) requestConfirmation()
             })
         }
+        requestConfirmation()
     }, [cancelFrameConfirmation, fps])
     const sync = React.useCallback(() => {
         const video = ref.current
@@ -143,11 +148,14 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         }
         const onSeeked = () => {
             seekCleanupRef.current = null
-            if (revision === revisionRef.current && !video.seeking) confirmPresentedFrame(video, revision, target)
+            if (revision === revisionRef.current && !video.seeking && frameCallbackRef.current === null && animationFrameRef.current === null) {
+                confirmPresentedFrame(video, revision, target)
+            }
         }
         video.addEventListener("seeked", onSeeked, { once: true })
         seekCleanupRef.current = () => video.removeEventListener("seeked", onSeeked)
         if (Math.abs(video.currentTime - target) > 0.0005) video.currentTime = target
+        confirmPresentedFrame(video, revision, target)
     }, [cancelFrameConfirmation, confirmPresentedFrame, loop, sampledTimeMs, source])
     React.useLayoutEffect(sync, [sync])
     React.useLayoutEffect(() => {

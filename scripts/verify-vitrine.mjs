@@ -14,7 +14,12 @@ import {
 import { reconcileVitrineConfig, validateVitrineRuntimeConfig } from "../src/vitrineConfig.ts"
 
 const require = createRequire(import.meta.url)
-const { assertNoPrivateEvidence } = require("../electron/g11-vitrine-smoke.cjs")
+const { assertNoPrivateEvidence, parsePackagedFfmpegVersion } = require("../electron/g11-vitrine-smoke.cjs")
+const approvedFfmpeg = require("./ffmpeg-approved-binaries.json")
+
+assert.equal(parsePackagedFfmpegVersion(`ffmpeg version ${approvedFfmpeg.version} approved-build`), approvedFfmpeg.version)
+assert.equal(parsePackagedFfmpegVersion("ffmpeg version 7.0.2 approved-build"), "7.0.2")
+assert.equal(parsePackagedFfmpegVersion("ffmpeg version malformed"), null)
 
 const close = (actual, expected, tolerance = 0.00001, message = `${actual} != ${expected}`) => {
     assert(Math.abs(actual - expected) <= tolerance, message)

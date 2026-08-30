@@ -17,6 +17,9 @@ const EXPECTED_FRAME_INTENTS = [
 ]
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 const sha256 = (value) => crypto.createHash("sha256").update(value).digest("hex")
+const parsePackagedFfmpegVersion = (output) => typeof output === "string"
+    ? /^ffmpeg version ([0-9]+(?:\.[0-9]+){1,3}(?:-[^\s]+)?)\s/m.exec(output)?.[1] ?? null
+    : null
 
 function capturePathAuthority(resolved) {
     const root = path.parse(resolved).root
@@ -140,7 +143,14 @@ async function settle(window) {
         }))
         const deadline = performance.now() + 10_000
         while ([...document.querySelectorAll('.vitrine-plane video, .vitrine-guard video')].some((video) => video.dataset.storyReady !== 'true')) {
-            if (performance.now() >= deadline) throw new Error('Vitrine source video did not present its requested frame.')
+            if (performance.now() >= deadline) {
+                const states = [...document.querySelectorAll('.vitrine-plane video, .vitrine-guard video')].map((video) => ({
+                    ready: video.dataset.storyReady, currentTime: video.currentTime, duration: video.duration,
+                    seeking: video.seeking, readyState: video.readyState, networkState: video.networkState,
+                    visibility: getComputedStyle(video).visibility, parent: video.parentElement?.className,
+                }))
+                throw new Error('Vitrine source video did not present its requested frame: ' + JSON.stringify(states))
+            }
             await new Promise((resolve) => requestAnimationFrame(resolve))
         }
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))))
@@ -912,7 +922,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
     const ffmpeg = fileEvidence(ffmpegPath)
     const ffmpegVersionRead = spawnSync(ffmpegPath, ["-version"], { encoding: "utf8", env: { LANG: "C", LC_ALL: "C", PATH: "/usr/bin:/bin" } })
     if (ffmpegVersionRead.status !== 0) throw new Error("G11 packaged FFmpeg identity could not be executed.")
-    const ffmpegVersion = /^ffmpeg version ([0-9]+(?:\.[0-9]+){1,3})(?:-[^\s]+)?\s/m.exec(ffmpegVersionRead.stdout)?.[1]
+    const ffmpegVersion = parsePackagedFfmpegVersion(ffmpegVersionRead.stdout)
     if (!ffmpegVersion) throw new Error("G11 packaged FFmpeg version is malformed.")
     if (process.env.G11_EXPECTED_FFMPEG_SHA && process.env.G11_EXPECTED_FFMPEG_SHA !== ffmpeg.sha256) throw new Error("G11 packaged FFmpeg digest differs from runner identity.")
     const sandboxPath = path.join(path.dirname(process.execPath), "chrome-sandbox")
@@ -1153,4 +1163,4 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
     fs.writeFileSync(path.join(evidenceRoot, "receipt.json"), `${serialized}\n`)
 }
 
-module.exports = { assertNoPrivateEvidence, inspectArtwork, runG11VitrineSmoke }
+module.exports = { assertNoPrivateEvidence, inspectArtwork, parsePackagedFfmpegVersion, runG11VitrineSmoke }
