@@ -119,8 +119,8 @@ function exactTreeEvidence(directory) {
 }
 
 const runs = [
-    { id: "run-a", mode: "save", frameDirectory: "run-a-frames" },
-    { id: "run-b", mode: "reopen", frameDirectory: "run-b-frames" },
+    { id: "run-a", mode: "save", frameDirectory: "run-a-frames", visiblePlacardFrameDirectory: "vitrine-save-placard-visible-frames" },
+    { id: "run-b", mode: "reopen", frameDirectory: "run-b-frames", visiblePlacardFrameDirectory: "vitrine-reopen-placard-visible-frames" },
 ]
 assert.equal(fs.realpathSync.native(root), root, "G11 artifact root or an ancestor is a symbolic link")
 assert(fs.lstatSync(root).isDirectory() && !fs.lstatSync(root).isSymbolicLink())
@@ -128,6 +128,8 @@ const receiptFiles = runs.map((run) => boundedJSON(path.join(root, run.id, "rece
 const receipts = receiptFiles.map((entry) => entry.value)
 const manifestFiles = runs.map((run) => boundedJSON(path.join(root, run.frameDirectory, "manifest.json"), 5_000_000))
 const manifests = manifestFiles.map((entry) => entry.value)
+const visiblePlacardManifestFiles = runs.map((run) => boundedJSON(path.join(root, run.id, run.visiblePlacardFrameDirectory, "manifest.json"), 5_000_000))
+const visiblePlacardManifests = visiblePlacardManifestFiles.map((entry) => entry.value)
 const corruptOpenReceipt = boundedJSON(path.join(root, "run-corrupt-open", "receipt.json"), 2_000_000).value
 const missingMediaReceipt = boundedJSON(path.join(root, "run-missing-media-export", "receipt.json"), 2_000_000).value
 assert.deepEqual(receipts.map((receipt) => receipt.mode), ["save", "reopen"])
@@ -147,7 +149,11 @@ const expectedFiles = new Set([
     "run-corrupt-open/receipt.json",
     "run-missing-media-export/receipt.json",
     "missing-media-destination/prior.txt",
-    ...runs.flatMap((run) => [`${run.id}/receipt.json`, `${run.frameDirectory}/manifest.json`]),
+    ...runs.flatMap((run) => [
+        `${run.id}/receipt.json`,
+        `${run.frameDirectory}/manifest.json`,
+        `${run.id}/${run.visiblePlacardFrameDirectory}/manifest.json`,
+    ]),
 ])
 
 for (const [index, receipt] of receipts.entries()) {
@@ -502,6 +508,67 @@ for (const [index, receipt] of receipts.entries()) {
     assert.equal(receipt.export.probes[18].phrase, "exchange")
     assert.equal(receipt.export.probes[24].planes[0].id, "vitrine-portrait")
 
+    const visiblePlacardManifestFile = visiblePlacardManifestFiles[index]
+    const visiblePlacardManifest = visiblePlacardManifests[index]
+    assertNoPrivateEvidence(visiblePlacardManifest)
+    assert.deepEqual(visiblePlacardManifest.scene, { id: "vitrine", version: 2 })
+    assert.equal(visiblePlacardManifest.width, 96)
+    assert.equal(visiblePlacardManifest.height, 64)
+    assert.equal(visiblePlacardManifest.fps, 24)
+    assert.equal(visiblePlacardManifest.durationMs, 2_000)
+    assert.equal(visiblePlacardManifest.frameCount, 48)
+    assert.equal(visiblePlacardManifest.alpha, true)
+    assert.equal(visiblePlacardManifest.audio, "none")
+    assert.equal(visiblePlacardManifest.frames.length, 48)
+    const visiblePlacardFrameRoot = path.join(root, run.id, run.visiblePlacardFrameDirectory)
+    const visiblePlacardEntries = ["manifest.json"]
+    const visiblePlacardHashes = []
+    for (let frameIndex = 0; frameIndex < 48; frameIndex += 1) {
+        const frame = visiblePlacardManifest.frames[frameIndex]
+        assert.deepEqual(Object.keys(frame).sort(), ["bytes", "name", "sha256", "timeMs"])
+        const expectedName = `frame-${String(frameIndex + 1).padStart(6, "0")}.png`
+        assert.equal(frame.name, expectedName)
+        assert.equal(frame.timeMs, frameIndex * 1_000 / 24)
+        assert(Number.isSafeInteger(frame.bytes) && frame.bytes > 0 && frame.bytes < 1_000_000)
+        assert.match(frame.sha256, /^[a-f0-9]{64}$/)
+        const target = safeNamedFile(visiblePlacardFrameRoot, frame.name, /^frame-[0-9]{6}\.png$/, 1_000_000)
+        const bytes = stableRead(target, 1_000_000).bytes
+        assert.equal(bytes.length, frame.bytes)
+        assert.equal(sha256(bytes), frame.sha256)
+        const inspected = inspectPng(bytes, { width: 96, height: 64, alpha: true })
+        assert.equal(inspected.bytes, frame.bytes)
+        assert.equal(inspected.sha256, frame.sha256)
+        visiblePlacardHashes.push(frame.sha256)
+        visiblePlacardEntries.push(expectedName)
+        expectedFiles.add(`${run.id}/${run.visiblePlacardFrameDirectory}/${expectedName}`)
+    }
+    assert.deepEqual(fs.readdirSync(visiblePlacardFrameRoot).sort(), visiblePlacardEntries.sort())
+    const visiblePlacardProof = receipt.export.visiblePlacardProof
+    assertNoPrivateEvidence(visiblePlacardProof)
+    assert.equal(visiblePlacardProof.transparentWindow, true)
+    assert.equal(visiblePlacardProof.shadowSuppressed, true)
+    assert.equal(visiblePlacardProof.manifestSha256, sha256(visiblePlacardManifestFile.bytes))
+    assert.deepEqual(visiblePlacardProof.frameHashes, visiblePlacardHashes)
+    assert.deepEqual(Object.keys(visiblePlacardProof.probes), ["0", "18", "47"])
+    const visiblePlacardProbeIds = new Set()
+    for (const frameIndex of [0, 18, 47]) {
+        const probe = visiblePlacardProof.probes[frameIndex]
+        assert.match(probe.exportMarker.frameId, new RegExp(`^png-[a-f0-9]{24}-${frameIndex}$`))
+        assert.equal(probe.exportMarker.timeMs, String(frameIndex * 1_000 / 24))
+        assert.equal(visiblePlacardProbeIds.has(probe.exportMarker.frameId), false)
+        visiblePlacardProbeIds.add(probe.exportMarker.frameId)
+        assert.equal(probe.transparentExport, true)
+        assert.equal(probe.placardExpected, true)
+        assert.notEqual(probe.placard, null)
+        assert.equal(probe.placardShadow, "none")
+        assert(probe.planes.every((plane) => ["IMG", "VIDEO"].includes(plane.mediaTag) && plane.failed === false))
+        for (const plane of probe.planes.filter((candidate) => candidate.id === "vitrine-portrait")) {
+            assert.equal(plane.mediaTag, "VIDEO")
+            assert.equal(plane.storyReady, "true")
+            assert.equal(plane.storySeeking, false)
+        }
+    }
+
     const screenshotNames = new Set()
     for (const screenshot of Object.values(receipt.screenshots)) {
         const pattern = new RegExp(`^vitrine-${run.mode}-(?:hold-a|exchange|scale-(?:75|100|200)|export-success)\\.png$`)
@@ -547,6 +614,10 @@ assert.equal(receipts[0].presentation.final.revision, receipts[1].presentation.i
 assert.equal(receipts[0].presentation.final.sha256, receipts[1].presentation.initial.sha256)
 assert.deepEqual(receipts[0].export.frameHashes, receipts[1].export.frameHashes, "normal and reduced-motion exports must have identical frame hashes")
 assert.equal(receipts[0].export.manifestSha256, receipts[1].export.manifestSha256)
+assert.deepEqual(visiblePlacardManifests[0].frames.map((frame) => frame.sha256), visiblePlacardManifests[1].frames.map((frame) => frame.sha256),
+    "save and reopen visible-Placard exports must have identical frame hashes")
+assert.equal(sha256(visiblePlacardManifestFiles[0].bytes), sha256(visiblePlacardManifestFiles[1].bytes),
+    "save and reopen visible-Placard manifests must have identical digests")
 
 function verifyFailurePackage(receipt) {
     assertNoPrivateEvidence(receipt)

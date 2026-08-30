@@ -1965,7 +1965,14 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
     if (blockedAlphaTruth.disabled || blockedAlphaTruth.exportDisabled || !blockedAlphaTruth.text.includes("Verified sequence")) throw new Error("G11 explicitly-authored Placard was incorrectly blocked from transparent export.")
     const primaryDestination = process.env.REEL_G11_PNG_DESTINATION
     const placardDestination = path.join(evidenceRoot, "vitrine-" + mode + "-placard-visible-frames")
-    if (!primaryDestination || evidenceFs.existsSync(placardDestination)) throw new Error("G11 visible-Placard export destination is unsafe.")
+    let placardDestinationAbsent = false
+    try {
+        evidenceFs.lstatSync(placardDestination)
+    } catch (error) {
+        if (error?.code !== "ENOENT") throw error
+        placardDestinationAbsent = true
+    }
+    if (!primaryDestination || !placardDestinationAbsent) throw new Error("G11 visible-Placard export destination is unsafe.")
     const placardObserver = observeExportFrames(new Set([0, 18, 47]))
     let placardExportProbes = null
     process.env.REEL_G11_PNG_DESTINATION = placardDestination
@@ -1981,11 +1988,16 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         || !probe.placardExpected || probe.placard === null || probe.placardShadow !== "none")) {
         throw new Error("G11 transparent export window did not prove a current visible Placard with its shadow suppressed.")
     }
+    if (mode === "save" && (!normalizedParity(exchange, placardExportProbes[18])
+        || !normalizedPlacardParity(exchange, placardExportProbes[18]))) {
+        throw new Error("G11 visible Placard preview/export geometry diverged.")
+    }
     const placardManifestBytes = stableFileBytes(path.join(placardDestination, "manifest.json"), 5_000_000)
     const placardManifest = JSON.parse(placardManifestBytes)
     if (placardManifest.format !== "galileo-gallery-png-frames" || placardManifest.scene?.id !== "vitrine"
-        || placardManifest.scene?.version !== 2 || placardManifest.fps !== 24 || placardManifest.durationMs !== 2_000
-        || placardManifest.frameCount !== 48 || placardManifest.frames.length !== 48 || placardManifest.alpha !== true) {
+        || placardManifest.scene?.version !== 2 || placardManifest.width !== 96 || placardManifest.height !== 64
+        || placardManifest.fps !== 24 || placardManifest.durationMs !== 2_000 || placardManifest.frameCount !== 48
+        || placardManifest.frames.length !== 48 || placardManifest.alpha !== true || placardManifest.audio !== "none") {
         throw new Error("G11 visible-Placard transparent export manifest is wrong.")
     }
     await clickText(window, ".inspector-top button", "Look")
