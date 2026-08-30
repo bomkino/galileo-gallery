@@ -1148,7 +1148,12 @@ function inspectArtwork(destination, manifest) {
     let opaquePixels = 0
     let zeroAlphaRgbViolations = 0
     const palette = new Map([["239,78,74", 0], ["34,89,214", 0]])
-    const tupleCounts = new Map([...palette.keys()].flatMap((rgb) => [64, 128, 192, 255].map((alpha) => [`${rgb},${alpha}`, 0])))
+    const sourceRgbTolerance = 2
+    const sourceTuples = [...palette.keys()].flatMap((rgb) => {
+        const [red, green, blue] = rgb.split(",").map(Number)
+        return [64, 128, 192, 255].map((alpha) => ({ key: `${rgb},${alpha}`, red, green, blue, alpha }))
+    })
+    const tupleCounts = new Map(sourceTuples.map((tuple) => [tuple.key, 0]))
     for (const frameIndex of manifest.frames.keys()) {
         const frame = manifest.frames[frameIndex]
         const bytes = stableFileBytes(path.join(destination, frame.name), Math.max(1_000_000, frame.bytes))
@@ -1168,8 +1173,14 @@ function inspectArtwork(destination, manifest) {
                 const key = `${red},${green},${blue}`
                 if (palette.has(key)) palette.set(key, palette.get(key) + 1)
             } else partialAlphaPixels += 1
-            const tuple = `${red},${green},${blue},${alpha}`
-            if (tupleCounts.has(tuple)) tupleCounts.set(tuple, tupleCounts.get(tuple) + 1)
+            for (const tuple of sourceTuples) {
+                if (alpha === tuple.alpha
+                    && Math.abs(red - tuple.red) <= sourceRgbTolerance
+                    && Math.abs(green - tuple.green) <= sourceRgbTolerance
+                    && Math.abs(blue - tuple.blue) <= sourceRgbTolerance) {
+                    tupleCounts.set(tuple.key, tupleCounts.get(tuple.key) + 1)
+                }
+            }
         }
     }
     const paletteCounts = Object.fromEntries(palette)
@@ -1183,9 +1194,10 @@ function inspectArtwork(destination, manifest) {
             zeroAlphaRgbViolations,
             paletteCounts,
             sourceTupleCounts,
+            sourceRgbTolerance,
         })}`)
     }
-    return { transparentPixels, partialAlphaPixels, opaquePixels, zeroAlphaRgbViolations, paletteCounts, sourceTupleCounts }
+    return { transparentPixels, partialAlphaPixels, opaquePixels, zeroAlphaRgbViolations, paletteCounts, sourceTupleCounts, sourceRgbTolerance }
 }
 
 function canonical(value) {

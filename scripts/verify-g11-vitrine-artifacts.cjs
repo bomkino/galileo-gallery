@@ -464,6 +464,7 @@ for (const [index, receipt] of receipts.entries()) {
     const recomputedArtwork = inspectArtwork(frameRoot, manifest)
     assert.deepEqual(receipt.export.artwork, recomputedArtwork)
     assert.equal(recomputedArtwork.zeroAlphaRgbViolations, 0)
+    assert.equal(recomputedArtwork.sourceRgbTolerance, 2)
     assert.deepEqual(Object.keys(recomputedArtwork.sourceTupleCounts).sort(), [
         ...["239,78,74", "34,89,214"].flatMap((rgb) => [64, 128, 192, 255].map((alpha) => `${rgb},${alpha}`)),
     ].sort())
