@@ -603,10 +603,10 @@ async function vitrineInteractionEvidence(window) {
     await setRange(window, label, 6)
     const beforeDefaults = await rangeValueAndUndoDepth(window, label)
     assert.equal(beforeDefaults.depth, baseline.depth + 1)
-    await clickText(window, ".inspector-top button", "Expert")
+    await clickText(window, ".inspector-top button", "Motion")
     await until(window, "document.querySelector('.expert-presets')", "Vitrine Expert presets")
     await clickText(window, ".expert-presets button", "Restore Defaults")
-    await clickText(window, ".inspector-top button", "Design")
+    await clickText(window, ".inspector-top button", "Look")
     const restoredDefaults = await rangeValueAndUndoDepth(window, label)
     assert.deepEqual(restoredDefaults, baseline, "Restore Defaults must clear Vitrine undo and restore factory controls")
     await undoVitrineControl(window)
@@ -1590,7 +1590,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         throw new Error("G11 Design exposed noncausal or inaccessible Vitrine background controls.")
     }
     const backgroundKeyboard = await backgroundKeyboardEvidence(window)
-    await clickText(window, ".inspector-top button", "Expert")
+    await clickText(window, ".inspector-top button", "Motion")
     const expertTruth = {}
     for (const tab of ["frame", "story", "timing", "look"]) {
         await clickText(window, ".expert-tabs button", tab)
@@ -1616,7 +1616,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         return { disabled: card?.disabled ?? false, text: card?.textContent.replace(/\\s+/g, ' ').trim() ?? '', exportDisabled: document.querySelector('.export-button')?.disabled ?? false }
     })()`)
     if (blockedAlphaTruth.disabled || blockedAlphaTruth.exportDisabled || !blockedAlphaTruth.text.includes("Verified sequence")) throw new Error("G11 explicitly-authored Placard was incorrectly blocked from transparent export.")
-    await clickText(window, ".inspector-top button", "Design")
+    await clickText(window, ".inspector-top button", "Look")
     await chooseSegment(window, "Placard", "Clean")
     await scrub(window, 0.375)
     const cleanAlphaPreview = await readScene(window)
