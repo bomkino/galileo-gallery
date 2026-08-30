@@ -424,6 +424,7 @@ export function vitrineTimeline(config: ReelConfig, fps = 30, mediaCount = confi
 }
 
 export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames, terminal = false, cataloguePreview = false, reducedMotion, exportMode = false, inspectionItemId = null }: Props) {
+    const ref = React.useRef<HTMLDivElement>(null)
     const [systemReducedMotion, setSystemReducedMotion] = React.useState(() => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false)
     React.useEffect(() => {
         const query = window.matchMedia?.("(prefers-reduced-motion: reduce)")
@@ -452,6 +453,43 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
     const finaleId = config.settings.finaleEnabled ? eligibleItems.at(-1)?.id : spotlightId
     const logicalWidth = Math.max(1, config.settings.canvasWidth)
     const logicalHeight = Math.max(1, config.settings.canvasHeight)
+    React.useLayoutEffect(() => {
+        const element = ref.current
+        if (!element) return
+
+        let lastWidth = Number.NaN
+        let lastHeight = Number.NaN
+        const sync = () => {
+            const style = getComputedStyle(element)
+            const width = Number.parseFloat(style.width)
+            const height = Number.parseFloat(style.height)
+            if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) {
+                delete element.dataset.vitrineShortEdge
+                return
+            }
+            if (width === lastWidth && height === lastHeight && element.dataset.vitrineShortEdge) return
+            lastWidth = width
+            lastHeight = height
+            const shortEdge = Math.min(width, height)
+            const metrics = [
+                ["--vitrine-short-edge", shortEdge],
+                ["--vitrine-placard-gap", shortEdge * 0.0234375],
+                ["--vitrine-placard-padding-x", shortEdge * 0.03125],
+                ["--vitrine-placard-border", shortEdge * 0.00390625],
+                ["--vitrine-placard-shadow-y", shortEdge * 0.015625],
+                ["--vitrine-placard-shadow-blur", shortEdge * 0.046875],
+                ["--vitrine-placard-label-size", shortEdge * 0.0390625],
+                ["--vitrine-placard-caption-size", shortEdge * 0.0546875],
+            ] as const
+            for (const [name, value] of metrics) element.style.setProperty(name, `${value}px`)
+            element.dataset.vitrineShortEdge = String(shortEdge)
+        }
+
+        sync()
+        const observer = new ResizeObserver(sync)
+        observer.observe(element)
+        return () => observer.disconnect()
+    }, [logicalWidth, logicalHeight])
     const { designWidth, designHeight, projectScale } = vitrineDesignSpace(logicalWidth, logicalHeight)
     const effectiveReducedMotion = reducedMotion ?? (!exportMode && systemReducedMotion)
     const evaluated = evaluateVitrine({
@@ -490,7 +528,7 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
         }] : []),
         ...evaluated.planes.map((plane) => ({ plane, guard: false })),
     ]
-    return <div className={`vitrine-stage ${transparent ? "is-transparent" : ""}`} data-product-scene="vitrine" data-scene-version="2" data-evaluator-hash={evaluated.stateHash} data-vitrine-phrase={evaluated.phrase} data-current-id={evaluated.currentId ?? ""} data-incoming-id={evaluated.incomingId ?? ""} data-semantic-id={semanticId ?? ""} data-vitrine-inspection={inspectedSource?.item.id ?? ""} data-transition-progress={evaluated.transitionProgress} data-logical-width={logicalWidth} data-logical-height={logicalHeight} style={{ background } as React.CSSProperties}>
+    return <div className={`vitrine-stage ${transparent ? "is-transparent" : ""}`} data-product-scene="vitrine" data-scene-version="2" data-evaluator-hash={evaluated.stateHash} data-vitrine-phrase={evaluated.phrase} data-current-id={evaluated.currentId ?? ""} data-incoming-id={evaluated.incomingId ?? ""} data-semantic-id={semanticId ?? ""} data-vitrine-inspection={inspectedSource?.item.id ?? ""} data-transition-progress={evaluated.transitionProgress} data-logical-width={logicalWidth} data-logical-height={logicalHeight} ref={ref} style={{ background } as React.CSSProperties}>
         <div className="vitrine-logical-stage" style={{ width: "100%", height: "100%", transform: "none" } as React.CSSProperties}>
             <div className="vitrine-field" aria-hidden="true" />
             {renderPlanes.map(({ plane, guard }) => {

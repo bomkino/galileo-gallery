@@ -304,6 +304,17 @@ async function settle(window) {
                 }))
             }
         }
+        const layoutDeadline = performance.now() + 2_000
+        while (true) {
+            const stage = document.querySelector('.vitrine-stage')
+            const style = stage ? getComputedStyle(stage) : null
+            const expected = style ? Math.min(parseFloat(style.width), parseFloat(style.height)) : Number.NaN
+            const applied = Number(stage?.dataset.vitrineShortEdge)
+            const cssValue = style ? parseFloat(style.getPropertyValue('--vitrine-short-edge')) : Number.NaN
+            if (Number.isFinite(expected) && expected > 0 && Math.abs(applied - expected) <= 0.001 && Math.abs(cssValue - expected) <= 0.001) break
+            if (performance.now() >= layoutDeadline) throw new Error('Vitrine authored metrics did not reach the rendered stage: ' + JSON.stringify({ expected, applied, cssValue }))
+            await new Promise((resolve) => requestAnimationFrame(resolve))
+        }
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     })()`)
 }
@@ -908,8 +919,26 @@ const sceneExpression = `(() => {
     const designViewportHeight = parseFloat(designStyle.height)
     if (![stageLayoutWidth, stageLayoutHeight, designViewportWidth, designViewportHeight].every((value) => Number.isFinite(value) && value > 0)) throw new Error('Vitrine rendered design overlay is empty.')
     if (Math.abs(designViewportWidth - stageLayoutWidth) > 0.001 || Math.abs(designViewportHeight - stageLayoutHeight) > 0.001 || designStyle.transform !== 'none') throw new Error('Vitrine rendered design overlay left the stage viewport.')
-    if (stageStyle.containerType !== 'size' || designStyle.containerType !== 'normal') throw new Error('Vitrine layout does not have one physical query container.')
+    if (stageStyle.containerType !== 'inline-size' || designStyle.containerType !== 'normal') throw new Error('Vitrine layout does not have one physical inline query container.')
     const minimumRenderedDimension = Math.min(designViewportWidth, designViewportHeight)
+    const renderedShortEdge = Number(stage.dataset.vitrineShortEdge)
+    const cssShortEdge = parseFloat(stageStyle.getPropertyValue('--vitrine-short-edge'))
+    if (!Number.isFinite(renderedShortEdge) || Math.abs(renderedShortEdge - minimumRenderedDimension) > 0.001
+        || !Number.isFinite(cssShortEdge) || Math.abs(cssShortEdge - minimumRenderedDimension) > 0.001) throw new Error('Vitrine authored metrics do not match the rendered stage short edge.')
+    const authoredMetrics = {
+        gap: parseFloat(stageStyle.getPropertyValue('--vitrine-placard-gap')),
+        paddingX: parseFloat(stageStyle.getPropertyValue('--vitrine-placard-padding-x')),
+        border: parseFloat(stageStyle.getPropertyValue('--vitrine-placard-border')),
+        shadowY: parseFloat(stageStyle.getPropertyValue('--vitrine-placard-shadow-y')),
+        shadowBlur: parseFloat(stageStyle.getPropertyValue('--vitrine-placard-shadow-blur')),
+        labelFont: parseFloat(stageStyle.getPropertyValue('--vitrine-placard-label-size')),
+        captionFont: parseFloat(stageStyle.getPropertyValue('--vitrine-placard-caption-size')),
+    }
+    const authoredMetricCoefficients = { gap: 0.0234375, paddingX: 0.03125, border: 0.00390625, shadowY: 0.015625, shadowBlur: 0.046875, labelFont: 0.0390625, captionFont: 0.0546875 }
+    for (const [name, coefficient] of Object.entries(authoredMetricCoefficients)) {
+        const value = authoredMetrics[name]
+        if (!Number.isFinite(value) || Math.abs(value - minimumRenderedDimension * coefficient) > 0.001) throw new Error('Vitrine authored metric coefficient drifted: ' + JSON.stringify({ name, value, coefficient, minimumRenderedDimension }))
+    }
     const normalizedBox = (element) => {
         const box = element.getBoundingClientRect()
         return {
@@ -923,6 +952,27 @@ const sceneExpression = `(() => {
     const placardLabel = placard?.querySelector('span')
     const placardCaption = placard?.querySelector('strong')
     const placardStyle = placard ? getComputedStyle(placard) : null
+    if (placard && placardLabel && placardCaption && placardStyle) {
+        const computedPlacardMetrics = {
+            gap: parseFloat(placardStyle.columnGap),
+            paddingTop: parseFloat(placardStyle.paddingTop),
+            paddingRight: parseFloat(placardStyle.paddingRight),
+            paddingBottom: parseFloat(placardStyle.paddingBottom),
+            paddingLeft: parseFloat(placardStyle.paddingLeft),
+            border: parseFloat(placardStyle.borderTopWidth),
+            labelFont: parseFloat(getComputedStyle(placardLabel).fontSize),
+            captionFont: parseFloat(getComputedStyle(placardCaption).fontSize),
+        }
+        const expectedPlacardMetrics = {
+            gap: authoredMetrics.gap, paddingTop: authoredMetrics.gap, paddingRight: authoredMetrics.paddingX,
+            paddingBottom: authoredMetrics.gap, paddingLeft: authoredMetrics.paddingX, border: authoredMetrics.border,
+            labelFont: authoredMetrics.labelFont, captionFont: authoredMetrics.captionFont,
+        }
+        for (const [name, expected] of Object.entries(expectedPlacardMetrics)) {
+            const value = computedPlacardMetrics[name]
+            if (!Number.isFinite(value) || Math.abs(value - expected) > 0.001) throw new Error('Vitrine Placard did not consume its authored metric: ' + JSON.stringify({ name, value, expected }))
+        }
+    }
     return {
         scene: stage.dataset.productScene,
         version: Number(stage.dataset.sceneVersion),
@@ -952,6 +1002,8 @@ const sceneExpression = `(() => {
             designHeight,
             designViewportWidth,
             designViewportHeight,
+            renderedShortEdge,
+            authoredMetrics,
             projectScale,
             viewportPerspective: parseFloat(logicalStyle.perspective),
             perspective: parseFloat(logicalStyle.perspective) * logicalWidth / stageLayoutWidth,

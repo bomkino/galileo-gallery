@@ -379,7 +379,7 @@ function nextPaint() {
     return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
 }
 
-async function waitForExportFrameImages() {
+async function waitForExportFrameImages(expectVitrineMetrics = false) {
     const images = Array.from(document.querySelectorAll<HTMLImageElement>("img.orl-export-frame, img.galileo-media, .qc-export-stage img, img.product-export-media"))
     await Promise.all(images.map(async (image) => {
         try {
@@ -397,8 +397,22 @@ async function waitForExportFrameImages() {
         await nextPaint()
         if (document.querySelector('[data-media-failed="true"]')) throw new Error("Export source media could not be decoded.")
         const videos = Array.from(document.querySelectorAll<HTMLVideoElement>('video.product-export-media'))
-        if (videos.every((video) => video.dataset.storyReady === "true" && !video.seeking)) return
+        const stage = document.querySelector<HTMLElement>('.vitrine-stage[data-product-scene="vitrine"]')
+        let vitrineMetricsReady = !expectVitrineMetrics
+        if (expectVitrineMetrics && stage) {
+            const style = getComputedStyle(stage)
+            const width = Number.parseFloat(style.width)
+            const height = Number.parseFloat(style.height)
+            const expected = Math.min(width, height)
+            const committed = Number(stage.dataset.vitrineShortEdge)
+            const cssValue = Number.parseFloat(style.getPropertyValue("--vitrine-short-edge"))
+            vitrineMetricsReady = Number.isFinite(expected) && expected > 0
+                && Math.abs(committed - expected) <= 0.001
+                && Math.abs(cssValue - expected) <= 0.001
+        }
+        if (vitrineMetricsReady && videos.every((video) => video.dataset.storyReady === "true" && !video.seeking)) return
     }
+    if (expectVitrineMetrics) throw new Error("Export Vitrine layout metrics or source video did not reach the requested frame.")
     throw new Error("Export source video did not reach the requested story frame.")
 }
 
@@ -447,7 +461,7 @@ function ExportView() {
                 setFrameOverrides(payload ? exportFrameOverrides(payload, frame.timeMs) : {})
                 await nextPaint()
                 await nextPaint()
-                await waitForExportFrameImages()
+                await waitForExportFrameImages(Boolean(payload && isAuthoredVitrine(payload.request.config)))
                 await nextPaint()
                 document.documentElement.dataset.exportFrameId = frame.frameId
                 document.documentElement.dataset.exportTimeMs = String(frame.timeMs)
@@ -466,7 +480,7 @@ function ExportView() {
         const prepare = async () => {
             await nextPaint()
             await nextPaint()
-            await waitForExportFrameImages()
+            await waitForExportFrameImages(Boolean(payload && isAuthoredVitrine(payload.request.config)))
             await nextPaint()
             if (!cancelled) reelAPI.exportReady(payload.exportId)
         }
