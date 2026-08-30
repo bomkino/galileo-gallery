@@ -424,23 +424,6 @@ export function vitrineTimeline(config: ReelConfig, fps = 30, mediaCount = confi
 }
 
 export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames, terminal = false, cataloguePreview = false, reducedMotion, exportMode = false, inspectionItemId = null }: Props) {
-    const ref = React.useRef<HTMLDivElement>(null)
-    const [size, setSize] = React.useState({ width: config.settings.canvasWidth, height: config.settings.canvasHeight })
-    React.useLayoutEffect(() => {
-        const element = ref.current
-        if (!element) return
-        const update = () => {
-            if (element.clientWidth > 0 && element.clientHeight > 0) {
-                setSize((current) => current.width === element.clientWidth && current.height === element.clientHeight
-                    ? current
-                    : { width: element.clientWidth, height: element.clientHeight })
-            }
-        }
-        update()
-        const observer = new ResizeObserver(update)
-        observer.observe(element)
-        return () => observer.disconnect()
-    }, [])
     const [systemReducedMotion, setSystemReducedMotion] = React.useState(() => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false)
     React.useEffect(() => {
         const query = window.matchMedia?.("(prefers-reduced-motion: reduce)")
@@ -507,8 +490,8 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
         }] : []),
         ...evaluated.planes.map((plane) => ({ plane, guard: false })),
     ]
-    return <div className={`vitrine-stage ${transparent ? "is-transparent" : ""}`} data-product-scene="vitrine" data-scene-version="2" data-evaluator-hash={evaluated.stateHash} data-vitrine-phrase={evaluated.phrase} data-current-id={evaluated.currentId ?? ""} data-incoming-id={evaluated.incomingId ?? ""} data-semantic-id={semanticId ?? ""} data-vitrine-inspection={inspectedSource?.item.id ?? ""} data-transition-progress={evaluated.transitionProgress} data-logical-width={logicalWidth} data-logical-height={logicalHeight} ref={ref} style={{ background } as React.CSSProperties}>
-        <div className="vitrine-logical-stage" style={{ width: "100%", height: "100%", transform: "none", "--vitrine-perspective": `${size.width * 1.46}px` } as React.CSSProperties}>
+    return <div className={`vitrine-stage ${transparent ? "is-transparent" : ""}`} data-product-scene="vitrine" data-scene-version="2" data-evaluator-hash={evaluated.stateHash} data-vitrine-phrase={evaluated.phrase} data-current-id={evaluated.currentId ?? ""} data-incoming-id={evaluated.incomingId ?? ""} data-semantic-id={semanticId ?? ""} data-vitrine-inspection={inspectedSource?.item.id ?? ""} data-transition-progress={evaluated.transitionProgress} data-logical-width={logicalWidth} data-logical-height={logicalHeight} style={{ background } as React.CSSProperties}>
+        <div className="vitrine-logical-stage" style={{ width: "100%", height: "100%", transform: "none" } as React.CSSProperties}>
             <div className="vitrine-field" aria-hidden="true" />
             {renderPlanes.map(({ plane, guard }) => {
                 const item = items[plane.sourceIndex]
