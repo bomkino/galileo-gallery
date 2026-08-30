@@ -335,8 +335,12 @@ for (const [index, receipt] of receipts.entries()) {
     assert(receipt.controls.decoderEvidence.activePlanes <= 2)
     assert(receipt.controls.decoderEvidence.activeVideos <= 2)
     assert.equal(receipt.controls.decoderEvidence.readyVideos, receipt.controls.decoderEvidence.activeVideos)
-    assert.equal(receipt.controls.decoderEvidence.guardVideos, 1)
+    assert.equal(receipt.controls.decoderEvidence.guardVideos, receipt.mode === "save" ? 1 : 0)
     assert.equal(receipt.controls.decoderEvidence.libraryVideos, 0)
+    if (receipt.mode === "reopen") {
+        assert.equal(receipt.controls.decoderEvidence.reducedMotion, true)
+        assert.equal(receipt.controls.decoderEvidence.phrase, "reduced-motion-settled")
+    }
     for (const scale of [75, 100, 200]) {
         const sample = receipt.preview.scales[scale]
         assert.equal(sample.interfaceScale, scale)

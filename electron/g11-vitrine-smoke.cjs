@@ -1603,8 +1603,15 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
         readyVideos: document.querySelectorAll('.vitrine-stage video[data-story-ready="true"]').length,
         guardVideos: document.querySelectorAll('.vitrine-guard video[data-story-ready="true"]').length,
         libraryVideos: document.querySelectorAll('.media-list video').length,
+        phrase: document.querySelector('.vitrine-stage')?.dataset.vitrinePhrase ?? null,
+        reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
     })`)
-    if (decoderEvidence.activePlanes > 2 || decoderEvidence.activeVideos > 2 || decoderEvidence.readyVideos !== decoderEvidence.activeVideos || decoderEvidence.guardVideos !== 1 || decoderEvidence.libraryVideos !== 0) throw new Error(`G11 video guard or two-decoder budget is wrong: ${JSON.stringify(decoderEvidence)}`)
+    const expectedGuardVideos = mode === "save" ? 1 : 0
+    if (decoderEvidence.activePlanes > 2 || decoderEvidence.activeVideos > 2 || decoderEvidence.readyVideos !== decoderEvidence.activeVideos
+        || decoderEvidence.guardVideos !== expectedGuardVideos || decoderEvidence.libraryVideos !== 0
+        || (mode === "reopen" && (!decoderEvidence.reducedMotion || decoderEvidence.phrase !== "reduced-motion-settled"))) {
+        throw new Error(`G11 video guard or two-decoder budget is wrong: ${JSON.stringify({ expectedGuardVideos, decoderEvidence })}`)
+    }
     const continuousVideoHandoff = mode === "save" ? await continuousVideoHandoffEvidence(window) : null
     const sourceVideoSeekBurst = mode === "save" ? await sourceVideoSeekBurstEvidence(window) : null
     const libraryKeyboard = await libraryKeyboardEvidence(window, mode === "save")
