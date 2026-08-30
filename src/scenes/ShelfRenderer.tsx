@@ -272,7 +272,7 @@ function ShelfVideo({ source, sourceKey, poster, timeMs, loop, fps, style, onFai
     }, [cancelPending, onPresented, source, sourceKey])
     React.useLayoutEffect(sync, [sync])
     return <>
-        {!hasPresented && poster ? <img className="shelf-media shelf-video-poster" src={poster} alt="" draggable={false} style={style} data-poster-owner={sourceKey} onError={() => onPosterFailure(sourceKey)} /> : null}
+        {!hasPresented && poster ? <img className="shelf-media shelf-video-poster" crossOrigin="anonymous" src={poster} alt="" draggable={false} style={style} data-poster-owner={sourceKey} onError={() => onPosterFailure(sourceKey)} /> : null}
         <canvas
             ref={surfaceRef}
             className="shelf-media shelf-video-surface"
@@ -298,7 +298,7 @@ function ShelfVideo({ source, sourceKey, poster, timeMs, loop, fps, style, onFai
     </>
 }
 
-function ShelfMedia({ item, source, sourceKey, poster, timeMs, loop, fps, fit, allowLiveVideo, frame, sourceRequired, onPresented, onPosterFailure }: {
+export function ShelfMedia({ item, source, sourceKey, poster, timeMs, loop, fps, fit, allowLiveVideo, frame, sourceRequired, onPresented, onPosterFailure }: {
     item: MediaItem
     source: string | null
     sourceKey: string
@@ -319,11 +319,11 @@ function ShelfMedia({ item, source, sourceKey, poster, timeMs, loop, fps, fit, a
     const fail = React.useCallback(() => setFailed(true), [])
     const mediaFailed = shelfMediaFailureState(source, failed, sourceRequired)
     if (failed || !source) return <div className="shelf-placeholder" data-media-failed={mediaFailed ? "true" : "false"} data-media-required={sourceRequired ? "true" : "false"}><span>{item.type === "video" ? "VIDEO" : "FRAME"}</span></div>
-    if (frame) return <img className="shelf-media" src={source} alt="" draggable={false} style={style} onError={fail} />
-    if (item.type === "video" && !allowLiveVideo && poster) return <img className="shelf-media shelf-video-poster" src={poster} alt="" draggable={false} style={style} data-poster-owner={sourceKey} onError={() => onPosterFailure(sourceKey)} />
+    if (frame) return <img className="shelf-media" crossOrigin="anonymous" src={source} alt="" draggable={false} style={style} onError={fail} />
+    if (item.type === "video" && !allowLiveVideo && poster) return <img className="shelf-media shelf-video-poster" crossOrigin="anonymous" src={poster} alt="" draggable={false} style={style} data-poster-owner={sourceKey} onError={() => onPosterFailure(sourceKey)} />
     if (item.type === "video" && !allowLiveVideo) return <div className="shelf-placeholder is-video-poster-pending" data-media-failed="false"><span>VIDEO</span></div>
     if (item.type === "video") return <ShelfVideo key={sourceKey} source={source} sourceKey={sourceKey} poster={poster} timeMs={timeMs} loop={loop} fps={fps} style={style} onFailure={fail} onPresented={onPresented} onPosterFailure={onPosterFailure} />
-    return <img className="shelf-media" src={source} alt="" draggable={false} style={style} onError={fail} />
+    return <img className="shelf-media" crossOrigin="anonymous" src={source} alt="" draggable={false} style={style} onError={fail} />
 }
 
 export default function ShelfRenderer({ config, timeMs, fps = 30, exportFrames, terminal = false, cataloguePreview = false, reducedMotion, exportMode = false }: Props) {

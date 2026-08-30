@@ -280,7 +280,7 @@ jobs:
   renderer-g11:
     if: github.ref_name == 'main' || startsWith(github.ref_name, 'codex/g11-') || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v6
@@ -338,6 +338,26 @@ jobs:
           REEL_SHELF_ARTIFACTS="$root" \
           REEL_SHELF_EXECUTABLE="$executable" \
           xvfb-run -a node scripts/run-shelf-renderer.cjs
+      - name: Run packaged Light Table save, reopen, media, and reduced-motion journeys
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_sha="$GITHUB_SHA"
+          source_tree="$(git rev-parse HEAD^{tree})"
+          executable="$PWD/release/g03/linux-unpacked/galileo-gallery"
+          app_asar="$PWD/release/g03/linux-unpacked/resources/app.asar"
+          root="$PWD/artifacts/light-table"
+          test -x "$executable"
+          test -f "$app_asar"
+          mkdir -p "$root"
+          GALLERY_SOURCE_SHA="$source_sha" \
+          GALLERY_SOURCE_TREE="$source_tree" \
+          LIGHT_TABLE_EXPECTED_EXECUTABLE_SHA="$(sha256sum "$executable" | cut -d' ' -f1)" \
+          LIGHT_TABLE_EXPECTED_APP_ASAR_SHA="$(sha256sum "$app_asar" | cut -d' ' -f1)" \
+          REEL_LIGHT_TABLE_ARTIFACTS="$root" \
+          REEL_LIGHT_TABLE_EXECUTABLE="$executable" \
+          xvfb-run -a node scripts/run-light-table-renderer.cjs
       - name: Re-run packaged PNG cancellation after G11 runtime changes
         shell: bash
         run: |
@@ -368,6 +388,12 @@ jobs:
         with:
           name: g11-shelf-normal-reduced-and-failure-evidence
           path: artifacts/shelf/
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: g11-light-table-save-reopen-and-renderer-evidence
+          path: artifacts/light-table/
           if-no-files-found: warn
       - uses: actions/upload-artifact@v6
         if: success()

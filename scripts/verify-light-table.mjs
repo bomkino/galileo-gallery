@@ -66,7 +66,7 @@ import {
 } from "../src/scenes/lightTablePresentation.ts"
 
 const PINNED_CORE_AUTHORITY_SHA256 = "58cb28c0a6d44b3334ef0c25bc02f902dd1383270fe194f4145f2f34c1eccbf8"
-const PINNED_CORE_IMPLEMENTATION_SHA256 = "f10702b12e1f90ad4db655b33179ad04c3100bf08ec9d988e52f8d9b599bcfcc"
+const PINNED_CORE_IMPLEMENTATION_SHA256 = "2613193927f3f7c052ce149d0538d10e6009588d0de94790fa7d6c8f42b8b01e"
 const { lightTableFrameCount: hostLightTableFrameCount } = createRequire(import.meta.url)("../electron/frame-count-policy.cjs")
 const VECTOR_IDS = [
     "seam-ordinary-six",
@@ -269,16 +269,16 @@ cover("seam-ordinary-six", () => {
     assert.equal(start.apply, "ok")
     assert.equal(end.apply, "ok")
     const geometry = (result) => result.frames.map(({ x, y, rotation, scale, focusWeight, underlight }) => ({ x, y, rotation, scale, focusWeight, underlight }))
-    assert.equal(hash(geometry(start)), "3989fb494fa06f1d851b1eb8c5df9f24dc2d87bbf84f585086e5aa2289378c24")
+    assert.equal(hash(geometry(start)), "93194010b6e0051e2603d6502710b26f515c3573290cc2d67b979eacf3c7fbb8")
     assert.deepEqual(geometry(end), geometry(start))
     assert.deepEqual([end.normalizedTime, end.phase, end.phaseSeam], [1, "seam", true])
 })
 
 for (const [vectorId, fixtureId, layout, compiledHash, frameHash] of [
     ["count-one", "one", "single-inspection", "0b38cd32f988584f538262ce74c981a3284f70dc16bd2e977555dc31ea16ad53", "4d2c73e09c3b57145ec67ef73da9a3de7cc86284f740cd984d85d029d6dbed86"],
-    ["count-two", "two", "bilateral", "423210431933f960d83a2479ce82bbde6597e76274bc120379f8efe99bad9993", "90956c6ab59d254a3847b1de1bb5304a465b500f40f01956bcb31c2207f7f806"],
-    ["count-five", "five", "open-bay", "91b897a4d486cf71f093f3b3756025e3dc014683318b831a79eb0c853769619f", "7ef05d11b3b43feb9a654261d976fd9fecd975ccb120882256b957054283f88f"],
-    ["count-six", "ordinary-six", "ordinary", "151c2b30c1546d5507d9bf90b5eaa295dde281dbc0048ff24d97fc04454be80c", "61bd0853cf89eb6e3ce8c8cb0f26af37b1df57bd6ceab38502cd3af349394a79"],
+    ["count-two", "two", "bilateral", "423210431933f960d83a2479ce82bbde6597e76274bc120379f8efe99bad9993", "13a030ca7d199ff42f61dc558b93b51406357ab718676fbfbf522cc125559106"],
+    ["count-five", "five", "open-bay", "91b897a4d486cf71f093f3b3756025e3dc014683318b831a79eb0c853769619f", "fc4f0625f01b3829ed8e4a5b3000e68095ccc518fe58621b0e534cbc32f1a64d"],
+    ["count-six", "ordinary-six", "ordinary", "151c2b30c1546d5507d9bf90b5eaa295dde281dbc0048ff24d97fc04454be80c", "a8c37635573fe169f94e954b5d0216f111225639ef0686ccaa524d58670543ce"],
 ]) cover(vectorId, () => {
     const candidate = authority(fixtureId)
     const frame = candidate.evaluate(0.5)
@@ -286,13 +286,13 @@ for (const [vectorId, fixtureId, layout, compiledHash, frameHash] of [
     assert.equal(hash(frame), frameHash)
     assert.equal(frame.layout, layout)
     assert.equal(new Set(frame.frames.map((item) => item.id)).size, candidate.sources.length)
-    if (fixtureId === "ordinary-six") assert.equal(hash(frame.frames), "5919d54d86ac53e906f9e1f5f712a3bb0241bfe2d11855a5e3505742ab41ad70", "ordinary rendered geometry must remain unchanged")
+    if (fixtureId === "ordinary-six") assert.equal(hash(frame.frames), "00518963007bd86acd9ae037c186c3639827bb778f16452e8e35afd2dfc4e1e8", "ordinary constrained geometry must remain pinned")
 })
 
 cover("bounded-many", () => {
     const exact = authority("many-24")
     assert.equal(hash(exact.compiled), "5abf811413c0352d8f889a3bfab0a2418e3003541c7deec9a7f43c4b3763a16a")
-    assert.equal(hash(exact.evaluate(0.5)), "7add2cba509e0ae267fe6b3b7aede1a31e948f274b1f5e2e8f7479cfaa140911")
+    assert.equal(hash(exact.evaluate(0.5)), "6b179f336b227ad91bfa1d5127a848fd04d75aa6ec7255b17eb4dfa3f36f0977")
     for (const fixtureId of ["many-12", "many-24"]) {
         for (const ratio of [16 / 9, 9 / 16, 1, 4 / 5]) {
             const candidate = authority(fixtureId, { overlap: 0.22 })
@@ -401,7 +401,7 @@ cover("zero", () => {
 cover("reduced-motion", () => {
     const ordinary = authority()
     const exact = ordinary.evaluate(0.5, { reducedMotion: true })
-    assert.equal(hash(exact), "5dea8846ceacd955be2de53337ff319500e5670d2e174f424a518403b56a580d")
+    assert.equal(hash(exact), "dc7c8de8523b155ac36cd93f1896c63830470a94dc982391d647769419b92843")
     const first = ordinary.evaluate(0.25, { reducedMotion: true })
     const second = ordinary.evaluate(0.75, { reducedMotion: true })
     assert.deepEqual(first.frames.map(({ x, y, rotation }) => [x, y, rotation]), second.frames.map(({ x, y, rotation }) => [x, y, rotation]))
@@ -411,7 +411,7 @@ cover("reduced-motion", () => {
 cover("failed-source", () => {
     const candidate = authority("failed-six")
     const frame = candidate.evaluate(0.5)
-    assert.equal(hash(frame), "e34adc4729f09b1edc3ea546b07b36425b1ed061d99241398fc30acb76e8bff5")
+    assert.equal(hash(frame), "7139b5edac91718a26cce38ffd8139657d6b1f2dc8c7e095bd1b5cb37a33f5c3")
     assert.equal(frame.frames[2].failed, true)
     assert.equal(frame.frames[2].id, candidate.sources[2].id)
 })
@@ -419,7 +419,7 @@ cover("failed-source", () => {
 cover("source-video", () => {
     const candidate = authority("video-six")
     const frame = candidate.evaluate(0.375)
-    assert.equal(hash(frame), "85548227111c3f562aeb7aac7d0e1ec5847f38db8f54ac1126c24d520ab3b043")
+    assert.equal(hash(frame), "13da9b23ff51ea23b4c0d914b0fe13764d5e8a91c68848a0d49a6a86c6032d81")
     assert.equal(frame.frames[1].kind, "video")
     assert.equal(lightTableSourceTimeSeconds(2_500, 2, true), 0.5)
     assert.equal(lightTableSourceTimeSeconds(2_500, 2, false), 2)
@@ -508,7 +508,8 @@ cover("reverse-parity", () => {
 cover("control-spread", () => {
     const low = authority("ordinary-six", { tableSpread: 0.52 }).evaluate(0.5)
     const high = authority("ordinary-six", { tableSpread: 0.92 }).evaluate(0.5)
-    assert(Math.abs(low.frames[2].x - high.frames[2].x) > 0.05)
+    const maximumCentreDelta = Math.max(...low.frames.map((frame, index) => Math.hypot(frame.x - high.frames[index].x, frame.y - high.frames[index].y)))
+    assert(maximumCentreDelta > 0.05)
     assert.deepEqual(low.frames.map(({ width, ratio }) => ({ width, ratio })), high.frames.map(({ width, ratio }) => ({ width, ratio })))
 })
 
@@ -519,6 +520,74 @@ cover("control-overlap", () => {
     assert(high.layoutMetrics.maxOcclusionFraction > low.layoutMetrics.maxOcclusionFraction)
     assert.deepEqual(low.frames.map(({ width, ratio }) => ({ width, ratio })), high.frames.map(({ width, ratio }) => ({ width, ratio })))
 })
+
+const overlapSweepTimes = [0, 0.0625, 0.1, 0.1875, 0.25, 0.375, 0.5, 0.625, 0.75, 0.78, 0.85, 0.92, 0.96875, 1]
+const overlapSweepRatios = {
+    minimum: [LIGHT_TABLE_CORE_MIN_SOURCE_RATIO],
+    maximum: [LIGHT_TABLE_CORE_MAX_SOURCE_RATIO],
+    alternating: [LIGHT_TABLE_CORE_MIN_SOURCE_RATIO, LIGHT_TABLE_CORE_MAX_SOURCE_RATIO],
+    reverse: [LIGHT_TABLE_CORE_MAX_SOURCE_RATIO, LIGHT_TABLE_CORE_MIN_SOURCE_RATIO],
+    representative: [16 / 9, 4 / 3, 1, 3 / 4, 9 / 16, 4 / 5],
+}
+const overlapSweepSources = (count, pattern) => Array.from({ length: count }, (_, index) => ({
+    id: `overlap-source-${index + 1}`,
+    ratio: overlapSweepRatios[pattern][index % overlapSweepRatios[pattern].length],
+}))
+const assertOverlapContract = ({ count, pattern, canvasRatio, tableSpread, overlap, nudgeRestraint, reducedMotion, manualFocus, focusBehaviour, time }) => {
+    const sources = overlapSweepSources(count, pattern)
+    const compiled = compileLightTableCoreTimeline({ mode: "automatic" }, count, { tableSpread, overlap, nudgeRestraint, focusBehaviour })
+    const options = { canvasRatio, reducedMotion, ...(manualFocus ? { manualFocusIndex: count - 1 } : {}) }
+    const frame = evaluateLightTableCore(compiled, time, sources, options)
+    assert.equal(frame.apply, "ok")
+    assert.deepEqual(frame.frames.map((item) => item.id), sources.map((source) => source.id))
+    assert.deepEqual(frame.frames.map((item) => item.ratio), sources.map((source) => source.ratio))
+    assert(allFinite(frame))
+    const actual = independentMetrics(frame.frames, canvasRatio)
+    assert.equal(actual.outOfBounds, 0, `Light Table escaped at count=${count}, canvas=${canvasRatio}, t=${time}`)
+    assert.equal(frame.layoutMetrics.outOfBoundsCount, actual.outOfBounds)
+    assert.equal(frame.layoutMetrics.intersectionCount, actual.intersections)
+    assert.equal(frame.layoutMetrics.maxOcclusionFraction, actual.maximum)
+    assert(actual.maximum <= overlap, `Light Table occlusion ${actual.maximum} exceeded ${overlap} at count=${count}, canvas=${canvasRatio}, t=${time}`)
+    assert.deepEqual(evaluateLightTableCore(compiled, time, sources, options), frame, "Light Table collision placement must be deterministic")
+}
+
+for (let count = 1; count <= 24; count += 1) {
+    for (const scenario of [
+        { pattern: "minimum", canvasRatio: LIGHT_TABLE_CORE_MIN_CANVAS_RATIO, tableSpread: 0.52, overlap: 0, nudgeRestraint: 0.6, reducedMotion: false, manualFocus: true, focusBehaviour: "route" },
+        { pattern: "maximum", canvasRatio: LIGHT_TABLE_CORE_MIN_CANVAS_RATIO, tableSpread: 0.92, overlap: 0.22, nudgeRestraint: 0, reducedMotion: true, manualFocus: false, focusBehaviour: "none" },
+        { pattern: "maximum", canvasRatio: LIGHT_TABLE_CORE_MAX_CANVAS_RATIO, tableSpread: 0.52, overlap: 0, nudgeRestraint: 0.6, reducedMotion: false, manualFocus: true, focusBehaviour: "route" },
+        { pattern: "minimum", canvasRatio: LIGHT_TABLE_CORE_MAX_CANVAS_RATIO, tableSpread: 0.92, overlap: 0.22, nudgeRestraint: 0.28, reducedMotion: true, manualFocus: false, focusBehaviour: "loupe-only" },
+        { pattern: "alternating", canvasRatio: 1, tableSpread: 0.52, overlap: 0.1, nudgeRestraint: 0.6, reducedMotion: false, manualFocus: true, focusBehaviour: "route" },
+        { pattern: "reverse", canvasRatio: 16 / 9, tableSpread: 0.72, overlap: 0.1, nudgeRestraint: 0.28, reducedMotion: false, manualFocus: false, focusBehaviour: "route" },
+        { pattern: "representative", canvasRatio: 9 / 16, tableSpread: 0.92, overlap: 0.22, nudgeRestraint: 0.6, reducedMotion: false, manualFocus: false, focusBehaviour: "loupe-only" },
+        { pattern: "representative", canvasRatio: 16 / 9, tableSpread: 0.52, overlap: 0, nudgeRestraint: 0, reducedMotion: true, manualFocus: true, focusBehaviour: "none" },
+    ]) {
+        for (const time of overlapSweepTimes) assertOverlapContract({ count, time, ...scenario })
+    }
+    const low = evaluateLightTableCore(compileLightTableCoreTimeline({ mode: "automatic" }, count, { overlap: 0, nudgeRestraint: 0.6 }), 0.375, overlapSweepSources(count, "representative"), { canvasRatio: 1 })
+    const high = evaluateLightTableCore(compileLightTableCoreTimeline({ mode: "automatic" }, count, { overlap: 0.22, nudgeRestraint: 0.6 }), 0.375, overlapSweepSources(count, "representative"), { canvasRatio: 1 })
+    assert.deepEqual(low.frames.map(({ width, ratio }) => ({ width, ratio })), high.frames.map(({ width, ratio }) => ({ width, ratio })), "overlap must remain a position-only control")
+}
+
+for (const count of [5, 6, 24]) {
+    for (const canvasRatio of [1, 16 / 9]) {
+        for (const pattern of ["alternating", "representative"]) {
+            for (const tableSpread of [0.52, 0.92]) {
+                for (const overlap of [0, 0.1, 0.22]) {
+                    for (const nudgeRestraint of [0, 0.6]) {
+                        for (const reducedMotion of [false, true]) {
+                            for (const manualFocus of [false, true]) {
+                                for (const time of [0, 0.375, 1]) {
+                                    assertOverlapContract({ count, pattern, canvasRatio, tableSpread, overlap, nudgeRestraint, reducedMotion, manualFocus, focusBehaviour: "route", time })
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 cover("opaque-capability", () => {
     const frame = authority().evaluate(0.5)

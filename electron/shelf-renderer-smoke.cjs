@@ -678,27 +678,31 @@ async function collectPosterJourney(window, colors, journey, onCheckpoint = () =
     }
 }
 
+function shelfAlphaPreviewProbeExpression() {
+    return `async () => {
+        const stage = document.querySelector('.shelf-stage')
+        const image = document.querySelector('.shelf-card[data-media-id="shelf-alpha"] img.shelf-media')
+        if (!stage || !image || !image.complete || image.naturalWidth < 1) return null
+        const canvas = document.createElement('canvas')
+        canvas.width = image.naturalWidth
+        canvas.height = image.naturalHeight
+        const context = canvas.getContext('2d', { alpha: true, willReadFrequently: true })
+        context.drawImage(image, 0, 0)
+        const data = context.getImageData(0, 0, canvas.width, canvas.height).data
+        const counts = { transparent: 0, partial: 0, opaque: 0 }
+        for (let offset = 3; offset < data.length; offset += 4) {
+            if (data[offset] === 0) counts.transparent += 1
+            else if (data[offset] === 255) counts.opaque += 1
+            else counts.partial += 1
+        }
+        return { counts, stageBackground: getComputedStyle(stage).backgroundColor, transparentClass: stage.classList.contains('is-transparent') }
+    }`
+}
+
 async function alphaPreviewEvidence(window, expected) {
     for (let step = 0; step <= 32; step += 1) {
         await scrub(window, step / 32)
-        const value = await window.webContents.executeJavaScript(`(() => {
-            const stage = document.querySelector('.shelf-stage')
-            const image = document.querySelector('.shelf-card[data-media-id="shelf-alpha"] img.shelf-media')
-            if (!stage || !image || !image.complete || image.naturalWidth < 1) return null
-            const canvas = document.createElement('canvas')
-            canvas.width = image.naturalWidth
-            canvas.height = image.naturalHeight
-            const context = canvas.getContext('2d', { alpha: true, willReadFrequently: true })
-            context.drawImage(image, 0, 0)
-            const data = context.getImageData(0, 0, canvas.width, canvas.height).data
-            const counts = { transparent: 0, partial: 0, opaque: 0 }
-            for (let offset = 3; offset < data.length; offset += 4) {
-                if (data[offset] === 0) counts.transparent += 1
-                else if (data[offset] === 255) counts.opaque += 1
-                else counts.partial += 1
-            }
-            return { counts, stageBackground: getComputedStyle(stage).backgroundColor, transparentClass: stage.classList.contains('is-transparent') }
-        })()`)
+        const value = await executeShelfRendererProbe(window.webContents, "preview.original.alpha", shelfAlphaPreviewProbeExpression())
         if (!value) continue
         assert.deepEqual(value.counts, expected)
         if (!value.transparentClass || !/^rgba\(0, 0, 0, 0\)$|^transparent$/.test(value.stageBackground)) throw new Error("Shelf transparent preview compositor state is wrong.")
@@ -1109,4 +1113,4 @@ async function runShelfRendererSmoke(window, evidenceRoot, mode = process.env.RE
     }
 }
 
-module.exports = { runShelfRendererSmoke, shelfMediaSamplesProbeExpression }
+module.exports = { runShelfRendererSmoke, shelfAlphaPreviewProbeExpression, shelfMediaSamplesProbeExpression }

@@ -9,7 +9,7 @@ const {
     transportDiagnostic,
     validShelfDiagnostic,
 } = require("../electron/shelf-smoke-diagnostics.cjs")
-const { shelfMediaSamplesProbeExpression } = require("../electron/shelf-renderer-smoke.cjs")
+const { shelfAlphaPreviewProbeExpression, shelfMediaSamplesProbeExpression } = require("../electron/shelf-renderer-smoke.cjs")
 
 async function run() {
     assert.deepEqual(shelfDiagnosticCheckpoint("poster.original.scrub-14", { journey: "original", step: 14, normalized: 14 / 64 }), {
@@ -50,6 +50,46 @@ async function run() {
         ok: true,
         value: { result: [], liveNodeCount: 0, sampleErrors: [], stage: null },
     })
+
+    const alphaImage = { complete: true, naturalWidth: 2, naturalHeight: 2 }
+    const alphaStage = { classList: { contains: (name) => name === "is-transparent" } }
+    const alphaDocument = (getImageData) => ({
+        querySelector: (selector) => selector === ".shelf-stage" ? alphaStage : alphaImage,
+        createElement: () => ({ getContext: () => ({ drawImage() {}, getImageData }) }),
+    })
+    const alphaProbe = JSON.parse(await vm.runInNewContext(rendererProbeSource("preview.original.alpha", shelfAlphaPreviewProbeExpression()), {
+        document: alphaDocument(() => ({ data: Uint8ClampedArray.from([
+            0, 0, 0, 0,
+            15, 20, 25, 127,
+            40, 50, 60, 255,
+            70, 80, 90, 255,
+        ]) })),
+        getComputedStyle: () => ({ backgroundColor: "rgba(0, 0, 0, 0)" }),
+        Uint8ClampedArray,
+    }))
+    assert.deepEqual(JSON.parse(JSON.stringify(alphaProbe)), {
+        ok: true,
+        value: {
+            counts: { transparent: 1, partial: 1, opaque: 2 },
+            stageBackground: "rgba(0, 0, 0, 0)",
+            transparentClass: true,
+        },
+    })
+
+    const canvasSecurityError = new Error("The canvas has been tainted by cross-origin data")
+    canvasSecurityError.name = "SecurityError"
+    const rejectedAlphaProbe = JSON.parse(await vm.runInNewContext(rendererProbeSource("preview.original.alpha", shelfAlphaPreviewProbeExpression()), {
+        document: alphaDocument(() => { throw canvasSecurityError }),
+        getComputedStyle: () => ({ backgroundColor: "rgba(0, 0, 0, 0)" }),
+    }))
+    assert.deepEqual({ ...rejectedAlphaProbe.error, fingerprint: "redacted" }, {
+        stage: "preview.original.alpha",
+        channel: "renderer",
+        name: "SecurityError",
+        category: "canvas-security",
+        fingerprint: "redacted",
+    })
+    assert.match(rejectedAlphaProbe.error.fingerprint, /^[a-f0-9]{8}$/)
 
     const transient = JSON.parse(await vm.runInNewContext(rendererProbeSource("poster.original.sample-14", `async () => {
         const name = 'InvalidStateError'

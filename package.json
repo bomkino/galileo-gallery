@@ -39,6 +39,7 @@
     "verify:g08-renderer": "npm run build && npm run prepare:electron && node scripts/run-g08-renderer.cjs",
     "verify:g11-renderer": "npm run package:linux:g03 && node scripts/run-g11-renderer.cjs",
     "verify:shelf-renderer": "npm run package:linux:g03 && node scripts/run-shelf-renderer.cjs",
+    "verify:light-table-renderer": "npm run package:linux:g03 && sudo chown root:root release/g03/linux-unpacked/chrome-sandbox && sudo chmod 4755 release/g03/linux-unpacked/chrome-sandbox && xvfb-run -a node scripts/run-light-table-renderer.cjs",
     "verify:linux-host-port": "node scripts/verify-linux-host-port.cjs",
     "verify:linux-host-controller": "node scripts/verify-linux-host-controller.cjs",
     "verify:linux-protocols": "node scripts/verify-linux-protocols.cjs",

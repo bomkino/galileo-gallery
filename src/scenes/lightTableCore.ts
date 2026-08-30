@@ -1,5 +1,5 @@
 export const LIGHT_TABLE_CORE_AUTHORITY_SHA256 = "58cb28c0a6d44b3334ef0c25bc02f902dd1383270fe194f4145f2f34c1eccbf8"
-export const LIGHT_TABLE_CORE_IMPLEMENTATION_SHA256 = "f10702b12e1f90ad4db655b33179ad04c3100bf08ec9d988e52f8d9b599bcfcc"
+export const LIGHT_TABLE_CORE_IMPLEMENTATION_SHA256 = "2613193927f3f7c052ce149d0538d10e6009588d0de94790fa7d6c8f42b8b01e"
 
 const TAU = Math.PI * 2
 export const LIGHT_TABLE_CORE_MAX_VISIBLE = 24
@@ -461,6 +461,138 @@ export function lightTableCoreRectangleMetrics(frames: LightTableCoreFrame[], ca
     return { maxOcclusionFraction, intersectionCount, outOfBoundsCount }
 }
 
+const LIGHT_TABLE_PACKING_GAP = 1e-6
+
+function lightTableCorePlacementDimensions(frame: LightTableCoreFrame, canvasRatio: number) {
+    const footprintWidth = frame.width * frame.scale
+    const footprintHeight = footprintWidth * canvasRatio / frame.ratio * frame.scale
+    const rendered = normalizedFrameAabbDimensions(frame.width, frame.ratio, canvasRatio, frame.rotation, frame.scale)
+    return {
+        width: Math.max(footprintWidth, rendered.width),
+        height: Math.max(footprintHeight, rendered.height),
+    }
+}
+
+function preferredLightTableColumnCount(count: number, canvasRatio: number) {
+    if (count === 1) return 1
+    if (count === 2) return 2
+    if (count === 5 || count === 6) return 3
+    return clamp(Math.ceil(Math.sqrt(count * canvasRatio)), 2, Math.min(7, count))
+}
+
+function packedLightTableFrames(
+    frames: LightTableCoreFrame[],
+    canvasRatio: number,
+    columns: number,
+    widthScale: number,
+    margin: number,
+    tableSpread: number,
+) {
+    const scaled = frames.map((frame) => ({ ...frame, width: frame.width * widthScale }))
+    const dimensions = scaled.map((frame) => lightTableCorePlacementDimensions(frame, canvasRatio))
+    const rows = Array.from({ length: Math.ceil(scaled.length / columns) }, (_, rowIndex) => {
+        const start = rowIndex * columns
+        const end = Math.min(scaled.length, start + columns)
+        const indices = Array.from({ length: end - start }, (_, offset) => start + offset)
+        const width = indices.reduce((sum, index) => sum + dimensions[index].width, 0) + LIGHT_TABLE_PACKING_GAP * Math.max(0, indices.length - 1)
+        const height = Math.max(...indices.map((index) => dimensions[index].height))
+        return { indices, width, height }
+    })
+    const available = 1 - margin * 2
+    const totalHeight = rows.reduce((sum, row) => sum + row.height, 0) + LIGHT_TABLE_PACKING_GAP * Math.max(0, rows.length - 1)
+    if (totalHeight > available || rows.some((row) => row.width > available)) return null
+
+    const spread = clamp((tableSpread - 0.52) / (0.92 - 0.52), 0, 1)
+    const positioned = scaled.map((frame) => ({ ...frame }))
+    const verticalSlack = rows.length > 1 ? (available - totalHeight) * spread : 0
+    const verticalGap = LIGHT_TABLE_PACKING_GAP + (rows.length > 1 ? verticalSlack / (rows.length - 1) : 0)
+    let top = (1 - totalHeight - verticalSlack) / 2
+    rows.forEach((row) => {
+        const y = top + row.height / 2
+        const horizontalSlack = row.indices.length > 1 ? (available - row.width) * spread : 0
+        const horizontalGap = LIGHT_TABLE_PACKING_GAP + (row.indices.length > 1 ? horizontalSlack / (row.indices.length - 1) : 0)
+        let left = (1 - row.width - horizontalSlack) / 2
+        row.indices.forEach((index) => {
+            positioned[index].x = left + dimensions[index].width / 2
+            positioned[index].y = y
+            left += dimensions[index].width + horizontalGap
+        })
+        top += row.height + verticalGap
+    })
+    return positioned
+}
+
+function safeLightTableGrid(frames: LightTableCoreFrame[], canvasRatio: number, margin: number, tableSpread: number) {
+    const preferred = preferredLightTableColumnCount(frames.length, canvasRatio)
+    const columnCounts = Array.from({ length: frames.length }, (_, index) => index + 1)
+        .sort((left, right) => Math.abs(left - preferred) - Math.abs(right - preferred) || left - right)
+    for (const columns of columnCounts) {
+        const candidate = packedLightTableFrames(frames, canvasRatio, columns, 1, margin, tableSpread)
+        if (candidate) return candidate
+    }
+
+    let best: LightTableCoreFrame[] | null = null
+    let bestScale = 0
+    for (const columns of columnCounts) {
+        let safeScale = 0
+        let unsafeScale = 1
+        for (let pass = 0; pass < 40; pass += 1) {
+            const scale = (safeScale + unsafeScale) / 2
+            if (packedLightTableFrames(frames, canvasRatio, columns, scale, margin, tableSpread)) safeScale = scale
+            else unsafeScale = scale
+        }
+        const candidate = packedLightTableFrames(frames, canvasRatio, columns, safeScale, margin, tableSpread)
+        if (candidate && safeScale > bestScale) {
+            best = candidate
+            bestScale = safeScale
+        }
+    }
+    if (!best) throw new Error("Light Table overlap solver could not produce a safe packing endpoint.")
+    return best
+}
+
+function constrainLightTableOcclusion(
+    frames: LightTableCoreFrame[],
+    canvasRatio: number,
+    maximumOcclusionFraction: number,
+    margin: number,
+    tableSpread: number,
+) {
+    const desiredMetrics = lightTableCoreRectangleMetrics(frames, canvasRatio)
+    if (desiredMetrics.outOfBoundsCount === 0 && desiredMetrics.maxOcclusionFraction <= maximumOcclusionFraction) return frames
+
+    const safe = safeLightTableGrid(frames, canvasRatio, margin, tableSpread)
+    const widthScale = safe[0].width / frames[0].width
+    const desired = widthScale === 1 ? frames : frames.map((frame) => ({ ...frame, width: frame.width * widthScale }))
+    const safeMetrics = lightTableCoreRectangleMetrics(safe, canvasRatio)
+    if (safeMetrics.outOfBoundsCount !== 0 || safeMetrics.maxOcclusionFraction > maximumOcclusionFraction) {
+        throw new Error("Light Table overlap solver produced an invalid packing endpoint.")
+    }
+
+    let safeBlend = 0
+    let unsafeBlend = 1
+    for (let pass = 0; pass < 32; pass += 1) {
+        const blend = (safeBlend + unsafeBlend) / 2
+        const candidate = safe.map((frame, index) => ({
+            ...frame,
+            x: mix(frame.x, desired[index].x, blend),
+            y: mix(frame.y, desired[index].y, blend),
+        }))
+        const metrics = lightTableCoreRectangleMetrics(candidate, canvasRatio)
+        if (metrics.outOfBoundsCount === 0 && metrics.maxOcclusionFraction <= maximumOcclusionFraction) safeBlend = blend
+        else unsafeBlend = blend
+    }
+    const constrained = safe.map((frame, index) => ({
+        ...frame,
+        x: mix(frame.x, desired[index].x, safeBlend),
+        y: mix(frame.y, desired[index].y, safeBlend),
+    }))
+    const constrainedMetrics = lightTableCoreRectangleMetrics(constrained, canvasRatio)
+    return constrainedMetrics.outOfBoundsCount === 0 && constrainedMetrics.maxOcclusionFraction <= maximumOcclusionFraction
+        ? constrained
+        : safe
+}
+
 export function evaluateLightTableCore(
     compiled: CompiledLightTableCoreTimeline,
     time: unknown,
@@ -483,7 +615,7 @@ export function evaluateLightTableCore(
     const many = sources.length > 6
     const overlapPull = controls.overlap * (many ? 0.16 : 0.72)
 
-    const frames = slots.map((slot, index): LightTableCoreFrame => {
+    const desiredFrames = slots.map((slot, index): LightTableCoreFrame => {
         const source = sources[index]
         const ratio = normalizedSourceRatio(source.ratio)
         const width = frameWidthForRatio(sources.length, ratio, canvasRatio)
@@ -525,6 +657,8 @@ export function evaluateLightTableCore(
             media: { opacity: 1, filter: "none", blend: "normal" },
         }
     })
+
+    const frames = constrainLightTableOcclusion(desiredFrames, canvasRatio, controls.overlap, 0.018, controls.tableSpread)
 
     return {
         apply: "ok",

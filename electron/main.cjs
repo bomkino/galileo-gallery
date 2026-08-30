@@ -97,7 +97,7 @@ function developmentRendererOrigin() {
 }
 
 function linuxHostMode() {
-    return process.platform === "linux" && (Boolean(process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT || process.env.REEL_SHELF_RENDERER_OUTPUT) || (app.isPackaged && packagedBuildIdentity().profile === "g03-linux-host-port"))
+    return process.platform === "linux" && (Boolean(process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT || process.env.REEL_SHELF_RENDERER_OUTPUT || process.env.REEL_LIGHT_TABLE_RENDERER_OUTPUT) || (app.isPackaged && packagedBuildIdentity().profile === "g03-linux-host-port"))
 }
 
 function packagedBuildIdentity() {
@@ -179,7 +179,7 @@ function rendererURL(exportMode = false) {
     const query = new URLSearchParams()
     if (exportMode) query.set("export", "1")
     if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT) query.set("tracer", "quiet-carousel")
-    if (process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT || process.env.REEL_SHELF_RENDERER_OUTPUT) query.set("host", "linux")
+    if (process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT || process.env.REEL_SHELF_RENDERER_OUTPUT || process.env.REEL_LIGHT_TABLE_RENDERER_OUTPUT) query.set("host", "linux")
     const suffix = query.size ? `?${query}` : ""
     const developmentOrigin = developmentRendererOrigin()
     if (developmentOrigin) {
@@ -1006,10 +1006,13 @@ function createMainWindow() {
     }
     installWindowSecurity(mainWindow, { developmentOrigin: developmentRendererOrigin(), onDecision: recordSecurityDecision })
     mainWindow.loadURL(rendererURL())
-    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT || process.env.REEL_SHELF_RENDERER_OUTPUT) {
+    if (process.env.REEL_G02_RENDERER_OUTPUT || process.env.REEL_G03_RENDERER_OUTPUT || process.env.REEL_G05_RENDERER_OUTPUT || process.env.REEL_G06_RENDERER_OUTPUT || process.env.REEL_G08_RENDERER_OUTPUT || process.env.REEL_G11_RENDERER_OUTPUT || process.env.REEL_SHELF_RENDERER_OUTPUT || process.env.REEL_LIGHT_TABLE_RENDERER_OUTPUT) {
         mainWindow.webContents.once("did-finish-load", async () => {
             try {
-                if (process.env.REEL_SHELF_RENDERER_OUTPUT) {
+                if (process.env.REEL_LIGHT_TABLE_RENDERER_OUTPUT) {
+                    const { runLightTableRendererSmoke } = require("./light-table-renderer-smoke.cjs")
+                    await runLightTableRendererSmoke(mainWindow, path.resolve(process.env.REEL_LIGHT_TABLE_RENDERER_OUTPUT), process.env.REEL_LIGHT_TABLE_RENDERER_MODE ?? "normal")
+                } else if (process.env.REEL_SHELF_RENDERER_OUTPUT) {
                     const { runShelfRendererSmoke } = require("./shelf-renderer-smoke.cjs")
                     await runShelfRendererSmoke(mainWindow, path.resolve(process.env.REEL_SHELF_RENDERER_OUTPUT), process.env.REEL_SHELF_RENDERER_MODE ?? "normal")
                 } else if (process.env.REEL_G11_RENDERER_OUTPUT) {

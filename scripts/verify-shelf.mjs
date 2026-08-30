@@ -1,6 +1,10 @@
 import assert from "node:assert/strict"
 import { createHash } from "node:crypto"
 import { readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+import React from "react"
+import { renderToStaticMarkup } from "react-dom/server"
+import { createServer } from "vite"
 import { DEFAULT_SETTINGS } from "../src/defaults.ts"
 import {
     compileShelfTimeline,
@@ -634,6 +638,44 @@ for (const cleanRule of [".shelf-card", ".shelf-artwork-plane", ".shelf-media"])
     const end = shelfCss.indexOf("}", start)
     const block = shelfCss.slice(start, end)
     assert(start >= 0 && /filter:\s*none/.test(block) && /mix-blend-mode:\s*normal/.test(block))
+}
+
+const vite = await createServer({
+    root: fileURLToPath(new URL("../", import.meta.url)),
+    appType: "custom",
+    logLevel: "silent",
+    server: { middlewareMode: true },
+})
+try {
+    const { ShelfMedia } = await vite.ssrLoadModule("/src/scenes/ShelfRenderer.tsx")
+    const renderMedia = (item, patch = {}) => renderToStaticMarkup(React.createElement(ShelfMedia, {
+        item,
+        source: item.url,
+        sourceKey: `${item.id}:source`,
+        poster: null,
+        timeMs: 0,
+        loop: true,
+        fps: 30,
+        fit: "contain",
+        allowLiveVideo: false,
+        frame: false,
+        sourceRequired: true,
+        onPresented() {},
+        onPosterFailure() {},
+        ...patch,
+    }))
+    const assertAnonymousImages = (markup, label) => {
+        const imageTags = [...markup.matchAll(/<img\b[^>]*>/g)].map((match) => match[0])
+        assert(imageTags.length > 0, `${label} must render an image`)
+        assert(imageTags.every((tag) => tag.includes('crossorigin="anonymous"')), `${label} must opt into CORS before compositor readback`)
+    }
+    const imageItem = runtimeItem(1, { type: "image", url: "reel-media://grant/image-source" })
+    const videoItem = runtimeItem(2, { type: "video", url: "reel-media://grant/video-source" })
+    assertAnonymousImages(renderMedia(imageItem), "Shelf source image")
+    assertAnonymousImages(renderMedia(imageItem, { frame: true, source: "blob:export-frame" }), "Shelf export frame")
+    assertAnonymousImages(renderMedia(videoItem, { poster: "blob:video-poster" }), "Shelf video poster")
+} finally {
+    await vite.close()
 }
 
 console.log("Verified source-ready: Shelf v2 replays all eight pinned evaluator vectors with natural-ratio geometry, exact loop/finite/reduced focus semantics, reverse parity, bounded nodes, causal controls, and source-faithful rendering contracts. DOM/Electron pixel and decoder proof remains an integration gate.")
