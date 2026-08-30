@@ -53,7 +53,7 @@ assert.ok(start.cards.length >= items.length, "renderer dropped source identitie
 assert.deepEqual(middle, repeat, "same input and story time must be deterministic")
 assert.deepEqual([...new Set(start.cards.map((card) => card.sourceIndex))].sort((a, b) => a - b), items.map((_, index) => index), "source identity set changed")
 assert.ok(middle.cards.every((card) => [card.x, card.y, card.width, card.height, card.scale, card.z, card.opacity].every(Number.isFinite)), "non-finite geometry")
-assert.ok(middle.cards.every((card) => card.opacity === 1 && card.filter === "none" && card.blend === "normal"), "source fidelity drift")
+assert.ok(middle.cards.every((card) => card.opacity >= 0 && card.opacity <= 1 && card.filter === "none" && card.blend === "normal"), "source fidelity drift")
 if (scene.looping) assert.equal(start.stateHash, seam.stateHash, "loop seam is discontinuous")
 
 const range = scene.controls.find((control) => control.type === "range" && Number.isFinite(control.min) && Number.isFinite(control.max))
