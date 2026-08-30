@@ -892,6 +892,7 @@ const sceneExpression = `(() => {
     const stageBox = stage.getBoundingClientRect()
     const logicalWidth = Number(stage.dataset.logicalWidth)
     const logicalHeight = Number(stage.dataset.logicalHeight)
+    if (Number(design.dataset.projectWidth) !== logicalWidth || Number(design.dataset.projectHeight) !== logicalHeight) throw new Error('Vitrine design overlay does not match the Project canvas.')
     const stageStyle = getComputedStyle(stage)
     const logicalStyle = getComputedStyle(logical)
     const designStyle = getComputedStyle(design)

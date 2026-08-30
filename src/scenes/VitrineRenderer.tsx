@@ -518,7 +518,8 @@ export default function VitrineRenderer({ config, timeMs, fps = 30, exportFrames
                 </figure>
             })}
         </div>
-        <div className="vitrine-design-overlay" data-design-width={designWidth} data-design-height={designHeight} style={{ width: "100%", height: "100%", transform: "none" }}>
+        {/* Project-canvas changes remount this stateless layer so container units recalculate before capture. */}
+        <div key={`${logicalWidth}:${logicalHeight}`} className="vitrine-design-overlay" data-design-width={designWidth} data-design-height={designHeight} data-project-width={logicalWidth} data-project-height={logicalHeight} style={{ width: "100%", height: "100%", transform: "none" }}>
             {evaluated.placard ? <div className="vitrine-placard" data-media-id={evaluated.placard.mediaId}><span>Vitrine</span><strong>{evaluated.placard.caption}</strong></div> : null}
         </div>
         <div className="vitrine-status" role="status" aria-live="polite" aria-atomic="true">{currentLabel ? `Showing ${currentLabel}, item ${semanticIndex + 1} of ${allSourceItems.length}` : "Vitrine is empty"}</div>
