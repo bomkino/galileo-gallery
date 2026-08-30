@@ -665,7 +665,7 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
             }
         })
     })()`)
-    if (!formatTruth[0]?.disabled || !formatTruth[0]?.text.includes("Quiet Carousel v1 or Vitrine v2 only") || !formatTruth[1]?.disabled || !formatTruth[1]?.text.includes("Quiet Carousel only")) {
+    if (!formatTruth[0]?.disabled || !formatTruth[0]?.text.includes("Quiet Carousel, Vitrine, or image-only Shelf") || !formatTruth[1]?.disabled || !formatTruth[1]?.text.includes("Quiet Carousel only")) {
         throw new Error("G08 did not preserve the honest Scene-specific export capability boundary.")
     }
     if (formatTruth.some((card) => card.opacity !== "1" || card.cursor !== "not-allowed" || card.titleContrast < 4.5 || card.detailContrast < 4.5)) {
