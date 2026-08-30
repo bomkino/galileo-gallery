@@ -21,6 +21,8 @@ const settings = {
   direction: "forward",
   axis: "horizontal",
   imageFit: "contain",
+  slideHeight: 44,
+  gap: 30,
   backgroundStyle: "transparent",
   ground: "#11110f",
   radius: 8,
