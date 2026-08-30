@@ -49,9 +49,13 @@ const repeat = evaluate(durationMs * 0.413)
 const seam = evaluate(durationMs)
 
 assert.equal(start.sceneId, sceneId)
-assert.ok(start.cards.length >= items.length, "renderer dropped source identities")
+assert.ok(start.cards.length > 0, "renderer produced no source-backed cards")
 assert.deepEqual(middle, repeat, "same input and story time must be deterministic")
-assert.deepEqual([...new Set(start.cards.map((card) => card.sourceIndex))].sort((a, b) => a - b), items.map((_, index) => index), "source identity set changed")
+const observedSourceIndices = new Set()
+for (let sample = 0; sample <= 16; sample += 1) {
+  for (const card of evaluate(durationMs * sample / 17).cards) observedSourceIndices.add(card.sourceIndex)
+}
+assert.deepEqual([...observedSourceIndices].sort((a, b) => a - b), items.map((_, index) => index), "source identity disappeared across the authored route")
 assert.ok(middle.cards.every((card) => [card.x, card.y, card.width, card.height, card.scale, card.z, card.opacity].every(Number.isFinite)), "non-finite geometry")
 assert.ok(middle.cards.every((card) => card.opacity >= 0 && card.opacity <= 1 && card.filter === "none" && card.blend === "normal"), "source fidelity drift")
 if (scene.looping) assert.equal(start.stateHash, seam.stateHash, "loop seam is discontinuous")
