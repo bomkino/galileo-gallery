@@ -4,7 +4,18 @@ Updated: 30 August 2026
 
 Repository start: `bomkino/galileo-gallery@2762043bb733aa28a6c63fe26564504b9f257564`
 
-Task branch: `codex/g11-vitrine-v2`
+Release-candidate branch: `codex/galileo-phase3-release-candidate`
+
+## Galileo Scene parity release candidate
+
+State: **29/29 independently authored Scenes integrated; batched human acceptance recorded; final exact-SHA release audit and native package matrix in progress**
+
+The repaired six-Atelier handoff has been integrated one-to-one rather than collapsed back into scene
+families. The catalogue exposes 29 distinct entries with 145 authored controls. Source provenance,
+original-versus-normalised decisions, evaluator/timing contracts, accessibility behavior, alpha/video
+treatment, and per-Scene receipts remain bound to the imported Atelier packets. Quiet Carousel remains
+an additional compatibility Scene. The hardened Vitrine v2 portable-Project and hostile-input boundary
+is unchanged.
 
 ## G01A — safe archive import boundary
 
@@ -195,14 +206,11 @@ Full evidence: `docs/programme/evidence/G11_EVIDENCE_RECEIPT.md`.
 
 ## Known unsafe or unproved surfaces
 
-- legacy non-G03 package paths still exist and are not release candidates;
+- the public macOS build is ad-hoc signed, not Developer ID signed or notarized;
 - decoded video/audio/proxy/export cache budgets and eviction beyond G03 media reads;
-- exact Garuda and Apple-Silicon target behaviour;
-- human interaction, visual, motion, and audio acceptance.
+- exact Garuda behavior;
+- broad human audio acceptance beyond the deterministic and renderer evidence already recorded.
 
-Current frontier: **three disjoint clean-room Scene lanes under one serial catalogue owner**. The repaired
-handoff is validated evidence input only: 29 candidates, 139 controls, and 43 pending human decisions.
-Quiet Carousel and Vitrine v2 are the only individually authored end-to-end engineering-verified Product
-Scenes. Shelf v2 and Light Table v2 are active in isolated task worktrees; Zoetrope v2 is dependency-ready
-for the third implementation slot. Registered IDs are not counted as completion. G04 remains deferred
-until an Apple-Silicon runner is available.
+Current frontier: **stable v1.0.1 publication and exact published-artifact smoke**. The catalogue promotion
+checkpoint is complete only when its immutable RC SHA passes Ubuntu, macOS, Windows, renderer, native
+package, and release audit gates. G04 remains deferred until an exact Garuda runner is available.

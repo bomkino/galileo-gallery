@@ -2,15 +2,15 @@
 
 Galileo Gallery is a free, local desktop motion studio for turning images, videos, GIFs, and deck slides into authored gallery films. Make a clean loop, a finite sequence, or a one-shot animation for an explainer, social post, website, or transparent video overlay.
 
-It began as the Opening Reel Framer component and grew into 17 motion scenes distilled from 29 original components. Every scene has its own defaults, spatial rules, timing, and physical character; the importer, timeline, projects, and deterministic export pipeline are shared.
+It began as the Opening Reel Framer component and grew into 29 distinct motion scenes distilled from 29 original components. Every scene has its own defaults, spatial rules, timing, and physical character; the importer, timeline, projects, and deterministic export pipeline are shared.
 
-Current version: **1.0.0**
+Current version: **1.0.1**
 
-> Development status: the published v1 release and its 29 registered presets predate the current hardened v2 rebuild. On the active `codex/` task branches, Quiet Carousel is the only independently authored and causally verified Scene so far; the remaining registered presets are catalogue inventory, not 28 completed Scene implementations. The current deterministic audio boundary is verified, while final mux/export, Interface Scale integration, platform candidates, and human Scene review remain in progress. See `docs/programme/IMPLEMENTATION_STATUS.md` for exact evidence.
+> Release status: v1.0.1 promotes the independently rebuilt 29-scene catalogue after source, renderer, cross-platform, and batched human-review gates. Quiet Carousel remains an additional compatibility Scene and Vitrine keeps its hardened v2 Project boundary. See `docs/programme/IMPLEMENTATION_STATUS.md` for the evidence boundary and remaining platform caveats.
 
 ## What it can make
 
-- 17 scene families and 29 original-informed styles
+- 29 distinct original-informed scenes
 - Images, silent videos, GIFs, and deck-slide media
 - Once, Loop × N, and seamless forever playback
 - Forward, reverse, horizontal, and vertical motion where the scene supports it
@@ -45,8 +45,8 @@ Only run that command after downloading Galileo Gallery from this repository's o
 Linux is distributed as an AppImage. Make it executable, then run it:
 
 ```bash
-chmod +x "Galileo Gallery-1.0.0-Linux-x86_64.AppImage"
-./"Galileo Gallery-1.0.0-Linux-x86_64.AppImage"
+chmod +x "Galileo Gallery-1.0.1-Linux-x86_64.AppImage"
+./"Galileo Gallery-1.0.1-Linux-x86_64.AppImage"
 ```
 
 ## Run from source
