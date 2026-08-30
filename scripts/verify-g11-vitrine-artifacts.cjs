@@ -235,6 +235,9 @@ for (const [index, receipt] of receipts.entries()) {
         assert.equal(receipt.preview.terminalVideo.planes[0].mediaTag, "VIDEO")
         assert(receipt.preview.terminalVideo.planes[0].storyPresentedTime >= 1.9 && receipt.preview.terminalVideo.planes[0].storyPresentedTime < 2)
         assert(receipt.controls.causal)
+        assert.deepEqual(receipt.controls.causal.restoredRhythm, { exchangeMs: 1_760, holdMs: 3_740 })
+        assert.deepEqual(receipt.controls.causal.compactExportRhythm, { exchangeMs: 320, holdMs: 680 })
+        assert.deepEqual(receipt.controls.causal.compactExportTimeline, { mode: "fixed-duration", fixedDurationMs: 2_000, activeOption: "Fixed", exactDurationMs: 2_000 })
         const interaction = receipt.controls.interaction
         assert.deepEqual({ value: interaction.baseline.value, dragged: interaction.dragged.value, dragUndone: interaction.dragUndone.value, shifted: interaction.shifted.value, shiftUndone: interaction.shiftUndone.value }, {
             value: 5, dragged: 7, dragUndone: 5, shifted: 7.5, shiftUndone: 5,
@@ -410,7 +413,8 @@ for (const [index, receipt] of receipts.entries()) {
         assert.notEqual(probe.phrase, "reduced-motion-settled")
     }
     assert.equal(receipt.export.probes[6].phrase, "readable-hold")
-    assert.equal(receipt.export.probes[15].phrase, "exchange")
+    assert.equal(receipt.export.probes[15].phrase, "readable-hold")
+    assert.equal(receipt.export.probes[18].phrase, "exchange")
     assert.equal(receipt.export.probes[24].planes[0].id, "vitrine-portrait")
 
     const screenshotNames = new Set()

@@ -1218,7 +1218,32 @@ async function causalControls(window) {
     await setRange(window, "Transition depth", 24)
     await chooseSegment(window, "Exchange direction", "Right")
     await chooseSegment(window, "Placard", "Visible")
-    return { baseline, presentationScale, objectTurn, transitionDepth, transitionDirection, placard }
+    const restoredRhythm = {
+        exchangeMs: (await rangeValueAndUndoDepth(window, "Loop exchange")).value,
+        holdMs: (await rangeValueAndUndoDepth(window, "Loop readable hold")).value,
+    }
+    assert.deepEqual(restoredRhythm, { exchangeMs: 1_760, holdMs: 3_740 }, "Restore Defaults must restore Vitrine's authored rhythm")
+    await setRange(window, "Loop exchange", 320)
+    await setRange(window, "Loop readable hold", 680)
+    const compactExportRhythm = {
+        exchangeMs: (await rangeValueAndUndoDepth(window, "Loop exchange")).value,
+        holdMs: (await rangeValueAndUndoDepth(window, "Loop readable hold")).value,
+    }
+    assert.deepEqual(compactExportRhythm, { exchangeMs: 320, holdMs: 680 }, "G11 compact export fixture rhythm did not restore")
+    await chooseNamedSegment(window, "Timeline mode", "Fixed")
+    await setRange(window, "Exact duration", 2_000)
+    const compactExportTimeline = await window.webContents.executeJavaScript(`(() => {
+        const project = JSON.parse(localStorage.getItem(${JSON.stringify(PROJECT_KEY)}))
+        const timeline = document.querySelector('.segment[aria-label="Timeline mode"]')
+        return {
+            mode: project.timelineMode,
+            fixedDurationMs: project.timelineFixedDurationMs,
+            activeOption: timeline?.querySelector('button[aria-pressed="true"]')?.textContent.trim() ?? null,
+            exactDurationMs: Number(document.querySelector('input[type="range"][aria-label="Exact duration"]')?.value),
+        }
+    })()`)
+    assert.deepEqual(compactExportTimeline, { mode: "fixed-duration", fixedDurationMs: 2_000, activeOption: "Fixed", exactDurationMs: 2_000 }, "G11 compact fixed-duration export intent did not persist")
+    return { baseline, presentationScale, objectTurn, transitionDepth, transitionDirection, placard, restoredRhythm, compactExportRhythm, compactExportTimeline }
 }
 
 async function installHydrationProbe(window) {
@@ -1634,7 +1659,8 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
     await until(window, "document.querySelector('.export-success strong')?.textContent.includes('PNG Frames verified')", "verified PNG Frames", 120_000)
     const exportProbes = await observer.finish()
     if (mode === "save" && !normalizedParity(exchange, exportProbes[18])) throw new Error("G11 preview and PNG export do not share Project-canvas evaluator geometry.")
-    if (exportProbes[6]?.phrase !== "readable-hold" || exportProbes[15]?.phrase !== "exchange" || exportProbes[24]?.planes[0]?.id !== "vitrine-portrait") throw new Error("G11 exported boundary phrases are wrong.")
+    if (exportProbes[6]?.phrase !== "readable-hold" || exportProbes[15]?.phrase !== "readable-hold"
+        || exportProbes[18]?.phrase !== "exchange" || exportProbes[24]?.planes[0]?.id !== "vitrine-portrait") throw new Error("G11 exported boundary phrases are wrong.")
     if (Object.values(exportProbes).some((probe) => probe.phrase === "reduced-motion-settled")) throw new Error("Reduced motion leaked into deterministic export.")
     if (Object.values(exportProbes).some((probe) => probe.placard !== null)) throw new Error("Placard contaminated the isolated transparent alpha proof.")
 
