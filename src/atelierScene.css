@@ -1,0 +1,68 @@
+.atelier-scene {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    isolation: isolate;
+    transform-style: preserve-3d;
+}
+
+.atelier-card {
+    position: absolute;
+    box-sizing: border-box;
+    overflow: visible;
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+.atelier-media,
+.atelier-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: inherit;
+    opacity: 1;
+    filter: none;
+    mix-blend-mode: normal;
+}
+
+.atelier-media {
+    background: transparent;
+}
+
+.atelier-placeholder {
+    position: relative;
+    display: grid;
+    align-content: end;
+    gap: 4px;
+    box-sizing: border-box;
+    padding: clamp(8px, 1.4vw, 20px);
+    color: #f7f4ec;
+    background: linear-gradient(145deg, #292d32, #59626b);
+}
+
+.atelier-placeholder span {
+    font: 650 clamp(7px, .7vw, 11px)/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .1em;
+}
+
+.atelier-placeholder strong {
+    font: 720 clamp(18px, 3vw, 48px)/.9 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.atelier-caption {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    color: currentColor;
+    font: 500 11px/1.3 ui-sans-serif, system-ui, sans-serif;
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .atelier-scene,
+    .atelier-card {
+        animation: none !important;
+        transition: none !important;
+    }
+}
