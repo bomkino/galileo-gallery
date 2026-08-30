@@ -8,6 +8,7 @@ import {
     minimumVitrineFixedDuration,
     VITRINE_MIN_EXCHANGE_MS,
     VITRINE_MIN_HOLD_MS,
+    vitrineDesignSpace,
     vitrineScene,
     vitrineStoryTimeMs,
 } from "../src/scenes/vitrine.ts"
@@ -32,6 +33,13 @@ const items = [
     { id: "d", ratio: 3 / 2, caption: "Edition" },
 ]
 const parameters = vitrineScene.defaults()
+assert.deepEqual(vitrineDesignSpace(96, 64), { designWidth: 960, designHeight: 640, projectScale: 0.1 })
+assert.deepEqual(vitrineDesignSpace(7_680, 5_120), { designWidth: 960, designHeight: 640, projectScale: 8 })
+assert.deepEqual(vitrineDesignSpace(7_680, 64), { designWidth: 76_800, designHeight: 640, projectScale: 0.1 })
+assert.deepEqual(vitrineDesignSpace(64, 7_680), { designWidth: 640, designHeight: 76_800, projectScale: 0.1 })
+assert.deepEqual(vitrineDesignSpace(4_800, 6_000), { designWidth: 640, designHeight: 800, projectScale: 7.5 })
+assert.throws(() => vitrineDesignSpace(0, 64), /Project canvas/)
+assert.throws(() => vitrineDesignSpace(64, Number.NaN), /Project canvas/)
 const automatic = compileVitrineTimeline({
     mode: "automatic",
     mediaCount: 2,

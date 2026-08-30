@@ -105,6 +105,19 @@ export type VitrineEvaluationInput = {
 
 export const VITRINE_MIN_HOLD_MS = 600
 export const VITRINE_MIN_EXCHANGE_MS = 280
+export const VITRINE_DESIGN_SHORT_EDGE = 640
+
+export function vitrineDesignSpace(width: number, height: number) {
+    if (!Number.isFinite(width) || width < 1 || !Number.isFinite(height) || height < 1) {
+        throw new Error("Vitrine Project canvas is invalid.")
+    }
+    const projectScale = Math.min(width, height) / VITRINE_DESIGN_SHORT_EDGE
+    return {
+        designWidth: width / projectScale,
+        designHeight: height / projectScale,
+        projectScale,
+    }
+}
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 const positiveModulo = (value: number, divisor: number) => ((value % divisor) + divisor) % divisor

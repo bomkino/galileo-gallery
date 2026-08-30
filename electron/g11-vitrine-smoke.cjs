@@ -891,6 +891,11 @@ const sceneExpression = `(() => {
     const stageBox = stage.getBoundingClientRect()
     const logicalWidth = Number(stage.dataset.logicalWidth)
     const logicalHeight = Number(stage.dataset.logicalHeight)
+    const logicalStyle = getComputedStyle(logical)
+    const designWidth = parseFloat(logicalStyle.width)
+    const designHeight = parseFloat(logicalStyle.height)
+    const projectScale = logicalWidth / designWidth
+    const minimumDesignDimension = Math.min(designWidth, designHeight)
     const normalizedBox = (element) => {
         const box = element.getBoundingClientRect()
         return {
@@ -904,7 +909,6 @@ const sceneExpression = `(() => {
     const placardLabel = placard?.querySelector('span')
     const placardCaption = placard?.querySelector('strong')
     const placardStyle = placard ? getComputedStyle(placard) : null
-    const minimumLogicalDimension = Math.min(logicalWidth, logicalHeight)
     return {
         scene: stage.dataset.productScene,
         version: Number(stage.dataset.sceneVersion),
@@ -928,7 +932,9 @@ const sceneExpression = `(() => {
             visualHeight: stageBox.height,
             logicalWidth,
             logicalHeight,
-            perspective: parseFloat(getComputedStyle(logical).perspective),
+            designWidth,
+            designHeight,
+            perspective: parseFloat(logicalStyle.perspective) * projectScale,
         },
         planes: [...stage.querySelectorAll('.vitrine-plane')].map((plane) => {
             const media = plane.querySelector('.vitrine-media')
@@ -987,14 +993,14 @@ const sceneExpression = `(() => {
             caption: normalizedBox(placardCaption),
         } : null,
         placardMetrics: placard && placardLabel && placardCaption && placardStyle ? {
-            labelFont: parseFloat(getComputedStyle(placardLabel).fontSize) / minimumLogicalDimension,
-            captionFont: parseFloat(getComputedStyle(placardCaption).fontSize) / minimumLogicalDimension,
-            gap: parseFloat(placardStyle.columnGap) / minimumLogicalDimension,
-            paddingTop: parseFloat(placardStyle.paddingTop) / minimumLogicalDimension,
-            paddingRight: parseFloat(placardStyle.paddingRight) / minimumLogicalDimension,
-            paddingBottom: parseFloat(placardStyle.paddingBottom) / minimumLogicalDimension,
-            paddingLeft: parseFloat(placardStyle.paddingLeft) / minimumLogicalDimension,
-            border: parseFloat(placardStyle.borderTopWidth) / minimumLogicalDimension,
+            labelFont: parseFloat(getComputedStyle(placardLabel).fontSize) / minimumDesignDimension,
+            captionFont: parseFloat(getComputedStyle(placardCaption).fontSize) / minimumDesignDimension,
+            gap: parseFloat(placardStyle.columnGap) / minimumDesignDimension,
+            paddingTop: parseFloat(placardStyle.paddingTop) / minimumDesignDimension,
+            paddingRight: parseFloat(placardStyle.paddingRight) / minimumDesignDimension,
+            paddingBottom: parseFloat(placardStyle.paddingBottom) / minimumDesignDimension,
+            paddingLeft: parseFloat(placardStyle.paddingLeft) / minimumDesignDimension,
+            border: parseFloat(placardStyle.borderTopWidth) / minimumDesignDimension,
         } : null,
         status: stage.querySelector('[role="status"]')?.textContent.trim() ?? null,
         background: getComputedStyle(stage).backgroundColor,
@@ -1689,6 +1695,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
     const maximumCanvasChecks = {
         logicalWidth: maximumCanvas.stage.logicalWidth === 7_680,
         logicalHeight: maximumCanvas.stage.logicalHeight === 5_120,
+        evaluatorHash: maximumCanvas.hash === exchange.hash,
         planeParity: normalizedParity(exchange, maximumCanvas),
         placardParity: normalizedPlacardParity(exchange, maximumCanvas),
         placardChildrenContained: placardChildrenContained(maximumCanvas),
@@ -1716,6 +1723,7 @@ async function runG11VitrineSmoke(window, evidenceRoot, mode = process.env.REEL_
     await scrub(window, 0.375)
     const restoredCanvas = await readScene(window)
     if (restoredCanvas.stage.logicalWidth !== 96 || restoredCanvas.stage.logicalHeight !== 64
+        || restoredCanvas.hash !== exchange.hash
         || !normalizedParity(exchange, restoredCanvas) || !normalizedPlacardParity(exchange, restoredCanvas)
         || !placardChildrenContained(restoredCanvas)) {
         throw new Error("Vitrine Placard did not restore exact fixture-resolution geometry.")
