@@ -1521,7 +1521,8 @@ function AppView() {
                                         data-library-item={item.id}
                                         onClick={() => inspectLibraryItem(item.id)}
                                         onKeyDown={(event) => {
-                                            if (event.altKey && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+                                            if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey
+                                                && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
                                                 event.preventDefault()
                                                 const nextIndex = index + (["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1)
                                                 if (nextIndex < 0 || nextIndex >= config.items.length) return
@@ -1530,6 +1531,7 @@ function AppView() {
                                                 requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-library-item="${CSS.escape(item.id)}"]`)?.focus())
                                                 return
                                             }
+                                            if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
                                             if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return
                                             event.preventDefault()
                                             const nextIndex = event.key === "Home" ? 0 : event.key === "End" ? config.items.length - 1

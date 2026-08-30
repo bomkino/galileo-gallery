@@ -109,6 +109,11 @@ async function run() {
     } }, 1, "request-vitrine-save-quota"))
     assert.equal(oversizedVitrine.error.code, "invalid_request")
     assert.equal(saveCount, 1, "invalid Vitrine save must be rejected before host persistence")
+    const oversizedGeneric = await host.handle(event, envelope("project.save", { config: {
+        styleId: "quiet-carousel", sceneVersion: 1, items: Array.from({ length: 257 }, (_, index) => ({ id: `generic-${index}`, url: chosen.value[0].mediaURL })),
+    } }, 1, "request-generic-save-quota"))
+    assert.equal(oversizedGeneric.error.code, "invalid_request")
+    assert.equal(saveCount, 1, "generic save beyond the renderer reopen envelope must be rejected before host persistence")
 
     const begun = await host.handle(event, envelope("project.open.begin"))
     assert.equal(begun.ok, true)

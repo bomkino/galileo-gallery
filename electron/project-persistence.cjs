@@ -174,7 +174,7 @@ async function savePortableProjectArchive(options) {
     let temporary = null
     try {
         if (!options.config || typeof options.config !== "object" || Array.isArray(options.config)
-            || !Array.isArray(options.config.items) || options.config.items.length > 4095) {
+            || !Array.isArray(options.config.items) || options.config.items.length > 256) {
             throw new ProjectSchemaError("manifest_invalid", "The current Project cannot be serialized safely.")
         }
         const configuredAudioSources = options.config.audio?.sources ?? []

@@ -225,6 +225,9 @@ for (const [index, receipt] of receipts.entries()) {
     assert.equal(receipt.controls.libraryKeyboard.movedLater.focused, "vitrine-square")
     assert.deepEqual(receipt.controls.libraryKeyboard.movedEarlier.order, ["vitrine-square", "vitrine-portrait"])
     assert.equal(receipt.controls.libraryKeyboard.movedEarlier.focused, "vitrine-square")
+    assert.deepEqual(receipt.controls.libraryKeyboard.voiceOverChord, {
+        order: ["vitrine-square", "vitrine-portrait"], focused: "vitrine-square", selected: "vitrine-square",
+    })
     assert(receipt.controls.libraryKeyboard.retired.count >= 1)
     assert.equal(receipt.controls.libraryKeyboard.retired.allCleared, true)
     assert(receipt.controls.decoderEvidence.activePlanes <= 2)

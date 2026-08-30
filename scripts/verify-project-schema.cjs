@@ -398,15 +398,21 @@ async function run() {
         duplicateSourceVideo.audio.sources.push({ ...duplicateSourceVideo.audio.sources[0], id: "source-video-audio-duplicate" })
         assert.throws(() => validatePortableProject(duplicateSourceVideo), (error) => error?.code === "audio_invalid")
 
+        let oversizedResolverCalls = 0
         await assert.rejects(
             savePortableProjectArchive({
-                config: { ...config, items: Array.from({ length: 4_094 }, (_, index) => ({ ...config.items[0], id: `quota-${index}`, url: path.join(root, "never-read.png") })) },
-                outputPath: path.join(root, "too-many-authored-entries.galileo"),
+                config: { ...config, items: Array.from({ length: 257 }, (_, index) => ({ ...config.items[0], id: `quota-${index}`, url: path.join(root, "never-read.png") })) },
+                outputPath: quotaDestination,
                 tempRoot: root,
-                mediaPathFromURL: (url) => url,
+                mediaPathFromURL: (url) => {
+                    oversizedResolverCalls += 1
+                    return url
+                },
             }),
-            (error) => error?.code === "too_many_entries"
+            (error) => error?.code === "manifest_invalid"
         )
+        assert.equal(oversizedResolverCalls, 0, "oversized save must reject before resolving any source authority")
+        assert.equal(fs.readFileSync(quotaDestination, "utf8"), "known-prior-project-bytes")
 
         const protectedDestination = path.join(root, "protected.galileo")
         fs.writeFileSync(protectedDestination, "known-prior-project-bytes")

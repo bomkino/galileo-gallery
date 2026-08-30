@@ -78,7 +78,6 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
     const [presentedTime, setPresentedTime] = React.useState<number | null>(null)
     const readyRef = React.useRef(false)
     const desiredRef = React.useRef<{ source: string; target: number } | null>(null)
-    const confirmedRef = React.useRef<{ source: string; target: number; mediaTime: number } | null>(null)
     const seekCleanupRef = React.useRef<(() => void) | null>(null)
     const sampledTimeMs = Math.floor(Math.max(0, timeMs) * fps / 1_000 + 1e-9) * 1_000 / fps
     const cancelFrameConfirmation = React.useCallback((video?: HTMLVideoElement | null) => {
@@ -96,41 +95,50 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         const frameVideo = video as HTMLVideoElement & {
             requestVideoFrameCallback?: (handler: (_now: number, metadata: { mediaTime: number }) => void) => number
         }
-        const markReady = (mediaTime: number) => {
-            if (isCurrent() && !video.seeking && Number.isFinite(mediaTime)) {
+        const targetTolerance = 1 / Math.max(1, fps)
+        let seekComplete = false
+        let presentedMediaTime: number | null = null
+        const markReady = () => {
+            if (isCurrent() && seekComplete && !video.seeking && Number.isFinite(presentedMediaTime)
+                && Math.abs(video.currentTime - target) <= targetTolerance) {
                 video.pause()
                 readyRef.current = true
-                confirmedRef.current = { source: requestedSource, target, mediaTime }
                 setHasPresented(true)
-                setPresentedTime(mediaTime)
+                setPresentedTime(presentedMediaTime)
                 setReady(true)
                 return true
             }
             return false
         }
+        const onSeeked = () => {
+            seekCleanupRef.current = null
+            if (!isCurrent()) return
+            seekComplete = true
+            if (!frameVideo.requestVideoFrameCallback) {
+                const animationId = requestAnimationFrame(() => {
+                    if (animationFrameRef.current === animationId) animationFrameRef.current = null
+                    if (!isCurrent()) return
+                    presentedMediaTime = video.currentTime
+                    markReady()
+                })
+                animationFrameRef.current = animationId
+                return
+            }
+            markReady()
+        }
+        video.addEventListener("seeked", onSeeked, { once: true })
+        seekCleanupRef.current = () => video.removeEventListener("seeked", onSeeked)
         if (frameVideo.requestVideoFrameCallback) {
             const callbackId = frameVideo.requestVideoFrameCallback((_now, metadata) => {
                 if (frameCallbackRef.current === callbackId) frameCallbackRef.current = null
                 if (!isCurrent()) return
-                markReady(metadata.mediaTime)
+                if (Number.isFinite(metadata.mediaTime)) presentedMediaTime = metadata.mediaTime
+                markReady()
             })
             frameCallbackRef.current = callbackId
-        } else {
-            const onSeeked = () => {
-                seekCleanupRef.current = null
-                if (!isCurrent()) return
-                const animationId = requestAnimationFrame(() => {
-                    if (animationFrameRef.current === animationId) animationFrameRef.current = null
-                    if (!isCurrent()) return
-                    markReady(video.currentTime)
-                })
-                animationFrameRef.current = animationId
-            }
-            video.addEventListener("seeked", onSeeked, { once: true })
-            seekCleanupRef.current = () => video.removeEventListener("seeked", onSeeked)
         }
         video.currentTime = target
-    }, [cancelFrameConfirmation])
+    }, [cancelFrameConfirmation, fps])
     const sync = React.useCallback(() => {
         const video = ref.current
         if (!video) return
@@ -152,13 +160,6 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         cancelFrameConfirmation(video)
         desiredRef.current = { source, target }
         targetRef.current = target
-        const confirmed = confirmedRef.current
-        if (confirmed?.source === source && Math.abs(confirmed.target - target) <= 0.0005) {
-            readyRef.current = true
-            setPresentedTime(confirmed.mediaTime)
-            setReady(true)
-            return
-        }
         if (!video.seeking && Math.abs(video.currentTime - target) <= 0.0005) {
             const detourDistance = Math.min(video.duration / 2, Math.max(0.25, 2 / Math.max(1, fps)))
             const detour = target + detourDistance < video.duration ? target + detourDistance : Math.max(0, target - detourDistance)
@@ -184,7 +185,6 @@ function VitrineVideo({ source, timeMs, loop, fps, style, onFailure }: { source:
         if (!video) return
         readyRef.current = false
         desiredRef.current = null
-        confirmedRef.current = null
         setReady(false)
         setHasPresented(false)
         setPresentedTime(null)

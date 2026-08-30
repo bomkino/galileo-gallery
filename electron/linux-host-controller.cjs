@@ -103,7 +103,7 @@ function cheapExactH264AudioAppendEnvelope(value, generation) {
 }
 
 function validConfig(value) {
-    if (!value || typeof value !== "object" || Array.isArray(value) || !Array.isArray(value.items) || value.items.length > 4093) return false
+    if (!value || typeof value !== "object" || Array.isArray(value) || !Array.isArray(value.items) || value.items.length > 256) return false
     if (value.styleId === "vitrine" && value.sceneVersion === 2 && (value.items.length < 1 || value.items.length > 127)) return false
     const audio = value.audio
     if (audio !== undefined && (!audio || typeof audio !== "object" || Array.isArray(audio)

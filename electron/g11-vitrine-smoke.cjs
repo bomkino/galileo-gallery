@@ -468,6 +468,13 @@ async function libraryKeyboardEvidence(window) {
     assert.equal(movedEarlier.focused, "vitrine-square")
     assert.equal(movedEarlier.selected, "vitrine-square")
     assert.match(movedEarlier.notice, /moved to position 1 of 2/)
+    await keyboardInput(window, "Down", ["control", "alt"])
+    const voiceOverChord = await window.webContents.executeJavaScript(`({
+        order: [...document.querySelectorAll('[data-library-item]')].map((item) => item.dataset.libraryItem),
+        focused: document.activeElement?.dataset.libraryItem ?? null,
+        selected: document.querySelector('.media-row.is-selected [data-library-item]')?.dataset.libraryItem ?? null,
+    })`)
+    assert.deepEqual(voiceOverChord, { order: ["vitrine-square", "vitrine-portrait"], focused: "vitrine-square", selected: "vitrine-square" }, "Control+Option VoiceOver navigation must not reorder or consume library focus")
     const retired = await window.webContents.executeJavaScript(`(async () => {
         const deadline = performance.now() + 2_000
         while (performance.now() < deadline && !window.__g11RetiredVideos.every((video) => !video.getAttribute('src') && !video.currentSrc)) {
@@ -481,7 +488,7 @@ async function libraryKeyboardEvidence(window) {
     })()`)
     if (retired.count < 1 || !retired.allCleared) throw new Error(`G11 source-video handoff did not release the retired decoder source: ${JSON.stringify(retired)}`)
     await window.webContents.executeJavaScript("window.__g11VideoObserver.disconnect()")
-    return { next, previous, movedLater, movedEarlier, retired }
+    return { next, previous, movedLater, movedEarlier, voiceOverChord, retired }
 }
 
 async function documentBoundaryEvidence(window) {
