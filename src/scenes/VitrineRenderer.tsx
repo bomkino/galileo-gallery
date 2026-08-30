@@ -204,7 +204,7 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
                 schedulePump()
                 return
             }
-            if (frameVideo.requestVideoFrameCallback) armFrameCallback()
+            if (typeof frameVideo.requestVideoFrameCallback === "function") armFrameCallback()
             else schedulePaintFallback()
             return
         }
@@ -248,7 +248,9 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
         video.pause()
         const confirmed = confirmedRef.current
         const targetTolerance = Math.max(0.0005, 0.5 / Math.max(1, fps))
-        if (sameVideoTarget(confirmed, desired) && !video.seeking && Math.abs(video.currentTime - desired.target) <= targetTolerance) {
+        const proof = frameProofRef.current
+        const proofReady = prewarmRef.current ? proof === "decoded" || proof === "presented" : proof === "presented"
+        if (proofReady && sameVideoTarget(confirmed, desired) && !video.seeking && Math.abs(video.currentTime - desired.target) <= targetTolerance) {
             readyRef.current = true
             setReady(true)
             return
@@ -280,17 +282,18 @@ function VitrineVideo({ source, timeMs, loop, fps, style, prewarm, onFailure }: 
     React.useLayoutEffect(sync, [sync])
     React.useLayoutEffect(() => {
         const video = ref.current
+        if (prewarm || !video || frameProofRef.current !== "decoded") return
+        readyRef.current = false
+        video.dataset.storyReady = "false"
+        setReady(false)
         const desired = desiredRef.current
         const targetTolerance = Math.max(0.0005, 0.5 / Math.max(1, fps))
-        if (prewarm || !video || frameProofRef.current !== "decoded" || !sameVideoTarget(confirmedRef.current, desired)
+        if (!sameVideoTarget(confirmedRef.current, desired)
             || activeRef.current || loadedSourceRef.current !== source || video.seeking
             || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA
             || Math.abs(video.currentTime - (desired?.target ?? Number.NaN)) > targetTolerance) return
         const operation = { ...(desired as VideoTarget), epoch: epochRef.current }
         activeRef.current = operation
-        readyRef.current = false
-        video.dataset.storyReady = "false"
-        setReady(false)
         seekToPresentedFrame(video, operation, true)
     }, [fps, frameProof, prewarm, seekToPresentedFrame, source])
     React.useLayoutEffect(() => {
