@@ -110,6 +110,9 @@ jobs:
           g08_path.write_text(g08.replace(error_anchor, error_replacement, 1))
           PY
 
+      - name: Contain the stacked Project panel
+        run: python scripts/patch-v1.2.0-overflow.py
+
       - name: Resolve exact lockfile
         run: npm install --package-lock-only --ignore-scripts
 
@@ -153,6 +156,7 @@ jobs:
           set -euo pipefail
           rm -f \
             scripts/bootstrap-v1.2.0.py \
+            scripts/patch-v1.2.0-overflow.py \
             .github/workflows/bootstrap-v1.2.0.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
