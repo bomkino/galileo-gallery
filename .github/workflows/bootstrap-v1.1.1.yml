@@ -60,11 +60,12 @@ jobs:
           app_path = Path("src/App.tsx")
           app = app_path.read_text()
           focus_anchor = '        if (restoreFocus) requestAnimationFrame(() => triggerRef.current?.focus())\n'
-          focus_replacement = '''        if (restoreFocus) {
-              triggerRef.current?.focus({ preventScroll: true })
-              requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }))
-          }
-'''
+          focus_replacement = (
+              '        if (restoreFocus) {\n'
+              '            triggerRef.current?.focus({ preventScroll: true })\n'
+              '            requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }))\n'
+              '        }\n'
+          )
           if app.count(focus_anchor) != 1:
               raise SystemExit("Project focus restoration anchor mismatch")
           app_path.write_text(app.replace(focus_anchor, focus_replacement, 1))
