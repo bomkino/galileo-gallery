@@ -58,41 +58,43 @@ jobs:
           g08_path = Path("electron/g08-interface-smoke.cjs")
           g08 = g08_path.read_text()
           prep_anchor = "        const shell = document.querySelector('.app-shell')\n        const stage = rect('.stage')\n"
-          prep_replacement = """        const shell = document.querySelector('.app-shell')
-        const shellBox = shell.getBoundingClientRect()
-        const describeElement = (element) => {
-            const box = element.getBoundingClientRect()
-            const style = getComputedStyle(element)
-            const id = element.id ? '#' + element.id : ''
-            const classes = Array.from(element.classList).slice(0, 5).map((name) => '.' + name).join('')
-            return {
-                element: element.tagName.toLowerCase() + id + classes,
-                left: box.left,
-                right: box.right,
-                width: box.width,
-                rightOverflow: box.right - shellBox.right,
-                leftOverflow: shellBox.left - box.left,
-                clientWidth: element.clientWidth,
-                scrollWidth: element.scrollWidth,
-                intrinsicOverflow: element.scrollWidth - element.clientWidth,
-                overflowX: style.overflowX,
-                position: style.position,
-                boxSizing: style.boxSizing,
-                minWidth: style.minWidth,
-                widthStyle: style.width,
-                marginLeft: style.marginLeft,
-                marginRight: style.marginRight,
-                borderLeft: style.borderLeftWidth,
-                borderRight: style.borderRightWidth,
-            }
-        }
-        const overflowOffenders = Array.from(shell.querySelectorAll('*'))
-            .map(describeElement)
-            .filter((item) => item.rightOverflow > 0.25 || item.leftOverflow > 0.25 || item.intrinsicOverflow > 1)
-            .sort((a, b) => Math.max(b.rightOverflow, b.leftOverflow, b.intrinsicOverflow) - Math.max(a.rightOverflow, a.leftOverflow, a.intrinsicOverflow))
-            .slice(0, 24)
-        const stage = rect('.stage')
-"""
+          prep_replacement = "\n".join([
+              "        const shell = document.querySelector('.app-shell')",
+              "        const shellBox = shell.getBoundingClientRect()",
+              "        const describeElement = (element) => {",
+              "            const box = element.getBoundingClientRect()",
+              "            const style = getComputedStyle(element)",
+              "            const id = element.id ? '#' + element.id : ''",
+              "            const classes = Array.from(element.classList).slice(0, 5).map((name) => '.' + name).join('')",
+              "            return {",
+              "                element: element.tagName.toLowerCase() + id + classes,",
+              "                left: box.left,",
+              "                right: box.right,",
+              "                width: box.width,",
+              "                rightOverflow: box.right - shellBox.right,",
+              "                leftOverflow: shellBox.left - box.left,",
+              "                clientWidth: element.clientWidth,",
+              "                scrollWidth: element.scrollWidth,",
+              "                intrinsicOverflow: element.scrollWidth - element.clientWidth,",
+              "                overflowX: style.overflowX,",
+              "                position: style.position,",
+              "                boxSizing: style.boxSizing,",
+              "                minWidth: style.minWidth,",
+              "                widthStyle: style.width,",
+              "                marginLeft: style.marginLeft,",
+              "                marginRight: style.marginRight,",
+              "                borderLeft: style.borderLeftWidth,",
+              "                borderRight: style.borderRightWidth,",
+              "            }",
+              "        }",
+              "        const overflowOffenders = Array.from(shell.querySelectorAll('*'))",
+              "            .map(describeElement)",
+              "            .filter((item) => item.rightOverflow > 0.25 || item.leftOverflow > 0.25 || item.intrinsicOverflow > 1)",
+              "            .sort((a, b) => Math.max(b.rightOverflow, b.leftOverflow, b.intrinsicOverflow) - Math.max(a.rightOverflow, a.leftOverflow, a.intrinsicOverflow))",
+              "            .slice(0, 24)",
+              "        const stage = rect('.stage')",
+              "",
+          ])
           if g08.count(prep_anchor) != 1:
               raise SystemExit(f"overflow diagnostic prep anchor mismatch: {g08.count(prep_anchor)}")
           g08 = g08.replace(prep_anchor, prep_replacement, 1)
