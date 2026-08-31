@@ -1,52 +1,55 @@
 # Galileo Gallery
 
-Galileo Gallery is a free, local desktop motion studio for turning images, videos, GIFs, and deck slides into authored gallery films. Make a clean loop, a finite sequence, or a one-shot animation for an explainer, social post, website, or transparent video overlay.
+Galileo Gallery is a free, local desktop motion studio for turning images, videos, GIFs, and deck slides into authored gallery films. Build a clean loop, a finite sequence, or a one-shot animation for a deck, explainer, social post, website, or transparent overlay.
 
-It began as the Opening Reel Framer component and grew into 29 distinct motion scenes distilled from 29 original components. Every scene has its own defaults, spatial rules, timing, and physical character; the importer, timeline, projects, and deterministic export pipeline are shared.
+**Latest stable: 1.1.0**
 
-Current version: **1.0.1**
+The app contains 29 distinct motion Scenes distilled from 29 original components. Each Scene keeps its own timing, geometry, spatial rules, and physical character. Import, Timeline, Project storage, Interface Scale, and deterministic export remain shared.
 
-> Release status: v1.0.1 promotes the independently rebuilt 29-scene catalogue after source, renderer, cross-platform, and batched human-review gates. Quiet Carousel remains an additional compatibility Scene and Vitrine keeps its hardened v2 Project boundary. See `docs/programme/IMPLEMENTATION_STATUS.md` for the evidence boundary and remaining platform caveats.
+## What it makes
 
-## What it can make
-
-- 29 distinct original-informed scenes
+- 29 independently authored motion Scenes
 - Images, silent videos, GIFs, and deck-slide media
-- Once, Loop × N, and seamless forever playback
-- Forward, reverse, horizontal, and vertical motion where the scene supports it
+- Once, Loop × N, and seamless-forever playback
 - Timeline scrubbing and exact-frame inspection
 - Scene-specific Spotlight and Finale holds
 - Transparent backgrounds for compositing
-- MP4, Premiere MOV, WebM, and compact WebM exports
-- ProRes 422 HQ and ProRes 4444 XQ master output
-- Portable `.galileo` projects and reusable look templates
+- MP4, Premiere MOV, WebM, compact WebM, ProRes 422 HQ, and ProRes 4444 XQ output
+- Portable `.galileo` Projects and reusable look templates
 
-Before/After is one shared comparison surface with a gentle authored sweep. Orrery is a layered orbital system whose satellites pass both behind and in front of its central slide. The Build is a staged construction sequence, not a generic card loop.
+Media stays on the user's machine.
 
 ## Download
 
-Builds for macOS Apple silicon, Windows x64, and Linux x64 are published on the [GitHub Releases page](https://github.com/bomkino/galileo-gallery/releases). The macOS app has an ad-hoc integrity signature, but it is not Apple Developer ID signed or notarized. Gatekeeper will therefore ask you to confirm that you trust it.
+Use the repository's GitHub Releases page for:
 
-### Install on macOS
+- macOS Apple silicon DMG
+- Windows x64 portable EXE
+- Linux x64 AppImage
+- SHA-256 checksums
 
-1. Download the latest macOS Apple silicon DMG and open it.
+The macOS app is ad-hoc signed for bundle integrity. It is not Apple Developer ID signed or notarized, so Gatekeeper may ask you to confirm trust.
+
+### macOS
+
+1. Open the DMG.
 2. Drag **Galileo Gallery** into **Applications**.
-3. In Applications, Control-click **Galileo Gallery**, choose **Open**, then choose **Open** again.
-4. If macOS still blocks it, open **System Settings → Privacy & Security**, find the Galileo Gallery message, and choose **Open Anyway**.
+3. Control-click the app, choose **Open**, then confirm **Open** again.
+4. If blocked, use **System Settings → Privacy & Security → Open Anyway**.
 
-If macOS reports that the app is damaged after those steps, remove the downloaded file's quarantine attribute as a last resort:
+If macOS still reports damage after downloading from this repository's official release, remove the quarantine flag as a last resort:
 
 ```bash
 xattr -dr com.apple.quarantine "/Applications/Galileo Gallery.app"
 ```
 
-Only run that command after downloading Galileo Gallery from this repository's official Releases page. It bypasses Gatekeeper's quarantine check for this app; it does not notarize or establish Apple trust. Then Control-click the app and choose **Open** again. Installation help: [hello@pitch.dog](mailto:hello@pitch.dog).
+That command bypasses quarantine for this app. It does not notarize the build or create Apple trust.
 
-Linux is distributed as an AppImage. Make it executable, then run it:
+### Linux
 
 ```bash
-chmod +x "Galileo Gallery-1.0.1-Linux-x86_64.AppImage"
-./"Galileo Gallery-1.0.1-Linux-x86_64.AppImage"
+chmod +x "Galileo Gallery-1.1.0-Linux-x86_64.AppImage"
+./"Galileo Gallery-1.1.0-Linux-x86_64.AppImage"
 ```
 
 ## Run from source
@@ -60,40 +63,58 @@ npm install
 npm run dev
 ```
 
-`ffmpeg-static` downloads the correct FFmpeg executable for the current platform during installation. Media stays local.
+`ffmpeg-static` prepares the correct FFmpeg executable for the current platform during installation.
 
-## Test and package
+## Test
 
 ```bash
 npm test
+npm run verify:design-system
+npm run verify:g08-renderer
+```
+
+`npm test` covers build correctness, Project safety, Scene timing, media handling, persistence, deterministic audio/export contracts, Interface Scale, the pitch.dog font source, Phosphor icon coverage, and spacing-system invariants. G08 runs the real Electron interface across viewport sizes and scale settings and writes screenshot evidence under `artifacts/g08/`.
+
+## Package
+
+Run packaging on the target operating system:
+
+```bash
 npm run package:mac
 npm run package:windows
 npm run package:linux
 ```
 
-Package on the target operating system. Each packaging command prepares that platform's FFmpeg executable, builds the renderer, and creates an app under `release/`. macOS packaging uses an ad-hoc signature for bundle integrity; it does not create a trusted or notarized release.
+Each command prepares the platform FFmpeg binary, builds the renderer, and writes to `release/`. Tagged releases are built again on all three operating systems by GitHub Actions before publication.
 
-## How export works
+## Interface system
 
-Videos are decoded by bundled FFmpeg into bounded, cycle-local frame caches at the export frame rate and canvas size. A hidden renderer receives exact global times, chooses deterministic source frames at normal speed, renders the selected scene pose, and streams captured frames to the encoder. Final export does not depend on browser video seeking.
+Version 1.1.0 adopts the public pitch.dog type system as the packaged default and uses Phosphor for product-control icons. Padding, gaps, and control sizing follow a shared 4 px scale with a 44 px minimum target at every Interface Scale.
+
+See [`docs/design-system.md`](docs/design-system.md) for exact source pins, type roles, spacing tokens, icon rules, and verification. See [`docs/README.md`](docs/README.md) for the active documentation map. The full historical programme and renderer evidence remains available under `docs/programme/`.
+
+## Export architecture
+
+Bundled FFmpeg decodes videos into bounded, cycle-local frame caches at the chosen frame rate and canvas size. A hidden renderer receives exact global times, selects deterministic source frames, renders the Scene pose, and streams captured frames to the encoder. Final export does not depend on browser video seeking.
 
 Opaque masters use ProRes 422 HQ. Transparent masters use ProRes 4444 XQ. Opaque video carries explicit BT.709 tags; alpha-capable exports preserve transparency. The verified Linux MP4 path carries the authored deterministic AAC mix.
 
-## Design principles
+## Principles
 
-- Each scene gets scene-specific defaults and behavior.
-- Loops preserve continuity; cards do not pop in or disappear without cause.
-- Depth ordering should feel physically legible and tactile.
-- Spotlight and Finale are authored timeline states, not generic enlargement effects.
-- The studio remains usable with reduced motion enabled.
-- Imported work stays on the user's machine.
+- Scene identity beats generic motion presets.
+- Loops preserve continuity; frames do not pop without cause.
+- Depth should read physically.
+- Spotlight and Finale are authored Timeline states.
+- Controls remain reachable at every supported Interface Scale.
+- Reduced-motion preferences are respected.
+- Imported work stays local.
 
 ## Open development
 
-Galileo Gallery was designed and implemented by pitch.dog in close collaboration with OpenAI Codex. Codex helped investigate the original Framer components, build the desktop architecture and deterministic exporter, implement motion systems, diagnose export failures, write tests, and prepare the cross-platform open-source release. We are publishing the work—including its rough edges—because learning in public matters.
+Galileo Gallery was designed and implemented by pitch.dog in close collaboration with OpenAI Codex. The repository keeps implementation receipts and failure evidence because learning in public matters.
 
-Bug reports and focused contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and the [Code of Conduct](CODE_OF_CONDUCT.md).
+Bug reports and focused contributions are welcome. Read [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md), and [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
 
 ## License
 
-Galileo Gallery is free software licensed under [GPL-3.0-or-later](LICENSE). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for bundled dependencies and FFmpeg information.
+Galileo Gallery is free software under GPL-3.0-or-later. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) for bundled dependencies, fonts, icons, and FFmpeg notices.
