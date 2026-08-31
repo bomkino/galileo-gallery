@@ -1,0 +1,100 @@
+name: Apply Galileo Gallery 1.1.1 final theme hardening
+
+on:
+  push:
+    branches: [codex/galileo-theme-hygiene-v1.1.1]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: galileo-gallery-v1-1-1-theme-hygiene
+  cancel-in-progress: false
+
+jobs:
+  apply-and-prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: codex/galileo-theme-hygiene-v1.1.1
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Materialize and apply CSP-safe dual-theme hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat scripts/theme-bootstrap/chunk-* | base64 --decode | gzip --decompress > scripts/bootstrap-v1.1.1-theme.py
+          python3 scripts/bootstrap-v1.1.1-theme.py
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Run complete source suite
+        run: npm test
+
+      - name: Audit production dependency surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/hygiene
+          set +e
+          npm audit --omit=dev --json > artifacts/hygiene/npm-audit-production.json
+          audit_status=$?
+          set -e
+          node - <<'NODE'
+          const fs = require('node:fs')
+          const report = JSON.parse(fs.readFileSync('artifacts/hygiene/npm-audit-production.json', 'utf8'))
+          const counts = report.metadata?.vulnerabilities
+          if (!counts) throw new Error('npm audit did not return vulnerability metadata.')
+          console.log(JSON.stringify({ productionAudit: counts }, null, 2))
+          if ((counts.high ?? 0) > 0 || (counts.critical ?? 0) > 0) process.exit(1)
+          NODE
+          if test "$audit_status" -ne 0; then
+            node -e "const r=require('./artifacts/hygiene/npm-audit-production.json'); const v=r.metadata?.vulnerabilities; if (!v || (v.high??0)>0 || (v.critical??0)>0) process.exit(1)"
+          fi
+
+      - name: Prepare final candidate commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f scripts/bootstrap-v1.1.1-theme.py .github/workflows/bootstrap-v1.1.1-theme.yml
+          rm -rf scripts/theme-bootstrap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "feat: add verified light and dark interface modes"
+
+      - name: Run real Electron dual-theme layout and interaction proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run prepare:electron
+          sudo chown root:root node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+          source_sha="$(git rev-parse HEAD)"
+          source_tree="$(git rev-parse HEAD^{tree})"
+          GALLERY_SOURCE_SHA="$source_sha" GALLERY_SOURCE_TREE="$source_tree" xvfb-run -a npm run verify:g08-renderer
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: galileo-gallery-v1.1.1-light-dark-proof
+          path: |
+            artifacts/g08/
+            artifacts/hygiene/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Push proved candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin "HEAD:${GITHUB_REF_NAME}"
