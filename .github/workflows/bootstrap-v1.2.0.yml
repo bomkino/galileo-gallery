@@ -47,7 +47,7 @@ jobs:
           helper_path.write_text("\n".join(helper_lines) + "\n")
 
           old_script = '<script src="./theme-preflight.js"></script>'
-          new_script = '<script type="module" src="./theme-preflight.js"></script>'
+          new_script = '<script type="module" src="/theme-preflight.js"></script>'
           for filename in ("index.html", "scripts/verify-design-system.cjs"):
               path = Path(filename)
               text = path.read_text()
