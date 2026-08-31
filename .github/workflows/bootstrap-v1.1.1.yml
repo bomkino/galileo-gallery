@@ -46,6 +46,16 @@ jobs:
           path.write_text(text)
           PY
           node scripts/bootstrap-v1.1.1.mjs
+          python - <<'PY'
+          from pathlib import Path
+          path = Path("scripts/verify-design-system.cjs")
+          text = path.read_text()
+          anchor = '    assert(icon.includes(`${name}:`), `Phosphor icon map is missing ${name}`)\n'
+          replacement = '    const key = name.includes("-") ? `"${name}":` : `${name}:`\n    assert(icon.includes(key), `Phosphor icon map is missing ${name}`)\n'
+          if text.count(anchor) != 1:
+              raise SystemExit("icon verifier anchor mismatch")
+          path.write_text(text.replace(anchor, replacement, 1))
+          PY
 
       - name: Resolve exact lockfile
         run: npm install --package-lock-only --ignore-scripts
