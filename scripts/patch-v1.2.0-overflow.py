@@ -60,8 +60,8 @@ g08 = replace_once(
 )
 g08 = replace_once(
     g08,
-    "        const stage = rect('.stage')\n\n        const stageShellElement",
-    "        const stage = rect('.stage')\n        const projectPanel = rect('.project-menu-panel')\n\n        const stageShellElement",
+    "        const stage = rect('.stage')\n        const stageShellElement",
+    "        const stage = rect('.stage')\n        const projectPanel = rect('.project-menu-panel')\n        const stageShellElement",
     "Project panel metric preparation",
 )
 g08 = replace_once(
