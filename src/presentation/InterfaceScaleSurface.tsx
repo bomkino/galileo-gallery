@@ -1,4 +1,5 @@
 import * as React from "react"
+import Icon from "../ui/PhosphorIcon"
 import { createBrowserPresentationAdapter } from "./browserPresentationAdapter"
 import {
     coerceInterfaceScale,
@@ -87,7 +88,7 @@ export function InterfaceScaleControl() {
                 disabled={interfaceScale === MIN_INTERFACE_SCALE}
                 onClick={decrease}
             >
-                <span aria-hidden="true">−</span>
+                <Icon name="minus" size={18} />
             </button>
             <button
                 className="interface-scale-value"
@@ -105,7 +106,7 @@ export function InterfaceScaleControl() {
                 disabled={interfaceScale === MAX_INTERFACE_SCALE}
                 onClick={increase}
             >
-                <span aria-hidden="true">+</span>
+                <Icon name="plus" size={18} />
             </button>
         </div>
     )

@@ -175,6 +175,15 @@ async function readMetrics(window) {
                 text: button.textContent.replace(/\\s+/g, ' ').trim(),
                 disabled: button.disabled,
             })),
+            designSystem: {
+                bodyFont: getComputedStyle(document.body).fontFamily,
+                headingFont: getComputedStyle(document.querySelector('.panel-heading h2')).fontFamily,
+                eyebrowFont: getComputedStyle(document.querySelector('.eyebrow')).fontFamily,
+                fontReady: ['PD Head', 'PD Body', 'PD Body Alt', 'PD Eyebrow'].every((family) => document.fonts.check('12px \"' + family + '\"')),
+                phosphorIcons: document.querySelectorAll('[data-phosphor-icon]').length,
+                rogueControlSvgs: Array.from(document.querySelectorAll('.titlebar button svg, .library button svg, .inspector button svg, .transport button svg')).filter((svg) => !svg.hasAttribute('data-phosphor-icon')).length,
+                spacingTokens: ['--pd-space-1', '--pd-space-2', '--pd-space-3', '--pd-space-4', '--pd-space-6', '--pd-space-8', '--pd-space-10'].map((token) => getComputedStyle(document.documentElement).getPropertyValue(token).trim()),
+            },
             manifest: {
                 format: manifest.format,
                 product: manifest.product,
@@ -347,6 +356,13 @@ async function resetStudioScroll(window) {
 function assertInvariant(metrics) {
     const baseline = metrics["wide-100"]
     for (const [key, value] of Object.entries(metrics)) {
+        if (!value.designSystem.bodyFont.includes('PD Body')) throw new Error(`${key} did not resolve PD Body.`)
+        if (!value.designSystem.headingFont.includes('PD Head')) throw new Error(`${key} did not resolve PD Head.`)
+        if (!value.designSystem.eyebrowFont.includes('PD Eyebrow')) throw new Error(`${key} did not resolve PD Eyebrow.`)
+        if (!value.designSystem.fontReady) throw new Error(`${key} did not load every pitch.dog font role.`)
+        if (value.designSystem.phosphorIcons < 4) throw new Error(`${key} rendered too few Phosphor interface icons.`)
+        if (value.designSystem.rogueControlSvgs !== 0) throw new Error(`${key} rendered a non-Phosphor control SVG.`)
+        if (value.designSystem.spacingTokens.some((token) => !token)) throw new Error(`${key} lost a pitch.dog spacing token.`)
         if (value.interfaceScale !== Number(key.split("-")[1])) throw new Error(`${key} rendered the wrong Interface Scale.`)
         if (value.scaleLabel !== `${value.interfaceScale}%`) throw new Error(`${key} showed a stale Interface Scale label.`)
         if (value.manifest.interfaceScale !== value.interfaceScale) throw new Error(`${key} did not persist its visible Interface Scale.`)

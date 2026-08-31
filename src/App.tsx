@@ -1,5 +1,6 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
+import Icon from "./ui/PhosphorIcon"
 import OpeningReel from "./OpeningReel"
 import ExpertControls, { type ExpertPreset, type ExpertTab } from "./ExpertControls"
 import ProductSceneRenderer, { isAuthoredVitrine, productSceneDuration } from "./scenes/ProductSceneRenderer"
@@ -154,43 +155,6 @@ function canvasOutput(settings: ReelSettings) {
         return { width: evenDimension(settings.canvasWidth), height: evenDimension(settings.canvasHeight), label: "Custom", short: "Custom" }
     }
     return CANVAS_PRESETS[settings.canvasPreset]
-}
-
-function Icon({ name, size = 16 }: { name: string; size?: number }) {
-    const common = {
-        width: size,
-        height: size,
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: 1.8,
-        strokeLinecap: "round" as const,
-        strokeLinejoin: "round" as const,
-        "aria-hidden": true,
-    }
-    if (name === "plus")
-        return <svg {...common}><path d="M12 5v14M5 12h14" /></svg>
-    if (name === "play")
-        return <svg {...common}><path d="m8 5 11 7-11 7V5Z" /></svg>
-    if (name === "spark")
-        return <svg {...common}><path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3Z" /><path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z" /></svg>
-    if (name === "mute")
-        return <svg {...common}><path d="M11 5 6 9H3v6h3l5 4V5Z" /><path d="m18 9-6 6M12 9l6 6" /></svg>
-    if (name === "skip")
-        return <svg {...common}><path d="m5 7 8 5-8 5V7Z" /><path d="M17 7v10" /></svg>
-    if (name === "trash")
-        return <svg {...common}><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13" /></svg>
-    if (name === "grip")
-        return <svg {...common}><circle cx="9" cy="7" r=".7" fill="currentColor" stroke="none" /><circle cx="15" cy="7" r=".7" fill="currentColor" stroke="none" /><circle cx="9" cy="12" r=".7" fill="currentColor" stroke="none" /><circle cx="15" cy="12" r=".7" fill="currentColor" stroke="none" /><circle cx="9" cy="17" r=".7" fill="currentColor" stroke="none" /><circle cx="15" cy="17" r=".7" fill="currentColor" stroke="none" /></svg>
-    if (name === "film")
-        return <svg {...common}><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M7 5v14M17 5v14M3 9h4M17 9h4M3 15h4M17 15h4" /></svg>
-    if (name === "folder")
-        return <svg {...common}><path d="M3 7h7l2 2h9v10H3V7Z" /></svg>
-    if (name === "close")
-        return <svg {...common}><path d="m6 6 12 12M18 6 6 18" /></svg>
-    if (name === "check")
-        return <svg {...common}><path d="m5 12 4 4L19 6" /></svg>
-    return <svg {...common}><circle cx="12" cy="12" r="8" /></svg>
 }
 
 function idForMedia(media: SelectedMedia) {
