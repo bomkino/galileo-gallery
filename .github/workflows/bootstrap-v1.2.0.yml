@@ -29,6 +29,31 @@ jobs:
       - name: Apply bounded interface-theme migration
         run: python scripts/bootstrap-v1.2.0.py
 
+      - name: Close preflight and contrast-test cracks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          helper_path = Path("electron/g08-theme-smoke.cjs")
+          helper = helper_path.read_text()
+          old_parser = r'value.match(/[\\d.]+/g)'
+          new_parser = r'value.match(/[\d.]+/g)'
+          if helper.count(old_parser) != 1:
+              raise SystemExit(f"contrast parser anchor mismatch: {helper.count(old_parser)}")
+          helper_path.write_text(helper.replace(old_parser, new_parser, 1))
+
+          old_script = '<script src="./theme-preflight.js"></script>'
+          new_script = '<script type="module" src="./theme-preflight.js"></script>'
+          for filename in ("index.html", "scripts/verify-design-system.cjs"):
+              path = Path(filename)
+              text = path.read_text()
+              if text.count(old_script) != 1:
+                  raise SystemExit(f"theme preflight anchor mismatch in {filename}: {text.count(old_script)}")
+              path.write_text(text.replace(old_script, new_script, 1))
+          PY
+
       - name: Resolve exact lockfile
         run: npm install --package-lock-only --ignore-scripts
 
