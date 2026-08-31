@@ -55,7 +55,21 @@ jobs:
           verify_replacement = '    const key = name.includes("-") ? `"${name}":` : `${name}:`\n    assert(icon.includes(key), `Phosphor icon map is missing ${name}`)\n'
           if verify.count(verify_anchor) != 1:
               raise SystemExit("icon verifier anchor mismatch")
-          verify_path.write_text(verify.replace(verify_anchor, verify_replacement, 1))
+          verify = verify.replace(verify_anchor, verify_replacement, 1)
+          verify_read_anchor = 'const theme = read("src/pitchdogTheme.css")\n'
+          verify_read_replacement = 'const theme = read("src/pitchdogTheme.css")\nconst selectCaret = read("src/assets/icons/caret-down.svg")\n'
+          if verify.count(verify_read_anchor) != 1:
+              raise SystemExit("caret asset verifier read anchor mismatch")
+          verify = verify.replace(verify_read_anchor, verify_read_replacement, 1)
+          verify_assert_anchor = 'assert(theme.includes("--pd-select-caret:"), "custom Phosphor-derived select caret is missing")\n'
+          verify_assert_replacement = (
+              'assert(theme.includes("--pd-select-caret:"), "custom Phosphor-derived select caret is missing")\n'
+              'assert(theme.includes(\'url("./assets/icons/caret-down.svg")\'), "select caret does not reference the packaged Phosphor asset")\n'
+              'assert(selectCaret.includes(\'viewBox="0 0 256 256"\') && selectCaret.includes("M213.66,101.66"), "packaged select caret is not the Phosphor Caret Down geometry")\n'
+          )
+          if verify.count(verify_assert_anchor) != 1:
+              raise SystemExit("caret asset verifier assertion anchor mismatch")
+          verify_path.write_text(verify.replace(verify_assert_anchor, verify_assert_replacement, 1))
 
           app_path = Path("src/App.tsx")
           app = app_path.read_text()
@@ -69,6 +83,32 @@ jobs:
           if app.count(focus_anchor) != 1:
               raise SystemExit("Project focus restoration anchor mismatch")
           app_path.write_text(app.replace(focus_anchor, focus_replacement, 1))
+
+          theme_path = Path("src/pitchdogTheme.css")
+          theme = theme_path.read_text()
+          caret_anchor = '    --pd-select-caret: url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 256 256\'%3E%3Cpath fill=\'%23181917\' d=\'M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z\'/%3E%3C/svg%3E");\n'
+          caret_replacement = '    --pd-select-caret: url("./assets/icons/caret-down.svg");\n'
+          if theme.count(caret_anchor) != 1:
+              raise SystemExit("select caret data URI anchor mismatch")
+          theme = theme.replace(caret_anchor, caret_replacement, 1)
+          panel_anchor = '    will-change: opacity, transform;\n}\n\n.project-menu.is-open > .project-menu-panel {'
+          panel_replacement = (
+              '    background: #fbfaf6;\n'
+              '    box-shadow: 0 24px 64px rgba(24, 25, 23, .2), 0 0 0 1px rgba(24, 25, 23, .14);\n'
+              '    backdrop-filter: blur(24px) saturate(130%);\n'
+              '    will-change: opacity, transform;\n'
+              '}\n\n.project-menu.is-open > .project-menu-panel {'
+          )
+          if theme.count(panel_anchor) != 1:
+              raise SystemExit("Project panel surface anchor mismatch")
+          theme_path.write_text(theme.replace(panel_anchor, panel_replacement, 1))
+
+          caret_path = Path("src/assets/icons/caret-down.svg")
+          caret_path.parent.mkdir(parents=True, exist_ok=True)
+          caret_path.write_text('''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" aria-hidden="true">
+            <path fill="#181917" d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/>
+          </svg>
+          ''')
 
           g08_path = Path("electron/g08-interface-smoke.cjs")
           g08 = g08_path.read_text()
