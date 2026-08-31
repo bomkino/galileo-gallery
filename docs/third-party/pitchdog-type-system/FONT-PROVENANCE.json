@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "release": "13.0.0",
+  "sourceArchive": "FontBlind-Final-2026-08-28-v13.zip",
+  "licenseIdentifier": "CC0-1.0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+  "licenseFile": "FONT-LICENSE.md",
+  "declarationDate": "2026-08-29",
+  "rightsDeclaration": "pitch.dog declares the FontBlind v13 font binaries distributed by this repository to be dedicated to the public domain under CC0 1.0 Universal.",
+  "scope": [
+    "assets/fonts/*.{woff2,woff,ttf,otf}",
+    "pitchdog-font-handoff-v13/**/*.{woff2,woff,ttf,otf}"
+  ],
+  "runtimeManifest": "dist/pitchdog-font-runtime.json",
+  "knownIssues": [
+    "PD Eyebrow's native internal family name is Untitled / Untitled Regular."
+  ]
+}
