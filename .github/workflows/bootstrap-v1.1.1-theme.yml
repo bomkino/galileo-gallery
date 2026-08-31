@@ -125,6 +125,38 @@ jobs:
           git diff --cached --check
           git commit -m "feat: add verified light and dark interface modes"
 
+      - name: Snapshot generated theme source
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            index.html
+            package.json
+            README.md
+            CHANGELOG.md
+            public/theme-boot.js
+            src/App.tsx
+            src/StyleGallery.tsx
+            src/pitchdogTheme.css
+            src/ui/PhosphorIcon.tsx
+            src/presentation/ThemeControl.tsx
+            src/presentation/uiTheme.ts
+            src/assets/icons/caret-down.svg
+            src/assets/icons/caret-down-light.svg
+            electron/g08-interface-smoke.cjs
+            scripts/verify-design-system.cjs
+            scripts/verify-linux-protocols.cjs
+            docs/design-system.md
+            docs/programme/IMPLEMENTATION_STATUS.md
+            docs/releases/v1.1.1.md
+          )
+          for file in "${files[@]}"; do
+            test -f "$file"
+            mkdir -p "artifacts/theme-source/$(dirname "$file")"
+            cp "$file" "artifacts/theme-source/$file"
+          done
+          git show --stat --oneline HEAD > artifacts/theme-source/COMMIT.txt
+
       - name: Run real Electron dual-theme layout and interaction proof
         shell: bash
         run: |
@@ -143,6 +175,7 @@ jobs:
           path: |
             artifacts/g08/
             artifacts/hygiene/
+            artifacts/theme-source/
           if-no-files-found: warn
           retention-days: 14
 
