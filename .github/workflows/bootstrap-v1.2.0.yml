@@ -29,7 +29,7 @@ jobs:
       - name: Apply bounded interface-theme migration
         run: python scripts/bootstrap-v1.2.0.py
 
-      - name: Close preflight and contrast-test cracks
+      - name: Close preflight, contrast-test, and overflow-diagnostic cracks
         shell: bash
         run: |
           set -euo pipefail
@@ -54,6 +54,58 @@ jobs:
               if text.count(old_script) != 1:
                   raise SystemExit(f"theme preflight anchor mismatch in {filename}: {text.count(old_script)}")
               path.write_text(text.replace(old_script, new_script, 1))
+
+          g08_path = Path("electron/g08-interface-smoke.cjs")
+          g08 = g08_path.read_text()
+          prep_anchor = "        const shell = document.querySelector('.app-shell')\n        const stage = rect('.stage')\n"
+          prep_replacement = """        const shell = document.querySelector('.app-shell')
+        const shellBox = shell.getBoundingClientRect()
+        const describeElement = (element) => {
+            const box = element.getBoundingClientRect()
+            const style = getComputedStyle(element)
+            const id = element.id ? '#' + element.id : ''
+            const classes = Array.from(element.classList).slice(0, 5).map((name) => '.' + name).join('')
+            return {
+                element: element.tagName.toLowerCase() + id + classes,
+                left: box.left,
+                right: box.right,
+                width: box.width,
+                rightOverflow: box.right - shellBox.right,
+                leftOverflow: shellBox.left - box.left,
+                clientWidth: element.clientWidth,
+                scrollWidth: element.scrollWidth,
+                intrinsicOverflow: element.scrollWidth - element.clientWidth,
+                overflowX: style.overflowX,
+                position: style.position,
+                boxSizing: style.boxSizing,
+                minWidth: style.minWidth,
+                widthStyle: style.width,
+                marginLeft: style.marginLeft,
+                marginRight: style.marginRight,
+                borderLeft: style.borderLeftWidth,
+                borderRight: style.borderRightWidth,
+            }
+        }
+        const overflowOffenders = Array.from(shell.querySelectorAll('*'))
+            .map(describeElement)
+            .filter((item) => item.rightOverflow > 0.25 || item.leftOverflow > 0.25 || item.intrinsicOverflow > 1)
+            .sort((a, b) => Math.max(b.rightOverflow, b.leftOverflow, b.intrinsicOverflow) - Math.max(a.rightOverflow, a.leftOverflow, a.intrinsicOverflow))
+            .slice(0, 24)
+        const stage = rect('.stage')
+"""
+          if g08.count(prep_anchor) != 1:
+              raise SystemExit(f"overflow diagnostic prep anchor mismatch: {g08.count(prep_anchor)}")
+          g08 = g08.replace(prep_anchor, prep_replacement, 1)
+          shell_anchor = "                scrollHeight: shell.scrollHeight,\n            },\n            headerGeometry: {\n"
+          shell_replacement = "                scrollHeight: shell.scrollHeight,\n                box: { left: shellBox.left, right: shellBox.right, width: shellBox.width },\n                overflowOffenders,\n            },\n            headerGeometry: {\n"
+          if g08.count(shell_anchor) != 1:
+              raise SystemExit(f"overflow diagnostic shell anchor mismatch: {g08.count(shell_anchor)}")
+          g08 = g08.replace(shell_anchor, shell_replacement, 1)
+          error_anchor = "        if (value.shell.scrollWidth > value.shell.clientWidth + 1) throw new Error(`${key} has horizontally clipped studio content.`)\n"
+          error_replacement = "        if (value.shell.scrollWidth > value.shell.clientWidth + 1) throw new Error(`${key} has horizontally clipped studio content: ${JSON.stringify({ shell: value.shell, offenders: value.shell.overflowOffenders })}`)\n"
+          if g08.count(error_anchor) != 1:
+              raise SystemExit(f"overflow diagnostic error anchor mismatch: {g08.count(error_anchor)}")
+          g08_path.write_text(g08.replace(error_anchor, error_replacement, 1))
           PY
 
       - name: Resolve exact lockfile
