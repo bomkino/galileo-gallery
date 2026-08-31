@@ -37,12 +37,14 @@ jobs:
           from pathlib import Path
 
           helper_path = Path("electron/g08-theme-smoke.cjs")
-          helper = helper_path.read_text()
-          old_parser = r'value.match(/[\\d.]+/g)'
-          new_parser = r'value.match(/[\d.]+/g)'
-          if helper.count(old_parser) != 1:
-              raise SystemExit(f"contrast parser anchor mismatch: {helper.count(old_parser)}")
-          helper_path.write_text(helper.replace(old_parser, new_parser, 1))
+          helper_lines = helper_path.read_text().splitlines()
+          matches = [index for index, line in enumerate(helper_lines) if "const numbers = value.match(" in line]
+          if len(matches) != 1:
+              raise SystemExit(f"contrast parser line mismatch: {len(matches)}")
+          index = matches[0]
+          indent = helper_lines[index][:len(helper_lines[index]) - len(helper_lines[index].lstrip())]
+          helper_lines[index] = indent + r'const numbers = value.match(/[\d.]+/g)?.map(Number) ?? []'
+          helper_path.write_text("\n".join(helper_lines) + "\n")
 
           old_script = '<script src="./theme-preflight.js"></script>'
           new_script = '<script type="module" src="./theme-preflight.js"></script>'
