@@ -1,0 +1,82 @@
+name: Apply Galileo Gallery 1.1.1 interface polish
+
+on:
+  push:
+    branches: [codex/interface-balance-v1.1.1]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: galileo-gallery-v1-1-1-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  apply-and-prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: codex/interface-balance-v1.1.1
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Materialize the bounded migration
+        shell: bash
+        run: cat scripts/bootstrap-v1.1.1.part*.b64 | base64 --decode > scripts/bootstrap-v1.1.1.mjs
+
+      - name: Apply the bounded interface migration
+        run: node scripts/bootstrap-v1.1.1.mjs
+
+      - name: Resolve the exact lockfile
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Check generated smoke source
+        run: node --check electron/g08-interface-smoke.cjs
+
+      - name: Run source, build, Project, media, and design-system gates
+        run: npm test
+
+      - name: Prepare the auditable candidate commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f scripts/bootstrap-v1.1.1.mjs scripts/bootstrap-v1.1.1.part*.b64 .github/workflows/bootstrap-v1.1.1.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "fix: finish interface geometry and motion"
+
+      - name: Run real Electron layout, scale, motion, and screenshot proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run prepare:electron
+          sudo chown root:root node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+          source_sha="$(git rev-parse HEAD)"
+          source_tree="$(git rev-parse HEAD^{tree})"
+          GALLERY_SOURCE_SHA="$source_sha" GALLERY_SOURCE_TREE="$source_tree" xvfb-run -a npm run verify:g08-renderer
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: galileo-gallery-v1.1.1-interface-proof
+          path: artifacts/g08/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Push the proved candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin "HEAD:${GITHUB_REF_NAME}"
