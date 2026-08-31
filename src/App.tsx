@@ -195,6 +195,89 @@ function Tooltip({ text, children }: { text: string; children: React.ReactElemen
     )
 }
 
+type ProjectMenuProps = {
+    projectOpening: boolean
+    isExporting: boolean
+    onOpenProject: () => void | Promise<void>
+    onSaveProject: () => void | Promise<void>
+    onOpenTemplate: () => void | Promise<void>
+    onSaveTemplate: () => void | Promise<void>
+}
+
+function ProjectMenu({
+    projectOpening,
+    isExporting,
+    onOpenProject,
+    onSaveProject,
+    onOpenTemplate,
+    onSaveTemplate,
+}: ProjectMenuProps) {
+    const [open, setOpen] = React.useState(false)
+    const rootRef = React.useRef<HTMLDivElement | null>(null)
+    const triggerRef = React.useRef<HTMLButtonElement | null>(null)
+
+    const close = React.useCallback((restoreFocus = false) => {
+        setOpen(false)
+        if (restoreFocus) {
+            triggerRef.current?.focus({ preventScroll: true })
+            requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }))
+        }
+    }, [])
+
+    React.useEffect(() => {
+        if (!open) return
+        const onPointerDown = (event: PointerEvent) => {
+            if (!rootRef.current?.contains(event.target as Node)) close()
+        }
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key !== "Escape") return
+            event.preventDefault()
+            close(true)
+        }
+        window.addEventListener("pointerdown", onPointerDown)
+        window.addEventListener("keydown", onKeyDown)
+        return () => {
+            window.removeEventListener("pointerdown", onPointerDown)
+            window.removeEventListener("keydown", onKeyDown)
+        }
+    }, [close, open])
+
+    const run = (action: () => void | Promise<void>) => {
+        close()
+        void action()
+    }
+
+    return (
+        <div className={`project-menu ${open ? "is-open" : ""}`} ref={rootRef}>
+            <button
+                className="button quiet project-trigger"
+                type="button"
+                ref={triggerRef}
+                aria-haspopup="menu"
+                aria-expanded={open}
+                aria-controls="project-menu-panel"
+                onClick={() => setOpen((current) => !current)}
+            >
+                <Icon name="folder" />
+                <span>Project</span>
+                <span className="menu-caret"><Icon name="caret-down" size={14} /></span>
+            </button>
+            <div
+                className="project-menu-panel"
+                id="project-menu-panel"
+                role="menu"
+                aria-hidden={!open}
+            >
+                <button role="menuitem" type="button" disabled={projectOpening || isExporting} onClick={() => run(onOpenProject)}>Open project</button>
+                <button role="menuitem" type="button" onClick={() => run(onSaveProject)}><span>Save project</span><small>media + progress</small></button>
+                <span className="project-menu-divider" aria-hidden="true" />
+                <button role="menuitem" type="button" onClick={() => run(onOpenTemplate)}>Apply template</button>
+                <button role="menuitem" type="button" onClick={() => run(onSaveTemplate)}><span>Save template</span><small>settings only</small></button>
+            </div>
+        </div>
+    )
+}
+
 function mediaRatio(media: SelectedMedia): Promise<number> {
     return new Promise((resolve) => {
         if (media.type === "image") {
@@ -1461,16 +1544,14 @@ function AppView() {
                     <button className="button quiet" type="button" onClick={() => setShowStyleGallery(true)}>
                         <Icon name="spark" /> Scenes
                     </button>
-                    <details className="project-menu">
-                        <summary className="button quiet"><Icon name="folder" /> Project</summary>
-                        <div>
-                            <button type="button" disabled={projectOpening || Boolean(isExporting)} onClick={(event) => { void openProject(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Open project</button>
-                            <button type="button" onClick={(event) => { void saveProject(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Save project <small>media + progress</small></button>
-                            <span />
-                            <button type="button" onClick={(event) => { void openTemplate(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Apply template</button>
-                            <button type="button" onClick={(event) => { void saveTemplate(); event.currentTarget.closest("details")?.removeAttribute("open") }}>Save template <small>settings only</small></button>
-                        </div>
-                    </details>
+                    <ProjectMenu
+                        projectOpening={projectOpening}
+                        isExporting={Boolean(isExporting)}
+                        onOpenProject={openProject}
+                        onSaveProject={saveProject}
+                        onOpenTemplate={openTemplate}
+                        onSaveTemplate={saveTemplate}
+                    />
                     {projectOpening ? (
                         <button className="button quiet" type="button" onClick={() => void cancelProjectOpen()}>
                             Cancel open

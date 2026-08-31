@@ -17,13 +17,15 @@ const app = read("src/App.tsx")
 const scale = read("src/presentation/InterfaceScaleSurface.tsx")
 const icon = read("src/ui/PhosphorIcon.tsx")
 const theme = read("src/pitchdogTheme.css")
+const selectCaret = read("src/assets/icons/caret-down.svg")
 const notices = read("THIRD_PARTY_NOTICES.md")
 const designNotes = read("docs/design-system.md")
 const fontSource = JSON.parse(read("src/assets/fonts/SOURCE.json"))
 
-assert(packageJson.version === "1.1.0", "package version must be 1.1.0")
+assert(packageJson.version === "1.1.1", "package version must be 1.1.1")
 assert(packageJson.dependencies?.["@phosphor-icons/react"] === "2.1.10", "Phosphor React must be pinned to 2.1.10")
 assert(lock.packages?.[""]?.dependencies?.["@phosphor-icons/react"] === "2.1.10", "package lock must pin Phosphor React")
+assert(lock.packages?.[""]?.version === "1.1.1", "package lock root version must be 1.1.1")
 assert(packageJson.scripts?.["verify:design-system"] === "node scripts/verify-design-system.cjs", "verify:design-system script is missing")
 assert(packageJson.scripts?.test?.includes("npm run verify:design-system"), "npm test does not run the design-system verifier")
 
@@ -40,11 +42,24 @@ assert(scale.includes('<Icon name="plus"'), "Interface Scale plus icon is not Ph
 assert(!scale.includes("<span aria-hidden=\"true\">−</span>"), "legacy text minus control remains")
 assert(!scale.includes("<span aria-hidden=\"true\">+</span>"), "legacy text plus control remains")
 
-for (const name of ["check", "close", "film", "folder", "grip", "minus", "mute", "play", "plus", "skip", "spark", "trash"]) {
-    assert(icon.includes(`${name}:`), `Phosphor icon map is missing ${name}`)
+for (const name of ["caret-down", "check", "close", "film", "folder", "grip", "minus", "mute", "play", "plus", "skip", "spark", "trash"]) {
+    const key = name.includes("-") ? `"${name}":` : `${name}:`
+    assert(icon.includes(key), `Phosphor icon map is missing ${name}`)
 }
 assert(icon.includes("data-phosphor-icon={name}"), "Phosphor icons need a runtime provenance marker")
 assert(icon.includes('@phosphor-icons/react/dist/csr/'), "icons must use direct tree-shakeable Phosphor imports")
+assert(app.includes("function ProjectMenu("), "controlled Project menu component is missing")
+assert(app.includes('className="button quiet project-trigger"'), "Project menu trigger contract is missing")
+assert(app.includes('className="menu-caret"'), "Project menu caret is missing")
+assert(!app.includes('<details className="project-menu">'), "native Project details disclosure remains")
+assert(theme.includes("--pd-select-caret:"), "custom Phosphor-derived select caret is missing")
+assert(theme.includes('url("./assets/icons/caret-down.svg")'), "select caret does not reference the packaged Phosphor asset")
+assert(theme.includes("background-image: var(--pd-select-caret) !important"), "select caret cannot survive authored background shorthands")
+assert(selectCaret.includes('viewBox="0 0 256 256"') && selectCaret.includes("M213.66,101.66"), "packaged select caret is not the Phosphor Caret Down geometry")
+assert(theme.includes("appearance: none"), "native select caret was not disabled")
+assert(theme.includes(".project-menu.is-open > .project-menu-panel"), "bidirectional Project menu motion contract is missing")
+assert(theme.includes("@keyframes pd-inspector-enter"), "inspector panel reveal motion is missing")
+assert(theme.includes("grid-template-columns: minmax(0, 1fr) auto auto"), "stable titlebar geometry contract is missing")
 
 for (const family of ["PD Head", "PD Head Alt", "PD Body", "PD Body Alt", "PD Eyebrow"]) {
     assert(theme.includes(`font-family: "${family}"`), `missing @font-face for ${family}`)
@@ -91,4 +106,5 @@ console.log(JSON.stringify({
     fonts: fontFiles.length,
     spacingScale: "4px",
     minimumTarget: "44px",
+    interfacePolish: "stable-header + Phosphor-carets + disclosure-motion",
 }, null, 2))

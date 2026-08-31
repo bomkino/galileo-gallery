@@ -2,13 +2,13 @@
 
 Updated: 31 August 2026
 
-Current stable release: **v1.1.0**
+Current stable release: **v1.1.1**
 
 ## Released product boundary
 
-State: **29/29 independently authored Scenes released; deterministic export and Project safety boundaries retained; pitch.dog typography, Phosphor iconography, and spacing-system verification released in v1.1.0**
+State: **29/29 independently authored Scenes released; deterministic export and Project safety boundaries retained; pitch.dog typography, Phosphor iconography, spacing, geometry, caret, and disclosure-motion verification released through v1.1.1**
 
-Version 1.0.1 released the independently rebuilt 29-Scene catalogue after source, renderer, cross-platform, and batched human-review gates. Version 1.1.0 changes the product interface around those Scenes: local pitch.dog fonts, a shared Phosphor icon boundary, tokenised spacing, stronger G08 layout checks, and an exact-version release workflow. Scene timing, Project schemas, media semantics, and export contracts are intentionally unchanged.
+Version 1.0.1 released the independently rebuilt 29-Scene catalogue after source, renderer, cross-platform, and batched human-review gates. Version 1.1.0 changed the product interface around those Scenes: local pitch.dog fonts, a shared Phosphor icon boundary, tokenised spacing, stronger G08 layout checks, and an exact-version release workflow. Version 1.1.1 removes the remaining titlebar collision, standardises caret geometry, stabilises Project disclosure, balances wrapped actions, and verifies reduced-motion-safe panel transitions. Scene timing, Project schemas, media semantics, and export contracts are intentionally unchanged.
 
 The sections below preserve gate-by-gate evidence and point-in-time caveats. They are an audit archive, not a competing list of current user-facing work. Active documentation begins at `docs/README.md`.
 

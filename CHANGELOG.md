@@ -2,6 +2,21 @@
 
 All notable released changes are recorded here. Dates use UTC.
 
+## [1.1.1] — 2026-08-31
+
+### Fixed
+
+- Removed the titlebar collision between autosave status and Interface Scale.
+- Rebalanced wrapped header actions at high Interface Scale so Export receives a full, deliberate row.
+- Reduced short-height empty-state clipping without shrinking interactive targets.
+- Replaced cramped native select arrows with explicit, consistently inset Phosphor-derived carets.
+
+### Changed
+
+- Rebuilt Project as a controlled popover with outside-click dismissal, Escape focus restoration, caret rotation, and bidirectional motion that never shifts the application grid.
+- Added a restrained inspector-panel reveal and a complete reduced-motion fallback.
+- Strengthened G08 with sibling-overlap, disclosure stability, select-caret, stacked-header, clipping, and screenshot assertions.
+
 ## [1.1.0] — 2026-08-31
 
 ### Added

@@ -131,16 +131,50 @@ async function readMetrics(window) {
         focusTarget.focus()
         const focusStyle = getComputedStyle(focusTarget)
         const manifest = JSON.parse(localStorage.getItem('${PRESENTATION_KEY}'))
+        const brand = rect('.brand-lockup')
+        const actions = rect('.title-actions')
+        const primary = rect('.title-actions .button.primary')
+        const autosaveElement = document.querySelector('.autosave-status')
+        const autosaveStyle = autosaveElement ? getComputedStyle(autosaveElement) : null
+        const autosaveRect = autosaveElement?.getBoundingClientRect()
+        const autosaveVisible = Boolean(autosaveElement && autosaveStyle.display !== 'none' && autosaveStyle.visibility !== 'hidden' && autosaveRect.width > 0 && autosaveRect.height > 0)
+        const autosave = autosaveRect ? { left: autosaveRect.left, top: autosaveRect.top, right: autosaveRect.right, bottom: autosaveRect.bottom, width: autosaveRect.width, height: autosaveRect.height } : null
+        const overlaps = (a, b) => Boolean(a && b && Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5)
+        const selectElement = document.querySelector('.inspector select')
+        if (!selectElement) throw new Error('Inspector select control is missing.')
+        const selectStyle = getComputedStyle(selectElement)
+        const inspectorPanelStyle = getComputedStyle(document.querySelector('.inspector > .inspector-scroll'))
+        const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
         return {
             viewport: { width: innerWidth, height: innerHeight },
             interfaceScale: Number(scaleRoot.dataset.interfaceScale),
             scaleLabel: document.querySelector('.interface-scale-value').textContent.trim(),
             surfaceTransform: getComputedStyle(document.querySelector('.interface-scale-surface')).transform,
             shell: {
+                display: getComputedStyle(shell).display,
                 clientWidth: shell.clientWidth,
                 scrollWidth: shell.scrollWidth,
                 clientHeight: shell.clientHeight,
                 scrollHeight: shell.scrollHeight,
+            },
+            headerGeometry: {
+                brand,
+                actions,
+                primary,
+                autosave,
+                autosaveVisible,
+                autosaveBrandOverlap: autosaveVisible && overlaps(autosave, brand),
+                autosaveActionsOverlap: autosaveVisible && overlaps(autosave, actions),
+            },
+            controlPolish: {
+                selectAppearance: selectStyle.appearance || selectStyle.webkitAppearance,
+                selectBackgroundImage: selectStyle.backgroundImage,
+                selectBackgroundPosition: selectStyle.backgroundPosition,
+                selectBackgroundSize: selectStyle.backgroundSize,
+                selectPaddingRight: parseFloat(selectStyle.paddingRight),
+                inspectorAnimationName: inspectorPanelStyle.animationName,
+                inspectorAnimationDuration: parseFloat(inspectorPanelStyle.animationDuration) || 0,
+                reducedMotion,
             },
             regions: {
                 titlebar: rect('.titlebar'),
@@ -192,6 +226,81 @@ async function readMetrics(window) {
             },
         }
     })()`)
+}
+
+async function verifyDisclosureMotion(window) {
+    const result = await window.webContents.executeJavaScript(`(async () => {
+        const projectBefore = localStorage.getItem('${PROJECT_KEY}')
+        const trigger = document.querySelector('.project-trigger')
+        const menu = document.querySelector('.project-menu-panel')
+        const caret = document.querySelector('.menu-caret')
+        if (!trigger || !menu || !caret) throw new Error('Project disclosure controls are missing.')
+        const readRect = (element) => {
+            const box = element.getBoundingClientRect()
+            return { left: box.left, top: box.top, right: box.right, bottom: box.bottom, width: box.width, height: box.height }
+        }
+        const stableElements = ['.titlebar', '.library', '.studio', '.inspector'].map((selector) => document.querySelector(selector))
+        const before = stableElements.map(readRect)
+        const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
+        trigger.click()
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        const configuredStyle = getComputedStyle(menu)
+        const configured = {
+            duration: configuredStyle.transitionDuration,
+            property: configuredStyle.transitionProperty,
+        }
+        await new Promise((resolve) => setTimeout(resolve, reducedMotion ? 20 : 260))
+        const openStyle = getComputedStyle(menu)
+        const openRect = readRect(menu)
+        const open = {
+            expanded: trigger.getAttribute('aria-expanded'),
+            hidden: menu.getAttribute('aria-hidden'),
+            opacity: Number(openStyle.opacity),
+            visibility: openStyle.visibility,
+            transform: openStyle.transform,
+            caretTransform: getComputedStyle(caret).transform,
+            rect: openRect,
+            insideViewport: openRect.left >= -1 && openRect.right <= innerWidth + 1 && openRect.top >= -1 && openRect.bottom <= innerHeight + 1,
+        }
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+        await new Promise((resolve) => setTimeout(resolve, reducedMotion ? 20 : 360))
+        const closedStyle = getComputedStyle(menu)
+        const after = stableElements.map(readRect)
+        const maximumLayoutShift = Math.max(...before.flatMap((box, index) => {
+            const next = after[index]
+            return ['left', 'top', 'right', 'bottom', 'width', 'height'].map((key) => Math.abs(box[key] - next[key]))
+        }))
+        return {
+            configured,
+            reducedMotion,
+            open,
+            closed: {
+                expanded: trigger.getAttribute('aria-expanded'),
+                hidden: menu.getAttribute('aria-hidden'),
+                opacity: Number(closedStyle.opacity),
+                visibility: closedStyle.visibility,
+                pointerEvents: closedStyle.pointerEvents,
+                transform: closedStyle.transform,
+                focusRestored: document.activeElement === trigger,
+            },
+            maximumLayoutShift,
+            projectInvariant: projectBefore === localStorage.getItem('${PROJECT_KEY}'),
+        }
+    })()`)
+    if (result.open.expanded !== 'true' || result.open.hidden !== 'false' || result.open.opacity < 0.99 || result.open.visibility !== 'visible' || !result.open.insideViewport) {
+        throw new Error('Project menu did not open visibly inside the viewport.')
+    }
+    if (!result.reducedMotion && (!result.configured.duration || result.configured.duration.split(',').every((value) => parseFloat(value) < 0.15))) {
+        throw new Error('Project menu has no premium disclosure transition.')
+    }
+    if (!result.reducedMotion && result.open.caretTransform === 'none') throw new Error('Project menu caret did not rotate.')
+    if (result.closed.expanded !== 'false' || result.closed.hidden !== 'true' || result.closed.opacity > 0.01 || result.closed.pointerEvents !== 'none' || !result.closed.focusRestored) {
+        throw new Error('Project menu did not close cleanly and restore trigger focus: ' + JSON.stringify(result.closed))
+    }
+    if (result.maximumLayoutShift > 0.75) throw new Error('Opening or closing Project menu shifted the application layout.')
+    if (!result.projectInvariant) throw new Error('Project menu disclosure changed Project state.')
+    await settleRenderer(window)
+    return result
 }
 
 async function verifyWorkflowNavigation(window) {
@@ -382,6 +491,18 @@ function assertInvariant(metrics) {
             throw new Error(`${key} changed or distorted the preview canvas ratio.`)
         }
         if (value.shell.scrollWidth > value.shell.clientWidth + 1) throw new Error(`${key} has horizontally clipped studio content.`)
+        if (value.headerGeometry.autosaveBrandOverlap || value.headerGeometry.autosaveActionsOverlap) {
+            throw new Error(`${key} lets autosave status collide with a titlebar neighbour.`)
+        }
+        if (value.controlPolish.selectAppearance !== 'none' || value.controlPolish.selectBackgroundImage === 'none' || value.controlPolish.selectPaddingRight < 44) {
+            throw new Error(`${key} lost the explicit, comfortably inset select caret.`)
+        }
+        if (!value.controlPolish.reducedMotion && (value.controlPolish.inspectorAnimationName === 'none' || value.controlPolish.inspectorAnimationDuration < 0.15)) {
+            throw new Error(`${key} lost inspector panel reveal motion.`)
+        }
+        if (value.shell.display === 'flex' && value.headerGeometry.primary.width + 2 < value.headerGeometry.actions.width) {
+            throw new Error(`${key} leaves the primary Export action stranded in a short wrapped row.`)
+        }
         if (value.regions.titlebar.bottom > value.regions.library.top + 1) {
             throw new Error(`${key} lets the header overlap the Slides rail.`)
         }
@@ -457,6 +578,13 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
     if (!formatTruth[0]?.disabled || !formatTruth[0]?.text.includes("Quiet Carousel v1 or Vitrine v2 only") || !formatTruth[1]?.disabled || !formatTruth[1]?.text.includes("Quiet Carousel only")) {
         throw new Error("G08 did not preserve the honest Scene-specific export capability boundary.")
     }
+    const disclosure = await verifyDisclosureMotion(window)
+    await window.webContents.executeJavaScript(`document.querySelector('.project-trigger')?.click()`)
+    await waitFor(window, `document.querySelector('.project-menu')?.classList.contains('is-open')`, "open Project menu for screenshot")
+    await new Promise((resolve) => setTimeout(resolve, disclosure.reducedMotion ? 20 : 260))
+    captures.projectMenu100 = await capture(window, outputDirectory, "gallery-project-menu-100")
+    await window.webContents.executeJavaScript(`window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`)
+    await new Promise((resolve) => setTimeout(resolve, disclosure.reducedMotion ? 20 : 260))
     const workflow = await verifyWorkflowNavigation(window)
     if (workflow.slides !== "Slides"
         || workflow.tabs.join(",") !== "Look,Motion,Export"
@@ -492,6 +620,7 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
                     tree: process.env.GALLERY_SOURCE_TREE ?? null,
                 },
                 captures,
+                disclosure,
                 catalogueMetrics,
                 catalogueReachability,
                 metrics,
@@ -512,6 +641,7 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
         },
         host,
         workflow,
+        disclosure,
         captures,
         catalogueMetrics,
         catalogueReachability,

@@ -38,6 +38,14 @@ Interface icons come from `@phosphor-icons/react@2.1.10`, under the MIT License.
 
 Scene artwork, rendered media, and app identity artwork are not interface icons and remain outside this rule.
 
+## Geometry and motion
+
+The titlebar is a three-column grid: flexible brand, optional status, fixed actions. Autosave is part of layout rather than an absolutely centred overlay, so it cannot collide with Interface Scale or action controls.
+
+Select controls suppress the platform arrow and use the Phosphor Caret Down geometry at a consistent 16 px size with 16 px right inset. The Project control uses the live Phosphor component and rotates it as disclosure state changes.
+
+Project is a controlled, absolutely positioned popover. Opening and closing animate opacity and transform without changing panel, stage, or titlebar geometry. Inspector workflow panels use a short entrance transition. Every motion rule becomes instantaneous under `prefers-reduced-motion: reduce`.
+
 ## Verification
 
 `npm test` includes `npm run verify:design-system`. That gate checks:
@@ -50,7 +58,7 @@ Scene artwork, rendered media, and app identity artwork are not interface icons 
 - spacing tokens and primary-surface contracts;
 - documentation and third-party notices.
 
-`npm run verify:g08-renderer` then exercises the actual Electron interface across viewport sizes and Interface Scales. It checks minimum targets, reachability, overflow, canvas geometry, persistence, keyboard navigation, pitch.dog font resolution, and Phosphor runtime markers, and writes screenshot evidence to `artifacts/g08/`.
+`npm run verify:g08-renderer` then exercises the actual Electron interface across viewport sizes and Interface Scales. It checks minimum targets, reachability, overflow, canvas geometry, titlebar sibling collisions, wrapped-action balance, select-caret geometry, Project disclosure motion and layout stability, persistence, keyboard navigation, pitch.dog font resolution, and Phosphor runtime markers, and writes screenshot evidence to `artifacts/g08/`.
 
 ## Updating
 

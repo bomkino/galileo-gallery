@@ -1,4 +1,5 @@
 import type { Icon as PhosphorComponent, IconWeight } from "@phosphor-icons/react"
+import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown"
 import { CheckIcon } from "@phosphor-icons/react/dist/csr/Check"
 import { CircleIcon } from "@phosphor-icons/react/dist/csr/Circle"
 import { DotsSixVerticalIcon } from "@phosphor-icons/react/dist/csr/DotsSixVertical"
@@ -14,6 +15,7 @@ import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash"
 import { XIcon } from "@phosphor-icons/react/dist/csr/X"
 
 const ICONS = {
+    "caret-down": CaretDownIcon,
     check: CheckIcon,
     close: XIcon,
     film: FilmStripIcon,
