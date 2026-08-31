@@ -36,9 +36,14 @@ jobs:
           text = path.read_text()
           anchor = 'const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")'
           replacement = "const PRESENTATION_KEY = '${PRESENTATION_KEY}'\nconst PROJECT_KEY = '${PROJECT_KEY}'\n\n" + anchor
+          duplicate_guard = '    assert(text.indexOf(search, first + search.length) < 0, `duplicate ${label}`)\n'
           if text.count(anchor) != 1:
               raise SystemExit("bootstrap constant anchor mismatch")
-          path.write_text(text.replace(anchor, replacement, 1))
+          if text.count(duplicate_guard) != 1:
+              raise SystemExit("bootstrap duplicate guard mismatch")
+          text = text.replace(anchor, replacement, 1)
+          text = text.replace(duplicate_guard, "", 1)
+          path.write_text(text)
           PY
           node scripts/bootstrap-v1.1.1.mjs
 
