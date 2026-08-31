@@ -42,6 +42,44 @@ jobs:
           path.write_text(text.replace(broken, fixed, 1))
           PY
           python3 scripts/bootstrap-v1.1.1-theme.py
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("electron/g08-interface-smoke.cjs")
+          text = path.read_text()
+          old = (
+              "        const changed = root.dataset.uiTheme !== target\n"
+              "        toggle.focus({ preventScroll: true })\n"
+              "        if (changed) toggle.click()\n"
+              "        const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches\n"
+          )
+          new = (
+              "        const storedBefore = localStorage.getItem('${THEME_KEY}')\n"
+              "        const sourceBefore = root.dataset.uiThemeSource\n"
+              "        const changed = root.dataset.uiTheme !== target || storedBefore !== target || sourceBefore !== 'stored'\n"
+              "        const waitForApplied = async (expected) => {\n"
+              "            const deadline = performance.now() + 1500\n"
+              "            while (root.dataset.uiTheme !== expected && performance.now() < deadline) {\n"
+              "                await new Promise((resolve) => requestAnimationFrame(resolve))\n"
+              "            }\n"
+              "            if (root.dataset.uiTheme !== expected) throw new Error('Theme toggle did not reach ' + expected)\n"
+              "        }\n"
+              "        toggle.focus({ preventScroll: true })\n"
+              "        if (root.dataset.uiTheme !== target) {\n"
+              "            toggle.click()\n"
+              "            await waitForApplied(target)\n"
+              "        } else if (storedBefore !== target || sourceBefore !== 'stored') {\n"
+              "            const opposite = target === 'dark' ? 'light' : 'dark'\n"
+              "            toggle.click()\n"
+              "            await waitForApplied(opposite)\n"
+              "            toggle.click()\n"
+              "            await waitForApplied(target)\n"
+              "        }\n"
+              "        const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches\n"
+          )
+          if text.count(old) != 1:
+              raise SystemExit("deterministic theme persistence anchor mismatch")
+          path.write_text(text.replace(old, new, 1))
+          PY
 
       - name: Install exact dependencies
         run: npm ci
