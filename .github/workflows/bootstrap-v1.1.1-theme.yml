@@ -74,6 +74,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("electron/g08-interface-smoke.cjs")
+          path.write_text(path.read_text().rstrip() + "\n")
+          PY
           rm -f scripts/bootstrap-v1.1.1-theme.py .github/workflows/bootstrap-v1.1.1-theme.yml
           rm -rf scripts/theme-bootstrap
           git config user.name "github-actions[bot]"
