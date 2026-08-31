@@ -27,7 +27,20 @@ jobs:
           cache: npm
 
       - name: Apply geometry and motion polish
-        run: node scripts/bootstrap-v1.1.1.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path = Path("scripts/bootstrap-v1.1.1.mjs")
+          text = path.read_text()
+          anchor = 'const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")'
+          replacement = "const PRESENTATION_KEY = '${PRESENTATION_KEY}'\nconst PROJECT_KEY = '${PROJECT_KEY}'\n\n" + anchor
+          if text.count(anchor) != 1:
+              raise SystemExit("bootstrap constant anchor mismatch")
+          path.write_text(text.replace(anchor, replacement, 1))
+          PY
+          node scripts/bootstrap-v1.1.1.mjs
 
       - name: Resolve exact lockfile
         run: npm install --package-lock-only --ignore-scripts
