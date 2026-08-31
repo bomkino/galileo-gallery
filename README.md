@@ -2,7 +2,7 @@
 
 Galileo Gallery is a free, local desktop motion studio for turning images, videos, GIFs, and deck slides into authored gallery films. Build a clean loop, a finite sequence, or a one-shot animation for a deck, explainer, social post, website, or transparent overlay.
 
-**Latest stable: 1.1.1**
+**Latest stable: 1.2.0**
 
 The app contains 29 distinct motion Scenes distilled from 29 original components. Each Scene keeps its own timing, geometry, spatial rules, and physical character. Import, Timeline, Project storage, Interface Scale, and deterministic export remain shared.
 
@@ -16,6 +16,7 @@ The app contains 29 distinct motion Scenes distilled from 29 original components
 - Transparent backgrounds for compositing
 - MP4, Premiere MOV, WebM, compact WebM, ProRes 422 HQ, and ProRes 4444 XQ output
 - Portable `.galileo` Projects and reusable look templates
+- System-aware Light and Dark interface modes with local preference
 
 Media stays on the user's machine.
 
@@ -48,8 +49,8 @@ That command bypasses quarantine for this app. It does not notarize the build or
 ### Linux
 
 ```bash
-chmod +x Galileo.Gallery-1.1.1-Linux-x86_64.AppImage
-./Galileo.Gallery-1.1.1-Linux-x86_64.AppImage
+chmod +x Galileo.Gallery-1.2.0-Linux-x86_64.AppImage
+./Galileo.Gallery-1.2.0-Linux-x86_64.AppImage
 ```
 
 ## Run from source
@@ -73,7 +74,7 @@ npm run verify:design-system
 npm run verify:g08-renderer
 ```
 
-`npm test` covers build correctness, Project safety, Scene timing, media handling, persistence, deterministic audio/export contracts, Interface Scale, the pitch.dog font source, Phosphor icon coverage, and spacing-system invariants. G08 runs the real Electron interface across viewport sizes and scale settings and writes screenshot evidence under `artifacts/g08/`.
+`npm test` covers build correctness, Project safety, Scene timing, media handling, persistence, deterministic audio/export contracts, Interface Scale, the pitch.dog font source, Phosphor icon coverage, theme boundaries, and spacing-system invariants. G08 runs the real Electron interface across viewport sizes and scale settings, proves Light and Dark behaviour and persistence, and writes screenshot evidence under `artifacts/g08/`.
 
 ## Package
 
@@ -89,7 +90,7 @@ Each command prepares the platform FFmpeg binary, builds the renderer, and write
 
 ## Interface system
 
-Version 1.1.1 keeps the packaged pitch.dog type system and Phosphor control language, then closes the remaining geometry defects: collision-free titlebar placement, explicit well-inset carets, stable disclosure menus, balanced wrapped actions, and reduced-motion-safe panel transitions. Padding, gaps, and control sizing continue to follow a shared 4 px scale with a 44 px minimum target at every Interface Scale.
+Version 1.2.0 adds system-aware Light and Dark modes to the Scene catalogue and studio while preserving the packaged pitch.dog type system, Phosphor controls, stable geometry, and 4 px spacing scale. The warm dark palette is authored rather than inverted; both modes retain 44 px minimum targets, explicit carets, focus visibility, reduced-motion behaviour, and identical Scene, Project, Timeline, and export truth.
 
 See [`docs/design-system.md`](docs/design-system.md) for exact source pins, type roles, spacing tokens, icon rules, and verification. See [`docs/README.md`](docs/README.md) for the active documentation map. The full historical programme and renderer evidence remains available under `docs/programme/`.
 

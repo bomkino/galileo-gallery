@@ -1,6 +1,7 @@
 const crypto = require("node:crypto")
 const fs = require("node:fs")
 const path = require("node:path")
+const { verifyThemeModes } = require("./g08-theme-smoke.cjs")
 
 const PRESENTATION_KEY = "galileo-gallery:local-presentation:v1"
 const PROJECT_KEY = "galileo-gallery-project-v1"
@@ -119,7 +120,43 @@ async function readMetrics(window) {
         }
         const scaleRoot = document.querySelector('[data-interface-scale]')
         const shell = document.querySelector('.app-shell')
+        const shellBox = shell.getBoundingClientRect()
+        const physicalScale = Number(scaleRoot.dataset.interfaceScale) / 100
+        const shellContentRight = shellBox.left + shell.clientWidth * physicalScale
+        const describeElement = (element) => {
+            const box = element.getBoundingClientRect()
+            const style = getComputedStyle(element)
+            const id = element.id ? '#' + element.id : ''
+            const classes = Array.from(element.classList).slice(0, 5).map((name) => '.' + name).join('')
+            return {
+                element: element.tagName.toLowerCase() + id + classes,
+                left: box.left,
+                right: box.right,
+                width: box.width,
+                rightOverflow: box.right - shellContentRight,
+                leftOverflow: shellBox.left - box.left,
+                clientWidth: element.clientWidth,
+                scrollWidth: element.scrollWidth,
+                intrinsicOverflow: element.scrollWidth - element.clientWidth,
+                overflowX: style.overflowX,
+                position: style.position,
+                boxSizing: style.boxSizing,
+                minWidth: style.minWidth,
+                widthStyle: style.width,
+                marginLeft: style.marginLeft,
+                marginRight: style.marginRight,
+                borderLeft: style.borderLeftWidth,
+                borderRight: style.borderRightWidth,
+            }
+        }
+        const overflowOffenders = Array.from(shell.querySelectorAll('*'))
+            .filter((element) => !element.closest('.stage-shell'))
+            .map(describeElement)
+            .filter((item) => item.rightOverflow > 0.25 || item.leftOverflow > 0.25 || item.intrinsicOverflow > 1)
+            .sort((a, b) => Math.max(b.rightOverflow, b.leftOverflow, b.intrinsicOverflow) - Math.max(a.rightOverflow, a.leftOverflow, a.intrinsicOverflow))
+            .slice(0, 24)
         const stage = rect('.stage')
+        const projectPanel = rect('.project-menu-panel')
         const stageShellElement = document.querySelector('.stage-shell')
         const stageShell = rect('.stage-shell')
         const declaredAspect = getComputedStyle(stageShellElement).aspectRatio
@@ -156,6 +193,8 @@ async function readMetrics(window) {
                 scrollWidth: shell.scrollWidth,
                 clientHeight: shell.clientHeight,
                 scrollHeight: shell.scrollHeight,
+                box: { left: shellBox.left, right: shellBox.right, width: shellBox.width, contentRight: shellContentRight },
+                overflowOffenders,
             },
             headerGeometry: {
                 brand,
@@ -165,6 +204,7 @@ async function readMetrics(window) {
                 autosaveVisible,
                 autosaveBrandOverlap: autosaveVisible && overlaps(autosave, brand),
                 autosaveActionsOverlap: autosaveVisible && overlaps(autosave, actions),
+                projectPanel,
             },
             controlPolish: {
                 selectAppearance: selectStyle.appearance || selectStyle.webkitAppearance,
@@ -188,6 +228,7 @@ async function readMetrics(window) {
                 addMedia: rect('.add-media'),
                 segment: rect('.inspector-top .segment button'),
                 scaleButton: rect('.interface-scale-control button'),
+                themeButton: rect('[data-interface-theme-control]'),
                 format: rect('.format-cards button'),
                 export: rect('.export-button'),
                 timeline: rect('.timeline'),
@@ -370,6 +411,7 @@ async function readCatalogueMetrics(window) {
             },
             targets: {
                 scaleButton: rect('.interface-scale-control button'),
+                themeButton: rect('[data-interface-theme-control]'),
                 category: rect('.style-category-pills button'),
                 search: rect('.style-search input'),
                 scene: rect('.style-card'),
@@ -490,7 +532,11 @@ function assertInvariant(metrics) {
             || Math.abs(value.preview.planeRatio - value.preview.declaredRatio) > 0.002) {
             throw new Error(`${key} changed or distorted the preview canvas ratio.`)
         }
-        if (value.shell.scrollWidth > value.shell.clientWidth + 1) throw new Error(`${key} has horizontally clipped studio content.`)
+        if (value.shell.scrollWidth > value.shell.clientWidth + 1) throw new Error(`${key} has horizontally clipped studio content: ${JSON.stringify({ shell: value.shell, offenders: value.shell.overflowOffenders })}`)
+        if (value.headerGeometry.projectPanel.left < value.shell.box.left - 1
+            || value.headerGeometry.projectPanel.right > value.shell.box.contentRight + 1) {
+            throw new Error(`${key} lets the hidden Project panel escape the usable shell: ${JSON.stringify(value.headerGeometry.projectPanel)}`)
+        }
         if (value.headerGeometry.autosaveBrandOverlap || value.headerGeometry.autosaveActionsOverlap) {
             throw new Error(`${key} lets autosave status collide with a titlebar neighbour.`)
         }
@@ -520,7 +566,13 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
     await resize(window, 1280, 900)
     await waitFor(window, `document.querySelector('.style-gallery-shell')`, "scene catalogue")
     await setScale(window, 100)
-    const captures = { catalogue100: await capture(window, outputDirectory, "gallery-catalogue-100") }
+    const captures = {}
+    const catalogueThemes = await verifyThemeModes(window, outputDirectory, "catalogue", {
+        verifySystem: true,
+        verifyPersistence: true,
+    })
+    Object.assign(captures, catalogueThemes.captures)
+    captures.catalogue100 = await capture(window, outputDirectory, "gallery-catalogue-100")
 
     // Keyboard, persisted reload, and a real StorageEvent all converge without StrictMode leaks.
     await window.webContents.executeJavaScript(`window.dispatchEvent(new KeyboardEvent('keydown', { key: '=', ctrlKey: true, bubbles: true }))`)
@@ -598,6 +650,9 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
         throw new Error("G08 did not preserve the Slides, Look, Motion, Export workflow without changing Project truth.")
     }
     await freezeStoryPose(window)
+    const studioThemes = await verifyThemeModes(window, outputDirectory, "studio")
+    Object.assign(captures, studioThemes.captures)
+    await freezeStoryPose(window)
 
     const metrics = {}
     const reachability = {}
@@ -621,6 +676,8 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
                 },
                 captures,
                 disclosure,
+                catalogueThemes,
+                studioThemes,
                 catalogueMetrics,
                 catalogueReachability,
                 metrics,
@@ -642,6 +699,8 @@ async function runG08InterfaceSmoke(window, outputDirectory) {
         host,
         workflow,
         disclosure,
+        catalogueThemes,
+        studioThemes,
         captures,
         catalogueMetrics,
         catalogueReachability,

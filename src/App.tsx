@@ -17,6 +17,7 @@ import { styleProfile, styleSettings } from "./styleProfiles"
 import { placeholderItems, studioTimeline } from "./timeline"
 import { GALLERY_STYLES, galleryScene, galleryStyle, latestSceneVersion, sceneVariants, supportsSceneVersion, supportsVerifiedPngFrames, type StyleDefinition } from "./styleRegistry"
 import { InterfaceScaleControl, InterfaceScaleSurface } from "./presentation/InterfaceScaleSurface"
+import ThemeControl from "./presentation/ThemeControl"
 import type {
     ExportFormat,
     ExportProgress,
@@ -1541,6 +1542,7 @@ function AppView() {
                 </div>
                 <div className="title-actions">
                     <InterfaceScaleControl />
+                    <ThemeControl />
                     <button className="button quiet" type="button" onClick={() => setShowStyleGallery(true)}>
                         <Icon name="spark" /> Scenes
                     </button>

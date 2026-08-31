@@ -38,6 +38,16 @@ Interface icons come from `@phosphor-icons/react@2.1.10`, under the MIT License.
 
 Scene artwork, rendered media, and app identity artwork are not interface icons and remain outside this rule.
 
+## Light and dark interface modes
+
+Light and dark are interface preferences, not creative settings. `src/presentation/theme.ts` owns the bounded `"light" | "dark"` state, follows the operating system on first launch, persists a manual choice locally, and synchronises storage changes between windows. `public/theme-preflight.js` applies the same decision before React mounts, preventing a bright or dark flash at launch.
+
+`src/themeModes.css` owns semantic colour tokens and loads after the geometry and typography layers. The light mode preserves the editorial paper system. The dark mode is an authored warm-charcoal palette, not an inversion. Both retain the same spacing, dimensions, borders, type metrics, and target sizes. The Theme control appears in both the Scene catalogue and studio and uses Phosphor Sun and Moon icons.
+
+Theme preference never enters `.galileo` Projects, Scene settings, Timeline state, media, or export requests. Hidden export renderers use the existing neutral boundary. The colour layer is forbidden from targeting rendered Scene or export content.
+
+The mode system also honours `prefers-reduced-motion`, `prefers-reduced-transparency`, `prefers-contrast`, and forced-colour environments. Select controls use separate Phosphor-derived caret assets so the glyph remains legible in both palettes.
+
 ## Geometry and motion
 
 The titlebar is a three-column grid: flexible brand, optional status, fixed actions. Autosave is part of layout rather than an absolutely centred overlay, so it cannot collide with Interface Scale or action controls.
@@ -56,9 +66,10 @@ Project is a controlled, absolutely positioned popover. Opening and closing anim
 - removal of hand-authored product-control SVGs;
 - Phosphor coverage for the shared icon vocabulary;
 - spacing tokens and primary-surface contracts;
+- bounded Light / Dark state, preflight, accessibility fallbacks, and export isolation;
 - documentation and third-party notices.
 
-`npm run verify:g08-renderer` then exercises the actual Electron interface across viewport sizes and Interface Scales. It checks minimum targets, reachability, overflow, canvas geometry, titlebar sibling collisions, wrapped-action balance, select-caret geometry, Project disclosure motion and layout stability, persistence, keyboard navigation, pitch.dog font resolution, and Phosphor runtime markers, and writes screenshot evidence to `artifacts/g08/`.
+`npm run verify:g08-renderer` then exercises the actual Electron interface across viewport sizes and Interface Scales. It checks minimum targets, reachability, overflow, canvas geometry, titlebar sibling collisions, wrapped-action balance, both colour modes, operating-system fallback, persisted reload, storage synchronisation, contrast, select-caret geometry, Project disclosure motion and layout stability, Project invariance, keyboard navigation, pitch.dog font resolution, and Phosphor runtime markers, and writes screenshot evidence to `artifacts/g08/`.
 
 ## Updating
 

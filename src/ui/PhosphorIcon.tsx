@@ -6,11 +6,13 @@ import { DotsSixVerticalIcon } from "@phosphor-icons/react/dist/csr/DotsSixVerti
 import { FilmStripIcon } from "@phosphor-icons/react/dist/csr/FilmStrip"
 import { FolderOpenIcon } from "@phosphor-icons/react/dist/csr/FolderOpen"
 import { MinusIcon } from "@phosphor-icons/react/dist/csr/Minus"
+import { MoonIcon } from "@phosphor-icons/react/dist/csr/Moon"
 import { PlayIcon } from "@phosphor-icons/react/dist/csr/Play"
 import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus"
 import { SkipForwardIcon } from "@phosphor-icons/react/dist/csr/SkipForward"
 import { SparkleIcon } from "@phosphor-icons/react/dist/csr/Sparkle"
 import { SpeakerSlashIcon } from "@phosphor-icons/react/dist/csr/SpeakerSlash"
+import { SunIcon } from "@phosphor-icons/react/dist/csr/Sun"
 import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash"
 import { XIcon } from "@phosphor-icons/react/dist/csr/X"
 
@@ -22,11 +24,13 @@ const ICONS = {
     folder: FolderOpenIcon,
     grip: DotsSixVerticalIcon,
     minus: MinusIcon,
+    moon: MoonIcon,
     mute: SpeakerSlashIcon,
     play: PlayIcon,
     plus: PlusIcon,
     skip: SkipForwardIcon,
     spark: SparkleIcon,
+    sun: SunIcon,
     trash: TrashIcon,
 } satisfies Record<string, PhosphorComponent>
 

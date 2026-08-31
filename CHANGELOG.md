@@ -2,6 +2,22 @@
 
 All notable released changes are recorded here. Dates use UTC.
 
+## [1.2.0] — 2026-08-31
+
+### Added
+
+- System-aware Light and Dark interface modes in both the Scene catalogue and studio.
+- Local theme persistence, cross-window storage synchronisation, matching application chrome colour, and export-neutral hidden renderers.
+- Dedicated warm dark surfaces and a second Phosphor-derived select caret rather than colour inversion.
+- Forced-colour, increased-contrast, reduced-transparency, and reduced-motion fallbacks.
+
+### Hardened
+
+- Theme changes preserve titlebar, panel, stage, menu, card, and action geometry without layout shift.
+- Interface theme never enters `.galileo` Projects, Scene settings, Timeline state, or export requests.
+- G08 now proves both palettes, operating-system fallback, persisted reload, storage synchronisation, contrast, focus, clipping, Project invariance, and dark Project-menu treatment.
+- Production dependency auditing is a release gate; full build-tool advisories remain separately recorded and visible.
+
 ## [1.1.1] — 2026-08-31
 
 ### Fixed
