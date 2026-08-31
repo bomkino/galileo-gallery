@@ -48,8 +48,8 @@ That command bypasses quarantine for this app. It does not notarize the build or
 ### Linux
 
 ```bash
-chmod +x "Galileo Gallery-1.1.0-Linux-x86_64.AppImage"
-./"Galileo Gallery-1.1.0-Linux-x86_64.AppImage"
+chmod +x Galileo.Gallery-1.1.0-Linux-x86_64.AppImage
+./Galileo.Gallery-1.1.0-Linux-x86_64.AppImage
 ```
 
 ## Run from source
