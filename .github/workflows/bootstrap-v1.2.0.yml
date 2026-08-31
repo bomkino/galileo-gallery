@@ -43,7 +43,7 @@ jobs:
               raise SystemExit(f"contrast parser line mismatch: {len(matches)}")
           index = matches[0]
           indent = helper_lines[index][:len(helper_lines[index]) - len(helper_lines[index].lstrip())]
-          helper_lines[index] = indent + r'const numbers = value.match(/[\d.]+/g)?.map(Number) ?? []'
+          helper_lines[index] = indent + r'const numbers = value.match(/[\\d.]+/g)?.map(Number) ?? []'
           helper_path.write_text("\n".join(helper_lines) + "\n")
 
           old_script = '<script src="./theme-preflight.js"></script>'
