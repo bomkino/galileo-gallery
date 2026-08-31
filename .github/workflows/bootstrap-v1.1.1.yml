@@ -116,7 +116,22 @@ jobs:
           error_replacement = "        throw new Error('Project menu did not close cleanly and restore trigger focus: ' + JSON.stringify(result.closed))\n"
           if g08.count(error_anchor) != 1:
               raise SystemExit("Project disclosure diagnostic anchor mismatch")
-          g08_path.write_text(g08.replace(error_anchor, error_replacement, 1))
+          g08 = g08.replace(error_anchor, error_replacement, 1)
+          close_wait_anchor = "        await new Promise((resolve) => setTimeout(resolve, reducedMotion ? 20 : 260))\n        const closedStyle = getComputedStyle(menu)\n"
+          close_wait_replacement = "        await new Promise((resolve) => setTimeout(resolve, reducedMotion ? 20 : 360))\n        const closedStyle = getComputedStyle(menu)\n"
+          if g08.count(close_wait_anchor) != 1:
+              raise SystemExit("Project disclosure close wait anchor mismatch")
+          g08 = g08.replace(close_wait_anchor, close_wait_replacement, 1)
+          pointer_anchor = "                visibility: closedStyle.visibility,\n                transform: closedStyle.transform,\n"
+          pointer_replacement = "                visibility: closedStyle.visibility,\n                pointerEvents: closedStyle.pointerEvents,\n                transform: closedStyle.transform,\n"
+          if g08.count(pointer_anchor) != 1:
+              raise SystemExit("Project disclosure pointer metric anchor mismatch")
+          g08 = g08.replace(pointer_anchor, pointer_replacement, 1)
+          close_assert_anchor = "    if (result.closed.expanded !== 'false' || result.closed.hidden !== 'true' || result.closed.opacity > 0.01 || result.closed.visibility !== 'hidden' || !result.closed.focusRestored) {\n"
+          close_assert_replacement = "    if (result.closed.expanded !== 'false' || result.closed.hidden !== 'true' || result.closed.opacity > 0.01 || result.closed.pointerEvents !== 'none' || !result.closed.focusRestored) {\n"
+          if g08.count(close_assert_anchor) != 1:
+              raise SystemExit("Project disclosure close assertion anchor mismatch")
+          g08_path.write_text(g08.replace(close_assert_anchor, close_assert_replacement, 1))
           PY
 
       - name: Resolve exact lockfile
