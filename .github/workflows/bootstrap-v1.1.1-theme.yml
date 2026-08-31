@@ -31,6 +31,16 @@ jobs:
         run: |
           set -euo pipefail
           cat scripts/theme-bootstrap/chunk-* | base64 --decode | gzip --decompress > scripts/bootstrap-v1.1.1-theme.py
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("scripts/bootstrap-v1.1.1-theme.py")
+          text = path.read_text()
+          broken = r"""assert(protocols.includes('"script-src \'self\'"'), "packaged CSP no longer permits only self-hosted scripts")"""
+          fixed = """assert(protocols.includes(`"script-src 'self'"`), "packaged CSP no longer permits only self-hosted scripts")"""
+          if text.count(broken) != 1:
+              raise SystemExit("CSP verifier correction anchor mismatch")
+          path.write_text(text.replace(broken, fixed, 1))
+          PY
           python3 scripts/bootstrap-v1.1.1-theme.py
 
       - name: Install exact dependencies
