@@ -365,7 +365,7 @@ async function clickText(window, selector, text) {
 }
 
 async function projectAction(window, text, expectedNotice) {
-    await clickText(window, ".project-menu summary", "Project")
+    await clickText(window, ".project-trigger", "Project")
     await clickText(window, ".project-menu button", text)
     await until(window, `document.querySelector('.autosave-status')?.textContent.includes(${JSON.stringify(expectedNotice)})`, expectedNotice)
     return window.webContents.executeJavaScript("document.querySelector('.autosave-status').textContent.trim()")
@@ -1564,7 +1564,7 @@ async function runCorruptOpenEvidence(window, evidenceRoot) {
     let corruptOpenNotice
     let hydration
     try {
-        await clickText(window, ".project-menu summary", "Project")
+        await clickText(window, ".project-trigger", "Project")
         await clickText(window, ".project-menu button", "Open project")
         await until(window, `document.querySelector('.autosave-status')?.textContent.includes('Could not hydrate Vitrine Portrait.mp4.')`, "corrupt media hydration rejection", 25_000)
         corruptOpenNotice = await window.webContents.executeJavaScript("document.querySelector('.autosave-status').textContent.trim()")
