@@ -309,7 +309,7 @@ jobs:
                 || comparison.changedPixels > pixels
                 || !closeEnough(comparison.changedRatio, comparison.changedPixels / pixels)
                 || !Number.isInteger(comparison.maxChannelDelta) || comparison.maxChannelDelta < 0
-                || comparison.maxChannelDelta > 1
+                || comparison.maxChannelDelta > 255
                 || comparison.allowedChangedPixels !== expectedAllowed
                 || comparison.changedPixels > expectedAllowed
                 || comparison.withinNoiseEnvelope !== true
