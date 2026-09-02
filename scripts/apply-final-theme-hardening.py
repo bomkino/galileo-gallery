@@ -123,6 +123,34 @@ html[data-ui-theme] .style-card.is-current > p em { color: var(--pd-ui-card-curr
 """,
     "selected-card contrast boundary",
 )
+replace_once(
+    "src/pitchdogTheme.css",
+    "html[data-ui-theme] .autosave-status { color: color-mix(in srgb, var(--muted) 76%, transparent); }\n",
+    "html[data-ui-theme] .autosave-status { color: var(--muted); }\n",
+    "legible autosave status",
+)
+replace_once(
+    "src/pitchdogTheme.css",
+    "html[data-ui-theme] .button.primary,\n",
+    "html[data-ui-theme] .button.primary { background: var(--accent); }\nhtml[data-ui-theme] .button.primary,\n",
+    "primary action accent fill",
+)
+replace_once(
+    "src/pitchdogTheme.css",
+    """    .project-menu > .project-menu-panel {
+        right: auto;
+        left: 0;
+        transform-origin: top left;
+    }
+""",
+    """    .project-menu > .project-menu-panel {
+        right: 0;
+        left: auto;
+        transform-origin: top right;
+    }
+""",
+    "in-bounds high-scale Project menu anchor",
+)
 
 # 6. Release files use their exact public GitHub names so SHA256SUMS verifies after download.
 for label in ("macOS", "Windows", "Linux"):
@@ -227,6 +255,9 @@ assert((theme.match(/--pd-ui-card-current-profile:/g) ?? []).length === 2, "both
 assert(theme.includes(".style-card.is-current > span > small"), "selected catalogue metadata lacks its contrast boundary")
 assert(theme.includes(".style-card.is-current > p { color: var(--pd-ui-card-current-copy); }"), "selected catalogue copy lacks its contrast boundary")
 assert(theme.includes(".style-card.is-current > p em { color: var(--pd-ui-card-current-profile); }"), "selected catalogue profile copy lacks its contrast boundary")
+assert(theme.includes("html[data-ui-theme] .autosave-status { color: var(--muted); }"), "autosave status is not legible in both themes")
+assert(theme.includes("html[data-ui-theme] .button.primary { background: var(--accent); }"), "primary action lost its semantic accent fill")
+assert(!theme.includes("right: auto;\n        left: 0;\n        transform-origin: top left;"), "high-scale Project menu still creates hidden horizontal overflow")
 assert(g08.includes("sample('catalogue selected card metadata', '.style-card.is-current > span > small')"), "G08 does not pin selected-card contrast coverage")
 assert(g08.includes("sample('catalogue ordinary card metadata', '.style-card:not(.is-current) > span > small')"), "G08 does not pin ordinary-card contrast coverage")
 assert(g08.includes("captureCatalogueSceneProof"), "G08 does not prove every catalogue Scene across themes")
@@ -245,6 +276,7 @@ assert(g08.includes("schemaVersion: 2") && g08.includes("bitmapEncoding: 'electr
 assert(g08.includes("toBitmap()"), "G08 does not compare raw presented-frame pixels")
 assert(g08.includes("focusIndicator.ratio < 3"), "G08 does not enforce non-text focus contrast")
 assert(g08.includes("const caretColour = theme === 'dark' ? '%23f4efe7' : '%23181917'"), "G08 does not recognise bundled theme-correct select carets")
+assert(g08.includes("const channelScale = text.startsWith('color(srgb ') ? 255 : 1"), "G08 misreads normalized CSS colour channels")
 assert(!implementationStatus.includes("Current frontier: **stable v1.0.1"), "implementation status carries a stale release frontier")
 assert(!implementationStatus.includes("must be triaged before a release frontier"), "implementation status contradicts the production audit boundary")
 '''
@@ -314,6 +346,24 @@ write(verify_path, verify)
 # 9. Strengthen real Electron proof: clean screenshots, broader contrast, card fit, action naming, and all 29 Scene hashes.
 g08_path = "electron/g08-interface-smoke.cjs"
 g08 = read(g08_path)
+
+appearance_colour_parse_anchor = r'''        const parse = (value) => {
+            const numbers = String(value).match(/[\\d.]+/g)?.map(Number) ?? []
+            if (numbers.length < 3) return [0, 0, 0, 0]
+            return [numbers[0], numbers[1], numbers[2], numbers.length > 3 ? numbers[3] : 1]
+        }
+'''
+appearance_colour_parse_replacement = r'''        const parse = (value) => {
+            const text = String(value).trim()
+            const numbers = text.match(/[\\d.]+/g)?.map(Number) ?? []
+            if (numbers.length < 3) return [0, 0, 0, 0]
+            const channelScale = text.startsWith('color(srgb ') ? 255 : 1
+            return [numbers[0] * channelScale, numbers[1] * channelScale, numbers[2] * channelScale, numbers.length > 3 ? numbers[3] : 1]
+        }
+'''
+if g08.count(appearance_colour_parse_anchor) != 1:
+    raise SystemExit("G08: CSS colour parser anchor mismatch")
+g08 = g08.replace(appearance_colour_parse_anchor, appearance_colour_parse_replacement, 1)
 
 timeout_anchor = '''function sha256(value) {
     return crypto.createHash("sha256").update(value).digest("hex")
