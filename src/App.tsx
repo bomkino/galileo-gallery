@@ -1,6 +1,7 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 import Icon from "./ui/PhosphorIcon"
+import ThemeControl from "./presentation/ThemeControl"
 import OpeningReel from "./OpeningReel"
 import ExpertControls, { type ExpertPreset, type ExpertTab } from "./ExpertControls"
 import ProductSceneRenderer, { isAuthoredVitrine, productSceneDuration } from "./scenes/ProductSceneRenderer"
@@ -1541,6 +1542,7 @@ function AppView() {
                 </div>
                 <div className="title-actions">
                     <InterfaceScaleControl />
+                    <ThemeControl />
                     <button className="button quiet" type="button" onClick={() => setShowStyleGallery(true)}>
                         <Icon name="spark" /> Scenes
                     </button>

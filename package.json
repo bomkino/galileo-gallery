@@ -101,7 +101,7 @@
       ],
       "darkModeSupport": true,
       "identity": "-",
-      "artifactName": "${productName}-${version}-macOS-${arch}.${ext}",
+      "artifactName": "Galileo.Gallery-${version}-macOS-${arch}.${ext}",
       "extraResources": [
         {
           "from": "vendor/ffmpeg/darwin-${arch}",
@@ -111,7 +111,7 @@
     },
     "win": {
       "icon": "build/icon.ico",
-      "artifactName": "${productName}-${version}-Windows-${arch}.${ext}",
+      "artifactName": "Galileo.Gallery-${version}-Windows-${arch}.${ext}",
       "target": [
         {
           "target": "portable",
@@ -131,7 +131,7 @@
       "icon": "build/icon.png",
       "category": "AudioVideo",
       "syncDesktopName": true,
-      "artifactName": "${productName}-${version}-Linux-${arch}.${ext}",
+      "artifactName": "Galileo.Gallery-${version}-Linux-${arch}.${ext}",
       "target": [
         {
           "target": "AppImage",

@@ -89,7 +89,7 @@ Each command prepares the platform FFmpeg binary, builds the renderer, and write
 
 ## Interface system
 
-Version 1.1.1 keeps the packaged pitch.dog type system and Phosphor control language, then closes the remaining geometry defects: collision-free titlebar placement, explicit well-inset carets, stable disclosure menus, balanced wrapped actions, and reduced-motion-safe panel transitions. Padding, gaps, and control sizing continue to follow a shared 4 px scale with a 44 px minimum target at every Interface Scale.
+Version 1.1.1 keeps the packaged pitch.dog type system and Phosphor control language, closes the remaining geometry defects, and adds persistent Light and Dark interface modes. Both modes preserve Scene pixels, Project data, layout geometry, 44 px minimum targets, explicit carets, stable disclosure menus, and reduced-motion-safe transitions across every Interface Scale.
 
 See [`docs/design-system.md`](docs/design-system.md) for exact source pins, type roles, spacing tokens, icon rules, and verification. See [`docs/README.md`](docs/README.md) for the active documentation map. The full historical programme and renderer evidence remains available under `docs/programme/`.
 

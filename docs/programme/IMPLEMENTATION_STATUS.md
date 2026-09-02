@@ -6,9 +6,9 @@ Current stable release: **v1.1.1**
 
 ## Released product boundary
 
-State: **29/29 independently authored Scenes released; deterministic export and Project safety boundaries retained; pitch.dog typography, Phosphor iconography, spacing, geometry, caret, and disclosure-motion verification released through v1.1.1**
+State: **29/29 independently authored Scenes released; deterministic export and Project safety boundaries retained; pitch.dog typography, Phosphor iconography, spacing, geometry, dual-theme contrast, caret, disclosure-motion, and Scene-pixel-isolation verification released through v1.1.1**
 
-Version 1.0.1 released the independently rebuilt 29-Scene catalogue after source, renderer, cross-platform, and batched human-review gates. Version 1.1.0 changed the product interface around those Scenes: local pitch.dog fonts, a shared Phosphor icon boundary, tokenised spacing, stronger G08 layout checks, and an exact-version release workflow. Version 1.1.1 removes the remaining titlebar collision, standardises caret geometry, stabilises Project disclosure, balances wrapped actions, and verifies reduced-motion-safe panel transitions. Scene timing, Project schemas, media semantics, and export contracts are intentionally unchanged.
+Version 1.0.1 released the independently rebuilt 29-Scene catalogue after source, renderer, cross-platform, and batched human-review gates. Version 1.1.0 changed the product interface around those Scenes: local pitch.dog fonts, a shared Phosphor icon boundary, tokenised spacing, stronger G08 layout checks, and an exact-version release workflow. Version 1.1.1 removes the remaining titlebar collision, standardises caret geometry, stabilises Project disclosure, balances wrapped actions, adds persistent Light and Dark modes, and proves contrast, fit, and Scene-pixel isolation across every supported Interface Scale. Scene timing, Project schemas, media semantics, and export contracts are intentionally unchanged.
 
 The sections below preserve gate-by-gate evidence and point-in-time caveats. They are an audit archive, not a competing list of current user-facing work. Active documentation begins at `docs/README.md`.
 
@@ -33,7 +33,7 @@ Dependency receipt:
 - untrusted import uses `yauzl@3.4.0` with lazy entries, streamed extraction, and entry-size validation;
 - production dependency audit reports zero known vulnerabilities at this source state.
 
-The full development-tool dependency audit still reports nine high-severity advisories in pre-existing build/test transitive dependencies. They are outside the packaged production dependency graph and remain unremediated in G01A; they must be triaged before a release frontier.
+The full development-tool dependency audit still reports nine high-severity advisories in pre-existing build/test transitive dependencies. They are outside the packaged production dependency graph, remain recorded as tooling debt, and must be reviewed independently rather than force-upgraded through a release.
 
 ## G01B — clean Project schema
 
@@ -206,6 +206,4 @@ Full evidence: `docs/programme/evidence/G11_EVIDENCE_RECEIPT.md`.
 - exact Garuda behavior;
 - broad human audio acceptance beyond the deterministic and renderer evidence already recorded.
 
-Current frontier: **stable v1.0.1 publication and exact published-artifact smoke**. The catalogue promotion
-checkpoint is complete only when its immutable RC SHA passes Ubuntu, macOS, Windows, renderer, native
-package, and release audit gates. G04 remains deferred until an exact Garuda runner is available.
+Release discipline: every candidate must pass Ubuntu, macOS, Windows, renderer, native-package, production-dependency, checksum, and published-artifact gates before promotion. G04 remains deferred until an exact Garuda runner is available.

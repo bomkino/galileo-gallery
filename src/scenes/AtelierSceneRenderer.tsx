@@ -67,7 +67,8 @@ export default function AtelierSceneRenderer({ contract, config, timeMs, duratio
         className={`atelier-scene atelier-scene-${contract.id}`}
         data-scene-id={contract.id}
         data-source-state={frame.stateHash}
-        style={{ background }}
+        data-scene-theme={settings.theme}
+        style={{ background, color: settings.theme === "light" ? "#181917" : "#f7f4ec", colorScheme: settings.theme === "light" ? "light" : "dark" }}
         role="img"
         aria-label={`${contract.id} gallery Scene`}
     >
