@@ -3,6 +3,7 @@ name: Apply Galileo Gallery 1.1.1 final theme hardening
 on:
   push:
     branches: [codex/galileo-theme-hygiene-v1.1.1]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,7 +15,7 @@ concurrency:
 jobs:
   apply-and-prove:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v5
         with:
@@ -26,7 +27,19 @@ jobs:
           node-version: 24
           cache: npm
 
-      - name: Materialize and apply CSP-safe dual-theme hardening
+      - name: Verify bounded staging ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="124a80ee62ab1e80510ac146ca81ea9b0b2b83ef"
+          git merge-base --is-ancestor "$base" HEAD
+          unexpected="$(git diff --name-only "$base"...HEAD | grep -Ev '^(\.github/workflows/bootstrap-v1\.1\.1-theme\.yml|scripts/theme-bootstrap/chunk-[0-9]+|scripts/apply-final-theme-hardening\.py)$' || true)"
+          if test -n "$unexpected"; then
+            printf 'Unexpected staging paths:\n%s\n' "$unexpected" >&2
+            exit 1
+          fi
+
+      - name: Materialize and apply CSP-safe dual-theme migration
         shell: bash
         run: |
           set -euo pipefail
@@ -81,32 +94,53 @@ jobs:
           path.write_text(text.replace(old, new, 1))
           PY
 
+      - name: Apply all-Scene isolation and fit-through-cracks hardening
+        run: |
+          python3 -W error -m py_compile scripts/apply-final-theme-hardening.py
+          python3 scripts/apply-final-theme-hardening.py
+
+      - name: Parse generated verification code
+        run: |
+          node --check public/theme-boot.js
+          node --check electron/g08-interface-smoke.cjs
+          node --check scripts/verify-design-system.cjs
+          git diff --check
+
       - name: Install exact dependencies
         run: npm ci
 
       - name: Run complete source suite
         run: npm test
 
-      - name: Audit production dependency surface
+      - name: Audit dependency surface
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p artifacts/hygiene
           set +e
+          npm audit --json > artifacts/hygiene/npm-audit-full.json
+          full_status=$?
           npm audit --omit=dev --json > artifacts/hygiene/npm-audit-production.json
-          audit_status=$?
+          production_status=$?
           set -e
           node - <<'NODE'
           const fs = require('node:fs')
-          const report = JSON.parse(fs.readFileSync('artifacts/hygiene/npm-audit-production.json', 'utf8'))
-          const counts = report.metadata?.vulnerabilities
-          if (!counts) throw new Error('npm audit did not return vulnerability metadata.')
-          console.log(JSON.stringify({ productionAudit: counts }, null, 2))
-          if ((counts.high ?? 0) > 0 || (counts.critical ?? 0) > 0) process.exit(1)
+          const full = JSON.parse(fs.readFileSync('artifacts/hygiene/npm-audit-full.json', 'utf8'))
+          const production = JSON.parse(fs.readFileSync('artifacts/hygiene/npm-audit-production.json', 'utf8'))
+          const summary = {
+            full: full.metadata?.vulnerabilities ?? null,
+            production: production.metadata?.vulnerabilities ?? null,
+            dependencies: production.metadata?.dependencies ?? null,
+          }
+          fs.writeFileSync('artifacts/hygiene/audit-summary.json', JSON.stringify(summary, null, 2) + '\n')
+          console.log(JSON.stringify(summary, null, 2))
+          const counts = summary.production
+          if (!counts || (counts.high ?? 0) > 0 || (counts.critical ?? 0) > 0) process.exit(1)
           NODE
-          if test "$audit_status" -ne 0; then
-            node -e "const r=require('./artifacts/hygiene/npm-audit-production.json'); const v=r.metadata?.vulnerabilities; if (!v || (v.high??0)>0 || (v.critical??0)>0) process.exit(1)"
-          fi
+          # Full/dev audit is evidence, not an invitation to force-upgrade the packaging toolchain.
+          test "$production_status" -eq 0 || node -e "const r=require('./artifacts/hygiene/npm-audit-production.json'); const v=r.metadata?.vulnerabilities; if(!v||(v.high??0)>0||(v.critical??0)>0)process.exit(1)"
+          echo "full_audit_exit=$full_status" >> artifacts/hygiene/audit-exits.txt
+          echo "production_audit_exit=$production_status" >> artifacts/hygiene/audit-exits.txt
 
       - name: Prepare final candidate commit
         shell: bash
@@ -117,30 +151,42 @@ jobs:
           path = Path("electron/g08-interface-smoke.cjs")
           path.write_text(path.read_text().rstrip() + "\n")
           PY
-          rm -f scripts/bootstrap-v1.1.1-theme.py .github/workflows/bootstrap-v1.1.1-theme.yml
-          rm -rf scripts/theme-bootstrap
+          rm -f \
+            scripts/bootstrap-v1.1.1-theme.py \
+            scripts/apply-final-theme-hardening.py \
+            .github/workflows/bootstrap-v1.1.1-theme.yml
+          rm -rf scripts/theme-bootstrap scripts/__pycache__
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git diff --cached --check
+          if git grep -nE 'bootstrap-v1\.1\.1-theme|theme-bootstrap|apply-final-theme-hardening' -- . ':!docs/programme/evidence/**'; then
+            echo "Temporary migration material remains in the candidate." >&2
+            exit 1
+          fi
           git commit -m "feat: add verified light and dark interface modes"
 
-      - name: Snapshot generated theme source
+      - name: Snapshot final source
         shell: bash
         run: |
           set -euo pipefail
           files=(
             index.html
             package.json
+            package-lock.json
             README.md
             CHANGELOG.md
             public/theme-boot.js
+            src/main.tsx
             src/App.tsx
             src/StyleGallery.tsx
+            src/styles.css
+            src/interfacePolish.css
             src/pitchdogTheme.css
             src/ui/PhosphorIcon.tsx
             src/presentation/ThemeControl.tsx
             src/presentation/uiTheme.ts
+            src/scenes/AtelierSceneRenderer.tsx
             src/assets/icons/caret-down.svg
             src/assets/icons/caret-down-light.svg
             electron/g08-interface-smoke.cjs
@@ -156,8 +202,10 @@ jobs:
             cp "$file" "artifacts/theme-source/$file"
           done
           git show --stat --oneline HEAD > artifacts/theme-source/COMMIT.txt
+          git status --short > artifacts/theme-source/WORKTREE.txt
+          test ! -s artifacts/theme-source/WORKTREE.txt
 
-      - name: Run real Electron dual-theme layout and interaction proof
+      - name: Run real Electron dual-theme layout and all-Scene proof
         shell: bash
         run: |
           set -euo pipefail
@@ -168,10 +216,126 @@ jobs:
           source_tree="$(git rev-parse HEAD^{tree})"
           GALLERY_SOURCE_SHA="$source_sha" GALLERY_SOURCE_TREE="$source_tree" xvfb-run -a npm run verify:g08-renderer
 
+      - name: Verify final proof bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f artifacts/g08/renderer-receipt.json
+          test -f artifacts/hygiene/audit-summary.json
+          test -f artifacts/theme-source/COMMIT.txt
+          test -f artifacts/theme-source/WORKTREE.txt
+          test ! -s artifacts/theme-source/WORKTREE.txt
+          node - <<'NODE'
+          const fs = require('node:fs')
+          const { execFileSync } = require('node:child_process')
+          const receipt = JSON.parse(fs.readFileSync('artifacts/g08/renderer-receipt.json', 'utf8'))
+          const audit = JSON.parse(fs.readFileSync('artifacts/hygiene/audit-summary.json', 'utf8'))
+          const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+          const sourceTree = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim()
+          if (receipt.source?.sha !== sourceSha || receipt.source?.tree !== sourceTree) {
+            throw new Error('Final proof is not bound to the generated candidate commit and tree.')
+          }
+          const catalogue = receipt.visualIsolation?.catalogue
+          const studio = receipt.visualIsolation?.studio
+          const lightEntries = Object.entries(catalogue?.light ?? {})
+          const darkEntries = Object.entries(catalogue?.dark ?? {})
+          const light = lightEntries.map(([id]) => id).sort()
+          const dark = darkEntries.map(([id]) => id).sort()
+          const lightHashes = lightEntries.map(([, value]) => value?.sha256)
+          const darkHashes = darkEntries.map(([, value]) => value?.sha256)
+          if (light.length !== 29 || dark.length !== 29 || light.join('\n') !== dark.join('\n')
+              || lightHashes.some((hash) => !/^[a-f0-9]{64}$/i.test(hash ?? ''))
+              || darkHashes.some((hash) => !/^[a-f0-9]{64}$/i.test(hash ?? ''))
+              || new Set(lightHashes).size !== 29 || new Set(darkHashes).size !== 29) {
+            throw new Error('Final proof does not cover 29 unique catalogue Scenes in both themes.')
+          }
+          for (const id of light) {
+            if (catalogue.light[id].sha256 !== catalogue.dark[id].sha256) {
+              throw new Error(`Final proof contains a Light/Dark hash mismatch for ${id}.`)
+            }
+          }
+          if (!Array.isArray(catalogue?.mismatches) || catalogue.mismatches.length) {
+            throw new Error('Final proof contains Scene theme leaks or lacks the mismatch ledger.')
+          }
+          if (!studio?.light?.sha256 || studio.light.sha256 !== studio?.dark?.sha256) {
+            throw new Error('Studio Scene preview changed with UI theme.')
+          }
+          const expectedStudioKeys = ['light', 'dark'].flatMap((theme) =>
+            ['wide', 'minimum'].flatMap((viewport) => [75, 100, 150, 200].map((scale) => `${theme}-${viewport}-${scale}`)))
+          const expectedCatalogueKeys = ['light', 'dark'].flatMap((theme) =>
+            [75, 200].map((scale) => `${theme}-minimum-${scale}`))
+          const studioMetrics = receipt.metrics ?? {}
+          const catalogueMetrics = receipt.catalogueMetrics ?? {}
+          if (Object.keys(studioMetrics).sort().join('\n') !== expectedStudioKeys.sort().join('\n')
+              || Object.keys(catalogueMetrics).sort().join('\n') !== expectedCatalogueKeys.sort().join('\n')) {
+            throw new Error('Final proof lacks the complete studio or catalogue layout matrix.')
+          }
+          const verifyFit = (key, value, targetNames, requireCardFit) => {
+            const scale = Number(key.split('-').at(-1))
+            const physicalTargetFloor = scale < 100 ? 44 : 44 * scale / 100
+            if (value?.interfaceScale !== scale) throw new Error(`${key} recorded the wrong Interface Scale.`)
+            const rootOverflow = value.appearance?.rootOverflow
+            const clientWidth = value.shell?.clientWidth
+            const scrollWidth = value.shell?.scrollWidth
+            if (![rootOverflow, clientWidth, scrollWidth].every(Number.isFinite)
+                || rootOverflow > 1 || scrollWidth > clientWidth + 1) {
+              throw new Error(`${key} has horizontal overflow.`)
+            }
+            if (requireCardFit && (!Array.isArray(value.cardFit) || value.cardFit.length)) {
+              throw new Error(`${key} has Scene-card content outside its container.`)
+            }
+            for (const name of targetNames) {
+              const target = value.targets?.[name]
+              if (!target || !Number.isFinite(target.height) || target.height + .2 < physicalTargetFloor) {
+                throw new Error(`${key}/${name} has a physical target below its floor.`)
+              }
+            }
+            const appearance = value.appearance
+            const focus = appearance?.focusIndicator
+            const toggle = appearance?.toggle
+            if (!appearance || !focus || focus.style === 'none'
+                || !Number.isFinite(focus.width) || focus.width < 2
+                || !Number.isFinite(focus.ratio) || focus.ratio < 3
+                || !toggle || !Number.isFinite(toggle.height) || !Number.isFinite(toggle.width)
+                || toggle.height + .2 < physicalTargetFloor
+                || toggle.width + .2 < physicalTargetFloor) {
+              throw new Error(`${key} fails overflow, focus, or theme-toggle target proof.`)
+            }
+          }
+          const studioTargets = ['primary', 'icon', 'addMedia', 'segment', 'scaleButton', 'format', 'export', 'timeline']
+          const catalogueTargets = ['scaleButton', 'category', 'search', 'scene']
+          for (const key of expectedStudioKeys) verifyFit(key, studioMetrics[key], studioTargets, false)
+          for (const key of expectedCatalogueKeys) verifyFit(key, catalogueMetrics[key], catalogueTargets, true)
+          const themeSwitches = receipt.themeSwitches
+          if (!Array.isArray(themeSwitches) || !themeSwitches.some((entry) => entry.changed)
+              || themeSwitches.some((entry) => !Number.isFinite(entry.maximumLayoutShift)
+                || entry.maximumLayoutShift > .75 || entry.projectInvariant !== true || entry.focusRetained !== true)) {
+            throw new Error('Final proof contains a theme switch that moved layout, changed Project truth, or lost focus.')
+          }
+          if (receipt.resetTheme !== 'light' || receipt.resetScale !== 100) {
+            throw new Error('Final proof did not restore the documented default review state.')
+          }
+          if (!receipt.captures?.catalogueLight100 || !receipt.captures?.catalogueDark100
+              || receipt.captures.catalogueLight100.sha256 === receipt.captures.catalogueDark100.sha256) {
+            throw new Error('Final proof lacks visibly distinct Light and Dark catalogue captures.')
+          }
+          const production = audit.production
+          if (!production || (production.high ?? 0) > 0 || (production.critical ?? 0) > 0) {
+            throw new Error('Production dependency audit is not clean.')
+          }
+          console.log(JSON.stringify({
+            status: 'FINAL_THEME_PROOF_VERIFIED',
+            catalogueScenes: light.length,
+            mismatches: catalogue.mismatches.length,
+            studioSceneStable: true,
+            productionAudit: production,
+          }, null, 2))
+          NODE
+
       - uses: actions/upload-artifact@v6
         if: always()
         with:
-          name: galileo-gallery-v1.1.1-light-dark-proof
+          name: galileo-gallery-v1.1.1-final-light-dark-proof
           path: |
             artifacts/g08/
             artifacts/hygiene/
