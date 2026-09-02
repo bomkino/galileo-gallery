@@ -927,7 +927,8 @@ async function captureCatalogueSceneProof(window, themeSwitches) {
         try {
             if (!presentedFrameMarkerMatches(image, current.state.viewport, current.markerToken)) return
             current.matchingFrames += 1
-            const crop = cropPresentedFrame(image, current.state.viewport, current.state.box, 1)
+            // Exclude the miniature's 1px border and 2px rounded-clip antialiasing; those pixels belong to UI chrome, not the Scene.
+            const crop = cropPresentedFrame(image, current.state.viewport, current.state.box, 2)
             const bitmap = crop.toBitmap()
             const size = crop.getSize()
             const sample = { bitmap, sha256: sha256(bitmap), size }
@@ -1179,11 +1180,7 @@ async function captureCatalogueSceneProof(window, themeSwitches) {
             assertTargetState(id, darkState)
             const expectedPixels = lightActual.bitmap.length / 4
             const allowedChangedPixels = Math.max(32, Math.ceil(expectedPixels * .0001))
-            const darkActual = await nextStablePresentedCrop(`${id} dark`, darkState, {
-                referenceBitmap: lightActual.bitmap,
-                maximumChangedPixels: allowedChangedPixels,
-                maximumChannelDelta: 1,
-            })
+            const darkActual = await nextStablePresentedCrop(`${id} dark`, darkState)
             const delta = pixelDeltaSummary(lightActual.bitmap, darkActual.bitmap)
             comparisons[id] = {
                 rawHashEqual: lightActual.sha256 === darkActual.sha256,
@@ -1193,6 +1190,7 @@ async function captureCatalogueSceneProof(window, themeSwitches) {
                 allowedChangedPixels,
                 withinNoiseEnvelope: delta.maxChannelDelta <= 1 && delta.changedPixels <= allowedChangedPixels,
             }
+            if (!comparisons[id].withinNoiseEnvelope) throw new Error(`UI theme leaked into catalogue Scene ${id}: ${JSON.stringify(comparisons[id])}`)
 
             themeSwitches.push(await setTheme(window, 'light'))
             await webContents.executeJavaScript(`(() => {
@@ -1307,11 +1305,7 @@ studio_capture_replacement = '''    themeSwitches.push(await setTheme(window, 'l
     const studioPixelCount = stageLight.bitmap.length / 4
     const studioAllowedChangedPixels = Math.max(32, Math.ceil(studioPixelCount * .0001))
     themeSwitches.push(await setTheme(window, 'dark'))
-    const stageDark = await captureStablePresentedRegion(window, '.stage', 'studio dark Scene', 2, {
-        referenceBitmap: stageLight.bitmap,
-        maximumChangedPixels: studioAllowedChangedPixels,
-        maximumChannelDelta: 1,
-    })
+    const stageDark = await captureStablePresentedRegion(window, '.stage', 'studio dark Scene', 2)
     captures.studioDarkFinal = await capture(window, outputDirectory, 'gallery-studio-dark-final')
 '''
 if g08.count(studio_capture_anchor) != 1:
