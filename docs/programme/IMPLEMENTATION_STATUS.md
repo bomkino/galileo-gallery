@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated: 31 August 2026
+Updated: 3 September 2026
 
 Current stable release: **v1.1.1**
 
@@ -149,7 +149,7 @@ CI run `33279747975` passed source tests on Ubuntu, macOS, and Windows plus pack
 
 ## G08 — Interface Scale and editorial editor UI
 
-State: **engineering-complete in source and real Electron renderer CI; packaging, installation, target-platform, and human acceptance remain unclaimed**
+Historical gate state at G08 close: **engineering-complete in source and real Electron renderer CI; packaging, installation, target-platform, and human acceptance remained unclaimed at that point**
 
 Implemented and proved:
 
@@ -171,7 +171,7 @@ and contains 21 screenshots plus progress and final machine receipts. Exact revi
 
 ## G11 — Vitrine v2 Product Scene
 
-State: **engineering-complete in source and a sandboxed packaged-directory Linux x64 Electron journey; exact target platforms and human acceptance remain unclaimed**
+Historical gate state at G11 close: **engineering-complete in source and a sandboxed packaged-directory Linux x64 Electron journey; exact target platforms and human acceptance remained unclaimed at that point**
 
 Implemented and proved:
 

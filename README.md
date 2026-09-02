@@ -21,7 +21,7 @@ Media stays on the user's machine.
 
 ## Download
 
-Use the repository's GitHub Releases page for:
+Download [Galileo Gallery 1.1.1](https://github.com/bomkino/galileo-gallery/releases/tag/v1.1.1) from GitHub Releases. It includes:
 
 - macOS Apple silicon DMG
 - Windows x64 portable EXE
@@ -29,6 +29,12 @@ Use the repository's GitHub Releases page for:
 - SHA-256 checksums
 
 The macOS app is ad-hoc signed for bundle integrity. It is not Apple Developer ID signed or notarized, so Gatekeeper may ask you to confirm trust.
+
+On macOS or Linux, put the downloads beside `SHA256SUMS.txt` and verify them before opening:
+
+```bash
+shasum -a 256 --check SHA256SUMS.txt
+```
 
 ### macOS
 

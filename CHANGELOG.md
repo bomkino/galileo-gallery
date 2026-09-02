@@ -2,7 +2,7 @@
 
 All notable released changes are recorded here. Dates use UTC.
 
-## [1.1.1] — 2026-08-31
+## [1.1.1] — 2026-09-02
 
 ### Added
 
