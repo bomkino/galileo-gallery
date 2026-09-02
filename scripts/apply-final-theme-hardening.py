@@ -244,6 +244,7 @@ assert(g08.includes("maxChannelDelta") && g08.includes("allowedChangedPixels") &
 assert(g08.includes("schemaVersion: 2") && g08.includes("bitmapEncoding: 'electron-native-bitmap'") && g08.includes("bitmapBytes") && g08.includes("bitmapSha256"), "G08 lacks an explicit raw-bitmap receipt schema")
 assert(g08.includes("toBitmap()"), "G08 does not compare raw presented-frame pixels")
 assert(g08.includes("focusIndicator.ratio < 3"), "G08 does not enforce non-text focus contrast")
+assert(g08.includes("const caretColour = theme === 'dark' ? '%23f4efe7' : '%23181917'"), "G08 does not recognise bundled theme-correct select carets")
 assert(!implementationStatus.includes("Current frontier: **stable v1.0.1"), "implementation status carries a stale release frontier")
 assert(!implementationStatus.includes("must be triaged before a release frontier"), "implementation status contradicts the production audit boundary")
 '''
@@ -1341,6 +1342,27 @@ fit_assert_replacement = '''            if (value.shell.scrollWidth > value.shel
 if g08.count(fit_assert_anchor) != 1:
     raise SystemExit("G08: catalogue fit assertion anchor mismatch")
 g08 = g08.replace(fit_assert_anchor, fit_assert_replacement, 1)
+
+caret_assert_anchor = '''        const caretFile = theme === 'dark' ? 'caret-down-light' : 'caret-down'
+        if (value.controlPolish.selectAppearance !== 'none'
+            || !value.controlPolish.selectBackgroundImage.includes(caretFile)
+            || value.controlPolish.selectPaddingRight < 44) {
+            throw new Error(`${key} lost the explicit, theme-correct, comfortably inset select caret.`)
+        }
+'''
+caret_assert_replacement = '''        const caretFile = theme === 'dark' ? 'caret-down-light' : 'caret-down'
+        const caretColour = theme === 'dark' ? '%23f4efe7' : '%23181917'
+        const caretImage = value.controlPolish.selectBackgroundImage.toLowerCase()
+        const hasThemeCorrectCaret = caretImage.includes(caretFile) || caretImage.includes(caretColour)
+        if (value.controlPolish.selectAppearance !== 'none'
+            || !hasThemeCorrectCaret
+            || value.controlPolish.selectPaddingRight < 44) {
+            throw new Error(`${key} lost the explicit, theme-correct, comfortably inset select caret.`)
+        }
+'''
+if g08.count(caret_assert_anchor) != 1:
+    raise SystemExit("G08: select-caret verification anchor mismatch")
+g08 = g08.replace(caret_assert_anchor, caret_assert_replacement, 1)
 
 receipt_schema_anchor = '''    const receipt = {
         task: 'G08 dual-theme interface, scale, fit, and HostPort smoke',
