@@ -505,10 +505,10 @@
 }
 .style-card.is-current { border-color: var(--ink); background: #f7a18f; box-shadow: 8px 8px 0 var(--ink); }
 .style-card > span { padding: 16px 7px 0; }
-.style-card strong { color: var(--ink); font-size: 16px; font-weight: 700; }
-.style-card small { color: var(--muted); font-size: 10px; }
-.style-card p { min-height: 46px; margin: 8px 7px 0; color: #666963; font-size: 11px; line-height: 1.55; }
-.style-card p em { margin-top: 7px; color: #ad4e3d; }
+.style-card > span > strong { color: var(--ink); font-size: 16px; font-weight: 700; }
+.style-card > span > small { color: var(--muted); font-size: 10px; }
+.style-card > p { min-height: 46px; margin: 8px 7px 0; color: #666963; font-size: 11px; line-height: 1.55; }
+.style-card > p em { margin-top: 7px; color: #ad4e3d; }
 .style-miniature { height: 230px; border: 1px solid var(--ink); border-radius: 2px; }
 .style-miniature > b { right: 12px; bottom: 10px; padding: 5px 6px; font-size: 10px; }
 .style-gallery-footer { max-width: 1384px; padding-bottom: 50px; color: var(--muted); font-size: 11px; }

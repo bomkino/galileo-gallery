@@ -2,7 +2,7 @@
 
 Galileo Gallery is a free, local desktop motion studio for turning images, videos, GIFs, and deck slides into authored gallery films. Build a clean loop, a finite sequence, or a one-shot animation for a deck, explainer, social post, website, or transparent overlay.
 
-**Latest stable: 1.1.0**
+**Latest stable: 1.1.1**
 
 The app contains 29 distinct motion Scenes distilled from 29 original components. Each Scene keeps its own timing, geometry, spatial rules, and physical character. Import, Timeline, Project storage, Interface Scale, and deterministic export remain shared.
 
@@ -48,8 +48,8 @@ That command bypasses quarantine for this app. It does not notarize the build or
 ### Linux
 
 ```bash
-chmod +x Galileo.Gallery-1.1.0-Linux-x86_64.AppImage
-./Galileo.Gallery-1.1.0-Linux-x86_64.AppImage
+chmod +x Galileo.Gallery-1.1.1-Linux-x86_64.AppImage
+./Galileo.Gallery-1.1.1-Linux-x86_64.AppImage
 ```
 
 ## Run from source
@@ -89,7 +89,7 @@ Each command prepares the platform FFmpeg binary, builds the renderer, and write
 
 ## Interface system
 
-Version 1.1.0 adopts the public pitch.dog type system as the packaged default and uses Phosphor for product-control icons. Padding, gaps, and control sizing follow a shared 4 px scale with a 44 px minimum target at every Interface Scale.
+Version 1.1.1 keeps the packaged pitch.dog type system and Phosphor control language, closes the remaining geometry defects, and adds persistent Light and Dark interface modes. Both modes preserve Scene pixels, Project data, layout geometry, 44 px minimum targets, explicit carets, stable disclosure menus, and reduced-motion-safe transitions across every Interface Scale.
 
 See [`docs/design-system.md`](docs/design-system.md) for exact source pins, type roles, spacing tokens, icon rules, and verification. See [`docs/README.md`](docs/README.md) for the active documentation map. The full historical programme and renderer evidence remains available under `docs/programme/`.
 

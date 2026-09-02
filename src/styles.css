@@ -958,10 +958,10 @@ html[data-export-transparent] #root { background: transparent !important; }
 .style-card:active { transform:translateY(-1px) scale(.99); }
 .style-card.is-current { border-color:rgba(255,143,99,.35); box-shadow:inset 0 0 0 1px rgba(255,143,99,.08); }
 .style-card > span { display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:11px 5px 0; }
-.style-card strong { font-size:12px; letter-spacing:-.015em; font-weight:620; }
-.style-card small { color:rgba(244,240,231,.31); font-size:8px; text-transform:uppercase; letter-spacing:.08em; }
-.style-card p { min-height:28px; margin:5px 5px 0; color:rgba(244,240,231,.42); font-size:9px; line-height:1.45; }
-.style-card p em { display:block; margin-top:5px; color:rgba(255,181,145,.42); font-style:normal; }
+.style-card > span > strong { font-size:12px; letter-spacing:-.015em; font-weight:620; }
+.style-card > span > small { color:rgba(244,240,231,.31); font-size:8px; text-transform:uppercase; letter-spacing:.08em; }
+.style-card > p { min-height:28px; margin:5px 5px 0; color:rgba(244,240,231,.42); font-size:9px; line-height:1.45; }
+.style-card > p em { display:block; margin-top:5px; color:rgba(255,181,145,.42); font-style:normal; }
 .style-miniature { position:relative; height:142px; overflow:hidden; border-radius:10px; background:radial-gradient(circle,color-mix(in srgb,var(--mini-accent) 16%,transparent),transparent 52%),linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px),#0e0e0d; background-size:auto,24px 24px,24px 24px,auto; perspective:700px; }
 .style-miniature > .galileo-renderer { position:absolute; inset:0; }
 .style-miniature > i { position:absolute; left:50%; top:50%; display:block; width:52px; height:36px; border:2px solid rgba(240,233,218,.72); border-radius:2px; background:color-mix(in srgb,var(--mini-accent) 32%,#25231f); box-shadow:0 9px 16px rgba(0,0,0,.32); transform:translate(-50%,-50%) translateX(calc((var(--i) - 3) * 20px)) rotate(calc((var(--i) - 3) * 12deg)); }

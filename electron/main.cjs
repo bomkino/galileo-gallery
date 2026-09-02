@@ -1047,7 +1047,7 @@ function createMainWindow() {
             if (process.env.REEL_SCREENSHOT_TAB === "project") {
                 setTimeout(() => {
                     void mainWindow?.webContents.executeJavaScript(
-                        `document.querySelector(".project-menu summary")?.click()`
+                        `document.querySelector(".project-trigger")?.click()`
                     )
                 }, 100)
             }

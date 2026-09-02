@@ -3,6 +3,7 @@ import ProductSceneRenderer from "./scenes/ProductSceneRenderer"
 import { GALLERY_STYLES, galleryScene, galleryStyle, latestSceneVersion, type SceneDefinition, type StyleCategory, type StyleDefinition } from "./styleRegistry"
 import { styleProfile, styleSettings } from "./styleProfiles"
 import { InterfaceScaleControl } from "./presentation/InterfaceScaleSurface"
+import ThemeControl from "./presentation/ThemeControl"
 
 type Props = {
     currentStyleId: string
@@ -43,6 +44,7 @@ export default function StyleGallery({ currentStyleId, onChoose, onClose }: Prop
                 </div>
                 <div className="style-gallery-actions">
                     <InterfaceScaleControl />
+                    <ThemeControl />
                     {onClose ? <button type="button" className="button quiet" onClick={onClose}>Back to studio</button> : null}
                 </div>
             </header>

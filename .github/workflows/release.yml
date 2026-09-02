@@ -17,7 +17,7 @@ concurrency:
 jobs:
   prepare:
     if: >-
-      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     outputs:
@@ -100,7 +100,6 @@ jobs:
           app="release/mac-arm64/Galileo Gallery.app"
           output="$RUNNER_TEMP/galileo-gallery-release-smoke.mp4"
           test -d "$app"
-          codesign --force --deep --sign - "$app"
           REEL_SMOKE_OUTPUT="$output" REEL_USER_DATA_DIR="$RUNNER_TEMP/galileo-gallery-release-user-data" \
             "$app/Contents/MacOS/Galileo Gallery"
           test "$(stat -f%z "$output")" -gt 1000
