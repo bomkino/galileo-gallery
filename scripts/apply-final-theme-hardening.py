@@ -100,7 +100,31 @@ replace_once(
     "legacy Scene root style boundary",
 )
 
-# 5. Focus indicators must remain visible against both palettes, not merely exist in source.
+# 5. Selected catalogue copy must stay readable on its authored salmon/brown surfaces.
+replace_once(
+    "src/pitchdogTheme.css",
+    "    --pd-ui-card-current: #f7a18f;\n",
+    "    --pd-ui-card-current: #f7a18f;\n    --pd-ui-card-current-copy: #3f423d;\n    --pd-ui-card-current-profile: #702b20;\n",
+    "light selected-card contrast tokens",
+)
+replace_once(
+    "src/pitchdogTheme.css",
+    "    --pd-ui-card-current: #4d2822;\n",
+    "    --pd-ui-card-current: #4d2822;\n    --pd-ui-card-current-copy: #b6b8b1;\n    --pd-ui-card-current-profile: #ff9a84;\n",
+    "dark selected-card contrast tokens",
+)
+replace_once(
+    "src/pitchdogTheme.css",
+    "html[data-ui-theme] .style-card > p em { color: var(--pd-ui-profile); }\n",
+    """html[data-ui-theme] .style-card > p em { color: var(--pd-ui-profile); }
+html[data-ui-theme] .style-card.is-current > span > small,
+html[data-ui-theme] .style-card.is-current > p { color: var(--pd-ui-card-current-copy); }
+html[data-ui-theme] .style-card.is-current > p em { color: var(--pd-ui-card-current-profile); }
+""",
+    "selected-card contrast boundary",
+)
+
+# 6. Focus indicators must remain visible against both palettes, not merely exist in source.
 replace_once(
     "src/pitchdogTheme.css",
     "    --pd-ui-success: #3f9b69;\n",
@@ -129,7 +153,7 @@ html[data-ui-theme] body,
     "theme-specific focus indicator",
 )
 
-# 6. Strengthen the source verifier with executable first-paint scenarios and Scene-boundary assertions.
+# 7. Strengthen the source verifier with executable first-paint scenarios and Scene-boundary assertions.
 verify_path = "scripts/verify-design-system.cjs"
 verify = read(verify_path)
 if 'const vm = require("node:vm")\n' not in verify:
@@ -171,6 +195,13 @@ assert(galleryRenderer.includes('data-scene-theme={settings.theme}'), "legacy Sc
 assert(galleryRenderer.includes('colorScheme: settings.theme === "light" ? "light" : "dark"'), "legacy Scene native colour scheme still inherits UI theme")
 assert((theme.match(/--pd-ui-focus:/g) ?? []).length === 2, "both themes need an explicit focus colour")
 assert(theme.includes("outline-color: var(--pd-ui-focus)"), "theme focus token is not applied to interactive controls")
+assert((theme.match(/--pd-ui-card-current-copy:/g) ?? []).length === 2, "both themes need a selected-card copy colour")
+assert((theme.match(/--pd-ui-card-current-profile:/g) ?? []).length === 2, "both themes need a selected-card profile colour")
+assert(theme.includes(".style-card.is-current > span > small"), "selected catalogue metadata lacks its contrast boundary")
+assert(theme.includes(".style-card.is-current > p { color: var(--pd-ui-card-current-copy); }"), "selected catalogue copy lacks its contrast boundary")
+assert(theme.includes(".style-card.is-current > p em { color: var(--pd-ui-card-current-profile); }"), "selected catalogue profile copy lacks its contrast boundary")
+assert(g08.includes("sample('catalogue selected card metadata', '.style-card.is-current > span > small')"), "G08 does not pin selected-card contrast coverage")
+assert(g08.includes("sample('catalogue ordinary card metadata', '.style-card:not(.is-current) > span > small')"), "G08 does not pin ordinary-card contrast coverage")
 assert(g08.includes("captureCatalogueSceneProof"), "G08 does not prove every catalogue Scene across themes")
 assert(g08.includes("expected 29 Scene miniatures"), "G08 does not pin the complete 29-Scene catalogue")
 assert(g08.includes("beginFrameSubscription(false"), "G08 does not sample compositor-presented Scene frames")
@@ -250,7 +281,7 @@ if boot_matrix not in verify:
     verify = verify.replace(boot_anchor, boot_anchor + "\n" + boot_matrix + "\n", 1)
 write(verify_path, verify)
 
-# 6. Strengthen real Electron proof: clean screenshots, broader contrast, card fit, action naming, and all 29 Scene hashes.
+# 8. Strengthen real Electron proof: clean screenshots, broader contrast, card fit, action naming, and all 29 Scene hashes.
 g08_path = "electron/g08-interface-smoke.cjs"
 g08 = read(g08_path)
 
@@ -496,9 +527,12 @@ new_samples = '''        const samples = surface === 'catalogue'
                 sample('catalogue heading', '.style-gallery-header h1'),
                 sample('catalogue introduction', '.style-gallery-header p'),
                 sample('catalogue card title', '.style-card > span > strong'),
-                sample('catalogue card metadata', '.style-card > span > small'),
-                sample('catalogue card description', '.style-card > p'),
-                sample('catalogue card profile', '.style-card > p em'),
+                sample('catalogue selected card metadata', '.style-card.is-current > span > small'),
+                sample('catalogue selected card description', '.style-card.is-current > p'),
+                sample('catalogue selected card profile', '.style-card.is-current > p em'),
+                sample('catalogue ordinary card metadata', '.style-card:not(.is-current) > span > small'),
+                sample('catalogue ordinary card description', '.style-card:not(.is-current) > p'),
+                sample('catalogue ordinary card profile', '.style-card:not(.is-current) > p em'),
                 sample('catalogue search', '.style-search input'),
                 sample('catalogue active filter', '.style-category-pills button.is-active'),
                 sample('catalogue inactive filter', '.style-category-pills button:not(.is-active)'),
@@ -1290,7 +1324,7 @@ if g08.count(receipt_anchor) != 1:
 g08 = g08.replace(receipt_anchor, receipt_replacement, 1)
 write(g08_path, g08.rstrip() + "\n")
 
-# 7. Documentation must describe the actual all-Scene proof, not a one-card proxy.
+# 9. Documentation must describe the actual all-Scene proof, not a one-card proxy.
 doc_replacements = {
     "docs/releases/v1.1.1.md": [
         (
