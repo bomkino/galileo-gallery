@@ -171,6 +171,7 @@ jobs:
         run: |
           set -euo pipefail
           files=(
+            .github/workflows/release.yml
             index.html
             package.json
             package-lock.json

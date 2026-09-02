@@ -124,7 +124,28 @@ html[data-ui-theme] .style-card.is-current > p em { color: var(--pd-ui-card-curr
     "selected-card contrast boundary",
 )
 
-# 6. Focus indicators must remain visible against both palettes, not merely exist in source.
+# 6. Release files use their exact public GitHub names so SHA256SUMS verifies after download.
+for label in ("macOS", "Windows", "Linux"):
+    replace_once(
+        "package.json",
+        f'      "artifactName": "${{productName}}-${{version}}-{label}-${{arch}}.${{ext}}",\n',
+        f'      "artifactName": "Galileo.Gallery-${{version}}-{label}-${{arch}}.${{ext}}",\n',
+        f"{label} public artifact name",
+    )
+replace_once(
+    ".github/workflows/release.yml",
+    "      github.event_name == 'workflow_dispatch' ||\n",
+    "      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||\n",
+    "main-only manual release gate",
+)
+replace_once(
+    ".github/workflows/release.yml",
+    '          codesign --force --deep --sign - "$app"\n',
+    "",
+    "post-DMG app mutation",
+)
+
+# 7. Focus indicators must remain visible against both palettes, not merely exist in source.
 replace_once(
     "src/pitchdogTheme.css",
     "    --pd-ui-success: #3f9b69;\n",
@@ -153,7 +174,7 @@ html[data-ui-theme] body,
     "theme-specific focus indicator",
 )
 
-# 7. Strengthen the source verifier with executable first-paint scenarios and Scene-boundary assertions.
+# 8. Strengthen the source verifier with executable first-paint scenarios and Scene-boundary assertions.
 verify_path = "scripts/verify-design-system.cjs"
 verify = read(verify_path)
 if 'const vm = require("node:vm")\n' not in verify:
@@ -171,11 +192,17 @@ if 'const baseStyles = read("src/styles.css")\n' not in verify:
         + 'const vitrineRenderer = read("src/scenes/VitrineRenderer.tsx")\n'
         + 'const galleryRenderer = read("src/GalleryRenderer.tsx")\n'
         + 'const g08 = read("electron/g08-interface-smoke.cjs")\n'
+        + 'const releaseWorkflow = read(".github/workflows/release.yml")\n'
         + 'const implementationStatus = read("docs/programme/IMPLEMENTATION_STATUS.md")\n',
         1,
     )
 control_anchor = 'assert(themeControl.includes(\'aria-pressed={theme === "dark"}\'), "theme toggle does not expose state")\n'
-source_checks = r'''assert(themeControl.includes("aria-label={action}"), "theme toggle does not name its next action")
+source_checks = r'''assert(packageJson.build?.mac?.artifactName === "Galileo.Gallery-${version}-macOS-${arch}.${ext}", "macOS release name will not match its public checksum entry")
+assert(packageJson.build?.win?.artifactName === "Galileo.Gallery-${version}-Windows-${arch}.${ext}", "Windows release name will not match its public checksum entry")
+assert(packageJson.build?.linux?.artifactName === "Galileo.Gallery-${version}-Linux-${arch}.${ext}", "Linux release name will not match its public checksum entry")
+assert(releaseWorkflow.includes("github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'"), "manual release dispatch is not restricted to main")
+assert(!releaseWorkflow.includes('codesign --force --deep --sign - "$app"'), "release smoke mutates the macOS app after the DMG is sealed")
+assert(themeControl.includes("aria-label={action}"), "theme toggle does not name its next action")
 assert(themeRuntime.includes("window.dispatchEvent(new CustomEvent<UiTheme>(UI_THEME_EVENT, { detail: theme }))"), "theme runtime does not publish system, storage, and explicit changes through one event boundary")
 assert((themeRuntime.match(/window\.dispatchEvent\(new CustomEvent<UiTheme>\(UI_THEME_EVENT/g) ?? []).length === 1, "theme runtime contains duplicate change-event dispatch paths")
 for (const [label, sheet] of [["base styles", baseStyles], ["interface polish", interfacePolish], ["pitch.dog theme", theme]]) {
@@ -281,7 +308,7 @@ if boot_matrix not in verify:
     verify = verify.replace(boot_anchor, boot_anchor + "\n" + boot_matrix + "\n", 1)
 write(verify_path, verify)
 
-# 8. Strengthen real Electron proof: clean screenshots, broader contrast, card fit, action naming, and all 29 Scene hashes.
+# 9. Strengthen real Electron proof: clean screenshots, broader contrast, card fit, action naming, and all 29 Scene hashes.
 g08_path = "electron/g08-interface-smoke.cjs"
 g08 = read(g08_path)
 
@@ -1324,7 +1351,7 @@ if g08.count(receipt_anchor) != 1:
 g08 = g08.replace(receipt_anchor, receipt_replacement, 1)
 write(g08_path, g08.rstrip() + "\n")
 
-# 9. Documentation must describe the actual all-Scene proof, not a one-card proxy.
+# 10. Documentation must describe the actual all-Scene proof, not a one-card proxy.
 doc_replacements = {
     "docs/releases/v1.1.1.md": [
         (
