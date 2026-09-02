@@ -269,9 +269,29 @@ jobs:
               throw new Error(`${label} lacks a complete raw-bitmap record.`)
             }
             assertBounds(value.bounds, label)
-            if (frameSubscription && (value.method !== 'frame-subscription'
-                || !Number.isInteger(value.stableFrames) || value.stableFrames < 2)) {
-              throw new Error(`${label} was not proved from a stable presented-frame subscription.`)
+            if (frameSubscription) {
+              const pixels = value.pixelWidth * value.pixelHeight
+              const stability = value.stability
+              const expectedAllowed = Math.max(32, Math.ceil(pixels * .0001))
+              const expectedHashEquality = stability?.previousBitmapSha256 === value.bitmapSha256
+              if (value.method !== 'frame-subscription'
+                  || value.stableFrames !== 2
+                  || !Number.isInteger(value.correlatedFrames) || value.correlatedFrames < value.stableFrames
+                  || !stability || !sha256Pattern.test(stability.previousBitmapSha256 ?? '')
+                  || stability.rawHashEqual !== expectedHashEquality
+                  || !Number.isInteger(stability.changedPixels) || stability.changedPixels < 0
+                  || stability.changedPixels > pixels
+                  || !closeEnough(stability.changedRatio, stability.changedPixels / pixels)
+                  || !Number.isInteger(stability.maxChannelDelta) || stability.maxChannelDelta < 0
+                  || stability.maxChannelDelta > 1
+                  || stability.allowedChangedPixels !== expectedAllowed
+                  || stability.changedPixels > expectedAllowed
+                  || stability.withinNoiseEnvelope !== true
+                  || (stability.rawHashEqual && (stability.changedPixels !== 0 || stability.maxChannelDelta !== 0))
+                  || (!stability.rawHashEqual && stability.changedPixels === 0)
+                  || (stability.changedPixels > 0 && stability.maxChannelDelta === 0)) {
+                throw new Error(`${label} was not proved from two temporally stable presented frames.`)
+              }
             }
             return value.pixelWidth * value.pixelHeight
           }

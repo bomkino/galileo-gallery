@@ -235,9 +235,11 @@ assert(g08.includes("beginFrameSubscription(false"), "G08 does not sample compos
 assert(g08.includes("endFrameSubscription()"), "G08 does not close the presented-frame subscription")
 assert(g08.includes("method: 'frame-subscription'"), "G08 proof receipt does not identify its capture method")
 assert(g08.includes("data-g08-proof-target"), "G08 lacks one-Scene-at-a-time proof isolation")
+assert(g08.includes('.style-card[data-g08-proof-target="true"]{transition:none!important;transform:none!important}'), "G08 proof target can still move under pointer interaction")
 assert(g08.includes("data-g08-paint-mask"), "G08 lacks material-paint proof isolation")
 assert(g08.includes("paintedPixels") && g08.includes("paintedRatio"), "G08 does not record materially painted Scene pixels")
 assert(g08.includes("paintSignature"), "G08 does not bind every Scene to an exact computed-paint signature")
+assert(g08.includes("temporalStabilitySummary") && g08.includes("correlatedFrames") && g08.includes("stability: actual.stability"), "G08 lacks bounded temporal-stability evidence")
 assert(g08.includes("maxChannelDelta") && g08.includes("allowedChangedPixels") && g08.includes("withinNoiseEnvelope"), "G08 lacks its bounded raster-noise proof")
 assert(g08.includes("schemaVersion: 2") && g08.includes("bitmapEncoding: 'electron-native-bitmap'") && g08.includes("bitmapBytes") && g08.includes("bitmapSha256"), "G08 lacks an explicit raw-bitmap receipt schema")
 assert(g08.includes("toBitmap()"), "G08 does not compare raw presented-frame pixels")
@@ -737,6 +739,20 @@ function pixelDeltaSummary(first, second) {
     return { changedPixels: changed, pixelCount: first.length / 4, changedRatio: changed / (first.length / 4), maxChannelDelta }
 }
 
+function temporalStabilitySummary(previous, sample) {
+    const delta = pixelDeltaSummary(previous.bitmap, sample.bitmap)
+    const allowedChangedPixels = Math.max(32, Math.ceil(delta.pixelCount * .0001))
+    return {
+        previousBitmapSha256: previous.sha256,
+        rawHashEqual: previous.sha256 === sample.sha256,
+        changedPixels: delta.changedPixels,
+        changedRatio: delta.changedRatio,
+        maxChannelDelta: delta.maxChannelDelta,
+        allowedChangedPixels,
+        withinNoiseEnvelope: delta.maxChannelDelta <= 1 && delta.changedPixels <= allowedChangedPixels,
+    }
+}
+
 function changedPixelCount(first, second) {
     return pixelDeltaSummary(first, second).changedPixels
 }
@@ -827,14 +843,17 @@ async function captureStablePresentedRegion(window, selector, label, inset = 0, 
                     return
                 }
             }
-            if (!previous || previous.sha256 !== sample.sha256
-                || previous.size.width !== sample.size.width || previous.size.height !== sample.size.height) {
+            const sameSize = previous
+                && previous.size.width === sample.size.width
+                && previous.size.height === sample.size.height
+            const stability = sameSize ? temporalStabilitySummary(previous, sample) : null
+            if (!stability?.withinNoiseEnvelope) {
                 previous = sample
                 if (matchingFrames < maximumFrames) return
-                stop(fail, new Error(`Presented-frame pixels did not converge: ${label}.`))
+                stop(fail, new Error(`Presented-frame pixels did not converge: ${label}; ${JSON.stringify(stability ?? { reason: 'bitmap dimensions changed' })}.`))
                 return
             }
-            stop(settle, { ...sample, stableFrames: matchingFrames })
+            stop(settle, { ...sample, stableFrames: 2, correlatedFrames: matchingFrames, stability })
         } catch (error) {
             stop(fail, error)
         }
@@ -875,6 +894,8 @@ async function captureStablePresentedRegion(window, selector, label, inset = 0, 
             pixelWidth: actual.size.width,
             pixelHeight: actual.size.height,
             stableFrames: actual.stableFrames,
+            correlatedFrames: actual.correlatedFrames,
+            stability: actual.stability,
             bounds: state.box,
         }
         Object.defineProperty(result, 'bitmap', { value: actual.bitmap, enumerable: false })
@@ -921,19 +942,20 @@ async function captureCatalogueSceneProof(window, themeSwitches) {
                     return
                 }
             }
-            if (!current.previous
-                || current.previous.sha256 !== sample.sha256
-                || current.previous.size.width !== sample.size.width
-                || current.previous.size.height !== sample.size.height) {
+            const sameSize = current.previous
+                && current.previous.size.width === sample.size.width
+                && current.previous.size.height === sample.size.height
+            const stability = sameSize ? temporalStabilitySummary(current.previous, sample) : null
+            if (!stability?.withinNoiseEnvelope) {
                 current.previous = sample
                 if (current.matchingFrames < current.maximumFrames) return
-                current.fail(new Error(`Presented-frame pixels did not converge: ${current.label}.`))
+                current.fail(new Error(`Presented-frame pixels did not converge: ${current.label}; ${JSON.stringify(stability ?? { reason: 'bitmap dimensions changed' })}.`))
                 return
             }
             pendingFrame = null
             clearTimeout(current.timer)
             clearInterval(current.pulseTimer)
-            current.resolve({ ...sample, stableFrames: current.matchingFrames })
+            current.resolve({ ...sample, stableFrames: 2, correlatedFrames: current.matchingFrames, stability })
         } catch (error) {
             current.fail(error)
         }
@@ -1000,7 +1022,7 @@ async function captureCatalogueSceneProof(window, themeSwitches) {
             if (!style) {
                 style = document.createElement('style')
                 style.id = 'g08-catalogue-proof-style'
-                style.textContent = 'html[data-g08-proof="true"] .style-card:not([data-g08-proof-target="true"]){display:none!important}[data-g08-paint-mask="true"]>*{visibility:hidden!important}#g08-frame-pulse{position:fixed;left:4px;top:4px;width:16px;height:12px;z-index:2147483647;pointer-events:none}'
+                style.textContent = 'html[data-g08-proof="true"] .style-card:not([data-g08-proof-target="true"]){display:none!important}html[data-g08-proof="true"] .style-card[data-g08-proof-target="true"]{transition:none!important;transform:none!important}[data-g08-paint-mask="true"]>*{visibility:hidden!important}#g08-frame-pulse{position:fixed;left:4px;top:4px;width:16px;height:12px;z-index:2147483647;pointer-events:none}'
                 document.head.append(style)
             }
             let pulse = document.getElementById('g08-frame-pulse')
@@ -1135,6 +1157,8 @@ async function captureCatalogueSceneProof(window, themeSwitches) {
                 pixelWidth: actual.size.width,
                 pixelHeight: actual.size.height,
                 stableFrames: actual.stableFrames,
+                correlatedFrames: actual.correlatedFrames,
+                stability: actual.stability,
                 bounds: state.box,
                 scene: {
                     visibleLayers: state.visibleLayers,
