@@ -12,6 +12,8 @@ Version 1.0.1 released the independently rebuilt 29-Scene catalogue after source
 
 The sections below preserve gate-by-gate evidence and point-in-time caveats. They are an audit archive, not a competing list of current user-facing work. Active documentation begins at `docs/README.md`.
 
+GitHub Actions artifact IDs below are historical identifiers. On 3 September 2026, after the stable release assets and final local closure evidence were independently verified, all ephemeral Actions artifacts and caches were deleted. Committed receipts remain the durable in-repository record.
+
 ## G01A — safe archive import boundary
 
 State: **tested in source; not packaged, installed, released, or human-accepted**
