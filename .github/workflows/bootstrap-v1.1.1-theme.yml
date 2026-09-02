@@ -179,6 +179,7 @@ jobs:
             public/theme-boot.js
             src/main.tsx
             src/App.tsx
+            src/GalleryRenderer.tsx
             src/StyleGallery.tsx
             src/styles.css
             src/interfacePolish.css
@@ -187,6 +188,7 @@ jobs:
             src/presentation/ThemeControl.tsx
             src/presentation/uiTheme.ts
             src/scenes/AtelierSceneRenderer.tsx
+            src/scenes/VitrineRenderer.tsx
             src/assets/icons/caret-down.svg
             src/assets/icons/caret-down-light.svg
             electron/g08-interface-smoke.cjs
@@ -232,6 +234,9 @@ jobs:
           const audit = JSON.parse(fs.readFileSync('artifacts/hygiene/audit-summary.json', 'utf8'))
           const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
           const sourceTree = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim()
+          if (receipt.schemaVersion !== 2 || receipt.visualIsolation?.schemaVersion !== 2) {
+            throw new Error('Final proof does not use the explicit v2 raw-bitmap receipt schema.')
+          }
           if (receipt.source?.sha !== sourceSha || receipt.source?.tree !== sourceTree) {
             throw new Error('Final proof is not bound to the generated candidate commit and tree.')
           }
@@ -241,25 +246,110 @@ jobs:
           const darkEntries = Object.entries(catalogue?.dark ?? {})
           const light = lightEntries.map(([id]) => id).sort()
           const dark = darkEntries.map(([id]) => id).sort()
-          const lightHashes = lightEntries.map(([, value]) => value?.sha256)
-          const darkHashes = darkEntries.map(([, value]) => value?.sha256)
-          if (light.length !== 29 || dark.length !== 29 || light.join('\n') !== dark.join('\n')
-              || lightHashes.some((hash) => !/^[a-f0-9]{64}$/i.test(hash ?? ''))
-              || darkHashes.some((hash) => !/^[a-f0-9]{64}$/i.test(hash ?? ''))
-              || new Set(lightHashes).size !== 29 || new Set(darkHashes).size !== 29) {
-            throw new Error('Final proof does not cover 29 unique catalogue Scenes in both themes.')
-          }
-          for (const id of light) {
-            if (catalogue.light[id].sha256 !== catalogue.dark[id].sha256) {
-              throw new Error(`Final proof contains a Light/Dark hash mismatch for ${id}.`)
+          const lightHashes = lightEntries.map(([, value]) => value?.bitmapSha256)
+          const darkHashes = darkEntries.map(([, value]) => value?.bitmapSha256)
+          const sha256Pattern = /^[a-f0-9]{64}$/i
+          const closeEnough = (actual, expected) => Number.isFinite(actual)
+            && Math.abs(actual - expected) <= 1e-12
+          const assertBounds = (bounds, label) => {
+            const values = ['left', 'top', 'right', 'bottom', 'width', 'height'].map((key) => bounds?.[key])
+            if (!values.every(Number.isFinite) || bounds.width < 40 || bounds.height < 40
+                || bounds.right <= bounds.left || bounds.bottom <= bounds.top) {
+              throw new Error(`${label} lacks a valid capturable bounds record.`)
             }
+          }
+          const assertRaster = (value, label, frameSubscription = false) => {
+            if (!value || value.bitmapEncoding !== 'electron-native-bitmap'
+                || !sha256Pattern.test(value.bitmapSha256 ?? '')
+                || !Number.isInteger(value.pixelWidth) || value.pixelWidth < 1
+                || !Number.isInteger(value.pixelHeight) || value.pixelHeight < 1
+                || !Number.isInteger(value.bitmapBytes)
+                || value.bitmapBytes !== value.pixelWidth * value.pixelHeight * 4) {
+              throw new Error(`${label} lacks a complete raw-bitmap record.`)
+            }
+            assertBounds(value.bounds, label)
+            if (frameSubscription && (value.method !== 'frame-subscription'
+                || !Number.isInteger(value.stableFrames) || value.stableFrames < 2)) {
+              throw new Error(`${label} was not proved from a stable presented-frame subscription.`)
+            }
+            return value.pixelWidth * value.pixelHeight
+          }
+          const assertNoiseComparison = (comparison, lightValue, darkValue, label) => {
+            const pixels = lightValue.pixelWidth * lightValue.pixelHeight
+            if (darkValue.pixelWidth !== lightValue.pixelWidth
+                || darkValue.pixelHeight !== lightValue.pixelHeight
+                || darkValue.bitmapBytes !== lightValue.bitmapBytes) {
+              throw new Error(`${label} Light/Dark bitmap dimensions do not align.`)
+            }
+            const expectedAllowed = Math.max(32, Math.ceil(pixels * .0001))
+            const expectedHashEquality = lightValue.bitmapSha256 === darkValue.bitmapSha256
+            if (!comparison || comparison.rawHashEqual !== expectedHashEquality
+                || !Number.isInteger(comparison.changedPixels) || comparison.changedPixels < 0
+                || comparison.changedPixels > pixels
+                || !closeEnough(comparison.changedRatio, comparison.changedPixels / pixels)
+                || !Number.isInteger(comparison.maxChannelDelta) || comparison.maxChannelDelta < 0
+                || comparison.maxChannelDelta > 1
+                || comparison.allowedChangedPixels !== expectedAllowed
+                || comparison.changedPixels > expectedAllowed
+                || comparison.withinNoiseEnvelope !== true
+                || (comparison.rawHashEqual && (comparison.changedPixels !== 0 || comparison.maxChannelDelta !== 0))
+                || (!comparison.rawHashEqual && comparison.changedPixels === 0)
+                || (comparison.changedPixels > 0 && comparison.maxChannelDelta === 0)) {
+              throw new Error(`${label} has an inconsistent or out-of-envelope GPU raster comparison.`)
+            }
+          }
+          const lightStateHashes = lightEntries.map(([, value]) => value?.scene?.stateHash)
+          const darkStateHashes = darkEntries.map(([, value]) => value?.scene?.stateHash)
+          if (light.length !== 29 || dark.length !== 29 || light.join('\n') !== dark.join('\n')
+              || lightHashes.some((hash) => !sha256Pattern.test(hash ?? ''))
+              || darkHashes.some((hash) => !sha256Pattern.test(hash ?? ''))
+              || new Set(lightHashes).size !== 29 || new Set(darkHashes).size !== 29
+              || new Set(lightStateHashes).size !== 29 || new Set(darkStateHashes).size !== 29) {
+            throw new Error('Final proof does not cover 29 unique catalogue Scenes in both themes.')
           }
           if (!Array.isArray(catalogue?.mismatches) || catalogue.mismatches.length) {
             throw new Error('Final proof contains Scene theme leaks or lacks the mismatch ledger.')
           }
-          if (!studio?.light?.sha256 || studio.light.sha256 !== studio?.dark?.sha256) {
-            throw new Error('Studio Scene preview changed with UI theme.')
+          const comparisonIds = Object.keys(catalogue?.comparisons ?? {}).sort()
+          if (comparisonIds.join('\n') !== light.join('\n')) {
+            throw new Error('Final proof lacks one comparison ledger entry per catalogue Scene.')
           }
+          for (const id of light) {
+            const lightValue = catalogue.light[id]
+            const darkValue = catalogue.dark[id]
+            const pixels = assertRaster(lightValue, `${id}/Light`, true)
+            assertRaster(darkValue, `${id}/Dark`, true)
+            const lightScene = lightValue.scene
+            const darkScene = darkValue.scene
+            const validSceneTheme = (value) => value === 'light' || value === 'dark'
+            const validScene = (scene) => scene
+              && Number.isInteger(scene.visibleLayers) && scene.visibleLayers > 0
+              && typeof scene.stateHash === 'string' && scene.stateHash.length > 0
+              && validSceneTheme(scene.sceneTheme) && validSceneTheme(scene.colorScheme)
+              && scene.sceneTheme === scene.colorScheme
+              && Number.isInteger(scene.paintNodes) && scene.paintNodes > 0
+              && sha256Pattern.test(scene.paintSignature ?? '')
+            if (!validScene(lightScene) || !validScene(darkScene)
+                || lightScene.visibleLayers !== darkScene.visibleLayers
+                || lightScene.stateHash !== darkScene.stateHash
+                || lightScene.sceneTheme !== darkScene.sceneTheme
+                || lightScene.colorScheme !== darkScene.colorScheme
+                || lightScene.paintNodes !== darkScene.paintNodes
+                || lightScene.paintSignature !== darkScene.paintSignature) {
+              throw new Error(`${id} changed authored Scene state or computed paint across UI themes.`)
+            }
+            const minimumPaintedPixels = Math.max(128, Math.ceil(pixels * .005))
+            if (!Number.isInteger(lightValue.paintedPixels)
+                || lightValue.paintedPixels < minimumPaintedPixels
+                || lightValue.paintedPixels > pixels
+                || !closeEnough(lightValue.paintedRatio, lightValue.paintedPixels / pixels)) {
+              throw new Error(`${id}/Light lacks a material painted-content mask proof.`)
+            }
+            assertNoiseComparison(catalogue.comparisons[id], lightValue, darkValue, `catalogue/${id}`)
+          }
+          assertRaster(studio?.light, 'studio/Light', true)
+          assertRaster(studio?.dark, 'studio/Dark', true)
+          assertNoiseComparison(studio?.comparison, studio.light, studio.dark, 'studio')
           const expectedStudioKeys = ['light', 'dark'].flatMap((theme) =>
             ['wide', 'minimum'].flatMap((viewport) => [75, 100, 150, 200].map((scale) => `${theme}-${viewport}-${scale}`)))
           const expectedCatalogueKeys = ['light', 'dark'].flatMap((theme) =>
@@ -293,8 +383,8 @@ jobs:
             const appearance = value.appearance
             const focus = appearance?.focusIndicator
             const toggle = appearance?.toggle
-            if (!appearance || !focus || focus.style === 'none'
-                || !Number.isFinite(focus.width) || focus.width < 2
+            if (!appearance || !focus || focus.focusVisible !== true || focus.style === 'none'
+                || !Number.isFinite(focus.physicalWidth) || focus.physicalWidth < 2
                 || !Number.isFinite(focus.ratio) || focus.ratio < 3
                 || !toggle || !Number.isFinite(toggle.height) || !Number.isFinite(toggle.width)
                 || toggle.height + .2 < physicalTargetFloor
@@ -327,7 +417,8 @@ jobs:
             status: 'FINAL_THEME_PROOF_VERIFIED',
             catalogueScenes: light.length,
             mismatches: catalogue.mismatches.length,
-            studioSceneStable: true,
+            cataloguePaintSignaturesExact: true,
+            studioSceneWithinNoiseEnvelope: true,
             productionAudit: production,
           }, null, 2))
           NODE

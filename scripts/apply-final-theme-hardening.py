@@ -80,12 +80,24 @@ replace_once(
     "duplicate explicit-theme event dispatch",
 )
 
-# 4. Atelier Scenes own foreground colour through their Project look, never through UI inheritance.
+# 4. Every Scene renderer owns native colour treatment through its Project look, never through UI inheritance.
 replace_once(
     "src/scenes/AtelierSceneRenderer.tsx",
     '        data-source-state={frame.stateHash}\n        style={{ background }}\n',
-    '        data-source-state={frame.stateHash}\n        data-scene-theme={settings.theme}\n        style={{ background, color: settings.theme === "light" ? "#181917" : "#f7f4ec" }}\n',
+    '        data-source-state={frame.stateHash}\n        data-scene-theme={settings.theme}\n        style={{ background, color: settings.theme === "light" ? "#181917" : "#f7f4ec", colorScheme: settings.theme === "light" ? "light" : "dark" }}\n',
     "Atelier Scene root style boundary",
+)
+replace_once(
+    "src/scenes/VitrineRenderer.tsx",
+    'data-logical-width={logicalWidth} data-logical-height={logicalHeight} ref={ref} style={{ background } as React.CSSProperties}>',
+    'data-logical-width={logicalWidth} data-logical-height={logicalHeight} ref={ref} data-scene-theme={config.settings.theme} style={{ background, color: config.settings.theme === "light" ? "#181917" : "#f7f4ec", colorScheme: config.settings.theme === "light" ? "light" : "dark" } as React.CSSProperties}>',
+    "Vitrine Scene root style boundary",
+)
+replace_once(
+    "src/GalleryRenderer.tsx",
+    '        <div className={`galileo-renderer galileo-style-${style.id} galileo-mode-${style.mode} galileo-bg-${settings.backgroundStyle}`} style={{ "--galileo-ground": ground,',
+    '        <div className={`galileo-renderer galileo-style-${style.id} galileo-mode-${style.mode} galileo-bg-${settings.backgroundStyle}`} data-scene-theme={settings.theme} style={{ colorScheme: settings.theme === "light" ? "light" : "dark", "--galileo-ground": ground,',
+    "legacy Scene root style boundary",
 )
 
 # 5. Focus indicators must remain visible against both palettes, not merely exist in source.
@@ -132,6 +144,8 @@ if 'const baseStyles = read("src/styles.css")\n' not in verify:
         + 'const baseStyles = read("src/styles.css")\n'
         + 'const interfacePolish = read("src/interfacePolish.css")\n'
         + 'const atelierRenderer = read("src/scenes/AtelierSceneRenderer.tsx")\n'
+        + 'const vitrineRenderer = read("src/scenes/VitrineRenderer.tsx")\n'
+        + 'const galleryRenderer = read("src/GalleryRenderer.tsx")\n'
         + 'const g08 = read("electron/g08-interface-smoke.cjs")\n'
         + 'const implementationStatus = read("docs/programme/IMPLEMENTATION_STATUS.md")\n',
         1,
@@ -150,10 +164,25 @@ for (const [label, sheet] of [["base styles", baseStyles], ["interface polish", 
 }
 assert(atelierRenderer.includes('data-scene-theme={settings.theme}'), "Atelier Scene theme provenance is missing")
 assert(atelierRenderer.includes('color: settings.theme === "light" ? "#181917" : "#f7f4ec"'), "Atelier Scene foreground still inherits UI theme")
+assert(atelierRenderer.includes('colorScheme: settings.theme === "light" ? "light" : "dark"'), "Atelier Scene native colour scheme still inherits UI theme")
+assert(vitrineRenderer.includes('data-scene-theme={config.settings.theme}'), "Vitrine Scene theme provenance is missing")
+assert(vitrineRenderer.includes('colorScheme: config.settings.theme === "light" ? "light" : "dark"'), "Vitrine Scene native colour scheme still inherits UI theme")
+assert(galleryRenderer.includes('data-scene-theme={settings.theme}'), "legacy Scene theme provenance is missing")
+assert(galleryRenderer.includes('colorScheme: settings.theme === "light" ? "light" : "dark"'), "legacy Scene native colour scheme still inherits UI theme")
 assert((theme.match(/--pd-ui-focus:/g) ?? []).length === 2, "both themes need an explicit focus colour")
 assert(theme.includes("outline-color: var(--pd-ui-focus)"), "theme focus token is not applied to interactive controls")
-assert(g08.includes("captureCatalogueSceneHashes"), "G08 does not compare every catalogue Scene across themes")
+assert(g08.includes("captureCatalogueSceneProof"), "G08 does not prove every catalogue Scene across themes")
 assert(g08.includes("expected 29 Scene miniatures"), "G08 does not pin the complete 29-Scene catalogue")
+assert(g08.includes("beginFrameSubscription(false"), "G08 does not sample compositor-presented Scene frames")
+assert(g08.includes("endFrameSubscription()"), "G08 does not close the presented-frame subscription")
+assert(g08.includes("method: 'frame-subscription'"), "G08 proof receipt does not identify its capture method")
+assert(g08.includes("data-g08-proof-target"), "G08 lacks one-Scene-at-a-time proof isolation")
+assert(g08.includes("data-g08-paint-mask"), "G08 lacks material-paint proof isolation")
+assert(g08.includes("paintedPixels") && g08.includes("paintedRatio"), "G08 does not record materially painted Scene pixels")
+assert(g08.includes("paintSignature"), "G08 does not bind every Scene to an exact computed-paint signature")
+assert(g08.includes("maxChannelDelta") && g08.includes("allowedChangedPixels") && g08.includes("withinNoiseEnvelope"), "G08 lacks its bounded raster-noise proof")
+assert(g08.includes("schemaVersion: 2") && g08.includes("bitmapEncoding: 'electron-native-bitmap'") && g08.includes("bitmapBytes") && g08.includes("bitmapSha256"), "G08 lacks an explicit raw-bitmap receipt schema")
+assert(g08.includes("toBitmap()"), "G08 does not compare raw presented-frame pixels")
 assert(g08.includes("focusIndicator.ratio < 3"), "G08 does not enforce non-text focus contrast")
 assert(!implementationStatus.includes("Current frontier: **stable v1.0.1"), "implementation status carries a stale release frontier")
 assert(!implementationStatus.includes("must be triaged before a release frontier"), "implementation status contradicts the production audit boundary")
@@ -225,16 +254,168 @@ write(verify_path, verify)
 g08_path = "electron/g08-interface-smoke.cjs"
 g08 = read(g08_path)
 
+timeout_anchor = '''function sha256(value) {
+    return crypto.createHash("sha256").update(value).digest("hex")
+}
+'''
+timeout_replacement = timeout_anchor + '''
+async function withTimeout(promise, label, timeoutMs = 12_000) {
+    let timer
+    try {
+        return await Promise.race([
+            promise,
+            new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error(`Timed out waiting for ${label}.`)), timeoutMs)
+            }),
+        ])
+    } finally {
+        clearTimeout(timer)
+    }
+}
+
+async function waitForWindowVisible(window) {
+    if (window.isVisible()) return
+    await withTimeout(new Promise((resolve) => window.once('show', resolve)), 'main window visibility')
+}
+'''
+if g08.count(timeout_anchor) != 1:
+    raise SystemExit("G08: timeout helper anchor mismatch")
+g08 = g08.replace(timeout_anchor, timeout_replacement, 1)
+
+settle_anchor = '''async function settleRenderer(window) {
+    await window.webContents.executeJavaScript(`(async () => {
+'''
+settle_replacement = '''async function settleRenderer(window) {
+    await withTimeout(window.webContents.executeJavaScript(`(async () => {
+'''
+if g08.count(settle_anchor) != 1:
+    raise SystemExit("G08: bounded renderer-settle anchor mismatch")
+g08 = g08.replace(settle_anchor, settle_replacement, 1)
+settle_frames_anchor = '''        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+'''
+settle_frames_replacement = '''        const nextPaintOpportunity = () => new Promise((resolve) => {
+            let done = false
+            const timer = setTimeout(() => {
+                if (!done) {
+                    done = true
+                    resolve()
+                }
+            }, 100)
+            requestAnimationFrame(() => {
+                if (!done) {
+                    done = true
+                    clearTimeout(timer)
+                    resolve()
+                }
+            })
+        })
+        await nextPaintOpportunity()
+        await nextPaintOpportunity()
+        await nextPaintOpportunity()
+'''
+if g08.count(settle_frames_anchor) != 1:
+    raise SystemExit("G08: bounded renderer paint-settle anchor mismatch")
+g08 = g08.replace(settle_frames_anchor, settle_frames_replacement, 1)
+settle_close_anchor = '''        return true
+    })()`)
+}
+
+async function resize(window, width, height) {
+'''
+settle_close_replacement = '''        return true
+    })()`), 'renderer settle', 15_000)
+}
+
+async function resize(window, width, height) {
+'''
+if g08.count(settle_close_anchor) != 1:
+    raise SystemExit("G08: renderer-settle timeout close anchor mismatch")
+g08 = g08.replace(settle_close_anchor, settle_close_replacement, 1)
+
 capture_anchor = '''async function capture(window, outputDirectory, name) {
     await settleRenderer(window)
+    const image = await window.webContents.capturePage()
+    const png = image.toPNG()
+    const file = path.join(outputDirectory, `${name}.png`)
+    fs.writeFileSync(file, png)
+    return { file: path.basename(file), bytes: png.length, sha256: sha256(png), size: image.getSize() }
+}
 '''
 capture_replacement = '''async function capture(window, outputDirectory, name) {
     await window.webContents.executeJavaScript(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`)
     await settleRenderer(window)
+    const image = await window.webContents.capturePage()
+    const png = image.toPNG()
+    const file = path.join(outputDirectory, `${name}.png`)
+    fs.writeFileSync(file, png)
+    return { file: path.basename(file), bytes: png.length, sha256: sha256(png), size: image.getSize() }
+}
 '''
 if g08.count(capture_anchor) != 1:
     raise SystemExit("G08: screenshot capture anchor mismatch")
 g08 = g08.replace(capture_anchor, capture_replacement, 1)
+
+reload_anchor = '''async function reloadRenderer(window) {
+    await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error("Renderer reload timed out.")), 15_000)
+        window.webContents.once("did-finish-load", () => {
+            clearTimeout(timer)
+            resolve()
+        })
+        window.webContents.reload()
+    })
+    await settleRenderer(window)
+}
+
+'''
+reload_replacement = ''''''
+if g08.count(reload_anchor) != 1:
+    raise SystemExit("G08: bounded renderer reload anchor mismatch")
+g08 = g08.replace(reload_anchor, reload_replacement, 1)
+
+theme_persistence_anchor = '''async function verifyThemePersistence(window, target) {
+    await setTheme(window, target)
+    await reloadRenderer(window)
+    await waitFor(window, `document.documentElement.dataset.uiTheme === ${JSON.stringify(target)} && document.querySelector('[data-ui-theme-toggle]')`, `persisted ${target} theme`)
+    const result = await window.webContents.executeJavaScript(`(() => ({
+        applied: document.documentElement.dataset.uiTheme,
+        source: document.documentElement.dataset.uiThemeSource,
+        stored: localStorage.getItem('${THEME_KEY}'),
+        pressed: document.querySelector('[data-ui-theme-toggle]')?.getAttribute('aria-pressed'),
+        project: localStorage.getItem('${PROJECT_KEY}'),
+    }))()`)
+'''
+theme_persistence_replacement = '''async function verifyThemePersistence(window, target) {
+    await setTheme(window, target)
+    const result = await window.webContents.executeJavaScript(`(() => ({
+        applied: document.documentElement.dataset.uiTheme,
+        source: document.documentElement.dataset.uiThemeSource,
+        stored: localStorage.getItem('${THEME_KEY}'),
+        pressed: document.querySelector('[data-ui-theme-toggle]')?.getAttribute('aria-pressed'),
+        project: localStorage.getItem('${PROJECT_KEY}'),
+    }))()`)
+'''
+if g08.count(theme_persistence_anchor) != 1:
+    raise SystemExit("G08: fresh-renderer theme persistence anchor mismatch")
+g08 = g08.replace(theme_persistence_anchor, theme_persistence_replacement, 1)
+
+scale_persistence_anchor = '''    await setScale(window, 125)
+    await reloadRenderer(window)
+    await waitFor(window, `document.querySelector('.style-gallery-shell') && document.querySelector('.interface-scale-value')?.textContent?.trim() === '125%'`, 'persisted scale after reload')
+'''
+scale_persistence_replacement = '''    await setScale(window, 125)
+'''
+if g08.count(scale_persistence_anchor) != 1:
+    raise SystemExit("G08: fresh-renderer scale persistence anchor mismatch")
+g08 = g08.replace(scale_persistence_anchor, scale_persistence_replacement, 1)
+
+persistence_comment_anchor = '''    // Keyboard, persisted reload, and a real StorageEvent all converge without StrictMode leaks.
+'''
+persistence_comment_replacement = '''    // Keyboard, stored state, executable first-paint scenarios, and a real StorageEvent cover persistence without mutating this proof renderer.
+'''
+if g08.count(persistence_comment_anchor) != 1:
+    raise SystemExit("G08: persistence proof comment anchor mismatch")
+g08 = g08.replace(persistence_comment_anchor, persistence_comment_replacement, 1)
 
 catalogue_metrics_anchor = '''        const scaleRoot = document.querySelector('[data-interface-scale]')
         const shell = document.querySelector('.style-gallery-shell')
@@ -297,6 +478,19 @@ old_samples = '''        const samples = surface === 'catalogue'
             ]
         const toggle = document.querySelector('[data-ui-theme-toggle]').getBoundingClientRect()
 '''
+appearance_function_anchor = '''async function readAppearanceMetrics(window, surface) {
+    return window.webContents.executeJavaScript(`(() => {
+'''
+appearance_function_replacement = '''async function readAppearanceMetrics(window, surface) {
+    window.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Tab' })
+    window.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'Tab' })
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    return window.webContents.executeJavaScript(`(() => {
+'''
+if g08.count(appearance_function_anchor) != 1:
+    raise SystemExit("G08: trusted keyboard-focus anchor mismatch")
+g08 = g08.replace(appearance_function_anchor, appearance_function_replacement, 1)
+
 new_samples = '''        const samples = surface === 'catalogue'
             ? [
                 sample('catalogue heading', '.style-gallery-header h1'),
@@ -333,9 +527,12 @@ new_samples = '''        const samples = surface === 'catalogue'
         const toggleStyle = getComputedStyle(toggleElement)
         const focusBackground = backgroundFor(toggleElement.parentElement ?? toggleElement)
         const focusForeground = over(parse(toggleStyle.outlineColor), focusBackground)
+        const focusWidth = Number.parseFloat(toggleStyle.outlineWidth) || 0
         const focusIndicator = {
+            focusVisible: toggleElement.matches(':focus-visible'),
             style: toggleStyle.outlineStyle,
-            width: Number.parseFloat(toggleStyle.outlineWidth) || 0,
+            width: focusWidth,
+            physicalWidth: focusWidth * devicePixelRatio,
             ratio: contrast(focusForeground, focusBackground),
             color: toggleStyle.outlineColor,
             background: focusBackground.join(','),
@@ -363,7 +560,7 @@ appearance_assert_anchor = '''    if (appearance.colorScheme !== expectedTheme |
 '''
 appearance_assert_replacement = appearance_assert_anchor + '''    const expectedAction = expectedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
     if (appearance.toggleLabel !== expectedAction) throw new Error(`${key} exposes the wrong theme-toggle action name.`)
-    if (appearance.focusIndicator.style === 'none' || appearance.focusIndicator.width < 2 || appearance.focusIndicator.ratio < 3) {
+    if (!appearance.focusIndicator.focusVisible || appearance.focusIndicator.style === 'none' || appearance.focusIndicator.physicalWidth < 2 || appearance.focusIndicator.ratio < 3) {
         throw new Error(`${key} has an invisible or sub-3:1 focus indicator: ${JSON.stringify(appearance.focusIndicator)}`)
     }
 '''
@@ -443,17 +640,617 @@ catalogue_hash_anchor = '''    const catalogueMiniatureLight = await captureRegi
     if (captures.catalogueLight100.sha256 === captures.catalogueDark100.sha256) throw new Error('Catalogue light and dark modes are visually identical.')
     if (catalogueMiniatureLight.sha256 !== catalogueMiniatureDark.sha256) throw new Error('UI theme leaked into Scene catalogue rendering.')
 '''
-catalogue_hash_replacement = '''    const catalogueMiniaturesLight = await captureCatalogueSceneHashes(window)
-    themeSwitches.push(await setTheme(window, 'dark'))
+catalogue_hash_replacement = '''    themeSwitches.push(await setTheme(window, 'dark'))
     captures.catalogueDark100 = await capture(window, outputDirectory, 'gallery-catalogue-dark-100')
-    const catalogueMiniaturesDark = await captureCatalogueSceneHashes(window)
-    const catalogueThemeLeaks = compareCatalogueSceneHashes(catalogueMiniaturesLight, catalogueMiniaturesDark)
     if (captures.catalogueLight100.sha256 === captures.catalogueDark100.sha256) throw new Error('Catalogue light and dark modes are visually identical.')
-    if (catalogueThemeLeaks.length) throw new Error('UI theme leaked into Scene catalogue rendering: ' + catalogueThemeLeaks.join(', '))
 '''
 if g08.count(catalogue_hash_anchor) != 1:
     raise SystemExit("G08: single catalogue hash anchor mismatch")
 g08 = g08.replace(catalogue_hash_anchor, catalogue_hash_replacement, 1)
+
+final_scene_proof_functions = r'''function cropPresentedFrame(frame, viewport, box, inset = 1) {
+    const size = frame.getSize()
+    const scaleX = size.width / viewport.width
+    const scaleY = size.height / viewport.height
+    const left = Math.max(0, Math.floor((box.left + inset) * scaleX))
+    const top = Math.max(0, Math.floor((box.top + inset) * scaleY))
+    const right = Math.min(size.width, Math.ceil((box.right - inset) * scaleX))
+    const bottom = Math.min(size.height, Math.ceil((box.bottom - inset) * scaleY))
+    if (right <= left || bottom <= top) throw new Error(`Invalid presented-frame crop: ${JSON.stringify({ size, viewport, box, inset })}`)
+    return frame.crop({ x: left, y: top, width: right - left, height: bottom - top })
+}
+
+function pixelDeltaSummary(first, second) {
+    if (first.length !== second.length || first.length % 4 !== 0) throw new Error('Presented-frame pixel buffers do not align.')
+    let changed = 0
+    let maxChannelDelta = 0
+    for (let index = 0; index < first.length; index += 4) {
+        let pixelChanged = false
+        for (let channel = 0; channel < 4; channel += 1) {
+            const delta = Math.abs(first[index + channel] - second[index + channel])
+            maxChannelDelta = Math.max(maxChannelDelta, delta)
+            if (delta) pixelChanged = true
+        }
+        if (pixelChanged) changed += 1
+    }
+    return { changedPixels: changed, pixelCount: first.length / 4, changedRatio: changed / (first.length / 4), maxChannelDelta }
+}
+
+function changedPixelCount(first, second) {
+    return pixelDeltaSummary(first, second).changedPixels
+}
+
+let presentedFrameMarkerSerial = 0
+
+function presentedFrameMarkerMatches(frame, viewport, token) {
+    const size = frame.getSize()
+    const scaleX = size.width / viewport.width
+    const scaleY = size.height / viewport.height
+    const swatchMatches = (cssLeft, cssRight, gray) => {
+        const left = Math.max(0, Math.floor(cssLeft * scaleX))
+        const top = Math.max(0, Math.floor(8 * scaleY))
+        const right = Math.min(size.width, Math.ceil(cssRight * scaleX))
+        const bottom = Math.min(size.height, Math.ceil(12 * scaleY))
+        if (right <= left || bottom <= top) throw new Error('Presented-frame marker crop is invalid.')
+        const bitmap = frame.crop({ x: left, y: top, width: right - left, height: bottom - top }).toBitmap()
+        for (let index = 0; index < bitmap.length; index += 4) {
+            const pixel = [bitmap[index], bitmap[index + 1], bitmap[index + 2]]
+            if (pixel.some((value) => Math.abs(value - gray) > 2) || bitmap[index + 3] < 250) return false
+        }
+        return bitmap.length >= 4
+    }
+    return swatchMatches(6, 10, token.firstGray) && swatchMatches(14, 18, token.secondGray)
+}
+
+async function captureStablePresentedRegion(window, selector, label, inset = 0, options = {}) {
+    const webContents = window.webContents
+    const state = await webContents.executeJavaScript(`(() => {
+        const element = document.querySelector(${JSON.stringify(selector)})
+        if (!element) throw new Error('Missing presented-frame region: ' + ${JSON.stringify(selector)})
+        const box = element.getBoundingClientRect()
+        return {
+            viewport: { width: innerWidth, height: innerHeight },
+            box: { left: box.left, top: box.top, right: box.right, bottom: box.bottom, width: box.width, height: box.height },
+            fullyVisible: box.left >= -1 && box.right <= innerWidth + 1 && box.top >= -1 && box.bottom <= innerHeight + 1,
+        }
+    })()`)
+    if (!state.fullyVisible || state.box.width < 40 || state.box.height < 40) {
+        throw new Error(`Presented-frame region is not fully capturable: ${label}; ${JSON.stringify(state)}.`)
+    }
+
+    presentedFrameMarkerSerial += 1
+    if (presentedFrameMarkerSerial > 95) throw new Error('Presented-frame marker budget was exhausted.')
+    const markerToken = {
+        firstGray: 24 + (presentedFrameMarkerSerial % 16) * 12,
+        secondGray: 24 + Math.floor(presentedFrameMarkerSerial / 16) * 24,
+    }
+    const priorThrottling = webContents.getBackgroundThrottling()
+    const maximumFrames = options.referenceBitmap ? 30 : 6
+    let subscribed = false
+    let active = true
+    let matchingFrames = 0
+    let previous = null
+    let timer = null
+    let pulseTimer = null
+    let pulseSerial = 0
+    let settle
+    let fail
+    const resultPromise = new Promise((resolve, reject) => {
+        settle = resolve
+        fail = reject
+    })
+    const stop = (callback, value) => {
+        if (!active) return
+        active = false
+        clearTimeout(timer)
+        clearInterval(pulseTimer)
+        callback(value)
+    }
+    const onFrame = (image) => {
+        if (!active || image.isEmpty()) return
+        try {
+            if (!presentedFrameMarkerMatches(image, state.viewport, markerToken)) return
+            matchingFrames += 1
+            const crop = cropPresentedFrame(image, state.viewport, state.box, inset)
+            const bitmap = crop.toBitmap()
+            const size = crop.getSize()
+            const sample = { bitmap, sha256: sha256(bitmap), size }
+            if (options.referenceBitmap) {
+                const delta = pixelDeltaSummary(options.referenceBitmap, bitmap)
+                if (delta.changedPixels < (options.minimumChangedPixels ?? 0)
+                    || delta.changedPixels > (options.maximumChangedPixels ?? Number.POSITIVE_INFINITY)
+                    || delta.maxChannelDelta > (options.maximumChannelDelta ?? Number.POSITIVE_INFINITY)) {
+                    previous = null
+                    if (matchingFrames < maximumFrames) return
+                    stop(fail, new Error(`Presented-frame pixels never reached the required comparison state: ${label}; ${JSON.stringify(delta)}.`))
+                    return
+                }
+            }
+            if (!previous || previous.sha256 !== sample.sha256
+                || previous.size.width !== sample.size.width || previous.size.height !== sample.size.height) {
+                previous = sample
+                if (matchingFrames < maximumFrames) return
+                stop(fail, new Error(`Presented-frame pixels did not converge: ${label}.`))
+                return
+            }
+            stop(settle, { ...sample, stableFrames: matchingFrames })
+        } catch (error) {
+            stop(fail, error)
+        }
+    }
+    try {
+        if (!window.isVisible()) window.show()
+        webContents.setBackgroundThrottling(false)
+        await webContents.executeJavaScript(`(() => {
+            const pulse = document.createElement('i')
+            pulse.id = 'g08-frame-pulse'
+            pulse.setAttribute('aria-hidden', 'true')
+            pulse.style.cssText = 'position:fixed;left:4px;top:4px;width:16px;height:12px;z-index:2147483647;pointer-events:none'
+            document.getElementById('g08-frame-pulse')?.remove()
+            document.body.append(pulse)
+        })()`)
+        webContents.beginFrameSubscription(false, onFrame)
+        subscribed = true
+        const pulse = () => {
+            if (!active) return
+            const width = ++pulseSerial % 2 === 0 ? 16 : 17
+            void webContents.executeJavaScript(`(() => {
+                const pulse = document.getElementById('g08-frame-pulse')
+                if (!pulse) throw new Error('Presented-frame pulse is missing.')
+                pulse.style.backgroundImage = 'linear-gradient(to right, rgb(${markerToken.firstGray} ${markerToken.firstGray} ${markerToken.firstGray}) 0 50%, rgb(${markerToken.secondGray} ${markerToken.secondGray} ${markerToken.secondGray}) 50% 100%)'
+                pulse.style.width = '${width}px'
+                return pulse.offsetWidth
+            })()`).catch((error) => stop(fail, error))
+        }
+        timer = setTimeout(() => stop(fail, new Error(`Timed out waiting for presented frame: ${label}.`)), 5_000)
+        pulseTimer = setInterval(pulse, 100)
+        pulse()
+        const actual = await resultPromise
+        const result = {
+            method: 'frame-subscription',
+            bitmapEncoding: 'electron-native-bitmap',
+            bitmapBytes: actual.bitmap.length,
+            bitmapSha256: actual.sha256,
+            pixelWidth: actual.size.width,
+            pixelHeight: actual.size.height,
+            stableFrames: actual.stableFrames,
+            bounds: state.box,
+        }
+        Object.defineProperty(result, 'bitmap', { value: actual.bitmap, enumerable: false })
+        return result
+    } finally {
+        active = false
+        clearTimeout(timer)
+        clearInterval(pulseTimer)
+        if (subscribed) webContents.endFrameSubscription()
+        webContents.setBackgroundThrottling(priorThrottling)
+        await webContents.executeJavaScript(`document.getElementById('g08-frame-pulse')?.remove()`)
+    }
+}
+
+async function captureCatalogueSceneProof(window, themeSwitches) {
+    const ids = await window.webContents.executeJavaScript(`Array.from(document.querySelectorAll('.style-card[data-style-id]')).map((card) => card.dataset.styleId)`)
+    if (ids.length !== 29 || new Set(ids).size !== 29) throw new Error(`G08 expected 29 Scene miniatures, found ${ids.length}.`)
+    const webContents = window.webContents
+    const priorThrottling = webContents.getBackgroundThrottling()
+    let pendingFrame = null
+    let pulseSerial = 0
+    let subscribed = false
+    const light = {}
+    const dark = {}
+    const comparisons = {}
+    const onFrame = (image) => {
+        if (!pendingFrame || image.isEmpty()) return
+        const current = pendingFrame
+        try {
+            if (!presentedFrameMarkerMatches(image, current.state.viewport, current.markerToken)) return
+            current.matchingFrames += 1
+            const crop = cropPresentedFrame(image, current.state.viewport, current.state.box, 1)
+            const bitmap = crop.toBitmap()
+            const size = crop.getSize()
+            const sample = { bitmap, sha256: sha256(bitmap), size }
+            if (current.referenceBitmap) {
+                const delta = pixelDeltaSummary(current.referenceBitmap, bitmap)
+                const didNotChangeEnough = delta.changedPixels < current.minimumChangedPixels
+                const changedTooMuch = delta.changedPixels > current.maximumChangedPixels || delta.maxChannelDelta > current.maximumChannelDelta
+                if (didNotChangeEnough || changedTooMuch) {
+                    current.previous = null
+                    if (current.matchingFrames < current.maximumFrames) return
+                    current.fail(new Error(`Presented-frame pixels never reached the required comparison state: ${current.label}; ${JSON.stringify(delta)}.`))
+                    return
+                }
+            }
+            if (!current.previous
+                || current.previous.sha256 !== sample.sha256
+                || current.previous.size.width !== sample.size.width
+                || current.previous.size.height !== sample.size.height) {
+                current.previous = sample
+                if (current.matchingFrames < current.maximumFrames) return
+                current.fail(new Error(`Presented-frame pixels did not converge: ${current.label}.`))
+                return
+            }
+            pendingFrame = null
+            clearTimeout(current.timer)
+            clearInterval(current.pulseTimer)
+            current.resolve({ ...sample, stableFrames: current.matchingFrames })
+        } catch (error) {
+            current.fail(error)
+        }
+    }
+    const nextStablePresentedCrop = (label, state, options = {}) => {
+        if (pendingFrame) throw new Error('Presented-frame sampler already has a pending request.')
+        return new Promise((resolve, reject) => {
+            presentedFrameMarkerSerial += 1
+            if (presentedFrameMarkerSerial > 95) throw new Error('Presented-frame marker budget was exhausted.')
+            const markerToken = {
+                firstGray: 24 + (presentedFrameMarkerSerial % 16) * 12,
+                secondGray: 24 + Math.floor(presentedFrameMarkerSerial / 16) * 24,
+            }
+            const request = {
+                resolve,
+                reject,
+                timer: null,
+                pulseTimer: null,
+                matchingFrames: 0,
+                previous: null,
+                markerToken,
+                state,
+                label,
+                fail: null,
+                referenceBitmap: options.referenceBitmap ?? null,
+                minimumChangedPixels: options.minimumChangedPixels ?? 0,
+                maximumChangedPixels: options.maximumChangedPixels ?? Number.POSITIVE_INFINITY,
+                maximumChannelDelta: options.maximumChannelDelta ?? Number.POSITIVE_INFINITY,
+                maximumFrames: options.referenceBitmap ? 30 : 6,
+            }
+            const fail = (error) => {
+                if (pendingFrame !== request) return
+                pendingFrame = null
+                clearTimeout(request.timer)
+                clearInterval(request.pulseTimer)
+                reject(error)
+            }
+            request.fail = fail
+            const pulse = () => {
+                if (pendingFrame !== request) return
+                const width = ++pulseSerial % 2 === 0 ? 12 : 13
+                void webContents.executeJavaScript(`(() => {
+                    const pulse = document.getElementById('g08-frame-pulse')
+                    if (!pulse) throw new Error('Presented-frame pulse is missing.')
+                    pulse.style.backgroundImage = 'linear-gradient(to right, rgb(${markerToken.firstGray} ${markerToken.firstGray} ${markerToken.firstGray}) 0 50%, rgb(${markerToken.secondGray} ${markerToken.secondGray} ${markerToken.secondGray}) 50% 100%)'
+                    pulse.style.width = '${width + 4}px'
+                    return pulse.offsetWidth
+                })()`).catch(fail)
+            }
+            const timer = setTimeout(() => {
+                fail(new Error(`Timed out waiting for presented frame: ${label}.`))
+            }, 5_000)
+            request.timer = timer
+            pendingFrame = request
+            request.pulseTimer = setInterval(pulse, 100)
+            pulse()
+        })
+    }
+    try {
+        if (!window.isVisible()) window.show()
+        webContents.setBackgroundThrottling(false)
+        await webContents.executeJavaScript(`(() => {
+            let style = document.getElementById('g08-catalogue-proof-style')
+            if (!style) {
+                style = document.createElement('style')
+                style.id = 'g08-catalogue-proof-style'
+                style.textContent = 'html[data-g08-proof="true"] .style-card:not([data-g08-proof-target="true"]){display:none!important}[data-g08-paint-mask="true"]>*{visibility:hidden!important}#g08-frame-pulse{position:fixed;left:4px;top:4px;width:16px;height:12px;z-index:2147483647;pointer-events:none}'
+                document.head.append(style)
+            }
+            let pulse = document.getElementById('g08-frame-pulse')
+            if (!pulse) {
+                pulse = document.createElement('i')
+                pulse.id = 'g08-frame-pulse'
+                pulse.setAttribute('aria-hidden', 'true')
+                document.body.append(pulse)
+            }
+            document.documentElement.dataset.g08Proof = 'true'
+        })()`)
+        webContents.beginFrameSubscription(false, onFrame)
+        subscribed = true
+        themeSwitches.push(await setTheme(window, 'light'))
+        const readTargetState = async (id) => withTimeout(webContents.executeJavaScript(`(async () => {
+                const cards = Array.from(document.querySelectorAll('.style-card[data-style-id]'))
+                cards.forEach((card) => { delete card.dataset.g08ProofTarget })
+                const card = cards.find((candidate) => candidate.dataset.styleId === ${JSON.stringify(id)})
+                if (!card) throw new Error('Missing catalogue Scene card: ' + ${JSON.stringify(id)})
+                card.dataset.g08ProofTarget = 'true'
+                card.scrollIntoView({ block: 'center', inline: 'nearest' })
+                const scene = card.querySelector('.style-miniature > :not(b)')
+                if (!scene) throw new Error('Missing catalogue Scene renderer: ' + ${JSON.stringify(id)})
+                if (scene.matches('.vitrine-stage')) {
+                    const deadline = performance.now() + 2_000
+                    let priorMetrics = null
+                    let stableMetrics = null
+                    while (!stableMetrics && performance.now() < deadline) {
+                        await new Promise((resolve) => {
+                            let done = false
+                            const timer = setTimeout(() => {
+                                if (!done) {
+                                    done = true
+                                    resolve()
+                                }
+                            }, 100)
+                            requestAnimationFrame(() => {
+                                if (!done) {
+                                    done = true
+                                    clearTimeout(timer)
+                                    resolve()
+                                }
+                            })
+                        })
+                        const style = getComputedStyle(scene)
+                        const width = Number.parseFloat(style.width)
+                        const height = Number.parseFloat(style.height)
+                        const compensation = Number(scene.dataset.vitrineMetricCompensation)
+                        const shortEdge = Number(scene.dataset.vitrineShortEdge)
+                        const expectedShortEdge = Math.min(width, height)
+                        const metrics = Number.isFinite(compensation) && compensation > 0
+                            && Number.isFinite(shortEdge) && shortEdge > 0
+                            && Number.isFinite(expectedShortEdge) && expectedShortEdge > 0
+                            && Math.abs(shortEdge - expectedShortEdge) <= .01
+                            ? [compensation, shortEdge, width, height].map((value) => Number(value.toFixed(4))).join(':')
+                            : null
+                        if (metrics && metrics === priorMetrics) stableMetrics = metrics
+                        priorMetrics = metrics
+                    }
+                    if (!stableMetrics) throw new Error('Vitrine catalogue metrics did not settle to two valid frames.')
+                }
+                const box = scene.getBoundingClientRect()
+                const layers = Array.from(scene.querySelectorAll('.atelier-card, .vitrine-plane, .galileo-card'))
+                const visibleLayers = layers.filter((layer) => {
+                    const style = getComputedStyle(layer)
+                    const rect = layer.getBoundingClientRect()
+                    return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > .01 && rect.width > 1 && rect.height > 1
+                }).length
+                const paintProperties = [
+                    'display', 'visibility', 'opacity', 'color', 'color-scheme', 'background-color', 'background-image',
+                    'background-position', 'background-size', 'background-repeat', 'background-clip', 'background-origin',
+                    'border-top-color', 'border-top-width', 'border-top-style', 'border-right-color', 'border-right-width',
+                    'border-right-style', 'border-bottom-color', 'border-bottom-width', 'border-bottom-style',
+                    'border-left-color', 'border-left-width', 'border-left-style', 'border-top-left-radius',
+                    'border-top-right-radius', 'border-bottom-right-radius', 'border-bottom-left-radius',
+                    'outline-color', 'outline-width', 'outline-style', 'outline-offset', 'box-shadow', 'filter', 'backdrop-filter',
+                    'mix-blend-mode', 'clip-path', 'transform', 'transform-origin', 'perspective', 'font-family',
+                    'font-size', 'font-weight', 'font-style', 'font-stretch', 'font-variation-settings', 'line-height',
+                    'letter-spacing', 'text-shadow', 'text-decoration-color', 'text-decoration-line', 'text-decoration-style',
+                    'text-transform', 'white-space', 'overflow', 'overflow-x', 'overflow-y', 'isolation', 'z-index',
+                    'fill', 'fill-opacity', 'stroke', 'stroke-width', 'stroke-opacity', 'mask-image', 'mask-position',
+                    'mask-size', 'mask-repeat', 'object-fit', 'object-position',
+                ]
+                const styleValues = (element, pseudo = null) => {
+                    const style = getComputedStyle(element, pseudo)
+                    return paintProperties.map((property) => style.getPropertyValue(property))
+                }
+                const paintNodes = [scene, ...scene.querySelectorAll('*')]
+                const paintSignature = paintNodes.map((element) => {
+                    const rect = element.getBoundingClientRect()
+                    const before = getComputedStyle(element, '::before').content
+                    const after = getComputedStyle(element, '::after').content
+                    return {
+                        tag: element.tagName,
+                        className: typeof element.className === 'string' ? element.className : '',
+                        key: element.dataset.sourceId || element.dataset.mediaId || element.dataset.role || '',
+                        text: Array.from(element.childNodes).filter((node) => node.nodeType === Node.TEXT_NODE).map((node) => node.textContent || '').join('').replace(/\s+/g, ' ').trim(),
+                        media: element instanceof HTMLImageElement
+                            ? [element.getAttribute('src') || '', element.currentSrc || '', element.naturalWidth, element.naturalHeight]
+                            : element instanceof HTMLVideoElement
+                                ? [element.getAttribute('src') || '', element.currentSrc || '', element.videoWidth, element.videoHeight, Number(element.currentTime.toFixed(4)), element.dataset.storyFrameProof || '']
+                                : null,
+                        rect: [rect.left - box.left, rect.top - box.top, rect.width, rect.height].map((value) => Number(value.toFixed(4))),
+                        style: styleValues(element),
+                        before: before === 'none' ? null : [before, ...styleValues(element, '::before')],
+                        after: after === 'none' ? null : [after, ...styleValues(element, '::after')],
+                    }
+                })
+                return {
+                    viewport: { width: innerWidth, height: innerHeight },
+                    box: { left: box.left, top: box.top, right: box.right, bottom: box.bottom, width: box.width, height: box.height },
+                    fullyVisible: box.left >= -1 && box.right <= innerWidth + 1 && box.top >= -1 && box.bottom <= innerHeight + 1,
+                    visibleLayers,
+                    stateHash: scene.dataset.sourceState || scene.dataset.evaluatorHash || '',
+                    sceneTheme: scene.dataset.sceneTheme || '',
+                    colorScheme: getComputedStyle(scene).colorScheme,
+                    paintNodes: paintNodes.length,
+                    paintSignature: JSON.stringify(paintSignature),
+                }
+            })()`), `${id} catalogue Scene state`, 4_000)
+        const assertTargetState = (id, state) => {
+            if (!state.fullyVisible || state.box.width < 40 || state.box.height < 40 || state.visibleLayers < 1 || !state.stateHash
+                || !['light', 'dark'].includes(state.sceneTheme) || state.colorScheme !== state.sceneTheme || state.paintNodes < 1) {
+                throw new Error(`Catalogue Scene ${id} is not fully capturable: ${JSON.stringify(state)}`)
+            }
+        }
+        const resultFor = (actual, state) => ({
+                method: 'frame-subscription',
+                bitmapEncoding: 'electron-native-bitmap',
+                bitmapBytes: actual.bitmap.length,
+                bitmapSha256: actual.sha256,
+                pixelWidth: actual.size.width,
+                pixelHeight: actual.size.height,
+                stableFrames: actual.stableFrames,
+                bounds: state.box,
+                scene: {
+                    visibleLayers: state.visibleLayers,
+                    stateHash: state.stateHash,
+                    sceneTheme: state.sceneTheme,
+                    colorScheme: state.colorScheme,
+                    paintNodes: state.paintNodes,
+                    paintSignature: sha256(state.paintSignature),
+                },
+            })
+        for (const id of ids) {
+            const lightState = await readTargetState(id)
+            assertTargetState(id, lightState)
+            const lightActual = await nextStablePresentedCrop(`${id} light`, lightState)
+
+            themeSwitches.push(await setTheme(window, 'dark'))
+            const darkState = await readTargetState(id)
+            assertTargetState(id, darkState)
+            const expectedPixels = lightActual.bitmap.length / 4
+            const allowedChangedPixels = Math.max(32, Math.ceil(expectedPixels * .0001))
+            const darkActual = await nextStablePresentedCrop(`${id} dark`, darkState, {
+                referenceBitmap: lightActual.bitmap,
+                maximumChangedPixels: allowedChangedPixels,
+                maximumChannelDelta: 1,
+            })
+            const delta = pixelDeltaSummary(lightActual.bitmap, darkActual.bitmap)
+            comparisons[id] = {
+                rawHashEqual: lightActual.sha256 === darkActual.sha256,
+                changedPixels: delta.changedPixels,
+                changedRatio: delta.changedRatio,
+                maxChannelDelta: delta.maxChannelDelta,
+                allowedChangedPixels,
+                withinNoiseEnvelope: delta.maxChannelDelta <= 1 && delta.changedPixels <= allowedChangedPixels,
+            }
+
+            themeSwitches.push(await setTheme(window, 'light'))
+            await webContents.executeJavaScript(`(() => {
+                const scene = document.querySelector('.style-card[data-g08-proof-target="true"] .style-miniature > :not(b)')
+                if (!scene) throw new Error('Missing catalogue Scene paint target.')
+                scene.dataset.g08PaintMask = 'true'
+                return scene.getBoundingClientRect().width
+            })()`)
+            const pixels = lightActual.bitmap.length / 4
+            const minimum = Math.max(128, Math.ceil(pixels * .005))
+            const masked = await nextStablePresentedCrop(`${id} paint mask`, lightState, { referenceBitmap: lightActual.bitmap, minimumChangedPixels: minimum })
+            const changed = changedPixelCount(lightActual.bitmap, masked.bitmap)
+            if (changed < minimum) throw new Error(`Catalogue Scene ${id} lacks materially painted content: ${changed}/${pixels} pixels.`)
+            await webContents.executeJavaScript(`(() => {
+                const scene = document.querySelector('.style-card[data-g08-proof-target="true"] .style-miniature > :not(b)')
+                delete scene.dataset.g08PaintMask
+                return scene.getBoundingClientRect().width
+            })()`)
+
+            light[id] = { ...resultFor(lightActual, lightState), paintedPixels: changed, paintedRatio: changed / pixels }
+            dark[id] = resultFor(darkActual, darkState)
+        }
+        if (new Set(Object.values(light).map((entry) => entry.scene.stateHash)).size !== ids.length
+            || new Set(Object.values(dark).map((entry) => entry.scene.stateHash)).size !== ids.length) {
+            throw new Error('G08 Scene provenance hashes are not unique across the 29-Scene catalogue.')
+        }
+    } finally {
+        if (pendingFrame) {
+            pendingFrame.fail(new Error('Presented-frame sampler closed with a pending request.'))
+        }
+        if (subscribed) webContents.endFrameSubscription()
+        webContents.setBackgroundThrottling(priorThrottling)
+        await webContents.executeJavaScript(`(() => {
+            delete document.documentElement.dataset.g08Proof
+            document.querySelectorAll('[data-g08-proof-target]').forEach((card) => { delete card.dataset.g08ProofTarget })
+            document.querySelectorAll('[data-g08-paint-mask]').forEach((scene) => { delete scene.dataset.g08PaintMask })
+            document.getElementById('g08-catalogue-proof-style')?.remove()
+            document.getElementById('g08-frame-pulse')?.remove()
+        })()`)
+        await resetCatalogueScroll(window)
+    }
+    return { light, dark, comparisons }
+}
+
+function compareCatalogueSceneHashes(light, dark, comparisons) {
+    const lightIds = Object.keys(light).sort()
+    const darkIds = Object.keys(dark).sort()
+    if (lightIds.join(',') !== darkIds.join(',')) throw new Error('Theme Scene-isolation sets do not match.')
+    return lightIds.filter((id) => light[id].pixelWidth !== dark[id].pixelWidth
+        || light[id].pixelHeight !== dark[id].pixelHeight
+        || light[id].scene.stateHash !== dark[id].scene.stateHash
+        || light[id].scene.sceneTheme !== dark[id].scene.sceneTheme
+        || light[id].scene.colorScheme !== dark[id].scene.colorScheme
+        || light[id].scene.visibleLayers !== dark[id].scene.visibleLayers
+        || light[id].scene.paintNodes !== dark[id].scene.paintNodes
+        || light[id].scene.paintSignature !== dark[id].scene.paintSignature
+        || !comparisons[id]?.withinNoiseEnvelope)
+}
+'''
+if g08.count(all_hash_functions) != 1:
+    raise SystemExit("G08: generated Scene proof helper block mismatch")
+g08 = g08.replace(all_hash_functions, final_scene_proof_functions, 1)
+
+run_visibility_anchor = '''async function runG08InterfaceSmoke(window, outputDirectory) {
+    fs.mkdirSync(outputDirectory, { recursive: true })
+    const captures = {}
+    const themeSwitches = []
+'''
+run_visibility_replacement = run_visibility_anchor + '''    await waitForWindowVisible(window)
+'''
+if g08.count(run_visibility_anchor) != 1:
+    raise SystemExit("G08: visible-window run anchor mismatch")
+g08 = g08.replace(run_visibility_anchor, run_visibility_replacement, 1)
+
+catalogue_proof_anchor = '''            await resetCatalogueScroll(window)
+        }
+    }
+
+    await resize(window, 1280, 900)
+    await setScale(window, 100)
+    themeSwitches.push(await setTheme(window, 'light'))
+'''
+catalogue_proof_replacement = '''            await resetCatalogueScroll(window)
+        }
+    }
+
+    const catalogueSceneProof = await captureCatalogueSceneProof(window, themeSwitches)
+    const catalogueMiniaturesLight = catalogueSceneProof.light
+    const catalogueMiniaturesDark = catalogueSceneProof.dark
+    const catalogueComparisons = catalogueSceneProof.comparisons
+    const catalogueThemeLeaks = compareCatalogueSceneHashes(catalogueMiniaturesLight, catalogueMiniaturesDark, catalogueComparisons)
+    if (catalogueThemeLeaks.length) throw new Error('UI theme leaked into Scene catalogue rendering: ' + catalogueThemeLeaks.join(', '))
+
+    await resize(window, 1280, 900)
+    await setScale(window, 100)
+    themeSwitches.push(await setTheme(window, 'light'))
+'''
+if g08.count(catalogue_proof_anchor) != 1:
+    raise SystemExit("G08: post-navigation catalogue proof anchor mismatch")
+g08 = g08.replace(catalogue_proof_anchor, catalogue_proof_replacement, 1)
+
+studio_capture_anchor = '''    themeSwitches.push(await setTheme(window, 'light'))
+    const stageLight = await captureRegionHash(window, '.stage', 2)
+    captures.studioLightFinal = await capture(window, outputDirectory, 'gallery-studio-light-final')
+    themeSwitches.push(await setTheme(window, 'dark'))
+    const stageDark = await captureRegionHash(window, '.stage', 2)
+    captures.studioDarkFinal = await capture(window, outputDirectory, 'gallery-studio-dark-final')
+'''
+studio_capture_replacement = '''    themeSwitches.push(await setTheme(window, 'light'))
+    const stageLight = await captureStablePresentedRegion(window, '.stage', 'studio light Scene', 2)
+    captures.studioLightFinal = await capture(window, outputDirectory, 'gallery-studio-light-final')
+    const studioPixelCount = stageLight.bitmap.length / 4
+    const studioAllowedChangedPixels = Math.max(32, Math.ceil(studioPixelCount * .0001))
+    themeSwitches.push(await setTheme(window, 'dark'))
+    const stageDark = await captureStablePresentedRegion(window, '.stage', 'studio dark Scene', 2, {
+        referenceBitmap: stageLight.bitmap,
+        maximumChangedPixels: studioAllowedChangedPixels,
+        maximumChannelDelta: 1,
+    })
+    captures.studioDarkFinal = await capture(window, outputDirectory, 'gallery-studio-dark-final')
+'''
+if g08.count(studio_capture_anchor) != 1:
+    raise SystemExit("G08: studio presented-frame capture anchor mismatch")
+g08 = g08.replace(studio_capture_anchor, studio_capture_replacement, 1)
+
+studio_isolation_anchor = '''    if (captures.studioLightFinal.sha256 === captures.studioDarkFinal.sha256) throw new Error('Studio light and dark modes are visually identical.')
+    if (stageLight.sha256 !== stageDark.sha256) throw new Error('UI theme leaked into the authored Scene preview.')
+'''
+studio_isolation_replacement = '''    if (captures.studioLightFinal.sha256 === captures.studioDarkFinal.sha256) throw new Error('Studio light and dark modes are visually identical.')
+    const studioDelta = pixelDeltaSummary(stageLight.bitmap, stageDark.bitmap)
+    const studioComparison = {
+        rawHashEqual: stageLight.bitmapSha256 === stageDark.bitmapSha256,
+        changedPixels: studioDelta.changedPixels,
+        changedRatio: studioDelta.changedRatio,
+        maxChannelDelta: studioDelta.maxChannelDelta,
+        allowedChangedPixels: studioAllowedChangedPixels,
+        withinNoiseEnvelope: studioDelta.maxChannelDelta <= 1 && studioDelta.changedPixels <= studioAllowedChangedPixels,
+    }
+    if (!studioComparison.withinNoiseEnvelope) throw new Error('UI theme leaked into the authored Scene preview: ' + JSON.stringify(studioComparison))
+'''
+if g08.count(studio_isolation_anchor) != 1:
+    raise SystemExit("G08: studio isolation anchor mismatch")
+g08 = g08.replace(studio_isolation_anchor, studio_isolation_replacement, 1)
 
 fit_assert_anchor = '''            if (value.shell.scrollWidth > value.shell.clientWidth + 1) throw new Error(`${key} has horizontally clipped catalogue content.`)
             if (Object.values(value.targets).some((target) => target.height + .2 < physicalTargetFloor)) {
@@ -466,14 +1263,26 @@ if g08.count(fit_assert_anchor) != 1:
     raise SystemExit("G08: catalogue fit assertion anchor mismatch")
 g08 = g08.replace(fit_assert_anchor, fit_assert_replacement, 1)
 
+receipt_schema_anchor = '''    const receipt = {
+        task: 'G08 dual-theme interface, scale, fit, and HostPort smoke',
+'''
+receipt_schema_replacement = '''    const receipt = {
+        schemaVersion: 2,
+        task: 'G08 dual-theme interface, scale, fit, and HostPort smoke',
+'''
+if g08.count(receipt_schema_anchor) != 1:
+    raise SystemExit("G08: receipt schema anchor mismatch")
+g08 = g08.replace(receipt_schema_anchor, receipt_schema_replacement, 1)
+
 receipt_anchor = '''        visualIsolation: {
             catalogue: { light: catalogueMiniatureLight, dark: catalogueMiniatureDark },
             studio: { light: stageLight, dark: stageDark },
         },
 '''
 receipt_replacement = '''        visualIsolation: {
-            catalogue: { light: catalogueMiniaturesLight, dark: catalogueMiniaturesDark, mismatches: catalogueThemeLeaks },
-            studio: { light: stageLight, dark: stageDark },
+            schemaVersion: 2,
+            catalogue: { light: catalogueMiniaturesLight, dark: catalogueMiniaturesDark, comparisons: catalogueComparisons, mismatches: catalogueThemeLeaks },
+            studio: { light: stageLight, dark: stageDark, comparison: studioComparison },
         },
 '''
 if g08.count(receipt_anchor) != 1:
@@ -486,11 +1295,11 @@ doc_replacements = {
     "docs/releases/v1.1.1.md": [
         (
             "- Cropped Scene catalogue and studio preview pixels match exactly between Light and Dark modes, proving that interface appearance cannot alter authored Scene output.",
-            "- All 29 catalogue Scene previews and the studio preview match pixel-for-pixel between Light and Dark modes, proving that interface appearance cannot alter authored Scene output.",
+            "- All 29 catalogue Scene previews and the studio preview preserve exact authored state, geometry, layer counts, and computed-paint signatures between Light and Dark modes; raw compositor frames are retained and must stay within a 1-LSB, 0.01%-pixel GPU raster-noise ceiling.",
         ),
         (
             "- Runtime contrast, clipping, overflow, sibling overlap, popover bounds, focus, touch-target size, reload persistence, StorageEvent convergence, reduced-motion contracts, and final-action reachability verified.",
-            "- Runtime text and focus-indicator contrast, clipping, overflow, sibling overlap, popover bounds, focus retention, touch-target size, reload persistence, StorageEvent convergence, reduced-motion contracts, and final-action reachability verified.",
+            "- Runtime text and focus-indicator contrast, clipping, overflow, sibling overlap, popover bounds, focus retention, touch-target size, stored-state plus executable first-paint persistence, StorageEvent convergence, reduced-motion contracts, and final-action reachability verified.",
         ),
     ],
     "docs/design-system.md": [
@@ -500,11 +1309,11 @@ doc_replacements = {
         ),
         (
             "Scene-pixel isolation, keyboard navigation",
-            "all-Scene pixel isolation, keyboard navigation",
+            "all-Scene theme isolation, keyboard navigation",
         ),
         (
             "Both palettes use semantic surface, text, border, state, scrollbar, tooltip, error, and caret tokens. G08 computes runtime text contrast, proves matching geometry between modes, and compares cropped Scene pixels across Light and Dark renders.",
-            "Both palettes use semantic surface, text, border, state, scrollbar, tooltip, error, caret, and focus tokens. G08 computes runtime text and focus-indicator contrast, proves matching geometry between modes, and compares every catalogue Scene plus the studio preview across Light and Dark renders.",
+            "Both palettes use semantic surface, text, border, state, scrollbar, tooltip, error, caret, and focus tokens. G08 computes runtime text and focus-indicator contrast, proves matching geometry and exact computed-paint signatures, records raw compositor hashes, and limits any GPU raster variance to one channel value across at most 0.01% of pixels for every catalogue Scene plus the studio preview.",
         ),
         (
             "minimum targets, runtime contrast, theme persistence",
@@ -514,11 +1323,11 @@ doc_replacements = {
     "CHANGELOG.md": [
         (
             "Theme-specific select carets, metadata colours, contrast verification, reload/storage convergence, and Scene-pixel isolation proof.",
-            "Theme-specific select carets, metadata colours, executable first-paint scenarios, reload/storage convergence, and pixel-isolation proof across all 29 catalogue Scenes.",
+            "Theme-specific select carets, metadata colours, executable first-paint scenarios, stored-state/storage-event convergence, and exact state/computed-paint isolation proof with a strict GPU raster-noise ceiling across all 29 catalogue Scenes.",
         ),
         (
             "Strengthened G08 with dual-theme contrast, persistence, sibling-overlap, disclosure stability, stacked-header, clipping, reachability, and pixel-isolation assertions",
-            "Strengthened G08 with dual-theme text and focus-indicator contrast, persistence, sibling-overlap, disclosure stability, stacked-header, clipping, reachability, and pixel-isolation assertions",
+            "Strengthened G08 with dual-theme text and focus-indicator contrast, persistence, sibling-overlap, disclosure stability, stacked-header, clipping, reachability, exact computed-paint isolation, material-paint masks, and bounded raw-raster assertions",
         ),
     ],
     "docs/programme/IMPLEMENTATION_STATUS.md": [
