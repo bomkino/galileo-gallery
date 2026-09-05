@@ -25,7 +25,6 @@ final class SpotlightVideoTests: XCTestCase {
         let cue = try XCTUnwrap(snapshot.plan.spotlights.first)
         XCTAssertEqual(cue.holdFrames, 240)
         let renderer = NativeRenderer()
-        // Stay away from colour boundaries and test beyond one complete source loop.
         let sampleFrames = [cue.holdStartFrame + 5, cue.holdStartFrame + 35,
                             cue.holdStartFrame + 95, cue.holdEndFrame - 5]
         var preview = [Int64: [UInt8]]()
@@ -44,7 +43,8 @@ final class SpotlightVideoTests: XCTestCase {
         XCTAssertEqual(receipt.decodedFrames, Int(snapshot.plan.schedule.totalFrames))
         // Independent AVFoundation decoding of the finished movie, not the render hash.
         let asset = AVURLAsset(url: movie), reader = try AVAssetReader(asset: asset)
-        let track = try XCTUnwrap(try await asset.loadTracks(withMediaType: .video).first)
+        let tracks = try await asset.loadTracks(withMediaType: .video)
+        let track = try XCTUnwrap(tracks.first)
         let output = AVAssetReaderTrackOutput(track: track, outputSettings: [
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
         ])
@@ -60,7 +60,7 @@ final class SpotlightVideoTests: XCTestCase {
             let cgImage = try XCTUnwrap(context.createCGImage(image, from: image.extent))
             let actual = try centre(cgImage)
             for channel in 0..<3 {
-                XCTAssertEqual(Int(actual[channel]), Int(expected[channel]), accuracy: 18,
+                XCTAssertEqual(Double(actual[channel]), Double(expected[channel]), accuracy: 18,
                                "Export and preview disagree on the held video at frame \(frame).")
             }
             seen.insert(frame)
