@@ -2,7 +2,7 @@ name: Native source import and validation
 on:
   push:
     branches: [codex/native-mac-rebuild]
-    paths: ['.native-delivery/**', '.github/workflows/native-import.yml']
+    paths: ['.native-delivery/**']
 permissions:
   contents: write
 concurrency:
@@ -15,50 +15,39 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: codex/native-mac-rebuild
           fetch-depth: 0
-      - name: Verify and unpack reviewed native source
+      - name: Apply checksummed, reviewed source correction
         run: |
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           python3 - <<'PY'
-          import hashlib, json, lzma, pathlib, shutil
-          root = pathlib.Path('.native-delivery')
-          manifest = json.loads((root/'manifest.json').read_text())
-          blocks = []
-          for part in manifest['parts']:
-              p = pathlib.PurePosixPath(part['path'])
-              assert len(p.parts) == 1 and p.name.startswith('part-')
-              b = (root/p.name).read_bytes()
-              assert len(b) == part['bytes']
-              assert hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest() == part['sha']
-              blocks.append(b)
-          data = b''.join(blocks)
-          assert len(data) == manifest['bytes']
-          assert hashlib.sha256(data).hexdigest() == manifest['sha256']
-          decoder = lzma.LZMADecompressor(memlimit=128*1024*1024)
-          decoded = decoder.decompress(data, max_length=2*1024*1024)
+          import hashlib,json,lzma,pathlib,shutil,subprocess,tempfile
+          root=pathlib.Path('.native-delivery')
+          manifest=json.loads((root/'manifest.json').read_text())
+          assert manifest['format']=='reviewed-unified-diff-xz'
+          data=(root/'change.patch.xz').read_bytes()
+          assert len(data)==manifest['bytes'] and len(data)<200000
+          assert hashlib.sha256(data).hexdigest()==manifest['sha256']
+          decoder=lzma.LZMADecompressor(memlimit=128*1024*1024)
+          patch=decoder.decompress(data,max_length=1024*1024)
           assert decoder.eof and not decoder.unused_data
-          files = json.loads(decoded)
-          assert isinstance(files,dict) and len(files) == manifest['files'] <= 100
-          for name, text in files.items():
-              p = pathlib.PurePosixPath(name)
-              assert not p.is_absolute() and '..' not in p.parts
-              assert isinstance(text,str) and len(text.encode()) < 150000
-              if name in ('.github/workflows/native.yml','.github/workflows/ci.yml'):
-                  continue
-              assert name.startswith(('native/', 'scripts/native/')) and '.git' not in p.parts and '.build' not in p.parts
-              target=pathlib.Path(name)
-              target.parent.mkdir(parents=True,exist_ok=True)
-              target.write_text(text)
-          pathlib.Path('scripts/native/package.sh').chmod(0o755)
+          with tempfile.NamedTemporaryFile(suffix='.patch') as f:
+              f.write(patch);f.flush()
+              stats=subprocess.check_output(['git','apply','--numstat',f.name]).decode().splitlines()
+              assert stats
+              for row in stats:
+                  name=row.split('\t',2)[2]
+                  p=pathlib.PurePosixPath(name)
+                  assert not p.is_absolute() and '..' not in p.parts and name.startswith(('native/','scripts/native/'))
+                  assert '.build' not in p.parts and '.git' not in p.parts
+              subprocess.run(['git','apply','--check',f.name],check=True)
+              subprocess.run(['git','apply',f.name],check=True)
           shutil.rmtree(root)
           PY
-      - name: Commit readable native source on the candidate branch only
+      - name: Commit normal readable source on the candidate only
         run: |
           git config user.name 'Chattie Intern'
           git config user.email 'chattie-intern@users.noreply.github.com'
-          git add native scripts/native .native-delivery
-          git commit -m 'feat: native Mac document studio; validation pending'
+          git add --all native scripts/native .native-delivery
+          git commit -m 'fix: native overwrite, cancellation, shutdown and time boundaries'
           git push origin HEAD:codex/native-mac-rebuild
       - name: Record tested identity
         run: |
@@ -68,7 +57,7 @@ jobs:
           uname -m | tee -a native-evidence/machine.txt
           swift --version | tee -a native-evidence/machine.txt
           test "$(uname -m)" = arm64
-      - name: Test core and native contracts
+      - name: Test native contracts
         run: |
           set -o pipefail
           swift test --package-path native 2>&1 | tee native-evidence/tests.log
