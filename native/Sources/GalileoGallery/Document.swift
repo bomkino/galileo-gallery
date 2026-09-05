@@ -49,7 +49,15 @@ private final class DocumentStorage:@unchecked Sendable {
     nonisolated override func fileWrapper(ofType typeName:String)throws->FileWrapper {
         let snapshot=try storage.get();return try NativeDocumentIO.wrapper(project:snapshot.plan.project,workspace:snapshot.workspace)
     }
-    override var fileURL:URL? { didSet { if let fileURL { editor?.documentName=fileURL.deletingPathExtension().lastPathComponent } } }
+    override var fileURL:URL? {
+        didSet {
+            let newURL=fileURL
+            Task { @MainActor [weak self] in
+                guard let self,let newURL,self.fileURL==newURL else { return }
+                self.editor?.documentName=newURL.deletingPathExtension().lastPathComponent
+            }
+        }
+    }
     override func makeWindowControllers() {
         do {
             let snapshot=try storage.get(),session=try EditorSession(project:snapshot.plan.project,workspace:snapshot.workspace)
