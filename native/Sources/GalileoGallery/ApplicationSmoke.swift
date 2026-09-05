@@ -22,6 +22,7 @@ import GalileoNative
             p.scene=SceneCatalog.defaults(for:"the-stack");p.scene.shadow=0.25;p.timing.durationMilliseconds=3000
         }
         let expected=editor.project
+        guard document.isDocumentEdited else { throw GalleryError.invalid("A real document edit was not registered for save/recovery.") }
         let projectURL=directory.appendingPathComponent("Studio study.galileo",isDirectory:true)
         try await withCheckedThrowingContinuation { (continuation:CheckedContinuation<Void,Error>) in
             document.save(to:projectURL,ofType:GalleryDocument.typeName,for:.saveAsOperation) { error in

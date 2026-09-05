@@ -18,10 +18,12 @@ public struct FrameSchedule: Equatable, Sendable {
     }
     public var duration: Double { Double(totalFrames * rate.denominator) / Double(rate.numerator) }
     public var cycleDuration: Double { Double(cycleFrames * rate.denominator) / Double(rate.numerator) }
-    public func seconds(for frame: Int64) -> Double { Double(frame * rate.denominator) / Double(rate.numerator) }
+    public func seconds(for frame: Int64) -> Double { Double(frame) * Double(rate.denominator) / Double(rate.numerator) }
     public func frame(at seconds: Double) -> Int64 {
         guard seconds.isFinite else { return 0 }
-        return min(totalFrames - 1, max(0, Int64(floor(max(0, seconds) * rate.value + 1e-8))))
+        if seconds<=0 { return 0 }
+        if seconds>=duration { return totalFrames-1 }
+        return min(totalFrames-1,Int64(floor(seconds*rate.value+1e-8)))
     }
     public func sample(frame: Int64) -> TimeSample {
         let frame = min(totalFrames - 1, max(0, frame))
@@ -31,7 +33,7 @@ public struct FrameSchedule: Equatable, Sendable {
                           progress: Double(local) / Double(cycleFrames), isLastCycle: frame / cycleFrames == cycles - 1)
     }
     public func label(frame: Int64) -> String {
-        let seconds = self.seconds(for: max(0, frame))
+        let seconds = self.seconds(for: min(totalFrames,max(0, frame)))
         let whole = Int(seconds)
         let sub = Int(floor((seconds - Double(whole)) * rate.value + 1e-6))
         return String(format: "%02d:%02d:%02d:%02d", whole / 3600, (whole / 60) % 60, whole % 60, sub)
@@ -53,14 +55,22 @@ public struct Transport: Sendable {
     }
     public mutating func play(now: Double, schedule: FrameSchedule) {
         if frame >= schedule.totalFrames - 1 { frame = 0 }
+        guard now.isFinite else { return }
         anchorSeconds = now; anchorFrame = frame; playing = true
     }
     public mutating func pause() { playing = false }
     public mutating func tick(now: Double, schedule: FrameSchedule, loop: Bool) {
-        guard playing else { return }
-        let elapsed = max(0, now - anchorSeconds)
-        let candidate = anchorFrame + Int64(floor(elapsed * schedule.rate.value))
-        if loop { frame = candidate % schedule.totalFrames }
-        else { frame = min(candidate, schedule.totalFrames - 1); if candidate >= schedule.totalFrames { playing = false } }
+        guard playing,now.isFinite else { return }
+        let elapsed=max(0,now-anchorSeconds)
+        guard elapsed.isFinite else { playing=false;return }
+        if loop {
+            let local=elapsed.truncatingRemainder(dividingBy:schedule.duration)
+            let advanced=Int64(floor(local*schedule.rate.value))
+            frame=(anchorFrame+advanced)%schedule.totalFrames
+        } else if elapsed>=schedule.seconds(for:schedule.totalFrames-anchorFrame) {
+            frame=schedule.totalFrames-1;playing=false
+        } else {
+            frame=min(schedule.totalFrames-1,anchorFrame+Int64(floor(elapsed*schedule.rate.value)))
+        }
     }
 }

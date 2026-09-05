@@ -59,15 +59,15 @@ public enum AssetImporter {
                   width>0,height>0,Double(width)*Double(height)<=200_000_000 else { throw GalleryError.invalid("\(name) exceeds the image decode budget or has invalid dimensions.") }
             let orientation=(props[kCGImagePropertyOrientation] as? Int) ?? 1
             let swapped=[5,6,7,8].contains(orientation)
+            let animated=count>1 && ImageSequenceTiming.delay(properties:props) != nil
             var duration:Double=0
-            if count>1 {
+            if animated {
                 for index in 0..<count {
                     let properties=CGImageSourceCopyPropertiesAtIndex(source,index,nil) as? [CFString:Any] ?? [:]
-                    let gif=properties[kCGImagePropertyGIFDictionary] as? [CFString:Any] ?? [:]
-                    duration+=max(0.02,(gif[kCGImagePropertyGIFUnclampedDelayTime] as? Double) ?? (gif[kCGImagePropertyGIFDelayTime] as? Double) ?? 0.1)
+                    duration+=ImageSequenceTiming.delay(properties:properties) ?? 0.1
                 }
             }
-            var item=MediaItem(name:name,asset:url.lastPathComponent,sha256:hash,kind:count>1 ? .animatedImage:.image,width:swapped ? height:width,height:swapped ? width:height,duration:count>1 ? duration:nil)
+            var item=MediaItem(name:name,asset:url.lastPathComponent,sha256:hash,kind:animated ? .animatedImage:.image,width:swapped ? height:width,height:swapped ? width:height,duration:animated ? duration:nil)
             item.hasAlpha=(props[kCGImagePropertyHasAlpha] as? Bool) ?? false
             item.colorSpace=(props[kCGImagePropertyProfileName] as? String) ?? "sRGB"
             return item
@@ -192,5 +192,23 @@ public enum LegacyImporter {
         project.legacyManifestFilename="legacy-manifest.json"
         project.migrationNotes=["This is a native reinterpretation, not an identical legacy render. Original scene, timing and audio intent are preserved in this document. Review the composition before exporting.","Audio is preserved for migration but is not played or exported by this native build. Save creates a separate native document; the legacy original is unchanged."]
         try project.validate();return(project,workspace)
+    }
+}
+
+public enum ImageSequenceTiming {
+    /// Multiple TIFF pages and HEIC auxiliary views are not animation.
+    public static func delay(properties:[CFString:Any])->Double? {
+        let formats:[(CFString,CFString,CFString)]=[
+            (kCGImagePropertyGIFDictionary,kCGImagePropertyGIFUnclampedDelayTime,kCGImagePropertyGIFDelayTime),
+            (kCGImagePropertyPNGDictionary,kCGImagePropertyAPNGUnclampedDelayTime,kCGImagePropertyAPNGDelayTime),
+            (kCGImagePropertyWebPDictionary,kCGImagePropertyWebPUnclampedDelayTime,kCGImagePropertyWebPDelayTime),
+            (kCGImagePropertyHEICSDictionary,kCGImagePropertyHEICSUnclampedDelayTime,kCGImagePropertyHEICSDelayTime)
+        ]
+        for (dictionary,unclamped,clamped) in formats {
+            guard let values=properties[dictionary] as? [CFString:Any],
+                  let value=(values[unclamped] as? Double) ?? (values[clamped] as? Double) else { continue }
+            return value.isFinite && value>0 ? min(600,max(0.001,value)):0.1
+        }
+        return nil
     }
 }

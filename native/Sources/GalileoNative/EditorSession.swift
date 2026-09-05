@@ -99,6 +99,7 @@ import GalileoCore
         guard urls.count+(replacing==nil ? project.items.count:project.items.count-1)<=512 else { issue="A document supports at most 512 media items.";return }
         let token=generation;importing=true
         importTask=Task.detached(priority:.userInitiated) { [weak self] in
+            guard let self else { return }
             do {
                 let staging=try Workspace();var items:[MediaItem]=[],failures:[String]=[]
                 for url in urls {
@@ -110,7 +111,7 @@ import GalileoCore
                 try Task.checkCancellation()
                 let completedItems=items,completedFailures=failures
                 await MainActor.run {
-                    guard let self,self.generation==token,!Task.isCancelled else { return }
+                    guard self.generation==token,!Task.isCancelled else { return }
                     do {
                         var candidate=self.project
                         if let replacing,let index=candidate.items.firstIndex(where:{$0.id==replacing}),var replacement=completedItems.first {
@@ -138,7 +139,7 @@ import GalileoCore
             } catch {
                 let message=(error is CancellationError) ? nil:error.localizedDescription
                 await MainActor.run {
-                    guard let self,self.generation==token else { return }
+                    guard self.generation==token else { return }
                     self.importing=false;self.importTask=nil
                     if let message { self.issue=message }
                 }
@@ -195,15 +196,16 @@ import GalileoCore
         guard !busy else { return }
         let id=UUID();jobID=id;busy=true;progress=0;status="Preparing";error=nil;result=nil
         task=Task.detached(priority:.userInitiated) { [weak self] in
+            guard let self else { return }
             do {
                 let receipt=try await NativeExport.run(snapshot:snapshot,destination:destination,stillFrame:stillFrame) { value,label in
                     Task { @MainActor [weak self] in guard let self,self.jobID==id,self.busy else { return };self.progress=value;self.status=label }
                 }
-                await MainActor.run { guard let self,self.jobID==id else { return };self.result=receipt;self.status="Exported";self.progress=1;self.busy=false;self.task=nil }
+                await MainActor.run { guard self.jobID==id else { return };self.result=receipt;self.status="Exported";self.progress=1;self.busy=false;self.task=nil }
             } catch {
                 let cancelled=error is CancellationError || (error as? GalleryError) == .cancelled
                 let message=error.localizedDescription
-                await MainActor.run { guard let self,self.jobID==id else { return };self.busy=false;self.task=nil;self.status=cancelled ? "Cancelled":"Export failed";self.error=cancelled ? nil:message }
+                await MainActor.run { guard self.jobID==id else { return };self.busy=false;self.task=nil;self.status=cancelled ? "Cancelled":"Export failed";self.error=cancelled ? nil:message }
             }
         }
     }

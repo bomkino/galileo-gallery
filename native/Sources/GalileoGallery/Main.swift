@@ -89,8 +89,15 @@ import GalileoNative
         for url in urls {documents.openDocument(withContentsOf:url,display:true) {_,_,error in if let error {application.presentError(error)}}}
     }
     func applicationShouldTerminate(_ sender:NSApplication)->NSApplication.TerminateReply {
-        guard ExportCenter.shared.busy else {return .terminateNow}
         guard !quitPending else {return .terminateCancel}
+        if !ExportCenter.shared.busy {
+            guard !documents.documents.isEmpty else { return .terminateNow }
+            quitPending=true
+            DispatchQueue.main.async { [self] in
+                documents.closeAllDocuments(withDelegate:self,didCloseAllSelector:#selector(documentController(_:didCloseAll:contextInfo:)),contextInfo:nil)
+            }
+            return .terminateLater
+        }
         let alert=NSAlert();alert.messageText="An export is running.";alert.informativeText="Keep the app open to finish, or cancel the export before quitting."
         alert.addButton(withTitle:"Keep Exporting");alert.addButton(withTitle:"Cancel Export and Quit")
         guard alert.runModal() == .alertSecondButtonReturn else {return .terminateCancel}
@@ -100,6 +107,10 @@ import GalileoNative
             quitPending=false;NSApp.terminate(nil)
         }
         return .terminateCancel
+    }
+    @objc private func documentController(_ controller:NSDocumentController,didCloseAll:Bool,contextInfo:UnsafeMutableRawPointer?) {
+        quitPending=false
+        NSApp.reply(toApplicationShouldTerminate:didCloseAll)
     }
     func menuNeedsUpdate(_ menu:NSMenu) {
         guard menu === recentMenu else{return}
@@ -147,6 +158,6 @@ struct SettingsView:View {
         Form {
             Picker("Appearance",selection:$appearance) {Text("System").tag("system");Text("Light").tag("light");Text("Dark").tag("dark")}
             Text("Interface appearance never changes your exported artwork.").font(.callout).foregroundStyle(.secondary)
-        }.formStyle(.grouped).padding(20).frame(width:440).onChange(of:appearance){_ in applyAppearance()}
+        }.formStyle(.grouped).padding(20).frame(width:440).onChange(of:appearance){ applyAppearance() }
     }
 }

@@ -75,7 +75,7 @@ struct NativePreview:NSViewRepresentable {
             let scale=rect.width/CGFloat(canvas.width)
             ctx.setStrokeColor(NSColor.controlAccentColor.cgColor);ctx.setLineWidth(1.5)
             for card in cards where selection.contains(card.itemID) {
-                let quad=card.quad(perspective:Double(canvas.width)*1.5)
+                let quad=card.quad(perspective:Double(canvas.width)*2)
                 guard let first=quad.first else { continue }
                 ctx.beginPath();ctx.move(to:CGPoint(x:rect.minX+first.x*scale,y:rect.minY+first.y*scale))
                 for point in quad.dropFirst() { ctx.addLine(to:CGPoint(x:rect.minX+point.x*scale,y:rect.minY+point.y*scale)) }
@@ -91,7 +91,7 @@ struct NativePreview:NSViewRepresentable {
         let scale=Double(canvas.width)/rect.width
         let point=CGPoint(x:(location.x-rect.minX)*scale,y:(location.y-rect.minY)*scale)
         let hit=cards.reversed().first { card in
-            let quad=card.quad(perspective:Double(canvas.width)*1.5)
+            let quad=card.quad(perspective:Double(canvas.width)*2)
             let path=CGMutablePath();guard let first=quad.first else { return false }
             path.move(to:CGPoint(x:first.x,y:first.y));quad.dropFirst().forEach{path.addLine(to:CGPoint(x:$0.x,y:$0.y))};path.closeSubpath()
             return path.contains(point)

@@ -2,6 +2,7 @@ import XCTest
 import AppKit
 import CoreImage
 import AVFoundation
+import ImageIO
 import GalileoCore
 @testable import GalileoNative
 
@@ -87,6 +88,36 @@ final class NativeTests:XCTestCase {
     func testUnsupportedInputDoesNotCreateReadyProxy() async throws {
         let w=try Workspace(),file=w.root.appendingPathComponent("broken.mov");try Data("not video".utf8).write(to:file)
         do {_=try await AssetImporter.inspect(file,workspace:w);XCTFail("A corrupt movie was accepted")}catch{}
+    }
+    func testMultiframeStillAndAnimatedTimingAreDistinct() {
+        XCTAssertNil(ImageSequenceTiming.delay(properties:[kCGImagePropertyTIFFDictionary:[:]]))
+        XCTAssertEqual(ImageSequenceTiming.delay(properties:[kCGImagePropertyGIFDictionary:[kCGImagePropertyGIFUnclampedDelayTime:0.025]]),0.025)
+        XCTAssertEqual(ImageSequenceTiming.delay(properties:[kCGImagePropertyPNGDictionary:[kCGImagePropertyAPNGUnclampedDelayTime:0.3]]),0.3)
+    }
+    func testPNGStillAndSequenceAreActualFiles() async throws {
+        var (p,w)=try VerificationFixtures.workspace();p.canvas.width=320;p.canvas.height=180
+        for format in [OutputFormat.png,.pngSequence] {
+            p.export.format=format
+            let snapshot=try RenderSnapshot(project:p,workspace:w)
+            let url=w.root.appendingPathComponent(format == .png ? "still.png":"sequence")
+            let receipt=try await NativeExport.run(snapshot:snapshot,destination:ExportDestination(url:url),stillFrame:7)
+            if format == .png {
+                XCTAssertEqual(receipt.decodedFrames,1);try NativeExport.verifyPNG(url,width:320,height:180)
+            } else {
+                let files=try FileManager.default.contentsOfDirectory(at:url,includingPropertiesForKeys:nil).filter{$0.pathExtension=="png"}
+                XCTAssertEqual(files.count,Int(snapshot.plan.schedule.totalFrames))
+                for file in files {try NativeExport.verifyPNG(file,width:320,height:180)}
+            }
+        }
+    }
+    @MainActor func testCancelledImportCannotCommitIntoAnotherDocumentState() async throws {
+        let (p,w)=try VerificationFixtures.workspace(),session=try EditorSession()
+        let url=try w.url(for:p.items[0])
+        session.importURLs([url]);session.cancelImport()
+        var next=GalleryProject();next.name="Replacement document"
+        try session.load(project:next,workspace:Workspace())
+        try await Task.sleep(nanoseconds:200_000_000)
+        XCTAssertEqual(session.project,next);XCTAssertFalse(session.importing)
     }
     private func pixels(_ image:CGImage)throws->[UInt8] {
         var data=[UInt8](repeating:0,count:image.width*image.height*4)

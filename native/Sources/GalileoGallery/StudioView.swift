@@ -48,8 +48,8 @@ struct StudioView:View {
         .frame(minWidth:900,minHeight:600)
         .sheet(isPresented:$session.choosingScene) { SceneChooser(session:session) }
         .sheet(isPresented:$session.choosingExport) { ExportOptions(session:session,frame:playback.frame) }
-        .onChange(of:session.revision) { _ in playback.update(session.snapshot.plan) }
-        .onChange(of:session.selection) { selection in if !selection.isEmpty { inspector="Media" } }
+        .onChange(of:session.revision) { playback.update(session.snapshot.plan) }
+        .onChange(of:session.selection) { _,selection in if !selection.isEmpty { inspector="Media" } }
         .onDrop(of:[UTType.fileURL],isTargeted:nil) { providers in
             guard !session.importing else { return false }
             Task { @MainActor in
@@ -194,11 +194,11 @@ struct NumberControl:View {
             HStack {
                 Text(label).font(.callout);Spacer()
                 TextField(label,text:$text).multilineTextAlignment(.trailing).frame(width:62).textFieldStyle(.roundedBorder).focused($focused)
-                    .onSubmit(commit).onChange(of:focused) { focus in if focus { begin() } else { commit();end() } }
+                    .onSubmit(commit).onChange(of:focused) { _,focus in if focus { begin() } else { commit();end() } }
                 if !unit.isEmpty { Text(unit).font(.caption).foregroundStyle(.secondary).frame(width:16,alignment:.leading) }
             }
             Slider(value:$value,in:range,step:step,onEditingChanged:{ editing in editing ? begin():end() }).accessibilityLabel(label)
-        }.onAppear { sync() }.onChange(of:value) { _ in if !focused { sync() } }
+        }.onAppear { sync() }.onChange(of:value) { if !focused { sync() } }
     }
     private func sync() { text=String(format:step<1 ? "%.2f":"%.0f",value) }
     private func commit() { if let number=Double(text),number.isFinite { value=bounded(number,range.lowerBound,range.upperBound) };sync() }

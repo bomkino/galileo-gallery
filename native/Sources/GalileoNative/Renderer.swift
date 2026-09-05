@@ -108,8 +108,7 @@ public final class NativeRenderer {
                 var elapsed:Double=0
                 for i in 0..<CGImageSourceGetCount(source) {
                     let properties=CGImageSourceCopyPropertiesAtIndex(source,i,nil) as? [CFString:Any] ?? [:]
-                    let gif=properties[kCGImagePropertyGIFDictionary] as? [CFString:Any] ?? [:]
-                    elapsed+=max(0.02,(gif[kCGImagePropertyGIFUnclampedDelayTime] as? Double) ?? (gif[kCGImagePropertyGIFDelayTime] as? Double) ?? 0.1)
+                    elapsed+=ImageSequenceTiming.delay(properties:properties) ?? 0.1
                     index=i;if seconds<elapsed { break }
                 }
             }

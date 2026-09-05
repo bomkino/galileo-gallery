@@ -1,4 +1,5 @@
 import Foundation
+import Darwin
 import AVFoundation
 import CoreImage
 import ImageIO
@@ -29,10 +30,18 @@ public struct ExportDestination: @unchecked Sendable {
         if existed && identity==nil { throw GalleryError.invalid("The destination is not a replaceable regular file. Choose another name.") }
     }
     private static func identity(_ url:URL)throws->String? {
-        guard FileManager.default.fileExists(atPath:url.path) else { return nil }
-        let v=try url.resourceValues(forKeys:[.isRegularFileKey,.isSymbolicLinkKey,.fileSizeKey,.contentModificationDateKey,.fileResourceIdentifierKey])
-        guard v.isRegularFile==true,v.isSymbolicLink != true else { return nil }
-        return "\(String(describing:v.fileResourceIdentifier)):\(v.fileSize ?? -1):\(v.contentModificationDate?.timeIntervalSince1970 ?? -1)"
+        // URL resource values can remain cached after another process changes a file.
+        // Read the filesystem identity afresh at both authorisation and commit.
+        var value=stat()
+        let result=url.path.withCString { lstat($0,&value) }
+        if result != 0 {
+            if errno==ENOENT { return nil }
+            throw GalleryError.invalid("The export destination could not be inspected.")
+        }
+        guard value.st_mode & S_IFMT == S_IFREG else {
+            throw GalleryError.invalid("The export destination is not a regular file.")
+        }
+        return "\(value.st_dev):\(value.st_ino):\(value.st_mode):\(value.st_size):\(value.st_mtimespec.tv_sec):\(value.st_mtimespec.tv_nsec):\(value.st_ctimespec.tv_sec):\(value.st_ctimespec.tv_nsec)"
     }
     public func publish(_ staged:URL) throws {
         try Task.checkCancellation()
@@ -155,7 +164,14 @@ public enum NativeExport {
             }
             input.markAsFinished()
             writer.endSession(atSourceTime:CMTime(value:schedule.totalFrames*schedule.rate.denominator,timescale:Int32(schedule.rate.numerator)))
-            await writer.finishWriting()
+            let finished=WriterCompletion()
+            writer.finishWriting { finished.markFinished() }
+            let deadline=ProcessInfo.processInfo.systemUptime+60
+            while !finished.isFinished {
+                try Task.checkCancellation()
+                guard ProcessInfo.processInfo.systemUptime<deadline else { throw GalleryError.invalid("The video encoder did not finish. The destination was not changed.") }
+                try await Task.sleep(nanoseconds:10_000_000)
+            }
             guard writer.status == .completed else { throw writer.error ?? GalleryError.invalid("The movie was not finalised.") }
         } catch { writer.cancelWriting();throw error }
     }
@@ -164,26 +180,31 @@ public enum NativeExport {
         guard tracks.count==1,let track=tracks.first else { throw GalleryError.invalid("The exported movie has an invalid video track.") }
         let size=try await track.load(.naturalSize),duration=try await asset.load(.duration)
         guard Int(size.width)==width,Int(size.height)==height,abs(duration.seconds-schedule.duration)<=max(0.002,1/schedule.rate.value) else { throw GalleryError.invalid("The exported size or duration does not match the document.") }
-        if schedule.totalFrames<=1800 {
-            let reader=try AVAssetReader(asset:asset)
-            let output=AVAssetReaderTrackOutput(track:track,outputSettings:[kCVPixelBufferPixelFormatTypeKey as String:kCVPixelFormatType_32BGRA])
-            output.alwaysCopiesSampleData=false;reader.add(output)
-            guard reader.startReading() else { throw reader.error ?? GalleryError.invalid("The exported movie could not be read.") }
-            var count=0
-            while let sample=output.copyNextSampleBuffer() {
-                try Task.checkCancellation()
-                let pts=CMSampleBufferGetPresentationTimeStamp(sample)
-                guard abs(pts.seconds-schedule.seconds(for:Int64(count)))<=0.002 else { reader.cancelReading();throw GalleryError.invalid("The exported timestamps are inconsistent.") }
-                count+=1
-            }
-            guard reader.status == .completed,Int64(count)==schedule.totalFrames else { throw GalleryError.invalid("The exported frame count does not match the schedule.") }
-            return count
-        }
-        let generator=AVAssetImageGenerator(asset:asset);generator.appliesPreferredTrackTransform=true
-        for frame in [Int64(0),schedule.totalFrames/2,schedule.totalFrames-1] {
+        let reader=try AVAssetReader(asset:asset)
+        defer { if reader.status == .reading { reader.cancelReading() } }
+        let output=AVAssetReaderTrackOutput(track:track,outputSettings:[kCVPixelBufferPixelFormatTypeKey as String:kCVPixelFormatType_32BGRA])
+        output.alwaysCopiesSampleData=false
+        guard reader.canAdd(output) else { throw GalleryError.invalid("The exported movie could not be verified.") }
+        reader.add(output)
+        guard reader.startReading() else { throw reader.error ?? GalleryError.invalid("The exported movie could not be read.") }
+        var count=0
+        while let sample=output.copyNextSampleBuffer() {
             try Task.checkCancellation()
-            _=try generator.copyCGImage(at:CMTime(value:frame*schedule.rate.denominator,timescale:Int32(schedule.rate.numerator)),actualTime:nil)
+            let pts=CMSampleBufferGetPresentationTimeStamp(sample)
+            guard abs(pts.seconds-schedule.seconds(for:Int64(count)))<=0.002 else {
+                throw GalleryError.invalid("The exported timestamps are inconsistent.")
+            }
+            count+=1
+            if count%60==0 { await Task.yield() }
         }
-        return nil
+        guard reader.status == .completed,Int64(count)==schedule.totalFrames else { throw GalleryError.invalid("The exported frame count does not match the schedule.") }
+        return count
     }
+}
+
+private final class WriterCompletion:@unchecked Sendable {
+    private let lock=NSLock()
+    private var finished=false
+    func markFinished() { lock.lock();finished=true;lock.unlock() }
+    var isFinished:Bool { lock.lock();defer{lock.unlock()};return finished }
 }
