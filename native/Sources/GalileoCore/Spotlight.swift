@@ -9,7 +9,8 @@ public struct SpotlightCue: Equatable, Sendable {
     public let transitionFrames: Int64
     public let holdFrames: Int64
     public let scale: Double
-    public var frameCount: Int64 { transitionFrames * 2 + holdFrames }
+    public var closing: Bool = false
+    public var frameCount: Int64 { transitionFrames * (closing ? 1 : 2) + holdFrames }
     public var holdStartFrame: Int64 { startFrame + transitionFrames }
     public var holdEndFrame: Int64 { holdStartFrame + holdFrames }
     public var endFrame: Int64 { startFrame + frameCount }
@@ -20,18 +21,20 @@ public struct SpotlightCue: Equatable, Sendable {
             let divisor = 1000 * motion.rate.denominator
             return max(1, (milliseconds * motion.rate.numerator + divisor - 1) / divisor)
         }
-        let transition = max(2, frames(450))
         let anchors = items.enumerated().compactMap { index, item -> (Int, MediaItem, Int64)? in
-            guard item.spotlight?.enabled == true else { return nil }
+            guard item.spotlight?.enabled == true || (item.closing == true && timing.playMode != .loop) else { return nil }
+            if item.closing == true && timing.playMode != .loop { return (index, item, motion.cycleFrames) }
             let phase = anchor(index: index, count: items.count, variant: variant, hold: timing.holdFraction)
             return (index, item, min(motion.cycleFrames - 1, max(0, Int64(floor(phase * Double(motion.cycleFrames))))))
         }.sorted { $0.2 == $1.2 ? $0.0 < $1.0 : $0.2 < $1.2 }
         var added: Int64 = 0
         return anchors.map { _, item, anchor in
-            let setting = item.spotlight!
+            let setting = item.spotlight ?? Spotlight()
+            let transition = max(2, frames(setting.transitionMilliseconds ?? 450))
             let cue = SpotlightCue(itemID: item.id, motionFrame: anchor,
                                    startFrame: anchor + added, transitionFrames: transition,
-                                   holdFrames: frames(setting.holdMilliseconds), scale: setting.scale)
+                                   holdFrames: frames(setting.holdMilliseconds), scale: setting.scale,
+                                   closing: item.closing == true && timing.playMode != .loop)
             added += cue.frameCount
             return cue
         }
@@ -45,7 +48,7 @@ public struct SpotlightCue: Equatable, Sendable {
         case .reel:
             return (i + (variant.controls.contains(.hold) ? hold * 0.5 : 0.1)) / n
         case .orbit:
-            if variant.id == "the-orrery", index > 0, count > 12 { return (i - 0.9) / n }
+            if variant.id == "the-orrery", index > 0, count > 13 { return (i - 1) / (n - 1) }
             return (i + 0.1) / n
         case .fan:
             let pages = (count + 9) / 10
@@ -101,12 +104,12 @@ public struct SpotlightCue: Equatable, Sendable {
             return hypot(left.center.x-w/2, left.center.y-h/2) > hypot(right.center.x-w/2, right.center.y-h/2)
         }!
         if !fragments { matching = [primary] }
-        let origin = result[primary], highest = (cards.map(\.z).max() ?? 0) + 10
+        let highest = (cards.map(\.z).max() ?? 0) + 10
         func mix(_ from: Double, _ to: Double) -> Double { from + (to - from) * weight }
         for index in matching {
             var card = result[index]
-            card.center = Point(mix(card.center.x, w/2 + (card.center.x-origin.center.x)),
-                                mix(card.center.y, h/2 + (card.center.y-origin.center.y)))
+            card.center = Point(mix(card.center.x, w/2),
+                                mix(card.center.y, h/2))
             card.width = mix(card.width, targetWidth)
             card.height = mix(card.height, targetHeight)
             card.angle = mix(card.angle, 0); card.yaw = mix(card.yaw, 0); card.pitch = mix(card.pitch, 0)

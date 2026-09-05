@@ -13,6 +13,7 @@ struct StudioView:View {
     @State private var inspector="Scene"
     let addMedia:()->Void
     let replaceMedia:()->Void
+    var prepareImport:(([URL])->Void)?=nil
     var body:some View {
         VStack(spacing:0) {
             HSplitView {
@@ -23,10 +24,13 @@ struct StudioView:View {
                         Picker("Inspector",selection:$inspector) { Text("Scene").tag("Scene");Text("Media").tag("Media") }
                             .pickerStyle(.segmented).padding(16)
                         Divider()
-                        ScrollView { if inspector=="Scene" { SceneInspector(session:session) } else { MediaInspector(session:session,replace:replaceMedia) } }
+                        ScrollView { if inspector=="Scene" { SceneInspector(session:session) } else { MediaInspector(session:session,replace:replaceMedia,preview:{ id in
+                            if let cue=session.snapshot.plan.spotlights.first(where:{$0.itemID==id}) {playback.preview(cue,cycle:playback.frame/session.snapshot.plan.schedule.cycleFrames)}
+                        }).id(session.selection.sorted().joined(separator:"|")) } }
                     }.frame(minWidth:260,idealWidth:285,maxWidth:380).background(.regularMaterial)
                 }
             }
+            .background(SplitAutosave(name:"GalileoStudioColumns"))
             if let issue=session.issue {
                 Divider()
                 HStack(alignment:.top,spacing:10) {
@@ -47,6 +51,7 @@ struct StudioView:View {
         }
         .frame(minWidth:900,minHeight:600)
         .sheet(isPresented:$session.choosingScene) { SceneChooser(session:session) }
+        .sheet(item:Binding(get:{session.framingMediaID.map{FramingSelection(id:$0)}},set:{session.framingMediaID=$0?.id})) { item in FramingEditor(session:session,itemID:item.id) }
         .sheet(isPresented:$session.choosingExport) { ExportOptions(session:session,frame:playback.frame) }
         .onChange(of:session.revision) { playback.update(session.snapshot.plan) }
         .onChange(of:session.selection) { _,selection in if !selection.isEmpty { inspector="Media" } }
@@ -60,7 +65,7 @@ struct StudioView:View {
                     }
                     if let data,let url=URL(dataRepresentation:data,relativeTo:nil) { urls.append(url) }
                 }
-                session.importURLs(urls)
+                if let prepareImport {prepareImport(urls)} else {session.importURLs(urls)}
             }
             return true
         }
@@ -68,6 +73,7 @@ struct StudioView:View {
     private var library:some View {
         VStack(spacing:0) {
             HStack { Text("Media").font(.headline);Spacer();Text("\(session.project.items.count)").foregroundStyle(.secondary).monospacedDigit() }.padding(16)
+            TextField("Find media",text:$session.mediaQuery).textFieldStyle(.roundedBorder).padding(.horizontal,12).padding(.bottom,8)
             if session.project.items.isEmpty {
                 VStack(spacing:12) {
                     Image(systemName:"photo.on.rectangle").font(.system(size:28,weight:.light)).foregroundStyle(.secondary)
@@ -75,10 +81,11 @@ struct StudioView:View {
                 }.frame(maxWidth:.infinity,maxHeight:.infinity)
             } else {
                 List(selection:$session.selection) {
-                    ForEach(session.project.items) { item in
+                    ForEach(session.project.items.filter{session.mediaQuery.isEmpty || $0.name.localizedCaseInsensitiveContains(session.mediaQuery)}) { item in
                         MediaRow(item:item,workspace:session.workspace).tag(item.id)
                             .contextMenu {
                                 Button("Use as opening") { session.markOpening(item.id) }
+                                Button("Use as closing") { session.markClosing(item.id) }
                                 Button(item.spotlight?.enabled == true ? "Remove spotlight" : "Spotlight in centre") {
                                     session.commit("Change spotlight") { p in
                                         if let i = p.items.firstIndex(where: { $0.id == item.id }) {
@@ -88,13 +95,17 @@ struct StudioView:View {
                                         }
                                     }
                                 }
+                                if let cue=session.snapshot.plan.spotlights.first(where:{$0.itemID==item.id}) {
+                                    Button("Preview spotlight") {playback.preview(cue,cycle:playback.frame/session.snapshot.plan.schedule.cycleFrames)}
+                                }
+                                Button("Edit framing…") {session.framingMediaID=item.id}
                                 Button(item.included ? "Exclude":"Include") { session.commit("Change inclusion") { p in if let i=p.items.firstIndex(where:{$0.id==item.id}) { p.items[i].included.toggle() } } }
                                 Button("Replace…") { session.selection=[item.id];replaceMedia() }
                                 Divider()
                                 Button("Duplicate") { session.selection=[item.id];session.duplicateSelection() }
                                 Button("Remove") { session.selection=[item.id];session.removeSelection() }
                             }
-                    }.onMove(perform:session.move)
+                    }.onMove { offsets,destination in if session.mediaQuery.isEmpty {session.move(from:offsets,to:destination)} }
                 }.listStyle(.sidebar).onDeleteCommand(perform:session.removeSelection)
             }
             Divider()
@@ -116,22 +127,25 @@ struct StudioView:View {
                 VStack(spacing:16) {
                     Image(systemName:"rectangle.stack").font(.system(size:48,weight:.ultraLight)).foregroundStyle(.secondary)
                     Text("Start with your media").font(.title2.weight(.medium))
-                    Text("Drop images or video into this window.").foregroundStyle(.secondary)
+                    Text("Drop images, video or a PDF into this window.").foregroundStyle(.secondary)
                     Button("Add media",action:addMedia).buttonStyle(.borderedProminent).controlSize(.large)
                 }.frame(maxWidth:.infinity,maxHeight:.infinity)
             } else {
                 NativePreview(snapshot:session.snapshot,revision:session.revision,frame:playback.frame,selection:session.selection,onSelect:{ id,extend in
                     if let id { if extend { if session.selection.contains(id) { session.selection.remove(id) } else { session.selection.insert(id) } } else { session.selection=[id] } }
                     else { session.selection=[] }
-                },onError:{session.issue=$0}).padding(24)
+                },zoom:session.canvasZoom,onError:{session.issue=$0}).padding(12)
             }
             HStack {
+                Picker("Canvas zoom",selection:$session.canvasZoom) {
+                    Text("Fit").tag(0.0);Text("50%").tag(0.5);Text("100%").tag(1.0);Text("200%").tag(2.0)
+                }.labelsHidden().frame(width:90)
                 Text("\(session.project.canvas.width) × \(session.project.canvas.height)")
                 Spacer()
                 Text("\(session.project.export.frameRate.label) fps")
             }.font(.caption).foregroundStyle(.secondary).monospacedDigit().padding(.horizontal,24).padding(.bottom,12)
             Divider()
-            TransportBar(playback:playback,schedule:session.snapshot.plan.schedule).padding(16)
+            TransportBar(playback:playback,schedule:session.snapshot.plan.schedule,cues:session.snapshot.plan.spotlights).padding(16)
         }.background(Color(nsColor:.underPageBackgroundColor))
     }
 }
@@ -147,7 +161,8 @@ private struct MediaRow:View {
             }.frame(width:52,height:38).clipShape(RoundedRectangle(cornerRadius:4))
             VStack(alignment:.leading,spacing:3) {
                 Text(item.name).font(.system(size:12,weight:.medium)).lineLimit(1).help(item.name)
-                if !item.included { Text("Excluded").font(.caption2).foregroundStyle(.secondary) }
+                if item.unavailable != nil { Text("Missing · Replace or locate").font(.caption2).foregroundStyle(.orange) }
+                else if !item.included { Text("Excluded").font(.caption2).foregroundStyle(.secondary) }
                 else if item.spotlight?.enabled == true {
                     Label("Spotlight", systemImage: "viewfinder").font(.caption2).foregroundStyle(.secondary)
                 } else if item.opening { Text("Opening").font(.caption2).foregroundStyle(.secondary) }
@@ -157,15 +172,7 @@ private struct MediaRow:View {
             .accessibilityElement(children:.combine)
             .task(id:item.sha256) {
                 let item=item,workspace=workspace
-                let cg=await Task.detached(priority:.utility) { ()->CGImage? in
-                    guard let url=try? workspace.url(for:item) else { return nil }
-                    if item.kind == .video {
-                        let generator=AVAssetImageGenerator(asset:AVURLAsset(url:url));generator.appliesPreferredTrackTransform=true;generator.maximumSize=CGSize(width:160,height:100)
-                        return try? generator.copyCGImage(at:.zero,actualTime:nil)
-                    }
-                    guard let source=CGImageSourceCreateWithURL(url as CFURL,nil) else { return nil }
-                    return CGImageSourceCreateThumbnailAtIndex(source,0,[kCGImageSourceCreateThumbnailFromImageAlways:true,kCGImageSourceCreateThumbnailWithTransform:true,kCGImageSourceThumbnailMaxPixelSize:160] as CFDictionary)
-                }.value
+                let cg=try? await ThumbnailWorker.shared.image(item:item,workspace:workspace)
                 if !Task.isCancelled,let cg { image=NSImage(cgImage:cg,size:.zero) }
             }
     }
@@ -173,15 +180,31 @@ private struct MediaRow:View {
 struct TransportBar:View {
     @ObservedObject var playback:PlaybackModel
     let schedule:FrameSchedule
+    var cues:[SpotlightCue]=[]
     var body:some View {
         VStack(spacing:10) {
-            Slider(value:Binding(get:{Double(playback.frame)},set:{playback.seek(Int64($0.rounded()))}),in:0...Double(max(1,schedule.totalFrames-1)))
-                .accessibilityLabel("Timeline frame")
+            VStack(spacing:1) {
+                GeometryReader { geometry in
+                    let cycle=playback.frame/schedule.cycleFrames
+                    ForEach(Array(cues.enumerated()),id:\.offset) { _,cue in
+                        let offset=cycle*schedule.cycleFrames
+                        let x=Double(cue.holdStartFrame+offset)/Double(schedule.totalFrames)*geometry.size.width
+                        let width=max(2,Double(cue.holdFrames)/Double(schedule.totalFrames)*geometry.size.width)
+                        RoundedRectangle(cornerRadius:2).fill(Color.accentColor.opacity(0.65)).frame(width:width,height:4).offset(x:x)
+                    }
+                }.frame(height:4).accessibilityHidden(true)
+                Slider(value:Binding(get:{Double(playback.frame)},set:{playback.seek(Int64($0.rounded()))}),in:0...Double(max(1,schedule.totalFrames-1)))
+                    .accessibilityLabel("Timeline frame")
+            }
             HStack(spacing:14) {
                 Button(action:{playback.seek(0)}) { Image(systemName:"backward.end") }.help("First frame")
                 Button(action:{playback.step(-1)}) { Image(systemName:"backward.frame") }.help("Previous frame")
                 Button(action:playback.toggle) { Image(systemName:playback.playing ? "pause.fill":"play.fill").frame(width:18) }.help(playback.playing ? "Pause":"Play")
                 Button(action:{playback.step(1)}) { Image(systemName:"forward.frame") }.help("Next frame")
+                if !cues.isEmpty {
+                    Button(action:{playback.jumpCue(cues,direction:-1)}) {Image(systemName:"backward.end.alt")}.help("Previous spotlight")
+                    Button(action:{playback.jumpCue(cues,direction:1)}) {Image(systemName:"forward.end.alt")}.help("Next spotlight")
+                }
                 Spacer()
                 Text(schedule.label(frame:playback.frame)).monospacedDigit().font(.system(.caption,design:.monospaced))
                 TextField("Frame",value:Binding(get:{playback.frame},set:{playback.seek($0)}),format:.number.grouping(.never))
@@ -196,7 +219,7 @@ struct InspectorSection<Content:View>:View {
     var body:some View { VStack(alignment:.leading,spacing:12) { Text(title).font(.system(size:12,weight:.semibold)).foregroundStyle(.secondary);content() } }
 }
 struct NumberControl:View {
-    let label:String;@Binding var value:Double;let range:ClosedRange<Double>;var unit="";var step=1.0
+    let label:String;@Binding var value:Double;let range:ClosedRange<Double>;var unit="";var step=1.0;var mixed=false
     var begin:()->Void={};var end:()->Void={}
     @State private var text=""
     @FocusState private var focused:Bool
@@ -204,11 +227,11 @@ struct NumberControl:View {
         VStack(spacing:5) {
             HStack {
                 Text(label).font(.callout);Spacer()
-                TextField(label,text:$text).multilineTextAlignment(.trailing).frame(width:62).textFieldStyle(.roundedBorder).focused($focused)
+                TextField(mixed ? "Mixed":label,text:$text).multilineTextAlignment(.trailing).frame(width:62).textFieldStyle(.roundedBorder).focused($focused)
                     .onSubmit(commit).onChange(of:focused) { _,focus in if focus { begin() } else { commit();end() } }
                 if !unit.isEmpty { Text(unit).font(.caption).foregroundStyle(.secondary).frame(width:16,alignment:.leading) }
             }
-            Slider(value:Binding(get:{value},set:{ proposed in
+            if !mixed { Slider(value:Binding(get:{bounded(value,range.lowerBound,range.upperBound)},set:{ proposed in
                 let snapped=range.lowerBound+((proposed-range.lowerBound)/step).rounded()*step
                 value=bounded(snapped,range.lowerBound,range.upperBound)
             }),in:range,onEditingChanged:{ editing in editing ? begin():end() })
@@ -221,9 +244,10 @@ struct NumberControl:View {
                     @unknown default:break
                     }
                 }
-        }.onAppear { sync() }.onChange(of:value) { if !focused { sync() } }
+            }
+        }.onAppear { sync() }.onChange(of:value) { if !focused { sync() } }.onChange(of:mixed) { if !focused { sync() } }.onDisappear { if focused {commit();end()} }
     }
-    private func sync() { text=String(format:step<1 ? "%.2f":"%.0f",value) }
+    private func sync() { text=mixed ? "":String(format:step<1 ? "%.2f":"%.0f",value) }
     private func commit() { if let number=Double(text),number.isFinite { value=bounded(number,range.lowerBound,range.upperBound) };sync() }
 }
 struct SceneInspector:View {
@@ -310,80 +334,5 @@ struct SceneInspector:View {
             guard let c=NSColor(value).usingColorSpace(.sRGB) else { return }
             session.commit("Change colour"){$0.canvas[keyPath:key]=RGBA(c.redComponent,c.greenComponent,c.blueComponent,1)}
         })
-    }
-}
-struct MediaInspector:View {
-    @ObservedObject var session:EditorSession
-    let replace:()->Void
-    private func number(_ key:WritableKeyPath<MediaItem,Double>,name:String,range:ClosedRange<Double>,unit:String="",factor:Double=1)->some View {
-        NumberControl(label:name,value:Binding(get:{(session.selectedItem?[keyPath:key] ?? 0)*factor},set:{v in session.editSelected(name){$0[keyPath:key]=v/factor} }),range:range,unit:unit,step:0.01,begin:{session.beginGesture(name)},end:session.endGesture)
-    }
-    var body:some View {
-        VStack(alignment:.leading,spacing:24) {
-            if let item=session.selectedItem {
-                Text(session.selection.count>1 ? "\(session.selection.count) selected":item.name).font(.headline).lineLimit(3).textSelection(.enabled)
-                InspectorSection(title:"Source") {
-                    Text("\(item.width) × \(item.height)").font(.caption).foregroundStyle(.secondary)
-                    Toggle("Include",isOn:Binding(get:{item.included},set:{value in session.editSelected("Change inclusion"){$0.included=value} }))
-                    Button("Replace media…",action:replace).disabled(session.selection.count != 1)
-                }
-                InspectorSection(title: "Spotlight") {
-                    Toggle("Bring to centre", isOn: Binding(get: { item.spotlight?.enabled ?? false }, set: { enabled in
-                        session.editSelected("Change spotlight") { media in
-                            var setting = media.spotlight ?? Spotlight()
-                            setting.enabled = enabled
-                            media.spotlight = setting
-                        }
-                    })).accessibilityIdentifier("spotlight-enabled")
-                    if item.spotlight?.enabled == true {
-                        NumberControl(label: "Hold", value: Binding(get: { Double(item.spotlight?.holdMilliseconds ?? 3000) / 1000 }, set: { seconds in
-                            session.editSelected("Change spotlight hold") { media in
-                                var setting = media.spotlight ?? Spotlight()
-                                setting.holdMilliseconds = Int64((seconds * 1000).rounded())
-                                media.spotlight = setting
-                            }
-                        }), range: 0.25...60, unit: "s", step: 0.25,
-                        begin: { session.beginGesture("Change spotlight hold") }, end: session.endGesture)
-                        NumberControl(label: "Size", value: Binding(get: { (item.spotlight?.scale ?? 0.85) * 100 }, set: { value in
-                            session.editSelected("Change spotlight size") { media in
-                                var setting = media.spotlight ?? Spotlight()
-                                setting.scale = value / 100
-                                media.spotlight = setting
-                            }
-                        }), range: 25...95, unit: "%",
-                        begin: { session.beginGesture("Change spotlight size") }, end: session.endGesture)
-                    }
-                }
-                InspectorSection(title:"Framing") {
-                    Picker("Fit",selection:Binding(get:{item.fit},set:{value in session.editSelected("Change fit"){$0.fit=value} })) { Text("Fit").tag(MediaFit.contain);Text("Fill").tag(MediaFit.cover) }.pickerStyle(.segmented).labelsHidden()
-                    NumberControl(label:"Focal X",value:Binding(get:{item.focal.x*100},set:{v in session.editSelected("Move focal point"){$0.focal.x=v/100} }),range:0...100,unit:"%",begin:{session.beginGesture("Move focal point")},end:session.endGesture)
-                    NumberControl(label:"Focal Y",value:Binding(get:{item.focal.y*100},set:{v in session.editSelected("Move focal point"){$0.focal.y=v/100} }),range:0...100,unit:"%",begin:{session.beginGesture("Move focal point")},end:session.endGesture)
-                    DisclosureGroup("Crop") {
-                        crop("Left",\.x,maximum:1-item.crop.width)
-                        crop("Top",\.y,maximum:1-item.crop.height)
-                        crop("Width",\.width,maximum:1-item.crop.x)
-                        crop("Height",\.height,maximum:1-item.crop.y)
-                        Button("Reset crop") { session.editSelected("Reset crop"){$0.crop=Crop();$0.focal=Point();$0.displayRatio=nil} }.buttonStyle(.borderless)
-                    }
-                }
-                InspectorSection(title:"Caption") {
-                    TextField("Caption",text:Binding(get:{item.caption},set:{value in session.editSelected("Edit caption"){$0.caption=value} }),axis:.vertical).lineLimit(2...5).textFieldStyle(.roundedBorder)
-                    Toggle("Show captions",isOn:Binding(get:{session.project.scene.captions},set:{value in session.commit("Toggle captions"){$0.scene.captions=value} }))
-                }
-                if item.kind != .image,let duration=item.duration {
-                    InspectorSection(title:"Source playback") {
-                        Text(String(format:"%.2f s",duration)).font(.caption).foregroundStyle(.secondary)
-                        Toggle("Play source",isOn:Binding(get:{item.sourcePlays},set:{value in session.editSelected("Change source playback"){$0.sourcePlays=value} }))
-                        Toggle("Loop source",isOn:Binding(get:{item.sourceLoops},set:{value in session.editSelected("Change source looping"){$0.sourceLoops=value} }))
-                        number(\.sourceRate,name:"Rate",range:0.25...4,unit:"×")
-                        number(\.trimStart,name:"In",range:0...max(0,(item.trimEnd ?? duration)-0.02),unit:"s")
-                        NumberControl(label:"Out",value:Binding(get:{item.trimEnd ?? duration},set:{v in session.editSelected("Change source out"){$0.trimEnd=v} }),range:min(duration,item.trimStart+0.02)...duration,unit:"s",step:0.01,begin:{session.beginGesture("Trim source")},end:session.endGesture)
-                    }
-                }
-            } else { Text("Select media to edit its framing.").foregroundStyle(.secondary).padding(.top,12) }
-        }.padding(16)
-    }
-    private func crop(_ label:String,_ key:WritableKeyPath<Crop,Double>,maximum:Double)->some View {
-        NumberControl(label:label,value:Binding(get:{(session.selectedItem?.crop[keyPath:key] ?? 0)*100},set:{v in session.editSelected("Crop media"){$0.crop[keyPath:key]=v/100} }),range:(key == \.width || key == \.height ? 0.01:0)...max(0.01,maximum*100),unit:"%",step:0.01,begin:{session.beginGesture("Crop media")},end:session.endGesture)
     }
 }

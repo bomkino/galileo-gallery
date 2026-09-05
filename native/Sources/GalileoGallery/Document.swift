@@ -89,14 +89,35 @@ private final class DocumentStorage:@unchecked Sendable {
         guard let editor,!editor.importing else { return }
         let panel=NSOpenPanel();panel.title="Add media";panel.allowsMultipleSelection=true;panel.canChooseDirectories=false
         panel.allowedContentTypes=AssetImporter.extensions.compactMap{UTType(filenameExtension:$0)}
-        if let window=windowForSheet { panel.beginSheetModal(for:window) { result in if result == .OK { editor.importURLs(panel.urls) } } }
-        else if panel.runModal() == .OK { editor.importURLs(panel.urls) }
+        if let window=windowForSheet { panel.beginSheetModal(for:window) { result in if result == .OK { self.prepareImport(panel.urls) } } }
+        else if panel.runModal() == .OK { self.prepareImport(panel.urls) }
     }
     @objc func replaceMedia(_ sender:Any?) {
         guard let editor,editor.selection.count==1,let id=editor.selection.first,!editor.importing else{return}
         let panel=NSOpenPanel();panel.title="Replace media";panel.allowsMultipleSelection=false;panel.canChooseDirectories=false
         panel.allowedContentTypes=AssetImporter.extensions.compactMap{UTType(filenameExtension:$0)}
-        if let window=windowForSheet { panel.beginSheetModal(for:window) { result in if result == .OK {editor.importURLs(panel.urls,replacing:id)} } }
+        if let window=windowForSheet { panel.beginSheetModal(for:window) { result in if result == .OK {self.prepareImport(panel.urls,replacing:id)} } }
+    }
+    func prepareImport(_ urls: [URL], replacing: String? = nil) {
+        guard let editor else { return }
+        do {
+            var selections: [String: PDFImportOptions] = [:]
+            for url in urls where url.pathExtension.lowercased() == "pdf" {
+                let count = try PDFImporter.pageCount(url)
+                let alert = NSAlert(); alert.messageText = "Import PDF pages"
+                alert.informativeText = "\(url.lastPathComponent) · \(count) pages. Enter pages such as 1, 3-5, or leave blank for all."
+                let form = NSView(frame: NSRect(x:0,y:0,width:340,height:104))
+                let pages = NSTextField(frame:NSRect(x:0,y:74,width:340,height:24));pages.placeholderString="All pages";form.addSubview(pages)
+                let resolution=NSPopUpButton(frame:NSRect(x:0,y:37,width:220,height:26))
+                resolution.addItems(withTitles:["1920 px long edge","3840 px long edge","7680 px long edge"]);resolution.selectItem(at:1);form.addSubview(resolution)
+                let transparent=NSButton(checkboxWithTitle:"Transparent page background",target:nil,action:nil);transparent.frame=NSRect(x:0,y:0,width:340,height:24);form.addSubview(transparent)
+                alert.accessoryView=form;alert.addButton(withTitle:"Import");alert.addButton(withTitle:"Cancel")
+                guard alert.runModal() == .alertFirstButtonReturn else{return}
+                let chosen=try PDFPageSelection.parse(pages.stringValue,pageCount:count)
+                selections[url.path]=PDFImportOptions(pages:chosen,maximumDimension:[1920,3840,7680][resolution.indexOfSelectedItem],transparent:transparent.state == .on)
+            }
+            editor.importURLs(urls,replacing:replacing,pdfOptions:selections)
+        } catch {editor.issue=error.localizedDescription}
     }
     @objc func chooseScene(_ sender:Any?) { playback?.pause();editor?.choosingScene=true }
     @objc func exportDocument(_ sender:Any?) { playback?.pause();editor?.choosingExport=true }
@@ -117,6 +138,7 @@ private final class DocumentStorage:@unchecked Sendable {
             let preset=ScenePreset(name:url.deletingPathExtension().lastPathComponent,project:editor.project);try preset.validate()
             let encoder=JSONEncoder();encoder.outputFormatting=[.prettyPrinted,.sortedKeys]
             try encoder.encode(preset).write(to:url,options:.atomic)
+            try PresetStore.save(preset)
         } catch {editor.issue=error.localizedDescription}
     }
     @objc func openScenePreset(_ sender:Any?) {
@@ -127,12 +149,13 @@ private final class DocumentStorage:@unchecked Sendable {
             let size=try url.resourceValues(forKeys:[.fileSizeKey]).fileSize ?? Int.max
             guard size<=1024*1024 else{throw GalleryError.invalid("The preset is too large.")}
             let preset=try JSONDecoder().decode(ScenePreset.self,from:Data(contentsOf:url));try preset.validate()
+            try PresetStore.save(preset)
             editor.commit("Apply scene preset"){$0.scene=preset.scene;$0.timing=preset.timing}
         } catch {editor.issue=error.localizedDescription}
     }
     override func validateUserInterfaceItem(_ item:NSValidatedUserInterfaceItem)->Bool {
         let action=item.action
-        if action == #selector(exportDocument(_:)) {return !(editor?.project.activeItems.isEmpty ?? true) && !ExportCenter.shared.busy}
+        if action == #selector(exportDocument(_:)) {return !(editor?.project.activeItems.isEmpty ?? true)}
         if [#selector(duplicateMedia(_:)),#selector(removeMedia(_:)),#selector(moveMediaEarlier(_:)),#selector(moveMediaLater(_:))].contains(action) {return !(editor?.selection.isEmpty ?? true)}
         if action == #selector(addMedia(_:)) {return !(editor?.importing ?? true)}
         return super.validateUserInterfaceItem(item)
@@ -147,7 +170,7 @@ private final class DocumentStorage:@unchecked Sendable {
         window.toolbarStyle = .unified;window.isReleasedWhenClosed=false
         window.setFrameAutosaveName("GalileoStudio");window.center()
         super.init(window:window);galleryDocument=document
-        let view=StudioView(session:session,playback:playback,addMedia:{[weak document] in document?.addMedia(nil)},replaceMedia:{[weak document] in document?.replaceMedia(nil)})
+        let view=StudioView(session:session,playback:playback,addMedia:{[weak document] in document?.addMedia(nil)},replaceMedia:{[weak document] in document?.replaceMedia(nil)},prepareImport:{[weak document] urls in document?.prepareImport(urls)})
         window.contentView=NSHostingView(rootView:view)
         let toolbar=NSToolbar(identifier:"GalileoStudioToolbar");toolbar.delegate=self;toolbar.displayMode = .iconAndLabel;toolbar.allowsUserCustomization=false;window.toolbar=toolbar
         for (name,action) in [(Notification.Name.togglePlayback,0),(.stepBackward,1),(.stepForward,2)] {
@@ -173,6 +196,11 @@ private final class DocumentStorage:@unchecked Sendable {
 }
 @MainActor final class GalleryDocumentController:NSDocumentController {
     private(set) var pendingOpens=0
+    private func isRecoverable(_ error:NSError)->Bool {
+        if error.domain==RecoverableMediaError.errorDomain {return true}
+        if let underlying=error.userInfo[NSUnderlyingErrorKey] as? NSError {return underlying.domain==RecoverableMediaError.errorDomain}
+        return false
+    }
     override var defaultType:String? {GalleryDocument.typeName}
     override func documentClass(forType typeName:String)->AnyClass? {GalleryDocument.self}
     override func makeUntitledDocument(ofType typeName:String)throws->NSDocument {GalleryDocument()}
@@ -180,7 +208,25 @@ private final class DocumentStorage:@unchecked Sendable {
     override func makeDocument(for url:URL?,withContentsOf contentsURL:URL,ofType typeName:String)throws->NSDocument {try GalleryDocument(for:url,withContentsOf:contentsURL,ofType:GalleryDocument.typeName)}
     override func openDocument(withContentsOf url:URL,display:Bool,completionHandler:@escaping (NSDocument?,Bool,Error?)->Void) {
         let isDirectory=(try? url.resourceValues(forKeys:[.isDirectoryKey]).isDirectory)==true
-        if isDirectory {super.openDocument(withContentsOf:url,display:display,completionHandler:completionHandler);return}
+        if isDirectory {
+            super.openDocument(withContentsOf:url,display:display) { document,alreadyOpen,error in
+                guard let error,self.isRecoverable(error as NSError) else {completionHandler(document,alreadyOpen,error);return}
+                let alert=NSAlert();alert.messageText="Some media is missing or damaged."
+                alert.informativeText="Open a recovery copy to locate or replace it. The original document will not be changed."
+                alert.addButton(withTitle:"Open Recovery Copy");alert.addButton(withTitle:"Cancel")
+                guard alert.runModal() == .alertFirstButtonReturn else {completionHandler(nil,false,CocoaError(.userCancelled));return}
+                Task { @MainActor in
+                    do {
+                        let recovered=try await Task.detached {try NativeDocumentIO.readPackage(url,allowRecovery:true)}.value
+                        let copy=try GalleryDocument(project:recovered.0,workspace:recovered.1)
+                        self.addDocument(copy);copy.updateChangeCount(.changeDone)
+                        if display {copy.makeWindowControllers();copy.showWindows();copy.editor?.issue="Recovery copy. Locate, replace or exclude missing media before exporting."}
+                        completionHandler(copy,false,nil)
+                    } catch {completionHandler(nil,false,error)}
+                }
+            }
+            return
+        }
         pendingOpens+=1
         Task { @MainActor in
             defer{pendingOpens-=1}

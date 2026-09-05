@@ -84,7 +84,7 @@ final class SpotlightTests: XCTestCase {
         for i in items.indices { items[i].removeValue(forKey: "spotlight") }
         json["items"] = items
         let old = try GalleryProject.decode(JSONSerialization.data(withJSONObject: json))
-        XCTAssertEqual(old.schemaVersion, 4); XCTAssertTrue(old.items.allSatisfy { $0.spotlight == nil })
+        XCTAssertEqual(old.schemaVersion, 5); XCTAssertTrue(old.items.allSatisfy { $0.spotlight == nil })
         p.items[0].spotlight?.holdMilliseconds = 0; XCTAssertThrowsError(try p.validate())
         p.items[0].spotlight?.holdMilliseconds = 3000; p.items[0].spotlight?.scale = .nan
         XCTAssertThrowsError(try p.validate())

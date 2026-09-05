@@ -9,10 +9,11 @@ struct NativePreview:NSViewRepresentable {
     let frame:Int64
     var selection:Set<String>=[]
     var onSelect:((String?,Bool)->Void)?=nil
+    var zoom:Double=0
     var onError:((String)->Void)?=nil
     func makeNSView(context:Context)->PreviewSurface { PreviewSurface() }
     func updateNSView(_ view:PreviewSurface,context:Context) {
-        view.selection=selection;view.onSelect=onSelect;view.onError=onError
+        view.selection=selection;view.onSelect=onSelect;view.onError=onError;view.zoom=zoom
         view.update(snapshot:snapshot,revision:revision,frame:frame)
     }
     static func dismantleNSView(_ view:PreviewSurface,coordinator:()) { view.stop() }
@@ -29,6 +30,8 @@ struct NativePreview:NSViewRepresentable {
     private var ticket=UUID()
     private var pending:(snapshot:RenderSnapshot,revision:Int,frame:Int64)?
     private var renderedCanvas:GalileoCore.Canvas?
+    var zoom=0.0 {didSet{if zoom != oldValue {pan = .zero;requestedFrame = -1;needsDisplay=true}}}
+    private var pan=CGPoint.zero
     var selection:Set<String>=[] { didSet { if oldValue != selection { needsDisplay=true } } }
     var onSelect:((String?,Bool)->Void)?
     var onError:((String)->Void)?
@@ -55,9 +58,11 @@ struct NativePreview:NSViewRepresentable {
         guard task==nil,let request=pending else { return }
         pending=nil
         let worker=worker,ticket=ticket
+        let desired = zoom == 0 ? Int(max(bounds.width,bounds.height)*(window?.backingScaleFactor ?? 1)) : Int(max(bounds.width,bounds.height)*max(1,zoom))
+        let previewSize=max(640,min(3840,Int(ceil(Double(desired)/256))*256))
         task=Task { [weak self] in
             do {
-                let result=try await worker.render(snapshot:request.snapshot,frame:request.frame,maximumDimension:1600)
+                let result=try await worker.render(snapshot:request.snapshot,frame:request.frame,maximumDimension:previewSize)
                 if !Task.isCancelled,let self,self.ticket==ticket {
                     self.image=result;self.committedFrame=request.frame
                     self.renderedCanvas=request.snapshot.plan.project.canvas
@@ -74,15 +79,23 @@ struct NativePreview:NSViewRepresentable {
     }
     private var contentRect:CGRect {
         guard let canvas=renderedCanvas ?? snapshot?.plan.project.canvas else { return bounds }
-        let scale=min(bounds.width/CGFloat(canvas.width),bounds.height/CGFloat(canvas.height))
+        let scale=zoom == 0 ? min(bounds.width/CGFloat(canvas.width),bounds.height/CGFloat(canvas.height)) : CGFloat(zoom)/(window?.backingScaleFactor ?? 1)
         let size=CGSize(width:CGFloat(canvas.width)*scale,height:CGFloat(canvas.height)*scale)
-        return CGRect(x:(bounds.width-size.width)/2,y:(bounds.height-size.height)/2,width:size.width,height:size.height)
+        return CGRect(x:(bounds.width-size.width)/2+pan.x,y:(bounds.height-size.height)/2+pan.y,width:size.width,height:size.height)
+    }
+    override func setFrameSize(_ newSize:NSSize) {
+        let changed=frame.size != newSize
+        super.setFrameSize(newSize)
+        if changed,let snapshot,requestedFrame>=0 {
+            let value=requestedFrame;requestedFrame = -1
+            update(snapshot:snapshot,revision:requestedRevision,frame:value)
+        }
     }
     override func draw(_ dirtyRect:NSRect) {
         super.draw(dirtyRect)
         guard let ctx=NSGraphicsContext.current?.cgContext else { return }
         let rect=contentRect
-        ctx.saveGState();ctx.clip(to:rect)
+        ctx.saveGState();ctx.clip(to:rect.intersection(bounds))
         let light=NSColor(calibratedWhite:0.68,alpha:1),dark=NSColor(calibratedWhite:0.55,alpha:1)
         ctx.setFillColor(light.cgColor);ctx.fill(rect)
         let cell:CGFloat=12
@@ -94,7 +107,7 @@ struct NativePreview:NSViewRepresentable {
             let scale=rect.width/CGFloat(canvas.width)
             ctx.setStrokeColor(NSColor.controlAccentColor.cgColor);ctx.setLineWidth(1.5)
             for card in cards where selection.contains(card.itemID) {
-                let quad=card.quad(perspective:Double(canvas.width)*2)
+                let quad=card.visibleQuad(perspective:Double(canvas.width)*2)
                 guard let first=quad.first else { continue }
                 ctx.beginPath();ctx.move(to:CGPoint(x:rect.minX+first.x*scale,y:rect.minY+first.y*scale))
                 for point in quad.dropFirst() { ctx.addLine(to:CGPoint(x:rect.minX+point.x*scale,y:rect.minY+point.y*scale)) }
@@ -109,13 +122,16 @@ struct NativePreview:NSViewRepresentable {
         guard rect.contains(location),let canvas=renderedCanvas ?? snapshot?.plan.project.canvas else { onSelect?(nil,false);return }
         let scale=Double(canvas.width)/rect.width
         let point=CGPoint(x:(location.x-rect.minX)*scale,y:(location.y-rect.minY)*scale)
-        let hit=cards.reversed().first { card in
-            let quad=card.quad(perspective:Double(canvas.width)*2)
-            let path=CGMutablePath();guard let first=quad.first else { return false }
-            path.move(to:CGPoint(x:first.x,y:first.y));quad.dropFirst().forEach{path.addLine(to:CGPoint(x:$0.x,y:$0.y))};path.closeSubpath()
-            return path.contains(point)
-        }
+        let hit=cards.reversed().first { $0.contains(Point(point.x,point.y),perspective:Double(canvas.width)*2) }
         onSelect?(hit?.itemID,event.modifierFlags.contains(.command) || event.modifierFlags.contains(.shift))
+    }
+    override func scrollWheel(with event:NSEvent) {
+        guard zoom != 0 else {super.scrollWheel(with:event);return}
+        let rect=contentRect
+        let maxX=max(0,(rect.width-bounds.width)/2),maxY=max(0,(rect.height-bounds.height)/2)
+        pan.x=bounded(pan.x+event.scrollingDeltaX,-maxX,maxX)
+        pan.y=bounded(pan.y+event.scrollingDeltaY,-maxY,maxY)
+        needsDisplay=true
     }
     override func keyDown(with event:NSEvent) {
         if event.keyCode==49 { NotificationCenter.default.post(name:.togglePlayback,object:window);return }

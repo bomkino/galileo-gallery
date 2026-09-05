@@ -18,6 +18,7 @@ public struct ExportReceipt: Codable, Sendable {
     public let sha256:String?
     public let backend:String
     public let outputPath:String
+    public var sourceStartFrame: Int64? = nil
 }
 public struct ExportDestination: @unchecked Sendable {
     public let url:URL
@@ -51,12 +52,14 @@ public struct ExportDestination: @unchecked Sendable {
     }
 }
 public enum NativeExport {
-    public static func run(snapshot:RenderSnapshot,destination:ExportDestination,stillFrame:Int64=0,
+    public static func run(snapshot:RenderSnapshot,destination:ExportDestination,stillFrame:Int64=0, range: ExportRange? = nil,
                            progress:@escaping @Sendable (Double,String)->Void = {_,_ in}) async throws -> ExportReceipt {
         let plan=snapshot.plan,project=plan.project,format=project.export.format
+        let range = try ExportRange(start: range?.start ?? 0, end: range?.end ?? plan.schedule.totalFrames, total: plan.schedule.totalFrames)
+        guard !plan.items.contains(where: { $0.unavailable != nil }) else { throw GalleryError.missing("Locate, replace or exclude the missing media before exporting.") }
         guard !plan.items.isEmpty else { throw GalleryError.invalid("Add at least one included media item before exporting.") }
         guard format.supportsAlpha || project.canvas.background != .transparent else { throw GalleryError.unsupported("Use ProRes 4444 or PNG for a transparent canvas.") }
-        guard plan.schedule.totalFrames<=216000 || format == .png else { throw GalleryError.unsupported("This export exceeds 216,000 frames. Shorten the duration or repeat count.") }
+        guard range.count<=216000 || format == .png else { throw GalleryError.unsupported("This export exceeds 216,000 frames. Shorten the duration or repeat count.") }
         let parent=destination.url.deletingLastPathComponent()
         let staged=parent.appendingPathComponent(".galileo-\(UUID().uuidString)"+(format.fileExtension.isEmpty ? "":"."+format.fileExtension))
         let scoped=parent.startAccessingSecurityScopedResource()
@@ -66,7 +69,7 @@ public enum NativeExport {
         var checked=Set<String>()
         for item in plan.items where checked.insert(item.asset).inserted {
             try Task.checkCancellation()
-            guard try Workspace.fingerprint(snapshot.workspace.url(for:item))==item.sha256 else { throw GalleryError.invalid("\(item.name) changed. Export stopped without replacing the destination.") }
+            guard try snapshot.workspace.verifiedFingerprint(snapshot.workspace.url(for:item))==item.sha256 else { throw GalleryError.invalid("\(item.name) changed. Export stopped without replacing the destination.") }
         }
         var decoded:Int?=nil
         if format == .png {
@@ -75,23 +78,23 @@ public enum NativeExport {
             decoded=1
         } else if format == .pngSequence {
             try FileManager.default.createDirectory(at:staged,withIntermediateDirectories:false)
-            for frame in 0..<plan.schedule.totalFrames {
+            for offset in 0..<range.count {
                 try Task.checkCancellation()
                 try autoreleasepool {
-                    let image=try renderer.image(snapshot:snapshot,frame:frame)
-                    try writePNG(image,to:staged.appendingPathComponent(String(format:"frame-%06lld.png",frame)))
+                    let image=try renderer.image(snapshot:snapshot,frame:range.start+offset)
+                    try writePNG(image,to:staged.appendingPathComponent(String(format:"frame-%06lld.png",offset)))
                 }
-                progress(Double(frame+1)/Double(plan.schedule.totalFrames)*0.94,"Rendering \(frame+1) / \(plan.schedule.totalFrames)")
+                progress(Double(offset+1)/Double(range.count)*0.94,"Rendering \(offset+1) / \(range.count)")
             }
-            for f in Set([Int64(0),plan.schedule.totalFrames/2,plan.schedule.totalFrames-1]) {
+            for f in Set([Int64(0),range.count/2,range.count-1]) {
                 try verifyPNG(staged.appendingPathComponent(String(format:"frame-%06lld.png",f)),width:project.canvas.width,height:project.canvas.height)
             }
-            let info:[String:Any]=["frameCount":plan.schedule.totalFrames,"firstFrame":0,"frameRateNumerator":plan.schedule.rate.numerator,"frameRateDenominator":plan.schedule.rate.denominator,"width":project.canvas.width,"height":project.canvas.height,"colourSpace":"sRGB","alpha":"straight PNG encoding from premultiplied working pixels"]
+            let info:[String:Any]=["frameCount":range.count,"firstFrame":0,"sourceStartFrame":range.start,"frameRateNumerator":plan.schedule.rate.numerator,"frameRateDenominator":plan.schedule.rate.denominator,"width":project.canvas.width,"height":project.canvas.height,"colourSpace":"sRGB","alpha":"straight PNG encoding from premultiplied working pixels"]
             try JSONSerialization.data(withJSONObject:info,options:[.prettyPrinted,.sortedKeys]).write(to:staged.appendingPathComponent("sequence.json"),options:.atomic)
         } else {
-            try await movie(snapshot:snapshot,renderer:renderer,to:staged,progress:progress)
+            try await movie(snapshot:snapshot,renderer:renderer,to:staged,range:range,progress:progress)
             progress(0.96,"Checking output")
-            decoded=try await verifyMovie(staged,schedule:plan.schedule,width:project.canvas.width,height:project.canvas.height)
+            decoded=try await verifyMovie(staged,schedule:plan.schedule,width:project.canvas.width,height:project.canvas.height,expectedFrames:range.count)
         }
         try Task.checkCancellation()
         let hash=format == .pngSequence ? nil:try Workspace.fingerprint(staged)
@@ -101,8 +104,8 @@ public enum NativeExport {
         progress(1,"Exported")
         return ExportReceipt(documentID:project.id,variantID:project.scene.variantID,format:format.rawValue,
                              width:project.canvas.width,height:project.canvas.height,
-                             scheduledFrames:format == .png ? 1:plan.schedule.totalFrames,decodedFrames:decoded,
-                             duration:format == .png ? 0:plan.schedule.duration,sha256:hash,backend:renderer.backend,outputPath:destination.url.path)
+                             scheduledFrames:format == .png ? 1:range.count,decodedFrames:decoded,
+                             duration:format == .png ? 0:plan.schedule.seconds(for:range.count),sha256:hash,backend:renderer.backend,outputPath:destination.url.path,sourceStartFrame:format == .png ? stillFrame:range.start)
     }
     public static func writePNG(_ image:CGImage,to url:URL)throws {
         guard let destination=CGImageDestinationCreateWithURL(url as CFURL,UTType.png.identifier as CFString,1,nil) else { throw GalleryError.invalid("The PNG destination could not be created.") }
@@ -112,7 +115,7 @@ public enum NativeExport {
     public static func verifyPNG(_ url:URL,width:Int,height:Int)throws {
         guard let source=CGImageSourceCreateWithURL(url as CFURL,nil),let image=CGImageSourceCreateImageAtIndex(source,0,nil),image.width==width,image.height==height else { throw GalleryError.invalid("The rendered PNG failed verification.") }
     }
-    private static func movie(snapshot:RenderSnapshot,renderer:NativeRenderer,to url:URL,progress:@escaping @Sendable(Double,String)->Void) async throws {
+    private static func movie(snapshot:RenderSnapshot,renderer:NativeRenderer,to url:URL,range:ExportRange,progress:@escaping @Sendable(Double,String)->Void) async throws {
         let project=snapshot.plan.project,schedule=snapshot.plan.schedule,format=project.export.format
         let writer=try AVAssetWriter(outputURL:url,fileType:format == .h264 ? .mp4:.mov)
         let codec:AVVideoCodecType=format == .h264 ? .h264:format == .proRes422 ? .proRes422:.proRes4444
@@ -140,7 +143,7 @@ public enum NativeExport {
         writer.startSession(atSourceTime:.zero)
         let rec709=CGColorSpace(name:CGColorSpace.itur_709)!
         do {
-            for frame in 0..<schedule.totalFrames {
+            for frame in 0..<range.count {
                 try Task.checkCancellation()
                 let waiting=Date()
                 while !input.isReadyForMoreMediaData {
@@ -153,17 +156,14 @@ public enum NativeExport {
                     guard let pool=adaptor.pixelBufferPool else { throw GalleryError.invalid("The video pixel buffer pool is unavailable.") }
                     var pixelBuffer:CVPixelBuffer?
                     guard CVPixelBufferPoolCreatePixelBuffer(nil,pool,&pixelBuffer)==kCVReturnSuccess,let buffer=pixelBuffer else { throw GalleryError.invalid("Not enough memory for the video frame.") }
-                    CVPixelBufferLockBaseAddress(buffer,[]);defer { CVPixelBufferUnlockBaseAddress(buffer,[]) }
-                    let image=try renderer.image(snapshot:snapshot,frame:frame,colorSpace:rec709)
-                    guard let ctx=CGContext(data:CVPixelBufferGetBaseAddress(buffer),width:project.canvas.width,height:project.canvas.height,bitsPerComponent:8,bytesPerRow:CVPixelBufferGetBytesPerRow(buffer),space:rec709,bitmapInfo:CGImageAlphaInfo.premultipliedFirst.rawValue|CGBitmapInfo.byteOrder32Little.rawValue) else { throw GalleryError.invalid("The encoder frame buffer could not be created.") }
-                    ctx.draw(image,in:CGRect(x:0,y:0,width:project.canvas.width,height:project.canvas.height))
+                    try renderer.render(snapshot:snapshot,frame:range.start+frame,into:buffer,colorSpace:rec709)
                     let timestamp=CMTime(value:frame*schedule.rate.denominator,timescale:Int32(schedule.rate.numerator))
                     guard adaptor.append(buffer,withPresentationTime:timestamp) else { throw writer.error ?? GalleryError.invalid("The video frame could not be encoded.") }
                 }
-                progress(Double(frame+1)/Double(schedule.totalFrames)*0.94,"Rendering \(frame+1) / \(schedule.totalFrames)")
+                progress(Double(frame+1)/Double(range.count)*0.94,"Rendering \(frame+1) / \(range.count)")
             }
             input.markAsFinished()
-            writer.endSession(atSourceTime:CMTime(value:schedule.totalFrames*schedule.rate.denominator,timescale:Int32(schedule.rate.numerator)))
+            writer.endSession(atSourceTime:CMTime(value:range.count*schedule.rate.denominator,timescale:Int32(schedule.rate.numerator)))
             let finished=WriterCompletion()
             writer.finishWriting { finished.markFinished() }
             let deadline=ProcessInfo.processInfo.systemUptime+60
@@ -175,11 +175,12 @@ public enum NativeExport {
             guard writer.status == .completed else { throw writer.error ?? GalleryError.invalid("The movie was not finalised.") }
         } catch { writer.cancelWriting();throw error }
     }
-    public static func verifyMovie(_ url:URL,schedule:FrameSchedule,width:Int,height:Int) async throws -> Int? {
+    public static func verifyMovie(_ url:URL,schedule:FrameSchedule,width:Int,height:Int,expectedFrames:Int64?=nil) async throws -> Int? {
+        let frameCount=expectedFrames ?? schedule.totalFrames
         let asset=AVURLAsset(url:url),tracks=try await asset.loadTracks(withMediaType:.video)
         guard tracks.count==1,let track=tracks.first else { throw GalleryError.invalid("The exported movie has an invalid video track.") }
         let size=try await track.load(.naturalSize),duration=try await asset.load(.duration)
-        guard Int(size.width)==width,Int(size.height)==height,abs(duration.seconds-schedule.duration)<=max(0.002,1/schedule.rate.value) else { throw GalleryError.invalid("The exported size or duration does not match the document.") }
+        guard Int(size.width)==width,Int(size.height)==height,abs(duration.seconds-schedule.seconds(for:frameCount))<=max(0.002,1/schedule.rate.value) else { throw GalleryError.invalid("The exported size or duration does not match the document.") }
         let reader=try AVAssetReader(asset:asset)
         defer { if reader.status == .reading { reader.cancelReading() } }
         let output=AVAssetReaderTrackOutput(track:track,outputSettings:[kCVPixelBufferPixelFormatTypeKey as String:kCVPixelFormatType_32BGRA])
@@ -197,7 +198,7 @@ public enum NativeExport {
             count+=1
             if count%60==0 { await Task.yield() }
         }
-        guard reader.status == .completed,Int64(count)==schedule.totalFrames else { throw GalleryError.invalid("The exported frame count does not match the schedule.") }
+        guard reader.status == .completed,Int64(count)==frameCount else { throw GalleryError.invalid("The exported frame count does not match the schedule.") }
         return count
     }
 }

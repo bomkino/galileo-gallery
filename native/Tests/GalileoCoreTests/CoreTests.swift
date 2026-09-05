@@ -105,7 +105,7 @@ final class CoreTests: XCTestCase {
                 let plan=try RenderPlan(project:p)
                 for frame in stride(from:Int64(0),to:plan.schedule.totalFrames,by:23) {
                     let cards=plan.evaluate(frame:frame)
-                    XCTAssertLessThanOrEqual(cards.count,13)
+                    XCTAssertLessThanOrEqual(cards.count,v.family == .table ? 24 : v.family == .hang ? 16 : 13)
                     XCTAssertEqual(Set(cards.map(\.instanceID)).count,cards.count)
                     for c in cards {
                         XCTAssertTrue([c.center.x,c.center.y,c.width,c.height,c.sourceTime].allSatisfy(\.isFinite))

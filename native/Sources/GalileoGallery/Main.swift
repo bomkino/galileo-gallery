@@ -101,7 +101,7 @@ import GalileoNative
         let alert=NSAlert();alert.messageText="An export is running.";alert.informativeText="Keep the app open to finish, or cancel the export before quitting."
         alert.addButton(withTitle:"Keep Exporting");alert.addButton(withTitle:"Cancel Export and Quit")
         guard alert.runModal() == .alertSecondButtonReturn else {return .terminateCancel}
-        quitPending=true;ExportCenter.shared.cancel()
+        quitPending=true;ExportCenter.shared.cancelAll()
         Task { @MainActor in
             while ExportCenter.shared.busy {try? await Task.sleep(nanoseconds:50_000_000)}
             quitPending=false;NSApp.terminate(nil)

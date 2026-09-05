@@ -218,8 +218,8 @@ public struct RenderPlan: Sendable {
                 let i=current+offset
                 if !canWrap && i>=n { continue }
                 let layer=Double(offset),shrink=1-layer*0.045+motion*0.045
-                var c=card(i,w/2+layer*s.spacing*0.15,h/2+layer*s.spacing*0.40-motion*s.spacing*0.4,w*s.scale*shrink,h*s.scale*shrink,"-\(offset)")
-                c.angle=(layer-1)*s.tilt*0.16; c.z = -layer
+                var c=card(i,w/2+(layer-motion)*s.spacing*0.15,h/2+layer*s.spacing*0.40-motion*s.spacing*0.4,w*s.scale*shrink,h*s.scale*shrink,"-\(offset)")
+                c.angle=(layer-motion-1)*s.tilt*0.16; c.z = -layer
                 if offset==0 {
                     if variant.id == "the-stack" { c.center.y-=motion*h; c.angle-=motion*s.tilt }
                     else if variant.id == "hero-deck-object" { c.center.x+=motion*w*1.1; c.center.y-=sin(motion*Double.pi)*h*0.1; c.angle+=motion*s.tilt*0.5 }
@@ -228,41 +228,52 @@ public struct RenderPlan: Sendable {
                 cards.append(c)
             }
         case .orbit:
-            let orrery=variant.id == "the-orrery"
-            if orrery { var center=card(0,w/2,h/2,w*s.scale*0.6,h*s.scale*0.6,"-primary"); center.z=20; cards.append(center) }
-            let count=min(12,orrery ? max(0,n-1):n)
-            guard count>0 else { return cards }
-            let start=n>12 ? Int(p*Double(n)) : 0
-            for slot in 0..<count {
-                let i=(start+slot+(orrery ? 1:0))%n
-                let angle=Double(slot)/Double(count)*tau-p*tau*(n>12 ? 1:1)
-                let near=(cos(angle)+1)/2
-                let ring=orrery && slot%2==1 ? 0.70:1.0
-                let rx=(w*0.31+s.spacing*0.25)*ring
-                var ry=h*(variant.id == "spin-image-orbit" ? 0.12:0.18+s.depth*0.12)*ring
-                if variant.id == "zoetrope" { ry=h*0.08 }
-                let scale=s.scale*(0.45+near*(0.3+s.depth*0.3))
-                var c=card(i,w/2+sin(angle)*rx,h/2+cos(angle)*ry,w*scale,h*scale,"-orbit\(slot)")
-                if variant.id == "proximity-orbit" { c.width*=1+pow(near,8)*0.18; c.height*=1+pow(near,8)*0.18 }
-                if variant.id == "spiral-image-vortex" {
-                    let t=Double(slot)/Double(max(1,count-1))
-                    c.center.y=h*0.2+t*h*0.6+sin(angle)*h*0.035
-                    c.center.x=w/2+sin(angle+t*tau)*rx*(0.5+t*0.5)
+            let orrery = variant.id == "the-orrery"
+            if orrery {
+                var primary = card(0, w/2, h/2, w*s.scale*0.6, h*s.scale*0.6, "-primary")
+                primary.z = 20; cards.append(primary)
+            }
+            let count = orrery ? n-1 : n
+            guard count > 0 else { return cards }
+            let conveyor = count > 12
+            for index in 0..<count {
+                // The source, not a changing slot, owns its entire route. Larger
+                // collections recycle through an off-canvas rear corridor.
+                var d = Double(index) - p*Double(count)
+                if conveyor {
+                    d -= floor((d + Double(count)/2) / Double(count))*Double(count)
+                    if abs(d) >= 6 { continue }
                 }
-                if variant.id == "zoetrope" { c.yaw=sin(angle)*70*s.depth }
-                else if variant.id != "spin-image-orbit" { c.yaw = -sin(angle)*22*s.depth }
-                c.z=near*10; cards.append(c)
+                let angle = conveyor ? d*tau/12 : Double(index)/Double(count)*tau-p*tau
+                let near = (cos(angle)+1)/2
+                let ring = orrery && index%2 == 1 ? 0.70 : 1.0
+                let rx = (w*0.31+s.spacing*0.25)*ring
+                var ry = h*(variant.id == "spin-image-orbit" ? 0.12 : 0.18+s.depth*0.12)*ring
+                if variant.id == "zoetrope" { ry = h*0.08 }
+                let scale = s.scale*(0.45+near*(0.3+s.depth*0.3))
+                var c = card(index+(orrery ? 1:0), w/2+sin(angle)*rx, h/2+cos(angle)*ry, w*scale, h*scale, "-orbit")
+                if variant.id == "proximity-orbit" { c.width *= 1+pow(near,8)*0.18; c.height *= 1+pow(near,8)*0.18 }
+                if variant.id == "spiral-image-vortex" {
+                    let t = conveyor ? bounded((d+6)/12,0,1) : Double(index)/Double(max(1,count-1))
+                    c.center.y = h*0.2+t*h*0.6+sin(angle)*h*0.035
+                    c.center.x = w/2+sin(angle+t*tau)*rx*(0.5+t*0.5)
+                }
+                if conveyor { c.center.y -= smooth((abs(d)-4.2)/1.8)*h*2 }
+                c.yaw = variant.id == "zoetrope" ? sin(angle)*70*s.depth : variant.id == "spin-image-orbit" ? 0 : -sin(angle)*22*s.depth
+                c.z = near*10; cards.append(c)
             }
         case .fan:
             let pageSize=10,pages=(n+pageSize-1)/pageSize,page=min(pages-1,Int(p*Double(pages)))
             let phase=p*Double(pages)-Double(page),first=page*pageSize,count=min(pageSize,n-first)
-            let opening=smooth(phase/0.14)*(1-smooth((phase-0.90)/0.10))
+            let entry = page > 0 || canWrap ? 1-smooth(phase/0.14) : 0
+            let exit = page < pages-1 || canWrap ? smooth((phase-0.86)/0.14) : 0
+            let opening=smooth(phase/0.14)*(1-exit)
             let feature=smooth((phase-0.3)/0.10)*(1-smooth((phase-project.timing.holdFraction)/max(0.05,0.9-project.timing.holdFraction)))
             for slot in 0..<count {
                 let position=count==1 ? 0:Double(slot)/Double(count-1)-0.5
                 let angle=position*s.spread*opening
                 let size=short*s.scale*0.7
-                var c=card(first+slot,w/2,h*0.64,size,size,"-fan")
+                var c=card(first+slot,w/2,h*0.64+(entry+exit)*h*1.5,size,size,"-fan")
                 let r=angle * .pi/180
                 c.center.x+=sin(r)*c.height*0.44
                 c.center.y-=cos(r)*c.height*0.30
@@ -272,37 +283,47 @@ public struct RenderPlan: Sendable {
                 cards.append(c)
             }
         case .table:
-            let strip=variant.id == "deck-contact-strip",pageSize=strip ? 5:12
-            let pages=(n+pageSize-1)/pageSize,page=min(pages-1,Int(p*Double(pages)))
-            let first=page*pageSize,count=min(pageSize,n-first),phase=p*Double(pages)-Double(page)
-            let travel=smooth((phase-project.timing.holdFraction)/(1-project.timing.holdFraction))
-            let columns=strip ? count : min(4,max(1,Int(ceil(sqrt(Double(count)*w/h)))))
-            let rows=(count+columns-1)/columns
-            let cellW=(w-s.spacing*2)/Double(columns),cellH=(h-s.spacing*2)/Double(rows)
-            for slot in 0..<count {
-                let i=first+slot
-                var c=card(i,s.spacing+(Double(slot%columns)+0.5)*cellW,s.spacing+(Double(slot/columns)+0.5)*cellH,max(1,cellW-s.spacing*0.45)*s.scale,max(1,cellH-s.spacing*0.45)*s.scale,"-table")
-                if pages>1 && page<pages-1 { c.center.x-=travel*w }
-                if variant.id == "drift-deck" || variant.id == "image-scatter-gallery" {
-                    let seed=Self.stableUnit(items[i].id),strength=variant.id == "drift-deck" ? 0.35:1.0
-                    c.angle=(seed-0.5)*s.tilt*strength+sin(p*tau+seed*tau)*s.tilt*0.1
-                    c.center.y+=sin(p*tau+seed*tau)*min(cellH*0.08,s.tilt*strength)
+            let strip = variant.id == "deck-contact-strip", pageSize = strip ? 5 : 12
+            let pages = (n+pageSize-1)/pageSize, page = min(pages-1,Int(p*Double(pages)))
+            let phase = p*Double(pages)-Double(page)
+            let exchangePage = pages > 1 && (page < pages-1 || canWrap)
+            let travel = exchangePage ? smooth((phase-project.timing.holdFraction)/(1-project.timing.holdFraction)) : 0
+            // Both pages exist throughout the handoff. The incoming page reaches
+            // exactly its next-page pose; the final looping page hands back to zero.
+            for pass in 0...(travel > 0 ? 1 : 0) {
+                let shownPage = pass == 0 ? page : (page+1)%pages
+                let first = shownPage*pageSize, count = min(pageSize,n-first)
+                let columns = strip ? count : min(4,max(1,Int(ceil(sqrt(Double(count)*w/h)))))
+                let rows = (count+columns-1)/columns
+                let cellW = (w-s.spacing*2)/Double(columns), cellH = (h-s.spacing*2)/Double(rows)
+                let pageShift = pass == 0 ? -travel*w*1.2 : (1-travel)*w*1.2
+                for slot in 0..<count {
+                    let i = first+slot
+                    var c = card(i,s.spacing+(Double(slot%columns)+0.5)*cellW+pageShift,s.spacing+(Double(slot/columns)+0.5)*cellH,max(1,cellW-s.spacing*0.45)*s.scale,max(1,cellH-s.spacing*0.45)*s.scale,"-table")
+                    if variant.id == "drift-deck" || variant.id == "image-scatter-gallery" {
+                        let seed = Self.stableUnit(items[i].id), strength = variant.id == "drift-deck" ? 0.35 : 1.0
+                        c.angle = (seed-0.5)*s.tilt*strength+sin(p*tau+seed*tau)*s.tilt*0.1
+                        c.center.y += sin(p*tau+seed*tau)*min(cellH*0.08,s.tilt*strength)
+                    }
+                    if strip || variant.id == "light-table" {
+                        let scanPhase = pass == 1 ? 0 : phase
+                        let scan = scanPhase*Double(count), selected = min(count-1,Int(scan))
+                        let blend = smooth((scan-Double(selected)-project.timing.holdFraction)/(1-project.timing.holdFraction))
+                        let weight = slot == selected ? 1-blend : slot == (selected+1)%count ? blend : 0
+                        let lift = strip ? 0.12 : s.depth*0.16
+                        c.width *= 1+weight*lift; c.height *= 1+weight*lift; c.z = weight*10
+                    }
+                    cards.append(c)
                 }
-                if strip || variant.id == "light-table" {
-                    let scan=phase*Double(count),selected=min(count-1,Int(scan))
-                    let blend=smooth((scan-Double(selected)-project.timing.holdFraction)/(1-project.timing.holdFraction))
-                    let weight=slot==selected ? 1-blend : slot==(selected+1)%count ? blend : 0
-                    let lift=strip ? 0.12:s.depth*0.16
-                    c.width*=1+weight*lift;c.height*=1+weight*lift;c.z=weight*10
-                }
-                cards.append(c)
             }
         case .vitrine:
-            var a=card(current,w/2-motion*w*0.3,h/2,w*s.scale*(1-motion*s.depth*0.2),h*s.scale*(1-motion*s.depth*0.2))
-            a.yaw = -motion*(15+s.depth*35); a.angle=sin(p*tau)*s.tilt*0.2; a.z=1
-            if motion>0 {
-                var b=card(current+1,w/2+(1-motion)*w*0.8,h/2,w*s.scale,h*s.scale,"-incoming")
-                b.yaw=(1-motion)*(15+s.depth*35); b.z=2; cards.append(b)
+            let distance = w*1.5
+            var a = card(current,w/2-motion*distance,h/2,w*s.scale*(1-motion*s.depth*0.2),h*s.scale*(1-motion*s.depth*0.2))
+            a.yaw = -motion*(15+s.depth*35); a.angle = sin(p*tau)*s.tilt*0.2; a.z = 1
+            if motion > 0 {
+                var b = card(current+1,w/2+(1-motion)*distance,h/2,w*s.scale,h*s.scale,"-incoming")
+                b.yaw = (1-motion)*(15+s.depth*35); b.angle = sin(p*tau)*s.tilt*0.2; b.z = 2
+                cards.append(b)
             }
             cards.append(a)
         case .compare:
@@ -315,25 +336,35 @@ public struct RenderPlan: Sendable {
             after.reveal=(1-cos(phase*tau))/2; after.verticalReveal=s.vertical; after.z=1
             cards.append(after)
         case .build:
-            let pieces=variant.id == "the-build" ? 6:3
+            let pieces = variant.id == "the-build" ? 6 : 3
+            let finish = project.timing.holdFraction
+            let leaving = (current < n-1 || canWrap) ? smooth((fraction-max(0.80,finish))/(1-max(0.80,finish))) : 0
             for part in 0..<pieces {
-                let delay=Double(part)*0.045,assemble=smooth((fraction-delay)/max(0.1,project.timing.holdFraction-delay))
-                var c=card(current,w/2,h/2,w*s.scale,h*s.scale,"-part\(part)")
-                var slice=Crop()
-                if variant.id == "the-build" { slice.x=Double(part)/Double(pieces); slice.width=1/Double(pieces) }
-                else { slice.y=Double(part)/Double(pieces); slice.height=1/Double(pieces) }
-                c.slice=slice
-                c.center.y+=(1-assemble)*(Double(part)-Double(pieces-1)/2)*(s.spacing+short*s.depth*0.16)
-                c.center.x+=(1-assemble)*(part%2==0 ? -1:1)*short*s.depth*0.08
-                c.z=Double(part); cards.append(c)
+                // Stagger is proportional to assembly time, never longer than it.
+                let delay = finish*0.4*Double(part)/Double(pieces)
+                let assemble = smooth((fraction-delay)/max(0.001,finish-delay))
+                var c = card(current,w/2,h/2,w*s.scale,h*s.scale,"-part\(part)")
+                var slice = Crop()
+                if variant.id == "the-build" { slice.x = Double(part)/Double(pieces); slice.width = 1/Double(pieces) }
+                else { slice.y = Double(part)/Double(pieces); slice.height = 1/Double(pieces) }
+                c.slice = slice
+                c.center.y += (1-assemble)*(h*1.6+Double(part)*(s.spacing+short*s.depth*0.05)) - leaving*h*1.6
+                c.center.x += (1-assemble)*(part%2 == 0 ? -1 : 1)*short*s.depth*0.08
+                c.z = Double(part); cards.append(c)
             }
         case .hang:
-            let pageSize=8,pages=(n+pageSize-1)/pageSize,page=min(pages-1,Int(p*Double(pages)))
-            let first=page*pageSize,count=min(pageSize,n-first),cell=w/Double(count)
-            for slot in 0..<count {
-                let i=first+slot,seed=Self.stableUnit(items[i].id)
-                var c=card(i,(Double(slot)+0.5)*cell,h*(0.42+seed*0.15),max(1,cell-s.spacing)*s.scale,h*0.60*s.scale,"-hang")
-                c.angle=sin(p*tau+seed*tau)*s.tilt; c.suspension=true; cards.append(c)
+            let pageSize = 8, pages = (n+pageSize-1)/pageSize, page = min(pages-1,Int(p*Double(pages)))
+            let phase = p*Double(pages)-Double(page)
+            let travel = pages > 1 && (page < pages-1 || canWrap) ? smooth((phase-0.78)/0.22) : 0
+            for pass in 0...(travel > 0 ? 1 : 0) {
+                let first = (pass == 0 ? page : (page+1)%pages)*pageSize
+                let count = min(pageSize,n-first), cell = w/Double(count)
+                let shift = pass == 0 ? -travel*h*1.8 : (1-travel)*h*1.8
+                for slot in 0..<count {
+                    let i = first+slot, seed = Self.stableUnit(items[i].id)
+                    var c = card(i,(Double(slot)+0.5)*cell,h*(0.42+seed*0.15)+shift,max(1,cell-s.spacing)*s.scale,h*0.60*s.scale,"-hang")
+                    c.angle = sin(p*tau+seed*tau)*s.tilt; c.suspension = true; cards.append(c)
+                }
             }
         }
         return cards.sorted { $0.z == $1.z ? $0.instanceID < $1.instanceID : $0.z < $1.z }

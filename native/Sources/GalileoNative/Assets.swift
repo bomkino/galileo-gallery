@@ -7,6 +7,7 @@ import UniformTypeIdentifiers
 import GalileoCore
 
 public final class Workspace: @unchecked Sendable {
+    let integrity = IntegrityCache()
     public let root: URL
     public var assets: URL { root.appendingPathComponent("Assets",isDirectory:true) }
     public init() throws {
@@ -28,12 +29,11 @@ public final class Workspace: @unchecked Sendable {
         return hash.finalize().map { String(format:"%02x",$0) }.joined()
     }
     public func acquire(_ source:URL) throws -> (url:URL,hash:String) {
-        let meta=try source.resourceValues(forKeys:[.isRegularFileKey,.isSymbolicLinkKey,.fileSizeKey])
-        guard meta.isRegularFile==true,meta.isSymbolicLink != true else { throw GalleryError.invalid("\(source.lastPathComponent) is not a regular file.") }
-        guard (meta.fileSize ?? Int.max)<=512*1024*1024 else { throw GalleryError.invalid("\(source.lastPathComponent) exceeds the 512 MB per-file limit.") }
+        guard try FileStamp(source).size <= MediaBudget.maximumFileBytes else { throw GalleryError.invalid("\(source.lastPathComponent) exceeds the 512 MiB per-file limit.") }
         let staged=root.appendingPathComponent("import-\(UUID().uuidString).\(source.pathExtension)")
         defer { try? FileManager.default.removeItem(at:staged) }
-        try FileManager.default.copyItem(at:source,to:staged)
+        try Self.copyOwned(source,to:staged)
+        guard try FileStamp(staged).size <= MediaBudget.maximumFileBytes else { throw GalleryError.invalid("The source grew beyond the import budget.") }
         try Task.checkCancellation()
         let hash=try Self.fingerprint(staged)
         let ext=source.pathExtension.lowercased().filter { $0.isASCII && ($0.isLetter || $0.isNumber) }
@@ -43,7 +43,7 @@ public final class Workspace: @unchecked Sendable {
     }
 }
 public enum AssetImporter {
-    public static let extensions=["png","jpg","jpeg","heic","heif","tif","tiff","gif","webp","avif","mp4","mov","m4v"]
+    public static let extensions=["png","jpg","jpeg","heic","heif","tif","tiff","gif","webp","avif","pdf","mp4","mov","m4v"]
     public static func inspect(_ source:URL,workspace:Workspace) async throws -> MediaItem {
         let scoped=source.startAccessingSecurityScopedResource()
         defer { if scoped { source.stopAccessingSecurityScopedResource() } }
@@ -89,16 +89,19 @@ public enum NativeDocumentIO {
         guard wrapper.isDirectory,let children=wrapper.fileWrappers,let bytes=children["project.json"]?.regularFileContents else { throw GalleryError.invalid("This is not a native Galileo document.") }
         let project=try GalleryProject.decode(bytes),workspace=try Workspace()
         guard let assets=children["Assets"],assets.isDirectory,let files=assets.fileWrappers,files.count<=2048 else { throw GalleryError.invalid("The document has no valid asset directory.") }
-        var total=0
+        var sizes=[String:Int64]()
         for (name,file) in files {
             guard GalleryProject.safeAssetName(name),file.isRegularFile,let data=file.regularFileContents,data.count<=512*1024*1024 else { throw GalleryError.invalid("An asset in the document is invalid.") }
-            total+=data.count
-            guard total<=4*1024*1024*1024 else { throw GalleryError.invalid("This project exceeds the 4 GB managed-media budget.") }
+            sizes[name]=Int64(data.count)
+            _ = try MediaBudget.total(sizes)
             try data.write(to:workspace.assets.appendingPathComponent(name),options:.atomic)
         }
-        for item in project.items {
+        for item in project.items where item.unavailable == nil {
             let url=try workspace.url(for:item)
-            guard try Workspace.fingerprint(url)==item.sha256 else { throw GalleryError.invalid("\(item.name) failed its integrity check. The original document has not been changed.") }
+            guard try workspace.verifiedFingerprint(url)==item.sha256 else { throw GalleryError.invalid("\(item.name) failed its integrity check. The original document has not been changed.") }
+            if let original=item.originalAsset, let expected=item.originalSHA256 {
+                guard try workspace.verifiedFingerprint(workspace.assets.appendingPathComponent(original))==expected else {throw GalleryError.invalid("The preserved PDF failed its integrity check.")}
+            }
         }
         for (name,file) in children where name != "project.json" && name != "Assets" {
             guard ["legacy-manifest.json","legacy-assets.json"].contains(name),file.isRegularFile,
@@ -110,15 +113,20 @@ public enum NativeDocumentIO {
     public static func wrapper(project:GalleryProject,workspace:Workspace) throws -> FileWrapper {
         var children:[String:FileWrapper]=["project.json":FileWrapper(regularFileWithContents:try project.encoded())]
         let assets=FileWrapper(directoryWithFileWrappers:[:])
-        for url in try FileManager.default.contentsOfDirectory(at:workspace.assets,includingPropertiesForKeys:[.isRegularFileKey,.isSymbolicLinkKey]) {
-            let meta=try url.resourceValues(forKeys:[.isRegularFileKey,.isSymbolicLinkKey])
-            guard meta.isRegularFile==true,meta.isSymbolicLink != true else { throw GalleryError.invalid("A managed asset is not a regular file.") }
-            let file=try FileWrapper(url:url,options:[]);file.preferredFilename=url.lastPathComponent;assets.addFileWrapper(file)
+        let sizes = try workspace.managedSizes(project:project)
+        _ = try MediaBudget.total(sizes)
+        for item in project.items where item.unavailable == nil {
+            guard try workspace.verifiedFingerprint(workspace.url(for:item)) == item.sha256 else { throw GalleryError.invalid("\(item.name) changed before saving.") }
+        }
+        for name in sizes.keys.sorted() {
+            let file=try FileWrapper(url:workspace.assets.appendingPathComponent(name),options:[])
+            file.preferredFilename=name;assets.addFileWrapper(file)
         }
         children["Assets"]=assets
-        for name in ["legacy-manifest.json","legacy-assets.json"] {
-            let url=workspace.root.appendingPathComponent(name)
-            if FileManager.default.fileExists(atPath:url.path) { children[name]=try FileWrapper(url:url,options:[]) }
+        if project.legacyManifestFilename != nil {
+            let url=workspace.root.appendingPathComponent("legacy-manifest.json")
+            if FileManager.default.fileExists(atPath:url.path) { children["legacy-manifest.json"]=try FileWrapper(url:url,options:[]) }
+            children["legacy-assets.json"]=FileWrapper(regularFileWithContents:try JSONEncoder().encode(legacyMapping(workspace)))
         }
         return FileWrapper(directoryWithFileWrappers:children)
     }
@@ -126,8 +134,13 @@ public enum NativeDocumentIO {
 public enum LegacyImporter {
     public static func open(_ url:URL) async throws -> (GalleryProject,Workspace) {
         let workspace=try Workspace()
-        let acquired=try workspace.acquire(url)
-        let archive=try SafeZIP(data:Data(contentsOf:acquired.url,options:.mappedIfSafe))
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        guard try FileStamp(url).size <= MediaBudget.maximumProjectBytes else { throw GalleryError.invalid("The legacy archive exceeds 4 GiB.") }
+        let archived = workspace.root.appendingPathComponent("legacy-input.zip")
+        try Workspace.copyOwned(url, to: archived)
+        defer { try? FileManager.default.removeItem(at: archived) }
+        let archive=try SafeZIP(data:Data(contentsOf:archived,options:.mappedIfSafe))
         let bytes=try archive.contents(of:"project/project.json")
         guard bytes.count<=8*1024*1024,let raw=try JSONSerialization.jsonObject(with:bytes) as? [String:Any],
               raw["schemaVersion"] as? Int==2,let media=raw["media"] as? [[String:Any]],media.count<=512,
@@ -168,8 +181,16 @@ public enum LegacyImporter {
             let target=workspace.assets.appendingPathComponent(filename)
             if !FileManager.default.fileExists(atPath:target.path) { try content.write(to:target,options:.atomic) }
             var item=try await AssetImporter.metadata(target,name:name,hash:hash)
-            item.id=id;item.caption=frame["caption"] as? String ?? "";item.included = !(frame["muted"] as? Bool ?? false)
-            item.opening=(frame["spotlight"] as? Bool ?? false) && (parameters["spotlightsEnabled"] as? Bool ?? true)
+            item.id=id;item.caption=frame["caption"] as? String ?? "";item.included = true
+            let eligible = !(frame["muted"] as? Bool ?? false)
+            let marked = eligible && (frame["spotlight"] as? Bool ?? false) && (parameters["spotlightsEnabled"] as? Bool ?? true)
+            if oldID == "vitrine" && version == 2 { item.opening = marked }
+            else if marked {
+                var cue = Spotlight()
+                cue.holdMilliseconds = Int64(bounded(parameters["holdMs"] as? Double ?? 3000,250,60000))
+                cue.scale = bounded((parameters["heroSize"] as? Double ?? 85)/100,0.25,0.95)
+                item.spotlight = cue
+            }
             item.fit=MediaFit(rawValue:frame["fit"] as? String ?? parameters["imageFit"] as? String ?? "contain") ?? .contain
             if let crop=frame["crop"] as? [String:Double] { item.crop.x=crop["x"] ?? 0;item.crop.y=crop["y"] ?? 0;item.crop.width=crop["width"] ?? 1;item.crop.height=crop["height"] ?? 1 }
             if let focal=frame["focal"] as? [String:Double] { item.focal=Point(focal["x"] ?? 0.5,focal["y"] ?? 0.5) }
@@ -182,15 +203,29 @@ public enum LegacyImporter {
             guard let path=entry["archivePath"] as? String,path.hasPrefix("project/audio/"),let hash=entry["sha256"] as? String else { throw GalleryError.invalid("A preserved audio source is invalid.") }
             let content=try archive.contents(of:path)
             guard SHA256.hash(data:content).map({String(format:"%02x",$0)}).joined()==hash else { throw GalleryError.invalid("An audio source failed its integrity check.") }
-            let name=hash+".wav";try content.write(to:workspace.assets.appendingPathComponent(name),options:.atomic)
-            mapping[path]=name;expected.insert(path)
+            // Sound is deliberately outside Galileo. Validate the archive entry
+            // but do not add standalone audio files to the native document.
+            expected.insert(path)
         }
         guard Set(archive.entries.filter{!$0.isDirectory}.map(\.name))==expected else { throw GalleryError.invalid("The legacy project contains unexpected files.") }
-        try FileManager.default.removeItem(at:acquired.url)
         try bytes.write(to:workspace.root.appendingPathComponent("legacy-manifest.json"),options:.atomic)
         try JSONSerialization.data(withJSONObject:mapping,options:[.sortedKeys]).write(to:workspace.root.appendingPathComponent("legacy-assets.json"),options:.atomic)
         project.legacyManifestFilename="legacy-manifest.json"
-        project.migrationNotes=["This is a native reinterpretation, not an identical legacy render. Original scene, timing and audio intent are preserved in this document. Review the composition before exporting.","Audio is preserved for migration but is not played or exported by this native build. Save creates a separate native document; the legacy original is unchanged."]
+        project.migrationNotes = [
+            "Preserved: original visual media, order, captions, crop, focal points and source play/loop settings.",
+            "Translated: marked spotlights become centre holds; Vitrine v2 opening remains an opening. Skip-beat media remains in the visual sequence but is not spotlighted.",
+            "Review: scene choreography, legacy finale exchanges and directed tempo segments are not exact native reproductions.",
+            "Sound is not imported. The original archive and its soundtrack remain unchanged."
+        ]
+        if (parameters["finaleEnabled"] as? Bool) == true {
+            let eligibleIDs = media.compactMap { entry -> String? in
+                guard let frame = entry["frame"] as? [String: Any], (frame["muted"] as? Bool) != true else { return nil }
+                return entry["id"] as? String
+            }
+            if let id = eligibleIDs.last, let i = project.items.firstIndex(where: { $0.id == id }) { project.items[i].closing = true }
+            project.migrationNotes.append("Translated: the eligible final source is a native closing hold; compare its timing with the original export.")
+        }
+        _ = try workspace.validateBudget(project: project)
         try project.validate();return(project,workspace)
     }
 }

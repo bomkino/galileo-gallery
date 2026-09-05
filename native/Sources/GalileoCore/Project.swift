@@ -47,6 +47,7 @@ public struct Spotlight: Codable, Equatable, Sendable {
     public var enabled = true
     public var holdMilliseconds: Int64 = 3000
     public var scale = 0.85
+    public var transitionMilliseconds: Int64? = nil
     public init() {}
 }
 public struct MediaItem: Codable, Equatable, Identifiable, Sendable {
@@ -63,6 +64,12 @@ public struct MediaItem: Codable, Equatable, Identifiable, Sendable {
     public var included = true
     public var opening = false
     public var spotlight: Spotlight? = nil
+    public var closing: Bool? = nil
+    /// Only recovery copies carry this marker. Missing artwork cannot export.
+    public var unavailable: String? = nil
+    /// PDF pages retain their original document as a separately owned asset.
+    public var originalAsset: String? = nil
+    public var originalSHA256: String? = nil
     public var caption = ""
     public var fit: MediaFit = .contain
     public var crop = Crop()
@@ -105,6 +112,7 @@ public struct SceneSettings: Codable, Equatable, Sendable {
     public var radius = 10.0
     public var shadow = 0.25
     public var captions = false
+    public var captionBacking: Bool? = nil
     public var vertical = false
     public init() {}
 }
@@ -139,7 +147,7 @@ public struct ExportSettings: Codable, Equatable, Sendable {
 }
 public struct GalleryProject: Codable, Equatable, Sendable {
     public var format = "dog.pitch.galileo.native"
-    public var schemaVersion = 4
+    public var schemaVersion = 5
     public var id = UUID().uuidString
     public var name = "Untitled"
     public var canvas = Canvas()
@@ -155,6 +163,9 @@ public struct GalleryProject: Codable, Equatable, Sendable {
         var result = items.filter(\.included)
         if let opening = result.firstIndex(where: \.opening) { result = Array(result[opening...]) + Array(result[..<opening]) }
         if timing.reverse { result.reverse() }
+        if timing.playMode != .loop, let closing = result.firstIndex(where: { $0.closing == true }) {
+            result.append(result.remove(at: closing))
+        }
         return result
     }
     public func validate() throws {
@@ -162,7 +173,7 @@ public struct GalleryProject: Codable, Equatable, Sendable {
         func finite(_ value: Double, _ range: ClosedRange<Double>, _ label: String) throws {
             try require(value.isFinite && range.contains(value), "\(label) must be between \(range.lowerBound) and \(range.upperBound).")
         }
-        try require(format == "dog.pitch.galileo.native" && schemaVersion == 4, "This document needs a different version of Galileo Gallery. The original was not changed.")
+        try require(format == "dog.pitch.galileo.native" && schemaVersion == 5, "This document needs a different version of Galileo Gallery. The original was not changed.")
         try require(!id.isEmpty && name.count <= 512, "The document identity is invalid.")
         try require((64...7680).contains(canvas.width) && (64...7680).contains(canvas.height), "Canvas dimensions must be 64–7,680 pixels.")
         try require(canvas.width % 2 == 0 && canvas.height % 2 == 0, "Canvas dimensions must be even pixel counts.")
@@ -181,9 +192,15 @@ public struct GalleryProject: Codable, Equatable, Sendable {
         try require(items.count <= 512, "A document supports at most 512 media items.")
         try require(Set(items.map(\.id)).count == items.count, "Media identities must be unique.")
         for item in items {
+            if let asset = item.originalAsset {
+                try require(Self.safeAssetName(asset), "The preserved source path is invalid.")
+                try require(item.originalSHA256?.count == 64 && item.originalSHA256!.allSatisfy { "0123456789abcdef".contains($0) }, "The preserved source fingerprint is invalid.")
+            }
+            if let reason = item.unavailable { try require(reason.count <= 1000, "The recovery marker is invalid.") }
             if let spotlight = item.spotlight {
                 try require((250...60000).contains(spotlight.holdMilliseconds), "A spotlight hold must last 0.25–60 seconds.")
                 try finite(spotlight.scale, 0.25...0.95, "Spotlight scale")
+                if let transition = spotlight.transitionMilliseconds { try require((100...5000).contains(transition), "A spotlight transition must last 0.1–5 seconds.") }
             }
             try require(!item.id.isEmpty && item.id.count <= 200 && !item.name.isEmpty && item.name.count <= 512, "A media identity is invalid.")
             try require(Self.safeAssetName(item.asset), "A media path is invalid.")
@@ -217,7 +234,7 @@ public struct GalleryProject: Codable, Equatable, Sendable {
         guard data.count <= 8 * 1024 * 1024 else { throw GalleryError.invalid("The document manifest is too large.") }
         var project = try JSONDecoder().decode(Self.self, from: data)
         // v3 had no per-media spotlight. Missing optional values decode as nil.
-        if project.schemaVersion == 3 { project.schemaVersion = 4 }
+        if [3, 4].contains(project.schemaVersion) { project.schemaVersion = 5 }
         try project.validate(); return project
     }
 }
