@@ -10,32 +10,19 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 5
     steps:
-      - name: Compare AppKit-owned undo managers at the failing boundary
+      - uses: actions/checkout@v5
+      - name: Instrument ownership without changing edit semantics
         run: |
-          cat > /tmp/document-probe.swift <<'SWIFT'
-          import AppKit
-          final class Model: NSObject { var value = 0 }
-          let app = NSApplication.shared
-          app.setActivationPolicy(.regular)
-          for explicit in [false, true] {
-              let document = NSDocument()
-              document.hasUndoManager = true
-              if explicit { document.undoManager = UndoManager() }
-              let manager = document.undoManager!
-              manager.groupsByEvent = false
-              let model = Model()
-              let observer = NotificationCenter.default.addObserver(forName: nil, object: manager, queue: nil) { note in print("notification", note.name.rawValue) }
-              print("before", explicit, document.isDocumentEdited, manager.groupingLevel)
-              manager.beginUndoGrouping()
-              manager.registerUndo(withTarget: model) { target in target.value = 0 }
-              model.value = 1
-              manager.endUndoGrouping()
-              print("after", explicit, document.isDocumentEdited, manager.canUndo)
-              RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.05))
-              print("after event", document.isDocumentEdited)
-              manager.undo()
-              print("undo", document.isDocumentEdited, model.value)
-              NotificationCenter.default.removeObserver(observer)
-          }
-          SWIFT
-          swift /tmp/document-probe.swift
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('native/Sources/GalileoGallery/Document.swift')
+          s=p.read_text().replace('self.storage.set(session.snapshot) } }','self.storage.set(session.snapshot); print("EDIT OWNERSHIP", session.undoManager as Any, self.undoManager as Any, "group", session.undoManager?.groupingLevel as Any, "dirty", self.isDocumentEdited); fflush(stdout) } }')
+          p.write_text(s)
+          p=Path('native/Sources/GalileoGallery/ApplicationSmoke.swift')
+          s=p.read_text().replace('editor.importURLs(try fixture.items.map','print("INITIAL OWNERSHIP", editor.undoManager as Any, document.undoManager as Any); fflush(stdout)\n        editor.importURLs(try fixture.items.map')
+          p.write_text(s)
+          PY
+      - name: Reproduce in the bundled native app
+        run: |
+          bash scripts/native/package.sh native-diagnosis
+          native-diagnosis/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$RUNNER_TEMP/document-diagnosis"
