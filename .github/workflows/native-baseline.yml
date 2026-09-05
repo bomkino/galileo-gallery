@@ -16,10 +16,10 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           p=Path('native/Sources/GalileoGallery/Document.swift')
-          s=p.read_text().replace('self.storage.set(session.snapshot) } }','self.storage.set(session.snapshot); print("EDIT OWNERSHIP", session.undoManager as Any, self.undoManager as Any, "group", session.undoManager?.groupingLevel as Any, "dirty", self.isDocumentEdited); fflush(stdout) } }')
+          s=p.read_text().replace('self.storage.set(session.snapshot) } }','self.storage.set(session.snapshot); Swift.print("EDIT OWNERSHIP", session.undoManager as Any, self.undoManager as Any, "group", session.undoManager?.groupingLevel as Any, "dirty", self.isDocumentEdited); fflush(stdout) } }')
           p.write_text(s)
           p=Path('native/Sources/GalileoGallery/ApplicationSmoke.swift')
-          s=p.read_text().replace('editor.importURLs(try fixture.items.map','print("INITIAL OWNERSHIP", editor.undoManager as Any, document.undoManager as Any); fflush(stdout)\n        editor.importURLs(try fixture.items.map')
+          s=p.read_text().replace('editor.importURLs(try fixture.items.map','Swift.print("INITIAL OWNERSHIP", editor.undoManager as Any, document.undoManager as Any); fflush(stdout)\n        editor.importURLs(try fixture.items.map')
           p.write_text(s)
           PY
       - name: Reproduce in the bundled native app
