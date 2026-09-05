@@ -74,6 +74,12 @@ import GalileoNative
         guard let reopened=reopened as? GalleryDocument,let restored=reopened.editor,let transport=reopened.playback,let restoredWindow=reopened.windowForSheet else{throw GalleryError.invalid("The saved native document did not reopen.")}
         guard restored.project==expectedAfterAutosave else{throw GalleryError.invalid("Document save/reopen changed authored state.")}
         restored.selection=[]
+        transport.seek(0)
+        try await wait { findPreview(restoredWindow.contentView)?.committedFrame==0 }
+        transport.play()
+        try await wait { (findPreview(restoredWindow.contentView)?.committedFrame ?? 0)>0 && transport.playing }
+        transport.pause()
+        try await wait { findPreview(restoredWindow.contentView)?.committedFrame==transport.frame }
         transport.seek(restored.snapshot.plan.schedule.cycleFrames/2)
         try await wait { findPreview(restoredWindow.contentView)?.committedFrame==transport.frame }
         for mode in [NSAppearance.Name.aqua,.darkAqua] {
@@ -113,7 +119,7 @@ import GalileoNative
         let receipt=try await Task.detached {try await NativeExport.run(snapshot:snapshot,destination:ExportDestination(url:movieURL),stillFrame:0){_,_ in}}.value
         guard receipt.scheduledFrames==62,receipt.decodedFrames==62 else{throw GalleryError.invalid("The actual native movie failed its frame count proof.")}
         try JSONEncoder().encode(receipt).write(to:directory.appendingPathComponent("export-receipt.json"))
-        let summary:[String:Any]=["documentRoundTrip":true,"documentEditedState":true,"failedSavePreservesChanges":true,"nativeAutosave":true,"spotlightSavedAndReopened":true,"importUndoRedo":true,"sceneUndoRedo":true,"nativeMovieDecodedFrames":62,"sceneSamples":visualEvidence,"operatingSystem":ProcessInfo.processInfo.operatingSystemVersionString,"version":Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "development"]
+        let summary:[String:Any]=["previewAdvancesDuringPlayback":true,"documentRoundTrip":true,"documentEditedState":true,"failedSavePreservesChanges":true,"nativeAutosave":true,"spotlightSavedAndReopened":true,"importUndoRedo":true,"sceneUndoRedo":true,"nativeMovieDecodedFrames":62,"sceneSamples":visualEvidence,"operatingSystem":ProcessInfo.processInfo.operatingSystemVersionString,"version":Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "development"]
         try JSONSerialization.data(withJSONObject:summary,options:[.prettyPrinted,.sortedKeys]).write(to:directory.appendingPathComponent("journey.json"))
         _=window;_=playback
         print("NATIVE JOURNEY PASS: import, undo, redo, edit, save, close, reopen, scrub, render, export, decode")

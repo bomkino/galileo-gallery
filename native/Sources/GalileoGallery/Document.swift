@@ -21,10 +21,16 @@ private final class DocumentStorage:@unchecked Sendable {
     nonisolated private let storage=DocumentStorage()
     private(set) var editor:EditorSession?
     private(set) var playback:PlaybackModel?
+    // Content transactions own change tracking. This manager is intentionally not
+    // installed through super.undoManager, whose notification-based bookkeeping
+    // would otherwise count the same model transaction a second time.
+    private var editUndoManager:UndoManager?=UndoManager()
+    override var undoManager:UndoManager? {
+        get { editUndoManager }
+        set { editUndoManager=newValue;editor?.undoManager=newValue }
+    }
     override init() {
-        super.init();hasUndoManager=true
-        // Install the document-owned manager explicitly before binding the editor.
-        undoManager=UndoManager()
+        super.init()
         if let workspace=try? Workspace(),let snapshot=try? RenderSnapshot(project:GalleryProject(),workspace:workspace) { storage.set(snapshot) }
         fileType=Self.typeName
     }
@@ -67,7 +73,13 @@ private final class DocumentStorage:@unchecked Sendable {
             self.editor=session;self.playback=playback
             session.undoManager=undoManager;undoManager?.groupsByEvent=false
             session.documentName=fileURL?.deletingPathExtension().lastPathComponent ?? snapshot.plan.project.name
-            session.didEdit={ [weak self,weak session] in if let self,let session { self.storage.set(session.snapshot) } }
+            session.didEdit={ [weak self,weak session] in
+                guard let self,let session else { return }
+                self.storage.set(session.snapshot)
+                let change:NSDocument.ChangeType=session.undoManager?.isUndoing == true ? .changeUndone
+                    : session.undoManager?.isRedoing == true ? .changeRedone : .changeDone
+                self.updateChangeCount(change)
+            }
             let controller=StudioWindowController(document:self,session:session,playback:playback)
             addWindowController(controller)
         } catch { presentError(error) }

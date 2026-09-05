@@ -27,6 +27,8 @@ struct NativePreview:NSViewRepresentable {
     private var cards:[SceneCard]=[]
     private var task:Task<Void,Never>?
     private var ticket=UUID()
+    private var pending:(snapshot:RenderSnapshot,revision:Int,frame:Int64)?
+    private var renderedCanvas:GalileoCore.Canvas?
     var selection:Set<String>=[] { didSet { if oldValue != selection { needsDisplay=true } } }
     var onSelect:((String?,Bool)->Void)?
     var onError:((String)->Void)?
@@ -35,26 +37,43 @@ struct NativePreview:NSViewRepresentable {
     override init(frame:NSRect) { super.init(frame:frame);setAccessibilityElement(true);setAccessibilityRole(.image);setAccessibilityLabel("Gallery canvas") }
     convenience init() { self.init(frame:.zero) }
     required init?(coder:NSCoder) { fatalError("Programmatic view") }
-    func stop() { task?.cancel();task=nil }
+    func stop() {
+        pending=nil;ticket=UUID();task?.cancel()
+        requestedRevision = -1;requestedFrame = -1
+    }
     func update(snapshot:RenderSnapshot,revision:Int,frame:Int64) {
-        guard revision != requestedRevision || frame != requestedFrame || self.snapshot?.plan.project.id != snapshot.plan.project.id else { return }
+        let changedDocument=self.snapshot?.plan.project.id != snapshot.plan.project.id
+        guard revision != requestedRevision || frame != requestedFrame || changedDocument else { return }
+        if revision != requestedRevision || changedDocument { ticket=UUID() }
         requestedRevision=revision;requestedFrame=frame;self.snapshot=snapshot
-        task?.cancel();let ticket=UUID();self.ticket=ticket
-        let worker=worker
+        pending=(snapshot,revision,frame)
+        renderNext()
+    }
+    private func renderNext() {
+        // Keep one render in flight and only the newest pending request. Cancelling
+        // every playback tick starves the canvas when rendering exceeds one tick.
+        guard task==nil,let request=pending else { return }
+        pending=nil
+        let worker=worker,ticket=ticket
         task=Task { [weak self] in
             do {
-                let result=try await worker.render(snapshot:snapshot,frame:frame,maximumDimension:1600)
-                guard !Task.isCancelled,let self,self.ticket==ticket else { return }
-                self.image=result;self.committedFrame=frame;self.cards=snapshot.plan.evaluate(frame:frame);self.needsDisplay=true
-                self.setAccessibilityValue("Frame \(frame), \(snapshot.plan.project.activeItems.count) media items")
+                let result=try await worker.render(snapshot:request.snapshot,frame:request.frame,maximumDimension:1600)
+                if !Task.isCancelled,let self,self.ticket==ticket {
+                    self.image=result;self.committedFrame=request.frame
+                    self.renderedCanvas=request.snapshot.plan.project.canvas
+                    self.cards=request.snapshot.plan.evaluate(frame:request.frame);self.needsDisplay=true
+                    self.setAccessibilityValue("Frame \(request.frame), \(request.snapshot.plan.project.activeItems.count) media items")
+                }
             } catch is CancellationError {} catch {
-                guard !Task.isCancelled,let self,self.ticket==ticket else { return }
-                self.onError?(error.localizedDescription)
+                if !Task.isCancelled,let self,self.ticket==ticket { self.onError?(error.localizedDescription) }
             }
+            guard let self else { return }
+            self.task=nil
+            self.renderNext()
         }
     }
     private var contentRect:CGRect {
-        guard let canvas=snapshot?.plan.project.canvas else { return bounds }
+        guard let canvas=renderedCanvas ?? snapshot?.plan.project.canvas else { return bounds }
         let scale=min(bounds.width/CGFloat(canvas.width),bounds.height/CGFloat(canvas.height))
         let size=CGSize(width:CGFloat(canvas.width)*scale,height:CGFloat(canvas.height)*scale)
         return CGRect(x:(bounds.width-size.width)/2,y:(bounds.height-size.height)/2,width:size.width,height:size.height)
@@ -71,7 +90,7 @@ struct NativePreview:NSViewRepresentable {
             ctx.setFillColor(dark.cgColor);ctx.fill(CGRect(x:rect.minX+CGFloat(column)*cell,y:rect.minY+CGFloat(row)*cell,width:cell,height:cell))
         } }
         if let image { ctx.saveGState();ctx.translateBy(x:rect.minX,y:rect.maxY);ctx.scaleBy(x:1,y:-1);ctx.draw(image,in:CGRect(origin:.zero,size:rect.size));ctx.restoreGState() }
-        if let canvas=snapshot?.plan.project.canvas {
+        if let canvas=renderedCanvas ?? snapshot?.plan.project.canvas {
             let scale=rect.width/CGFloat(canvas.width)
             ctx.setStrokeColor(NSColor.controlAccentColor.cgColor);ctx.setLineWidth(1.5)
             for card in cards where selection.contains(card.itemID) {
@@ -87,7 +106,7 @@ struct NativePreview:NSViewRepresentable {
     override func mouseDown(with event:NSEvent) {
         window?.makeFirstResponder(self)
         let location=convert(event.locationInWindow,from:nil),rect=contentRect
-        guard rect.contains(location),let canvas=snapshot?.plan.project.canvas else { onSelect?(nil,false);return }
+        guard rect.contains(location),let canvas=renderedCanvas ?? snapshot?.plan.project.canvas else { onSelect?(nil,false);return }
         let scale=Double(canvas.width)/rect.width
         let point=CGPoint(x:(location.x-rect.minX)*scale,y:(location.y-rect.minY)*scale)
         let hit=cards.reversed().first { card in

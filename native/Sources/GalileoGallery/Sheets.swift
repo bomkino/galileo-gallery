@@ -56,7 +56,10 @@ struct ExportOptions:View {
     @State private var settings:ExportSettings
     @State private var error:String?
     init(session:EditorSession,frame:Int64) { self.session=session;self.frame=frame;_settings=State(initialValue:session.project.export) }
-    private var schedule:FrameSchedule? { try? FrameSchedule(timing:session.project.timing,rate:settings.frameRate) }
+    private var schedule:FrameSchedule? {
+        var candidate=session.project;candidate.export=settings
+        return try? RenderPlan(project:candidate).schedule
+    }
     private var compatible:Bool { session.project.canvas.background != .transparent || settings.format.supportsAlpha }
     var body:some View {
         VStack(alignment:.leading,spacing:18) {
@@ -86,8 +89,10 @@ struct ExportOptions:View {
             guard panel.runModal() == .OK,let url=panel.url else { return }
             if settings.format == .pngSequence,FileManager.default.fileExists(atPath:url.path) { throw GalleryError.invalid("Choose a new folder name for the PNG sequence. Existing folders are never replaced.") }
             let destination=try ExportDestination(url:url)
+            let previewTime=session.snapshot.plan.schedule.seconds(for:frame)
             session.commit("Export settings"){$0.export=settings}
-            ExportCenter.shared.start(snapshot:snapshot,destination:destination,stillFrame:frame)
+            let exportFrame=snapshot.plan.schedule.frame(at:previewTime)
+            ExportCenter.shared.start(snapshot:snapshot,destination:destination,stillFrame:exportFrame)
             dismiss();NotificationCenter.default.post(name:.showExports,object:nil)
         } catch { self.error=error.localizedDescription }
     }
