@@ -101,7 +101,7 @@ import GalileoNative
             try await wait {findPreview(restoredWindow.contentView)?.committedFrame==transport.frame}
         }
         restored.canvasZoom=1
-        try await wait {findPreview(restoredWindow.contentView)?.committedPixelSize.width==Double(restored.project.canvas.width)}
+        try await wait {findPreview(restoredWindow.contentView)?.committedPixelSize.width==CGFloat(restored.project.canvas.width)}
         restored.canvasZoom=0
         restored.framingMediaID=restored.project.items[1].id
         try await wait {restoredWindow.attachedSheet != nil}
