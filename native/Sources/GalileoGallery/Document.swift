@@ -23,6 +23,8 @@ private final class DocumentStorage:@unchecked Sendable {
     private(set) var playback:PlaybackModel?
     override init() {
         super.init();hasUndoManager=true
+        // Install the document-owned manager explicitly before binding the editor.
+        undoManager=UndoManager()
         if let workspace=try? Workspace(),let snapshot=try? RenderSnapshot(project:GalleryProject(),workspace:workspace) { storage.set(snapshot) }
         fileType=Self.typeName
     }
@@ -98,7 +100,7 @@ private final class DocumentStorage:@unchecked Sendable {
     @objc func saveScenePreset(_ sender:Any?) {
         guard let editor else {return}
         let panel=NSSavePanel();panel.title="Save scene preset";panel.nameFieldStringValue="Scene.galileo-preset";panel.allowedContentTypes=[UTType(filenameExtension:"galileo-preset") ?? .json]
-        guard panel.runModal() == .OK,let url=panel.url else {return}
+        guard panel.runModal() == .OK,let url=panel.url else{return}
         do {
             let preset=ScenePreset(name:url.deletingPathExtension().lastPathComponent,project:editor.project);try preset.validate()
             let encoder=JSONEncoder();encoder.outputFormatting=[.prettyPrinted,.sortedKeys]
