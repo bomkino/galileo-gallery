@@ -1,0 +1,88 @@
+name: Native source import and validation
+on:
+  push:
+    branches: [codex/native-mac-rebuild]
+    paths: ['.native-delivery/**', '.github/workflows/native-import.yml']
+permissions:
+  contents: write
+concurrency:
+  group: native-source-import
+  cancel-in-progress: false
+jobs:
+  import-and-test:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: codex/native-mac-rebuild
+          fetch-depth: 0
+      - name: Verify and unpack reviewed native source
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 - <<'PY'
+          import hashlib, json, lzma, pathlib, shutil
+          root = pathlib.Path('.native-delivery')
+          manifest = json.loads((root/'manifest.json').read_text())
+          blocks = []
+          for part in manifest['parts']:
+              p = pathlib.PurePosixPath(part['path'])
+              assert len(p.parts) == 1 and p.name.startswith('part-')
+              b = (root/p.name).read_bytes()
+              assert len(b) == part['bytes']
+              assert hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest() == part['sha']
+              blocks.append(b)
+          data = b''.join(blocks)
+          assert len(data) == manifest['bytes']
+          assert hashlib.sha256(data).hexdigest() == manifest['sha256']
+          decoder = lzma.LZMADecompressor(memlimit=128*1024*1024)
+          decoded = decoder.decompress(data, max_length=2*1024*1024)
+          assert decoder.eof and not decoder.unused_data
+          files = json.loads(decoded)
+          assert isinstance(files,dict) and len(files) == manifest['files'] <= 100
+          for name, text in files.items():
+              p = pathlib.PurePosixPath(name)
+              assert not p.is_absolute() and '..' not in p.parts
+              assert isinstance(text,str) and len(text.encode()) < 150000
+              if name in ('.github/workflows/native.yml','.github/workflows/ci.yml'):
+                  continue
+              assert name.startswith(('native/', 'scripts/native/')) and '.git' not in p.parts and '.build' not in p.parts
+              target=pathlib.Path(name)
+              target.parent.mkdir(parents=True,exist_ok=True)
+              target.write_text(text)
+          pathlib.Path('scripts/native/package.sh').chmod(0o755)
+          shutil.rmtree(root)
+          PY
+      - name: Commit readable native source on the candidate branch only
+        run: |
+          git config user.name 'Chattie Intern'
+          git config user.email 'chattie-intern@users.noreply.github.com'
+          git add native scripts/native .native-delivery
+          git commit -m 'feat: native Mac document studio; validation pending'
+          git push origin HEAD:codex/native-mac-rebuild
+      - name: Record tested identity
+        run: |
+          mkdir -p native-evidence
+          git rev-parse HEAD | tee native-evidence/source.txt
+          sw_vers | tee native-evidence/machine.txt
+          uname -m | tee -a native-evidence/machine.txt
+          swift --version | tee -a native-evidence/machine.txt
+          test "$(uname -m)" = arm64
+      - name: Test core and native contracts
+        run: |
+          set -o pipefail
+          swift test --package-path native 2>&1 | tee native-evidence/tests.log
+      - name: Build native application
+        run: |
+          set -o pipefail
+          bash scripts/native/package.sh native-evidence/build 2>&1 | tee native-evidence/build.log
+      - name: Run native document and export journey
+        run: |
+          set -o pipefail
+          native-evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/native-evidence/journey" 2>&1 | tee native-evidence/journey.log
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: native-import-evidence
+          path: native-evidence
+          retention-days: 14

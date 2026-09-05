@@ -1,0 +1,45 @@
+name: Native macOS
+on:
+  push:
+    branches: [main, 'codex/native-mac-*']
+    paths: ['native/**', 'scripts/native/**', '.github/workflows/native.yml']
+  pull_request:
+    paths: ['native/**', 'scripts/native/**', '.github/workflows/native.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: native-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Record exact source and machine
+        run: |
+          mkdir -p native-evidence
+          git rev-parse HEAD | tee native-evidence/source.txt
+          sw_vers | tee native-evidence/machine.txt
+          uname -m | tee -a native-evidence/machine.txt
+          swift --version | tee -a native-evidence/machine.txt
+          test "$(uname -m)" = arm64
+      - name: Test core and native contracts
+        run: |
+          set -o pipefail
+          swift test --package-path native 2>&1 | tee native-evidence/tests.log
+      - name: Build and verify native app
+        run: |
+          set -o pipefail
+          bash scripts/native/package.sh native-evidence/build 2>&1 | tee native-evidence/build.log
+      - name: Exercise the actual native document window and exporter
+        run: |
+          set -o pipefail
+          native-evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/native-evidence/journey" 2>&1 | tee native-evidence/journey.log
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: native-macos-evidence
+          path: native-evidence
+          retention-days: 14
