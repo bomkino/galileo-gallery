@@ -1,0 +1,89 @@
+name: Complete native 2.1
+on:
+  push:
+    branches: [codex/native-mac-2-1]
+    paths: [.github/workflows/import-21.yml]
+permissions:
+  contents: write
+jobs:
+  native:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Restore reviewed source patches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$GITHUB_REF_NAME" = codex/native-mac-2-1
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 - <<'PY'
+          import subprocess,json,base64,hashlib,lzma,tempfile,pathlib
+          def blob(sha):
+              r=json.loads(subprocess.check_output(['gh','api','repos/bomkino/galileo-gallery/git/blobs/'+sha]))
+              b=base64.b64decode(r['content'])
+              assert hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()==sha
+              return b
+          old=['feeb0f6ff6ed36a1148259f6bed0fb5493c8b08b','dc69f713db39ec5735a63367936c1d459d775608','a6c80a35f5178d7072ba8f660099553b389a1867','51629580af8150aaea1c32a43d88227999c68340','18c5d26ab9dc4c4f670e6462f7b5a74b048e2faf']
+          data=b''.join(map(blob,old));assert len(data)==30000
+          decoder=lzma.LZMADecompressor(memlimit=128*1024*1024)
+          recovered=decoder.decompress(data,max_length=1000000)
+          assert not decoder.eof
+          prefix=recovered[:recovered.rfind(b'diff --git ')]
+          assert hashlib.sha256(prefix).hexdigest()=='7825af693b21fdf63fd1a02bd1ab70a6b57c481ecc1b87fced476cf355afac12'
+          finish=b''.join(map(blob,['ad46b0b8ff5149cb4a15f04eda7ace2357c0db71','ccad6cd806d6a9ba3d8c6c980a10e63a8ae7a0a4']))
+          assert len(finish)==11040
+          assert hashlib.sha256(finish).hexdigest()=='24040486135119d645012cceaaa7fc663a04f974423deee57aa9fb822648756a'
+          decoder=lzma.LZMADecompressor(memlimit=128*1024*1024)
+          finish=decoder.decompress(finish,max_length=1000000)
+          assert decoder.eof and not decoder.unused_data
+          for patch,flags in [(prefix,['--unidiff-zero']),(finish,[])]:
+              with tempfile.NamedTemporaryFile(suffix='.patch') as f:
+                  f.write(patch);f.flush()
+                  rows=subprocess.check_output(['git','apply','--numstat',*flags,f.name]).decode().splitlines()
+                  assert rows
+                  for row in rows:
+                      name=row.split('\t',2)[2];p=pathlib.PurePosixPath(name)
+                      assert name.startswith('native/') and not p.is_absolute() and '..' not in p.parts
+                      assert '.git' not in p.parts and '.build' not in p.parts
+                  subprocess.run(['git','apply','--check',*flags,f.name],check=True)
+                  subprocess.run(['git','apply',*flags,f.name],check=True)
+          PY
+      - name: Commit normal source on candidate only
+        run: |
+          git config user.name 'Chattie Intern'
+          git config user.email 'chattie-intern@users.noreply.github.com'
+          git add native
+          git commit -m 'feat: complete native editing, recovery, silent export and rendering improvements'
+          git push origin HEAD:codex/native-mac-2-1
+      - name: Record tested identity
+        run: |
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/source.txt
+          sw_vers > evidence/machine.txt
+          uname -m >> evidence/machine.txt
+          swift --version >> evidence/machine.txt
+          test "$(uname -m)" = arm64
+          git archive --format=zip HEAD native scripts/native .github/workflows README.md docs INSTALL.md > evidence/source.zip
+      - name: Test native regressions
+        run: |
+          set -o pipefail
+          swift test --package-path native 2>&1 | tee evidence/tests.log
+      - name: Build native app
+        if: ${{ !cancelled() }}
+        run: |
+          set -o pipefail
+          bash scripts/native/package.sh evidence/build 2>&1 | tee evidence/build.log
+      - name: Exercise packaged document and export workflow
+        if: ${{ !cancelled() }}
+        run: |
+          set -o pipefail
+          evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/evidence/journey" 2>&1 | tee evidence/journey.log
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: native-21-evidence
+          path: evidence
+          retention-days: 14
