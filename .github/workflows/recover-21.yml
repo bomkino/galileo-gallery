@@ -1,0 +1,35 @@
+name: Recover 2.1 source
+on:
+  push:
+    branches: [codex/native-mac-2-1]
+    paths: [.github/workflows/recover-21.yml]
+permissions:
+  contents: read
+jobs:
+  recover:
+    runs-on: macos-15
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Recover exact uploaded blobs without executing them
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p recovery
+          python3 - <<'PY'
+          import subprocess,json,base64,hashlib,pathlib
+          shas=['feeb0f6ff6ed36a1148259f6bed0fb5493c8b08b','dc69f713db39ec5735a63367936c1d459d775608','a6c80a35f5178d7072ba8f660099553b389a1867','51629580af8150aaea1c32a43d88227999c68340','18c5d26ab9dc4c4f670e6462f7b5a74b048e2faf']
+          for i,sha in enumerate(shas):
+              result=json.loads(subprocess.check_output(['gh','api','repos/bomkino/galileo-gallery/git/blobs/'+sha]))
+              data=base64.b64decode(result['content'])
+              assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==sha
+              pathlib.Path(f'recovery/part-{i:02d}').write_bytes(data)
+              print(i,sha,len(data),data[:12].hex())
+          PY
+          git rev-parse HEAD > recovery/source.txt
+          git archive --format=zip HEAD > recovery/repository.zip
+      - uses: actions/upload-artifact@v6
+        with:
+          name: recovered-21-source
+          path: recovery
+          retention-days: 7
