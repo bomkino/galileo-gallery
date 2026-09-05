@@ -1,4 +1,4 @@
-name: Native source snapshot
+name: Native document diagnosis
 on:
   push:
     branches: [codex/native-mac-rebuild]
@@ -6,19 +6,36 @@ on:
 permissions:
   contents: read
 jobs:
-  source:
+  document:
     runs-on: macos-15
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v5
-      - name: Capture source without build products or fonts
+      - name: Compare AppKit-owned undo managers at the failing boundary
         run: |
-          mkdir -p native-source
-          git rev-parse HEAD > native-source/commit.txt
-          git ls-tree -r HEAD > native-source/tree.txt
-          git archive --format=zip HEAD native scripts/native .github/workflows README.md CHANGELOG.md LICENSE THIRD_PARTY_NOTICES.md docs > native-source/source.zip
-      - uses: actions/upload-artifact@v6
-        with:
-          name: native-source-snapshot
-          path: native-source
-          retention-days: 7
+          cat > /tmp/document-probe.swift <<'SWIFT'
+          import AppKit
+          final class Model: NSObject { var value = 0 }
+          let app = NSApplication.shared
+          app.setActivationPolicy(.regular)
+          for explicit in [false, true] {
+              let document = NSDocument()
+              document.hasUndoManager = true
+              if explicit { document.undoManager = UndoManager() }
+              let manager = document.undoManager!
+              manager.groupsByEvent = false
+              let model = Model()
+              let observer = NotificationCenter.default.addObserver(forName: nil, object: manager, queue: nil) { note in print("notification", note.name.rawValue) }
+              print("before", explicit, document.isDocumentEdited, manager.groupingLevel)
+              manager.beginUndoGrouping()
+              manager.registerUndo(withTarget: model) { target in target.value = 0 }
+              model.value = 1
+              manager.endUndoGrouping()
+              print("after", explicit, document.isDocumentEdited, manager.canUndo)
+              RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.05))
+              print("after event", document.isDocumentEdited)
+              manager.undo()
+              print("undo", document.isDocumentEdited, model.value)
+              NotificationCenter.default.removeObserver(observer)
+          }
+          SWIFT
+          swift /tmp/document-probe.swift
