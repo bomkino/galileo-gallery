@@ -1,18 +1,16 @@
-# Documentation map
+# Documentation
 
-The repository contains live product documentation and a larger evidence archive. Read them in this order.
+## Current native Mac product
 
-## Active
+- [Product and source build](../README.md)
+- [Install or replace the old app](../INSTALL.md)
+- [Use the app and centre spotlights](native/README.md)
+- [Engineering boundary and known limitations](native/ENGINEERING.md)
+- [2.0.0 release notes](releases/v2.0.0.md)
+- [Licensing and credits](../THIRD_PARTY_NOTICES.md)
 
-- [`../README.md`](../README.md) — product, installation, source setup, packaging, and release status.
-- [`design-system.md`](design-system.md) — pitch.dog fonts, Phosphor icons, spacing tokens, and UI verification.
-- [`programme/IMPLEMENTATION_STATUS.md`](programme/IMPLEMENTATION_STATUS.md) — current engineering boundary and platform caveats.
-- [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — contribution and test expectations.
-- [`../SECURITY.md`](../SECURITY.md) — vulnerability reporting.
-- [`releases/`](releases/) — authored release notes used by the automated release workflow.
+## Historical source and evidence
 
-## Evidence archive
+`archive/`, `programme/`, `design-system.md`, old release notes and the scene-ateliers preserve the earlier Electron/cross-platform product's decisions and measurements. They are not the current native app specification, release status or install instructions. Historical pass claims apply only to their stated builds.
 
-`programme/evidence/`, `programme/receipts/`, and the Scene Atelier directories preserve build decisions, gates, measurements, and renderer proof. They are deliberately retained for auditability. They are not a second product specification and should not be read as a list of unfinished user-facing features.
-
-When a live document and an old receipt disagree, the released source, current tests, and active documents above win.
+The Git history, licenses and old releases remain available for authorship, debugging and rollback. Native-only shipping does not imply deletion of that history.

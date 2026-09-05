@@ -175,7 +175,7 @@ struct TransportBar:View {
     let schedule:FrameSchedule
     var body:some View {
         VStack(spacing:10) {
-            Slider(value:Binding(get:{Double(playback.frame)},set:{playback.seek(Int64($0))}),in:0...Double(max(1,schedule.totalFrames-1)),step:1)
+            Slider(value:Binding(get:{Double(playback.frame)},set:{playback.seek(Int64($0.rounded()))}),in:0...Double(max(1,schedule.totalFrames-1)))
                 .accessibilityLabel("Timeline frame")
             HStack(spacing:14) {
                 Button(action:{playback.seek(0)}) { Image(systemName:"backward.end") }.help("First frame")
@@ -208,7 +208,19 @@ struct NumberControl:View {
                     .onSubmit(commit).onChange(of:focused) { _,focus in if focus { begin() } else { commit();end() } }
                 if !unit.isEmpty { Text(unit).font(.caption).foregroundStyle(.secondary).frame(width:16,alignment:.leading) }
             }
-            Slider(value:$value,in:range,step:step,onEditingChanged:{ editing in editing ? begin():end() }).accessibilityLabel(label)
+            Slider(value:Binding(get:{value},set:{ proposed in
+                let snapped=range.lowerBound+((proposed-range.lowerBound)/step).rounded()*step
+                value=bounded(snapped,range.lowerBound,range.upperBound)
+            }),in:range,onEditingChanged:{ editing in editing ? begin():end() })
+                .accessibilityLabel(label)
+                .accessibilityAdjustableAction { direction in
+                    begin();defer { end() }
+                    switch direction {
+                    case .increment:value=bounded(value+step,range.lowerBound,range.upperBound)
+                    case .decrement:value=bounded(value-step,range.lowerBound,range.upperBound)
+                    @unknown default:break
+                    }
+                }
         }.onAppear { sync() }.onChange(of:value) { if !focused { sync() } }
     }
     private func sync() { text=String(format:step<1 ? "%.2f":"%.0f",value) }

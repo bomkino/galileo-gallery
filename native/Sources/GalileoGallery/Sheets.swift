@@ -35,7 +35,7 @@ struct SceneChooser:View {
                     }
                     if let snapshot {
                         NativePreview(snapshot:snapshot,revision:previewRevision,frame:previewFrame,onError:{error=$0})
-                        Slider(value:Binding(get:{Double(previewFrame)},set:{previewFrame=Int64($0)}),in:0...Double(max(1,snapshot.plan.schedule.cycleFrames-1)),step:1).accessibilityLabel("Scene preview frame")
+                        Slider(value:Binding(get:{Double(previewFrame)},set:{previewFrame=Int64($0.rounded())}),in:0...Double(max(1,snapshot.plan.schedule.cycleFrames-1))).accessibilityLabel("Scene preview frame")
                     }
                     if draft.items.isEmpty { Text("Add media to preview a scene with your own images.").foregroundStyle(.secondary) }
                     if let error { Text(error).foregroundStyle(.red) }

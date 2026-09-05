@@ -1,6 +1,16 @@
 # Changelog
 
-All notable released changes are recorded here. Dates use UTC.
+Dates use UTC. Version 2 is the native Apple-silicon Mac product. Older entries below describe the historical Electron application, not the current implementation.
+
+## [2.0.0] — 2026-09-05
+
+- Native AppKit/SwiftUI document studio with Core Image/Metal composition and AVFoundation output.
+- Per-slide centre spotlights with individual holds and sizes, looping source videos, and return to the sequence.
+- Document change tracking, grouped undo/redo, native save/autosave, failed-save protection and separate-copy legacy import.
+- Preview requests coalesce instead of cancelling every in-flight frame; export totals include spotlight time.
+- Quiet continuous-looking sliders retain stepped values and precise numeric input without hundreds of tick marks.
+- Mac-only DMG/ZIP release, checksum and synthetic validation evidence. Active docs and help now describe the native product.
+- Movies are silent. No WebM or native audio export; legacy choreography is reauthored rather than pixel-identical. Ad-hoc signing, not notarization. See [release notes](docs/releases/v2.0.0.md) for limits and installation.
 
 ## [1.1.1] — 2026-09-02
 

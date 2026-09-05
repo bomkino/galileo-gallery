@@ -13,3 +13,10 @@ Icon?
 .env
 .env.*
 !.env.example
+
+# Native build outputs
+native/.build/
+native/.swiftpm/
+release-native/
+native-evidence/
+.native-delivery/

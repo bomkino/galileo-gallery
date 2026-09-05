@@ -1,175 +1,108 @@
-name: Release
-
+name: Native Mac release
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
+  push:
     branches: [main]
+    paths: ['native/VERSION', '.github/workflows/release.yml']
   workflow_dispatch:
-
 permissions:
-  actions: read
   contents: write
-
 concurrency:
-  group: galileo-gallery-release
+  group: galileo-native-release
   cancel-in-progress: false
-
 jobs:
-  prepare:
-    if: >-
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.meta.outputs.version }}
-      tag: ${{ steps.meta.outputs.tag }}
-      sha: ${{ steps.meta.outputs.sha }}
-      publish: ${{ steps.meta.outputs.publish }}
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: macos-15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-      - id: meta
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Resolve version without replacing an existing release
+        id: version
         env:
           GH_TOKEN: ${{ github.token }}
-          SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
-        shell: bash
         run: |
           set -euo pipefail
-          version="$(node -p "require('./package.json').version")"
-          tag="v${version}"
-          publish=true
-          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            publish=false
+          test "$(uname -m)" = arm64
+          version="$(cat native/VERSION)"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          echo "number=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          if gh release view "v$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release v$version already exists; refusing to replace it." >&2
+            exit 1
           fi
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "sha=$SOURCE_SHA" >> "$GITHUB_OUTPUT"
-          echo "publish=$publish" >> "$GITHUB_OUTPUT"
-
-  build:
-    needs: prepare
-    if: needs.prepare.outputs.publish == 'true'
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            name: linux
-            command: npm run package:linux
-            artifact: release/*-Linux-x86_64.AppImage
-          - os: macos-latest
-            name: macos
-            command: npm run dist:mac
-            artifact: release/*-macOS-arm64.dmg
-          - os: windows-latest
-            name: windows
-            command: npm run package:windows
-            artifact: release/*-Windows-x64.exe
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v5
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null 2>&1; then
+            echo "Tag v$version already exists; review it before publishing." >&2
+            exit 1
+          fi
+      - name: Record exact build identity
+        run: |
+          mkdir -p native-evidence
+          git rev-parse HEAD > native-evidence/source.txt
+          sw_vers > native-evidence/machine.txt
+          uname -m >> native-evidence/machine.txt
+          swift --version >> native-evidence/machine.txt
+      - name: Test native contracts
+        run: |
+          set -o pipefail
+          swift test --package-path native 2>&1 | tee native-evidence/tests.log
+      - name: Build the native app
+        run: |
+          set -o pipefail
+          bash scripts/native/package.sh native-evidence/build 2>&1 | tee native-evidence/build.log
+      - name: Exercise document saving, playback and export in the packaged app
+        run: |
+          set -o pipefail
+          native-evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/native-evidence/journey" 2>&1 | tee native-evidence/journey.log
+      - name: Package and verify the DMG and ZIP
+        run: |
+          set -o pipefail
+          bash scripts/native/distribute.sh 'native-evidence/build/Galileo Gallery.app' release-native 2>&1 | tee native-evidence/distribution.log
+          git diff --exit-code
+      - name: Prepare durable release evidence and notes
+        env:
+          VERSION: ${{ steps.version.outputs.number }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, zipfile
+          root=pathlib.Path('native-evidence')
+          journey=json.loads((root/'journey/journey.json').read_text())
+          assert journey['documentRoundTrip'] and journey['nativeAutosave'] and journey['previewAdvancesDuringPlayback']
+          assert journey['failedSavePreservesChanges'] and journey['spotlightSavedAndReopened']
+          assert journey['nativeMovieDecodedFrames']==62
+          with zipfile.ZipFile(f"release-native/Galileo.Gallery-{os.environ['VERSION']}-validation.zip",'w',zipfile.ZIP_DEFLATED) as archive:
+              for f in sorted(root.rglob('*')):
+                  if f.is_file() and 'build' not in f.relative_to(root).parts:
+                      archive.write(f,str(f.relative_to(root)))
+          notes=pathlib.Path(f"docs/releases/v{os.environ['VERSION']}.md").read_text()
+          notes += '\n\n## Release build evidence\n\n'
+          notes += f"Source: `{os.environ['GITHUB_SHA']}`\n\n"
+          notes += f"[Build and checks](https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}). "
+          notes += 'The attached validation ZIP records the actual machine, tests, document journey and synthetic output.\n'
+          pathlib.Path('native-evidence/release-notes.md').write_text(notes)
+          PY
+          (cd release-native && shasum -a 256 *.dmg *.zip > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v6
+        if: always()
         with:
-          ref: ${{ needs.prepare.outputs.sha }}
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: ${{ matrix.command }}
-
-      - name: Smoke-test packaged Linux app
-        if: matrix.name == 'linux'
-        shell: bash
-        run: |
-          set -euo pipefail
-          output="$RUNNER_TEMP/galileo-gallery-release-smoke.mp4"
-          app="$(find release -maxdepth 1 -name '*-Linux-x86_64.AppImage' -print -quit)"
-          test -n "$app"
-          chmod +x "$app"
-          xvfb-run -a env REEL_SMOKE_OUTPUT="$output" "$app" --appimage-extract-and-run --no-sandbox
-          test "$(stat -c%s "$output")" -gt 1000
-          release/squashfs-root/resources/ffmpeg/ffmpeg -v error -i "$output" -f null - 2>/dev/null || true
-
-      - name: Smoke-test packaged macOS app
-        if: matrix.name == 'macos'
-        shell: bash
-        run: |
-          set -euo pipefail
-          app="release/mac-arm64/Galileo Gallery.app"
-          output="$RUNNER_TEMP/galileo-gallery-release-smoke.mp4"
-          test -d "$app"
-          REEL_SMOKE_OUTPUT="$output" REEL_USER_DATA_DIR="$RUNNER_TEMP/galileo-gallery-release-user-data" \
-            "$app/Contents/MacOS/Galileo Gallery"
-          test "$(stat -f%z "$output")" -gt 1000
-          "$app/Contents/Resources/ffmpeg/ffmpeg" -v error -i "$output" -f null -
-          codesign --verify --deep --strict "$app"
-
-      - name: Smoke-test packaged Windows app
-        if: matrix.name == 'windows'
-        shell: pwsh
-        run: |
-          $output = "$env:RUNNER_TEMP\galileo-gallery-release-smoke.mp4"
-          $env:REEL_SMOKE_OUTPUT = $output
-          $env:REEL_USER_DATA_DIR = "$env:RUNNER_TEMP\galileo-gallery-release-user-data"
-          & "release\win-unpacked\Galileo Gallery.exe"
-          $deadline = (Get-Date).AddSeconds(90)
-          while ((!(Test-Path $output) -or (Get-Item $output).Length -lt 1000) -and (Get-Date) -lt $deadline) {
-            Start-Sleep -Milliseconds 500
-          }
-          if (!(Test-Path $output)) { throw "Packaged Windows export did not finish." }
-          if ((Get-Item $output).Length -lt 1000) { throw "Packaged Windows export was empty." }
-
+          name: native-release-evidence
+          path: native-evidence
+          retention-days: 14
       - uses: actions/upload-artifact@v6
         with:
-          name: release-${{ matrix.name }}
-          path: ${{ matrix.artifact }}
+          name: native-mac-distribution
+          path: release-native
           if-no-files-found: error
           retention-days: 14
-
-  publish:
-    needs: [prepare, build]
-    if: needs.prepare.outputs.publish == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ needs.prepare.outputs.sha }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: release-*
-          path: release-assets
-          merge-multiple: true
-      - name: Verify assets and write checksums
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -d '' files < <(find release-assets -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0)
-          test "${#files[@]}" -eq 3
-          printf '%s\n' "${files[@]}"
-          (
-            cd release-assets
-            sha256sum ./* > SHA256SUMS.txt
-          )
-      - name: Publish exact-version release
+      - name: Publish matching assets as the latest release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ needs.prepare.outputs.tag }}
-          VERSION: ${{ needs.prepare.outputs.version }}
-          SOURCE_SHA: ${{ needs.prepare.outputs.sha }}
-        shell: bash
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.number }}
         run: |
           set -euo pipefail
-          notes="docs/releases/v${VERSION}.md"
-          if test ! -f "$notes"; then
-            printf '# Galileo Gallery %s\n\nAutomated cross-platform release.\n' "$VERSION" > "$RUNNER_TEMP/release-notes.md"
-            notes="$RUNNER_TEMP/release-notes.md"
-          fi
-          gh release create "$TAG" \
-            --repo "$GITHUB_REPOSITORY" \
-            --target "$SOURCE_SHA" \
-            --title "Galileo Gallery ${VERSION}" \
-            --notes-file "$notes" \
-            release-assets/*
+          gh release create "$TAG" release-native/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Galileo Gallery $VERSION" --notes-file native-evidence/release-notes.md --draft
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest

@@ -1,30 +1,27 @@
-# Contributing to Galileo Gallery
+# Contributing
 
-Thank you for helping make motion tools more expressive and accessible.
-
-## Before opening a pull request
-
-1. Open an issue for substantial behavior or interface changes so the motion intent can be discussed first.
-2. Keep changes focused. Galileo's scenes share infrastructure, but each scene owns its physical behavior and defaults.
-3. Run `npm test`.
-4. Exercise the affected scene in the app, including timeline scrubbing, Once, Loop, and export when relevant.
-5. Include a short screen recording for motion or interface changes.
+The active product is a native Apple-silicon Mac app. Keep changes focused on a demonstrated user need or defect. Preserve project data, source media, authored intent, credits and a reversible migration path.
 
 ## Development
 
-```bash
-npm install
-npm run dev
+On an Apple-silicon Mac with Xcode command-line tools:
+
+```sh
+swift test --package-path native
+bash scripts/native/package.sh release-native
+open "release-native/Galileo Gallery.app"
 ```
 
-The project downloads a platform-specific FFmpeg build during install. Packaging copies that binary into the desktop app with `npm run prepare:ffmpeg`.
+Use a new output folder for each package build. No npm or FFmpeg installation is needed for the native app. The old web/Electron source is retained for reference, not as a second shipping product.
 
-## Motion principles
+## Changes and proof
 
-- Prefer continuity over cuts or unexplained pop-ins.
-- Keep depth ordering physically legible.
-- A seamless loop should return naturally to its first pose.
-- Spotlight and Finale are authored states, not generic scale effects.
-- Respect `prefers-reduced-motion` in the studio interface.
+Trace a failing behaviour to the narrowest useful boundary. Keep a regression test for a real failure; do not add counts, hashes or screenshots as substitutes for the actual claimed behaviour. Run the packaged application when changing document lifecycle, UI or export. Check decoded output for video changes. Use synthetic or explicitly approved media, never client projects in public CI artifacts.
 
-By contributing, you agree that your contribution is licensed under GPL-3.0-or-later.
+Document the exact tested commit and Mac. State what remains untested. Do not hide failures, relax an assertion to obtain green CI without a demonstrated test defect, or claim native production readiness from a successful compiler run.
+
+A scene must preserve source readability, coherent depth, deliberate holds and continuity. Centre spotlights and source-video playback are independent. Interface appearance must not grade the artwork. Keep the UI quiet while retaining labels, units, keyboard access and actionable errors.
+
+New features should work through save/reopen and undo/redo before release. Release assets must match the source, version and checksums. Never force-push a published tag or erase historical evidence to make status look cleaner.
+
+Contributions remain licensed under GPL-3.0-or-later. [Engineering boundary](docs/native/ENGINEERING.md).

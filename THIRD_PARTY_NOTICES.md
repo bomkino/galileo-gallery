@@ -1,25 +1,17 @@
 # Third-party notices
 
-Galileo Gallery is built with Electron, React, Vite, TypeScript, and other open-source packages recorded with exact versions and integrity hashes in `package-lock.json`. Their respective licenses remain in force.
+## Native Mac product (version 2)
 
-## pitch.dog type system
+Galileo Gallery's native application is distributed under the repository's GPL-3.0 license. It uses Apple SDKs and system frameworks including AppKit, SwiftUI, Core Image, Metal, AVFoundation, ImageIO, CoreText, CoreGraphics and UniformTypeIdentifiers. Apple frameworks and system fonts are supplied by macOS; this app does not redistribute font files.
 
-The packaged interface includes seven WOFF2 files from the public [`bomkino/pitchdog-type-system`](https://github.com/bomkino/pitchdog-type-system), pinned at commit `786b4a2b671182319320f922b8de8f927ea3a002`.
+The `CZlib` module binds the operating system's zlib for legacy archive decompression. zlib is supplied by the operating system, not copied into the bundle. The native distribution contains the application, app icon, help, source identity and license/notices. It does not bundle Electron, Chromium, WebKit, React, FFmpeg, npm dependencies, web fonts or Phosphor React assets.
 
-The copied upstream font notice and provenance manifest are preserved under `docs/third-party/pitchdog-type-system/`. The exact packaged-file manifest is `src/assets/fonts/SOURCE.json`.
+The native source builds on the project's authored scene research and preserves legacy scene identities and manifests. New native choreography is not claimed to be an exact rendering of the original evaluators. Git history and the `scene-ateliers/` sources preserve authorship and provenance.
 
-## Phosphor Icons
+## Earlier product and retained source
 
-Product-control icons use [`@phosphor-icons/react`](https://github.com/phosphor-icons/react) version `2.1.10`, distributed under the MIT License. Copyright remains with the Phosphor contributors.
+The Electron/React/Vite/TypeScript product, its npm manifest/lockfile, source files and scene-ateliers remain in the repository as historical source. Their dependency licenses continue to apply to that source and to historical releases. They are not native runtime dependencies.
 
-## Project archives
+The earlier app used the pitch.dog type system pinned at `786b4a2b671182319320f922b8de8f927ea3a002`, Phosphor React 2.1.10 (MIT), adm-zip/yauzl/pend (MIT), and an FFmpeg binary supplied by ffmpeg-static (GPL subject to that binary's configuration). The exact earlier notices are preserved in [docs/archive/THIRD_PARTY_NOTICES-1.x.md](docs/archive/THIRD_PARTY_NOTICES-1.x.md), with upstream provenance under `docs/third-party/` and the historical source tree.
 
-Project archives are written with [`adm-zip`](https://github.com/cthackers/adm-zip) and read through the lazy streaming API in [`yauzl`](https://github.com/thejoshwolfe/yauzl), including its `pend` dependency. These packages are distributed under the MIT License.
-
-## FFmpeg
-
-Packaged applications include an FFmpeg executable supplied by [`ffmpeg-static`](https://github.com/eugeneware/ffmpeg-static). FFmpeg and `ffmpeg-static` are distributed under the GNU General Public License, version 3 or later, subject to the configuration of the supplied binary. The matching license is copied beside the binary during packaging. FFmpeg source and build information are available from the upstream project and binary provider.
-
-## Project artwork
-
-Galileo Gallery artwork and app identity assets are distributed under GPL-3.0-or-later unless a file states otherwise. Phosphor interface icons and pitch.dog font files remain governed by their notices above.
+App identity artwork remains governed by its existing repository license or a file-specific notice. No upstream ownership is transferred by this rebuild.
