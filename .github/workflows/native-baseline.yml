@@ -1,4 +1,4 @@
-name: Native rebuild baseline
+name: Native source snapshot
 on:
   push:
     branches: [codex/native-mac-rebuild]
@@ -6,44 +6,19 @@ on:
 permissions:
   contents: read
 jobs:
-  baseline:
+  source:
     runs-on: macos-15
-    timeout-minutes: 20
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-      - name: Collect source and machine identity
+      - name: Capture source without build products or fonts
         run: |
-          mkdir -p baseline-evidence
-          sw_vers > baseline-evidence/machine.txt
-          uname -m >> baseline-evidence/machine.txt
-          swift --version >> baseline-evidence/machine.txt
-          git rev-parse HEAD >> baseline-evidence/machine.txt
-          python3 - <<'PY'
-          import pathlib, subprocess, zipfile
-          names = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')
-          suffixes = {'.ts','.tsx','.mjs','.cjs','.json','.md','.yml','.yaml','.css','.html','.sh','.py'}
-          with zipfile.ZipFile('baseline-evidence/source.zip','w',zipfile.ZIP_DEFLATED) as z:
-              for name in names:
-                  p=pathlib.Path(name)
-                  if p.is_file() and (p.suffix in suffixes or p.name in ('LICENSE','.gitignore')):
-                      z.write(p,name)
-          PY
+          mkdir -p native-source
+          git rev-parse HEAD > native-source/commit.txt
+          git ls-tree -r HEAD > native-source/tree.txt
+          git archive --format=zip HEAD native scripts/native .github/workflows README.md CHANGELOG.md LICENSE THIRD_PARTY_NOTICES.md docs > native-source/source.zip
       - uses: actions/upload-artifact@v6
         with:
-          name: native-baseline-source
-          path: baseline-evidence
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - name: Record existing test results on Apple silicon
-        run: |
-          set -o pipefail
-          test "$(uname -m)" = arm64
-          npm test 2>&1 | tee baseline-evidence/legacy-tests.txt
-      - uses: actions/upload-artifact@v6
-        if: always()
-        with:
-          name: native-baseline-test-results
-          path: baseline-evidence/*.txt
+          name: native-source-snapshot
+          path: native-source
+          retention-days: 7
