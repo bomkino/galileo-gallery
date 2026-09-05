@@ -14,26 +14,42 @@ concurrency:
 jobs:
   native:
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - name: Record exact source and machine
         run: |
           mkdir -p native-evidence
           git rev-parse HEAD | tee native-evidence/source.txt
+          git ls-tree -r HEAD > native-evidence/tree.txt
+          git archive --format=zip HEAD native scripts/native .github/workflows README.md docs .gitignore LICENSE > native-evidence/reviewed-source.zip
           sw_vers | tee native-evidence/machine.txt
           uname -m | tee -a native-evidence/machine.txt
           swift --version | tee -a native-evidence/machine.txt
           test "$(uname -m)" = arm64
+      - uses: actions/upload-artifact@v6
+        with:
+          name: native-source
+          path: |
+            native-evidence/reviewed-source.zip
+            native-evidence/source.txt
+            native-evidence/tree.txt
+          retention-days: 14
       - name: Test core and native contracts
+        id: tests
         run: |
           set -o pipefail
           swift test --package-path native 2>&1 | tee native-evidence/tests.log
+      # A failing image assertion must not hide an unrelated document failure.
+      # The job stays failed; this workflow never publishes a release.
       - name: Build and verify native app
+        id: build
+        if: ${{ !cancelled() }}
         run: |
           set -o pipefail
           bash scripts/native/package.sh native-evidence/build 2>&1 | tee native-evidence/build.log
       - name: Exercise the actual native document window and exporter
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -o pipefail
           native-evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/native-evidence/journey" 2>&1 | tee native-evidence/journey.log
