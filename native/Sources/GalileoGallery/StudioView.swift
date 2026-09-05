@@ -79,6 +79,15 @@ struct StudioView:View {
                         MediaRow(item:item,workspace:session.workspace).tag(item.id)
                             .contextMenu {
                                 Button("Use as opening") { session.markOpening(item.id) }
+                                Button(item.spotlight?.enabled == true ? "Remove spotlight" : "Spotlight in centre") {
+                                    session.commit("Change spotlight") { p in
+                                        if let i = p.items.firstIndex(where: { $0.id == item.id }) {
+                                            var setting = p.items[i].spotlight ?? Spotlight()
+                                            setting.enabled = !(p.items[i].spotlight?.enabled ?? false)
+                                            p.items[i].spotlight = setting
+                                        }
+                                    }
+                                }
                                 Button(item.included ? "Exclude":"Include") { session.commit("Change inclusion") { p in if let i=p.items.firstIndex(where:{$0.id==item.id}) { p.items[i].included.toggle() } } }
                                 Button("Replace…") { session.selection=[item.id];replaceMedia() }
                                 Divider()
@@ -139,7 +148,9 @@ private struct MediaRow:View {
             VStack(alignment:.leading,spacing:3) {
                 Text(item.name).font(.system(size:12,weight:.medium)).lineLimit(1).help(item.name)
                 if !item.included { Text("Excluded").font(.caption2).foregroundStyle(.secondary) }
-                else if item.opening { Text("Opening").font(.caption2).foregroundStyle(.secondary) }
+                else if item.spotlight?.enabled == true {
+                    Label("Spotlight", systemImage: "viewfinder").font(.caption2).foregroundStyle(.secondary)
+                } else if item.opening { Text("Opening").font(.caption2).foregroundStyle(.secondary) }
             }
             Spacer(minLength:0)
         }.padding(.vertical,4).opacity(item.included ? 1:0.55)
@@ -234,7 +245,11 @@ struct SceneInspector:View {
                 }
             }
             InspectorSection(title:"Timing") {
-                NumberControl(label:"Duration",value:Binding(get:{Double(session.project.timing.durationMilliseconds)/1000},set:{value in session.commit("Change duration"){$0.timing.durationMilliseconds=Int64(value*1000)} }),range:1...600,unit:"s",step:0.1,begin:{session.beginGesture("Change duration")},end:session.endGesture)
+                NumberControl(label:"Motion duration",value:Binding(get:{Double(session.project.timing.durationMilliseconds)/1000},set:{value in session.commit("Change duration"){$0.timing.durationMilliseconds=Int64(value*1000)} }),range:1...600,unit:"s",step:0.1,begin:{session.beginGesture("Change duration")},end:session.endGesture)
+                if session.project.activeItems.contains(where: { $0.spotlight?.enabled == true }) {
+                    Text(String(format: "With spotlights: %.2f s per cycle", session.snapshot.plan.schedule.cycleDuration))
+                        .font(.caption).foregroundStyle(.secondary)
+                }
                 Picker("Playback",selection:Binding(get:{session.project.timing.playMode},set:{mode in session.commit("Change playback"){$0.timing.playMode=mode} })) { Text("Once").tag(PlayMode.once);Text("Repeat").tag(PlayMode.repeatCount);Text("Loop").tag(PlayMode.loop) }
                 if session.project.timing.playMode == .repeatCount {
                     Stepper("\(session.project.timing.repeats) repeats",value:Binding(get:{session.project.timing.repeats},set:{value in session.commit("Change repeat count"){$0.timing.repeats=value} }),in:1...1000)
@@ -299,6 +314,33 @@ struct MediaInspector:View {
                     Text("\(item.width) × \(item.height)").font(.caption).foregroundStyle(.secondary)
                     Toggle("Include",isOn:Binding(get:{item.included},set:{value in session.editSelected("Change inclusion"){$0.included=value} }))
                     Button("Replace media…",action:replace).disabled(session.selection.count != 1)
+                }
+                InspectorSection(title: "Spotlight") {
+                    Toggle("Bring to centre", isOn: Binding(get: { item.spotlight?.enabled ?? false }, set: { enabled in
+                        session.editSelected("Change spotlight") { media in
+                            var setting = media.spotlight ?? Spotlight()
+                            setting.enabled = enabled
+                            media.spotlight = setting
+                        }
+                    })).accessibilityIdentifier("spotlight-enabled")
+                    if item.spotlight?.enabled == true {
+                        NumberControl(label: "Hold", value: Binding(get: { Double(item.spotlight?.holdMilliseconds ?? 3000) / 1000 }, set: { seconds in
+                            session.editSelected("Change spotlight hold") { media in
+                                var setting = media.spotlight ?? Spotlight()
+                                setting.holdMilliseconds = Int64((seconds * 1000).rounded())
+                                media.spotlight = setting
+                            }
+                        }), range: 0.25...60, unit: "s", step: 0.25,
+                        begin: { session.beginGesture("Change spotlight hold") }, end: session.endGesture)
+                        NumberControl(label: "Size", value: Binding(get: { (item.spotlight?.scale ?? 0.85) * 100 }, set: { value in
+                            session.editSelected("Change spotlight size") { media in
+                                var setting = media.spotlight ?? Spotlight()
+                                setting.scale = value / 100
+                                media.spotlight = setting
+                            }
+                        }), range: 25...95, unit: "%",
+                        begin: { session.beginGesture("Change spotlight size") }, end: session.endGesture)
+                    }
                 }
                 InspectorSection(title:"Framing") {
                     Picker("Fit",selection:Binding(get:{item.fit},set:{value in session.editSelected("Change fit"){$0.fit=value} })) { Text("Fit").tag(MediaFit.contain);Text("Fill").tag(MediaFit.cover) }.pickerStyle(.segmented).labelsHidden()

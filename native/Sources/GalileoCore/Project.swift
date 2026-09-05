@@ -42,6 +42,13 @@ public struct Canvas: Codable, Equatable, Sendable {
 }
 public enum MediaKind: String, Codable, Sendable { case image, video, animatedImage }
 public enum MediaFit: String, Codable, CaseIterable, Sendable { case contain, cover }
+/// An authored centre hold, independent of source-video playback.
+public struct Spotlight: Codable, Equatable, Sendable {
+    public var enabled = true
+    public var holdMilliseconds: Int64 = 3000
+    public var scale = 0.85
+    public init() {}
+}
 public struct MediaItem: Codable, Equatable, Identifiable, Sendable {
     public var id: String = UUID().uuidString
     public var name: String
@@ -55,6 +62,7 @@ public struct MediaItem: Codable, Equatable, Identifiable, Sendable {
     public var colorSpace: String = "Unknown"
     public var included = true
     public var opening = false
+    public var spotlight: Spotlight? = nil
     public var caption = ""
     public var fit: MediaFit = .contain
     public var crop = Crop()
@@ -131,7 +139,7 @@ public struct ExportSettings: Codable, Equatable, Sendable {
 }
 public struct GalleryProject: Codable, Equatable, Sendable {
     public var format = "dog.pitch.galileo.native"
-    public var schemaVersion = 3
+    public var schemaVersion = 4
     public var id = UUID().uuidString
     public var name = "Untitled"
     public var canvas = Canvas()
@@ -154,7 +162,7 @@ public struct GalleryProject: Codable, Equatable, Sendable {
         func finite(_ value: Double, _ range: ClosedRange<Double>, _ label: String) throws {
             try require(value.isFinite && range.contains(value), "\(label) must be between \(range.lowerBound) and \(range.upperBound).")
         }
-        try require(format == "dog.pitch.galileo.native" && schemaVersion == 3, "This document needs a different version of Galileo Gallery. The original was not changed.")
+        try require(format == "dog.pitch.galileo.native" && schemaVersion == 4, "This document needs a different version of Galileo Gallery. The original was not changed.")
         try require(!id.isEmpty && name.count <= 512, "The document identity is invalid.")
         try require((64...7680).contains(canvas.width) && (64...7680).contains(canvas.height), "Canvas dimensions must be 64–7,680 pixels.")
         try require(canvas.width % 2 == 0 && canvas.height % 2 == 0, "Canvas dimensions must be even pixel counts.")
@@ -173,6 +181,10 @@ public struct GalleryProject: Codable, Equatable, Sendable {
         try require(items.count <= 512, "A document supports at most 512 media items.")
         try require(Set(items.map(\.id)).count == items.count, "Media identities must be unique.")
         for item in items {
+            if let spotlight = item.spotlight {
+                try require((250...60000).contains(spotlight.holdMilliseconds), "A spotlight hold must last 0.25–60 seconds.")
+                try finite(spotlight.scale, 0.25...0.95, "Spotlight scale")
+            }
             try require(!item.id.isEmpty && item.id.count <= 200 && !item.name.isEmpty && item.name.count <= 512, "A media identity is invalid.")
             try require(Self.safeAssetName(item.asset), "A media path is invalid.")
             try require(item.sha256.count == 64 && item.sha256.allSatisfy({ "0123456789abcdef".contains($0) }), "A media fingerprint is invalid.")
@@ -203,7 +215,9 @@ public struct GalleryProject: Codable, Equatable, Sendable {
     }
     public static func decode(_ data: Data) throws -> GalleryProject {
         guard data.count <= 8 * 1024 * 1024 else { throw GalleryError.invalid("The document manifest is too large.") }
-        let project = try JSONDecoder().decode(Self.self, from: data)
+        var project = try JSONDecoder().decode(Self.self, from: data)
+        // v3 had no per-media spotlight. Missing optional values decode as nil.
+        if project.schemaVersion == 3 { project.schemaVersion = 4 }
         try project.validate(); return project
     }
 }

@@ -6,13 +6,16 @@ public struct FrameSchedule: Equatable, Sendable {
     public let cycleFrames: Int64
     public let cycles: Int64
     public let totalFrames: Int64
-    public init(timing: Timing, rate: FrameRate) throws {
+    public init(timing: Timing, rate: FrameRate, additionalCycleFrames: Int64 = 0) throws {
         guard FrameRate.supported.contains(rate), (1000...600000).contains(timing.durationMilliseconds), (1...1000).contains(timing.repeats) else {
             throw GalleryError.invalid("The frame schedule is invalid.")
         }
+        guard (0...10_000_000).contains(additionalCycleFrames) else {
+            throw GalleryError.invalid("The spotlight schedule exceeds the supported duration.")
+        }
         self.rate = rate
         let divisor = 1000 * rate.denominator
-        cycleFrames = max(1, (timing.durationMilliseconds * rate.numerator + divisor - 1) / divisor)
+        cycleFrames = max(1, (timing.durationMilliseconds * rate.numerator + divisor - 1) / divisor) + additionalCycleFrames
         cycles = timing.playMode == .repeatCount ? Int64(timing.repeats) : 1
         totalFrames = cycleFrames * cycles
     }

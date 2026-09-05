@@ -3,7 +3,7 @@ import AppKit
 import Combine
 import GalileoCore
 
-@MainActor public final class EditorSession: ObservableObject {
+@MainActor public final class EditorSession: NSObject, ObservableObject {
     @Published public private(set) var project:GalleryProject
     @Published public private(set) var snapshot:RenderSnapshot
     @Published public private(set) var revision:Int=0
@@ -25,6 +25,7 @@ import GalileoCore
     public init(project:GalleryProject=GalleryProject(),workspace:Workspace?=nil)throws {
         let owned=try workspace ?? Workspace()
         self.project=project;self.documentName=project.name;self.workspace=owned;snapshot=try RenderSnapshot(project:project,workspace:owned)
+        super.init()
     }
     public var selectedItem:MediaItem? { project.items.first { selection.contains($0.id) } }
     public func commit(_ name:String,_ edit:(inout GalleryProject)->Void) {
@@ -34,6 +35,7 @@ import GalileoCore
     private func apply(_ candidate:GalleryProject,name:String)throws {
         try candidate.validate()
         guard candidate != project else { return }
+        let nextSnapshot = try RenderSnapshot(project: candidate, workspace: workspace)
         let previous=project
         let manager=undoManager
         let explicitGroup = !gesture && !(manager?.isUndoing ?? false) && !(manager?.isRedoing ?? false)
@@ -42,7 +44,7 @@ import GalileoCore
             MainActor.assumeIsolated { do { try session.apply(previous,name:name) } catch { session.issue=error.localizedDescription } }
         }
         manager?.setActionName(name)
-        project=candidate;snapshot=try RenderSnapshot(project:candidate,workspace:workspace);revision+=1
+        project=candidate;snapshot=nextSnapshot;revision+=1
         selection.formIntersection(Set(candidate.items.map(\.id)))
         if explicitGroup { manager?.endUndoGrouping() }
         didEdit?()
@@ -118,7 +120,7 @@ import GalileoCore
                             let prior=candidate.items[index];replacement.id=prior.id;replacement.caption=prior.caption
                             replacement.fit=prior.fit;replacement.crop=prior.crop;replacement.focal=prior.focal
                             replacement.displayRatio=prior.displayRatio;replacement.included=prior.included;replacement.opening=prior.opening
-                            replacement.sourcePlays=prior.sourcePlays;replacement.sourceLoops=prior.sourceLoops
+                            replacement.sourcePlays=prior.sourcePlays;replacement.sourceLoops=prior.sourceLoops;replacement.spotlight=prior.spotlight
                             candidate.items[index]=replacement
                         } else if replacing==nil { candidate.items+=completedItems }
                         try candidate.validate()

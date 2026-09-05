@@ -1,4 +1,5 @@
 import Foundation
+import AVFoundation
 import CoreGraphics
 import CoreText
 import GalileoCore
@@ -34,5 +35,66 @@ public enum VerificationFixtures {
             try FileManager.default.removeItem(at:temporary)
         }
         return(project,workspace)
+    }
+}
+
+extension VerificationFixtures {
+    /// Three independent, literal colour seconds: red, green, blue. This fixture
+    /// is written directly with AVFoundation, not by the compositor under test.
+    public static func loopingVideo(workspace: Workspace) async throws -> MediaItem {
+        let url = workspace.root.appendingPathComponent("three-second-source.mp4")
+        let writer = try AVAssetWriter(outputURL: url, fileType: .mp4)
+        let input = AVAssetWriterInput(mediaType: .video, outputSettings: [
+            AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: 320, AVVideoHeightKey: 180,
+            AVVideoCompressionPropertiesKey: [AVVideoAllowFrameReorderingKey: false]
+        ])
+        let adaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: input, sourcePixelBufferAttributes: [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+            kCVPixelBufferWidthKey as String: 320, kCVPixelBufferHeightKey as String: 180,
+            kCVPixelBufferCGImageCompatibilityKey as String: true,
+            kCVPixelBufferCGBitmapContextCompatibilityKey as String: true
+        ])
+        guard writer.canAdd(input) else { throw GalleryError.invalid("Fixture encoder unavailable.") }
+        writer.add(input)
+        guard writer.startWriting() else { throw GalleryError.invalid("Fixture encoder could not start.") }
+        writer.startSession(atSourceTime: .zero)
+        do {
+            for frame in 0..<90 {
+                let start = Date()
+                while !input.isReadyForMoreMediaData {
+                    guard writer.status == .writing, Date().timeIntervalSince(start) < 10 else {
+                        throw GalleryError.invalid("Fixture encoder stalled.")
+                    }
+                    try await Task.sleep(nanoseconds: 1_000_000)
+                }
+                guard let pool = adaptor.pixelBufferPool else { throw GalleryError.invalid("No fixture pixel pool.") }
+                var buffer: CVPixelBuffer?
+                guard CVPixelBufferPoolCreatePixelBuffer(nil, pool, &buffer) == kCVReturnSuccess, let buffer else {
+                    throw GalleryError.invalid("Fixture pixel allocation failed.")
+                }
+                CVPixelBufferLockBaseAddress(buffer, [])
+                let width = CVPixelBufferGetWidth(buffer), height = CVPixelBufferGetHeight(buffer)
+                let stride = CVPixelBufferGetBytesPerRow(buffer)
+                let bytes = CVPixelBufferGetBaseAddress(buffer)!.assumingMemoryBound(to: UInt8.self)
+                for y in 0..<height {
+                    for x in 0..<width {
+                        let offset = y * stride + x * 4
+                        bytes[offset] = frame >= 60 ? 240 : 16
+                        bytes[offset+1] = (30..<60).contains(frame) ? 240 : 16
+                        bytes[offset+2] = frame < 30 ? 240 : 16
+                        bytes[offset+3] = 255
+                    }
+                }
+                CVPixelBufferUnlockBaseAddress(buffer, [])
+                guard adaptor.append(buffer, withPresentationTime: CMTime(value: Int64(frame), timescale: 30)) else {
+                    throw GalleryError.invalid("Fixture frame was rejected.")
+                }
+            }
+            writer.endSession(atSourceTime: CMTime(value: 90, timescale: 30))
+            input.markAsFinished()
+            await withCheckedContinuation { continuation in writer.finishWriting { continuation.resume() } }
+            guard writer.status == .completed else { throw GalleryError.invalid("Fixture encoding failed.") }
+            return try await AssetImporter.inspect(url, workspace: workspace)
+        } catch { writer.cancelWriting(); throw error }
     }
 }

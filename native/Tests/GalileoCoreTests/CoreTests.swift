@@ -21,7 +21,7 @@ final class CoreTests: XCTestCase {
         p=project();p.scene.scale = .nan;XCTAssertThrowsError(try p.validate())
         p=project();p.items[0].asset="../secret";XCTAssertThrowsError(try p.validate())
         p=project();p.items[0].id=p.items[1].id;XCTAssertThrowsError(try p.validate())
-        p=project();p.schemaVersion=4;XCTAssertThrowsError(try p.validate())
+        p=project();p.schemaVersion=999;XCTAssertThrowsError(try p.validate())
         p=project();p.scene.variantID="unknown";XCTAssertThrowsError(try p.validate())
     }
     func testR01OnceDoesNotForceEndpoint() throws {

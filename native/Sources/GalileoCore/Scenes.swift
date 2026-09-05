@@ -123,15 +123,43 @@ public struct RenderPlan: Sendable {
     public let schedule: FrameSchedule
     public let variant: SceneVariant
     public let items: [MediaItem]
+    public let spotlights: [SpotlightCue]
+    private let motionSchedule: FrameSchedule
     public init(project: GalleryProject) throws {
         try project.validate()
-        self.project=project; schedule=try FrameSchedule(timing:project.timing,rate:project.export.frameRate)
-        variant=SceneCatalog.variant(project.scene.variantID)!
-        items=project.activeItems
+        self.project = project
+        motionSchedule = try FrameSchedule(timing: project.timing, rate: project.export.frameRate)
+        variant = SceneCatalog.variant(project.scene.variantID)!
+        items = project.activeItems
+        spotlights = SpotlightCue.compile(items: items, variant: variant, timing: project.timing, motion: motionSchedule)
+        schedule = try FrameSchedule(timing: project.timing, rate: project.export.frameRate,
+                                     additionalCycleFrames: spotlights.reduce(0) { $0 + $1.frameCount })
     }
     public func evaluate(frame: Int64) -> [SceneCard] {
         guard !items.isEmpty else { return [] }
-        let time=schedule.sample(frame:frame)
+        let output = schedule.sample(frame: frame)
+        var added: Int64 = 0
+        for cue in spotlights {
+            if output.localFrame < cue.startFrame { break }
+            if output.localFrame < cue.endFrame {
+                let time = motionSample(frame: cue.motionFrame, output: output)
+                let base = evaluateMotion(time: time, sourceSeconds: output.localSeconds)
+                return SpotlightCue.present(cue, offset: output.localFrame - cue.startFrame,
+                                            cards: base, items: items, canvas: project.canvas, sourceSeconds: output.localSeconds)
+            }
+            added += cue.frameCount
+        }
+        return evaluateMotion(time: motionSample(frame: output.localFrame - added, output: output),
+                              sourceSeconds: output.localSeconds)
+    }
+    private func motionSample(frame: Int64, output: TimeSample) -> TimeSample {
+        let original = motionSchedule.sample(frame: frame)
+        return TimeSample(absoluteFrame: output.absoluteFrame, cycleIndex: output.cycleIndex,
+                          localFrame: original.localFrame, seconds: output.seconds,
+                          localSeconds: original.localSeconds, progress: original.progress,
+                          isLastCycle: output.isLastCycle)
+    }
+    private func evaluateMotion(time: TimeSample, sourceSeconds: Double) -> [SceneCard] {
         let w=Double(project.canvas.width),h=Double(project.canvas.height),short=min(w,h)
         let s=project.scene, n=items.count, p=time.progress, tau=Double.pi*2
         let canWrap=project.timing.playMode == .loop || !time.isLastCycle
@@ -140,7 +168,7 @@ public struct RenderPlan: Sendable {
         func card(_ index:Int,_ x:Double,_ y:Double,_ maxW:Double,_ maxH:Double,_ instance:String="")->SceneCard {
             let item=source(index),ratio=item.ratio
             let ch=min(maxH,maxW/max(0.0001,ratio)),cw=ch*ratio
-            return SceneCard(item:item,instance:instance,x:x,y:y,width:max(1,cw),height:max(1,ch),seconds:time.localSeconds)
+            return SceneCard(item:item,instance:instance,x:x,y:y,width:max(1,cw),height:max(1,ch),seconds:sourceSeconds)
         }
         let beat=p*Double(n),current=min(n-1,Int(beat)),fraction=beat-Double(current)
         let exchange=smooth((fraction-project.timing.holdFraction)/(1-project.timing.holdFraction))
