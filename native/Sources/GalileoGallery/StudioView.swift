@@ -170,7 +170,8 @@ private struct MediaRow:View {
             Spacer(minLength:0)
         }.padding(.vertical,4).opacity(item.included ? 1:0.55)
             .accessibilityElement(children:.combine)
-            .task(id:item.sha256) {
+            .task(id:item.sha256+":"+(item.unavailable ?? "")) {
+                image=nil
                 let item=item,workspace=workspace
                 let cg=try? await ThumbnailWorker.shared.image(item:item,workspace:workspace)
                 if !Task.isCancelled,let cg { image=NSImage(cgImage:cg,size:.zero) }
@@ -196,24 +197,37 @@ struct TransportBar:View {
                 Slider(value:Binding(get:{Double(playback.frame)},set:{playback.seek(Int64($0.rounded()))}),in:0...Double(max(1,schedule.totalFrames-1)))
                     .accessibilityLabel("Timeline frame")
             }
-            HStack(spacing:14) {
-                Button(action:{playback.seek(0)}) { Image(systemName:"backward.end") }.help("First frame")
-                Button(action:{playback.step(-1)}) { Image(systemName:"backward.frame") }.help("Previous frame")
-                Button(action:playback.toggle) { Image(systemName:playback.playing ? "pause.fill":"play.fill").frame(width:18) }.help(playback.playing ? "Pause":"Play")
-                Button(action:{playback.step(1)}) { Image(systemName:"forward.frame") }.help("Next frame")
-                if !cues.isEmpty {
-                    Button(action:{playback.jumpCue(cues,direction:-1)}) {Image(systemName:"backward.end.alt")}.help("Previous spotlight")
-                    Button(action:{playback.jumpCue(cues,direction:1)}) {Image(systemName:"forward.end.alt")}.help("Next spotlight")
+            ViewThatFits(in:.horizontal) {
+                HStack(spacing:12) { transportButtons;Spacer(minLength:8);frameReadout }
+                VStack(spacing:10) {
+                    HStack {transportButtons;Spacer()}
+                    HStack {Spacer();frameReadout}
                 }
-                Spacer()
-                Text(schedule.label(frame:playback.frame)).monospacedDigit().font(.system(.caption,design:.monospaced))
-                TextField("Frame",value:Binding(get:{playback.frame},set:{playback.seek($0)}),format:.number.grouping(.never))
-                    .frame(width:68).textFieldStyle(.roundedBorder).accessibilityLabel("Frame index, starting at zero")
-                Text("/ \(schedule.totalFrames)").font(.caption).foregroundStyle(.secondary).monospacedDigit()
             }.buttonStyle(.borderless)
         }
     }
+    private var transportButtons:some View {
+        HStack(spacing:12) {
+            Button(action:{playback.seek(0)}) {Image(systemName:"backward.end")}.help("First frame").accessibilityLabel("First frame")
+            Button(action:{playback.step(-1)}) {Image(systemName:"backward.frame")}.help("Previous frame").accessibilityLabel("Previous frame")
+            Button(action:playback.toggle) {Image(systemName:playback.playing ? "pause.fill":"play.fill").frame(width:18)}.help(playback.playing ? "Pause":"Play").accessibilityLabel(playback.playing ? "Pause":"Play")
+            Button(action:{playback.step(1)}) {Image(systemName:"forward.frame")}.help("Next frame").accessibilityLabel("Next frame")
+            if !cues.isEmpty {
+                Button(action:{playback.jumpCue(cues,direction:-1)}) {Image(systemName:"backward.end.alt")}.help("Previous spotlight").accessibilityLabel("Previous spotlight")
+                Button(action:{playback.jumpCue(cues,direction:1)}) {Image(systemName:"forward.end.alt")}.help("Next spotlight").accessibilityLabel("Next spotlight")
+            }
+        }.fixedSize()
+    }
+    private var frameReadout:some View {
+        HStack(spacing:8) {
+            Text(schedule.label(frame:playback.frame)).font(.system(.caption,design:.monospaced)).lineLimit(1).fixedSize()
+            TextField("Frame",value:Binding(get:{playback.frame},set:{playback.seek($0)}),format:.number.grouping(.never))
+                .frame(width:58).textFieldStyle(.roundedBorder).accessibilityLabel("Frame index, starting at zero")
+            Text("/ \(schedule.totalFrames)").font(.caption).foregroundStyle(.secondary).lineLimit(1).fixedSize()
+        }.monospacedDigit().fixedSize()
+    }
 }
+
 struct InspectorSection<Content:View>:View {
     let title:String;@ViewBuilder var content:()->Content
     var body:some View { VStack(alignment:.leading,spacing:12) { Text(title).font(.system(size:12,weight:.semibold)).foregroundStyle(.secondary);content() } }

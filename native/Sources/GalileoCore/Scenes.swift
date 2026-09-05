@@ -337,20 +337,36 @@ public struct RenderPlan: Sendable {
             cards.append(after)
         case .build:
             let pieces = variant.id == "the-build" ? 6 : 3
-            let finish = project.timing.holdFraction
-            let leaving = (current < n-1 || canWrap) ? smooth((fraction-max(0.80,finish))/(1-max(0.80,finish))) : 0
+            let finish = project.timing.holdFraction, departureStart = max(0.80,finish)
+            // The outgoing assembly completes its departure in the following
+            // beat. Keeping those actual fragments avoids a blank handoff or
+            // deleting an image that is still visible at the beat boundary.
+            let previous: Int? = n > 1 ? (current > 0 ? current-1 : (canWrap ? n-1 : nil)) : nil
+            if let previous, fraction < 0.20 {
+                let leaving = smooth((fraction+1-departureStart)/(1.20-departureStart))
+                for part in 0..<pieces {
+                    var c = card(previous,w/2,h/2,w*s.scale,h*s.scale,"-out-part\(part)")
+                    var slice = Crop()
+                    if variant.id == "the-build" {slice.x=Double(part)/Double(pieces);slice.width=1/Double(pieces)}
+                    else {slice.y=Double(part)/Double(pieces);slice.height=1/Double(pieces)}
+                    c.slice=slice;c.center.y -= leaving*(h/2+c.height/2+short*0.05)
+                    c.z=Double(part);cards.append(c)
+                }
+            }
+            let leaving = (current < n-1 || canWrap) ? smooth((fraction-departureStart)/((n > 1 ? 1.20 : 1)-departureStart)) : 0
             for part in 0..<pieces {
-                // Stagger is proportional to assembly time, never longer than it.
                 let delay = finish*0.4*Double(part)/Double(pieces)
-                let assemble = smooth((fraction-delay)/max(0.001,finish-delay))
+                let arrival = bounded((fraction-delay)/max(0.001,finish-delay),0,1)
+                let assemble = 1-pow(1-arrival,3)
                 var c = card(current,w/2,h/2,w*s.scale,h*s.scale,"-part\(part)")
                 var slice = Crop()
                 if variant.id == "the-build" { slice.x = Double(part)/Double(pieces); slice.width = 1/Double(pieces) }
                 else { slice.y = Double(part)/Double(pieces); slice.height = 1/Double(pieces) }
                 c.slice = slice
-                c.center.y += (1-assemble)*(h*1.6+Double(part)*(s.spacing+short*s.depth*0.05)) - leaving*h*1.6
+                let travel=h/2+c.height/2+short*0.05
+                c.center.y += (1-assemble)*(travel+Double(part)*(s.spacing+short*s.depth*0.05)) - leaving*travel
                 c.center.x += (1-assemble)*(part%2 == 0 ? -1 : 1)*short*s.depth*0.08
-                c.z = Double(part); cards.append(c)
+                c.z = Double(part+pieces); cards.append(c)
             }
         case .hang:
             let pageSize = 8, pages = (n+pageSize-1)/pageSize, page = min(pages-1,Int(p*Double(pages)))

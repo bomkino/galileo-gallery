@@ -257,14 +257,15 @@ public struct ExportHistory: Identifiable {
     private var jobID=UUID()
     private var activePath: String?
     public init() {}
-    public func start(snapshot:RenderSnapshot,destination:ExportDestination,stillFrame:Int64,range:ExportRange?=nil) {
+    @discardableResult public func start(snapshot:RenderSnapshot,destination:ExportDestination,stillFrame:Int64,range:ExportRange?=nil) -> Bool {
         let path=destination.url.standardizedFileURL.path
         guard path != activePath, !pending.contains(where: { $0.destination.url.standardizedFileURL.path == path }) else {
-            error="That destination is already queued. Choose another filename.";return
+            error="That destination is already queued. Choose another filename.";return false
         }
-        guard pending.count<4 else {error="The export queue is full. Finish or remove a queued export first.";return}
+        guard pending.count<4 else {error="The export queue is full. Finish or remove a queued export first.";return false}
         let job=QueuedExport(snapshot:snapshot,destination:destination,stillFrame:stillFrame,range:range)
         if busy { pending.append(job) } else { execute(job) }
+        return true
     }
     private func execute(_ job:QueuedExport) {
         let id=job.id;jobID=id;busy=true;progress=0;status="Preparing \(job.name)";error=nil;result=nil

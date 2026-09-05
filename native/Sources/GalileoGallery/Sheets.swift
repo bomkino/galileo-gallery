@@ -114,6 +114,7 @@ struct ExportOptions:View {
     private var compatible:Bool {session.project.canvas.background != .transparent || settings.format.supportsAlpha}
     private func range(_ plan:RenderPlan)throws->ExportRange {
         if mode=="cue" {
+            guard session.selection.count==1 else {throw GalleryError.invalid("Select one spotlighted slide for this range.")}
             guard let cue=plan.spotlights.first(where:{session.selection.contains($0.itemID)}) else {throw GalleryError.invalid("Select a spotlighted slide first.")}
             let cycle=min(plan.schedule.cycles-1,frame/session.snapshot.plan.schedule.cycleFrames),offset=cycle*plan.schedule.cycleFrames
             return try ExportRange(start:cue.startFrame+offset,end:cue.endFrame+offset,total:plan.schedule.totalFrames)
@@ -159,7 +160,7 @@ struct ExportOptions:View {
         do {
             var candidate=session.project;candidate.export=settings
             let snapshot=try RenderSnapshot(project:candidate,workspace:session.workspace)
-            let selectedRange=try range(snapshot.plan)
+            let selectedRange:ExportRange? = settings.format == .png ? nil : try range(snapshot.plan)
             guard !snapshot.plan.items.contains(where:{$0.unavailable != nil}) else {throw GalleryError.missing("Locate, replace or exclude missing media before exporting.")}
             let panel=NSSavePanel();panel.title="Export";panel.nameFieldStringValue=settings.format == .pngSequence ? "\(session.documentName) Frames":"\(session.documentName).\(settings.format.fileExtension)"
             if settings.format != .pngSequence {panel.allowedContentTypes=[UTType(filenameExtension:settings.format.fileExtension) ?? .data]}
@@ -167,8 +168,10 @@ struct ExportOptions:View {
             guard panel.runModal() == .OK,let url=panel.url else{return}
             if settings.format == .pngSequence,FileManager.default.fileExists(atPath:url.path){throw GalleryError.invalid("Choose a new folder for the PNG sequence. Existing folders are not replaced.")}
             let destination=try ExportDestination(url:url),previewTime=session.snapshot.plan.schedule.seconds(for:frame)
+            guard ExportCenter.shared.start(snapshot:snapshot,destination:destination,stillFrame:snapshot.plan.schedule.frame(at:previewTime),range:selectedRange) else {
+                self.error=ExportCenter.shared.error;return
+            }
             session.commit("Export settings"){$0.export=settings}
-            ExportCenter.shared.start(snapshot:snapshot,destination:destination,stillFrame:snapshot.plan.schedule.frame(at:previewTime),range:selectedRange)
             dismiss();NotificationCenter.default.post(name:.showExports,object:nil)
         } catch {self.error=error.localizedDescription}
     }

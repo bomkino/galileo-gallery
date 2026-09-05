@@ -1,36 +1,45 @@
-# Native implementation boundary
+# Native implementation and validation
 
-The shipping product is `native/`, an Apple-silicon macOS 14+ application. `native/VERSION` is the release version. The npm application and historical platform adapters are retained only as reference source.
+## Product boundary
 
-## Responsibilities
+The shipping product is `native/`: Apple silicon, macOS 14+. `native/VERSION` is authoritative. Historical npm/Electron code and platform adapters are references, not active products or build dependencies. Sound is deliberately outside the product; do not add soundtrack/source-audio interfaces or audio output tracks. Preserve imported originals rather than stripping their audio streams destructively.
 
-- **GalileoCore:** versioned document data, input validation, integer/fractional frame schedule, scene geometry and centre-spotlight timing.
-- **GalileoNative:** owned media, immutable render snapshots, Core Image/Metal composition, source-video seeking, native export and checked destination replacement.
-- **GalileoGallery:** AppKit document lifecycle, SwiftUI editing surfaces, selection, native menus, frame transport, scene audition and export UI.
+`GalileoCore` owns versioned document state, frame scheduling, scene geometry, source time, spotlight and closing cues, common media budgets and frame ranges. `GalileoNative` owns media copies, integrity, PDF intake, immutable render snapshots, Core Image composition and AVFoundation picture export. `GalileoGallery` owns AppKit documents, SwiftUI controls, selection, transport and audition.
 
-The document's editor transactions update an immutable save snapshot and native change counts. The private edit undo manager is not also installed into NSDocument's automatic notification bookkeeping: each edit, undo and redo must be counted once, not twice. Successful native save/autosave owns clearing the corresponding save boundary. The actual packaged-app journey checks the integration, including grouped undo to saved content and a failed save.
+Schema 5 reads schemas 3/4 through explicit in-memory migration. Legacy ZIP projects become separate native copies. Migration notes distinguish preserved and translated intent; old manifests are traceability, not proof of equivalent choreography.
 
-Preview allows one in-flight render and one newest pending frame. New playback ticks do not continually cancel rendering. A revision token rejects output from an obsolete document revision; hit testing uses the geometry of the image actually displayed. Export does not depend on preview scheduling.
+## Project and output safety
 
-The export dialog obtains its count from the complete RenderPlan, including spotlight additions. Changing export frame rate retains the selected still's time, rather than reinterpreting the old frame index at the new rate.
+Editor transactions update immutable save snapshots and native change counts. The private content undo manager does not also use NSDocument's automatic undo notification counting. Edits, grouped changes, undo and redo are counted once. Successful native save/autosave clears only its save boundary. The packaged-app journey checks undo back to saved content, a failed save, autosave and reopen.
 
-## Meaningful checks
+`MediaBudget` is shared by import adoption, saving and opening: 512 MiB per file, 4 GiB unique managed media; original PDFs and preserved visual assets count. The per-file and aggregate checks happen before accepting a batch. Recovery requires a valid manifest; unresolved source rows retain their identity and settings. Export rejects unresolved included sources. Source paths, checksums, package entries and ZIP boundaries remain validated.
 
-`swift test --package-path native` covers core timing and native media/output contracts. In particular, a separately encoded three-second video must loop during an eight-second spotlight, survive project save/reopen, and agree between native preview pixels and independently decoded output. The synthetic video's RGB buffers and encoder are explicitly tagged Rec.709; the pixel thresholds were not relaxed to hide an untagged-fixture discrepancy.
+Owned media uses independent APFS copy-on-write clones where available, otherwise copies. Never hard-link saved documents to editable originals. Workspace-scoped integrity caches are valid only for an identical, freshly read device/inode/size/mtime/ctime stamp. Fallback copies are rehashed; changed sources prevent publication. A save checks space conservatively even on clone-capable volumes.
 
-The bundled application's `--smoke <empty-directory>` path opens an actual document window and runs import, edit, undo/redo, save, failing save, autosave, close/reopen, painted playback, frame inspection and native movie export. It writes synthetic scene samples, window captures and a machine-readable receipt. This is integration evidence, not human acceptance or exhaustive accessibility testing.
+Exports retain a project snapshot and a source-frame interval. Output timestamps start at zero; source timing stays on the document clock. Movie/sequence work is capped at 216,000 frames; canvas/layer limits remain explicit. The queue is serial, accepts at most four waiting jobs and rejects duplicate destinations. Cancellation before commit preserves the prior file; publication checks fresh destination identity. No automatic poster sidecar is created.
 
-The release job records its exact source SHA and machine, builds on arm64 macOS, exercises that app, then verifies the DMG-mounted app signature, architecture and binary identity. Matching ZIP/DMG/checksum files are published together. Passing unit tests alone do not publish a release.
+## Rendering and performance
 
-## Known limitations
+Preview scales geometry, image decoding, artwork preparation, captions and shadows to the requested viewport resolution before composition. At 100% it requests output-resolution pixels. One render runs per preview worker; only the newest pending frame is retained. Revision tokens discard stale output. Selection uses the geometry of the displayed frame and clips wipes/slices before hit testing.
 
-- No audio playback/export in the native product, including source-video audio and preserved legacy soundtrack data.
-- Native scene motion is reauthored. Legacy IDs and manifests are preserved, not pixel-identical choreography.
-- No WebM export, HDR mastering guarantee, native Intel build or non-Mac product.
-- Ad-hoc signing only; no Developer ID identity or notarization is claimed.
-- Low-memory sustained playback, sleep/wake, multiple external displays, prolonged editing and comprehensive VoiceOver/navigation acceptance still need real-device evaluation. CI does not substitute for those observations.
-- No automatic updating of installed applications. Install a downloaded release to update.
+A process-shared, thread-safe CIContext and immutable-image caches avoid duplicating those resources for each window. Decoded/prepared image eviction targets are 128/64 MiB, with count limits and memory-pressure clearing. These are NSCache targets, not hard total-memory guarantees. Mutable video generators remain worker-local and bounded. A frame's temporary objects are drained within an autorelease pool. Off-canvas layers are culled before bitmap preparation.
 
-## Documentation and rollback
+Movies render the composition directly into the encoder pixel buffer; they no longer allocate a full-frame CGImage followed by another CGContext copy. Exact-time source seeking remains AVAssetImageGenerator-based. A sequential decoder was not introduced without a separate media-format/lifecycle comparison. This is a remaining profiling opportunity, not a claim of full-rate playback for arbitrary multi-video projects.
 
-README, INSTALL and this directory are current. Other programme/design-system/atelier reports are historical evidence unless explicitly linked as current. Preserve history, notices and old releases. Use the previous app with an untouched legacy project to roll back; do not overwrite a legacy project during native migration.
+The release's tests log a reproducible 4K-canvas/640-pixel-preview sample, elapsed time, largest prepared layer and backend. CI uses a hosted/paravirtual Apple-silicon GPU: those numbers are not measurements of an 8 GB M2 Mac mini or M1 Pro MacBook Pro, and do not certify a universal speedup. Real-device sustained memory, scrubbing and export measurements remain useful.
+
+## Checks tied to actual risks
+
+`swift test --package-path native` covers common timing/geometry and Mac filesystem/media/output contracts. The 2.1 regressions cover the thirteenth orbit image, Orrery source identity, Vitrine departure, paged loop handoffs, assembled Build spotlights, clipped hit testing, replacement trims, managed-media budgets, recovery/relink, independent saved copies, PDF pages/original preservation, output ranges, serial jobs and transparent ProRes output.
+
+The independently encoded three-second video still must loop in an eight-second centre hold, survive save/reopen and agree with independently decoded export pixels. Its explicit Rec.709 fixture tags and original pixel thresholds are retained.
+
+The packaged application's `--smoke <empty-directory>` opens a real native window and exercises import, edits, undo/redo, successful and failed saving, autosave, close/reopen, painted playback, cue navigation, native-pixel zoom and export. It captures populated light/dark/spotlight, mixed-selection and framing surfaces and renders synthetic samples of every variant. Screenshots support visual review; they are not export proof. Movie decoding is separate.
+
+The release job identifies its exact source SHA and machine, runs those checks, verifies the mounted DMG's signature/architecture/binary identity and publishes matching assets and checksums. It does not publish from a failing run. The validation ZIP is synthetic and contains no client media.
+
+## Deliberate limits
+
+No sound, browser product, non-Mac build, Intel build, cloud account or automatic updater. No WebM or HDR mastering guarantee. Current composition prepares 8-bit sRGB artwork before Rec.709 output conversion. Native choreography is not legacy pixel parity. PDF pages are raster images with preserved originals, not editable text or vectors.
+
+Distribution is ad-hoc signed, not notarized. CI is not comprehensive human VoiceOver acceptance, long-session testing or all hardware/display coverage. Keep rollback copies of projects. Read the current release notes rather than treating historical atelier/programme reports as shipping claims.

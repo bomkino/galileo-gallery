@@ -21,11 +21,15 @@ After attempting to open the app, use **System Settings → Privacy & Security �
 
 Use **Add** to import media. Select **Scene** to choose a composition. To hold a particular slide at the centre, select it in the Media list and enable **Bring to centre** in its inspector. Adjust Hold and Size. A video remains a regular frame; keep **Play source** and **Loop source** enabled to loop it during the hold.
 
-Use **File → Save** to create a native `.galileo` document. Opening a ZIP-based legacy project makes a separate native copy and does not overwrite the legacy original. Save that copy with a different name. Native choreography can differ from old exports. Movies in this version are silent.
+Use **File → Save** to create a native `.galileo` document. Opening a ZIP-based legacy project makes a separate native copy and does not overwrite the legacy original. Save that copy with a different name. Native choreography can differ from old exports. Movies are silent by design. In 2.1 you can also import PDF pages, preview a selected spotlight, visually frame media, and queue range exports.
 
 ## Optional download verification
 
 The release includes `SHA256SUMS.txt`. A checksum proves a download matches that release's file, not that software is bug-free or notarized. In Terminal, run `shasum -a 256` followed by a space, drag the downloaded DMG into the window, then press Return. Compare the result with the DMG entry in `SHA256SUMS.txt`.
+
+## Project compatibility
+
+Version 2.1 reads older native documents but saves schema 5. Keep a copy before saving: 2.0 cannot read the new schema. A recovery copy never repairs the original in place.
 
 ## Roll back
 

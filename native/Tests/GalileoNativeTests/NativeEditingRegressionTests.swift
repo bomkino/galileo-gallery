@@ -105,6 +105,25 @@ final class NativeEditingRegressionTests:XCTestCase {
         XCTAssertEqual(queue.history.count,2);XCTAssertTrue(queue.history.allSatisfy{$0.error==nil && $0.result != nil})
         for name in ["One.png","Two.png"] {try NativeExport.verifyPNG(ws.root.appendingPathComponent(name),width:320,height:180)}
     }
+    func testDirectProRes4444ExportRetainsTransparentCanvas() async throws {
+        var (p,ws)=try VerificationFixtures.workspace(count:1)
+        p.canvas.width=320;p.canvas.height=180;p.canvas.background = .transparent
+        p.scene=SceneCatalog.defaults(for:"vitrine");p.scene.shadow=0;p.scene.radius=0
+        p.export.format = .proRes4444;p.timing.durationMilliseconds=1000
+        let snapshot=try RenderSnapshot(project:p,workspace:ws),url=ws.root.appendingPathComponent("Alpha.mov")
+        _=try await NativeExport.run(snapshot:snapshot,destination:ExportDestination(url:url),stillFrame:0)
+        let asset=AVURLAsset(url:url),tracks=try await asset.loadTracks(withMediaType:.video)
+        let reader=try AVAssetReader(asset:asset)
+        let track=try XCTUnwrap(tracks.first)
+        let output=AVAssetReaderTrackOutput(track:track,outputSettings:[kCVPixelBufferPixelFormatTypeKey as String:kCVPixelFormatType_32BGRA])
+        reader.add(output);XCTAssertTrue(reader.startReading())
+        let sample=try XCTUnwrap(output.copyNextSampleBuffer()),buffer=try XCTUnwrap(CMSampleBufferGetImageBuffer(sample))
+        CVPixelBufferLockBaseAddress(buffer,.readOnly);defer{CVPixelBufferUnlockBaseAddress(buffer,.readOnly);reader.cancelReading()}
+        let bytes=try XCTUnwrap(CVPixelBufferGetBaseAddress(buffer)).assumingMemoryBound(to:UInt8.self)
+        let stride=CVPixelBufferGetBytesPerRow(buffer)
+        XCTAssertLessThanOrEqual(bytes[3],2,"The transparent corner was flattened")
+        XCTAssertGreaterThanOrEqual(bytes[90*stride+160*4+3],250,"The opaque artwork lost alpha")
+    }
     @MainActor private func wait(_ predicate:()->Bool) async throws {
         let deadline=Date().addingTimeInterval(20)
         while !predicate() {if Date()>deadline {throw GalleryError.invalid("The operation stalled")};try await Task.sleep(nanoseconds:10_000_000)}

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0 — 5 September 2026
+
+Native reliability, directing and performance update. Recovery copies and common media budgets; preserved replacement timing; repaired orbit/Vitrine/page/Build motion; clipped hit testing; spotlight navigation/closing; visual framing; mixed selection; wrapped captions; PDF pages; preset favourites/library; range exports and serial queue. Early-resolution preparation, shared bounded caches, direct encoder-buffer composition and independent APFS media clones. Sound is deliberately outside the product. See [release notes](docs/releases/v2.1.0.md).
+
 Dates use UTC. Version 2 is the native Apple-silicon Mac product. Older entries below describe the historical Electron application, not the current implementation.
 
 ## [2.0.0] — 2026-09-05

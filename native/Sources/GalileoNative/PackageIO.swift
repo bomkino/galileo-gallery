@@ -30,6 +30,12 @@ extension NativeDocumentIO {
                 try Workspace.copyOwned(file, to: workspace.root.appendingPathComponent(file.lastPathComponent))
             }
         }
+        if project.legacyManifestFilename != nil {
+            guard fm.fileExists(atPath:workspace.root.appendingPathComponent("legacy-manifest.json").path),
+                  fm.fileExists(atPath:workspace.root.appendingPathComponent("legacy-assets.json").path) else {
+                throw GalleryError.invalid("The preserved legacy metadata is incomplete. Open the original archive instead.")
+            }
+        }
         let mapping = try legacyMapping(workspace)
         let assets = url.appendingPathComponent("Assets", isDirectory: true)
         var available: [String: URL] = [:], sizes: [String: Int64] = [:]

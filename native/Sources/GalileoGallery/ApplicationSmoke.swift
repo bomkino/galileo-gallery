@@ -94,6 +94,25 @@ import GalileoNative
             try await Task.sleep(nanoseconds:200_000_000)
             try capture(restoredWindow,to:directory.appendingPathComponent("spotlight-inspector.png"))
         }
+        // Inspect new editing surfaces in the real document, not mock previews.
+        if let first=restored.snapshot.plan.spotlights.first {
+            transport.seek(0);transport.jumpCue(restored.snapshot.plan.spotlights,direction:1)
+            guard transport.frame==first.holdStartFrame else {throw GalleryError.invalid("Spotlight navigation reached the wrong frame.")}
+            try await wait {findPreview(restoredWindow.contentView)?.committedFrame==transport.frame}
+        }
+        restored.canvasZoom=1
+        try await wait {findPreview(restoredWindow.contentView)?.committedPixelSize.width==Double(restored.project.canvas.width)}
+        restored.canvasZoom=0
+        restored.framingMediaID=restored.project.items[1].id
+        try await wait {restoredWindow.attachedSheet != nil}
+        try await Task.sleep(nanoseconds:400_000_000)
+        if let sheet=restoredWindow.attachedSheet {try capture(sheet,to:directory.appendingPathComponent("framing-editor.png"))}
+        restored.framingMediaID=nil
+        try await wait {restoredWindow.attachedSheet==nil}
+        restored.selection=Set(restored.project.items.prefix(2).map(\.id))
+        try await Task.sleep(nanoseconds:200_000_000)
+        try capture(restoredWindow,to:directory.appendingPathComponent("mixed-selection.png"))
+        restored.selection=[restored.project.items[1].id]
         let original=restored.project.scene
         restored.commit("Change scene"){$0.scene=SceneCatalog.defaults(for:"orbit-ring")}
         restored.undoManager?.undo();guard restored.project.scene==original else{throw GalleryError.invalid("Scene undo failed.")}
@@ -119,7 +138,7 @@ import GalileoNative
         let receipt=try await Task.detached {try await NativeExport.run(snapshot:snapshot,destination:ExportDestination(url:movieURL),stillFrame:0){_,_ in}}.value
         guard receipt.scheduledFrames==62,receipt.decodedFrames==62 else{throw GalleryError.invalid("The actual native movie failed its frame count proof.")}
         try JSONEncoder().encode(receipt).write(to:directory.appendingPathComponent("export-receipt.json"))
-        let summary:[String:Any]=["previewAdvancesDuringPlayback":true,"documentRoundTrip":true,"documentEditedState":true,"failedSavePreservesChanges":true,"nativeAutosave":true,"spotlightSavedAndReopened":true,"importUndoRedo":true,"sceneUndoRedo":true,"nativeMovieDecodedFrames":62,"sceneSamples":visualEvidence,"operatingSystem":ProcessInfo.processInfo.operatingSystemVersionString,"version":Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "development"]
+        let summary:[String:Any]=["spotlightNavigation":true,"nativePixelZoom":true,"framingSheet":true,"previewAdvancesDuringPlayback":true,"documentRoundTrip":true,"documentEditedState":true,"failedSavePreservesChanges":true,"nativeAutosave":true,"spotlightSavedAndReopened":true,"importUndoRedo":true,"sceneUndoRedo":true,"nativeMovieDecodedFrames":62,"sceneSamples":visualEvidence,"operatingSystem":ProcessInfo.processInfo.operatingSystemVersionString,"version":Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "development"]
         try JSONSerialization.data(withJSONObject:summary,options:[.prettyPrinted,.sortedKeys]).write(to:directory.appendingPathComponent("journey.json"))
         _=window;_=playback
         print("NATIVE JOURNEY PASS: import, undo, redo, edit, save, close, reopen, scrub, render, export, decode")

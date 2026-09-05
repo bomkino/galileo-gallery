@@ -24,6 +24,7 @@ struct NativePreview:NSViewRepresentable {
     private var requestedRevision = -1
     private var requestedFrame:Int64 = -1
     private(set) var committedFrame:Int64 = -1
+    private(set) var committedPixelSize=CGSize.zero
     private var image:CGImage?
     private var cards:[SceneCard]=[]
     private var task:Task<Void,Never>?
@@ -58,13 +59,19 @@ struct NativePreview:NSViewRepresentable {
         guard task==nil,let request=pending else { return }
         pending=nil
         let worker=worker,ticket=ticket
-        let desired = zoom == 0 ? Int(max(bounds.width,bounds.height)*(window?.backingScaleFactor ?? 1)) : Int(max(bounds.width,bounds.height)*max(1,zoom))
-        let previewSize=max(640,min(3840,Int(ceil(Double(desired)/256))*256))
+        let canvas=request.snapshot.plan.project.canvas
+        let backing=window?.backingScaleFactor ?? 1
+        let fit=min(bounds.width/Double(canvas.width),bounds.height/Double(canvas.height))
+        let desired=Double(max(canvas.width,canvas.height))*(zoom == 0 ? fit*backing:min(1,zoom))
+        // At 100% the canvas must contain source-resolution output pixels, not
+        // a small window-sized bitmap stretched to pretend it is 100%.
+        let previewSize=max(64,min(7680,Int(ceil(desired/256))*256))
         task=Task { [weak self] in
             do {
                 let result=try await worker.render(snapshot:request.snapshot,frame:request.frame,maximumDimension:previewSize)
                 if !Task.isCancelled,let self,self.ticket==ticket {
                     self.image=result;self.committedFrame=request.frame
+                    self.committedPixelSize=CGSize(width:result.width,height:result.height)
                     self.renderedCanvas=request.snapshot.plan.project.canvas
                     self.cards=request.snapshot.plan.evaluate(frame:request.frame);self.needsDisplay=true
                     self.setAccessibilityValue("Frame \(request.frame), \(request.snapshot.plan.project.activeItems.count) media items")
@@ -96,12 +103,20 @@ struct NativePreview:NSViewRepresentable {
         guard let ctx=NSGraphicsContext.current?.cgContext else { return }
         let rect=contentRect
         ctx.saveGState();ctx.clip(to:rect.intersection(bounds))
-        let light=NSColor(calibratedWhite:0.68,alpha:1),dark=NSColor(calibratedWhite:0.55,alpha:1)
-        ctx.setFillColor(light.cgColor);ctx.fill(rect)
-        let cell:CGFloat=12
-        for row in 0...Int(rect.height/cell) { for column in 0...Int(rect.width/cell) where (row+column)%2==0 {
-            ctx.setFillColor(dark.cgColor);ctx.fill(CGRect(x:rect.minX+CGFloat(column)*cell,y:rect.minY+CGFloat(row)*cell,width:cell,height:cell))
-        } }
+        let background=renderedCanvas ?? snapshot?.plan.project.canvas
+        let needsChecker=background?.background == .transparent || (background?.color.a ?? 1)<1 || (background?.background == .gradient && (background?.secondaryColor.a ?? 1)<1)
+        if needsChecker {
+            let visible=rect.intersection(bounds),cell:CGFloat=12
+            ctx.setFillColor(NSColor(calibratedWhite:0.68,alpha:1).cgColor);ctx.fill(visible)
+            ctx.setFillColor(NSColor(calibratedWhite:0.55,alpha:1).cgColor)
+            if !visible.isNull {
+                let firstRow=max(0,Int(floor((visible.minY-rect.minY)/cell))),lastRow=Int(ceil((visible.maxY-rect.minY)/cell))
+                let firstColumn=max(0,Int(floor((visible.minX-rect.minX)/cell))),lastColumn=Int(ceil((visible.maxX-rect.minX)/cell))
+                for row in firstRow...max(firstRow,lastRow) { for column in firstColumn...max(firstColumn,lastColumn) where (row+column)%2==0 {
+                    ctx.fill(CGRect(x:rect.minX+CGFloat(column)*cell,y:rect.minY+CGFloat(row)*cell,width:cell,height:cell))
+                } }
+            }
+        }
         if let image { ctx.saveGState();ctx.translateBy(x:rect.minX,y:rect.maxY);ctx.scaleBy(x:1,y:-1);ctx.draw(image,in:CGRect(origin:.zero,size:rect.size));ctx.restoreGState() }
         if let canvas=renderedCanvas ?? snapshot?.plan.project.canvas {
             let scale=rect.width/CGFloat(canvas.width)
