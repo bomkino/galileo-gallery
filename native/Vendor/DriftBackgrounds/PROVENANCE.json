@@ -1,0 +1,19 @@
+{
+  "repository": "bomkino/pitchdog-drift",
+  "commit": "340b5f631c9147890bc775c86a71af315dd17929",
+  "files": {
+    "src/backgrounds.ts": "a99c874c8b0cb7d73ac9db1c4f7a51505a4c31c1d80ec117f43100a86ac840b6",
+    "src/engine/backgroundShader.ts": "5e52c32df3078cf125fbebe16c71a404a091fd917f7e994cf81568d85d06b616",
+    "LICENSE": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+    "NOTICE": "1fe5ac62a397a6874c3fb1a42c1eecf620802016e4e62a086cd06f454c377c7a",
+    "src/engine/backgroundShaders/solid.ts": "45836663ff6edf740a5bd10359d1a01b82cb13705779c1016cddfd385117c25b",
+    "src/engine/backgroundShaders/gradient.ts": "932b94e230c47b76d99fa609808f2231e3f03ad99a86dbb93f1c05dfbfebf50c",
+    "src/engine/backgroundShaders/aura.ts": "29e5b251458e243779206cf4010a4bd233a46da46c3e7322e70e1ef9523c7dbc",
+    "src/engine/backgroundShaders/paper.ts": "e36590995622f8177cbaf67dcd0e2a9eafaae94dab214193e8bacbb87a68f4d2",
+    "src/engine/backgroundShaders/void.ts": "12b3e9771b072161e20b89864aaeb1758f810390fae3b3448c0d7d55bd6b4763",
+    "src/engine/backgroundShaders/cuttingMap.ts": "9e7edcd9a887fae6ce3a86092968ba5d3d3e2a68e7370334f8b0eb585cb24aed",
+    "src/engine/backgroundShaders/grid.ts": "aee8b84c986aec9df4d34bc4fa94fe33744e6c71e89e9982a41c9d52890a1884",
+    "src/engine/backgroundShaders/wave.ts": "ed26177df4c869e897b9eb8a7989aa63259aca6ff53f8f6735a3194a04c2a168",
+    "src/engine/backgroundShaders/atelier.ts": "f2ce78b906a275b4efdbae0343a6dceb19faa1ddf07d8b1b68791f47f4341cd3"
+  }
+}

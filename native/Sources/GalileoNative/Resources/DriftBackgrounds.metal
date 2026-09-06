@@ -417,7 +417,7 @@ struct DriftShader {
         float emulsion = fbm(q * 4.8 + closedDrift * 0.035);
         float clump = smoothstep(0.54, 0.82, emulsion);
         float leak = softEllipse(p, float2(aspect * 0.46, -0.28) + seedOffset * 0.1, float2(0.7, 0.8), 0.42);
-        float dust = step(0.988, hash12(floor(gl_FragCoord.xy / 3.0) + variationKey));
+        float dust = step(0.988, hash12(floor((vUv * uResolution) / 3.0) + variationKey));
         color = mix(uColorA, uColorB, clump * 0.48 * uIntensity);
         color = mix(color, uAccent, leak * 0.2 * uIntensity + dust * 0.34 * uIntensity);
       // paper-6 · Halftone field
@@ -435,7 +435,7 @@ struct DriftShader {
         float scratchSeed = hash12(float2(column, variation + 17.0));
         float scratchCoordinate = abs(fract((q.x + seedOffset.x) * 92.0) - 0.5);
         float scratch = (1.0 - smoothstep(0.0, 0.025, scratchCoordinate)) * step(0.9, scratchSeed);
-        float dust = step(0.982, hash12(floor(gl_FragCoord.xy / 4.0) + variationKey));
+        float dust = step(0.982, hash12(floor((vUv * uResolution) / 4.0) + variationKey));
         float exposure = fbm(q * 1.35 + closedDrift * 0.025);
         color = mix(uColorA, uColorB, exposure * 0.34 * uIntensity);
         color = mix(color, uAccent, (scratch * 0.22 + dust * 0.32) * uIntensity);
@@ -725,10 +725,7 @@ struct DriftShader {
         color = mix(color, uAccent, (bandA * 0.1 + bandB * 0.075 + bandC * 0.05) * uIntensity);
       }
 
-uPhase`, so the
- * same shader remains deterministic and loop-safe in preview and export.
- */
-export const atelierBackgroundBranch = /* glsl */ `
+
     } else {
       float2 pigmentDrift = float2(cos(uPhase), sin(uPhase)) * uMotion;
       float2 pigmentDriftTwo = float2(cos(uPhase * 2.0 + 1.1), sin(uPhase * 2.0 + 1.1)) * uMotion;
@@ -788,7 +785,7 @@ export const atelierBackgroundBranch = /* glsl */ `
         float arches = 1.0 - smoothstep(0.455, 0.5, abs(fract(archRadius * 6.5) - 0.5));
         arches *= 1.0 - smoothstep(0.12, max(0.54, aspect * 0.75), archRadius);
         float seam = softBand((rotate2d(0.34) * p).y, -0.07 + pigmentDrift.y * 0.02, 0.008, 0.022);
-        float fleck = step(0.987, hash12(floor(gl_FragCoord.xy / 5.0) + variationKey));
+        float fleck = step(0.987, hash12(floor((vUv * uResolution) / 5.0) + variationKey));
 
         color = mix(atelierStock, uColorB, (glaze * 0.4 + sidePatina * 0.2 + upperPatina * 0.1) * uIntensity);
         color = mix(color, uAccent, (arches * 0.15 + seam * 0.09 + fleck * 0.18) * uIntensity);

@@ -12,7 +12,9 @@ for name, digest in manifest['files'].items():
     assert hashlib.sha256((VENDOR/name).read_bytes()).hexdigest() == digest, name
 
 def literal(text):
-    return text.split('`',1)[1].rsplit('`',1)[0]
+    declaration = re.search(r"=\s*/\*\s*glsl\s*\*/\s*`", text)
+    assert declaration is not None, "Missing GLSL template declaration"
+    return text[declaration.end():].rsplit('`',1)[0]
 
 source = (VENDOR/'src/backgrounds.ts').read_text()
 palettes=[]
@@ -45,6 +47,7 @@ for name in re.findall(r'\$\{(\w+)\}',shader):
 shader=re.sub(r'precision highp float;\s*','',shader)
 shader=shader.replace('varying vec2 vUv;','vec2 vUv;')
 shader=shader.replace('uniform ','')
+shader=shader.replace('gl_FragCoord.xy', '(vUv * uResolution)')
 shader=re.sub(r'\bvec([234])\b',r'float\1',shader)
 shader=re.sub(r'\bmat2\(([^()]*)\)',lambda m:'float2x2(float2('+','.join(m[1].split(',')[:2])+'), float2('+','.join(m[1].split(',')[2:])+'))',shader)
 shader=shader.replace('mat2 ','float2x2 ')
@@ -58,7 +61,7 @@ shader=shader.replace('#include <colorspace_fragment>','output.rgb = driftToSRGB
 shader=shader.replace('gl_FragColor','output')
 shader=shader.replace('if (output.a <= 0.001) discard;', 'return float4(driftToLinear(output.rgb) * output.a, output.a);')
 # Shader constants are structure members in this mechanical translation.
-shader=shader.replace('const float ', 'const float ')
+assert 'gl_' not in shader and 'export const' not in shader and '`' not in shader
 preamble=header+'''#include <metal_stdlib>
 #include <CoreImage/CoreImage.h>
 using namespace metal;
