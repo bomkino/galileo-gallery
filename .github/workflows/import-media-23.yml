@@ -1,0 +1,91 @@
+name: Native media integration
+on:
+  push:
+    branches: [codex/native-mac-media-2-3]
+    paths: [.github/workflows/import-media-23.yml]
+permissions:
+  contents: write
+jobs:
+  native:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Apply hash-verified native implementation on candidate only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = codex/native-mac-media-2-3
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 - <<'PY'
+          import subprocess,json,base64,hashlib,lzma,tempfile,pathlib
+          shas=['0cf9a8c4d8bd42c8f553214793b1cea779383ac6','ea108fdb18b684a65f501dc64cbc5d84bdc3bc31','5fa7ee2d4499b40aee7df754df4bcfd09c96f20f','2f43ecb34162af8ec96a6a2ecd1f43dc81ca7780','76e3987d0a8d91f699fe5ef0966007a01eea6f71','19e09543830820be14a090fc7260fabcfc2299ec','2fb4c92cc779b09b0e49aad565e1b88266a13339','26d651c6b50b3a99ff7561ab3fe10eb0eaa091f9']
+          parts=[]
+          for sha in shas:
+              obj=json.loads(subprocess.check_output(['gh','api','repos/bomkino/galileo-gallery/git/blobs/'+sha]))
+              data=base64.b64decode(obj['content'])
+              assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==sha
+              parts.append(data)
+          data=b''.join(parts)
+          assert len(data)==42928 and hashlib.sha256(data).hexdigest()=='2bac15b299a493312d544e2cc035ed1b2f38b93fe29c684a98131b1d01a72bc7'
+          decoder=lzma.LZMADecompressor(memlimit=128*1024*1024)
+          patch=decoder.decompress(data,max_length=1000000)
+          assert decoder.eof and not decoder.unused_data and len(patch)==157912
+          with tempfile.NamedTemporaryFile(suffix='.patch') as f:
+              f.write(patch);f.flush()
+              rows=subprocess.check_output(['git','apply','--numstat',f.name]).decode().splitlines()
+              assert rows
+              for row in rows:
+                  name=row.split('\t',2)[2];p=pathlib.PurePosixPath(name)
+                  assert name.startswith(('native/','scripts/native/')) or name in ['.github/workflows/native.yml','.gitignore']
+                  assert not p.is_absolute() and '..' not in p.parts and '.git' not in p.parts and '.build' not in p.parts
+              subprocess.run(['git','apply','--check',f.name],check=True)
+              subprocess.run(['git','apply',f.name],check=True)
+          PY
+          git config user.name 'Chattie Intern'
+          git config user.email 'chattie-intern@users.noreply.github.com'
+          git add native scripts/native .github/workflows/native.yml .gitignore
+          git diff --cached --check
+          git commit -m 'feat: native WebM intake, frame reuse, live editing and project safety'
+          git push origin HEAD:codex/native-mac-media-2-3
+      - name: Record tested identity
+        run: |
+          mkdir -p native-evidence
+          git rev-parse HEAD > native-evidence/source.txt
+          sw_vers > native-evidence/machine.txt
+          uname -m >> native-evidence/machine.txt
+          swift --version >> native-evidence/machine.txt
+          test "$(uname -m)" = arm64
+          git archive --format=zip HEAD native scripts/native .github/workflows README.md docs INSTALL.md LICENSE > native-evidence/source.zip
+      - uses: actions/cache@v4
+        with:
+          path: native/.codecs
+          key: galileo-codecs-arm64-${{ hashFiles('scripts/native/build-codecs.sh') }}
+      - name: Prepare pinned offline media helpers
+        run: |
+          set -o pipefail
+          bash scripts/native/build-codecs.sh 2>&1 | tee native-evidence/codecs.log
+      - name: Verify media pixels, timing, persistence and rendering contracts
+        run: |
+          set -o pipefail
+          swift test --package-path native 2>&1 | tee native-evidence/tests.log
+      - name: Build the packaged Mac application
+        id: build
+        if: ${{ !cancelled() }}
+        run: |
+          set -o pipefail
+          bash scripts/native/package.sh native-evidence/build 2>&1 | tee native-evidence/build.log
+      - name: Exercise packaged document and export journey
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          GALILEO_MEDIA_FIXTURES="$PWD/native/Tests/GalileoNativeTests/Fixtures" native-evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/native-evidence/journey" 2>&1 | tee native-evidence/journey.log
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: native-media-evidence
+          path: native-evidence
+          retention-days: 14
