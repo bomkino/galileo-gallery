@@ -135,7 +135,7 @@ import GalileoNative
         settingsWindow?.showWindow(nil);settingsWindow?.window?.makeKeyAndOrderFront(nil)
     }
     @objc func about(_ sender:Any?) {
-        NSApp.orderFrontStandardAboutPanel(options:[.applicationName:"Galileo Gallery",.credits:NSAttributedString(string:"A native motion studio by pitch.dog.\nGPL-3.0. Original scene authorship is preserved in the source notices.")])
+        NSApp.orderFrontStandardAboutPanel(options:[.applicationName:"Galileo Gallery",.credits:NSAttributedString(string:"A native motion studio by pitch.dog.\nGPL-3.0; Drift backgrounds: AGPL-3.0-or-later.\nLocal media tools: FFmpeg (LGPL-2.1-or-later) and libvpx.\nOriginal authorship, licenses and corresponding source are identified in Help and the release notices.")])
     }
     @objc func help(_ sender:Any?) {
         if let url=Bundle.main.url(forResource:"Help",withExtension:"html") {NSWorkspace.shared.open(url)}

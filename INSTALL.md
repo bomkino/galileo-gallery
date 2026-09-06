@@ -19,7 +19,7 @@ After attempting to open the app, use **System Settings → Privacy & Security �
 
 ## Your first project
 
-Use **Add** to import media. Select **Scene** to choose a composition. To hold a particular slide at the centre, select it in the Media list and enable **Bring to centre** in its inspector. Adjust Hold and Size. A video remains a regular frame; keep **Play source** and **Loop source** enabled to loop it during the hold.
+Use **Add** to import media, including still/animated WebP and SDR VP8/VP9 WebM. WebM prepares locally; bundled tools require no installation. AV1 and HDR WebM are not supported in this release. Select one clip and use **Preview clip…** to inspect, trim, loop or freeze it before directing the sequence. Select **Scene** to choose a composition. To hold a particular slide at the centre, select it in the Media list and enable **Bring to centre** in its inspector. Adjust Hold and Size. A video remains a regular frame; keep **Play source** and **Loop source** enabled to loop it during the hold.
 
 Use **File → Save** to create a native `.galileo` document. Opening a ZIP-based legacy project makes a separate native copy and does not overwrite the legacy original. Save that copy with a different name. Native choreography can differ from old exports. Movies are silent by design. You can also import PDF pages, preview a selected spotlight, visually frame media, and queue range exports.
 
@@ -31,8 +31,12 @@ The release includes `SHA256SUMS.txt`. A checksum proves a download matches that
 
 ## Project compatibility
 
-Version 2.2 reads older native documents but saves schema 6. Keep a copy before saving: 2.0 and 2.1 cannot read the new schema. A recovery copy never repairs the original in place.
+Version 2.3 reads older native documents but saves schema 7. Keep a copy before saving: 2.0, 2.1 and 2.2 cannot read a new 2.3 save. A recovery copy never repairs the original in place.
 
 ## Roll back
 
 Quit the new app and restore the archived older app. Open an untouched older project. Do not expect a version-2 native project package to open in the old Electron app.
+
+## Optional Terminal installer
+
+The repository includes `scripts/native/install-latest.sh`. It verifies the release, bundle identity, checksum and signature, stages the replacement, asks Galileo to quit normally, and retains the old application for rollback. Cancelling or refusing to quit stops replacement. It never force-quits the app, deletes projects, removes quarantine attributes or disables Gatekeeper. Manual installation above remains the simplest option.

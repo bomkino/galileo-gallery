@@ -48,6 +48,11 @@ hdiutil attach "$output/$base.dmg" -readonly -nobrowse -mountpoint "$work/mount"
 mounted=true
 codesign --verify --deep --strict "$work/mount/Galileo Gallery.app"
 cmp "$app/Contents/MacOS/GalileoGallery" "$work/mount/Galileo Gallery.app/Contents/MacOS/GalileoGallery"
+for tool in ffmpeg ffprobe; do
+  cmp "$app/Contents/Resources/MediaTools/$tool" "$work/mount/Galileo Gallery.app/Contents/Resources/MediaTools/$tool"
+  codesign --verify --strict "$work/mount/Galileo Gallery.app/Contents/Resources/MediaTools/$tool"
+done
+cmp "$app/Contents/Resources/build.json" "$work/mount/Galileo Gallery.app/Contents/Resources/build.json"
 [[ "$(lipo -archs "$work/mount/Galileo Gallery.app/Contents/MacOS/GalileoGallery")" == arm64 ]]
 hdiutil detach "$work/mount" -quiet
 mounted=false
@@ -55,5 +60,9 @@ mkdir "$work/zip"
 ditto -x -k "$output/$base.zip" "$work/zip"
 codesign --verify --deep --strict "$work/zip/Galileo Gallery.app"
 cmp "$app/Contents/MacOS/GalileoGallery" "$work/zip/Galileo Gallery.app/Contents/MacOS/GalileoGallery"
+for tool in ffmpeg ffprobe; do
+  cmp "$app/Contents/Resources/MediaTools/$tool" "$work/zip/Galileo Gallery.app/Contents/Resources/MediaTools/$tool"
+done
+cmp "$app/Contents/Resources/build.json" "$work/zip/Galileo Gallery.app/Contents/Resources/build.json"
 (cd "$output" && shasum -a 256 "$base.dmg" "$base.zip" > SHA256SUMS.txt)
 printf '%s\n' "Verified distribution: $output"

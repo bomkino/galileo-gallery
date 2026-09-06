@@ -1,38 +1,41 @@
 # Galileo Gallery
 
-A silent, local motion studio for pitch-deck slides, images and looping video.
+A silent, local motion studio for slides, images and looping video.
 
-**Apple silicon · macOS 14 or later.** The released app is native AppKit/SwiftUI, with Core Image/Metal composition and AVFoundation picture export. No browser runtime, account, network service, soundtrack or audio controls are required.
+**Apple silicon · macOS 14 or later.** Native AppKit/SwiftUI, Core Image/Metal composition and AVFoundation picture export. No browser runtime, account, conversion service or sound controls.
 
-[Download the latest Mac release](https://github.com/bomkino/galileo-gallery/releases/latest) · [Install](INSTALL.md) · [Use Galileo](docs/native/README.md)
-
-## Drift backgrounds
-
-Choose **Scene → Canvas → Background → Drift → Browse** for Drift's 72 backgrounds and 28 palettes, including the eight Atelier studies. Colour, intensity, motion, grain, vignette and variation are editable. Backgrounds render natively in preview and every supported export. Switch off **Animate background** for a still field. Existing solid, gradient and transparent canvases keep their appearance.
+[Download the latest Mac release](https://github.com/bomkino/galileo-gallery/releases/latest) · [Install](INSTALL.md) · [Use Galileo](docs/native/README.md) · [Supported media](docs/native/MEDIA.md)
 
 ## Direct the sequence
 
-Import images, video or selected PDF pages. Choose a scene family and variant. Bring chosen slides to the centre, hold them, then return them to the sequence. Short videos can keep looping inside a long hold. Add a closing slide when the sequence needs a final image.
+Import images, still or animated WebP, VP8/VP9 WebM, other supported videos, or selected PDF pages. Choose a scene family and variant. Bring selected slides to the centre, hold them, then return them to the sequence. A short video can keep looping during a long hold. Choose an opening and a finite closing when the sequence needs them.
 
-Frame artwork visually or numerically; inspect the canvas at Fit, 50%, 100% or 200%. Jump between spotlights instead of hunting through the timeline. Save favourite scenes and named presets. Export the whole sequence, one spotlight, a time range or the current frame. A small serial queue keeps output work independent of the document window.
+Inspect a clip and its filmstrip without running the entire composition. Trim, change rate, loop or choose a freeze frame. Frame artwork visually or numerically; view the canvas at Fit, 50%, 100% or 200%. Jump between spotlights, save favourite scenes and named presets, and audition Drift backgrounds against your own artwork. Appearance adjustments remain live; structural edits pause deliberately.
 
 ## Keep work intact
 
-Native `.galileo` documents contain their media. Import and save use the same resource budget. Recovery copies let you locate or replace missing artwork without rewriting the original. Replacement preserves valid framing, spotlight and video-timing choices. Native save/autosave and undo/redo are exercised in the packaged app, not just in model tests.
+Native `.galileo` documents contain their media. Import, save and reopen share resource and manifest limits. Missing-media recovery keeps usable artwork and its settings. Replacement retains compatible framing, spotlight and source timing. Native save/autosave, failed writes, undo/redo and reopening are exercised in the packaged application.
 
-Older native projects and legacy ZIP projects open through explicit conversion. Keep original projects: a 2.2 save uses schema 6 and cannot be opened by 2.1 or 2.0. Native choreography may differ from the old cross-platform renderer.
+WebM preparation happens locally using bundled, restricted FFmpeg/libvpx tools. The original file stays unchanged beside its native working copy. This can require more disk space than the compressed source. Successful files remain imported when another file fails; failures name the affected input.
+
+A 2.3 save uses schema 7. Older native projects migrate in memory, but earlier apps cannot read newly saved 2.3 documents. Keep original projects. Native choreography may differ from historical Electron exports.
 
 ## Output
 
-Silent H.264 MP4, ProRes 422/4444 MOV, PNG stills and PNG sequences. ProRes 4444 and PNG preserve transparency. Original imported videos are retained unchanged; their audio is neither played nor exported. This is the intended product, not an unfinished sound feature.
+Silent H.264 MP4, ProRes 422/4444 MOV, PNG stills and PNG sequences. Export the whole sequence, one spotlight, a time interval or the current frame. A serial queue retains each export's document snapshot even if the window closes. ProRes 4444 and PNG support transparency.
 
-The release is ad-hoc signed, not notarized. See [installation](INSTALL.md) for Apple's per-app first-launch procedure. See [engineering and validation](docs/native/ENGINEERING.md) for measured boundaries and [2.2 release notes](docs/releases/v2.2.0.md).
+Original source audio is retained only as part of the unchanged imported file; it is never played or exported. AV1/HDR WebM intake and WebM output are not supported in 2.3. PDF pages are rasterized. [Media limits](docs/native/MEDIA.md).
+
+The app is ad-hoc signed, **not notarized**. The release includes matching DMG/ZIP downloads, validation evidence, checksums and corresponding codec source. This software uses FFmpeg under LGPL-2.1-or-later and libvpx under its retained license; see [notices](THIRD_PARTY_NOTICES.md) and the release's codec-source ZIP.
 
 ## Develop
 
 ```sh
+bash scripts/native/build-codecs.sh
 swift test --package-path native
 bash scripts/native/package.sh
 ```
 
-App builds and native integration tests require an Apple-silicon Mac with a compatible Swift toolchain. `native/VERSION` is authoritative. Historical JavaScript/Electron source, ateliers and their old reports are retained as reference, not a second product or build requirement. [Contributing](CONTRIBUTING.md) · [Documentation map](docs/README.md) · [License](LICENSE)
+Development requires an Apple-silicon Mac, Xcode/Metal tools, Python 3, Git, Make and pkg-config. The released app needs none of those tools. `native/VERSION` is authoritative. [Engineering and validation](docs/native/ENGINEERING.md) · [2.3 release notes](docs/releases/v2.3.0.md) · [Contributing](CONTRIBUTING.md).
+
+Historical JavaScript/Electron source and atelier reports remain as credited reference, not another product or a runtime requirement. [Documentation map](docs/README.md) · [License](LICENSE).

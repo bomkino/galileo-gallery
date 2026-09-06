@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.3.0 — 6 September 2026
+
+- Still/animated WebP validation; local SDR VP8/VP9 WebM preparation with original retention, alpha and variable frame timing.
+- Source-clip filmstrip/audition, trims/loop/freeze, live appearance editing, stable time/selection, honest crop locks and in-context background audition.
+- Corrected opening/reverse, repeat closing, short Reel/Wave continuity, manifest write/read bounds, PDF recovery and stale import ownership.
+- Reused sequential source frames and indexed animation timing; GPU crop/mask/fragment work, resolution-aware resources and bounded readers/caches.
+- Packaged transparent-WebM/animated-WebP save/reopen/spotlight/export checks; corresponding codec source and a normal-quit, rollback-preserving installer. Silent Mac-only product. See [release notes](docs/releases/v2.3.0.md).
+
 ## 2.2.0
 
 - Native import of Drift's background atlas and palettes, with independent controls, saved state and deterministic preview/export rendering.

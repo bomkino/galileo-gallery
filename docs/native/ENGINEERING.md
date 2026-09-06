@@ -1,49 +1,62 @@
-# Native implementation and validation
+# Native implementation and validation — 2.3
 
-## Product boundary
+## Ownership
 
-The shipping product is `native/`: Apple silicon, macOS 14+. `native/VERSION` is authoritative. Historical npm/Electron code and platform adapters are references, not active products or build dependencies. Sound is deliberately outside the product; do not add soundtrack/source-audio interfaces or audio output tracks. Preserve imported originals rather than stripping their audio streams destructively.
+The shipping source is `native/`: Apple silicon, macOS 14+. `native/VERSION` is authoritative. GalileoCore owns versioned state, validated schedules, geometry, source time and media budgets. GalileoNative owns media, immutable render snapshots, compatibility preparation, Core Image composition and AVFoundation picture export. GalileoGallery owns NSDocument, SwiftUI controls, transport and temporary audition.
 
-`GalileoCore` owns versioned document state, frame scheduling, scene geometry, source time, spotlight and closing cues, common media budgets and frame ranges. `GalileoNative` owns media copies, integrity, PDF intake, immutable render snapshots, Core Image composition and AVFoundation picture export. `GalileoGallery` owns AppKit documents, SwiftUI controls, selection, transport and audition.
+Schema 7 reads schemas 3–6 in memory. Legacy ZIPs become separate documents with conversion notes. Source audio is preserved only inside original files; sound controls, decoding and output are deliberately absent. Historical Electron/React code is reference, not a second runtime or product.
 
-Schema 6 reads schemas 3–5 through explicit in-memory migration. Legacy ZIP projects become separate native copies. Migration notes distinguish preserved and translated intent; old manifests are traceability, not proof of equivalent choreography.
+## Project and transaction boundaries
 
-## Project and output safety
+Import adoption, save and reopen share the same budgets: originals 512 MiB/file and 4 GiB unique; derived working files 4 GiB/file and 16 GiB aggregate. Both writing and reading enforce the actual 8 MiB encoded-manifest limit, including UTF-8/escaping overhead. Invalid or oversized content is rejected before a destination is replaced.
 
-Editor transactions update immutable save snapshots and native change counts. The private content undo manager does not also use NSDocument's automatic undo notification counting. Edits, grouped changes, undo and redo are counted once. Successful native save/autosave clears only its save boundary. The packaged-app journey checks undo back to saved content, a failed save, autosave and reopen.
+Editor transactions and the document change count are coordinated; native undo notification counting is not duplicated. One gesture stores its before-state once. Async imports and file-provider drops carry generation/ownership checks, preserve order, and report per-file failures. Closing/replacing a document cancels adoption rather than moving a late result into another state.
 
-`MediaBudget` is shared by import adoption, saving and opening: 512 MiB per file, 4 GiB unique managed media; original PDFs and preserved visual assets count. The per-file and aggregate checks happen before accepting a batch. Recovery requires a valid manifest; unresolved source rows retain their identity and settings. Export rejects unresolved included sources. Source paths, checksums, package entries and ZIP boundaries remain validated.
+Originals are independently copied, using APFS copy-on-write clones where available, never hard-linked to user files. Integrity caches require a freshly read identical device/inode/size/mtime/ctime stamp. Recovery distinguishes a missing archived original from a missing working picture: an intact PDF page remains usable. Malformed/unsafe documents are not opened as permissive recovery. Unresolved included pictures cannot silently export.
 
-Owned media uses independent APFS copy-on-write clones where available, otherwise copies. Never hard-link saved documents to editable originals. Workspace-scoped integrity caches are valid only for an identical, freshly read device/inode/size/mtime/ctime stamp. Fallback copies are rehashed; changed sources prevent publication. A save checks space conservatively even on clone-capable volumes.
+Queued exports keep immutable snapshots and media ownership after the document window closes. The serial queue has at most four waiting jobs. Output ranges use document time but movie timestamps start at zero. Completed movies are decoded for timing/frame-count checks before destination publication; fresh destination identity protects concurrent external changes. No automatic poster sidecar.
 
-Exports retain a project snapshot and a source-frame interval. Output timestamps start at zero; source timing stays on the document clock. Movie/sequence work is capped at 216,000 frames; canvas/layer limits remain explicit. The queue is serial, accepts at most four waiting jobs and rejects duplicate destinations. Cancellation before commit preserves the prior file; publication checks fresh destination identity. No automatic poster sidecar is created.
+## Media and performance
 
-## Rendering and performance
+`SourceFrames` keeps an AVAssetReader's current and lookahead samples, reuses the image while the requested time is inside that sample's interval, and resets for backward/large seeks. It is worker-owned, not shared mutable reader state. Animated image timing is indexed once and searched by interval. Mutable video readers are bounded to eight / an estimated 256 MiB per worker; animation indexes to sixteen. Those estimates are not a hard total-process memory cap.
 
-Preview scales geometry, image decoding, artwork preparation, captions and shadows to the requested viewport resolution before composition. At 100% it requests output-resolution pixels. One render runs per preview worker; only the newest pending frame is retained. Revision tokens discard stale output. Selection uses the geometry of the displayed frame and clips wipes/slices before hit testing.
+A shared CIContext and immutable caches avoid per-window duplicates. NSCache decoded-image / prepared-caption targets are 128/64 MiB, with counts and pressure flushing. Memory-pressure epochs clear worker media readers at the next render boundary. Temporary objects drain per frame. Minimized windows stop scheduling new preview renders and repaint when restored.
 
-A process-shared, thread-safe CIContext and immutable-image caches avoid duplicating those resources for each window. Decoded/prepared image eviction targets are 128/64 MiB, with count limits and memory-pressure clearing. These are NSCache targets, not hard total-memory guarantees. Mutable video generators remain worker-local and bounded. A frame's temporary objects are drained within an autorelease pool. Off-canvas layers are culled before bitmap preparation.
+Source-image requests account for projected size and crop magnification in resolution tiers. This reduces prepared images, not necessarily a codec's full-source decode allocation. Crop, fill, rounded masks, reveals and fragments now use Core Image transformations rather than a new full-card CPU bitmap per fragment. Captions remain separately prepared and cached. Movie composition continues directly into encoder buffers. The logical output coordinates and original drift-background clock are retained.
 
-Movies render the composition directly into the encoder pixel buffer; they no longer allocate a full-frame CGImage followed by another CGContext copy. Exact-time source seeking remains AVAssetImageGenerator-based. A sequential decoder was not introduced without a separate media-format/lifecycle comparison. This is a remaining profiling opportunity, not a claim of full-rate playback for arbitrary multi-video projects.
+The first source-frame interval regression makes fifteen output requests and asserts one prepared image with only current/lookahead decoding; forward/backward requests then check correctness after reuse. The hosted Mac sample logs elapsed time, preparation size and renderer for twelve 4K-canvas/640-preview frames. It is not an M2-mini/M1-Pro benchmark or a universal performance claim.
 
-The release's tests log a reproducible 4K-canvas/640-pixel-preview sample, elapsed time, largest prepared layer and backend. CI uses a hosted/paravirtual Apple-silicon GPU: those numbers are not measurements of an 8 GB M2 Mac mini or M1 Pro MacBook Pro, and do not certify a universal speedup. Real-device sustained memory, scrubbing and export measurements remain useful.
+Heavy media work stays off the interface thread. Some AVAssetReader setup uses deprecated synchronous metadata getters on its worker; an async API migration remains engineering debt, not a hidden main-thread performance claim. Reader budgets, concurrent preparation and cache targets still need representative multi-window/long-session profiling on physical machines.
 
-## Checks tied to actual risks
+## Native compatibility tools
 
-`swift test --package-path native` covers common timing/geometry and Mac filesystem/media/output contracts. The 2.1 regressions cover the thirteenth orbit image, Orrery source identity, Vitrine departure, paged loop handoffs, assembled Build spotlights, clipped hit testing, replacement trims, managed-media budgets, recovery/relink, independent saved copies, PDF pages/original preservation, output ranges, serial jobs and transparent ProRes output.
+`build-codecs.sh` fetches exact FFmpeg/libvpx revisions, enables only local file/pipe protocols and required picture functions, and verifies arm64 plus system-only dynamic dependencies. GPL/nonfree FFmpeg configuration switches are not enabled. Source archives, configuration, licenses, binary hashes and build recipe are supplied with the release. This is a pinned build recipe, not a claim of byte-identical compilation across different toolchains.
 
-The independently encoded three-second video still must loop in an eight-second centre hold, survive save/reopen and agree with independently decoded export pixels. Its explicit Rec.709 fixture tags and original pixel thresholds are retained.
+The packaged app accepts tools only from its own resources. Source-tree tests may use `native/.codecs`, but a broken app does not fall back to PATH/Homebrew. Process arguments are arrays, not shell strings; time/output/diagnostic caps, disk checks and cancellation apply. WebM originals and ProRes working copies have distinct hashes and a versioned recipe. See [Media](MEDIA.md) for codec/colour boundaries.
 
-The packaged application's `--smoke <empty-directory>` opens a real native window and exercises import, edits, undo/redo, successful and failed saving, autosave, close/reopen, painted playback, cue navigation, native-pixel zoom and export. It captures populated light/dark/spotlight, mixed-selection and framing surfaces and renders synthetic samples of every variant. Screenshots support visual review; they are not export proof. Movie decoding is separate.
+## Validation and release
 
-The release job identifies its exact source SHA and machine, runs those checks, verifies the mounted DMG's signature/architecture/binary identity and publishes matching assets and checksums. It does not publish from a failing run. The validation ZIP is synthetic and contains no client media.
+Build dependencies on a developer Mac: compatible Xcode/Metal tools, Python 3, Git, Make and pkg-config. The released application needs none of them. Build the pinned helpers once, then run:
+
+```sh
+bash scripts/native/build-codecs.sh
+swift test --package-path native
+bash scripts/native/package.sh /tmp/galileo-check
+GALILEO_MEDIA_FIXTURES="$PWD/native/Tests/GalileoNativeTests/Fixtures" "/tmp/galileo-check/Galileo Gallery.app/Contents/MacOS/GalileoGallery" --smoke /tmp/galileo-journey
+```
+
+Use new package/journey directories. Checks cover the concrete timing/recovery/manifest cases, independent WebP animation references, WebM alpha/VFR/persistence, source-frame reuse, shared crop geometry, live editing and cancellation. Fixture generation is maintenance-only; Pillow and an encoder-enabled FFmpeg are not app dependencies. `scripts/native/generate-media-fixtures.py` records the fixture recipe.
+
+The actual packaged journey additionally imports transparent WebM plus animated WebP, authors an eight-second centre hold, saves/reopens the NSDocument, inspects the source sheet, and exports 192 frames after closing the editor window. Independently decoded pictures must match preview within the retained threshold, loop at the expected phase, and contain no audio. The prior 62-frame journey and 72 packaged Drift-background renders remain separate checks.
+
+`release.yml` checks the exact source, tests, package journey, mounted DMG/ZIP contents, embedded helper identity and corresponding source before publishing a matching tag/assets. Validation contains synthetic data only. Temporary integration workflows are removed after promotion; old releases, tests and authorship remain.
 
 ## Deliberate limits
 
-No sound, browser product, non-Mac build, Intel build, cloud account or automatic updater. No WebM or HDR mastering guarantee. Current composition prepares 8-bit sRGB artwork before Rec.709 output conversion. Native choreography is not legacy pixel parity. PDF pages are raster images with preserved originals, not editable text or vectors.
+No sound, Intel/Linux/Windows/browser product, cloud service, automatic updater, WebM export, AV1/HDR WebM intake or HDR mastering guarantee. UI screenshots are visual evidence, not a substitute for human VoiceOver/long-session/physical-hardware acceptance. Full legacy choreography equivalence is not claimed. Optional A/B comparison and new lens/halation effects are not part of this media-and-correctness release.
 
-Distribution is ad-hoc signed, not notarized. CI is not comprehensive human VoiceOver acceptance, long-session testing or all hardware/display coverage. Keep rollback copies of projects. Read the current release notes rather than treating historical atelier/programme reports as shipping claims.
+The release is ad-hoc signed, not Developer ID signed or notarized. Keep original projects before a schema upgrade. A successful suite does not establish that every possible bug is fixed.
 
-## Drift shader import
+## Drift provenance
 
-Pinned source, license and hashes: `native/Vendor/DriftBackgrounds`. Regenerate offline with `python3 scripts/native/generate-drift-backgrounds.py`. `package.sh` precompiles Core Image Metal into the app; SwiftPM tests load the same bundled Metal source once. No new network/build service or browser runtime is required. Shader errors stop the affected render/export rather than silently substituting a flat colour. Old schema 5 backgrounds migrate without changing native solid/gradient values. Background parameters have a separate algorithm version and reject unknown versions.
+Pinned original code, licensing and hashes live in `native/Vendor/DriftBackgrounds`. Regenerate with `python3 scripts/native/generate-drift-backgrounds.py` without contacting upstream. Packaging precompiles Core Image Metal; tests use the same generated source. A shader failure is reported, not replaced by an unrelated flat background. This release does not modify Drift itself.

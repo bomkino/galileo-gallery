@@ -4,7 +4,7 @@
 
 Galileo Gallery's native application is distributed under the repository's GPL-3.0 license, combined with the AGPL-3.0-or-later Drift background component described below. It uses Apple SDKs and system frameworks including AppKit, SwiftUI, Core Image, Metal, AVFoundation, ImageIO, CoreText, CoreGraphics and UniformTypeIdentifiers. Apple frameworks and system fonts are supplied by macOS; this app does not redistribute font files.
 
-The `CZlib` module binds the operating system's zlib for legacy archive decompression. zlib is supplied by the operating system, not copied into the bundle. The native distribution contains the application, app icon, help, source identity and license/notices. It does not bundle Electron, Chromium, WebKit, React, FFmpeg, npm dependencies, web fonts or Phosphor React assets.
+The `CZlib` module binds the operating system's zlib for legacy archive decompression. zlib is supplied by the operating system, not copied into the bundle. The native distribution contains the application, app icon, help, source identity and license/notices. It does not bundle Electron, Chromium, WebKit, React, npm dependencies, web fonts or Phosphor React assets.
 
 The native source builds on the project's authored scene research and preserves legacy scene identities and manifests. New native choreography is not claimed to be an exact rendering of the original evaluators. Git history and the `scene-ateliers/` sources preserve authorship and provenance.
 
@@ -21,3 +21,13 @@ App identity artwork remains governed by its existing repository license or a fi
 The background catalogue, palette definitions and shader algorithms are adapted from `bomkino/pitchdog-drift` at `340b5f631c9147890bc775c86a71af315dd17929`. Copyright (C) 2026 pitch.dog and contributors. Drift's software is AGPL-3.0-or-later; its license and NOTICE are retained under `native/Vendor/DriftBackgrounds/` and bundled as `Drift-AGPL-3.0.txt` and `Drift-NOTICE.txt`. The derived catalogue and Metal shader remain AGPL-3.0-or-later. GPLv3 and AGPLv3 section 13 permit this combination; the AGPL network-interaction requirements apply to the combination if it is later provided for remote use. Galileo remains an offline native desktop app.
 
 The repository and release source archive provide the corresponding source, including the pinned original GLSL/TypeScript, file hashes, generated Metal/Swift, and the offline conversion/build scripts. No Three.js, web runtime, original demo artwork or font binaries are copied into the application. Names, colours, preset parameters and all nine shader families are retained. The native adaptation uses Galileo's frame/cycle clock, precompiled Core Image Metal, explicit sRGB conversion and premultiplied output. The original algorithms remain attributable to Drift; this port does not transfer authorship.
+
+## Local WebM compatibility tools (2.3 and later)
+
+This software uses FFmpeg 8.1.2 under LGPL-2.1-or-later and libvpx 1.15.2 under its retained BSD-style license and patent notice. Copyright remains with the respective FFmpeg/libvpx contributors. The exact revisions are `38b88335f99e76ed89ff3c93f877fdefce736c13` and `d168454ecd099805c675d4a98c66f4891373302a`. These are standalone, statically built helper executables; Galileo does not link their libraries into its own executable. The configuration does not enable GPL/nonfree components or network protocols.
+
+The app bundles `MediaTools/ffmpeg`, `MediaTools/ffprobe`, their build identity, and `CodecLicenses/` with the original FFmpeg LGPL, libvpx LICENSE and PATENTS texts. macOS supplies zlib and other system libraries. No ownership is claimed over upstream code, and no reverse-engineering restriction is added.
+
+The matching release includes `Galileo.Gallery-2.3.0-codec-source.zip`: the exact unmodified source archives, generated configuration, license texts, hashes, and `build-codecs.sh` recipe. It is hosted alongside the binary downloads at https://github.com/bomkino/galileo-gallery/releases/tag/v2.3.0. The recipe identifies build prerequisites and exact fetch revisions; all media preparation in the installed app is offline.
+
+The fixture-generation script uses separately installed developer tools only to author small synthetic test files. Those tools are not additional shipping runtime dependencies. ImageIO handles WebP; this release does not redistribute libwebp.

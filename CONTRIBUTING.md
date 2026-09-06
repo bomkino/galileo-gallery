@@ -1,27 +1,26 @@
 # Contributing
 
-The active product is a native Apple-silicon Mac app. Keep changes focused on a demonstrated user need or defect. Preserve project data, source media, authored intent, credits and a reversible migration path.
+The active product is a native Apple-silicon Mac app. Keep changes focused on a demonstrated need or defect. Preserve projects, originals, authored intent, credits and reversible migration.
 
 ## Development
 
-On an Apple-silicon Mac with Xcode command-line tools:
+On an Apple-silicon Mac with compatible Xcode/Metal tools, Python 3, Git, Make and pkg-config:
 
 ```sh
+bash scripts/native/build-codecs.sh
 swift test --package-path native
-bash scripts/native/package.sh release-native
-open "release-native/Galileo Gallery.app"
+bash scripts/native/package.sh /tmp/galileo-build
+open "/tmp/galileo-build/Galileo Gallery.app"
 ```
 
-Use a new output folder for each package build. No npm or FFmpeg installation is needed for the native app. The old web/Electron source is retained for reference, not as a second shipping product.
+Use new output folders. The first helper build fetches pinned source and caches its products; the installed application requires no developer tools, Homebrew or network conversion. Historical web/Electron source is reference, not another shipping product.
 
 ## Changes and proof
 
-Trace a failing behaviour to the narrowest useful boundary. Keep a regression test for a real failure; do not add counts, hashes or screenshots as substitutes for the actual claimed behaviour. Run the packaged application when changing document lifecycle, UI or export. Check decoded output for video changes. Use synthetic or explicitly approved media, never client projects in public CI artifacts.
+Trace failures to the narrowest useful boundary. Keep regressions for real failures; counts, hashes and screenshots alone do not prove user-visible behaviour. Exercise the packaged app when changing lifecycle, UI or export. Independently decode movie output. Use synthetic or approved fixtures, never client work in public artifacts.
 
-Document the exact tested commit and Mac. State what remains untested. Do not hide failures, relax an assertion to obtain green CI without a demonstrated test defect, or claim native production readiness from a successful compiler run.
+Document the exact commit and Mac. Do not hide a failed run, weaken a correct assertion to get green, or claim performance on hardware that was not measured. Centre holds and source-video playback are independent. Preserve readability and coherent motion; interface appearance must not grade the artwork.
 
-A scene must preserve source readability, coherent depth, deliberate holds and continuity. Centre spotlights and source-video playback are independent. Interface appearance must not grade the artwork. Keep the UI quiet while retaining labels, units, keyboard access and actionable errors.
+New state must survive save/reopen and undo/redo. A release must include matching version/tag/assets/checksums, updated format boundaries, and corresponding codec source. Do not force-push published tags or erase historical evidence. Sound, other platforms and new rendering engines require a new product decision, not opportunistic expansion.
 
-New features should work through save/reopen and undo/redo before release. Release assets must match the source, version and checksums. Never force-push a published tag or erase historical evidence to make status look cleaner.
-
-Contributions remain licensed under GPL-3.0-or-later. [Engineering boundary](docs/native/ENGINEERING.md).
+Contributions remain licensed under GPL-3.0-or-later unless an existing file-specific license governs the modified component. Retain Drift's AGPL notices and upstream decoder licenses. [Engineering](docs/native/ENGINEERING.md) · [Notices](THIRD_PARTY_NOTICES.md).
