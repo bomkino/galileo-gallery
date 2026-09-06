@@ -141,7 +141,16 @@ public enum NativeExport {
         writer.add(input)
         guard writer.startWriting() else { throw writer.error ?? GalleryError.invalid("The video writer could not start.") }
         writer.startSession(atSourceTime:.zero)
-        let rec709=CGColorSpace(name:CGColorSpace.itur_709)!
+        // Use the same transfer curve Core Video reconstructs from the movie tags.
+        // The named BT.709 ICC profile and decoded HDTV profile are not identical.
+        let videoColourAttachments: [String: Any] = [
+            kCVImageBufferColorPrimariesKey as String: kCVImageBufferColorPrimaries_ITU_R_709_2,
+            kCVImageBufferTransferFunctionKey as String: kCVImageBufferTransferFunction_ITU_R_709_2,
+            kCVImageBufferYCbCrMatrixKey as String: kCVImageBufferYCbCrMatrix_ITU_R_709_2
+        ]
+        guard let rec709 = CVImageBufferCreateColorSpaceFromAttachments(videoColourAttachments as CFDictionary)?.takeRetainedValue() else {
+            throw GalleryError.invalid("The video output colour space could not be created.")
+        }
         do {
             for frame in 0..<range.count {
                 try Task.checkCancellation()
@@ -156,13 +165,10 @@ public enum NativeExport {
                     guard let pool=adaptor.pixelBufferPool else { throw GalleryError.invalid("The video pixel buffer pool is unavailable.") }
                     var pixelBuffer:CVPixelBuffer?
                     guard CVPixelBufferPoolCreatePixelBuffer(nil,pool,&pixelBuffer)==kCVReturnSuccess,let buffer=pixelBuffer else { throw GalleryError.invalid("Not enough memory for the video frame.") }
-                    // The pool may supply an RGB profile unrelated to the output tags.
-                    // These bytes are rendered as Rec.709; tell the encoder the same.
+                    // Keep pool metadata and rendered pixel encoding in agreement.
                     CVBufferRemoveAttachment(buffer, kCVImageBufferICCProfileKey)
+                    CVBufferSetAttachments(buffer, videoColourAttachments as CFDictionary, .shouldPropagate)
                     CVBufferSetAttachment(buffer, kCVImageBufferCGColorSpaceKey, rec709, .shouldPropagate)
-                    CVBufferSetAttachment(buffer, kCVImageBufferColorPrimariesKey, kCVImageBufferColorPrimaries_ITU_R_709_2, .shouldPropagate)
-                    CVBufferSetAttachment(buffer, kCVImageBufferTransferFunctionKey, kCVImageBufferTransferFunction_ITU_R_709_2, .shouldPropagate)
-                    CVBufferSetAttachment(buffer, kCVImageBufferYCbCrMatrixKey, kCVImageBufferYCbCrMatrix_ITU_R_709_2, .shouldPropagate)
                     try renderer.render(snapshot:snapshot,frame:range.start+frame,into:buffer,colorSpace:rec709)
                     let timestamp=CMTime(value:frame*schedule.rate.denominator,timescale:Int32(schedule.rate.numerator))
                     guard adaptor.append(buffer,withPresentationTime:timestamp) else { throw writer.error ?? GalleryError.invalid("The video frame could not be encoded.") }
