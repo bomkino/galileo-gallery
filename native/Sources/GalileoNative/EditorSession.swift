@@ -17,6 +17,7 @@ import GalileoCore
     @Published public var framingMediaID: String? = nil
     @Published public var mediaQuery = ""
     @Published public var choosingScene=false
+    @Published public var choosingBackground=false
     @Published public var choosingExport=false
     public private(set) var workspace:Workspace
     public var undoManager:UndoManager?

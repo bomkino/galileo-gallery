@@ -15,7 +15,17 @@ public enum DriftBackgroundRenderer {
         guard let url = Bundle.module.url(forResource: "DriftBackgrounds", withExtension: "metal", subdirectory: "Resources") else {
             throw GalleryError.missing("The native Drift background renderer is missing. Reinstall Galileo Gallery.")
         }
-        let kernels = try CIKernel.kernels(withMetalString: String(contentsOf: url, encoding: .utf8))
+        // Core Image runtime compilation requires stitchable linkage; the shipping
+        // metallib uses -fcikernel instead. Keep the equations identical in both paths.
+        var source = try String(contentsOf: url, encoding: .utf8)
+        let linkage = "extern \"C\" { namespace coreimage {"
+        guard source.contains(linkage), source.hasSuffix("}}\n") else {
+            throw GalleryError.invalid("The native background kernel has an unsupported entry point.")
+        }
+        source = source.replacingOccurrences(of: linkage, with: "using namespace coreimage;")
+        source.removeLast(3)
+        source = source.replacingOccurrences(of: "float4 driftBackground(", with: "[[stitchable]] float4 driftBackground(")
+        let kernels = try CIKernel.kernels(withMetalString: source)
         guard let kernel = kernels.first else { throw GalleryError.invalid("The native background kernel could not be loaded.") }
         return kernel
     }

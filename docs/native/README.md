@@ -1,4 +1,4 @@
-# Use Galileo Gallery 2.1
+# Use Galileo Gallery 2.2
 
 ## Add media
 
@@ -38,7 +38,7 @@ Use native Save, Save As and Revert. Autosave is managed through the Mac documen
 
 If required media is missing or damaged, choose **Open Recovery Copy**. Use **Locate original…** for a fingerprint-matching file or **Replace…** for different artwork. Order, framing and spotlight intent stay attached to the slide. Save the repaired copy separately. An unresolved included source blocks export; excluding it is an explicit choice, not a silent omission. Malformed manifests and unsafe paths remain rejected.
 
-2.0 native documents (schemas 3/4) are upgraded in memory to schema 5. Save a copy before opening it in 2.1 when rollback matters. Legacy ZIP projects open separately and keep their original manifest and visual assets for traceability. Read the conversion notes: translated spotlights, opening/closing and unsupported settings are not pixel-identical reconstruction. Standalone soundtrack files are not imported; the original archive is untouched.
+Native documents from 2.0 and 2.1 (schemas 3–5) are upgraded in memory to schema 6. Keep a copy before saving in 2.2 when rollback matters; older apps cannot read a new 2.2 save. Legacy ZIP projects open separately and keep their original manifest and visual assets for traceability. Read the conversion notes: translated spotlights, opening/closing and unsupported settings are not pixel-identical reconstruction. Standalone soundtrack files are not imported; the original archive is untouched.
 
 ## Export
 

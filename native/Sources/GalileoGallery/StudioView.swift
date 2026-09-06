@@ -51,6 +51,11 @@ struct StudioView:View {
         }
         .frame(minWidth:900,minHeight:600)
         .sheet(isPresented:$session.choosingScene) { SceneChooser(session:session) }
+        .sheet(isPresented:$session.choosingBackground) {
+            DriftBackgroundBrowser(currentID:session.project.canvas.drift?.studyID ?? DriftBackgroundCatalog.studies[0].id) { study in
+                session.commit("Choose Drift background") { p in p.canvas.background = .drift; p.canvas.drift = study.settings }
+            }
+        }
         .sheet(item:Binding(get:{session.framingMediaID.map{FramingSelection(id:$0)}},set:{session.framingMediaID=$0?.id})) { item in FramingEditor(session:session,itemID:item.id) }
         .sheet(isPresented:$session.choosingExport) { ExportOptions(session:session,frame:playback.frame) }
         .onChange(of:session.revision) { playback.update(session.snapshot.plan) }

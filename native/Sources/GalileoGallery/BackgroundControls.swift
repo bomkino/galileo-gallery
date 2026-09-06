@@ -5,16 +5,12 @@ import GalileoNative
 
 struct BackgroundControls: View {
     @ObservedObject var session: EditorSession
-    @State private var browsing = false
     private var settings: DriftBackground { session.project.canvas.drift ?? DriftBackgroundCatalog.studies[0].settings }
     var body: some View {
         VStack(alignment:.leading,spacing:12) {
             Picker("Background",selection:Binding(get:{session.project.canvas.background},set:{ kind in
-                session.commit("Change background") { p in
-                    p.canvas.background = kind
-                    if kind == .drift && p.canvas.drift == nil { p.canvas.drift = DriftBackgroundCatalog.studies[0].settings }
-                }
-                if kind == .drift { browsing = true }
+                if kind == .drift { session.choosingBackground = true }
+                else { session.commit("Change background") { $0.canvas.background = kind } }
             })) {
                 Text("Solid").tag(BackgroundKind.solid)
                 Text("Gradient").tag(BackgroundKind.gradient)
@@ -25,7 +21,7 @@ struct BackgroundControls: View {
                 HStack {
                     Text(settings.study?.name ?? "Drift").font(.callout).lineLimit(1)
                     Spacer()
-                    Button("Browse…") { browsing = true }.accessibilityLabel("Browse Drift backgrounds")
+                    Button("Browse…") { session.choosingBackground = true }.accessibilityLabel("Browse Drift backgrounds")
                 }
                 Picker("Palette",selection:Binding(get:{settings.paletteID ?? "custom"},set:{ id in
                     guard let palette = DriftBackgroundCatalog.palettes.first(where:{$0.id == id}) else { return }
@@ -59,10 +55,6 @@ struct BackgroundControls: View {
                     ColorPicker("Second colour",selection:canvasColor(\.secondaryColor),supportsOpacity:false)
                     NumberControl(label:"Angle",value:Binding(get:{session.project.canvas.gradientAngle},set:{ v in session.commit("Change gradient"){$0.canvas.gradientAngle=v} }),range: -180...180,unit:"°",begin:{session.beginGesture("Change gradient")},end:session.endGesture)
                 }
-            }
-        }.sheet(isPresented:$browsing) {
-            DriftBackgroundBrowser(currentID:settings.studyID) { study in
-                session.commit("Choose Drift background") { p in p.canvas.background = .drift; p.canvas.drift = study.settings }
             }
         }
     }

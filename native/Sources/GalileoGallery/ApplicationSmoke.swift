@@ -95,6 +95,16 @@ import GalileoNative
             try await Task.sleep(nanoseconds:200_000_000)
             try capture(restoredWindow,to:directory.appendingPathComponent("spotlight-inspector.png"))
         }
+        // The browser belongs to the document window, not a disappearing inspector subtree.
+        let beforeBrowse=restored.project
+        restored.choosingBackground=true
+        try await wait {restoredWindow.attachedSheet != nil}
+        for study in DriftBackgroundCatalog.studies.prefix(9) { _=try await DriftBackgroundThumbnails.shared.image(for:study) }
+        try await Task.sleep(nanoseconds:200_000_000)
+        if let sheet=restoredWindow.attachedSheet {try capture(sheet,to:directory.appendingPathComponent("drift-background-browser.png"))}
+        restored.choosingBackground=false
+        try await wait {restoredWindow.attachedSheet==nil}
+        guard restored.project==beforeBrowse else {throw GalleryError.invalid("Background browsing changed the document without applying a selection.")}
         // Inspect new editing surfaces in the real document, not mock previews.
         if let first=restored.snapshot.plan.spotlights.first {
             transport.seek(0);transport.jumpCue(restored.snapshot.plan.spotlights,direction:1)
@@ -146,7 +156,7 @@ import GalileoNative
         let receipt=try await Task.detached {try await NativeExport.run(snapshot:snapshot,destination:ExportDestination(url:movieURL),stillFrame:0){_,_ in}}.value
         guard receipt.scheduledFrames==62,receipt.decodedFrames==62 else{throw GalleryError.invalid("The actual native movie failed its frame count proof.")}
         try JSONEncoder().encode(receipt).write(to:directory.appendingPathComponent("export-receipt.json"))
-        let summary:[String:Any]=["driftBackgroundSavedAndReopened":true,"spotlightNavigation":true,"nativePixelZoom":true,"framingSheet":true,"previewAdvancesDuringPlayback":true,"documentRoundTrip":true,"documentEditedState":true,"failedSavePreservesChanges":true,"nativeAutosave":true,"spotlightSavedAndReopened":true,"importUndoRedo":true,"sceneUndoRedo":true,"nativeMovieDecodedFrames":62,"sceneSamples":visualEvidence,"operatingSystem":ProcessInfo.processInfo.operatingSystemVersionString,"version":Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "development"]
+        let summary:[String:Any]=["backgroundBrowserCancelPreservesDocument":true,"driftBackgroundSavedAndReopened":true,"spotlightNavigation":true,"nativePixelZoom":true,"framingSheet":true,"previewAdvancesDuringPlayback":true,"documentRoundTrip":true,"documentEditedState":true,"failedSavePreservesChanges":true,"nativeAutosave":true,"spotlightSavedAndReopened":true,"importUndoRedo":true,"sceneUndoRedo":true,"nativeMovieDecodedFrames":62,"sceneSamples":visualEvidence,"operatingSystem":ProcessInfo.processInfo.operatingSystemVersionString,"version":Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "development"]
         try JSONSerialization.data(withJSONObject:summary,options:[.prettyPrinted,.sortedKeys]).write(to:directory.appendingPathComponent("journey.json"))
         _=window;_=playback
         print("NATIVE JOURNEY PASS: import, undo, redo, edit, save, close, reopen, scrub, render, export, decode")

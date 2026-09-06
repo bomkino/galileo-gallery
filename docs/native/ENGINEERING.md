@@ -6,7 +6,7 @@ The shipping product is `native/`: Apple silicon, macOS 14+. `native/VERSION` is
 
 `GalileoCore` owns versioned document state, frame scheduling, scene geometry, source time, spotlight and closing cues, common media budgets and frame ranges. `GalileoNative` owns media copies, integrity, PDF intake, immutable render snapshots, Core Image composition and AVFoundation picture export. `GalileoGallery` owns AppKit documents, SwiftUI controls, selection, transport and audition.
 
-Schema 5 reads schemas 3/4 through explicit in-memory migration. Legacy ZIP projects become separate native copies. Migration notes distinguish preserved and translated intent; old manifests are traceability, not proof of equivalent choreography.
+Schema 6 reads schemas 3–5 through explicit in-memory migration. Legacy ZIP projects become separate native copies. Migration notes distinguish preserved and translated intent; old manifests are traceability, not proof of equivalent choreography.
 
 ## Project and output safety
 

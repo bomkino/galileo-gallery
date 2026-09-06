@@ -21,7 +21,9 @@ After attempting to open the app, use **System Settings → Privacy & Security �
 
 Use **Add** to import media. Select **Scene** to choose a composition. To hold a particular slide at the centre, select it in the Media list and enable **Bring to centre** in its inspector. Adjust Hold and Size. A video remains a regular frame; keep **Play source** and **Loop source** enabled to loop it during the hold.
 
-Use **File → Save** to create a native `.galileo` document. Opening a ZIP-based legacy project makes a separate native copy and does not overwrite the legacy original. Save that copy with a different name. Native choreography can differ from old exports. Movies are silent by design. In 2.1 you can also import PDF pages, preview a selected spotlight, visually frame media, and queue range exports.
+Use **File → Save** to create a native `.galileo` document. Opening a ZIP-based legacy project makes a separate native copy and does not overwrite the legacy original. Save that copy with a different name. Native choreography can differ from old exports. Movies are silent by design. You can also import PDF pages, preview a selected spotlight, visually frame media, and queue range exports.
+
+For Drift backgrounds, use **Scene inspector → Canvas → Background → Drift**. Browse the studies and choose **Use background**. Cancelling the browser leaves your composition unchanged.
 
 ## Optional download verification
 
@@ -29,10 +31,8 @@ The release includes `SHA256SUMS.txt`. A checksum proves a download matches that
 
 ## Project compatibility
 
-Version 2.1 reads older native documents but saves schema 5. Keep a copy before saving: 2.0 cannot read the new schema. A recovery copy never repairs the original in place.
+Version 2.2 reads older native documents but saves schema 6. Keep a copy before saving: 2.0 and 2.1 cannot read the new schema. A recovery copy never repairs the original in place.
 
 ## Roll back
 
 Quit the new app and restore the archived older app. Open an untouched older project. Do not expect a version-2 native project package to open in the old Electron app.
-
-Projects saved by 2.2 use schema 6 and cannot be read by 2.1. Keep earlier project copies before saving an upgraded document.
