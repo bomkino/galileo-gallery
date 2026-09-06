@@ -31,6 +31,7 @@ struct NativePreview:NSViewRepresentable {
     private var ticket=UUID()
     private var pending:(snapshot:RenderSnapshot,revision:Int,frame:Int64)?
     private var renderedCanvas:GalileoCore.Canvas?
+    private var visibilityObserver:NSObjectProtocol?
     var zoom=0.0 {didSet{if zoom != oldValue {pan = .zero;requestedFrame = -1;needsDisplay=true}}}
     private var pan=CGPoint.zero
     var selection:Set<String>=[] { didSet { if oldValue != selection { needsDisplay=true } } }
@@ -42,8 +43,19 @@ struct NativePreview:NSViewRepresentable {
     convenience init() { self.init(frame:.zero) }
     required init?(coder:NSCoder) { fatalError("Programmatic view") }
     func stop() {
+        if let visibilityObserver {NotificationCenter.default.removeObserver(visibilityObserver);self.visibilityObserver=nil}
         pending=nil;ticket=UUID();task?.cancel()
         requestedRevision = -1;requestedFrame = -1
+    }
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        if let visibilityObserver {NotificationCenter.default.removeObserver(visibilityObserver);self.visibilityObserver=nil}
+        if let window {
+            visibilityObserver=NotificationCenter.default.addObserver(forName:NSWindow.didDeminiaturizeNotification,object:window,queue:.main) { [weak self] _ in
+                MainActor.assumeIsolated {self?.renderNext()}
+            }
+            renderNext()
+        }
     }
     func update(snapshot:RenderSnapshot,revision:Int,frame:Int64) {
         let changedDocument=self.snapshot?.plan.project.id != snapshot.plan.project.id
@@ -56,7 +68,7 @@ struct NativePreview:NSViewRepresentable {
     private func renderNext() {
         // Keep one render in flight and only the newest pending request. Cancelling
         // every playback tick starves the canvas when rendering exceeds one tick.
-        guard task==nil,let request=pending else { return }
+        guard task==nil,window?.isMiniaturized != true,let request=pending else { return }
         pending=nil
         let worker=worker,ticket=ticket
         let canvas=request.snapshot.plan.project.canvas

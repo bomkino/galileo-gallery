@@ -24,6 +24,9 @@ private final class RenderResources: @unchecked Sendable {
     let decoded=NSCache<NSString,ImageBox>()
     let prepared=NSCache<NSString,ImageBox>()
     private var pressure:DispatchSourceMemoryPressure?
+    private let epochLock=NSLock()
+    private var epoch:UInt64=0
+    var pressureEpoch:UInt64 {epochLock.lock();defer{epochLock.unlock()};return epoch}
     private init() {
         let options:[CIContextOption:Any]=[.cacheIntermediates:false,.workingColorSpace:CGColorSpace(name:CGColorSpace.extendedLinearSRGB)!]
         if let device=MTLCreateSystemDefaultDevice() {context=CIContext(mtlDevice:device,options:options);backend="Core Image / Metal: \(device.name)"}
@@ -34,7 +37,10 @@ private final class RenderResources: @unchecked Sendable {
         let source=DispatchSource.makeMemoryPressureSource(eventMask:[.warning,.critical],queue:.global(qos:.utility))
         source.setEventHandler { [weak self] in self?.clear() };source.resume();pressure=source
     }
-    func clear() {decoded.removeAllObjects();prepared.removeAllObjects();context.clearCaches()}
+    func clear() {
+        epochLock.lock();epoch &+= 1;epochLock.unlock()
+        decoded.removeAllObjects();prepared.removeAllObjects();context.clearCaches()
+    }
 }
 
 /// One compositor for editor and output. Preview resolution is applied BEFORE
@@ -43,10 +49,12 @@ public final class NativeRenderer {
     public let context:CIContext
     public let backend:String
     public private(set) var largestPreparedLayer=0
+    private var observedPressureEpoch:UInt64=0
     private var readers:[String:VideoFrameCursor]=[:]
     private var readerOrder:[String]=[]
     private var imageIndexes:[String:ImageFrameIndex]=[:]
-    public private(set) var decodedSourceFrames=0
+    public private(set) var preparedSourceFrames=0
+    public private(set) var decodedVideoSamples=0
     public private(set) var sourceDecodeRequests=0
     private let srgb=CGColorSpace(name:CGColorSpace.sRGB)!
     public init() {context=RenderResources.shared.context;backend=RenderResources.shared.backend}
@@ -111,7 +119,14 @@ public final class NativeRenderer {
             } else {
                 // Ask for the projected card, including crop magnification. Stable
                 // size tiers reuse a larger decode instead of re-decoding every pose.
-                let demand=max(card.width/max(0.0001,item.crop.width),card.height/max(0.0001,item.crop.height))
+                let quad=card.quad(perspective:w*2)
+                func edge(_ a:Point,_ b:Point)->Double {hypot(a.x-b.x,a.y-b.y)}
+                let projectedW=max(edge(quad[0],quad[1]),edge(quad[3],quad[2]))
+                let projectedH=max(edge(quad[0],quad[3]),edge(quad[1],quad[2]))
+                let sourceW=Double(item.width),sourceH=Double(item.height)
+                let sx=projectedW/max(0.0001,sourceW*item.crop.width)
+                let sy=projectedH/max(0.0001,sourceH*item.crop.height)
+                let demand=max(sourceW,sourceH)*(item.fit == .contain ? min(sx,sy):max(sx,sy))
                 let tier=min(16384,max(128,Int(pow(2,ceil(log2(max(128,demand)))))))
                 source=try sourceImage(item:item,seconds:card.sourceTime,workspace:snapshot.workspace,maximumDimension:tier)
             }
@@ -158,6 +173,10 @@ public final class NativeRenderer {
         return 0.2126*linear(c.r)+0.7152*linear(c.g)+0.0722*linear(c.b)
     }
     private func sourceImage(item:MediaItem,seconds:Double,workspace:Workspace,maximumDimension:Int)throws->DecodedSourceFrame {
+        let epoch=RenderResources.shared.pressureEpoch
+        if observedPressureEpoch != epoch {
+            readers.removeAll();readerOrder.removeAll();imageIndexes.removeAll();observedPressureEpoch=epoch
+        }
         sourceDecodeRequests+=1
         let url=try workspace.url(for:item)
         if item.kind == .video {
@@ -172,9 +191,9 @@ public final class NativeRenderer {
                 readers[key]=cursor
             }
             readerOrder.append(key)
-            let before=cursor.materializedFrames
+            let before=cursor.materializedFrames,samplesBefore=cursor.decodedSamples
             let frame=try cursor.frame(at:seconds,fingerprint:item.sha256)
-            decodedSourceFrames+=cursor.materializedFrames-before;return frame
+            preparedSourceFrames+=cursor.materializedFrames-before;decodedVideoSamples+=cursor.decodedSamples-samplesBefore;return frame
         }
         let sourceKey="\(workspace.root.path):\(item.sha256)"
         let index:ImageFrameIndex
@@ -189,7 +208,7 @@ public final class NativeRenderer {
         let options:[CFString:Any]=[kCGImageSourceCreateThumbnailFromImageAlways:true,kCGImageSourceCreateThumbnailWithTransform:true,kCGImageSourceThumbnailMaxPixelSize:maximumDimension,kCGImageSourceShouldCacheImmediately:true]
         guard let image=CGImageSourceCreateThumbnailAtIndex(index.source,number,options as CFDictionary) else {throw GalleryError.invalid("\(item.name) could not produce picture \(number+1).")}
         RenderResources.shared.decoded.setObject(ImageBox(image),forKey:key as NSString,cost:image.bytesPerRow*image.height)
-        decodedSourceFrames+=1;return DecodedSourceFrame(image:image,identity:key)
+        preparedSourceFrames+=1;return DecodedSourceFrame(image:image,identity:key)
     }
     /// Keep one source image through fit/crop/rounded masking and fragment
     /// clipping. No new full-card CPU bitmap for each animated pose or slice.

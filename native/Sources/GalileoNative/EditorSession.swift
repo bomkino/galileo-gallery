@@ -29,7 +29,11 @@ import GalileoCore
     public var importGeneration:UUID {generation}
     private var importTask:Task<Void,Never>?
     private var gesture=false
-    private final class GestureUndo {var steps=0}
+    @MainActor private final class GestureUndo {var steps=0}
+    @MainActor private final class SessionReference {
+        weak var value:EditorSession?
+        init(_ value:EditorSession) {self.value=value}
+    }
     private var gestureUndo:GestureUndo?
     internal var importBudgetLimit=MediaBudget.maximumProjectBytes
     public init(project:GalleryProject=GalleryProject(),workspace:Workspace?=nil)throws {
@@ -125,12 +129,13 @@ import GalileoCore
         guard !urls.isEmpty else{return}
         let token=generation,base=project,owned=workspace,limit=importBudgetLimit
         importing=true;importStatus="Preparing media"
-        importTask=Task.detached(priority:.userInitiated) { [weak self] in
+        let reference=SessionReference(self)
+        importTask=Task.detached(priority:.userInitiated) {
             do {
                 let staging=try Workspace();var accepted:[MediaItem]=[],failures:[String]=[]
                 for (offset,url) in urls.enumerated() {
                     try Task.checkCancellation()
-                    await MainActor.run {if self?.generation==token {self?.importStatus="Preparing \(offset+1) / \(urls.count) · \(url.lastPathComponent)"}}
+                    await MainActor.run {if let session=reference.value,session.generation==token {session.importStatus="Preparing \(offset+1) / \(urls.count) · \(url.lastPathComponent)"}}
                     do {
                         let incoming:[MediaItem]
                         if url.pathExtension.lowercased()=="pdf" {incoming=try await PDFImporter.importPages(url,workspace:staging,options:pdfOptions[url.path] ?? PDFImportOptions())}
@@ -162,7 +167,7 @@ import GalileoCore
                 }}
                 let completed=accepted,notices=failures
                 await MainActor.run {
-                    guard let self,self.generation==token,!Task.isCancelled else{return}
+                    guard let self=reference.value,self.generation==token,!Task.isCancelled else{return}
                     defer {self.importing=false;self.importStatus="";self.importTask=nil}
                     do {
                         var candidate=self.project;var replacementNotice:String?
@@ -180,7 +185,7 @@ import GalileoCore
                 }
             } catch {
                 await MainActor.run {
-                    guard let self,self.generation==token else{return}
+                    guard let self=reference.value,self.generation==token else{return}
                     self.importing=false;self.importStatus="";self.importTask=nil
                     if !(error is CancellationError) {self.issue=error.localizedDescription}
                 }

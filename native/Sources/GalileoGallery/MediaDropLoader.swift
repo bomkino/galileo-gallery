@@ -10,7 +10,12 @@ enum MediaDropLoader {
         private var continuation:CheckedContinuation<Data,Error>?
         private var completed=false
         private var result:Result<Data,Error>?
-        var progress:Progress?
+        private var progress:Progress?
+        func attach(_ value:Progress) {
+            lock.lock();progress=value;let ended=completed;lock.unlock()
+            if ended {value.cancel()}
+        }
+        func cancel() {lock.lock();let value=progress;lock.unlock();value?.cancel();finish(.failure(CancellationError()))}
         func install(_ continuation:CheckedContinuation<Data,Error>) {
             lock.lock()
             if let result {lock.unlock();continuation.resume(with:result)}
@@ -30,15 +35,15 @@ enum MediaDropLoader {
             let data=try await withTaskCancellationHandler(operation: {
                 try await withCheckedThrowingContinuation { continuation in
                     completion.install(continuation)
-                    completion.progress=provider.loadDataRepresentation(forTypeIdentifier:UTType.fileURL.identifier) {data,error in
+                    completion.attach(provider.loadDataRepresentation(forTypeIdentifier:UTType.fileURL.identifier) {data,error in
                         if let data,data.count<=64*1024 {completion.finish(.success(data))}
                         else {completion.finish(.failure(error ?? GalleryError.invalid("The dropped file could not be resolved.")))}
-                    }
+                    })
                     DispatchQueue.global().asyncAfter(deadline:.now()+15) {
                         completion.finish(.failure(GalleryError.invalid("The dropped file took too long to resolve. Add it with the file picker.")))
                     }
                 }
-            },onCancel:{completion.progress?.cancel();completion.finish(.failure(CancellationError()))})
+            },onCancel:{completion.cancel()})
             guard let url=URL(dataRepresentation:data,relativeTo:nil),url.isFileURL else{throw GalleryError.invalid("Only local files can be dropped here.")}
             result.append(url)
         }

@@ -60,6 +60,13 @@ final class MediaAndTimingRegressionTests: XCTestCase {
         XCTAssertEqual(edited.width*2/edited.height,1,accuracy:1e-10)
         let dragged=CropGeometry.resized(edited,corner:3,x:0.9,y:0.7,sourceAspect:2,ratio:1)
         XCTAssertEqual(dragged.width*2/dragged.height,1,accuracy:1e-10)
+        for aspect in [0.1,1.0,2.0,10.0] {for ratio in [0.25,1.0,4.0] {
+            var edge=Crop();edge.x=0.9998;edge.y=0.9998;edge.width=0.0001;edge.height=0.0001
+            let result=CropGeometry.constrained(edge,sourceAspect:aspect,ratio:ratio)
+            XCTAssertEqual(result.width*aspect/result.height,ratio,accuracy:1e-8)
+            XCTAssertLessThanOrEqual(result.x+result.width,1.000000001)
+            XCTAssertLessThanOrEqual(result.y+result.height,1.000000001)
+        }}
         var background=DriftBackgroundCatalog.studies[3].settings
         background.colorA=RGBA(0.2,0.3,0.4);background.grain=0.42;background.motion=0.37
         XCTAssertEqual(background.choosing(DriftBackgroundCatalog.studies[3],keepingPalette:false),background)

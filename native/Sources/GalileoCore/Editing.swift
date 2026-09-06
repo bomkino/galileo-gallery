@@ -139,8 +139,15 @@ public enum CropGeometry {
         guard ratio.isFinite,ratio>0,sourceAspect.isFinite,sourceAspect>0 else{return c}
         let normalized=ratio/sourceAspect
         var width=preferHeight ? c.height*normalized:c.width
-        width=min(width,min(1-c.x,(1-c.y)*normalized))
-        c.width=max(0.0001,width);c.height=c.width/normalized
+        // Keep both dimensions valid even when a numeric left/top edit leaves
+        // too little room for a locked ratio. Move the crop back inside the
+        // image instead of growing its height past the bottom edge.
+        let minimumWidth=max(0.0001,0.0001*normalized)
+        let maximumWidth=min(1,normalized)
+        guard minimumWidth<=maximumWidth else{return c}
+        width=bounded(width,minimumWidth,maximumWidth)
+        c.width=width;c.height=width/normalized
+        c.x=min(c.x,1-c.width);c.y=min(c.y,1-c.height)
         return c
     }
     public static func resized(_ start:Crop,corner:Int,x:Double,y:Double,

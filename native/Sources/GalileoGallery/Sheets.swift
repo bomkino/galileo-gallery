@@ -106,6 +106,7 @@ struct SceneChooser:View {
 }
 struct ExportOptions:View {
     @ObservedObject var session:EditorSession
+    @ObservedObject private var exports=ExportCenter.shared
     let frame:Int64
     @Environment(\.dismiss) private var dismiss
     @State private var settings:ExportSettings
@@ -158,7 +159,7 @@ struct ExportOptions:View {
             if let error {Text(error).foregroundStyle(.red).textSelection(.enabled)}
             HStack {
                 Spacer();Button("Cancel"){dismiss()}.keyboardShortcut(.cancelAction)
-                Button(ExportCenter.shared.busy ? "Queue export…":"Export…",action:export).keyboardShortcut(.defaultAction)
+                Button(exports.busy ? "Queue export…":"Export…",action:export).keyboardShortcut(.defaultAction)
                     .disabled(!compatible || session.project.activeItems.isEmpty)
             }
         }.padding(24).frame(width:480)
@@ -189,6 +190,7 @@ struct ExportsView:View {
         VStack(alignment:.leading,spacing:16) {
             HStack {Text("Exports").font(.title2.weight(.semibold));Spacer();if exports.busy {ProgressView().controlSize(.small)}}
             if exports.busy {
+                Text(exports.activeName).font(.headline).lineLimit(2).textSelection(.enabled)
                 ProgressView(value:exports.progress)
                 HStack {Text(exports.status).monospacedDigit();Spacer();Button("Cancel current",action:exports.cancel).disabled(exports.progress>=0.99)}
             }

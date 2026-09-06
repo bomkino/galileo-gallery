@@ -156,20 +156,22 @@ import GalileoNative
         let receipt=try await Task.detached {try await NativeExport.run(snapshot:snapshot,destination:ExportDestination(url:movieURL),stillFrame:0){_,_ in}}.value
         guard receipt.scheduledFrames==62,receipt.decodedFrames==62 else{throw GalleryError.invalid("The actual native movie failed its frame count proof.")}
         try JSONEncoder().encode(receipt).write(to:directory.appendingPathComponent("export-receipt.json"))
-        let summary:[String:Any]=["backgroundBrowserCancelPreservesDocument":true,"driftBackgroundSavedAndReopened":true,"spotlightNavigation":true,"nativePixelZoom":true,"framingSheet":true,"previewAdvancesDuringPlayback":true,"documentRoundTrip":true,"documentEditedState":true,"failedSavePreservesChanges":true,"nativeAutosave":true,"spotlightSavedAndReopened":true,"importUndoRedo":true,"sceneUndoRedo":true,"nativeMovieDecodedFrames":62,"sceneSamples":visualEvidence,"operatingSystem":ProcessInfo.processInfo.operatingSystemVersionString,"version":Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "development"]
+        var summary:[String:Any]=["backgroundBrowserCancelPreservesDocument":true,"driftBackgroundSavedAndReopened":true,"spotlightNavigation":true,"nativePixelZoom":true,"framingSheet":true,"previewAdvancesDuringPlayback":true,"documentRoundTrip":true,"documentEditedState":true,"failedSavePreservesChanges":true,"nativeAutosave":true,"spotlightSavedAndReopened":true,"importUndoRedo":true,"sceneUndoRedo":true,"nativeMovieDecodedFrames":62,"sceneSamples":visualEvidence,"operatingSystem":ProcessInfo.processInfo.operatingSystemVersionString,"version":Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "development"]
+        let mediaProof=try await MediaApplicationSmoke.run(directory:directory,documents:documents)
+        summary.merge(mediaProof){_,new in new}
         try JSONSerialization.data(withJSONObject:summary,options:[.prettyPrinted,.sortedKeys]).write(to:directory.appendingPathComponent("journey.json"))
         _=window;_=playback
         print("NATIVE JOURNEY PASS: import, undo, redo, edit, save, close, reopen, scrub, render, export, decode")
     }
-    private static func wait(_ predicate:()->Bool) async throws {
+    static func wait(_ predicate:()->Bool) async throws {
         let start=Date()
         while !predicate() {guard Date().timeIntervalSince(start)<30 else{throw GalleryError.invalid("The native editor did not reach the requested state.")};try await Task.sleep(nanoseconds:30_000_000)}
     }
-    private static func findPreview(_ view:NSView?)->PreviewSurface? {
+    static func findPreview(_ view:NSView?)->PreviewSurface? {
         guard let view else{return nil};if let preview=view as? PreviewSurface{return preview}
         for child in view.subviews {if let result=findPreview(child){return result}};return nil
     }
-    private static func capture(_ window:NSWindow,to url:URL)throws {
+    static func capture(_ window:NSWindow,to url:URL)throws {
         guard let view=window.contentView,let bitmap=view.bitmapImageRepForCachingDisplay(in:view.bounds) else{throw GalleryError.invalid("The populated native window could not be captured.")}
         view.displayIfNeeded();view.cacheDisplay(in:view.bounds,to:bitmap)
         guard let data=bitmap.representation(using:.png,properties:[:]) else{throw GalleryError.invalid("Window capture encoding failed.")}

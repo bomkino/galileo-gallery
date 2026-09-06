@@ -12,6 +12,9 @@ public enum MediaCompatibility {
             let bundled=resources.appendingPathComponent("MediaTools/\(name)")
             if FileManager.default.isExecutableFile(atPath:bundled.path) {return bundled}
         }
+        if Bundle.main.bundleURL.pathExtension == "app" {
+            throw GalleryError.missing("The bundled WebM decoder is missing. Reinstall Galileo Gallery.")
+        }
         // Only source-tree tests/development use this path; packaged apps never
         // search PATH or silently execute an unrelated Homebrew program.
         let source=URL(fileURLWithPath:#filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
@@ -54,6 +57,9 @@ public enum MediaCompatibility {
             process.waitUntilExit();throw error
         }
         process.waitUntilExit()
+        for file in [stdout,stderr] {
+            guard try FileStamp(file).size<=4*1024*1024 else {throw GalleryError.invalid("The media decoder produced excessive diagnostics.")}
+        }
         guard process.terminationStatus==0 else {
             let diagnostic=String(data:(try? Data(contentsOf:stderr)) ?? Data(),encoding:.utf8) ?? "Unknown codec error"
             throw GalleryError.invalid("Media preparation failed: \(String(diagnostic.suffix(1200)))")

@@ -36,6 +36,9 @@ struct FramingEditor: View {
     @State private var image:CGImage?
     @State private var error:String?
     @State private var moving:Crop?
+    @State private var filledPreview:RenderSnapshot?
+    @State private var filledRevision=0
+    @State private var sourceHash:String?
     private var item:MediaItem? {session.project.items.first{$0.id==itemID}}
     var body:some View {
         VStack(spacing:16) {
@@ -43,6 +46,7 @@ struct FramingEditor: View {
                 Text("Framing").font(.title2.weight(.semibold));Spacer()
                 Button("Cancel"){dismiss()}.keyboardShortcut(.cancelAction)
                 Button("Apply") {
+                    guard item?.sha256==sourceHash else {error="The source changed. Reopen Framing before applying.";return}
                     session.editItems([itemID],name:"Frame media"){$0.crop=crop;$0.focal=focal};dismiss()
                 }.keyboardShortcut(.defaultAction).disabled(image==nil)
             }
@@ -85,7 +89,14 @@ struct FramingEditor: View {
                         }
                     }.frame(width:size.width,height:size.height).coordinateSpace(name:"crop")
                         .frame(maxWidth:.infinity,maxHeight:.infinity)
-                }.frame(height:420)
+                }.frame(height:320)
+                if let filledPreview {
+                    HStack(spacing:14) {
+                        Text(item.fit == .cover ? "Filled frame":"Fitted frame").font(.caption).foregroundStyle(.secondary)
+                        NativePreview(snapshot:filledPreview,revision:filledRevision,frame:0)
+                            .frame(maxWidth:.infinity).frame(height:105).accessibilityLabel("Proposed crop in its display frame")
+                    }
+                }
                 HStack {
                     Picker("Lock ratio",selection:$ratioLock) {Text("Free").tag("free");Text("Source").tag("source");Text("16:9").tag("wide");Text("Square").tag("square");Text("4:5").tag("portrait")}.frame(width:220).onChange(of:ratioLock) { _,_ in
                         crop=CropGeometry.constrained(crop,sourceAspect:Double(item.width)/Double(item.height),ratio:ratio)
@@ -108,12 +119,25 @@ struct FramingEditor: View {
                 }
             } else if let error {Text(error).foregroundStyle(.red).frame(height:420)}
             else {ProgressView().frame(height:420)}
+            if image != nil,let error {Text(error).foregroundStyle(.red).textSelection(.enabled)}
         }.padding(24).frame(width:740)
         .task {
-            guard let item else{return};crop=item.crop;focal=item.focal
+            guard let item else{return};crop=item.crop;focal=item.focal;sourceHash=item.sha256;refreshFilledPreview()
             do {image=try await ThumbnailWorker.shared.image(item:item,workspace:session.workspace,maximumDimension:1600)}
             catch {self.error=error.localizedDescription}
         }
+        .onChange(of:crop) {_,_ in refreshFilledPreview()}
+        .onChange(of:focal) {_,_ in refreshFilledPreview()}
+    }
+    private func refreshFilledPreview() {
+        guard var media=item else{return};media.crop=crop;media.focal=focal
+        media.opening=false;media.closing=false;media.spotlight=nil;media.included=true
+        media.sourcePlays=false
+        var project=GalleryProject();project.items=[media]
+        project.canvas.width=640;project.canvas.height=360;project.canvas.background = .transparent
+        project.scene=SceneCatalog.defaults(for:"cms-slideshow");project.scene.scale=0.9;project.scene.shadow=0;project.scene.radius=0
+        do {filledPreview=try RenderSnapshot(project:project,workspace:session.workspace);filledRevision+=1}
+        catch {self.error=error.localizedDescription}
     }
     private func cropNumber(_ title:String,key:WritableKeyPath<Crop,Double>,maximum:Double)->some View {
         VStack(alignment:.leading) {

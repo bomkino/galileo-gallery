@@ -68,11 +68,12 @@ final class NativeMediaRegressionTests:XCTestCase {
             let image=try renderer.sourcePreview(item:item,seconds:Double(i)/30,workspace:workspace)
             if i==0 {first=try rgba(image)}else{XCTAssertEqual(try rgba(image),first)}
         }
-        XCTAssertLessThanOrEqual(renderer.decodedSourceFrames,1,"Fifteen output requests re-decoded one covering source frame")
+        XCTAssertLessThanOrEqual(renderer.preparedSourceFrames,1,"Fifteen output requests re-decoded one covering source frame")
+        XCTAssertLessThanOrEqual(renderer.decodedVideoSamples,2,"Covering samples were redundantly decoded instead of retained")
         let second=try rgba(renderer.sourcePreview(item:item,seconds:0.7,workspace:workspace))
         XCTAssertNotEqual(second,first)
         XCTAssertEqual(try rgba(renderer.sourcePreview(item:item,seconds:0.1,workspace:workspace)),first)
-        print("SOURCE FRAME REUSE: 15 output requests, \(renderer.decodedSourceFrames) prepared frames including forward and backward seeks")
+        print("SOURCE FRAME REUSE: 15 output requests, \(renderer.preparedSourceFrames) prepared frames and \(renderer.decodedVideoSamples) decoded samples including forward and backward seeks")
     }
     @MainActor func testMixedImportKeepsGoodFilesAndStaleDropCannotEnterNewDocument() async throws {
         let editor=try EditorSession();let generation=editor.importGeneration

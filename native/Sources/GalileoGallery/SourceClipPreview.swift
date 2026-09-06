@@ -47,7 +47,11 @@ import GalileoNative
                 while !Task.isCancelled {
                     let elapsed=(ProcessInfo.processInfo.systemUptime-anchor)*draft.sourceRate
                     let raw=initial-start+elapsed,length=max(0.001,end-start)
-                    if raw>=length && !draft.sourceLoops {seconds=max(start,end-0.002);playing=false;break}
+                    if raw>=length && !draft.sourceLoops {
+                        seconds=max(start,end-0.002)
+                        let last=try await worker.frame(item:item,seconds:seconds,workspace:workspace)
+                        try Task.checkCancellation();image=last;playing=false;break
+                    }
                     seconds=start+(draft.sourceLoops ? raw.truncatingRemainder(dividingBy:length):raw)
                     let picture=try await worker.frame(item:item,seconds:seconds,workspace:workspace)
                     try Task.checkCancellation();image=picture
@@ -125,6 +129,7 @@ struct SourceClipPreview:View {
         }.padding(22).frame(width:760)
         .task {await model.load()}
         .onChange(of:draft.sourceLoops){_,_ in model.stop()}
+        .onChange(of:draft.sourcePlays){_,_ in model.stop()}
         .onDisappear {model.stop()}
     }
 }
