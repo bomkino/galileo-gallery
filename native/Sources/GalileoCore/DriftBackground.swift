@@ -84,7 +84,7 @@ public struct DriftBackground: Codable, Equatable, Sendable {
         }
     }
     /// Explicit integer frame authority. No wall clock, random state or seek history.
-    /// Motion closes once per authored Galileo cycle, including spotlight holds.
+    /// Motion repeats once per authored Galileo cycle, including spotlight holds.
     public func time(frame: Int64, schedule: FrameSchedule) -> (phase: Double, grainFrame: Double) {
         guard animated else { return (0,0) }
         let local = max(0,frame) % schedule.cycleFrames
