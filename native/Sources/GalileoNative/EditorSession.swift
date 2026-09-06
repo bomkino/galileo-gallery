@@ -11,6 +11,8 @@ import GalileoCore
     @Published public var selection:Set<String>=[]
     @Published public var issue:String?=nil
     @Published public private(set) var importing=false
+    @Published public private(set) var importStatus=""
+    @Published public var previewMediaID:String?=nil
     @Published public var showSidebar = UserDefaults.standard.object(forKey: "showSidebar") as? Bool ?? true { didSet { UserDefaults.standard.set(showSidebar, forKey: "showSidebar") } }
     @Published public var showInspector = UserDefaults.standard.object(forKey: "showInspector") as? Bool ?? true { didSet { UserDefaults.standard.set(showInspector, forKey: "showInspector") } }
     @Published public var canvasZoom = 0.0
@@ -24,8 +26,11 @@ import GalileoCore
     public var didEdit:(()->Void)?
     public var didLoad:(()->Void)?
     private var generation=UUID()
+    public var importGeneration:UUID {generation}
     private var importTask:Task<Void,Never>?
     private var gesture=false
+    private final class GestureUndo {var steps=0}
+    private var gestureUndo:GestureUndo?
     internal var importBudgetLimit=MediaBudget.maximumProjectBytes
     public init(project:GalleryProject=GalleryProject(),workspace:Workspace?=nil)throws {
         let owned=try workspace ?? Workspace()
@@ -37,27 +42,30 @@ import GalileoCore
         var candidate=project;edit(&candidate)
         do { try apply(candidate,name:name) } catch { issue=error.localizedDescription }
     }
-    private func apply(_ candidate:GalleryProject,name:String)throws {
-        try candidate.validate()
+    private func apply(_ candidate:GalleryProject,name:String,changeSteps:Int=1)throws {
         guard candidate != project else { return }
         let nextSnapshot = try RenderSnapshot(project: candidate, workspace: workspace)
         let previous=project
         let manager=undoManager
         let explicitGroup = !gesture && !(manager?.isUndoing ?? false) && !(manager?.isRedoing ?? false)
         if explicitGroup { manager?.beginUndoGrouping() }
-        manager?.registerUndo(withTarget:self) { session in
-            MainActor.assumeIsolated { do { try session.apply(previous,name:name) } catch { session.issue=error.localizedDescription } }
-        }
+        if !gesture || gestureUndo == nil {
+            let transaction=GestureUndo();transaction.steps=changeSteps
+            if gesture {gestureUndo=transaction}
+            manager?.registerUndo(withTarget:self) { session in
+                MainActor.assumeIsolated { do { try session.apply(previous,name:name,changeSteps:transaction.steps) } catch { session.issue=error.localizedDescription } }
+            }
+        } else {gestureUndo?.steps+=changeSteps}
         manager?.setActionName(name)
         project=candidate;snapshot=nextSnapshot;revision+=1
         selection.formIntersection(Set(candidate.items.map(\.id)))
         if explicitGroup { manager?.endUndoGrouping() }
-        didEdit?()
+        for _ in 0..<changeSteps {didEdit?()}
     }
     public func beginGesture(_ name:String) {
-        guard !gesture else { return };gesture=true;undoManager?.beginUndoGrouping();undoManager?.setActionName(name)
+        guard !gesture else { return };gesture=true;gestureUndo=nil;undoManager?.beginUndoGrouping();undoManager?.setActionName(name)
     }
-    public func endGesture() { guard gesture else { return };gesture=false;undoManager?.endUndoGrouping() }
+    public func endGesture() { guard gesture else { return };gesture=false;gestureUndo=nil;undoManager?.endUndoGrouping() }
     public func load(project:GalleryProject,workspace:Workspace)throws {
         try project.validate();cancelImport();generation=UUID();endGesture();undoManager?.removeAllActions()
         self.project=project;self.workspace=workspace;snapshot=try RenderSnapshot(project:project,workspace:workspace)
@@ -110,71 +118,76 @@ import GalileoCore
             }
         }
     }
-    public func importURLs(_ urls:[URL],replacing:String?=nil, expectedFingerprint: String? = nil, pdfOptions: [String: PDFImportOptions] = [:]) {
-        guard !importing else { issue="An import is already running. Finish or cancel it before adding more media.";return }
-        guard !urls.isEmpty else { return }
-        guard urls.count+(replacing==nil ? project.items.count:project.items.count-1)<=512 else { issue="A document supports at most 512 media items.";return }
-        let token=generation;importing=true
+    public func importURLs(_ urls:[URL],replacing:String?=nil, expectedFingerprint:String?=nil,
+                           pdfOptions:[String:PDFImportOptions]=[:],expectedGeneration:UUID?=nil) {
+        guard expectedGeneration == nil || expectedGeneration == generation else {return}
+        guard !importing else {issue="Finish or cancel the current import before adding more media.";return}
+        guard !urls.isEmpty else{return}
+        let token=generation,base=project,owned=workspace,limit=importBudgetLimit
+        importing=true;importStatus="Preparing media"
         importTask=Task.detached(priority:.userInitiated) { [weak self] in
-            guard let self else { return }
             do {
-                let staging=try Workspace();var items:[MediaItem]=[],failures:[String]=[]
-                for url in urls {
+                let staging=try Workspace();var accepted:[MediaItem]=[],failures:[String]=[]
+                for (offset,url) in urls.enumerated() {
                     try Task.checkCancellation()
+                    await MainActor.run {if self?.generation==token {self?.importStatus="Preparing \(offset+1) / \(urls.count) · \(url.lastPathComponent)"}}
                     do {
-                        if url.pathExtension.lowercased() == "pdf" {
-                            items += try await PDFImporter.importPages(url, workspace: staging, options: pdfOptions[url.path] ?? PDFImportOptions())
-                        } else { items.append(try await AssetImporter.inspect(url,workspace:staging)) }
-                        guard items.count <= 512 else { throw GalleryError.invalid("The batch exceeds 512 media items.") }
-                        var imported = GalleryProject(); imported.items = items
-                        _ = try staging.validateBudget(project: imported)
-                    }
-                    catch is CancellationError { throw CancellationError() }
-                    catch { failures.append(error.localizedDescription) }
+                        let incoming:[MediaItem]
+                        if url.pathExtension.lowercased()=="pdf" {incoming=try await PDFImporter.importPages(url,workspace:staging,options:pdfOptions[url.path] ?? PDFImportOptions())}
+                        else {incoming=[try await AssetImporter.inspect(url,workspace:staging)]}
+                        var proposed=base
+                        if let replacing {proposed.items.removeAll{$0.id==replacing}}
+                        proposed.items+=accepted+incoming
+                        try proposed.validate()
+                        _ = try owned.validateBudget(project:proposed,additions:staging,limit:limit)
+                        // Append only after validating this file, so an oversized
+                        // sibling cannot poison an otherwise usable import batch.
+                        accepted+=incoming
+                    } catch is CancellationError {throw CancellationError()}
+                    catch {failures.append("\(url.lastPathComponent): \(error.localizedDescription)")}
                 }
                 try Task.checkCancellation()
-                let completedItems=items,completedFailures=failures
+                guard !accepted.isEmpty else {throw GalleryError.invalid(failures.joined(separator:"\n"))}
+                if replacing != nil && accepted.count != 1 {throw GalleryError.invalid("Replace one source with exactly one media item or PDF page.")}
+                if let expectedFingerprint,accepted.first?.sha256 != expectedFingerprint,accepted.first?.originalSHA256 != expectedFingerprint {
+                    throw GalleryError.invalid("This is not the original file. Use Replace media to choose different artwork.")
+                }
+                // File copies and integrity work remain on this worker. The
+                // session is checked again before any document-state adoption.
+                var names=Set<String>()
+                for item in accepted {for name in [item.asset,item.originalAsset].compactMap({$0}) where names.insert(name).inserted {
+                    try Task.checkCancellation()
+                    let source=staging.assets.appendingPathComponent(name),target=owned.assets.appendingPathComponent(name)
+                    if !FileManager.default.fileExists(atPath:target.path) {try Workspace.copyOwned(source,to:target)}
+                }}
+                let completed=accepted,notices=failures
                 await MainActor.run {
-                    guard self.generation==token,!Task.isCancelled else { return }
+                    guard let self,self.generation==token,!Task.isCancelled else{return}
+                    defer {self.importing=false;self.importStatus="";self.importTask=nil}
                     do {
-                        var candidate=self.project
-                        var replacementNotice: String?
-                        if let expectedFingerprint, completedItems.first?.sha256 != expectedFingerprint {
-                            throw GalleryError.invalid("This is not the original file. Use Replace media to choose different artwork.")
-                        }
-                        if replacing != nil && completedItems.count != 1 { throw GalleryError.invalid("Replace one source with exactly one image, video or selected PDF page.") }
-                        if let replacing,let index=candidate.items.firstIndex(where:{$0.id==replacing}),var replacement=completedItems.first {
-                            let result = Replacement.preserving(candidate.items[index], with: replacement)
-                            replacement = result.0; replacementNotice = result.1
-                            candidate.items[index]=replacement
-                        } else if replacing==nil { candidate.items+=completedItems }
-                        try candidate.validate()
-                        _ = try self.workspace.validateBudget(project: candidate, additions: staging, limit: self.importBudgetLimit)
-                        var unique=Set<String>()
-                        for item in completedItems {
-                            for name in [item.asset, item.originalAsset].compactMap({ $0 }) where unique.insert(name).inserted {
-                                let source = staging.assets.appendingPathComponent(name), destination = self.workspace.assets.appendingPathComponent(name)
-                                if !FileManager.default.fileExists(atPath: destination.path) { try Workspace.copyOwned(source, to: destination) }
-                            }
-                        }
-                        try self.apply(candidate,name:replacing==nil ? "Add media":"Replace media")
-                        if replacing==nil { self.selection=Set(completedItems.map(\.id)) }
-                        let notices = completedFailures + [replacementNotice].compactMap { $0 }
-                        if !notices.isEmpty { self.issue=notices.joined(separator:"\n") }
-                    } catch { self.issue=error.localizedDescription }
-                    self.importing=false;self.importTask=nil
+                        var candidate=self.project;var replacementNotice:String?
+                        if let replacing {
+                            guard let index=candidate.items.firstIndex(where:{$0.id==replacing}) else {throw GalleryError.cancelled}
+                            let result=Replacement.preserving(candidate.items[index],with:completed[0])
+                            candidate.items[index]=result.0;replacementNotice=result.1
+                        } else {candidate.items+=completed}
+                        _ = try owned.validateBudget(project:candidate,limit:limit)
+                        try self.apply(candidate,name:replacing == nil ? "Add media":"Replace media")
+                        if replacing == nil {self.selection=Set(completed.map(\.id))}
+                        let problems=notices+[replacementNotice].compactMap{$0}
+                        if !problems.isEmpty {self.issue=problems.joined(separator:"\n")}
+                    } catch {self.issue=error.localizedDescription}
                 }
             } catch {
-                let message=(error is CancellationError) ? nil:error.localizedDescription
                 await MainActor.run {
-                    guard self.generation==token else { return }
-                    self.importing=false;self.importTask=nil
-                    if let message { self.issue=message }
+                    guard let self,self.generation==token else{return}
+                    self.importing=false;self.importStatus="";self.importTask=nil
+                    if !(error is CancellationError) {self.issue=error.localizedDescription}
                 }
             }
         }
     }
-    public func cancelImport() { importTask?.cancel();importTask=nil;importing=false;generation=UUID() }
+    public func cancelImport() { importTask?.cancel();importTask=nil;importing=false;importStatus="";generation=UUID() }
     public func close() { cancelImport();endGesture();didEdit=nil;didLoad=nil }
 }
 
@@ -185,47 +198,65 @@ import GalileoCore
     private var schedule:FrameSchedule
     private var loop=false
     private var timer:Timer?
-    private var stoppingFrame: Int64?
-    private var documentID: String?
-    public init(schedule:FrameSchedule) { self.schedule=schedule }
-    deinit { timer?.invalidate() }
+    private var stoppingFrame:Int64?
+    private var documentID:String?
+    private var previousProject:GalleryProject?
+    private var auditionReturn:Int64?
+    private let persists:Bool
+    public init(schedule:FrameSchedule,persist:Bool=true) {self.schedule=schedule;persists=persist}
+    deinit {timer?.invalidate()}
     public func update(_ plan:RenderPlan) {
-        let firstLoad = documentID != plan.project.id
-        pause();schedule=plan.schedule;loop=plan.project.timing.playMode == .loop
-        documentID = plan.project.id
-        if firstLoad { frame = Int64(UserDefaults.standard.integer(forKey: "playhead-" + plan.project.id)) }
-        transport.seek(frame,schedule:schedule);frame=transport.frame
+        let firstLoad=documentID != plan.project.id
+        let appearanceOnly=previousProject.map { old -> Bool in
+            old.id==plan.project.id && old.items==plan.project.items && old.timing==plan.project.timing &&
+            old.scene.variantID==plan.project.scene.variantID && schedule==plan.schedule
+        } ?? false
+        if !appearanceOnly {pause()}
+        let oldSeconds=schedule.seconds(for:frame)
+        schedule=plan.schedule;loop=plan.project.timing.playMode == .loop;documentID=plan.project.id
+        previousProject=plan.project
+        if firstLoad {frame=persists ? Int64(UserDefaults.standard.integer(forKey:"playhead-"+plan.project.id)):0}
+        else if !appearanceOnly {frame=schedule.frame(at:oldSeconds)}
+        if !appearanceOnly {transport.seek(frame,schedule:schedule);frame=transport.frame}
     }
-    public func seek(_ frame:Int64) { pause();transport.seek(frame,schedule:schedule);self.frame=transport.frame;persistPosition() }
-    private func persistPosition() { if let documentID { UserDefaults.standard.set(frame,forKey:"playhead-"+documentID) } }
-    public func step(_ amount:Int64) { seek(frame+amount) }
-    public func restart() { seek(0);play() }
-    public func toggle() { playing ? pause():play() }
+    private func stopTimer() {timer?.invalidate();timer=nil;transport.pause();playing=false;stoppingFrame=nil}
+    private func persistPosition() {if persists,auditionReturn==nil,let documentID {UserDefaults.standard.set(frame,forKey:"playhead-"+documentID)}}
+    public func seek(_ frame:Int64) {
+        stopTimer();auditionReturn=nil;transport.seek(frame,schedule:schedule);self.frame=transport.frame;persistPosition()
+    }
+    public func step(_ amount:Int64) {seek(frame+amount)}
+    public func restart() {seek(0);play()}
+    public func toggle() {playing ? pause():play()}
     public func pause() {
-        timer?.invalidate();timer=nil;transport.pause();playing=false;stoppingFrame=nil
-        if let documentID { UserDefaults.standard.set(frame, forKey: "playhead-" + documentID) }
+        stopTimer()
+        if let original=auditionReturn {auditionReturn=nil;transport.seek(original,schedule:schedule);frame=transport.frame}
+        persistPosition()
     }
-    public func preview(_ cue: SpotlightCue, cycle: Int64 = 0) {
-        let offset = cycle * schedule.cycleFrames
-        seek(cue.startFrame + offset); play(); stoppingFrame = min(schedule.totalFrames-1, cue.endFrame-1 + offset)
+    public func preview(_ cue:SpotlightCue,cycle:Int64=0) {
+        let original=auditionReturn ?? frame
+        stopTimer();auditionReturn=original
+        let offset=min(schedule.cycles-1,max(0,cycle))*schedule.cycleFrames
+        transport.seek(cue.startFrame+offset,schedule:schedule);frame=transport.frame
+        startPlayback();stoppingFrame=min(schedule.totalFrames-1,cue.endFrame-1+offset)
     }
-    public func jumpCue(_ cues: [SpotlightCue], direction: Int) {
-        guard !cues.isEmpty else { return }
-        let local = frame % schedule.cycleFrames, offset = frame / schedule.cycleFrames * schedule.cycleFrames
-        let target = direction > 0 ? cues.first(where: { $0.holdStartFrame > local }) ?? cues[0]
-            : cues.last(where: { $0.holdStartFrame < local }) ?? cues[cues.count-1]
-        seek(offset + target.holdStartFrame)
+    public func jumpCue(_ cues:[SpotlightCue],direction:Int) {
+        guard !cues.isEmpty else{return}
+        let local=frame%schedule.cycleFrames,offset=frame/schedule.cycleFrames*schedule.cycleFrames
+        let target=direction>0 ? cues.first(where:{$0.holdStartFrame>local}) ?? cues[0]
+            : cues.last(where:{$0.holdStartFrame<local}) ?? cues[cues.count-1]
+        seek(offset+target.holdStartFrame)
     }
-    public func play() {
+    public func play() {auditionReturn=nil;startPlayback()}
+    private func startPlayback() {
         transport.play(now:ProcessInfo.processInfo.systemUptime,schedule:schedule);playing=true
         timer?.invalidate()
-        let newTimer=Timer(timeInterval:1/60,repeats:true) { [weak self] _ in
+        let newTimer=Timer(timeInterval:1/60,repeats:true) {[weak self] _ in
             MainActor.assumeIsolated {
-                guard let self else { return }
+                guard let self else{return}
                 self.transport.tick(now:ProcessInfo.processInfo.systemUptime,schedule:self.schedule,loop:self.loop)
-                if let stop = self.stoppingFrame, self.transport.frame >= stop { self.seek(stop); return }
-                if self.frame != self.transport.frame { self.frame=self.transport.frame }
-                if !self.transport.playing { self.pause() }
+                if let stop=self.stoppingFrame,self.transport.frame>=stop {self.pause();return}
+                if self.frame != self.transport.frame {self.frame=self.transport.frame}
+                if !self.transport.playing {self.pause()}
             }
         }
         timer=newTimer;RunLoop.main.add(newTimer,forMode:.common)
@@ -252,6 +283,8 @@ public struct ExportHistory: Identifiable {
     @Published public private(set) var status=""
     @Published public private(set) var result:ExportReceipt?
     @Published public private(set) var error:String?
+    @Published public private(set) var activeDocumentID:String?
+    @Published public private(set) var activeName=""
     @Published public private(set) var pending: [QueuedExport] = []
     @Published public private(set) var history: [ExportHistory] = []
     private var task:Task<Void,Never>?
@@ -270,12 +303,13 @@ public struct ExportHistory: Identifiable {
     }
     private func execute(_ job:QueuedExport) {
         let id=job.id;jobID=id;busy=true;progress=0;status="Preparing \(job.name)";error=nil;result=nil
-        activePath=job.destination.url.standardizedFileURL.path
+        activePath=job.destination.url.standardizedFileURL.path;activeDocumentID=job.snapshot.plan.project.id;activeName=job.name
         task=Task.detached(priority:.userInitiated) { [weak self] in
             guard let self else {return}
             do {
+                let throttle=ExportProgressThrottle()
                 let receipt=try await NativeExport.run(snapshot:job.snapshot,destination:job.destination,stillFrame:job.stillFrame,range:job.range) { value,label in
-                    Task { @MainActor [weak self] in guard let self,self.jobID==id,self.busy else{return};self.progress=value;self.status=label }
+                    if throttle.shouldReport(value,label:label) {Task { @MainActor [weak self] in guard let self,self.jobID==id,self.busy else{return};self.progress=value;self.status=label }}
                 }
                 await self.finished(job,result:receipt,error:nil)
             } catch {
@@ -296,4 +330,16 @@ public struct ExportHistory: Identifiable {
     public func cancel() { guard busy,progress<0.99 else{return};status="Cancelling";task?.cancel() }
     public func cancelAll() {pending=[];cancel()}
     public func reveal() { if let path=result?.outputPath {NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath:path)])} }
+}
+
+private final class ExportProgressThrottle: @unchecked Sendable {
+    private let lock=NSLock()
+    private var last=0.0
+    private var phase=""
+    func shouldReport(_ value:Double,label:String)->Bool {
+        lock.lock();defer{lock.unlock()}
+        let now=ProcessInfo.processInfo.systemUptime,next=String(label.prefix(while:{$0 != " "}))
+        guard value>=0.99 || next != phase || now-last>=0.1 else{return false}
+        last=now;phase=next;return true
+    }
 }

@@ -71,6 +71,9 @@ public struct MediaItem: Codable, Equatable, Identifiable, Sendable {
     /// PDF pages retain their original document as a separately owned asset.
     public var originalAsset: String? = nil
     public var originalSHA256: String? = nil
+    public var originalUnavailable: String? = nil
+    /// Versioned local decoding recipe; the original bytes remain separately owned.
+    public var derivation: String? = nil
     public var caption = ""
     public var fit: MediaFit = .contain
     public var crop = Crop()
@@ -148,7 +151,7 @@ public struct ExportSettings: Codable, Equatable, Sendable {
 }
 public struct GalleryProject: Codable, Equatable, Sendable {
     public var format = "dog.pitch.galileo.native"
-    public var schemaVersion = 6
+    public var schemaVersion = 7
     public var id = UUID().uuidString
     public var name = "Untitled"
     public var canvas = Canvas()
@@ -160,11 +163,12 @@ public struct GalleryProject: Codable, Equatable, Sendable {
     public var legacyManifestFilename: String? = nil
     public var migrationNotes: [String] = []
     public init() {}
+    public var derivedAssets: Set<String> { Set(items.filter { $0.derivation != nil }.map(\.asset)) }
     public var activeItems: [MediaItem] {
         var result = items.filter(\.included)
-        if let opening = result.firstIndex(where: \.opening) { result = Array(result[opening...]) + Array(result[..<opening]) }
         if timing.reverse { result.reverse() }
-        if timing.playMode != .loop, let closing = result.firstIndex(where: { $0.closing == true }) {
+        if let opening = result.firstIndex(where: \.opening) { result = Array(result[opening...]) + Array(result[..<opening]) }
+        if timing.playMode != .loop, let closing = result.firstIndex(where: { $0.closing == true && !$0.opening }) {
             result.append(result.remove(at: closing))
         }
         return result
@@ -174,7 +178,7 @@ public struct GalleryProject: Codable, Equatable, Sendable {
         func finite(_ value: Double, _ range: ClosedRange<Double>, _ label: String) throws {
             try require(value.isFinite && range.contains(value), "\(label) must be between \(range.lowerBound) and \(range.upperBound).")
         }
-        try require(format == "dog.pitch.galileo.native" && schemaVersion == 6, "This document needs a different version of Galileo Gallery. The original was not changed.")
+        try require(format == "dog.pitch.galileo.native" && schemaVersion == 7, "This document needs a different version of Galileo Gallery. The original was not changed.")
         try require(!id.isEmpty && name.count <= 512, "The document identity is invalid.")
         try require((64...7680).contains(canvas.width) && (64...7680).contains(canvas.height), "Canvas dimensions must be 64–7,680 pixels.")
         try require(canvas.width % 2 == 0 && canvas.height % 2 == 0, "Canvas dimensions must be even pixel counts.")
@@ -199,6 +203,8 @@ public struct GalleryProject: Codable, Equatable, Sendable {
                 try require(Self.safeAssetName(asset), "The preserved source path is invalid.")
                 try require(item.originalSHA256?.count == 64 && item.originalSHA256!.allSatisfy { "0123456789abcdef".contains($0) }, "The preserved source fingerprint is invalid.")
             }
+            if let recipe = item.derivation { try require(recipe.count <= 512 && item.originalAsset != nil, "The local media recipe is invalid.") }
+            if let reason = item.originalUnavailable { try require(reason.count <= 1000 && item.originalAsset != nil, "The original-media recovery marker is invalid.") }
             if let reason = item.unavailable { try require(reason.count <= 1000, "The recovery marker is invalid.") }
             if let spotlight = item.spotlight {
                 try require((250...60000).contains(spotlight.holdMilliseconds), "A spotlight hold must last 0.25–60 seconds.")
@@ -223,21 +229,27 @@ public struct GalleryProject: Codable, Equatable, Sendable {
                 try require(end.isFinite && end <= duration && end > item.trimStart, "\(item.name)'s trim range is invalid.")
             }
         }
+        try require(migrationNotes.count <= 128 && migrationNotes.allSatisfy { $0.utf8.count <= 8192 }, "The conversion notes exceed the metadata budget.")
         if let name = legacyManifestFilename { try require(Self.safeAssetName(name), "The legacy manifest path is invalid.") }
     }
     public static func safeAssetName(_ name: String) -> Bool {
         !name.isEmpty && name.count <= 200 && name != "." && name != ".." && !name.contains("/") && !name.contains("\\") && !name.unicodeScalars.contains(where: { $0.value < 32 })
     }
+    public static let maximumManifestBytes = 8 * 1024 * 1024
     public func encoded() throws -> Data {
         try validate()
         let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted,.sortedKeys,.withoutEscapingSlashes]
-        return try encoder.encode(self)
+        let data = try encoder.encode(self)
+        guard data.count <= Self.maximumManifestBytes else {
+            throw GalleryError.invalid("The document metadata exceeds 8 MiB. Shorten captions or split the project; the saved copy was not replaced.")
+        }
+        return data
     }
     public static func decode(_ data: Data) throws -> GalleryProject {
-        guard data.count <= 8 * 1024 * 1024 else { throw GalleryError.invalid("The document manifest is too large.") }
+        guard data.count <= maximumManifestBytes else { throw GalleryError.invalid("The document manifest is too large.") }
         var project = try JSONDecoder().decode(Self.self, from: data)
         // v3 had no per-media spotlight. Missing optional values decode as nil.
-        if [3, 4, 5].contains(project.schemaVersion) { project.schemaVersion = 6 }
+        if [3, 4, 5, 6].contains(project.schemaVersion) { project.schemaVersion = 7 }
         try project.validate(); return project
     }
 }

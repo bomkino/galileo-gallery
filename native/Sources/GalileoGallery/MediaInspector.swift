@@ -35,6 +35,7 @@ struct MediaInspector: View {
                 Text(items.count>1 ? "\(items.count) selected":item.name).font(.headline).lineLimit(3).textSelection(.enabled)
                 InspectorSection(title:"Source") {
                     if item.unavailable != nil {Label("Source missing",systemImage:"exclamationmark.triangle").foregroundStyle(.orange)}
+                    if let warning=item.originalUnavailable {Text("Archived original unavailable: \(warning)").font(.caption).foregroundStyle(.orange).lineLimit(3)}
                     if items.count==1 {Text("\(item.width) × \(item.height)").font(.caption).foregroundStyle(.secondary)}
                     toggle("Include",get:{$0.included},set:{$0.included=$1})
                     HStack {
@@ -64,7 +65,9 @@ struct MediaInspector: View {
                         Toggle("Use as closing",isOn:Binding(get:{item.closing == true},set:{enabled in
                             if enabled {session.markClosing(item.id)} else {edit("Clear closing"){$0.closing=false}}
                         }))
-                        if item.closing == true && session.project.timing.playMode == .loop {Text("Closing is saved for Once or Repeat.").font(.caption).foregroundStyle(.secondary)}
+                        if item.closing == true {
+                            Text(session.project.timing.playMode == .loop ? "Closing is used in Once or Repeat." : "Closing holds at the end of each cycle.").font(.caption).foregroundStyle(.secondary)
+                        }
                     }
                 }
                 InspectorSection(title:"Framing") {
@@ -103,6 +106,10 @@ struct MediaInspector: View {
                 }
                 if items.allSatisfy({$0.kind != .image && $0.duration != nil}) {
                     InspectorSection(title:"Source playback") {
+                        HStack {
+                            Button("Preview clip…") {session.previewMediaID=item.id}.disabled(items.count != 1 || item.unavailable != nil)
+                            Button("Reset trim") {edit("Reset source trim"){$0.trimStart=0;$0.trimEnd=nil}}
+                        }
                         toggle("Play source",get:{$0.sourcePlays},set:{$0.sourcePlays=$1})
                         toggle("Loop source",get:{$0.sourceLoops},set:{$0.sourceLoops=$1})
                         number("Rate",range:0.25...4,unit:"×",step:0.05,get:{$0.sourceRate},set:{$0.sourceRate=$1})
@@ -125,6 +132,6 @@ struct MediaInspector: View {
     private func locate(_ item:MediaItem) {
         let panel=NSOpenPanel();panel.title="Locate \(item.name)";panel.canChooseDirectories=false;panel.allowsMultipleSelection=false
         guard panel.runModal() == .OK,let url=panel.url else{return}
-        session.importURLs([url],replacing:item.id,expectedFingerprint:item.sha256)
+        session.importURLs([url],replacing:item.id,expectedFingerprint:item.originalSHA256 ?? item.sha256)
     }
 }

@@ -17,7 +17,7 @@ struct StudioView:View {
     var body:some View {
         VStack(spacing:0) {
             HSplitView {
-                if session.showSidebar { library.frame(minWidth:190,idealWidth:220,maxWidth:350) }
+                if session.showSidebar { library.frame(minWidth:170,idealWidth:205,maxWidth:350) }
                 canvas.frame(minWidth:320,maxWidth:.infinity,maxHeight:.infinity)
                 if session.showInspector {
                     VStack(spacing:0) {
@@ -27,7 +27,7 @@ struct StudioView:View {
                         ScrollView { if inspector=="Scene" { SceneInspector(session:session) } else { MediaInspector(session:session,replace:replaceMedia,preview:{ id in
                             if let cue=session.snapshot.plan.spotlights.first(where:{$0.itemID==id}) {playback.preview(cue,cycle:playback.frame/session.snapshot.plan.schedule.cycleFrames)}
                         }).id(session.selection.sorted().joined(separator:"|")) } }
-                    }.frame(minWidth:260,idealWidth:285,maxWidth:380).background(.regularMaterial)
+                    }.frame(minWidth:250,idealWidth:270,maxWidth:380).background(.regularMaterial)
                 }
             }
             .background(SplitAutosave(name:"GalileoStudioColumns"))
@@ -39,11 +39,11 @@ struct StudioView:View {
                     Button("Dismiss") { session.issue=nil }.buttonStyle(.borderless)
                 }.padding(12).background(Color(nsColor:.controlBackgroundColor))
             }
-            if exports.busy || exports.error != nil {
+            if (exports.busy || exports.error != nil) && exports.activeDocumentID==session.project.id {
                 Divider()
                 HStack {
                     if exports.busy { ProgressView(value:exports.progress).frame(width:100) }
-                    Text(exports.error ?? exports.status).font(.caption).lineLimit(2)
+                    Text("\(exports.activeName) · \(exports.error ?? exports.status)").font(.caption).lineLimit(2)
                     Spacer()
                     Button("Exports") { NotificationCenter.default.post(name:.showExports,object:nil) }.buttonStyle(.borderless)
                 }.padding(.horizontal,16).padding(.vertical,8)
@@ -52,25 +52,25 @@ struct StudioView:View {
         .frame(minWidth:900,minHeight:600)
         .sheet(isPresented:$session.choosingScene) { SceneChooser(session:session) }
         .sheet(isPresented:$session.choosingBackground) {
-            DriftBackgroundBrowser(currentID:session.project.canvas.drift?.studyID ?? DriftBackgroundCatalog.studies[0].id) { study in
-                session.commit("Choose Drift background") { p in p.canvas.background = .drift; p.canvas.drift = study.settings }
+            DriftBackgroundBrowser(snapshot:session.snapshot,frame:playback.frame) { background in
+                session.commit("Choose Drift background") { p in p.canvas.background = .drift; p.canvas.drift = background }
             }
         }
         .sheet(item:Binding(get:{session.framingMediaID.map{FramingSelection(id:$0)}},set:{session.framingMediaID=$0?.id})) { item in FramingEditor(session:session,itemID:item.id) }
+        .sheet(item:Binding(get:{session.previewMediaID.map{FramingSelection(id:$0)}},set:{session.previewMediaID=$0?.id})) { item in SourceClipPreview(session:session,itemID:item.id) }
         .sheet(isPresented:$session.choosingExport) { ExportOptions(session:session,frame:playback.frame) }
         .onChange(of:session.revision) { playback.update(session.snapshot.plan) }
-        .onChange(of:session.selection) { _,selection in if !selection.isEmpty { inspector="Media" } }
         .onDrop(of:[UTType.fileURL],isTargeted:nil) { providers in
             guard !session.importing else { return false }
+            let generation=session.importGeneration
             Task { @MainActor in
-                var urls:[URL]=[]
-                for provider in providers {
-                    let data:Data?=await withCheckedContinuation { continuation in
-                        provider.loadDataRepresentation(forTypeIdentifier:UTType.fileURL.identifier) { data,_ in continuation.resume(returning:data) }
-                    }
-                    if let data,let url=URL(dataRepresentation:data,relativeTo:nil) { urls.append(url) }
+                do {
+                    let urls=try await MediaDropLoader.urls(providers)
+                    guard generation==session.importGeneration,!session.importing else{return}
+                    if let prepareImport {prepareImport(urls)} else {session.importURLs(urls,expectedGeneration:generation)}
+                } catch {
+                    if generation==session.importGeneration {session.issue=error.localizedDescription}
                 }
-                if let prepareImport {prepareImport(urls)} else {session.importURLs(urls)}
             }
             return true
         }
@@ -104,6 +104,7 @@ struct StudioView:View {
                                     Button("Preview spotlight") {playback.preview(cue,cycle:playback.frame/session.snapshot.plan.schedule.cycleFrames)}
                                 }
                                 Button("Edit framing…") {session.framingMediaID=item.id}
+                                if item.kind != .image {Button("Preview clip…") {session.previewMediaID=item.id}}
                                 Button(item.included ? "Exclude":"Include") { session.commit("Change inclusion") { p in if let i=p.items.firstIndex(where:{$0.id==item.id}) { p.items[i].included.toggle() } } }
                                 Button("Replace…") { session.selection=[item.id];replaceMedia() }
                                 Divider()
@@ -115,7 +116,7 @@ struct StudioView:View {
             }
             Divider()
             if session.importing {
-                HStack { ProgressView().controlSize(.small);Text("Importing");Spacer();Button("Cancel",action:session.cancelImport).buttonStyle(.borderless) }.padding(12)
+                HStack { ProgressView().controlSize(.small);Text(session.importStatus).font(.caption).lineLimit(2);Spacer();Button("Cancel",action:session.cancelImport).buttonStyle(.borderless) }.padding(12)
             } else {
                 HStack {
                     Button(action:addMedia) { Image(systemName:"plus") }.help("Add media")
@@ -131,8 +132,7 @@ struct StudioView:View {
             if session.project.items.isEmpty {
                 VStack(spacing:16) {
                     Image(systemName:"rectangle.stack").font(.system(size:48,weight:.ultraLight)).foregroundStyle(.secondary)
-                    Text("Start with your media").font(.title2.weight(.medium))
-                    Text("Drop images, video or a PDF into this window.").foregroundStyle(.secondary)
+                    Text("Drop images, video or a PDF").font(.title2.weight(.medium))
                     Button("Add media",action:addMedia).buttonStyle(.borderedProminent).controlSize(.large)
                 }.frame(maxWidth:.infinity,maxHeight:.infinity)
             } else {

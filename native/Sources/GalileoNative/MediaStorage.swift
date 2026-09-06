@@ -44,7 +44,7 @@ extension Workspace {
     }
     public func managedSizes(project: GalleryProject, additions: Workspace? = nil) throws -> [String: Int64] {
         var names = Set(project.items.filter { $0.unavailable == nil }.map(\.asset))
-        names.formUnion(project.items.filter { $0.unavailable == nil }.compactMap(\.originalAsset))
+        names.formUnion(project.items.filter { $0.originalUnavailable == nil }.compactMap(\.originalAsset))
         if project.legacyManifestFilename != nil {
             let mapping = try NativeDocumentIO.legacyMapping(self)
             names.formUnion(mapping.values)
@@ -59,7 +59,7 @@ extension Workspace {
         return result
     }
     @discardableResult public func validateBudget(project: GalleryProject, additions: Workspace? = nil, limit: Int64 = MediaBudget.maximumProjectBytes) throws -> Int64 {
-        try MediaBudget.total(managedSizes(project: project, additions: additions), limit: limit)
+        try MediaBudget.total(managedSizes(project: project, additions: additions), limit: limit, derived: project.derivedAssets)
     }
 }
 

@@ -153,7 +153,7 @@ public struct RenderPlan: Sendable {
                               sourceSeconds: output.localSeconds)
     }
     private func motionSample(frame: Int64, output: TimeSample) -> TimeSample {
-        let original = motionSchedule.sample(frame: frame)
+        let original = motionSchedule.sample(frame: min(motionSchedule.cycleFrames - 1, max(0, frame)))
         return TimeSample(absoluteFrame: output.absoluteFrame, cycleIndex: output.cycleIndex,
                           localFrame: original.localFrame, seconds: output.seconds,
                           localSeconds: original.localSeconds, progress: original.progress,
@@ -162,7 +162,10 @@ public struct RenderPlan: Sendable {
     private func evaluateMotion(time: TimeSample, sourceSeconds: Double) -> [SceneCard] {
         let w=Double(project.canvas.width),h=Double(project.canvas.height),short=min(w,h)
         let s=project.scene, n=items.count, p=time.progress, tau=Double.pi*2
-        let canWrap=project.timing.playMode == .loop || !time.isLastCycle
+        // A declared closing owns the endpoint. Preserve the existing per-cycle
+        // hold duration; do not run a wrap-to-opening underneath that hold.
+        let canWrap=(project.timing.playMode == .loop || !time.isLastCycle) &&
+            !(project.timing.playMode != .loop && items.contains { $0.closing == true })
         func smooth(_ x: Double) -> Double { let x=bounded(x,0,1); return x*x*x*(x*(x*6-15)+10) }
         func source(_ index:Int)->MediaItem { items[((index%n)+n)%n] }
         func card(_ index:Int,_ x:Double,_ y:Double,_ maxW:Double,_ maxH:Double,_ instance:String="")->SceneCard {
@@ -196,17 +199,21 @@ public struct RenderPlan: Sendable {
         case .reel:
             let depthRiver = variant.id == "deck-river" || variant.id == "deck-river-loader"
             let cursor = (variant.id == "opening-reel" || variant.id == "deck-river-loader") ? Double(current)+motion : p*Double(n)
-            for offset in -4...5 {
+            let step = short*s.scale*0.8+s.spacing
+            let reach = depthRiver ? 5 : min(64, Int(ceil((w + short*s.scale)/max(1,step)))+2)
+            for offset in -reach...reach {
                 let virtual=Int(floor(cursor))+offset
                 if !canWrap && (virtual<0 || virtual>=n) { continue }
-                if n<10 && (offset<0 || offset>=n) && canWrap { continue }
                 let d=Double(virtual)-cursor
                 if depthRiver {
                     let scale=bounded(1-abs(d)*0.19,0.09,1)
                     var c=card(virtual,w/2+d*(short*0.1+s.spacing),h*0.5-d*short*0.075,w*s.scale*scale,h*s.scale*scale,"-\(offset)")
+                    // Recycle only beyond the stage, never through a visible slot.
+                    let retreat=smooth((abs(d)-3)/1.5)
+                    c.center.x += (d < 0 ? -1 : 1)*retreat*(w+c.width)
                     c.yaw=bounded(d*22*s.depth,-55,55); c.z = -abs(d); cards.append(c)
                 } else {
-                    let lane=variant.id == "filmstrip-river" ? virtual%2 : 0
+                    let lane=variant.id == "filmstrip-river" ? ((virtual%n+n)%n)%2 : 0
                     let wave=variant.id == "wave-ticker" ? sin(d*0.7+p*tau)*short*s.tilt/180 : 0
                     var c=card(virtual,w/2+d*(short*s.scale*0.8+s.spacing),h/2+(Double(lane)-0.5)*(variant.id == "filmstrip-river" ? h*0.45:0)+wave,short*s.scale,short*s.scale*0.70,"-\(offset)")
                     if variant.id == "wave-ticker" { c.angle=cos(d*0.7+p*tau)*s.tilt }
@@ -383,6 +390,9 @@ public struct RenderPlan: Sendable {
                 }
             }
         }
+        // The virtual reel extends beyond the stage to avoid visible recycling,
+        // but offstage instances do not belong in the draw/selection workload.
+        if variant.family == .reel {cards.removeAll {!$0.intersects(width:w,height:h,margin:short*0.15)}}
         return cards.sorted { $0.z == $1.z ? $0.instanceID < $1.instanceID : $0.z < $1.z }
     }
     private static func stableUnit(_ id:String)->Double {

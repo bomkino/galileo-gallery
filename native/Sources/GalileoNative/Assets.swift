@@ -43,11 +43,14 @@ public final class Workspace: @unchecked Sendable {
     }
 }
 public enum AssetImporter {
-    public static let extensions=["png","jpg","jpeg","heic","heif","tif","tiff","gif","webp","avif","pdf","mp4","mov","m4v"]
+    public static let extensions=["png","jpg","jpeg","heic","heif","tif","tiff","gif","webp","avif","pdf","mp4","mov","m4v","webm"]
     public static func inspect(_ source:URL,workspace:Workspace) async throws -> MediaItem {
         let scoped=source.startAccessingSecurityScopedResource()
         defer { if scoped { source.stopAccessingSecurityScopedResource() } }
         let acquired=try workspace.acquire(source)
+        if source.pathExtension.lowercased() == "webm" {
+            return try await MediaCompatibility.prepareWebM(acquired.url,name:source.lastPathComponent,hash:acquired.hash,workspace:workspace)
+        }
         return try await metadata(acquired.url,name:source.lastPathComponent,hash:acquired.hash)
     }
     public static func metadata(_ url:URL,name:String,hash:String) async throws -> MediaItem {
@@ -57,6 +60,8 @@ public enum AssetImporter {
             guard count<=3000,let props=CGImageSourceCopyPropertiesAtIndex(source,0,nil) as? [CFString:Any],
                   let width=props[kCGImagePropertyPixelWidth] as? Int,let height=props[kCGImagePropertyPixelHeight] as? Int,
                   width>0,height>0,Double(width)*Double(height)<=200_000_000 else { throw GalleryError.invalid("\(name) exceeds the image decode budget or has invalid dimensions.") }
+            let probeOptions:[CFString:Any]=[kCGImageSourceCreateThumbnailFromImageAlways:true,kCGImageSourceCreateThumbnailWithTransform:true,kCGImageSourceThumbnailMaxPixelSize:128,kCGImageSourceShouldCacheImmediately:true]
+            guard CGImageSourceCreateThumbnailAtIndex(source,0,probeOptions as CFDictionary) != nil else {throw GalleryError.invalid("\(name) has image metadata but its pixels could not be decoded.")}
             let orientation=(props[kCGImagePropertyOrientation] as? Int) ?? 1
             let swapped=[5,6,7,8].contains(orientation)
             let animated=count>1 && ImageSequenceTiming.delay(properties:props) != nil
@@ -79,6 +84,11 @@ public enum AssetImporter {
         let size=try await track.load(.naturalSize),transform=try await track.load(.preferredTransform)
         let transformed=CGRect(origin:.zero,size:size).applying(transform)
         guard duration.seconds.isFinite,duration.seconds>0,duration.seconds<=86400 else { throw GalleryError.invalid("\(name) has an invalid video duration.") }
+        guard transformed.width.isFinite,transformed.height.isFinite,transformed.width != 0,transformed.height != 0,
+              abs(transformed.width)<=16384,abs(transformed.height)<=16384,
+              abs(transformed.width*transformed.height)<=33_177_600 else {throw GalleryError.invalid("\(name) exceeds the supported video pixel budget.")}
+        let probe=AVAssetImageGenerator(asset:asset);probe.appliesPreferredTrackTransform=true;probe.maximumSize=CGSize(width:128,height:128)
+        _ = try await probe.image(at:.zero)
         var item=MediaItem(name:name,asset:url.lastPathComponent,sha256:hash,kind:.video,width:max(1,Int(abs(transformed.width))),height:max(1,Int(abs(transformed.height))),duration:duration.seconds)
         item.colorSpace="Video source profile"
         return item
@@ -91,15 +101,15 @@ public enum NativeDocumentIO {
         guard let assets=children["Assets"],assets.isDirectory,let files=assets.fileWrappers,files.count<=2048 else { throw GalleryError.invalid("The document has no valid asset directory.") }
         var sizes=[String:Int64]()
         for (name,file) in files {
-            guard GalleryProject.safeAssetName(name),file.isRegularFile,let data=file.regularFileContents,data.count<=512*1024*1024 else { throw GalleryError.invalid("An asset in the document is invalid.") }
+            guard GalleryProject.safeAssetName(name),file.isRegularFile,let data=file.regularFileContents,Int64(data.count)<=(project.derivedAssets.contains(name) ? MediaBudget.maximumDerivedFileBytes:MediaBudget.maximumFileBytes) else { throw GalleryError.invalid("An asset in the document is invalid.") }
             sizes[name]=Int64(data.count)
-            _ = try MediaBudget.total(sizes)
+            _ = try MediaBudget.total(sizes,derived:project.derivedAssets)
             try data.write(to:workspace.assets.appendingPathComponent(name),options:.atomic)
         }
         for item in project.items where item.unavailable == nil {
             let url=try workspace.url(for:item)
             guard try workspace.verifiedFingerprint(url)==item.sha256 else { throw GalleryError.invalid("\(item.name) failed its integrity check. The original document has not been changed.") }
-            if let original=item.originalAsset, let expected=item.originalSHA256 {
+            if item.originalUnavailable == nil, let original=item.originalAsset, let expected=item.originalSHA256 {
                 guard try workspace.verifiedFingerprint(workspace.assets.appendingPathComponent(original))==expected else {throw GalleryError.invalid("The preserved PDF failed its integrity check.")}
             }
         }
@@ -114,7 +124,7 @@ public enum NativeDocumentIO {
         var children:[String:FileWrapper]=["project.json":FileWrapper(regularFileWithContents:try project.encoded())]
         let assets=FileWrapper(directoryWithFileWrappers:[:])
         let sizes = try workspace.managedSizes(project:project)
-        _ = try MediaBudget.total(sizes)
+        _ = try MediaBudget.total(sizes,derived:project.derivedAssets)
         for item in project.items where item.unavailable == nil {
             guard try workspace.verifiedFingerprint(workspace.url(for:item)) == item.sha256 else { throw GalleryError.invalid("\(item.name) changed before saving.") }
         }

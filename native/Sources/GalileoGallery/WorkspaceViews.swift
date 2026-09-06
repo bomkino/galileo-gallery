@@ -87,8 +87,10 @@ struct FramingEditor: View {
                         .frame(maxWidth:.infinity,maxHeight:.infinity)
                 }.frame(height:420)
                 HStack {
-                    Picker("Lock ratio",selection:$ratioLock) {Text("Free").tag("free");Text("Source").tag("source");Text("16:9").tag("wide");Text("Square").tag("square");Text("4:5").tag("portrait")}.frame(width:220)
-                    Spacer();Button("Reset"){crop=Crop();focal=Point()}
+                    Picker("Lock ratio",selection:$ratioLock) {Text("Free").tag("free");Text("Source").tag("source");Text("16:9").tag("wide");Text("Square").tag("square");Text("4:5").tag("portrait")}.frame(width:220).onChange(of:ratioLock) { _,_ in
+                        crop=CropGeometry.constrained(crop,sourceAspect:Double(item.width)/Double(item.height),ratio:ratio)
+                    }
+                    Spacer();Button("Reset"){ratioLock="free";crop=Crop();focal=Point()}
                 }
                 if item.fit == .cover {
                     HStack {
@@ -116,22 +118,14 @@ struct FramingEditor: View {
     private func cropNumber(_ title:String,key:WritableKeyPath<Crop,Double>,maximum:Double)->some View {
         VStack(alignment:.leading) {
             Text(title).font(.caption).foregroundStyle(.secondary)
-            TextField(title,value:Binding(get:{crop[keyPath:key]*100},set:{crop[keyPath:key]=bounded($0/100,key == \.width || key == \.height ? 0.0001:0,max(0.0001,maximum))}),format:.number.precision(.fractionLength(2))).textFieldStyle(.roundedBorder)
+            TextField(title,value:Binding(get:{crop[keyPath:key]*100},set:{value in
+                var next=crop;next[keyPath:key]=bounded(value/100,key == \.width || key == \.height ? 0.0001:0,max(0.0001,maximum))
+                if let item {next=CropGeometry.constrained(next,sourceAspect:Double(item.width)/Double(item.height),ratio:ratio,preferHeight:key == \.height)}
+                crop=next
+            }),format:.number.precision(.fractionLength(2))).textFieldStyle(.roundedBorder)
         }
     }
     private func resize(_ start:Crop,corner:Int,point:CGPoint,size:CGSize,sourceRatio:Double) {
-        let right=corner%2==1,bottom=corner>=2
-        let fixedX=start.x+(right ? 0:start.width),fixedY=start.y+(bottom ? 0:start.height)
-        var width=max(0.01,abs(bounded(point.x/size.width,0,1)-fixedX))
-        var height=max(0.01,abs(bounded(point.y/size.height,0,1)-fixedY))
-        let maxW=right ? 1-fixedX:fixedX,maxH=bottom ? 1-fixedY:fixedY
-        width=min(maxW,width);height=min(maxH,height)
-        if ratio>0 {
-            let normalized=ratio/sourceRatio
-            width=min(min(width,height*normalized),min(maxW,maxH*normalized))
-            height=width/normalized
-        }
-        guard width>=0.0001,height>=0.0001 else{return}
-        crop.width=width;crop.height=height;crop.x=right ? fixedX:fixedX-width;crop.y=bottom ? fixedY:fixedY-height
+        crop=CropGeometry.resized(start,corner:corner,x:point.x/size.width,y:point.y/size.height,sourceAspect:sourceRatio,ratio:ratio)
     }
 }

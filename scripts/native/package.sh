@@ -5,6 +5,7 @@ cd "$(dirname "$0")/../.."
 output="${1:-release-native}"
 version="$(cat native/VERSION)"
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid version" >&2; exit 1; }
+bash scripts/native/build-codecs.sh
 swift build --package-path native -c release
 binary_dir="$(swift build --package-path native -c release --show-bin-path)"
 app="$output/Galileo Gallery.app"
@@ -21,6 +22,13 @@ xcrun -sdk macosx metallib -cikernel "$output/DriftBackgrounds.air" -o "$app/Con
 rm "$output/DriftBackgrounds.air"
 cp native/Vendor/DriftBackgrounds/LICENSE "$app/Contents/Resources/Drift-AGPL-3.0.txt"
 cp native/Vendor/DriftBackgrounds/NOTICE "$app/Contents/Resources/Drift-NOTICE.txt"
+mkdir -p "$app/Contents/Resources/MediaTools" "$app/Contents/Resources/CodecLicenses"
+cp native/.codecs/bin/ffmpeg native/.codecs/bin/ffprobe "$app/Contents/Resources/MediaTools/"
+cp native/.codecs/licenses/* "$app/Contents/Resources/CodecLicenses/"
+cp native/.codecs/identity.txt "$app/Contents/Resources/MediaTools/identity.txt"
+for tool in ffmpeg ffprobe; do
+    codesign --verify --strict "$app/Contents/Resources/MediaTools/$tool"
+done
 cp native/Resources/Help.html "$app/Contents/Resources/Help.html"
 GALLERY_APP="$app" GALLERY_VERSION="$version" GALLERY_SHA="$(git rev-parse HEAD)" python3 - <<'PY'
 import os, pathlib, plistlib, json

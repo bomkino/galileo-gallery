@@ -5,18 +5,25 @@ import Foundation
 public enum MediaBudget {
     public static let maximumFileBytes: Int64 = 512 * 1024 * 1024
     public static let maximumProjectBytes: Int64 = 4 * 1024 * 1024 * 1024
-    public static func total(_ sizes: [String: Int64], limit: Int64 = maximumProjectBytes) throws -> Int64 {
-        var total: Int64 = 0
+    public static let maximumDerivedFileBytes: Int64 = 4 * 1024 * 1024 * 1024
+    public static let maximumDerivedProjectBytes: Int64 = 16 * 1024 * 1024 * 1024
+    public static func total(_ sizes: [String: Int64], limit: Int64 = maximumProjectBytes, derived: Set<String> = []) throws -> Int64 {
+        var total: Int64 = 0, derivedTotal: Int64 = 0
         for (name, size) in sizes {
+            if derived.contains(name) {
+                guard GalleryProject.safeAssetName(name),size >= 0,size <= maximumDerivedFileBytes,
+                      derivedTotal <= maximumDerivedProjectBytes-size else {throw GalleryError.invalid("Native working media exceeds its 4 GiB per-file or 16 GiB project budget.")}
+                derivedTotal+=size;continue
+            }
             guard GalleryProject.safeAssetName(name), size >= 0, size <= maximumFileBytes else {
                 throw GalleryError.invalid("A source exceeds the 512 MiB per-file limit or is invalid.")
             }
             guard size <= limit, total <= limit - size else {
-                throw GalleryError.invalid("This collection exceeds the 4 GiB managed-media budget. No items from this batch were added.")
+                throw GalleryError.invalid("This collection exceeds the 4 GiB managed-media budget. The oversized source was not added.")
             }
             total += size
         }
-        return total
+        return total + derivedTotal
     }
 }
 
@@ -117,5 +124,38 @@ extension SceneCard {
         guard !q.isEmpty else { return false }
         return q.map(\.x).max()! >= -margin && q.map(\.x).min()! <= canvasWidth + margin &&
                q.map(\.y).max()! >= -margin && q.map(\.y).min()! <= canvasHeight + margin
+    }
+}
+
+
+/// All crop controls use the same geometry. Ratios are in source-pixel space,
+/// while crop coordinates remain normalized and independent of image size.
+public enum CropGeometry {
+    public static func constrained(_ crop:Crop,sourceAspect:Double,ratio:Double,
+                                   preferHeight:Bool=false)->Crop {
+        var c=crop
+        c.x=bounded(c.x,0,0.9999);c.y=bounded(c.y,0,0.9999)
+        c.width=bounded(c.width,0.0001,1-c.x);c.height=bounded(c.height,0.0001,1-c.y)
+        guard ratio.isFinite,ratio>0,sourceAspect.isFinite,sourceAspect>0 else{return c}
+        let normalized=ratio/sourceAspect
+        var width=preferHeight ? c.height*normalized:c.width
+        width=min(width,min(1-c.x,(1-c.y)*normalized))
+        c.width=max(0.0001,width);c.height=c.width/normalized
+        return c
+    }
+    public static func resized(_ start:Crop,corner:Int,x:Double,y:Double,
+                               sourceAspect:Double,ratio:Double)->Crop {
+        let right=corner%2==1,bottom=corner>=2
+        let fixedX=start.x+(right ? 0:start.width),fixedY=start.y+(bottom ? 0:start.height)
+        let maxW=right ? 1-fixedX:fixedX,maxH=bottom ? 1-fixedY:fixedY
+        var width=min(maxW,max(0.0001,abs(bounded(x,0,1)-fixedX)))
+        var height=min(maxH,max(0.0001,abs(bounded(y,0,1)-fixedY)))
+        if ratio>0,sourceAspect>0 {
+            let normalized=ratio/sourceAspect
+            width=min(min(width,height*normalized),min(maxW,maxH*normalized));height=width/normalized
+        }
+        guard width>=0.0001,height>=0.0001 else{return start}
+        var result=start;result.x=right ? fixedX:fixedX-width;result.y=bottom ? fixedY:fixedY-height
+        result.width=width;result.height=height;return result
     }
 }

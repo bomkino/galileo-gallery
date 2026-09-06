@@ -25,3 +25,7 @@ native-evidence/
 !native/Vendor/
 !native/Vendor/DriftBackgrounds/
 !native/Vendor/DriftBackgrounds/**
+
+# Rebuilt from pinned source; never commit compiler outputs.
+native/.codecs/
+codec-evidence/

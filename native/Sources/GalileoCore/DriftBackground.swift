@@ -83,6 +83,14 @@ public struct DriftBackground: Codable, Equatable, Sendable {
             }
         }
     }
+    public func choosing(_ study:DriftStudy,keepingPalette:Bool)->DriftBackground {
+        // Reapplying the current tile is not a hidden reset of custom controls.
+        guard study.id != studyID else{return self}
+        var next=study.settings
+        if keepingPalette {next.colorA=colorA;next.colorB=colorB;next.accent=accent}
+        next.animated=animated
+        return next
+    }
     /// Explicit integer frame authority. No wall clock, random state or seek history.
     /// Motion repeats once per authored Galileo cycle, including spotlight holds.
     public func time(frame: Int64, schedule: FrameSchedule) -> (phase: Double, grainFrame: Double) {

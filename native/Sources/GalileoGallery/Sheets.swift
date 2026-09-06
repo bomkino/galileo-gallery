@@ -11,6 +11,7 @@ struct SceneChooser:View {
     @State private var remembered:[String:SceneSettings]=[:]
     @State private var family:SceneFamily
     @State private var previewRevision=0
+    @State private var previewSnapshot:RenderSnapshot?
     @State private var error:String?
     @State private var applyTiming=false
     @State private var presets:[SavedPreset]=[]
@@ -20,11 +21,12 @@ struct SceneChooser:View {
     init(session:EditorSession) {
         self.session=session
         _draft=State(initialValue:session.project)
+        _previewSnapshot=State(initialValue:session.snapshot)
         _family=State(initialValue:session.snapshot.plan.variant.family)
         _favorites=State(initialValue:Set(UserDefaults.standard.stringArray(forKey:"favorite-scenes") ?? []))
-        _playback=StateObject(wrappedValue:PlaybackModel(schedule:session.snapshot.plan.schedule))
+        _playback=StateObject(wrappedValue:PlaybackModel(schedule:session.snapshot.plan.schedule,persist:false))
     }
-    private var snapshot:RenderSnapshot? {try? RenderSnapshot(project:draft,workspace:session.workspace)}
+    private var snapshot:RenderSnapshot? {previewSnapshot}
     var body:some View {
         VStack(spacing:0) {
             HStack {
@@ -77,6 +79,7 @@ struct SceneChooser:View {
                         NativePreview(snapshot:snapshot,revision:previewRevision,frame:playback.frame,onError:{error=$0})
                         TransportBar(playback:playback,schedule:snapshot.plan.schedule,cues:snapshot.plan.spotlights)
                     }
+                    if applyTiming {Text("Applies saved motion timing as well as the scene.").font(.caption).foregroundStyle(.secondary)}
                     if draft.items.isEmpty {Text("Add media to preview your scene.").foregroundStyle(.secondary)}
                     if let error {Text(error).foregroundStyle(.red)}
                 }.padding(20)
@@ -89,9 +92,13 @@ struct SceneChooser:View {
     private func select(_ id:String) {
         remembered[draft.scene.variantID]=draft.scene
         draft.scene=remembered[id] ?? SceneCatalog.defaults(for:id)
-        family=SceneCatalog.variant(id)!.family;changed()
+        family=SceneCatalog.variant(id)!.family;applyTiming=false;draft.timing=session.project.timing;changed()
     }
-    private func changed() {previewRevision+=1;error=nil;if let snapshot {playback.update(snapshot.plan);playback.seek(0)}}
+    private func changed() {
+        previewRevision+=1;error=nil
+        do {previewSnapshot=try RenderSnapshot(project:draft,workspace:session.workspace);if let snapshot {playback.update(snapshot.plan);playback.seek(0)}}
+        catch {self.error=error.localizedDescription}
+    }
     private func favorite(_ id:String) {
         if favorites.contains(id){favorites.remove(id)}else{favorites.insert(id)}
         UserDefaults.standard.set(favorites.sorted(),forKey:"favorite-scenes")

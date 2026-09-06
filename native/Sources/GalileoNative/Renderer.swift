@@ -10,10 +10,10 @@ import GalileoCore
 public struct RenderSnapshot: @unchecked Sendable {
     public let plan: RenderPlan
     public let workspace: Workspace
-    public init(project:GalleryProject,workspace:Workspace)throws { plan=try RenderPlan(project:project);self.workspace=workspace }
+    let sourceByID:[String:MediaItem]
+    public init(project:GalleryProject,workspace:Workspace)throws { plan=try RenderPlan(project:project);self.workspace=workspace;sourceByID=Dictionary(uniqueKeysWithValues:project.items.map{($0.id,$0)}) }
 }
 private final class ImageBox: NSObject { let image:CGImage;init(_ image:CGImage){self.image=image} }
-private final class GeneratorBox: NSObject { let generator:AVAssetImageGenerator;init(_ generator:AVAssetImageGenerator){self.generator=generator} }
 
 /// Immutable images and a thread-safe CIContext can be shared. Mutable video
 /// generators remain renderer-owned and confined to their worker.
@@ -43,13 +43,22 @@ public final class NativeRenderer {
     public let context:CIContext
     public let backend:String
     public private(set) var largestPreparedLayer=0
-    private let generators=NSCache<NSString,GeneratorBox>()
+    private var readers:[String:VideoFrameCursor]=[:]
+    private var readerOrder:[String]=[]
+    private var imageIndexes:[String:ImageFrameIndex]=[:]
+    public private(set) var decodedSourceFrames=0
+    public private(set) var sourceDecodeRequests=0
     private let srgb=CGColorSpace(name:CGColorSpace.sRGB)!
-    public init() {context=RenderResources.shared.context;backend=RenderResources.shared.backend;generators.countLimit=4}
-    public func clearCaches() {generators.removeAllObjects();RenderResources.shared.clear()}
+    public init() {context=RenderResources.shared.context;backend=RenderResources.shared.backend}
+    public func clearCaches() {readers.removeAll();readerOrder.removeAll();imageIndexes.removeAll();RenderResources.shared.clear()}
     public func thumbnail(item:MediaItem,workspace:Workspace,maximumDimension:Int=160)throws->CGImage {
         guard item.unavailable==nil else {throw GalleryError.missing("Locate or replace the missing source.")}
-        return try sourceImage(item:item,seconds:item.trimStart,workspace:workspace,maximumDimension:max(64,min(7680,maximumDimension)))
+        return try sourceImage(item:item,seconds:item.trimStart,workspace:workspace,maximumDimension:max(64,min(16384,maximumDimension))).image
+    }
+    public func sourcePreview(item:MediaItem,seconds:Double,workspace:Workspace,maximumDimension:Int=960)throws->CGImage {
+        try Task.checkCancellation()
+        guard seconds.isFinite else{throw GalleryError.invalid("Invalid source time.")}
+        return try sourceImage(item:item,seconds:max(0,seconds),workspace:workspace,maximumDimension:max(64,min(16384,maximumDimension))).image
     }
     public func image(snapshot:RenderSnapshot,frame:Int64,maximumDimension:Int?=nil,colorSpace:CGColorSpace?=nil)throws->CGImage {
         let result=try composition(snapshot:snapshot,frame:frame,maximumDimension:maximumDimension)
@@ -88,23 +97,27 @@ public final class NativeRenderer {
         let cards=snapshot.plan.evaluate(frame:frame).map { original -> SceneCard in
             var c=original;c.center=Point(c.center.x*factor,c.center.y*factor);c.width *= factor;c.height *= factor;return c
         }.filter{$0.intersects(width:w,height:h,margin:min(w,h)*0.08)}
-        let byID=Dictionary(uniqueKeysWithValues:project.items.map{($0.id,$0)})
+        let byID=snapshot.sourceByID
         if cards.contains(where: \.suspension),let ropes=ropeImage(cards:cards,width:Int(w),height:Int(h),light:luminance(background.color)>0.5) {
             result=CIImage(cgImage:ropes).composited(over:result)
         }
         for card in cards {
             try Task.checkCancellation()
             guard let item=byID[card.itemID] else {throw GalleryError.invalid("A rendered instance has no source media.")}
-            let source:CGImage
+            let source:DecodedSourceFrame
             if item.unavailable != nil {
                 guard let placeholder=captionImage("Missing source",width:320,fontSize:24,light:true,backing:true) else {throw GalleryError.invalid("The missing-media preview could not be drawn.")}
-                source=placeholder
+                source=DecodedSourceFrame(image:placeholder,identity:"missing")
             } else {
-                source=try sourceImage(item:item,seconds:card.sourceTime,workspace:snapshot.workspace,maximumDimension:min(7680,max(64,Int(ceil(max(w,h))))))
+                // Ask for the projected card, including crop magnification. Stable
+                // size tiers reuse a larger decode instead of re-decoding every pose.
+                let demand=max(card.width/max(0.0001,item.crop.width),card.height/max(0.0001,item.crop.height))
+                let tier=min(16384,max(128,Int(pow(2,ceil(log2(max(128,demand)))))))
+                source=try sourceImage(item:item,seconds:card.sourceTime,workspace:snapshot.workspace,maximumDimension:tier)
             }
             let bitmap=try artwork(source:source,item:item,card:card,scene:scene)
             let q=card.quad(perspective:w*2)
-            let layer=CIImage(cgImage:bitmap).applyingFilter("CIPerspectiveTransform",parameters:[
+            let layer=bitmap.applyingFilter("CIPerspectiveTransform",parameters:[
                 "inputTopLeft":CIVector(x:q[0].x,y:h-q[0].y),"inputTopRight":CIVector(x:q[1].x,y:h-q[1].y),
                 "inputBottomRight":CIVector(x:q[2].x,y:h-q[2].y),"inputBottomLeft":CIVector(x:q[3].x,y:h-q[3].y)
             ])
@@ -144,65 +157,65 @@ public final class NativeRenderer {
         func linear(_ v:Double)->Double {v<=0.04045 ? v/12.92:pow((v+0.055)/1.055,2.4)}
         return 0.2126*linear(c.r)+0.7152*linear(c.g)+0.0722*linear(c.b)
     }
-    private func sourceImage(item:MediaItem,seconds:Double,workspace:Workspace,maximumDimension:Int)throws->CGImage {
-        let key="\(item.sha256):\(item.kind == .image ? 0:Int64(seconds*1_000_000)):m\(maximumDimension)" as NSString
-        if let box=RenderResources.shared.decoded.object(forKey:key) { return box.image }
+    private func sourceImage(item:MediaItem,seconds:Double,workspace:Workspace,maximumDimension:Int)throws->DecodedSourceFrame {
+        sourceDecodeRequests+=1
         let url=try workspace.url(for:item)
-        let image:CGImage
         if item.kind == .video {
-            let generatorKey="\(item.sha256):\(maximumDimension)" as NSString
-            let generator:AVAssetImageGenerator
-            if let cached=generators.object(forKey:generatorKey) { generator=cached.generator }
+            let key="\(workspace.root.path):\(item.sha256):\(maximumDimension)"
+            let cursor:VideoFrameCursor
+            if let old=readers[key] {cursor=old;readerOrder.removeAll{$0==key}}
             else {
-                generator=AVAssetImageGenerator(asset:AVURLAsset(url:url));generator.appliesPreferredTrackTransform=true
-                generator.maximumSize=CGSize(width:maximumDimension,height:maximumDimension)
-                generator.requestedTimeToleranceBefore = .zero;generator.requestedTimeToleranceAfter = .zero
-                generators.setObject(GeneratorBox(generator),forKey:generatorKey)
-            }
-            do { image=try generator.copyCGImage(at:CMTime(seconds:seconds,preferredTimescale:600000),actualTime:nil) }
-            catch { throw GalleryError.invalid("\(item.name) could not be decoded at \(String(format:"%.3f",seconds)) s: \(error.localizedDescription)") }
-        } else {
-            guard let source=CGImageSourceCreateWithURL(url as CFURL,[kCGImageSourceShouldCache:false] as CFDictionary) else { throw GalleryError.invalid("\(item.name) could not be decoded.") }
-            var index=0
-            if item.kind == .animatedImage {
-                var elapsed:Double=0
-                for i in 0..<CGImageSourceGetCount(source) {
-                    let properties=CGImageSourceCopyPropertiesAtIndex(source,i,nil) as? [CFString:Any] ?? [:]
-                    elapsed+=ImageSequenceTiming.delay(properties:properties) ?? 0.1
-                    index=i;if seconds<elapsed { break }
+                cursor=try VideoFrameCursor(url:url,maximumDimension:maximumDimension,context:context)
+                while !readerOrder.isEmpty && (readers.count>=8 || readers.values.reduce(0){$0+$1.estimatedBytes}+cursor.estimatedBytes>256*1024*1024) {
+                    readers.removeValue(forKey:readerOrder.removeFirst())
                 }
+                readers[key]=cursor
             }
-            let options:[CFString:Any]=[kCGImageSourceCreateThumbnailFromImageAlways:true,kCGImageSourceCreateThumbnailWithTransform:true,kCGImageSourceThumbnailMaxPixelSize:maximumDimension,kCGImageSourceShouldCacheImmediately:true]
-            guard let decoded=CGImageSourceCreateThumbnailAtIndex(source,index,options as CFDictionary) else { throw GalleryError.invalid("\(item.name) could not be decoded.") }
-            image=decoded
+            readerOrder.append(key)
+            let before=cursor.materializedFrames
+            let frame=try cursor.frame(at:seconds,fingerprint:item.sha256)
+            decodedSourceFrames+=cursor.materializedFrames-before;return frame
         }
-        RenderResources.shared.decoded.setObject(ImageBox(image),forKey:key,cost:image.bytesPerRow*image.height)
-        return image
+        let sourceKey="\(workspace.root.path):\(item.sha256)"
+        let index:ImageFrameIndex
+        if let cached=imageIndexes[sourceKey] {index=cached}
+        else {
+            index=try ImageFrameIndex(url:url,animated:item.kind == .animatedImage)
+            if imageIndexes.count>=16 {imageIndexes.removeAll()}
+            imageIndexes[sourceKey]=index
+        }
+        let number=index.index(at:seconds),key="\(item.sha256):i\(number):m\(maximumDimension)"
+        if let cached=RenderResources.shared.decoded.object(forKey:key as NSString) {return DecodedSourceFrame(image:cached.image,identity:key)}
+        let options:[CFString:Any]=[kCGImageSourceCreateThumbnailFromImageAlways:true,kCGImageSourceCreateThumbnailWithTransform:true,kCGImageSourceThumbnailMaxPixelSize:maximumDimension,kCGImageSourceShouldCacheImmediately:true]
+        guard let image=CGImageSourceCreateThumbnailAtIndex(index.source,number,options as CFDictionary) else {throw GalleryError.invalid("\(item.name) could not produce picture \(number+1).")}
+        RenderResources.shared.decoded.setObject(ImageBox(image),forKey:key as NSString,cost:image.bytesPerRow*image.height)
+        decodedSourceFrames+=1;return DecodedSourceFrame(image:image,identity:key)
     }
-    private func artwork(source:CGImage,item:MediaItem,card:SceneCard,scene:SceneSettings)throws->CGImage {
-        let width=max(1,min(8192,Int(ceil(card.width)))),height=max(1,min(8192,Int(ceil(card.height))))
-        largestPreparedLayer=max(largestPreparedLayer,width*height)
-        let key="source\(source.width)x\(source.height):\(item.sha256):\(item.kind == .image ? 0:Int64(card.sourceTime*1_000_000)):\(width)x\(height):\(item.fit):\(item.crop):\(item.focal):\(scene.radius):\(String(describing:card.slice)):\(String(describing:card.reveal)):\(card.verticalReveal)" as NSString
-        if let cached=RenderResources.shared.prepared.object(forKey:key) { return cached.image }
-        guard width*height<=33_177_600,let ctx=CGContext(data:nil,width:width,height:height,bitsPerComponent:8,bytesPerRow:0,space:srgb,bitmapInfo:CGImageAlphaInfo.premultipliedLast.rawValue) else { throw GalleryError.invalid("A source layer exceeds the rendering budget.") }
+    /// Keep one source image through fit/crop/rounded masking and fragment
+    /// clipping. No new full-card CPU bitmap for each animated pose or slice.
+    private func artwork(source:DecodedSourceFrame,item:MediaItem,card:SceneCard,scene:SceneSettings)throws->CIImage {
+        let width=max(1,card.width),height=max(1,card.height)
+        guard width*height<=33_177_600 else {throw GalleryError.invalid("A source layer exceeds the rendering budget.")}
+        largestPreparedLayer=max(largestPreparedLayer,Int(ceil(width*height)))
         let bounds=CGRect(x:0,y:0,width:width,height:height)
-        let radius=min(CGFloat(scene.radius),min(bounds.width,bounds.height)/2)
-        ctx.addPath(CGPath(roundedRect:bounds,cornerWidth:radius,cornerHeight:radius,transform:nil));ctx.clip()
-        if let slice=card.slice { ctx.clip(to:CGRect(x:slice.x*Double(width),y:(1-slice.y-slice.height)*Double(height),width:slice.width*Double(width),height:slice.height*Double(height))) }
-        if let reveal=card.reveal {
-            ctx.clip(to:card.verticalReveal ? CGRect(x:0,y:Double(height)*(1-reveal),width:Double(width),height:Double(height)*reveal) : CGRect(x:0,y:0,width:Double(width)*reveal,height:Double(height)))
+        let bitmap=source.image
+        let crop=CGRect(x:item.crop.x*Double(bitmap.width),y:(1-item.crop.y-item.crop.height)*Double(bitmap.height),
+                        width:item.crop.width*Double(bitmap.width),height:item.crop.height*Double(bitmap.height))
+        var image=CIImage(cgImage:bitmap).cropped(to:crop).transformed(by:CGAffineTransform(translationX:-crop.minX,y:-crop.minY))
+        let sx=width/crop.width,sy=height/crop.height,scale=item.fit == .contain ? min(sx,sy):max(sx,sy)
+        let x=(width-crop.width*scale)*(item.fit == .contain ? 0.5:item.focal.x)
+        let y=(height-crop.height*scale)*(item.fit == .contain ? 0.5:1-item.focal.y)
+        image=image.transformed(by:CGAffineTransform(scaleX:scale,y:scale)).transformed(by:CGAffineTransform(translationX:x,y:y)).cropped(to:bounds)
+        let clear=CIImage(color:.clear).cropped(to:bounds)
+        if scene.radius>0 {
+            guard let mask=CIFilter(name:"CIRoundedRectangleGenerator",parameters:["inputExtent":CIVector(cgRect:bounds),"inputRadius":min(scene.radius,min(width,height)/2),"inputColor":CIColor.white])?.outputImage else {throw GalleryError.invalid("The rounded image mask is unavailable.")}
+            image=image.applyingFilter("CIBlendWithAlphaMask",parameters:[kCIInputBackgroundImageKey:clear,kCIInputMaskImageKey:mask]).cropped(to:bounds)
         }
-        let crop=CGRect(x:item.crop.x*Double(source.width),y:item.crop.y*Double(source.height),width:item.crop.width*Double(source.width),height:item.crop.height*Double(source.height)).integral
-        guard let cropped=source.cropping(to:crop) else { throw GalleryError.invalid("\(item.name)'s crop could not be rendered.") }
-        let sx=Double(width)/Double(cropped.width),sy=Double(height)/Double(cropped.height)
-        let scale=item.fit == .contain ? min(sx,sy):max(sx,sy)
-        let drawW=Double(cropped.width)*scale,drawH=Double(cropped.height)*scale
-        let x=(Double(width)-drawW)*(item.fit == .contain ? 0.5:item.focal.x)
-        let y=(Double(height)-drawH)*(item.fit == .contain ? 0.5:1-item.focal.y)
-        ctx.interpolationQuality = .high
-        ctx.draw(cropped,in:CGRect(x:x,y:y,width:drawW,height:drawH))
-        guard let image=ctx.makeImage() else { throw GalleryError.invalid("A source layer could not be rendered.") }
-        RenderResources.shared.prepared.setObject(ImageBox(image),forKey:key,cost:image.bytesPerRow*image.height);return image
+        if let slice=card.slice {image=image.cropped(to:CGRect(x:slice.x*width,y:(1-slice.y-slice.height)*height,width:slice.width*width,height:slice.height*height))}
+        if let reveal=card.reveal {image=image.cropped(to:card.verticalReveal ? CGRect(x:0,y:height*(1-reveal),width:width,height:height*reveal):CGRect(x:0,y:0,width:width*reveal,height:height))}
+        // Retain the full source plane so perspective maps clipped pieces into
+        // their original coordinates rather than stretching each piece.
+        return image.composited(over:clear).cropped(to:bounds)
     }
     private func captionImage(_ text:String,width:Int,fontSize:Double,light:Bool,backing:Bool)->CGImage? {
         let padding=max(3,fontSize*0.45),height=max(1,Int(ceil(fontSize*5.6+padding*2)))
@@ -262,5 +275,14 @@ public actor ThumbnailWorker {
     public func image(item:MediaItem,workspace:Workspace,maximumDimension:Int=160)throws->CGImage {
         try Task.checkCancellation()
         return try autoreleasepool {try renderer.thumbnail(item:item,workspace:workspace,maximumDimension:maximumDimension)}
+    }
+}
+
+public actor SourcePreviewWorker {
+    private let renderer=NativeRenderer()
+    public init() {}
+    public func frame(item:MediaItem,seconds:Double,workspace:Workspace,maximumDimension:Int=960)throws->CGImage {
+        try Task.checkCancellation()
+        return try autoreleasepool {try renderer.sourcePreview(item:item,seconds:seconds,workspace:workspace,maximumDimension:maximumDimension)}
     }
 }

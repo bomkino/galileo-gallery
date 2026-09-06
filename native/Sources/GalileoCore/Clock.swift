@@ -36,10 +36,11 @@ public struct FrameSchedule: Equatable, Sendable {
                           progress: Double(local) / Double(cycleFrames), isLastCycle: frame / cycleFrames == cycles - 1)
     }
     public func label(frame: Int64) -> String {
-        let seconds = self.seconds(for: min(totalFrames,max(0, frame)))
-        let whole = Int(seconds)
-        let sub = Int(floor((seconds - Double(whole)) * rate.value + 1e-6))
-        return String(format: "%02d:%02d:%02d:%02d", whole / 3600, (whole / 60) % 60, whole % 60, sub)
+        // Elapsed time, not a hybrid/drop-frame timecode. The adjacent frame
+        // field is the authoritative, reversible index at fractional rates.
+        let ms = min(totalFrames, max(0, frame)) * rate.denominator * 1000 / rate.numerator
+        return String(format: "%02lld:%02lld:%02lld.%03lld", ms / 3_600_000,
+                      (ms / 60_000) % 60, (ms / 1000) % 60, ms % 1000)
     }
 }
 public struct TimeSample: Equatable, Sendable {

@@ -19,14 +19,14 @@ extension NativeDocumentIO {
         guard root.isDirectory == true, root.isSymbolicLink != true else { throw GalleryError.invalid("This is not a native Galileo document package.") }
         let manifest = url.appendingPathComponent("project.json")
         let size = try FileStamp(manifest).size
-        guard size <= 8*1024*1024 else { throw GalleryError.invalid("The document manifest is too large.") }
+        guard size <= GalleryProject.maximumManifestBytes else { throw GalleryError.invalid("The document manifest is too large.") }
         var project = try GalleryProject.decode(Data(contentsOf: manifest))
         let workspace = try Workspace()
         let allowed = Set(["project.json", "Assets", "legacy-manifest.json", "legacy-assets.json", ".DS_Store"])
         for file in try fm.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) {
             guard allowed.contains(file.lastPathComponent) else { throw GalleryError.unsupported("Unsupported document resource: \(file.lastPathComponent).") }
             if file.lastPathComponent.hasPrefix("legacy-") {
-                guard try FileStamp(file).size <= 8*1024*1024 else { throw GalleryError.invalid("The preserved metadata is too large.") }
+                guard try FileStamp(file).size <= GalleryProject.maximumManifestBytes else { throw GalleryError.invalid("The preserved metadata is too large.") }
                 try Workspace.copyOwned(file, to: workspace.root.appendingPathComponent(file.lastPathComponent))
             }
         }
@@ -50,7 +50,7 @@ extension NativeDocumentIO {
                 sizes[name] = try FileStamp(file).size; available[name] = file
             }
         }
-        _ = try MediaBudget.total(sizes)
+        _ = try MediaBudget.total(sizes,derived:project.derivedAssets)
         var needed = Set(project.items.map(\.asset))
         needed.formUnion(project.items.compactMap(\.originalAsset)); needed.formUnion(mapping.values)
         for name in needed {
@@ -60,15 +60,20 @@ extension NativeDocumentIO {
         var failures: [String] = []
         for index in project.items.indices {
             let item = project.items[index]
-            var valid = (try? workspace.verifiedFingerprint(workspace.url(for: item))) == item.sha256
-            if let original = item.originalAsset {
-                valid = valid && (try? workspace.verifiedFingerprint(workspace.assets.appendingPathComponent(original))) == item.originalSHA256
-            }
+            let valid = (try? workspace.verifiedFingerprint(workspace.url(for: item))) == item.sha256
             if !valid {
                 if item.unavailable == nil { failures.append(item.name) }
-                project.items[index].unavailable = "Missing or damaged source"
-                // Do not adopt corrupt bytes into the recovery copy.
+                project.items[index].unavailable = "Missing or damaged picture source"
                 try? fm.removeItem(at: workspace.assets.appendingPathComponent(item.asset))
+            } else { project.items[index].unavailable = nil }
+            if let original=item.originalAsset {
+                let originalURL=workspace.assets.appendingPathComponent(original)
+                let intact=(try? workspace.verifiedFingerprint(originalURL))==item.originalSHA256
+                if !intact {
+                    if item.originalUnavailable == nil {failures.append(item.name + " (archived original)")}
+                    project.items[index].originalUnavailable="Archived original unavailable; the intact working picture remains usable."
+                    try? fm.removeItem(at:originalURL)
+                } else {project.items[index].originalUnavailable=nil}
             }
         }
         let missingLegacy = mapping.filter { !fm.fileExists(atPath: workspace.assets.appendingPathComponent($0.value).path) }
@@ -85,10 +90,10 @@ extension NativeDocumentIO {
         return (project, workspace)
     }
     public static func writePackage(project: GalleryProject, workspace: Workspace, to destination: URL) throws {
-        try project.validate()
+        let manifest = try project.encoded()
         let fm = FileManager.default, parent = destination.deletingLastPathComponent()
         let sizes = try workspace.managedSizes(project: project)
-        let total = try MediaBudget.total(sizes)
+        let total = try MediaBudget.total(sizes,derived:project.derivedAssets)
         // Conservative space check applies to the copy fallback too.
         if let available = try? parent.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage,
            available < total + 16*1024*1024 { throw GalleryError.invalid("There is not enough free space to save this document safely.") }
@@ -98,7 +103,7 @@ extension NativeDocumentIO {
         var expected: [String: String] = [:]
         for item in project.items where item.unavailable == nil {
             expected[item.asset] = item.sha256
-            if let original = item.originalAsset { expected[original] = item.originalSHA256 }
+            if item.originalUnavailable == nil, let original = item.originalAsset { expected[original] = item.originalSHA256 }
         }
         for name in sizes.keys {
             try Task.checkCancellation()
@@ -112,7 +117,7 @@ extension NativeDocumentIO {
             // regular copy is checked independently before it can be published.
             if !cloned, try Workspace.fingerprint(target) != hash { throw GalleryError.invalid("A copied source failed its integrity check.") }
         }
-        try project.encoded().write(to: staging.appendingPathComponent("project.json"), options: .atomic)
+        try manifest.write(to: staging.appendingPathComponent("project.json"), options: .atomic)
         if project.legacyManifestFilename != nil {
             try Workspace.copyOwned(workspace.root.appendingPathComponent("legacy-manifest.json"), to: staging.appendingPathComponent("legacy-manifest.json"))
             try JSONSerialization.data(withJSONObject: legacyMapping(workspace), options: [.sortedKeys]).write(to: staging.appendingPathComponent("legacy-assets.json"), options: .atomic)

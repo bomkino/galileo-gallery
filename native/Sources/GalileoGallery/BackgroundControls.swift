@@ -80,48 +80,75 @@ struct BackgroundControls: View {
 
 struct DriftBackgroundBrowser: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedID: String
-    @State private var family = "all"
-    @State private var search = ""
-    let choose: (DriftStudy)->Void
-    init(currentID:String,choose:@escaping (DriftStudy)->Void) { _selectedID=State(initialValue:currentID);self.choose=choose }
-    private var visible:[DriftStudy] {
-        DriftBackgroundCatalog.studies.filter { (family == "all" || $0.family.rawValue == family) &&
-            (search.isEmpty || $0.name.localizedCaseInsensitiveContains(search) || $0.family.label.localizedCaseInsensitiveContains(search)) }
+    @State private var draft:GalleryProject
+    @State private var snapshot:RenderSnapshot
+    @State private var revision=0
+    @State private var family="all"
+    @State private var search=""
+    @State private var keepPalette=true
+    @State private var error:String?
+    @StateObject private var playback:PlaybackModel
+    let workspace:Workspace
+    let initialFrame:Int64
+    let choose:(DriftBackground)->Void
+    init(snapshot:RenderSnapshot,frame:Int64,choose:@escaping(DriftBackground)->Void) {
+        var project=snapshot.plan.project;project.canvas.background = .drift
+        if project.canvas.drift==nil {project.canvas.drift=DriftBackgroundCatalog.studies[0].settings}
+        let preview=(try? RenderSnapshot(project:project,workspace:snapshot.workspace)) ?? snapshot
+        _draft=State(initialValue:project);_snapshot=State(initialValue:preview)
+        _playback=StateObject(wrappedValue:PlaybackModel(schedule:preview.plan.schedule,persist:false))
+        workspace=snapshot.workspace;initialFrame=frame;self.choose=choose
     }
-    var body: some View {
+    private var settings:DriftBackground {draft.canvas.drift ?? DriftBackgroundCatalog.studies[0].settings}
+    private var visible:[DriftStudy] {
+        DriftBackgroundCatalog.studies.filter {(family=="all" || $0.family.rawValue==family) &&
+            (search.isEmpty || $0.name.localizedCaseInsensitiveContains(search) || $0.family.label.localizedCaseInsensitiveContains(search))}
+    }
+    private func select(_ study:DriftStudy) {
+        draft.canvas.drift=settings.choosing(study,keepingPalette:keepPalette)
+        do {snapshot=try RenderSnapshot(project:draft,workspace:workspace);revision+=1;playback.update(snapshot.plan)}
+        catch {self.error=error.localizedDescription}
+    }
+    var body:some View {
         VStack(alignment:.leading,spacing:14) {
-            Text("Drift backgrounds").font(.title2.weight(.semibold))
+            HStack {
+                Text("Drift backgrounds").font(.title2.weight(.semibold));Spacer()
+                Button("Cancel"){dismiss()}.keyboardShortcut(.cancelAction)
+                Button("Use background"){choose(settings);dismiss()}.keyboardShortcut(.defaultAction).disabled(error != nil)
+            }
             HStack {
                 Picker("Family",selection:$family) {
                     Text("All").tag("all")
-                    ForEach(DriftFamily.allCases,id:\.self) { Text($0.label).tag($0.rawValue) }
+                    ForEach(DriftFamily.allCases,id:\.self) {Text($0.label).tag($0.rawValue)}
                 }.frame(width:250)
                 TextField("Search backgrounds",text:$search).textFieldStyle(.roundedBorder)
+                Toggle("Keep palette",isOn:$keepPalette).help("Keep your colours when choosing a different study")
             }
-            ScrollView {
-                LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:12),count:3),spacing:14) {
-                    ForEach(visible) { study in
-                        Button { selectedID=study.id } label: {
-                            VStack(alignment:.leading,spacing:6) {
-                                DriftBackgroundThumbnail(study:study).aspectRatio(240.0/136,contentMode:.fit).clipShape(RoundedRectangle(cornerRadius:6))
-                                Text(study.name).font(.callout).foregroundStyle(.primary).lineLimit(1)
-                            }.padding(6).background(selectedID==study.id ? Color.accentColor.opacity(0.12):Color.clear)
-                                .overlay(RoundedRectangle(cornerRadius:9).stroke(selectedID==study.id ? Color.accentColor:Color.clear,lineWidth:2))
-                        }.buttonStyle(.plain).accessibilityLabel(study.name).accessibilityAddTraits(selectedID==study.id ? .isSelected:[])
-                    }
-                }.padding(3)
-                if visible.isEmpty { Text("No matching backgrounds").foregroundStyle(.secondary).padding() }
+            HStack(spacing:18) {
+                ScrollView {
+                    LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:10),count:2),spacing:12) {
+                        ForEach(visible) {study in
+                            Button {select(study)} label: {
+                                VStack(alignment:.leading,spacing:6) {
+                                    DriftBackgroundThumbnail(study:study).aspectRatio(240.0/136,contentMode:.fit).clipShape(RoundedRectangle(cornerRadius:6))
+                                    Text(study.name).font(.callout).foregroundStyle(.primary).lineLimit(1)
+                                }.padding(6).background(settings.studyID==study.id ? Color.accentColor.opacity(0.12):Color.clear)
+                                    .overlay(RoundedRectangle(cornerRadius:9).stroke(settings.studyID==study.id ? Color.accentColor:Color.clear,lineWidth:2))
+                            }.buttonStyle(.plain).accessibilityLabel(study.name).accessibilityAddTraits(settings.studyID==study.id ? .isSelected:[])
+                        }
+                    }.padding(3)
+                    if visible.isEmpty {Text("No matching backgrounds").foregroundStyle(.secondary).padding()}
+                }.frame(width:390)
+                VStack(alignment:.leading,spacing:12) {
+                    NativePreview(snapshot:snapshot,revision:revision,frame:playback.frame,onError:{error=$0})
+                    Text(settings.study?.name ?? "Background").font(.headline)
+                    TransportBar(playback:playback,schedule:snapshot.plan.schedule,cues:snapshot.plan.spotlights)
+                    if let error {Text(error).foregroundStyle(.red).font(.caption)}
+                }.frame(minWidth:360,maxWidth:.infinity)
             }
-            HStack {
-                Text(DriftBackgroundCatalog.studies.first{$0.id==selectedID}?.name ?? "").foregroundStyle(.secondary)
-                Spacer()
-                Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
-                Button("Use background") {
-                    if let study=DriftBackgroundCatalog.studies.first(where:{$0.id==selectedID}) { choose(study);dismiss() }
-                }.keyboardShortcut(.defaultAction)
-            }
-        }.padding(20).frame(width:680,height:590)
+        }.padding(20).frame(width:880,height:600)
+        .onAppear {playback.update(snapshot.plan);playback.seek(initialFrame)}
+        .onDisappear {playback.pause()}
     }
 }
 private struct DriftBackgroundThumbnail:View {
