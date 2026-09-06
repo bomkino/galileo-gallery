@@ -31,12 +31,13 @@ public struct RGBA: Codable, Equatable, Sendable {
         self.init(Double((n >> 16) & 255)/255, Double((n >> 8) & 255)/255, Double(n & 255)/255)
     }
 }
-public enum BackgroundKind: String, Codable, CaseIterable, Sendable { case solid, gradient, transparent }
+public enum BackgroundKind: String, Codable, CaseIterable, Sendable { case solid, gradient, transparent, drift }
 public struct Canvas: Codable, Equatable, Sendable {
     public var width = 1920; public var height = 1080
     public var background: BackgroundKind = .solid
     public var color = RGBA(hex: "171817")
     public var secondaryColor = RGBA(hex: "4B4943")
+    public var drift: DriftBackground? = nil
     public var gradientAngle: Double = 90
     public init() {}
 }
@@ -147,7 +148,7 @@ public struct ExportSettings: Codable, Equatable, Sendable {
 }
 public struct GalleryProject: Codable, Equatable, Sendable {
     public var format = "dog.pitch.galileo.native"
-    public var schemaVersion = 5
+    public var schemaVersion = 6
     public var id = UUID().uuidString
     public var name = "Untitled"
     public var canvas = Canvas()
@@ -173,12 +174,14 @@ public struct GalleryProject: Codable, Equatable, Sendable {
         func finite(_ value: Double, _ range: ClosedRange<Double>, _ label: String) throws {
             try require(value.isFinite && range.contains(value), "\(label) must be between \(range.lowerBound) and \(range.upperBound).")
         }
-        try require(format == "dog.pitch.galileo.native" && schemaVersion == 5, "This document needs a different version of Galileo Gallery. The original was not changed.")
+        try require(format == "dog.pitch.galileo.native" && schemaVersion == 6, "This document needs a different version of Galileo Gallery. The original was not changed.")
         try require(!id.isEmpty && name.count <= 512, "The document identity is invalid.")
         try require((64...7680).contains(canvas.width) && (64...7680).contains(canvas.height), "Canvas dimensions must be 64–7,680 pixels.")
         try require(canvas.width % 2 == 0 && canvas.height % 2 == 0, "Canvas dimensions must be even pixel counts.")
         try require(canvas.width * canvas.height <= 33_177_600, "The canvas exceeds the supported 33-megapixel render budget.")
         for color in [canvas.color, canvas.secondaryColor] { for component in [color.r,color.g,color.b,color.a] { try finite(component, 0...1, "Colour") } }
+        if let drift = canvas.drift { try drift.validate() }
+        try require(canvas.background != .drift || canvas.drift != nil, "Choose a Drift background before saving.")
         try finite(canvas.gradientAngle, -360...360, "Gradient angle")
         try require(SceneCatalog.variant(scene.variantID) != nil, "This scene variant is not supported.")
         try finite(scene.scale, 0.15...1, "Scale"); try finite(scene.spacing, 0...240, "Spacing")
@@ -234,7 +237,7 @@ public struct GalleryProject: Codable, Equatable, Sendable {
         guard data.count <= 8 * 1024 * 1024 else { throw GalleryError.invalid("The document manifest is too large.") }
         var project = try JSONDecoder().decode(Self.self, from: data)
         // v3 had no per-media spotlight. Missing optional values decode as nil.
-        if [3, 4].contains(project.schemaVersion) { project.schemaVersion = 5 }
+        if [3, 4, 5].contains(project.schemaVersion) { project.schemaVersion = 6 }
         try project.validate(); return project
     }
 }

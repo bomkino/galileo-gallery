@@ -71,6 +71,11 @@ public final class NativeRenderer {
         let background=project.canvas
         var result:CIImage
         if background.background == .transparent {result=CIImage(color:.clear).cropped(to:extent)}
+        else if background.background == .drift {
+            guard let settings = background.drift else { throw GalleryError.invalid("Choose a Drift background.") }
+            result = try DriftBackgroundRenderer.image(settings:settings,extent:extent,
+                logicalSize:CGSize(width:logicalW,height:logicalH),frame:frame,schedule:snapshot.plan.schedule)
+        }
         else if background.background == .gradient {
             let radians=background.gradientAngle * .pi/180,distance=hypot(w,h)/2
             result=CIFilter(name:"CILinearGradient",parameters:[

@@ -43,3 +43,7 @@ The release job identifies its exact source SHA and machine, runs those checks, 
 No sound, browser product, non-Mac build, Intel build, cloud account or automatic updater. No WebM or HDR mastering guarantee. Current composition prepares 8-bit sRGB artwork before Rec.709 output conversion. Native choreography is not legacy pixel parity. PDF pages are raster images with preserved originals, not editable text or vectors.
 
 Distribution is ad-hoc signed, not notarized. CI is not comprehensive human VoiceOver acceptance, long-session testing or all hardware/display coverage. Keep rollback copies of projects. Read the current release notes rather than treating historical atelier/programme reports as shipping claims.
+
+## Drift shader import
+
+Pinned source, license and hashes: `native/Vendor/DriftBackgrounds`. Regenerate offline with `python3 scripts/native/generate-drift-backgrounds.py`. `package.sh` precompiles Core Image Metal into the app; SwiftPM tests load the same bundled Metal source once. No new network/build service or browser runtime is required. Shader errors stop the affected render/export rather than silently substituting a flat colour. Old schema 5 backgrounds migrate without changing native solid/gradient values. Background parameters have a separate algorithm version and reject unknown versions.

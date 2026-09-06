@@ -14,6 +14,13 @@ mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp "$binary_dir/GalileoGallery" "$app/Contents/MacOS/GalileoGallery"
 cp build/icon.icns "$app/Contents/Resources/icon.icns"
 cp LICENSE THIRD_PARTY_NOTICES.md "$app/Contents/Resources/"
+# Precompile the imported backgrounds: no shader compilation in the shipping UI.
+shader="native/Sources/GalileoNative/Resources/DriftBackgrounds.metal"
+xcrun -sdk macosx metal -fcikernel -c "$shader" -o "$output/DriftBackgrounds.air"
+xcrun -sdk macosx metallib -cikernel "$output/DriftBackgrounds.air" -o "$app/Contents/Resources/DriftBackgrounds.metallib"
+rm "$output/DriftBackgrounds.air"
+cp native/Vendor/DriftBackgrounds/LICENSE "$app/Contents/Resources/Drift-AGPL-3.0.txt"
+cp native/Vendor/DriftBackgrounds/NOTICE "$app/Contents/Resources/Drift-NOTICE.txt"
 cp native/Resources/Help.html "$app/Contents/Resources/Help.html"
 GALLERY_APP="$app" GALLERY_VERSION="$version" GALLERY_SHA="$(git rev-parse HEAD)" python3 - <<'PY'
 import os, pathlib, plistlib, json

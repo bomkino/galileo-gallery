@@ -10,7 +10,7 @@ var targets: [Target] = [
 #if os(macOS)
 products += [.executable(name: "GalileoGallery", targets: ["GalileoGallery"])]
 targets += [
-    .target(name: "GalileoNative", dependencies: ["GalileoCore"]),
+    .target(name: "GalileoNative", dependencies: ["GalileoCore"], resources: [.copy("Resources")]),
     .executableTarget(name: "GalileoGallery", dependencies: ["GalileoNative", "GalileoCore"]),
     .testTarget(name: "GalileoNativeTests", dependencies: ["GalileoNative", "GalileoCore"]),
 ]

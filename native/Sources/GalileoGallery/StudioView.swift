@@ -283,16 +283,7 @@ struct SceneInspector:View {
                     if !["1920x1080","2576x1080","3840x2160","1080x1920","1080x1080","1080x1350"].contains("\(session.project.canvas.width)x\(session.project.canvas.height)") { Text("Custom").tag("\(session.project.canvas.width)x\(session.project.canvas.height)") }
                 }.labelsHidden()
                 HStack { dimension("W",\.width);dimension("H",\.height) }
-                Picker("Background",selection:Binding(get:{session.project.canvas.background},set:{ kind in session.commit("Change background"){$0.canvas.background=kind} })) {
-                    ForEach(BackgroundKind.allCases,id:\.self) { Text($0.rawValue.capitalized).tag($0) }
-                }
-                if session.project.canvas.background != .transparent {
-                    ColorPicker("Colour",selection:color(\.color),supportsOpacity:false)
-                    if session.project.canvas.background == .gradient {
-                        ColorPicker("Second colour",selection:color(\.secondaryColor),supportsOpacity:false)
-                        NumberControl(label:"Angle",value:Binding(get:{session.project.canvas.gradientAngle},set:{ value in session.commit("Change gradient"){$0.canvas.gradientAngle=value} }),range: -180...180,unit:"°",begin:{session.beginGesture("Change gradient")},end:session.endGesture)
-                    }
-                }
+                BackgroundControls(session:session)
             }
             InspectorSection(title:"Timing") {
                 NumberControl(label:"Motion duration",value:Binding(get:{Double(session.project.timing.durationMilliseconds)/1000},set:{value in session.commit("Change duration"){$0.timing.durationMilliseconds=Int64(value*1000)} }),range:1...600,unit:"s",step:0.1,begin:{session.beginGesture("Change duration")},end:session.endGesture)
@@ -342,11 +333,5 @@ struct SceneInspector:View {
     }
     private func dimension(_ label:String,_ key:WritableKeyPath<GalileoCore.Canvas,Int>)->some View {
         HStack { Text(label).foregroundStyle(.secondary);TextField(label,value:Binding(get:{session.project.canvas[keyPath:key]},set:{value in session.commit("Resize canvas"){$0.canvas[keyPath:key]=value} }),format:.number.grouping(.never)).textFieldStyle(.roundedBorder).accessibilityLabel(label=="W" ? "Canvas width":"Canvas height") }
-    }
-    private func color(_ key:WritableKeyPath<GalileoCore.Canvas,RGBA>)->Binding<Color> {
-        Binding(get:{let c=session.project.canvas[keyPath:key];return Color(.sRGB,red:c.r,green:c.g,blue:c.b,opacity:c.a)},set:{value in
-            guard let c=NSColor(value).usingColorSpace(.sRGB) else { return }
-            session.commit("Change colour"){$0.canvas[keyPath:key]=RGBA(c.redComponent,c.greenComponent,c.blueComponent,1)}
-        })
     }
 }

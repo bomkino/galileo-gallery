@@ -19,6 +19,7 @@ import GalileoNative
         editor.undoManager?.redo();guard editor.project==imported else{throw GalleryError.invalid("Native import redo failed.")}
         editor.commit("Set study composition") {p in
             p.name="Studio study";p.canvas.width=1920;p.canvas.height=1080;p.canvas.color=RGBA(hex:"ECE9E1")
+            p.canvas.background = .drift;p.canvas.drift=DriftBackgroundCatalog.studies.first{$0.id=="verdigris-fresco-study"}!.settings
             p.scene=SceneCatalog.defaults(for:"the-stack");p.scene.shadow=0.25;p.timing.durationMilliseconds=3000
         }
         // Spotlight intent must travel through the same document save as the artwork.
@@ -130,7 +131,14 @@ import GalileoNative
                     try NativeExport.writePNG(image,to:samples.appendingPathComponent("\(variant.id)-\(index).png"));frames+=1
                 }
             }
-            return ["renderedSceneFrames":frames,"renderer":renderer.backend]
+            let backgrounds=directory.appendingPathComponent("drift-backgrounds",isDirectory:true)
+            try fm.createDirectory(at:backgrounds,withIntermediateDirectories:true)
+            for study in DriftBackgroundCatalog.studies {
+                var p=GalleryProject();p.canvas.width=256;p.canvas.height=144;p.canvas.background = .drift;p.canvas.drift=study.settings
+                let snapshot=try RenderSnapshot(project:p,workspace:workspace)
+                try NativeExport.writePNG(renderer.image(snapshot:snapshot,frame:0),to:backgrounds.appendingPathComponent(study.id+".png"))
+            }
+            return ["renderedSceneFrames":frames,"renderer":renderer.backend,"driftBackgroundsRendered":72]
         }.value
         var movieProject=restored.project;movieProject.canvas.width=640;movieProject.canvas.height=360;movieProject.timing.durationMilliseconds=1001;movieProject.timing.playMode = .repeatCount;movieProject.timing.repeats=2
         for i in movieProject.items.indices { movieProject.items[i].spotlight=nil };movieProject.export.format = .h264;movieProject.export.frameRate=FrameRate(30)
@@ -138,7 +146,7 @@ import GalileoNative
         let receipt=try await Task.detached {try await NativeExport.run(snapshot:snapshot,destination:ExportDestination(url:movieURL),stillFrame:0){_,_ in}}.value
         guard receipt.scheduledFrames==62,receipt.decodedFrames==62 else{throw GalleryError.invalid("The actual native movie failed its frame count proof.")}
         try JSONEncoder().encode(receipt).write(to:directory.appendingPathComponent("export-receipt.json"))
-        let summary:[String:Any]=["spotlightNavigation":true,"nativePixelZoom":true,"framingSheet":true,"previewAdvancesDuringPlayback":true,"documentRoundTrip":true,"documentEditedState":true,"failedSavePreservesChanges":true,"nativeAutosave":true,"spotlightSavedAndReopened":true,"importUndoRedo":true,"sceneUndoRedo":true,"nativeMovieDecodedFrames":62,"sceneSamples":visualEvidence,"operatingSystem":ProcessInfo.processInfo.operatingSystemVersionString,"version":Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "development"]
+        let summary:[String:Any]=["driftBackgroundSavedAndReopened":true,"spotlightNavigation":true,"nativePixelZoom":true,"framingSheet":true,"previewAdvancesDuringPlayback":true,"documentRoundTrip":true,"documentEditedState":true,"failedSavePreservesChanges":true,"nativeAutosave":true,"spotlightSavedAndReopened":true,"importUndoRedo":true,"sceneUndoRedo":true,"nativeMovieDecodedFrames":62,"sceneSamples":visualEvidence,"operatingSystem":ProcessInfo.processInfo.operatingSystemVersionString,"version":Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "development"]
         try JSONSerialization.data(withJSONObject:summary,options:[.prettyPrinted,.sortedKeys]).write(to:directory.appendingPathComponent("journey.json"))
         _=window;_=playback
         print("NATIVE JOURNEY PASS: import, undo, redo, edit, save, close, reopen, scrub, render, export, decode")

@@ -51,3 +51,7 @@ H.264 MP4 and ProRes 422 are opaque. ProRes 4444 and PNG support transparency. P
 The Exports window holds one running job and up to four waiting jobs. Each keeps an immutable snapshot of its project. Edit or close a document while its queued film continues. Remove a queued job, cancel the current job, or cancel all. Final output publication cannot be interrupted halfway. The exporter refuses to replace a destination that changed after you chose it. Successful movie output is decoded to verify frame count and timing before publication.
 
 For technical boundaries and validation, see [Engineering](ENGINEERING.md).
+
+## Drift backgrounds
+
+In Scene → Canvas, set Background to Drift and Browse. Search or filter by family, select a study, then Use background. Palette and texture controls apply only to the background. Animate background controls the room and grain, not source-video playback. Undo restores the previous choice; ordinary Save includes the complete settings. Native solid/gradient/transparent choices remain available.

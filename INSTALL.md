@@ -34,3 +34,5 @@ Version 2.1 reads older native documents but saves schema 5. Keep a copy before 
 ## Roll back
 
 Quit the new app and restore the archived older app. Open an untouched older project. Do not expect a version-2 native project package to open in the old Electron app.
+
+Projects saved by 2.2 use schema 6 and cannot be read by 2.1. Keep earlier project copies before saving an upgraded document.
