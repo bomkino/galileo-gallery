@@ -14,6 +14,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Apply hash-verified native implementation on candidate only
+        id: integrate
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -42,12 +43,13 @@ jobs:
                   name=row.split('\t',2)[2];p=pathlib.PurePosixPath(name)
                   assert name.startswith(('native/','scripts/native/')) or name in ['.github/workflows/native.yml','.gitignore']
                   assert not p.is_absolute() and '..' not in p.parts and '.git' not in p.parts and '.build' not in p.parts
-              subprocess.run(['git','apply','--check',f.name],check=True)
-              subprocess.run(['git','apply',f.name],check=True)
+              flags=['--exclude=.github/workflows/native.yml']
+              subprocess.run(['git','apply',*flags,'--check',f.name],check=True)
+              subprocess.run(['git','apply',*flags,f.name],check=True)
           PY
           git config user.name 'Chattie Intern'
           git config user.email 'chattie-intern@users.noreply.github.com'
-          git add native scripts/native .github/workflows/native.yml .gitignore
+          git add native scripts/native .gitignore
           git diff --cached --check
           git commit -m 'feat: native WebM intake, frame reuse, live editing and project safety'
           git push origin HEAD:codex/native-mac-media-2-3
@@ -74,7 +76,7 @@ jobs:
           swift test --package-path native 2>&1 | tee native-evidence/tests.log
       - name: Build the packaged Mac application
         id: build
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.integrate.outcome == 'success' }}
         run: |
           set -o pipefail
           bash scripts/native/package.sh native-evidence/build 2>&1 | tee native-evidence/build.log
