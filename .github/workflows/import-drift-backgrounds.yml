@@ -19,57 +19,46 @@ jobs:
           ref: 340b5f631c9147890bc775c86a71af315dd17929
           path: .drift-upstream
           persist-credentials: false
-      - name: Apply verified native source and preserve pinned upstream provenance
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Correct native translation and preserve source on case-insensitive filesystems
         run: |
           set -euo pipefail
           test "$GITHUB_REF_NAME" = codex/native-mac-drift-backgrounds
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$(git -C .drift-upstream rev-parse HEAD)" = 340b5f631c9147890bc775c86a71af315dd17929
           python3 - <<'PY'
-          import subprocess,json,base64,hashlib,lzma,tempfile,pathlib,shutil
-          shas=['37260a4b39dbe79e7691ab25090f5ff998db31eb','d32397b0f205f6e668e9c35e9f0e1f4b11a73c1d','d96df69b646e82e91881d8cee4c3d4050936530a','0f13b704e289600e17041eb9772476e0292e4d45']
-          parts=[]
-          for sha in shas:
-              r=json.loads(subprocess.check_output(['gh','api','repos/bomkino/galileo-gallery/git/blobs/'+sha]))
-              b=base64.b64decode(r['content'])
-              assert hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()==sha
-              parts.append(b)
-          data=b''.join(parts)
-          assert len(data)==18188 and hashlib.sha256(data).hexdigest()=='b64d7e1dc2df13fb6e510a7757077ea04b92619233fa46f70b78c9d6f5d1f59c'
-          decoder=lzma.LZMADecompressor(memlimit=128*1024*1024)
-          patch=decoder.decompress(data,max_length=1000000)
-          assert decoder.eof and not decoder.unused_data
-          with tempfile.NamedTemporaryFile(suffix='.patch') as f:
-              f.write(patch);f.flush()
-              rows=subprocess.check_output(['git','apply','--numstat',f.name]).decode().splitlines()
-              assert rows
-              for row in rows:
-                  name=row.split('\t',2)[2];p=pathlib.PurePosixPath(name)
-                  assert name.startswith(('native/','scripts/native/','docs/')) or name in ['README.md','INSTALL.md','CHANGELOG.md','THIRD_PARTY_NOTICES.md']
-                  assert not p.is_absolute() and '..' not in p.parts and '.git' not in p.parts and '.build' not in p.parts
-              subprocess.run(['git','apply','--check',f.name],check=True)
-              subprocess.run(['git','apply',f.name],check=True)
-          vendor=pathlib.Path('native/Vendor/DriftBackgrounds')
-          provenance=json.loads((vendor/'PROVENANCE.json').read_text())
-          assert provenance['commit']=='340b5f631c9147890bc775c86a71af315dd17929'
-          for name,digest in provenance['files'].items():
-              p=pathlib.PurePosixPath(name)
-              assert not p.is_absolute() and '..' not in p.parts
-              source=pathlib.Path('.drift-upstream')/name
-              assert hashlib.sha256(source.read_bytes()).hexdigest()==digest
-              dest=vendor/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,dest)
+          from pathlib import Path
+          import hashlib,json,shutil
+          vendor=Path('native/Vendor/DriftBackgrounds')
+          upstream=Path('.drift-upstream')
+          names=['src/backgrounds.ts','src/engine/backgroundShader.ts','LICENSE','NOTICE']
+          names += ['src/engine/backgroundShaders/'+name+'.ts' for name in ['solid','gradient','aura','paper','void','cuttingMap','grid','wave','atelier']]
+          manifest={'repository':'bomkino/pitchdog-drift','commit':'340b5f631c9147890bc775c86a71af315dd17929','files':{}}
+          for name in names:
+              content=(upstream/name).read_bytes()
+              manifest['files'][name]=hashlib.sha256(content).hexdigest()
+              dest=vendor/name;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(content)
+          (vendor/'PROVENANCE.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          p=Path('scripts/native/generate-drift-backgrounds.py');s=p.read_text()
+          old="    return text.split('`',1)[1].rsplit('`',1)[0]"
+          new='    declaration = re.search(r"=\\s*/\\*\\s*glsl\\s*\\*/\\s*`", text)\n    assert declaration is not None, "Missing GLSL template declaration"\n    return text[declaration.end():].rsplit(\'`\',1)[0]'
+          assert s.count(old)==1;s=s.replace(old,new)
+          old="shader=shader.replace('uniform ','')"
+          assert s.count(old)==1;s=s.replace(old,old+"\nshader=shader.replace('gl_FragCoord.xy', '(vUv * uResolution)')")
+          old="shader=shader.replace('const float ', 'const float ')"
+          assert s.count(old)==1;s=s.replace(old,"assert 'gl_' not in shader and 'export const' not in shader and '`' not in shader")
+          p.write_text(s)
+          p=Path('.gitignore');s=p.read_text();s+='\n# Keep pinned shader source and its licenses on case-insensitive macOS volumes.\n!native/Vendor/\n!native/Vendor/DriftBackgrounds/\n!native/Vendor/DriftBackgrounds/**\n';p.write_text(s)
           PY
           python3 scripts/native/generate-drift-backgrounds.py
           rm -rf .drift-upstream
-      - name: Commit readable source on the candidate branch
+      - name: Commit the source correction on the candidate
         run: |
           git config user.name 'Chattie Intern'
           git config user.email 'chattie-intern@users.noreply.github.com'
-          git add native scripts/native docs README.md INSTALL.md CHANGELOG.md THIRD_PARTY_NOTICES.md
+          git add native scripts/native .gitignore
+          git add -f native/Vendor/DriftBackgrounds
           git diff --cached --check
-          git commit -m 'feat: native Drift background library, palettes and deterministic export'
+          git commit -m 'fix: native shader coordinates, template parsing and vendored source preservation'
           git push origin HEAD:codex/native-mac-drift-backgrounds
       - name: Record exact source and machine
         run: |
