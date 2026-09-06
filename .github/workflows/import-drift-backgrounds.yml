@@ -13,41 +13,34 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Apply reviewed runtime linkage and background browser corrections
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Match encoder input metadata to the compositor destination colour space
         run: |
           set -euo pipefail
           test "$GITHUB_REF_NAME" = codex/native-mac-drift-backgrounds
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           python3 - <<'PY'
-          import subprocess,json,base64,hashlib,lzma,tempfile,pathlib
-          sha='1a10f51bce5f33ab7a8910c40a9b208a4e31050f'
-          response=json.loads(subprocess.check_output(['gh','api','repos/bomkino/galileo-gallery/git/blobs/'+sha]))
-          data=base64.b64decode(response['content'])
-          assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==sha
-          assert len(data)==6756 and hashlib.sha256(data).hexdigest()=='65362d62c6a212949bbf975010f1c36fc9c36c4093c2ddba6c7dbf02119f1e9d'
-          decoder=lzma.LZMADecompressor(memlimit=128*1024*1024)
-          patch=decoder.decompress(data,max_length=1000000)
-          assert decoder.eof and not decoder.unused_data
-          with tempfile.NamedTemporaryFile(suffix='.patch') as f:
-              f.write(patch);f.flush()
-              rows=subprocess.check_output(['git','apply','--numstat',f.name]).decode().splitlines()
-              assert rows
-              for row in rows:
-                  name=row.split('\t',2)[2];p=pathlib.PurePosixPath(name)
-                  assert name.startswith(('native/','docs/')) or name=='INSTALL.md'
-                  assert not p.is_absolute() and '..' not in p.parts and '.git' not in p.parts and '.build' not in p.parts
-              subprocess.run(['git','apply','--check',f.name],check=True)
-              subprocess.run(['git','apply',f.name],check=True)
+          from pathlib import Path
+          p=Path('native/Sources/GalileoNative/Export.swift');s=p.read_text()
+          old='                    try renderer.render(snapshot:snapshot,frame:range.start+frame,into:buffer,colorSpace:rec709)'
+          new='''                    // The pool may supply an RGB profile unrelated to the output tags.
+                              // These bytes are rendered as Rec.709; tell the encoder the same.
+                              CVBufferRemoveAttachment(buffer, kCVImageBufferICCProfileKey)
+                              CVBufferSetAttachment(buffer, kCVImageBufferCGColorSpaceKey, rec709, .shouldPropagate)
+                              CVBufferSetAttachment(buffer, kCVImageBufferColorPrimariesKey, kCVImageBufferColorPrimaries_ITU_R_709_2, .shouldPropagate)
+                              CVBufferSetAttachment(buffer, kCVImageBufferTransferFunctionKey, kCVImageBufferTransferFunction_ITU_R_709_2, .shouldPropagate)
+                              CVBufferSetAttachment(buffer, kCVImageBufferYCbCrMatrixKey, kCVImageBufferYCbCrMatrix_ITU_R_709_2, .shouldPropagate)
+                              try renderer.render(snapshot:snapshot,frame:range.start+frame,into:buffer,colorSpace:rec709)'''
+          assert s.count(old)==1;p.write_text(s.replace(old,new))
+          p=Path('native/Sources/GalileoCore/DriftBackground.swift');s=p.read_text();s=s.replace('Motion closes once per authored Galileo cycle','Motion repeats once per authored Galileo cycle');p.write_text(s)
           PY
-      - name: Commit readable source on the candidate
+          python3 scripts/native/generate-drift-backgrounds.py
+      - name: Commit the colour correction on the candidate
         run: |
           git config user.name 'Chattie Intern'
           git config user.email 'chattie-intern@users.noreply.github.com'
-          git add native docs INSTALL.md
+          git add native
           git diff --cached --check
-          git commit -m 'fix: native runtime kernel linkage and reversible background browser'
+          git commit -m 'fix: preserve preview colour through native video encoding'
           git push origin HEAD:codex/native-mac-drift-backgrounds
       - name: Record exact source and machine
         run: |
