@@ -1,57 +1,91 @@
-name: Native Drift colour boundary
+name: Native Drift backgrounds
 on:
   push:
     branches: [codex/native-mac-drift-backgrounds]
     paths: [.github/workflows/import-drift-backgrounds.yml]
 permissions:
-  contents: read
+  contents: write
 jobs:
   native:
     runs-on: macos-15
-    timeout-minutes: 10
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
-      - name: Inspect the actual encode and decode colours without changing assertions
+        with:
+          fetch-depth: 0
+      - name: Align the render destination with the actual video decoder colour space
         run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = codex/native-mac-drift-backgrounds
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           python3 - <<'PY'
           from pathlib import Path
           p=Path('native/Sources/GalileoNative/Export.swift');s=p.read_text()
-          needle='                    let timestamp=CMTime(value:frame*schedule.rate.denominator,timescale:Int32(schedule.rate.numerator))'
-          insert='''                    if frame == 0 {
-                                  CVPixelBufferLockBaseAddress(buffer, .readOnly)
-                                  if let base=CVPixelBufferGetBaseAddress(buffer) {
-                                      let q=base.assumingMemoryBound(to:UInt8.self),i=8*CVPixelBufferGetBytesPerRow(buffer)+8*4
-                                      print("ENCODE RGB",q[i+2],q[i+1],q[i],"space",rec709,"attachments",CVBufferCopyAttachments(buffer,.shouldPropagate) as Any)
-                                  }
-                                  CVPixelBufferUnlockBaseAddress(buffer, .readOnly)
-                              }
+          old='        let rec709=CGColorSpace(name:CGColorSpace.itur_709)!'
+          new='''        // Use the same transfer curve Core Video reconstructs from the movie tags.
+                  // The named BT.709 ICC profile and decoded HDTV profile are not identical.
+                  let videoColourAttachments: [String: Any] = [
+                      kCVImageBufferColorPrimariesKey as String: kCVImageBufferColorPrimaries_ITU_R_709_2,
+                      kCVImageBufferTransferFunctionKey as String: kCVImageBufferTransferFunction_ITU_R_709_2,
+                      kCVImageBufferYCbCrMatrixKey as String: kCVImageBufferYCbCrMatrix_ITU_R_709_2
+                  ]
+                  guard let rec709 = CVImageBufferCreateColorSpaceFromAttachments(videoColourAttachments as CFDictionary)?.takeRetainedValue() else {
+                      throw GalleryError.invalid("The video output colour space could not be created.")
+                  }'''
+          assert s.count(old)==1;s=s.replace(old,new)
+          start=s.index('                    // The pool may supply an RGB profile')
+          end=s.index('                    let timestamp=CMTime',start)
+          replacement='''                    // Keep pool metadata and rendered pixel encoding in agreement.
+                              CVBufferRemoveAttachment(buffer, kCVImageBufferICCProfileKey)
+                              CVBufferSetAttachments(buffer, videoColourAttachments as CFDictionary, .shouldPropagate)
+                              CVBufferSetAttachment(buffer, kCVImageBufferCGColorSpaceKey, rec709, .shouldPropagate)
+                              try renderer.render(snapshot:snapshot,frame:range.start+frame,into:buffer,colorSpace:rec709)
           '''
-          assert s.count(needle)==1;p.write_text(s.replace(needle,insert+needle))
-          p=Path('native/Tests/GalileoNativeTests/DriftBackgroundRenderTests.swift');s=p.read_text()
-          needle='            let expected=try pixels(r.image(snapshot:snapshot,frame:Int64(count)))'
-          insert='''
-                      if count == 0 {
-                          let i=(8*320+8)*4
-                          print("PREVIEW RGB", Array(expected[i..<i+3]), "DECODED SRGB", Array(actual[i..<i+3]))
-                          print("DECODE SPACE",ci.colorSpace as Any,"attachments",CVBufferCopyAttachments(buffer,.shouldPropagate) as Any)
-                          CVPixelBufferLockBaseAddress(buffer,.readOnly)
-                          if let base=CVPixelBufferGetBaseAddress(buffer) {
-                              let q=base.assumingMemoryBound(to:UInt8.self),offset=8*CVPixelBufferGetBytesPerRow(buffer)+8*4
-                              print("DECODE RAW RGB",q[offset+2],q[offset+1],q[offset])
-                          }
-                          CVPixelBufferUnlockBaseAddress(buffer,.readOnly)
-                      }
-          '''
-          assert s.count(needle)==1;p.write_text(s.replace(needle,needle+insert))
+          # Remove the YAML/template indent from continuation lines only.
+          newLines=s.splitlines();s='\n'.join(newLines)+'\n'
+          start=s.index('                    // The pool may supply an RGB profile');end=s.index('                    let timestamp=CMTime',start)
+          replacement='\n'.join(line[10:] if line.startswith('                              ') else line for line in replacement.splitlines()).rstrip()+'\n'
+          s=s[:start]+replacement+s[end:]
+          # Normalise the inserted declaration to the method's eight-space indent.
+          start=s.index('        // Use the same transfer curve');end=s.index('        do {',start)
+          block=s[start:end];block='\n'.join(line[10:] if line.startswith('                  ') else line for line in block.splitlines())+'\n'
+          s=s[:start]+block+s[end:];p.write_text(s)
           PY
-          SDK="$(xcrun --sdk macosx --show-sdk-path)"
-          grep -n 'TransferFunction.*=' "$SDK/System/Library/Frameworks/AVFoundation.framework/Versions/A/Headers/AVVideoSettings.h" || true
+      - name: Commit the colour correction on the candidate
+        run: |
+          git config user.name 'Chattie Intern'
+          git config user.email 'chattie-intern@users.noreply.github.com'
+          git add native/Sources/GalileoNative/Export.swift
+          git diff --cached --check
+          git commit -m 'fix: match native video colour to its declared transfer function'
+          git push origin HEAD:codex/native-mac-drift-backgrounds
+      - name: Record exact source and machine
+        run: |
           mkdir -p evidence
+          git rev-parse HEAD > evidence/source.txt
+          sw_vers > evidence/machine.txt
+          uname -m >> evidence/machine.txt
+          swift --version >> evidence/machine.txt
+          test "$(uname -m)" = arm64
+          git archive --format=zip HEAD native scripts/native .github/workflows README.md INSTALL.md CHANGELOG.md THIRD_PARTY_NOTICES.md LICENSE docs > evidence/source.zip
+      - name: Verify saved settings, native pixels and encoded backgrounds
+        run: |
           set -o pipefail
-          swift test --package-path native --filter DriftBackgroundRenderTests/testBackgroundSurvivesPackageAndDecodedMovie 2>&1 | tee evidence/colour.log
+          swift test --package-path native 2>&1 | tee evidence/tests.log
+      - name: Build the native app and precompiled Metal library
+        id: build
+        if: ${{ !cancelled() }}
+        run: |
+          set -o pipefail
+          bash scripts/native/package.sh evidence/build 2>&1 | tee evidence/build.log
+      - name: Exercise packaged document and export workflow
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/evidence/journey" 2>&1 | tee evidence/journey.log
       - uses: actions/upload-artifact@v6
         if: always()
         with:
-          name: drift-colour-diagnosis
+          name: drift-background-evidence
           path: evidence
-          retention-days: 7
+          retention-days: 14
