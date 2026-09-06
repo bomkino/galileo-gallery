@@ -30,7 +30,7 @@ jobs:
               obj=json.loads(subprocess.check_output(['gh','api','repos/bomkino/galileo-gallery/git/blobs/'+sha]))
               part=base64.b64decode(obj['content']);assert blob_hash(part)==sha;parts.append(part)
           data=b''.join(parts)
-          assert len(data)==23240 and hashlib.sha256(data).hexdigest()=='3115a709e572190c890c5b1625d8b7e4c3b2e0705d1ce76ad2c0856b0a177814'
+          assert len(data)==23208 and hashlib.sha256(data).hexdigest()=='c591460b84ab939faaeb86045d6216a49f07e35a8b4091b4ad8326ca0c443d05'
           decoder=lzma.LZMADecompressor(memlimit=128*1024*1024)
           decoded=decoder.decompress(data,max_length=200000)
           assert decoder.eof and not decoder.unused_data and len(decoded)==72137
@@ -47,7 +47,7 @@ jobs:
           for name,item in payload['files'].items():
               p=pathlib.Path(name);p.parent.mkdir(parents=True,exist_ok=True)
               p.write_text(item['content']);p.chmod(0o755 if item['executable'] else 0o644)
-          text=p.read_text() if False else pathlib.Path('CHANGELOG.md').read_text()
+          text=pathlib.Path('CHANGELOG.md').read_text()
           assert text.startswith('# Changelog\n\n')
           pathlib.Path('CHANGELOG.md').write_text('# Changelog\n\n'+payload['changelogHeader']+text[len('# Changelog\n\n'):])
           PY
