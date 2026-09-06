@@ -1,0 +1,30 @@
+name: Drift background source
+on:
+  push:
+    branches: [codex/native-mac-drift-backgrounds]
+    paths: [.github/workflows/drift-background-source.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+        with:
+          repository: bomkino/pitchdog-drift
+          ref: 340b5f631c9147890bc775c86a71af315dd17929
+          path: drift-source
+          persist-credentials: false
+      - name: Archive source and provenance
+        run: |
+          mkdir background-source
+          git archive --format=zip HEAD native scripts/native .github/workflows README.md INSTALL.md CHANGELOG.md THIRD_PARTY_NOTICES.md LICENSE docs > background-source/galileo.zip
+          git -C drift-source archive --format=zip HEAD src/engine src/backgrounds.ts src/model.ts src/core/project/schema.ts src/themes.ts LICENSE NOTICE ASSET-LICENSE.md THIRD_PARTY_NOTICES.md > background-source/drift.zip
+          git rev-parse HEAD > background-source/galileo-sha.txt
+          git -C drift-source rev-parse HEAD > background-source/drift-sha.txt
+      - uses: actions/upload-artifact@v6
+        with:
+          name: drift-background-source
+          path: background-source
+          retention-days: 7
