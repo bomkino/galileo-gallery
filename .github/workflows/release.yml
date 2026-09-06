@@ -45,6 +45,10 @@ jobs:
           sw_vers > native-evidence/machine.txt
           uname -m >> native-evidence/machine.txt
           swift --version >> native-evidence/machine.txt
+      - name: Verify pinned background source and generated native implementation
+        run: |
+          python3 scripts/native/generate-drift-backgrounds.py
+          git diff --exit-code -- native/Sources/GalileoCore/DriftBackgroundCatalog.swift native/Sources/GalileoNative/Resources/DriftBackgrounds.metal
       - name: Test native contracts
         run: |
           set -o pipefail
@@ -72,6 +76,8 @@ jobs:
           journey=json.loads((root/'journey/journey.json').read_text())
           assert journey['documentRoundTrip'] and journey['nativeAutosave'] and journey['previewAdvancesDuringPlayback']
           assert journey['failedSavePreservesChanges'] and journey['spotlightSavedAndReopened']
+          assert journey['driftBackgroundSavedAndReopened'] and journey['backgroundBrowserCancelPreservesDocument']
+          assert journey['sceneSamples']['driftBackgroundsRendered']==72
           assert journey['nativeMovieDecodedFrames']==62
           with zipfile.ZipFile(f"release-native/Galileo.Gallery-{os.environ['VERSION']}-validation.zip",'w',zipfile.ZIP_DEFLATED) as archive:
               for f in sorted(root.rglob('*')):
