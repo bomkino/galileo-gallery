@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Apply reviewed media-journey and rendering refinements
+      - name: Commit reviewed release documentation and packaging on the candidate
         id: integrate
         env:
           GH_TOKEN: ${{ github.token }}
@@ -22,35 +22,40 @@ jobs:
           test "$GITHUB_REF_NAME" = codex/native-mac-media-2-3
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           python3 - <<'PY'
-          import subprocess,json,base64,hashlib,lzma,tempfile,pathlib
-          shas=['993fcb183f76adfc4b09da27c0a53c98a135389b','4af5bcbc843800df97ff67ed680e237ac9cf943d','56dbcf36ab2a916f0447fd0b86aeb780b993a379']
+          import subprocess,json,base64,hashlib,lzma,pathlib
+          shas=['76144c0e1a0879972f553f70c8f7300ffa1e27ce','03bbb6dcce666e105cd961a6e5029854835c1b0d','1fd51d4528168da7d775121151eacafefcbe0cbb','45a9bc76ffc9759edab407291eba003ceac037ad']
+          def blob_hash(b):return hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
           parts=[]
           for sha in shas:
               obj=json.loads(subprocess.check_output(['gh','api','repos/bomkino/galileo-gallery/git/blobs/'+sha]))
-              data=base64.b64decode(obj['content'])
-              assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==sha
-              parts.append(data)
+              part=base64.b64decode(obj['content']);assert blob_hash(part)==sha;parts.append(part)
           data=b''.join(parts)
-          assert len(data)==12960 and hashlib.sha256(data).hexdigest()=='e7527533beddcf174faaf4a1d4ef0d106845ebdf2fcda4f988a97629df68c04b'
+          assert len(data)==23240 and hashlib.sha256(data).hexdigest()=='3115a709e572190c890c5b1625d8b7e4c3b2e0705d1ce76ad2c0856b0a177814'
           decoder=lzma.LZMADecompressor(memlimit=128*1024*1024)
-          patch=decoder.decompress(data,max_length=1000000)
-          assert decoder.eof and not decoder.unused_data and len(patch)==44957
-          with tempfile.NamedTemporaryFile(suffix='.patch') as f:
-              f.write(patch);f.flush()
-              rows=subprocess.check_output(['git','apply','--numstat',f.name]).decode().splitlines()
-              assert rows
-              for row in rows:
-                  name=row.split('\t',2)[2];p=pathlib.PurePosixPath(name)
-                  assert name.startswith(('native/','scripts/native/'))
-                  assert not p.is_absolute() and '..' not in p.parts and '.git' not in p.parts and '.build' not in p.parts
-              subprocess.run(['git','apply','--check',f.name],check=True)
-              subprocess.run(['git','apply',f.name],check=True)
+          decoded=decoder.decompress(data,max_length=200000)
+          assert decoder.eof and not decoder.unused_data and len(decoded)==72137
+          payload=json.loads(decoded)
+          for name,item in payload['files'].items():
+              p=pathlib.Path(name)
+              assert name.startswith(('native/','scripts/native/','docs/')) or name in ['README.md','INSTALL.md','CONTRIBUTING.md','THIRD_PARTY_NOTICES.md']
+              assert not p.is_absolute() and '..' not in p.parts and '.git' not in p.parts and '.build' not in p.parts
+              assert not p.is_symlink()
+              if item['expected'] is None:assert not p.exists(),name
+              else:assert blob_hash(p.read_bytes())==item['expected'],name
+          p=pathlib.Path('CHANGELOG.md')
+          assert blob_hash(p.read_bytes())==payload['changelogExpected']
+          for name,item in payload['files'].items():
+              p=pathlib.Path(name);p.parent.mkdir(parents=True,exist_ok=True)
+              p.write_text(item['content']);p.chmod(0o755 if item['executable'] else 0o644)
+          text=p.read_text() if False else pathlib.Path('CHANGELOG.md').read_text()
+          assert text.startswith('# Changelog\n\n')
+          pathlib.Path('CHANGELOG.md').write_text('# Changelog\n\n'+payload['changelogHeader']+text[len('# Changelog\n\n'):])
           PY
           git config user.name 'Chattie Intern'
           git config user.email 'chattie-intern@users.noreply.github.com'
-          git add native scripts/native
+          git add native scripts/native docs README.md INSTALL.md CONTRIBUTING.md THIRD_PARTY_NOTICES.md CHANGELOG.md
           git diff --cached --check
-          git commit -m 'fix: precise framing, bounded media work and packaged WebM spotlight journey'
+          git commit -m 'release: 2.3 media workflow, corresponding codec source and installation safety'
           git push origin HEAD:codex/native-mac-media-2-3
       - name: Record tested identity
         run: |
@@ -60,30 +65,35 @@ jobs:
           uname -m >> native-evidence/machine.txt
           swift --version >> native-evidence/machine.txt
           test "$(uname -m)" = arm64
-          git archive --format=zip HEAD native scripts/native .github/workflows README.md docs INSTALL.md LICENSE > native-evidence/source.zip
+          git archive --format=zip HEAD native scripts/native .github/workflows README.md docs INSTALL.md LICENSE CONTRIBUTING.md CHANGELOG.md THIRD_PARTY_NOTICES.md > native-evidence/source.zip
       - uses: actions/cache@v4
         with:
           path: native/.codecs
           key: galileo-codecs-arm64-${{ hashFiles('scripts/native/build-codecs.sh') }}
-      - name: Prepare pinned offline media helpers
+      - name: Prepare pinned local media helpers
         run: |
           set -o pipefail
           bash scripts/native/build-codecs.sh 2>&1 | tee native-evidence/codecs.log
-      - name: Verify media pixels, timing, persistence and rendering contracts
+          bash -n scripts/native/install-latest.sh
+      - name: Verify media, timing and rendering contracts
         run: |
           set -o pipefail
           swift test --package-path native 2>&1 | tee native-evidence/tests.log
       - name: Build the packaged Mac application
         id: build
-        if: ${{ !cancelled() && steps.integrate.outcome == 'success' }}
         run: |
           set -o pipefail
           bash scripts/native/package.sh native-evidence/build 2>&1 | tee native-evidence/build.log
       - name: Exercise packaged document and export journey
-        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -o pipefail
           GALILEO_MEDIA_FIXTURES="$PWD/native/Tests/GalileoNativeTests/Fixtures" native-evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/native-evidence/journey" 2>&1 | tee native-evidence/journey.log
+      - name: Verify installer contents and corresponding codec source
+        run: |
+          set -o pipefail
+          bash scripts/native/distribute.sh 'native-evidence/build/Galileo Gallery.app' release-check 2>&1 | tee native-evidence/distribution.log
+          python3 scripts/native/package-codec-source.py 'native-evidence/build/Galileo Gallery.app' release-check 2>&1 | tee native-evidence/codec-source.log
+          git diff --exit-code
       - uses: actions/upload-artifact@v6
         if: always()
         with:
