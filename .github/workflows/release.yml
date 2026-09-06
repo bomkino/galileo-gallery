@@ -49,6 +49,15 @@ jobs:
         run: |
           python3 scripts/native/generate-drift-backgrounds.py
           git diff --exit-code -- native/Sources/GalileoCore/DriftBackgroundCatalog.swift native/Sources/GalileoNative/Resources/DriftBackgrounds.metal
+      - uses: actions/cache@v4
+        with:
+          path: native/.codecs
+          key: galileo-codecs-arm64-${{ hashFiles('scripts/native/build-codecs.sh') }}
+      - name: Build pinned local media helpers
+        run: |
+          set -o pipefail
+          bash scripts/native/build-codecs.sh 2>&1 | tee native-evidence/codecs.log
+          bash -n scripts/native/install-latest.sh
       - name: Test native contracts
         run: |
           set -o pipefail
@@ -60,11 +69,12 @@ jobs:
       - name: Exercise document saving, playback and export in the packaged app
         run: |
           set -o pipefail
-          native-evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/native-evidence/journey" 2>&1 | tee native-evidence/journey.log
+          GALILEO_MEDIA_FIXTURES="$PWD/native/Tests/GalileoNativeTests/Fixtures" native-evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/native-evidence/journey" 2>&1 | tee native-evidence/journey.log
       - name: Package and verify the DMG and ZIP
         run: |
           set -o pipefail
           bash scripts/native/distribute.sh 'native-evidence/build/Galileo Gallery.app' release-native 2>&1 | tee native-evidence/distribution.log
+          python3 scripts/native/package-codec-source.py 'native-evidence/build/Galileo Gallery.app' release-native
           git diff --exit-code
       - name: Prepare durable release evidence and notes
         env:
@@ -79,6 +89,15 @@ jobs:
           assert journey['driftBackgroundSavedAndReopened'] and journey['backgroundBrowserCancelPreservesDocument']
           assert journey['sceneSamples']['driftBackgroundsRendered']==72
           assert journey['nativeMovieDecodedFrames']==62
+          assert journey['version']==os.environ['VERSION']
+          assert journey['packagedWebMDecoder'] and journey['originalWebMPreserved']
+          assert journey['webmAndAnimatedWebPReopened'] and journey['transparentWebMHeldAndLooped']
+          assert journey['sourcePreviewCancelPreservesDocument'] and journey['exportSurvivesDocumentClose']
+          assert journey['mediaExportSilent'] and journey['mediaMovieDecodedFrames']==192
+          assert journey['mediaComparison']['maximumPreviewMovieMeanError'] < 0.04
+          assert (root/'source.txt').read_text().strip()==os.environ['GITHUB_SHA']
+          build=json.loads((root/'build/Galileo Gallery.app/Contents/Resources/build.json').read_text())
+          assert build['sourceSha']==os.environ['GITHUB_SHA'] and build['version']==os.environ['VERSION']
           with zipfile.ZipFile(f"release-native/Galileo.Gallery-{os.environ['VERSION']}-validation.zip",'w',zipfile.ZIP_DEFLATED) as archive:
               for f in sorted(root.rglob('*')):
                   if f.is_file() and 'build' not in f.relative_to(root).parts:

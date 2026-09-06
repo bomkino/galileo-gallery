@@ -35,6 +35,15 @@ jobs:
             native-evidence/source.txt
             native-evidence/tree.txt
           retention-days: 14
+      - uses: actions/cache@v4
+        with:
+          path: native/.codecs
+          key: galileo-codecs-arm64-${{ hashFiles('scripts/native/build-codecs.sh') }}
+      - name: Build the pinned local media helpers
+        run: |
+          set -o pipefail
+          bash scripts/native/build-codecs.sh 2>&1 | tee native-evidence/codecs.log
+          bash -n scripts/native/install-latest.sh
       - name: Test core and native contracts
         id: tests
         run: |
@@ -52,7 +61,7 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -o pipefail
-          native-evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/native-evidence/journey" 2>&1 | tee native-evidence/journey.log
+          GALILEO_MEDIA_FIXTURES="$PWD/native/Tests/GalileoNativeTests/Fixtures" native-evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/native-evidence/journey" 2>&1 | tee native-evidence/journey.log
       - uses: actions/upload-artifact@v6
         if: always()
         with:
