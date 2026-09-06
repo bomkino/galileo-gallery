@@ -54,7 +54,7 @@ JOBS="$(sysctl -n hw.ncpu)"; (( JOBS > 8 )) && JOBS=8
 )
 for TOOL in ffmpeg ffprobe; do
   strip "$OUT/bin/$TOOL"
-  lipo -verify_arch arm64 "$OUT/bin/$TOOL"
+  lipo "$OUT/bin/$TOOL" -verify_arch arm64
   # Only system frameworks/libraries may be referenced. No Homebrew runtime.
   if otool -L "$OUT/bin/$TOOL" | tail -n +2 | grep -vE '^[[:space:]]+(/usr/lib/|/System/Library/)'; then
     echo 'Unexpected external runtime dependency.' >&2; exit 1
