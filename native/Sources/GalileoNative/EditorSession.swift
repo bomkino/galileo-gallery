@@ -17,7 +17,7 @@ import GalileoCore
     @Published public var showInspector = UserDefaults.standard.object(forKey: "showInspector") as? Bool ?? true { didSet { UserDefaults.standard.set(showInspector, forKey: "showInspector") } }
     @Published public var canvasZoom = 0.0
     @Published public var framingMediaID: String? = nil
-    @Published public var mediaQuery = ""
+    @Published public var mediaQuery = "" { didSet { if mediaQuery != oldValue { cancelMediaMove() } } }
     @Published public var choosingScene=false
     @Published public var choosingBackground=false
     @Published public var choosingExport=false
@@ -26,6 +26,29 @@ import GalileoCore
     public var didEdit:(()->Void)?
     public var didLoad:(()->Void)?
     private var generation=UUID()
+    private let moveSessionID = UUID()
+    private var moveLoadID = UUID()
+    private var orderEpoch: UInt64 = 0
+    private struct MoveTicket {
+        let token: UUID
+        let sessionID: UUID
+        let loadID: UUID
+        let epoch: UInt64
+        let ids: Set<String>
+        let originalOrder: [String]
+    }
+    private struct OrderSource: Equatable {
+        let id: String, asset: String, hash: String
+        let originalAsset: String?, originalHash: String?, derivation: String?
+        let width: Int, height: Int
+        let kind: MediaKind
+        init(_ item: MediaItem) {
+            id=item.id; asset=item.asset; hash=item.sha256; originalAsset=item.originalAsset
+            originalHash=item.originalSHA256; derivation=item.derivation
+            width=item.width; height=item.height; kind=item.kind
+        }
+    }
+    private var activeMove: MoveTicket?
     public var importGeneration:UUID {generation}
     private var importTask:Task<Void,Never>?
     private var gesture=false
@@ -61,6 +84,9 @@ import GalileoCore
             }
         } else {gestureUndo?.steps+=changeSteps}
         manager?.setActionName(name)
+        if project.items.map(OrderSource.init) != candidate.items.map(OrderSource.init) {
+            orderEpoch &+= 1; activeMove = nil
+        }
         project=candidate;snapshot=nextSnapshot;revision+=1
         selection.formIntersection(Set(candidate.items.map(\.id)))
         if explicitGroup { manager?.endUndoGrouping() }
@@ -71,7 +97,7 @@ import GalileoCore
     }
     public func endGesture() { guard gesture else { return };gesture=false;gestureUndo=nil;undoManager?.endUndoGrouping() }
     public func load(project:GalleryProject,workspace:Workspace)throws {
-        try project.validate();cancelImport();generation=UUID();endGesture();undoManager?.removeAllActions()
+        try project.validate();cancelImport();generation=UUID();moveLoadID=UUID();cancelMediaMove();endGesture();undoManager?.removeAllActions()
         self.project=project;self.workspace=workspace;snapshot=try RenderSnapshot(project:project,workspace:workspace)
         revision+=1;selection=[];issue=nil;didLoad?()
     }
@@ -94,23 +120,54 @@ import GalileoCore
         selection=newIDs.intersection(Set(project.items.map(\.id)))
     }
     public func move(from offsets:IndexSet,to destination:Int) {
-        commit("Reorder media") { p in
-            let moved=offsets.sorted().compactMap { p.items.indices.contains($0) ? p.items[$0]:nil }
-            let insertion=destination-offsets.filter{$0<destination}.count
-            for i in offsets.sorted(by:>) where p.items.indices.contains(i) { p.items.remove(at:i) }
-            p.items.insert(contentsOf:moved,at:min(p.items.count,max(0,insertion)))
+        guard canMoveMedia else { return }
+        guard !offsets.isEmpty, offsets.allSatisfy({ project.items.indices.contains($0) }) else {
+            issue="The selected media changed. Select it again before moving."; return
         }
+        reorder(ids:Set(offsets.map { project.items[$0].id }), gap:destination)
     }
-    public func moveSelection(by offset:Int) {
-        let ids=selection
-        commit("Reorder media") { p in
-            let indexes=offset<0 ? Array(p.items.indices):Array(p.items.indices.reversed())
-            for i in indexes where ids.contains(p.items[i].id) {
-                let j=i+offset
-                if p.items.indices.contains(j),!ids.contains(p.items[j].id) { p.items.swapAt(i,j) }
-            }
-        }
+    public var canMoveMedia: Bool { mediaQuery.isEmpty }
+    public func moveSelection(by offset:Int) { moveItems(selection, by:offset) }
+    public func moveItems(_ ids:Set<String>, by offset:Int) {
+        guard canMoveMedia else { return }
+        do { try applyOrder(MediaOrdering.stepping(project.items.map(\.id), selected:ids, direction:offset)) }
+        catch { issue=error.localizedDescription }
     }
+    private func reorder(ids:Set<String>, gap:Int) {
+        do { try applyOrder(MediaOrdering.moving(project.items.map(\.id), selected:ids, toGap:gap)) }
+        catch { issue=error.localizedDescription }
+    }
+    private func applyOrder(_ ids:[String]) throws {
+        guard ids != project.items.map(\.id) else { return }
+        let current=Dictionary(uniqueKeysWithValues:project.items.map { ($0.id,$0) })
+        guard ids.count==current.count, Set(ids)==Set(current.keys) else { throw GalleryError.invalid("Invalid media order.") }
+        var candidate=project; candidate.items=ids.compactMap { current[$0] }
+        try apply(candidate,name:"Reorder media")
+    }
+    /// Only the opaque token may leave the app-local drag adapter. No URL or item IDs are trusted on a pasteboard.
+    public func beginMediaMove(_ ids:Set<String>) -> UUID? {
+        cancelMediaMove()
+        guard canMoveMedia else { return nil }
+        let order=project.items.map(\.id)
+        guard (try? MediaOrdering.moving(order,selected:ids,toGap:0)) != nil else { return nil }
+        let token=UUID()
+        activeMove=MoveTicket(token:token,sessionID:moveSessionID,loadID:moveLoadID,epoch:orderEpoch,ids:ids,originalOrder:order)
+        return token
+    }
+    public func acceptsMediaMove(_ token:UUID) -> Bool {
+        guard let ticket=activeMove else { return false }
+        return canMoveMedia && ticket.token==token && ticket.sessionID==moveSessionID && ticket.loadID==moveLoadID &&
+            ticket.epoch==orderEpoch && ticket.originalOrder==project.items.map(\.id)
+    }
+    @discardableResult public func finishMediaMove(_ token:UUID, atGap gap:Int) -> Bool {
+        guard acceptsMediaMove(token), let ticket=activeMove else { return false }
+        activeMove=nil
+        do {
+            let order=try MediaOrdering.moving(project.items.map(\.id),selected:ticket.ids,toGap:gap)
+            try applyOrder(order); return true
+        } catch { issue=error.localizedDescription; return false }
+    }
+    public func cancelMediaMove() { activeMove=nil }
     public func markOpening(_ id:String) {
         commit("Set opening") { p in for i in p.items.indices { p.items[i].opening=p.items[i].id==id } }
     }
@@ -193,7 +250,7 @@ import GalileoCore
         }
     }
     public func cancelImport() { importTask?.cancel();importTask=nil;importing=false;importStatus="";generation=UUID() }
-    public func close() { cancelImport();endGesture();didEdit=nil;didLoad=nil }
+    public func close() { cancelImport();moveLoadID=UUID();cancelMediaMove();endGesture();didEdit=nil;didLoad=nil }
 }
 
 @MainActor public final class PlaybackModel: ObservableObject {

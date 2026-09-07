@@ -156,7 +156,10 @@ private final class DocumentStorage:@unchecked Sendable {
     override func validateUserInterfaceItem(_ item:NSValidatedUserInterfaceItem)->Bool {
         let action=item.action
         if action == #selector(exportDocument(_:)) {return !(editor?.project.activeItems.isEmpty ?? true)}
-        if [#selector(duplicateMedia(_:)),#selector(removeMedia(_:)),#selector(moveMediaEarlier(_:)),#selector(moveMediaLater(_:))].contains(action) {return !(editor?.selection.isEmpty ?? true)}
+        if [#selector(moveMediaEarlier(_:)),#selector(moveMediaLater(_:))].contains(action) {
+            return editor?.canMoveMedia == true && !(editor?.selection.isEmpty ?? true) && !(windowForSheet?.firstResponder is NSTextView)
+        }
+        if [#selector(duplicateMedia(_:)),#selector(removeMedia(_:))].contains(action) {return !(editor?.selection.isEmpty ?? true)}
         if action == #selector(addMedia(_:)) {return !(editor?.importing ?? true)}
         return super.validateUserInterfaceItem(item)
     }

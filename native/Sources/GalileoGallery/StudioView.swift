@@ -5,6 +5,7 @@ import AVFoundation
 import UniformTypeIdentifiers
 import GalileoCore
 import GalileoNative
+import PitchdogStudioUI
 
 struct StudioView:View {
     @ObservedObject var session:EditorSession
@@ -21,13 +22,13 @@ struct StudioView:View {
                 canvas.frame(minWidth:320,maxWidth:.infinity,maxHeight:.infinity)
                 if session.showInspector {
                     VStack(spacing:0) {
-                        Picker("Inspector",selection:$inspector) { Text("Scene").tag("Scene");Text("Media").tag("Media") }
-                            .pickerStyle(.segmented).padding(16)
+                        StudioChoiceBar("Inspector", selection:$inspector, choices:[.init("Scene","Scene"),.init("Media","Media")])
+                            .padding(12)
                         Divider()
                         ScrollView { if inspector=="Scene" { SceneInspector(session:session) } else { MediaInspector(session:session,replace:replaceMedia,preview:{ id in
                             if let cue=session.snapshot.plan.spotlights.first(where:{$0.itemID==id}) {playback.preview(cue,cycle:playback.frame/session.snapshot.plan.schedule.cycleFrames)}
                         }).id(session.selection.sorted().joined(separator:"|")) } }
-                    }.frame(minWidth:250,idealWidth:270,maxWidth:380).background(.regularMaterial)
+                    }.frame(minWidth:250,idealWidth:270,maxWidth:380).studioSurface(.panel)
                 }
             }
             .background(SplitAutosave(name:"GalileoStudioColumns"))
@@ -74,11 +75,16 @@ struct StudioView:View {
             }
             return true
         }
+        .modifier(GalleryChrome())
     }
     private var library:some View {
         VStack(spacing:0) {
             HStack { Text("Media").font(.headline);Spacer();Text("\(session.project.items.count)").foregroundStyle(.secondary).monospacedDigit() }.padding(16)
-            TextField("Find media",text:$session.mediaQuery).textFieldStyle(.roundedBorder).padding(.horizontal,12).padding(.bottom,8)
+            TextField("Find media",text:$session.mediaQuery).textFieldStyle(StudioTextFieldStyle()).padding(.horizontal,12).padding(.bottom,8)
+            if !session.mediaQuery.isEmpty {
+                Button("Clear search to reorder") { session.mediaQuery="" }
+                    .buttonStyle(StudioButtonStyle(.quiet)).font(.caption).padding(.horizontal,12).padding(.bottom,6)
+            }
             if session.project.items.isEmpty {
                 VStack(spacing:12) {
                     Image(systemName:"photo.on.rectangle").font(.system(size:28,weight:.light)).foregroundStyle(.secondary)
@@ -88,7 +94,13 @@ struct StudioView:View {
                 List(selection:$session.selection) {
                     ForEach(session.project.items.filter{session.mediaQuery.isEmpty || $0.name.localizedCaseInsensitiveContains(session.mediaQuery)}) { item in
                         MediaRow(item:item,workspace:session.workspace).tag(item.id)
+                            .contentShape(Rectangle())
+                            .moveDisabled(!session.canMoveMedia)
                             .contextMenu {
+                                let moveTargets = session.selection.contains(item.id) ? session.selection : [item.id]
+                                Button("Move Earlier") { session.moveItems(moveTargets,by:-1) }.disabled(!session.canMoveMedia)
+                                Button("Move Later") { session.moveItems(moveTargets,by:1) }.disabled(!session.canMoveMedia)
+                                Divider()
                                 Button("Use as opening") { session.markOpening(item.id) }
                                 Button("Use as closing") { session.markClosing(item.id) }
                                 Button(item.spotlight?.enabled == true ? "Remove spotlight" : "Spotlight in centre") {
@@ -125,7 +137,7 @@ struct StudioView:View {
                     Text("\(session.project.activeItems.count) used").font(.caption).foregroundStyle(.secondary)
                 }.buttonStyle(.borderless).padding(12)
             }
-        }.background(.regularMaterial)
+        }.studioSurface(.panel)
     }
     private var canvas:some View {
         VStack(spacing:0) {
@@ -133,7 +145,7 @@ struct StudioView:View {
                 VStack(spacing:16) {
                     Image(systemName:"rectangle.stack").font(.system(size:48,weight:.ultraLight)).foregroundStyle(.secondary)
                     Text("Drop images, video or a PDF").font(.title2.weight(.medium))
-                    Button("Add media",action:addMedia).buttonStyle(.borderedProminent).controlSize(.large)
+                    Button("Add media",action:addMedia).buttonStyle(StudioButtonStyle(.primary)).controlSize(.large)
                 }.frame(maxWidth:.infinity,maxHeight:.infinity)
             } else {
                 NativePreview(snapshot:session.snapshot,revision:session.revision,frame:playback.frame,selection:session.selection,onSelect:{ id,extend in
@@ -151,16 +163,17 @@ struct StudioView:View {
             }.font(.caption).foregroundStyle(.secondary).monospacedDigit().padding(.horizontal,24).padding(.bottom,12)
             Divider()
             TransportBar(playback:playback,schedule:session.snapshot.plan.schedule,cues:session.snapshot.plan.spotlights).padding(16)
-        }.background(Color(nsColor:.underPageBackgroundColor))
+        }.studioSurface(.surround)
     }
 }
 private struct MediaRow:View {
     let item:MediaItem;let workspace:Workspace
+    @Environment(\.studioTheme) private var theme
     @State private var image:NSImage?
     var body:some View {
         HStack(spacing:9) {
             ZStack {
-                RoundedRectangle(cornerRadius:4).fill(Color(nsColor:.controlBackgroundColor))
+                RoundedRectangle(cornerRadius:5).fill(theme.well.color)
                 if let image { Image(nsImage:image).resizable().aspectRatio(contentMode:.fit) }
                 else { Image(systemName:item.kind == .image ? "photo":"film").foregroundStyle(.secondary) }
             }.frame(width:52,height:38).clipShape(RoundedRectangle(cornerRadius:4))
@@ -168,9 +181,11 @@ private struct MediaRow:View {
                 Text(item.name).font(.system(size:12,weight:.medium)).lineLimit(1).help(item.name)
                 if item.unavailable != nil { Text("Missing · Replace or locate").font(.caption2).foregroundStyle(.orange) }
                 else if !item.included { Text("Excluded").font(.caption2).foregroundStyle(.secondary) }
-                else if item.spotlight?.enabled == true {
-                    Label("Spotlight", systemImage: "viewfinder").font(.caption2).foregroundStyle(.secondary)
-                } else if item.opening { Text("Opening").font(.caption2).foregroundStyle(.secondary) }
+                HStack(spacing:6) {
+                    if item.opening { Image(systemName:"play.rectangle").help("Opening").accessibilityLabel("Opening") }
+                    if item.spotlight?.enabled == true { Image(systemName:"viewfinder").help("Spotlight").accessibilityLabel("Spotlight") }
+                    if item.closing == true { Image(systemName:"flag.checkered").help("Closing").accessibilityLabel("Closing") }
+                }.font(.caption).foregroundStyle(.secondary)
             }
             Spacer(minLength:0)
         }.padding(.vertical,4).opacity(item.included ? 1:0.55)
@@ -246,24 +261,12 @@ struct NumberControl:View {
         VStack(spacing:5) {
             HStack {
                 Text(label).font(.callout);Spacer()
-                TextField(mixed ? "Mixed":label,text:$text).multilineTextAlignment(.trailing).frame(width:62).textFieldStyle(.roundedBorder).focused($focused)
+                TextField(mixed ? "Mixed":label,text:$text).multilineTextAlignment(.trailing).frame(width:72).textFieldStyle(StudioTextFieldStyle(focused:focused)).focused($focused)
                     .onSubmit(commit).onChange(of:focused) { _,focus in if focus { begin() } else { commit();end() } }
                 if !unit.isEmpty { Text(unit).font(.caption).foregroundStyle(.secondary).frame(width:16,alignment:.leading) }
             }
-            if !mixed { Slider(value:Binding(get:{bounded(value,range.lowerBound,range.upperBound)},set:{ proposed in
-                let snapped=range.lowerBound+((proposed-range.lowerBound)/step).rounded()*step
-                value=bounded(snapped,range.lowerBound,range.upperBound)
-            }),in:range,onEditingChanged:{ editing in editing ? begin():end() })
-                .accessibilityLabel(label)
-                .accessibilityAdjustableAction { direction in
-                    begin();defer { end() }
-                    switch direction {
-                    case .increment:value=bounded(value+step,range.lowerBound,range.upperBound)
-                    case .decrement:value=bounded(value-step,range.lowerBound,range.upperBound)
-                    @unknown default:break
-                    }
-                }
-            }
+            if !mixed { StudioSlider(label, value:$value, in:range, step:step,
+                                    onEditingChanged:{ editing in editing ? begin():end() }).frame(height:22) }
         }.onAppear { sync() }.onChange(of:value) { if !focused { sync() } }.onChange(of:mixed) { if !focused { sync() } }.onDisappear { if focused {commit();end()} }
     }
     private func sync() { text=mixed ? "":String(format:step<1 ? "%.2f":"%.0f",value) }
@@ -279,10 +282,10 @@ struct SceneInspector:View {
         VStack(alignment:.leading,spacing:24) {
             HStack { VStack(alignment:.leading,spacing:3) { Text(variant.family.name).font(.title3.weight(.semibold));Text(variant.name).font(.caption).foregroundStyle(.secondary) };Spacer();Button("Change") { session.choosingScene=true } }
             InspectorSection(title:"Canvas") {
-                Picker("Size",selection:Binding(get:{"\(session.project.canvas.width)x\(session.project.canvas.height)"},set:{ value in
+                StudioPicker("Size",selection:Binding(get:{"\(session.project.canvas.width)x\(session.project.canvas.height)"},set:{ value in
                     let parts=value.split(separator:"x").compactMap{Int($0)}
                     if parts.count==2 { session.commit("Change canvas") { $0.canvas.width=parts[0];$0.canvas.height=parts[1] } }
-                })) {
+                }),valueLabel:"\(session.project.canvas.width) × \(session.project.canvas.height)",showsLabel:false) {
                     Text("1920 × 1080").tag("1920x1080");Text("2576 × 1080").tag("2576x1080");Text("3840 × 2160").tag("3840x2160")
                     Text("1080 × 1920").tag("1080x1920");Text("1080 × 1080").tag("1080x1080");Text("1080 × 1350").tag("1080x1350")
                     if !["1920x1080","2576x1080","3840x2160","1080x1920","1080x1080","1080x1350"].contains("\(session.project.canvas.width)x\(session.project.canvas.height)") { Text("Custom").tag("\(session.project.canvas.width)x\(session.project.canvas.height)") }
@@ -337,6 +340,6 @@ struct SceneInspector:View {
         }
     }
     private func dimension(_ label:String,_ key:WritableKeyPath<GalileoCore.Canvas,Int>)->some View {
-        HStack { Text(label).foregroundStyle(.secondary);TextField(label,value:Binding(get:{session.project.canvas[keyPath:key]},set:{value in session.commit("Resize canvas"){$0.canvas[keyPath:key]=value} }),format:.number.grouping(.never)).textFieldStyle(.roundedBorder).accessibilityLabel(label=="W" ? "Canvas width":"Canvas height") }
+        HStack { Text(label).foregroundStyle(.secondary);TextField(label,value:Binding(get:{session.project.canvas[keyPath:key]},set:{value in session.commit("Resize canvas"){$0.canvas[keyPath:key]=value} }),format:.number.grouping(.never)).textFieldStyle(StudioTextFieldStyle()).accessibilityLabel(label=="W" ? "Canvas width":"Canvas height") }
     }
 }
