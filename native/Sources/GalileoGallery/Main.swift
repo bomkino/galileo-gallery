@@ -67,7 +67,13 @@ import GalileoNative
     func applicationDidFinishLaunching(_ notification:Notification) {
         applyAppearance()
         exportObserver=NotificationCenter.default.addObserver(forName:.showExports,object:nil,queue:.main) { [weak self] _ in MainActor.assumeIsolated {self?.showExports(nil)} }
-        if let index=CommandLine.arguments.firstIndex(of:"--smoke"),CommandLine.arguments.indices.contains(index+1) {
+        if let index=CommandLine.arguments.firstIndex(of:"--studio-ui-proof"),CommandLine.arguments.indices.contains(index+1) {
+            let url=URL(fileURLWithPath:CommandLine.arguments[index+1],isDirectory:true)
+            Task { @MainActor in
+                do {try await StudioUIProof.run(directory:url,documents:documents);fflush(stdout);exit(0)}
+                catch {fputs("STUDIO UI PROOF FAILED: \(error)\n",stderr);exit(1)}
+            }
+        } else if let index=CommandLine.arguments.firstIndex(of:"--smoke"),CommandLine.arguments.indices.contains(index+1) {
             let url=URL(fileURLWithPath:CommandLine.arguments[index+1],isDirectory:true)
             Task { @MainActor in
                 do {try await ApplicationSmoke.run(directory:url,documents:documents);fflush(stdout);exit(0)}

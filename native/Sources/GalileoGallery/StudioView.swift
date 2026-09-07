@@ -12,6 +12,7 @@ struct StudioView:View {
     @ObservedObject var playback:PlaybackModel
     @ObservedObject private var exports=ExportCenter.shared
     @State private var inspector="Scene"
+    @FocusState private var mediaSearchFocused:Bool
     let addMedia:()->Void
     let replaceMedia:()->Void
     var prepareImport:(([URL])->Void)?=nil
@@ -23,7 +24,7 @@ struct StudioView:View {
                 if session.showInspector {
                     VStack(spacing:0) {
                         StudioChoiceBar("Inspector", selection:$inspector, choices:[.init("Scene","Scene"),.init("Media","Media")])
-                            .padding(12)
+                            .padding(12).accessibilityIdentifier("galileo.inspector-tabs")
                         Divider()
                         ScrollView { if inspector=="Scene" { SceneInspector(session:session) } else { MediaInspector(session:session,replace:replaceMedia,preview:{ id in
                             if let cue=session.snapshot.plan.spotlights.first(where:{$0.itemID==id}) {playback.preview(cue,cycle:playback.frame/session.snapshot.plan.schedule.cycleFrames)}
@@ -80,7 +81,7 @@ struct StudioView:View {
     private var library:some View {
         VStack(spacing:0) {
             HStack { Text("Media").font(.headline);Spacer();Text("\(session.project.items.count)").foregroundStyle(.secondary).monospacedDigit() }.padding(16)
-            TextField("Find media",text:$session.mediaQuery).textFieldStyle(StudioTextFieldStyle()).padding(.horizontal,12).padding(.bottom,8)
+            TextField("Find media",text:$session.mediaQuery).textFieldStyle(StudioTextFieldStyle(focused:mediaSearchFocused)).focused($mediaSearchFocused).padding(.horizontal,12).padding(.bottom,8)
             if !session.mediaQuery.isEmpty {
                 Button("Clear search to reorder") { session.mediaQuery="" }
                     .buttonStyle(StudioButtonStyle(.quiet)).font(.caption).padding(.horizontal,12).padding(.bottom,6)
@@ -124,7 +125,7 @@ struct StudioView:View {
                                 Button("Remove") { session.selection=[item.id];session.removeSelection() }
                             }
                     }.onMove { offsets,destination in if session.mediaQuery.isEmpty {session.move(from:offsets,to:destination)} }
-                }.listStyle(.sidebar).onDeleteCommand(perform:session.removeSelection)
+                }.listStyle(.sidebar).scrollContentBackground(.hidden).onDeleteCommand(perform:session.removeSelection).accessibilityIdentifier("galileo.media-list")
             }
             Divider()
             if session.importing {
@@ -274,6 +275,7 @@ struct NumberControl:View {
 }
 struct SceneInspector:View {
     @ObservedObject var session:EditorSession
+    @FocusState private var dimensionFocus:String?
     private var variant:SceneVariant { session.snapshot.plan.variant }
     private func scene(_ key:WritableKeyPath<SceneSettings,Double>,factor:Double=1)->Binding<Double> {
         Binding(get:{session.project.scene[keyPath:key]*factor},set:{ value in session.commit("Adjust scene"){$0.scene[keyPath:key]=value/factor} })
@@ -289,7 +291,7 @@ struct SceneInspector:View {
                     Text("1920 × 1080").tag("1920x1080");Text("2576 × 1080").tag("2576x1080");Text("3840 × 2160").tag("3840x2160")
                     Text("1080 × 1920").tag("1080x1920");Text("1080 × 1080").tag("1080x1080");Text("1080 × 1350").tag("1080x1350")
                     if !["1920x1080","2576x1080","3840x2160","1080x1920","1080x1080","1080x1350"].contains("\(session.project.canvas.width)x\(session.project.canvas.height)") { Text("Custom").tag("\(session.project.canvas.width)x\(session.project.canvas.height)") }
-                }.labelsHidden()
+                }.labelsHidden().accessibilityIdentifier("galileo.canvas-size")
                 HStack { dimension("W",\.width);dimension("H",\.height) }
                 BackgroundControls(session:session)
             }
@@ -340,6 +342,6 @@ struct SceneInspector:View {
         }
     }
     private func dimension(_ label:String,_ key:WritableKeyPath<GalileoCore.Canvas,Int>)->some View {
-        HStack { Text(label).foregroundStyle(.secondary);TextField(label,value:Binding(get:{session.project.canvas[keyPath:key]},set:{value in session.commit("Resize canvas"){$0.canvas[keyPath:key]=value} }),format:.number.grouping(.never)).textFieldStyle(StudioTextFieldStyle()).accessibilityLabel(label=="W" ? "Canvas width":"Canvas height") }
+        HStack { Text(label).foregroundStyle(.secondary);TextField(label,value:Binding(get:{session.project.canvas[keyPath:key]},set:{value in session.commit("Resize canvas"){$0.canvas[keyPath:key]=value} }),format:.number.grouping(.never)).textFieldStyle(StudioTextFieldStyle(focused:dimensionFocus==label)).focused($dimensionFocus,equals:label).accessibilityLabel(label=="W" ? "Canvas width":"Canvas height") }
     }
 }
