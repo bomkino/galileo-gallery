@@ -156,7 +156,7 @@ public struct StudioPicker<Selection: Hashable, Options: View>: View {
     }
     public var body: some View {
         HStack(spacing: 8) {
-            if showsLabel { Text(title).font(.system(size: 13)).foregroundStyle(theme.text.color) }
+            if showsLabel { Text(title).font(.system(size: 13)).foregroundStyle(theme.text.color).accessibilityHidden(true) }
             Menu {
                 Picker(title, selection: $selection, content: options).labelsHidden()
             } label: {
