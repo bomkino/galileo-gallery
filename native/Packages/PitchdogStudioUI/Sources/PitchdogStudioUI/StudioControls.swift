@@ -50,8 +50,14 @@ public struct StudioButtonStyle: ButtonStyle {
             .frame(minWidth: compact ? 28 : 0, minHeight: compact ? 28 : 30)
             .background(background.color, in: RoundedRectangle(cornerRadius: 7))
             .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(
-                focused && theme.isActive ? theme.accent.color : emphasis == .quiet && !hovering ? Color.clear : theme.border.color,
-                lineWidth: focused && theme.isActive ? 2 : theme.lineWidth))
+                emphasis == .quiet && !hovering ? Color.clear : theme.border.color,
+                lineWidth: theme.lineWidth))
+            .overlay {
+                if focused && theme.isActive {
+                    RoundedRectangle(cornerRadius: 10).strokeBorder(theme.focus.color, lineWidth: 2)
+                        .padding(-3).allowsHitTesting(false)
+                }
+            }
             .contentShape(RoundedRectangle(cornerRadius: 7))
             .onHover { hovering = $0 }
             .animation(theme.reduceMotion ? nil : .easeOut(duration: 0.09), value: hovering)
@@ -73,7 +79,7 @@ public struct StudioTextFieldStyle: TextFieldStyle {
             .frame(minHeight: 28)
             .background(theme.well.color, in: RoundedRectangle(cornerRadius: 6))
             .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(
-                invalid ? theme.error.color : focused && theme.isActive ? theme.accent.color : theme.border.color,
+                invalid ? theme.error.color : focused && theme.isActive ? theme.focus.color : theme.border.color,
                 lineWidth: invalid || focused && theme.isActive ? 1.5 : theme.lineWidth))
     }
 }
@@ -106,12 +112,12 @@ public struct StudioChoiceBar<Value: Hashable>: View {
                                     in: RoundedRectangle(cornerRadius: 6))
                         .overlay(alignment: .bottom) {
                             if selection == choice.id {
-                                RoundedRectangle(cornerRadius: 1).fill((theme.isActive ? theme.accent : theme.secondary).color)
+                                RoundedRectangle(cornerRadius: 1).fill((theme.isActive ? theme.focus : theme.secondary).color)
                                     .frame(height: 2).padding(.horizontal, 12)
                             }
                         }
                         .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(
-                            focused == choice.id && theme.isActive ? theme.accent.color : Color.clear, lineWidth: 2))
+                            focused == choice.id && theme.isActive ? theme.focus.color : Color.clear, lineWidth: 2))
                         .contentShape(RoundedRectangle(cornerRadius: 6))
                 }
                 .buttonStyle(.plain).focused($focused, equals: choice.id)
@@ -154,19 +160,21 @@ public struct StudioPicker<Selection: Hashable, Options: View>: View {
             Menu {
                 Picker(title, selection: $selection, content: options).labelsHidden()
             } label: {
-                HStack(spacing: 8) {
-                    Text(valueLabel).lineLimit(1).frame(maxWidth: .infinity, alignment: .leading)
-                    Image(systemName: "chevron.down").font(.system(size: 10, weight: .semibold))
-                        .accessibilityHidden(true)
-                }
-                .font(.system(size: 13))
-                .foregroundStyle((enabled ? theme.text : theme.secondary).color)
-                .padding(.horizontal, 9).frame(minHeight: 30)
-                .background((hovering && enabled ? theme.hover : theme.well).color, in: RoundedRectangle(cornerRadius: 6))
-                .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(theme.border.color, lineWidth: theme.lineWidth))
-                .contentShape(RoundedRectangle(cornerRadius: 6))
+                // macOS can flatten a Menu label to native title/image. Paint the
+                // surface outside the Menu rather than losing it inside that label.
+                Text(valueLabel).font(.system(size: 13)).lineLimit(1)
             }
             .menuStyle(.borderlessButton).menuIndicator(.hidden)
+            .padding(.leading, 9).padding(.trailing, 24)
+            .frame(maxWidth: .infinity, minHeight: 30, alignment: .leading)
+            .foregroundStyle((enabled ? theme.text : theme.secondary).color)
+            .background((hovering && enabled ? theme.hover : theme.well).color, in: RoundedRectangle(cornerRadius: 6))
+            .overlay(alignment: .trailing) {
+                Image(systemName: "chevron.down").font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle((enabled ? theme.text : theme.secondary).color)
+                    .padding(.trailing, 9).allowsHitTesting(false).accessibilityHidden(true)
+            }
+            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(theme.border.color, lineWidth: theme.lineWidth).allowsHitTesting(false))
             .accessibilityLabel(title).accessibilityValue(valueLabel)
             .help(valueLabel).onHover { hovering = $0 }
         }

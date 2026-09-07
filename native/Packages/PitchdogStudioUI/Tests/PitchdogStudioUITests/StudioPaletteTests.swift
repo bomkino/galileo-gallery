@@ -27,6 +27,16 @@ final class StudioPaletteTests: XCTestCase {
             }
         }
     }
+    func testFocusSurvivesLowContrastSystemAccents() {
+        for accent in [UInt32(0xFFFF00),0xFFFFFF,0x000000,0xAAAAAA,0xFFAA00,0x2864DA] {
+            for appearance in [StudioAppearance.light, .dark] {
+                let theme=StudioTheme(appearance:appearance,accent:StudioRGB(hex:accent))
+                for surface in [theme.window,theme.panel,theme.well,theme.hover,theme.pressed] {
+                    XCTAssertGreaterThanOrEqual(theme.focus.contrast(with:surface),3)
+                }
+            }
+        }
+    }
     func testArtworkSurroundIsNeutralAndNotAccentDerived() {
         for appearance in [StudioAppearance.light, .dark] {
             let a = StudioTheme(appearance: appearance, accent: StudioRGB(hex: 0xFFAA00))

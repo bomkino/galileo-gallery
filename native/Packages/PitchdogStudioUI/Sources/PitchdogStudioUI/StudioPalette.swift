@@ -46,6 +46,11 @@ public struct StudioTheme: Equatable, Sendable {
     public var separator: StudioRGB { increasedContrast ? secondary : color(0xD9DEDF, 0x394148) }
     public var surround: StudioRGB { color(0xE6E6E6, 0x101010) }
     public var error: StudioRGB { color(0xAA2533, 0xFFA2A8) }
+    /// Focus is not allowed to disappear with a low-contrast system accent.
+    public var focus: StudioRGB {
+        let surfaces = [window, panel, well, hover, pressed]
+        return surfaces.allSatisfy { accent.contrast(with: $0) >= 3 } ? accent : text
+    }
     public var lineWidth: Double { increasedContrast ? 1.5 : 0.75 }
     private func color(_ light: UInt32, _ dark: UInt32) -> StudioRGB {
         StudioRGB(hex: appearance == .dark ? dark : light)
