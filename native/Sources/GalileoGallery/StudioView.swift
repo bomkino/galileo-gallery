@@ -84,7 +84,7 @@ struct StudioView:View {
             HStack { Text("Media").studioType(.panelTitle);Spacer();Text("\(session.project.items.count)").foregroundStyle(.secondary).monospacedDigit() }.padding(16)
             TextField("Find media",text:$session.mediaQuery).textFieldStyle(StudioTextFieldStyle(focused:mediaSearchFocused)).focused($mediaSearchFocused).padding(.horizontal,12).padding(.bottom,8)
             if !session.mediaQuery.isEmpty {
-                Button("Clear search to reorder") { session.mediaQuery="" }
+                Button("Clear search to reorder") { session.mediaQuery="";mediaSearchFocused=false }
                     .buttonStyle(StudioButtonStyle(.quiet)).studioType(.caption).padding(.horizontal,12).padding(.bottom,6)
             }
             if session.project.items.isEmpty {
