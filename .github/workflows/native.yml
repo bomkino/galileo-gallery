@@ -49,13 +49,14 @@ jobs:
         run: |
           set -o pipefail
           swift test --package-path native 2>&1 | tee native-evidence/tests.log
-      - name: Test and compile the resource-free studio component pilot
+      - name: Test and compile the pinned canonical studio package
         id: studio_ui
         if: ${{ !cancelled() }}
         run: |
           set -o pipefail
-          swift test --package-path native/Packages/PitchdogStudioUI 2>&1 | tee native-evidence/studio-ui-tests.log
-          swift build --package-path native/Packages/PitchdogStudioUI --product StudioUISpecimen 2>&1 | tee native-evidence/studio-ui-build.log
+          swift package --package-path native resolve
+          swift test --package-path native/.build/checkouts/pitchdog-studio-ui 2>&1 | tee native-evidence/studio-ui-tests.log
+          swift build --package-path native/.build/checkouts/pitchdog-studio-ui --product StudioUISpecimen 2>&1 | tee native-evidence/studio-ui-build.log
       # A failing image assertion must not hide an unrelated document failure.
       # The job stays failed; this workflow never publishes a release.
       - name: Build and verify native app

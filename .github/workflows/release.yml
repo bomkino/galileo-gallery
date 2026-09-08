@@ -30,6 +30,9 @@ jobs:
           [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
           echo "number=$version" >> "$GITHUB_OUTPUT"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          channel="$(cat native/RELEASE_CHANNEL)"
+          [[ "$channel" == stable || "$channel" == prerelease ]]
+          echo "channel=$channel" >> "$GITHUB_OUTPUT"
           if gh release view "v$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "Release v$version already exists; refusing to replace it." >&2
             exit 1
@@ -76,6 +79,11 @@ jobs:
           bash scripts/native/distribute.sh 'native-evidence/build/Galileo Gallery.app' release-native 2>&1 | tee native-evidence/distribution.log
           python3 scripts/native/package-codec-source.py 'native-evidence/build/Galileo Gallery.app' release-native
           git diff --exit-code
+      - name: Verify drag, keyboard, menus and source selection in the release app
+        run: |
+          set -o pipefail
+          command -v xcodegen >/dev/null || brew install xcodegen
+          python3 scripts/native/run-studio-ui-proof.py "native-evidence/build/Galileo Gallery.app" native-evidence/studio-ui-journey 2>&1 | tee native-evidence/studio-ui-journey.log
       - name: Prepare durable release evidence and notes
         env:
           VERSION: ${{ steps.version.outputs.number }}
@@ -98,6 +106,9 @@ jobs:
           assert (root/'source.txt').read_text().strip()==os.environ['GITHUB_SHA']
           build=json.loads((root/'build/Galileo Gallery.app/Contents/Resources/build.json').read_text())
           assert build['sourceSha']==os.environ['GITHUB_SHA'] and build['version']==os.environ['VERSION']
+          pins=json.loads(pathlib.Path('native/Package.resolved').read_text())['pins']
+          studio=next(p for p in pins if p['identity']=='pitchdog-studio-ui')
+          assert build['studioUIRepository']==studio['location'] and build['studioUIRevision']==studio['state']['revision']
           with zipfile.ZipFile(f"release-native/Galileo.Gallery-{os.environ['VERSION']}-validation.zip",'w',zipfile.ZIP_DEFLATED) as archive:
               for f in sorted(root.rglob('*')):
                   if f.is_file() and 'build' not in f.relative_to(root).parts:
@@ -122,12 +133,17 @@ jobs:
           path: release-native
           if-no-files-found: error
           retention-days: 14
-      - name: Publish matching assets as the latest release
+      - name: Publish matching assets to the declared release channel
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
           VERSION: ${{ steps.version.outputs.number }}
+          CHANNEL: ${{ steps.version.outputs.channel }}
         run: |
           set -euo pipefail
           gh release create "$TAG" release-native/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Galileo Gallery $VERSION" --notes-file native-evidence/release-notes.md --draft
-          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          if [[ "$CHANNEL" == prerelease ]]; then
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease --latest=false
+          else
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease=false --latest
+          fi
