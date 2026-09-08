@@ -18,7 +18,7 @@ struct GalleryChrome: ViewModifier {
                            increasedContrast: contrast == .increased, reduceMotion: reduceMotion, isActive: active != .inactive)
     }
     func body(content: Content) -> some View {
-        content.studioTheme(theme)
+        content.studioSurface(.window).studioTheme(theme)
             .buttonStyle(StudioButtonStyle()).textFieldStyle(StudioTextFieldStyle())
             .onReceive(NotificationCenter.default.publisher(for: NSColor.systemColorsDidChangeNotification)) { _ in colorRevision += 1 }
     }

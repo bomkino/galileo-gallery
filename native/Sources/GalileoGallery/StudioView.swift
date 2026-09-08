@@ -52,15 +52,15 @@ struct StudioView:View {
             }
         }
         .frame(minWidth:900,minHeight:600)
-        .sheet(isPresented:$session.choosingScene) { SceneChooser(session:session) }
+        .sheet(isPresented:$session.choosingScene) { SceneChooser(session:session).modifier(GalleryChrome()) }
         .sheet(isPresented:$session.choosingBackground) {
             DriftBackgroundBrowser(snapshot:session.snapshot,frame:playback.frame) { background in
                 session.commit("Choose Drift background") { p in p.canvas.background = .drift; p.canvas.drift = background }
-            }
+            }.modifier(GalleryChrome())
         }
-        .sheet(item:Binding(get:{session.framingMediaID.map{FramingSelection(id:$0)}},set:{session.framingMediaID=$0?.id})) { item in FramingEditor(session:session,itemID:item.id) }
-        .sheet(item:Binding(get:{session.previewMediaID.map{FramingSelection(id:$0)}},set:{session.previewMediaID=$0?.id})) { item in SourceClipPreview(session:session,itemID:item.id) }
-        .sheet(isPresented:$session.choosingExport) { ExportOptions(session:session,frame:playback.frame) }
+        .sheet(item:Binding(get:{session.framingMediaID.map{FramingSelection(id:$0)}},set:{session.framingMediaID=$0?.id})) { item in FramingEditor(session:session,itemID:item.id).modifier(GalleryChrome()) }
+        .sheet(item:Binding(get:{session.previewMediaID.map{FramingSelection(id:$0)}},set:{session.previewMediaID=$0?.id})) { item in SourceClipPreview(session:session,itemID:item.id).modifier(GalleryChrome()) }
+        .sheet(isPresented:$session.choosingExport) { ExportOptions(session:session,frame:playback.frame).modifier(GalleryChrome()) }
         .onChange(of:session.revision) { playback.update(session.snapshot.plan) }
         .onDrop(of:[UTType.fileURL],isTargeted:nil,perform:acceptMediaDrop)
         .modifier(GalleryChrome())

@@ -153,7 +153,7 @@ import PitchdogStudioUI
     }
     private func window<V:View>(title:String,view:V,size:NSSize)->NSWindowController {
         let window=NSWindow(contentRect:NSRect(origin:.zero,size:size),styleMask:[.titled,.closable],backing:.buffered,defer:false)
-        window.title=title;window.isReleasedWhenClosed=false;window.contentView=NSHostingView(rootView:view.studioType(.bodyCompact).studioTypography(GalileoType.typography));window.center();return NSWindowController(window:window)
+        window.title=title;window.isReleasedWhenClosed=false;window.contentView=NSHostingView(rootView:view.studioType(.bodyCompact).studioTypography(GalileoType.typography).modifier(GalleryChrome()));window.center();return NSWindowController(window:window)
     }
 }
 @MainActor func applyAppearance() {
