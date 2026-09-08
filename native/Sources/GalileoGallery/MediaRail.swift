@@ -117,13 +117,25 @@ struct MediaRail: NSViewRepresentable {
                   parent.session.acceptsMediaMove(ticket) else { return nil }
             return ticket
         }
+        private func insertionGap(_ info: NSDraggingInfo, in table: NSTableView) -> Int? {
+            let point = table.convert(info.draggingLocation, from: nil)
+            guard point.x >= table.bounds.minX, point.x <= table.bounds.maxX else { return nil }
+            let row = table.row(at: point)
+            guard items.indices.contains(row) else {
+                return items.isEmpty || point.y < table.rect(ofRow: 0).minY ? 0 : items.count
+            }
+            // Use the pointer against the original visible order. AppKit's proposed
+            // row can follow the dragged image rather than the pointer's target gap.
+            return point.y < table.rect(ofRow: row).midY ? row : row + 1
+        }
         func tableView(_ tableView: NSTableView, validateDrop info: NSDraggingInfo, proposedRow row: Int, proposedDropOperation operation: NSTableView.DropOperation) -> NSDragOperation {
             StudioUIProof.recordDrag("validate-gap-\(row)")
             if info.draggingPasteboard.types?.contains(Self.moveType) == true {
-                guard validToken(info) != nil, (0...items.count).contains(row) else {
+                guard validToken(info) != nil, let gap = insertionGap(info, in: tableView) else {
                     StudioUIProof.recordDrag("reject-validation"); return []
                 }
-                tableView.setDropRow(row, dropOperation: .above)
+                StudioUIProof.recordDrag("pointer-gap-\(gap)")
+                tableView.setDropRow(gap, dropOperation: .above)
                 return .move
             }
             guard !parent.session.importing, info.draggingPasteboard.types?.contains(.fileURL) == true else { return [] }
@@ -133,8 +145,8 @@ struct MediaRail: NSViewRepresentable {
         }
         func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row: Int, dropOperation: NSTableView.DropOperation) -> Bool {
             if info.draggingPasteboard.types?.contains(Self.moveType) == true {
-                guard let ticket = validToken(info), (0...items.count).contains(row) else { return false }
-                let accepted = parent.session.finishMediaMove(ticket, atGap: row)
+                guard let ticket = validToken(info), let gap = insertionGap(info, in: tableView) else { return false }
+                let accepted = parent.session.finishMediaMove(ticket, atGap: gap)
                 StudioUIProof.recordDrag(accepted ? "commit-ticket" : "reject-ticket")
                 if accepted {
                     refresh()
@@ -214,7 +226,7 @@ struct MediaRail: NSViewRepresentable {
         super.mouseDown(with: event)
     }
     func show(_ item: MediaItem, workspace: Workspace, theme: StudioTheme) {
-        let content = AnyView(MediaRow(item: item, workspace: workspace).environment(\.studioTheme, theme).padding(.horizontal, 8))
+        let content = AnyView(MediaRow(item: item, workspace: workspace).environment(\.studioTheme, theme).studioTypography(GalileoType.typography).padding(.horizontal, 8))
         if let hosting { hosting.rootView = content }
         else {
             let view = NSHostingView(rootView: content)
