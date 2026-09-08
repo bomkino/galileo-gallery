@@ -9,10 +9,10 @@ struct BackgroundControls: View {
     private var settings: DriftBackground { session.project.canvas.drift ?? DriftBackgroundCatalog.studies[0].settings }
     var body: some View {
         VStack(alignment:.leading,spacing:12) {
-            Picker("Background",selection:Binding(get:{session.project.canvas.background},set:{ kind in
+            StudioPicker("Background",selection:Binding(get:{session.project.canvas.background},set:{ kind in
                 if kind == .drift { session.choosingBackground = true }
                 else { session.commit("Change background") { $0.canvas.background = kind } }
-            })) {
+            }),valueLabel:session.project.canvas.background.rawValue.capitalized) {
                 Text("Solid").tag(BackgroundKind.solid)
                 Text("Gradient").tag(BackgroundKind.gradient)
                 Text("Transparent").tag(BackgroundKind.transparent)
@@ -24,10 +24,10 @@ struct BackgroundControls: View {
                     Spacer()
                     Button("Browse…") { session.choosingBackground = true }.accessibilityLabel("Browse Drift backgrounds")
                 }
-                Picker("Palette",selection:Binding(get:{settings.paletteID ?? "custom"},set:{ id in
+                StudioPicker("Palette",selection:Binding(get:{settings.paletteID ?? "custom"},set:{ id in
                     guard let palette = DriftBackgroundCatalog.palettes.first(where:{$0.id == id}) else { return }
                     edit("Change background palette") { $0.apply(palette) }
-                })) {
+                }),valueLabel:DriftBackgroundCatalog.palettes.first(where:{$0.id==settings.paletteID})?.name ?? "Custom") {
                     Text("Custom").tag("custom")
                     ForEach(DriftBackgroundCatalog.palettes) { Text($0.name).tag($0.id) }
                 }
@@ -118,11 +118,11 @@ struct DriftBackgroundBrowser: View {
                 Button("Use background"){choose(settings);dismiss()}.keyboardShortcut(.defaultAction).disabled(error != nil)
             }
             HStack {
-                Picker("Family",selection:$family) {
+                StudioPicker("Family",selection:$family,valueLabel:DriftFamily(rawValue:family)?.label ?? "All") {
                     Text("All").tag("all")
                     ForEach(DriftFamily.allCases,id:\.self) {Text($0.label).tag($0.rawValue)}
                 }.frame(width:250)
-                TextField("Search backgrounds",text:$search).textFieldStyle(.roundedBorder)
+                TextField("Search backgrounds",text:$search).textFieldStyle(StudioTextFieldStyle())
                 Toggle("Keep palette",isOn:$keepPalette).help("Keep your colours when choosing a different study")
             }
             HStack(spacing:18) {

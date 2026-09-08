@@ -151,14 +151,14 @@ struct SourceClipPreview:View {
                 TextField("Out seconds",value:Binding(get:{draft.trimEnd ?? duration},set:{draft.trimEnd=bounded($0,draft.trimStart+0.001,duration);model.stop()}),format:.number.precision(.fractionLength(3))).frame(width:75)
                 Button("Set here"){draft.trimEnd=min(duration,max(draft.trimStart+0.001,model.seconds));model.stop()}
                 Spacer();Button("Reset trim"){draft.trimStart=0;draft.trimEnd=nil;model.seek(0)}
-            }.textFieldStyle(.roundedBorder)
+            }.textFieldStyle(StudioTextFieldStyle())
             HStack {
                 StudioChoiceBar("Display",selection:Binding(get:{draft.sourcePlays},set:{plays in
                     draft.sourcePlays=plays;if !plays,draft.stillFrameSelection==nil {draft.stillFrameSelection = .last}
                 }),choices:[StudioChoice(true,draft.kind == .animatedImage ? "Animation":"Video"),StudioChoice(false,"Still")]).frame(width:210)
                 Toggle("Loop source",isOn:$draft.sourceLoops)
                 Text("Rate")
-                TextField("Playback rate",value:Binding(get:{draft.sourceRate},set:{draft.sourceRate=bounded($0,0.25,4);model.stop()}),format:.number.precision(.fractionLength(2))).frame(width:65).textFieldStyle(.roundedBorder)
+                TextField("Playback rate",value:Binding(get:{draft.sourceRate},set:{draft.sourceRate=bounded($0,0.25,4);model.stop()}),format:.number.precision(.fractionLength(2))).frame(width:65).textFieldStyle(StudioTextFieldStyle())
                 Text("×");Spacer()
                 Button("Use this frame") {
                     do {draft.stillFrameSelection=try model.useFrame(in:draft);draft.sourcePlays=false;model.stop()}

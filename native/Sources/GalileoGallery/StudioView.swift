@@ -123,7 +123,7 @@ struct StudioView:View {
                 },zoom:session.canvasZoom,onError:{session.issue=$0}).padding(12)
             }
             HStack {
-                Picker("Canvas zoom",selection:$session.canvasZoom) {
+                StudioPicker("Canvas zoom",selection:$session.canvasZoom,valueLabel:session.canvasZoom == 0 ? "Fit":String(format:"%.0f%%",session.canvasZoom*100),showsLabel:false) {
                     Text("Fit").tag(0.0);Text("50%").tag(0.5);Text("100%").tag(1.0);Text("200%").tag(2.0)
                 }.labelsHidden().frame(width:90)
                 Text("\(session.project.canvas.width) × \(session.project.canvas.height)")
@@ -215,7 +215,7 @@ struct TransportBar:View {
         HStack(spacing:8) {
             Text(schedule.label(frame:playback.frame)).studioType(.data).lineLimit(1).fixedSize()
             TextField("Frame",value:Binding(get:{playback.frame},set:{playback.seek($0)}),format:.number.grouping(.never))
-                .frame(width:58).textFieldStyle(.roundedBorder).accessibilityLabel("Frame index, starting at zero")
+                .frame(width:58).textFieldStyle(StudioTextFieldStyle()).accessibilityLabel("Frame index, starting at zero")
             Text("/ \(schedule.totalFrames)").studioType(.caption).foregroundStyle(.secondary).lineLimit(1).fixedSize()
         }.monospacedDigit().fixedSize()
     }
@@ -272,7 +272,7 @@ struct SceneInspector:View {
                     Text(String(format: "With spotlights: %.2f s per cycle", session.snapshot.plan.schedule.cycleDuration))
                         .studioType(.caption).foregroundStyle(.secondary)
                 }
-                Picker("Playback",selection:Binding(get:{session.project.timing.playMode},set:{mode in session.commit("Change playback"){$0.timing.playMode=mode} })) { Text("Once").tag(PlayMode.once);Text("Repeat").tag(PlayMode.repeatCount);Text("Loop").tag(PlayMode.loop) }
+                StudioPicker("Playback",selection:Binding(get:{session.project.timing.playMode},set:{mode in session.commit("Change playback"){$0.timing.playMode=mode} }),valueLabel:[PlayMode.once:"Once",.repeatCount:"Repeat",.loop:"Loop"][session.project.timing.playMode] ?? "Once") { Text("Once").tag(PlayMode.once);Text("Repeat").tag(PlayMode.repeatCount);Text("Loop").tag(PlayMode.loop) }
                 if session.project.timing.playMode == .repeatCount {
                     Stepper("\(session.project.timing.repeats) repeats",value:Binding(get:{session.project.timing.repeats},set:{value in session.commit("Change repeat count"){$0.timing.repeats=value} }),in:1...1000)
                 }

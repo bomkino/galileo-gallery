@@ -47,7 +47,7 @@ public struct StudioButtonStyle: ButtonStyle {
             .studioType(.action)
             .foregroundStyle(foreground.color)
             .padding(.horizontal, compact ? 7 : 11)
-            .frame(minWidth: compact ? 28 : 0, minHeight: 40)
+            .frame(minWidth: compact ? 28 : 0, minHeight: emphasis == .primary ? 40 : 32)
             .background(background.color, in: RoundedRectangle(cornerRadius: 7))
             .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(
                 emphasis == .quiet && !hovering ? Color.clear : theme.border.color,
@@ -76,7 +76,7 @@ public struct StudioTextFieldStyle: TextFieldStyle {
             .studioType(.input)
             .foregroundStyle((invalid ? theme.error : enabled ? theme.text : theme.secondary).color)
             .padding(.horizontal, 8).padding(.vertical, 5)
-            .frame(minHeight: 40)
+            .frame(minHeight: 32)
             .background(theme.well.color, in: RoundedRectangle(cornerRadius: 6))
             .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(
                 invalid ? theme.error.color : focused && theme.isActive ? theme.focus.color : theme.border.color,
@@ -106,7 +106,7 @@ public struct StudioChoiceBar<Value: Hashable>: View {
             ForEach(choices) { choice in
                 Button { if selection != choice.id { selection = choice.id } } label: {
                     Text(choice.title).studioType(.action)
-                        .lineLimit(1).frame(maxWidth: .infinity, minHeight: 40)
+                        .lineLimit(1).frame(maxWidth: .infinity, minHeight: 32)
                         .foregroundStyle((enabled ? theme.text : theme.secondary).color)
                         .background(selection == choice.id ? theme.well.color : Color.clear,
                                     in: RoundedRectangle(cornerRadius: 6))
@@ -166,7 +166,7 @@ public struct StudioPicker<Selection: Hashable, Options: View>: View {
             }
             .menuStyle(.borderlessButton).menuIndicator(.hidden)
             .padding(.leading, 9).padding(.trailing, 24)
-            .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 32, alignment: .leading)
             .foregroundStyle((enabled ? theme.text : theme.secondary).color)
             .background((hovering && enabled ? theme.hover : theme.well).color, in: RoundedRectangle(cornerRadius: 6))
             .overlay(alignment: .trailing) {

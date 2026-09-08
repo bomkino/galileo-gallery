@@ -75,16 +75,16 @@ struct MediaInspector: View {
                 }
                 InspectorSection(title:"Framing") {
                     Button("Edit framing…") {session.framingMediaID=item.id}.disabled(items.count != 1 || item.unavailable != nil)
-                    Picker("Ratio",selection:Binding(get:{mixed({$0.displayRatio}) ? -1:(item.displayRatio ?? 0)},set:{value in
+                    StudioPicker("Ratio",selection:Binding(get:{mixed({$0.displayRatio}) ? -1:(item.displayRatio ?? 0)},set:{value in
                         guard value >= 0 else{return};edit("Frame ratio"){$0.displayRatio=value == 0 ? nil:value}
-                    })) {
+                    }),valueLabel:mixed({$0.displayRatio}) ? "Mixed":([0.0:"Source",16.0/9:"16:9",1:"1:1",0.8:"4:5",9.0/16:"9:16"][item.displayRatio ?? 0] ?? "Custom")) {
                         if mixed({$0.displayRatio}) {Text("Mixed").tag(-1.0)}
                         Text("Source").tag(0.0);Text("16:9").tag(16.0/9);Text("1:1").tag(1.0);Text("4:5").tag(0.8);Text("9:16").tag(9.0/16)
                         if let ratio=item.displayRatio,![16.0/9,1,0.8,9.0/16].contains(ratio) {Text("Custom").tag(ratio)}
                     }
-                    Picker("Fit",selection:Binding(get:{mixed({$0.fit}) ? "mixed":item.fit.rawValue},set:{value in
+                    StudioPicker("Fit",selection:Binding(get:{mixed({$0.fit}) ? "mixed":item.fit.rawValue},set:{value in
                         if let fit=MediaFit(rawValue:value){edit("Change fit"){$0.fit=fit}}
-                    })) {
+                    }),valueLabel:mixed({$0.fit}) ? "Mixed":(item.fit == .cover ? "Fill":"Fit")) {
                         if mixed({$0.fit}) {Text("Mixed").tag("mixed")}
                         Text("Fit").tag("contain");Text("Fill").tag("cover")
                     }
@@ -101,7 +101,7 @@ struct MediaInspector: View {
                     }
                 }
                 InspectorSection(title:"Caption") {
-                    TextField(mixed({$0.caption}) ? "Mixed captions":"Caption",text:Binding(get:{mixed({$0.caption}) ? "":item.caption},set:{value in edit("Edit caption"){$0.caption=value}}),axis:.vertical).lineLimit(2...4).textFieldStyle(.roundedBorder)
+                    TextField(mixed({$0.caption}) ? "Mixed captions":"Caption",text:Binding(get:{mixed({$0.caption}) ? "":item.caption},set:{value in edit("Edit caption"){$0.caption=value}}),axis:.vertical).lineLimit(2...4).textFieldStyle(StudioTextFieldStyle())
                     Toggle("Show captions",isOn:Binding(get:{session.project.scene.captions},set:{v in session.commit("Show captions"){$0.scene.captions=v}}))
                     if session.project.scene.captions {
                         Toggle("Caption background",isOn:Binding(get:{session.project.scene.captionBacking ?? true},set:{v in session.commit("Caption background"){$0.scene.captionBacking=v}}))

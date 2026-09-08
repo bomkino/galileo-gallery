@@ -167,7 +167,7 @@ struct SettingsView:View {
     @AppStorage("interfaceAppearance") private var appearance="system"
     var body:some View {
         Form {
-            Picker("Appearance",selection:$appearance) {Text("System").tag("system");Text("Light").tag("light");Text("Dark").tag("dark")}
+            StudioPicker("Appearance",selection:$appearance,valueLabel:appearance.capitalized) {Text("System").tag("system");Text("Light").tag("light");Text("Dark").tag("dark")}
             Text("Interface appearance never changes your exported artwork.").studioType(.bodyCompact).foregroundStyle(.secondary)
         }.formStyle(.grouped).padding(20).frame(width:440).onChange(of:appearance){ applyAppearance() }
     }

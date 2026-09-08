@@ -99,7 +99,7 @@ struct FramingEditor: View {
                     }
                 }
                 HStack {
-                    Picker("Lock ratio",selection:$ratioLock) {Text("Free").tag("free");Text("Source").tag("source");Text("16:9").tag("wide");Text("Square").tag("square");Text("4:5").tag("portrait")}.frame(width:220).onChange(of:ratioLock) { _,_ in
+                    StudioPicker("Lock ratio",selection:$ratioLock,valueLabel:["free":"Free","source":"Source","wide":"16:9","square":"Square","portrait":"4:5"][ratioLock] ?? "Free") {Text("Free").tag("free");Text("Source").tag("source");Text("16:9").tag("wide");Text("Square").tag("square");Text("4:5").tag("portrait")}.frame(width:220).onChange(of:ratioLock) { _,_ in
                         crop=CropGeometry.constrained(crop,sourceAspect:Double(item.width)/Double(item.height),ratio:ratio)
                     }
                     Spacer();Button("Reset"){ratioLock="free";crop=Crop();focal=Point()}
@@ -107,8 +107,8 @@ struct FramingEditor: View {
                 if item.fit == .cover {
                     HStack {
                         Text("Fill position").studioType(.caption).foregroundStyle(.secondary)
-                        TextField("Horizontal position",value:Binding(get:{focal.x*100},set:{focal.x=bounded($0/100,0,1)}),format:.number.precision(.fractionLength(1))).textFieldStyle(.roundedBorder).frame(width:70).accessibilityLabel("Horizontal fill position percent")
-                        TextField("Vertical position",value:Binding(get:{focal.y*100},set:{focal.y=bounded($0/100,0,1)}),format:.number.precision(.fractionLength(1))).textFieldStyle(.roundedBorder).frame(width:70).accessibilityLabel("Vertical fill position percent")
+                        TextField("Horizontal position",value:Binding(get:{focal.x*100},set:{focal.x=bounded($0/100,0,1)}),format:.number.precision(.fractionLength(1))).textFieldStyle(StudioTextFieldStyle()).frame(width:70).accessibilityLabel("Horizontal fill position percent")
+                        TextField("Vertical position",value:Binding(get:{focal.y*100},set:{focal.y=bounded($0/100,0,1)}),format:.number.precision(.fractionLength(1))).textFieldStyle(StudioTextFieldStyle()).frame(width:70).accessibilityLabel("Vertical fill position percent")
                         Spacer()
                     }
                 }
@@ -148,7 +148,7 @@ struct FramingEditor: View {
                 var next=crop;next[keyPath:key]=bounded(value/100,key == \.width || key == \.height ? 0.0001:0,max(0.0001,maximum))
                 if let item {next=CropGeometry.constrained(next,sourceAspect:Double(item.width)/Double(item.height),ratio:ratio,preferHeight:key == \.height)}
                 crop=next
-            }),format:.number.precision(.fractionLength(2))).textFieldStyle(.roundedBorder)
+            }),format:.number.precision(.fractionLength(2))).textFieldStyle(StudioTextFieldStyle())
         }
     }
     private func resize(_ start:Crop,corner:Int,point:CGPoint,size:CGSize,sourceRatio:Double) {

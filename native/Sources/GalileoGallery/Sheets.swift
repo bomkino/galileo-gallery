@@ -138,10 +138,10 @@ struct ExportOptions:View {
         VStack(alignment:.leading,spacing:18) {
             Text("Export").studioType(.sectionTitle)
             Form {
-                Picker("Format",selection:$settings.format) {ForEach(OutputFormat.allCases,id:\.self){Text($0.label).tag($0)}}
+                StudioPicker("Format",selection:$settings.format,valueLabel:settings.format.label) {ForEach(OutputFormat.allCases,id:\.self){Text($0.label).tag($0)}}
                 if settings.format != .png {
-                    Picker("Frame rate",selection:$settings.frameRate) {ForEach(FrameRate.supported,id:\.self){Text("\($0.label) fps").tag($0)}}
-                    Picker("Range",selection:$mode) {
+                    StudioPicker("Frame rate",selection:$settings.frameRate,valueLabel:settings.frameRate.label+" fps") {ForEach(FrameRate.supported,id:\.self){Text("\($0.label) fps").tag($0)}}
+                    StudioPicker("Range",selection:$mode,valueLabel:["all":"Whole sequence","cue":"Selected spotlight","custom":"Custom"][mode] ?? "Whole sequence") {
                         Text("Whole sequence").tag("all");Text("Selected spotlight").tag("cue");Text("Custom").tag("custom")
                     }
                     if mode=="custom" {
