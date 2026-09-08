@@ -35,16 +35,16 @@ public struct StudioTheme: Equatable, Sendable {
         self.appearance = appearance; self.accent = accent
         self.increasedContrast = increasedContrast; self.reduceMotion = reduceMotion; self.isActive = isActive
     }
-    public var window: StudioRGB { color(0xF5F5F3, 0x121416) }
-    public var panel: StudioRGB { color(0xFAFAF8, 0x191C1F) }
-    public var well: StudioRGB { color(0xFFFFFF, 0x252A2E) }
-    public var hover: StudioRGB { color(0xEDEFEF, 0x333B43) }
-    public var pressed: StudioRGB { color(0xE0E4E7, 0x36404A) }
+    public var window: StudioRGB { color(0xF5F5F3, 0x050607) }
+    public var panel: StudioRGB { color(0xFAFAF8, 0x0B0D0F) }
+    public var well: StudioRGB { color(0xFFFFFF, 0x14171A) }
+    public var hover: StudioRGB { color(0xEDEFEF, 0x1E2328) }
+    public var pressed: StudioRGB { color(0xE0E4E7, 0x272E35) }
     public var text: StudioRGB { color(0x202326, 0xF1F3F5) }
     public var secondary: StudioRGB { color(0x5F666D, 0xA7AFB7) }
     public var border: StudioRGB { increasedContrast ? secondary : color(0x858C92, 0x7B8792) }
-    public var separator: StudioRGB { increasedContrast ? secondary : color(0xD9DEDF, 0x394148) }
-    public var surround: StudioRGB { color(0xE6E6E6, 0x101010) }
+    public var separator: StudioRGB { increasedContrast ? secondary : color(0xD9DEDF, 0x30373E) }
+    public var surround: StudioRGB { color(0xE6E6E6, 0x050505) }
     public var error: StudioRGB { color(0xAA2533, 0xFFA2A8) }
     /// Focus is not allowed to disappear with a low-contrast system accent.
     public var focus: StudioRGB {
