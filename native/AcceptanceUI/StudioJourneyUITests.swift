@@ -17,7 +17,7 @@ final class StudioJourneyUITests: XCTestCase {
         app.launch()
         defer { if app.state != .notRunning { app.terminate() } }
         do {
-            for name in ["drag", "undo", "redo", "undo-menu", "search", "clear-search", "canvas-menu", "undo-canvas", "numeric-field", "media-tab", "capture-light", "capture-dark"] {
+            for name in ["drag", "undo", "redo", "undo-menu", "search", "clear-search", "canvas-menu", "undo-canvas", "numeric-field", "media-tab", "capture-light", "capture-dark", "source-still", "source-undo", "source-redo", "source-first", "source-moving", "source-still-again", "source-middle", "source-custom"] {
                 let ready = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
                     self.json(root.appendingPathComponent("STEP.json"))?["step"] as? String == name ||
                     self.json(root.appendingPathComponent("RESULT.json")) != nil || app.state == .notRunning
@@ -69,6 +69,24 @@ final class StudioJourneyUITests: XCTestCase {
                     let shot = window.screenshot()
                     let attachment = XCTAttachment(screenshot: shot); attachment.name = name; attachment.lifetime = .keepAlways; add(attachment)
                     let next = window.buttons["Next frame"]; XCTAssertTrue(next.isHittable); next.click()
+                case "source-still", "source-still-again", "source-moving":
+                    let display=window.descendants(matching:.any).matching(identifier:"galileo.source-display").firstMatch
+                    let button=display.buttons[name=="source-moving" ? "Video":"Still"]
+                    XCTAssertTrue(button.waitForExistence(timeout:8));XCTAssertTrue(button.isHittable);button.click()
+                case "source-undo":app.typeKey("z",modifierFlags:.command)
+                case "source-redo":app.typeKey("z",modifierFlags:[.command,.shift])
+                case "source-first", "source-middle":
+                    let choices=window.descendants(matching:.any).matching(identifier:"galileo.still-choices").firstMatch
+                    let button=choices.buttons[name=="source-first" ? "First frame":"Middle frame"]
+                    XCTAssertTrue(button.isHittable);button.click()
+                case "source-custom":
+                    let choose=window.buttons["Choose another frame…"];XCTAssertTrue(choose.isHittable);choose.click()
+                    let sheet=window.sheets.firstMatch;XCTAssertTrue(sheet.waitForExistence(timeout:8))
+                    let use=sheet.buttons["Use this frame"]
+                    let ready=XCTNSPredicateExpectation(predicate:NSPredicate {_,_ in use.exists && use.isEnabled},object:nil)
+                    XCTAssertEqual(XCTWaiter.wait(for:[ready],timeout:20),.completed);use.click()
+                    let shot=XCTAttachment(screenshot:sheet.screenshot());shot.name="custom-source-frame";shot.lifetime = .keepAlways;add(shot)
+                    let apply=sheet.buttons["Apply"];XCTAssertTrue(apply.isEnabled);apply.click()
                 default: XCTFail("Unrecognised proof step")
                 }
             }

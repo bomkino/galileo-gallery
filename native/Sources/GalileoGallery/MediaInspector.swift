@@ -15,6 +15,8 @@ struct MediaInspector: View {
         self.session=session; self.replace=replace; self.preview=preview; targets=session.selection
     }
     private var items: [MediaItem] { session.project.items.filter {targets.contains($0.id)} }
+    private var timedItems:[MediaItem] {items.filter{$0.kind != .image && $0.duration != nil}}
+    private var timedIDs:Set<String> {Set(timedItems.map(\.id))}
     private func mixed<T: Equatable>(_ value: (MediaItem) -> T) -> Bool {
         guard let first=items.first else {return false}; return items.contains {value($0) != value(first)}
     }
@@ -105,21 +107,25 @@ struct MediaInspector: View {
                         Toggle("Caption background",isOn:Binding(get:{session.project.scene.captionBacking ?? true},set:{v in session.commit("Caption background"){$0.scene.captionBacking=v}}))
                     }
                 }
-                if items.allSatisfy({$0.kind != .image && $0.duration != nil}) {
+                if let clip=timedItems.first {
                     InspectorSection(title:"Source playback") {
+                        if timedItems.count != items.count {Text("Applies to \(timedItems.count) of \(items.count) selected items").studioType(.caption)}
                         HStack {
-                            Button("Preview clip…") {session.previewMediaID=item.id}.disabled(items.count != 1 || item.unavailable != nil)
-                            Button("Reset trim") {edit("Reset source trim"){$0.trimStart=0;$0.trimEnd=nil}}
+                            Button("Preview clip…") {session.previewMediaID=clip.id}.disabled(timedItems.count != 1 || clip.unavailable != nil)
+                            Button("Reset trim") {let ids=timedIDs;Task {await session.resetSourceTrim(ids)}}
                         }
-                        toggle("Play source",get:{$0.sourcePlays},set:{$0.sourcePlays=$1})
-                        toggle("Loop source",get:{$0.sourceLoops},set:{$0.sourceLoops=$1})
-                        number("Rate",range:0.25...4,unit:"×",step:0.05,get:{$0.sourceRate},set:{$0.sourceRate=$1})
-                        let maximumIn=items.map{max(0,($0.trimEnd ?? $0.duration!)-0.001)}.min() ?? 0
-                        number("In",range:0...maximumIn,unit:"s",step:0.01,get:{$0.trimStart},set:{$0.trimStart=$1})
-                        let minimumOut=items.map{$0.trimStart+min(0.001,$0.duration!/2)}.max() ?? 0
-                        let maximumOut=items.compactMap(\.duration).min() ?? 0
+                        SourceDisplayControls(session:session,items:timedItems)
+                        HStack {
+                            Toggle("Loop source",isOn:Binding(get:{clip.sourceLoops},set:{value in session.editItems(timedIDs,name:"Loop source"){$0.sourceLoops=value}}))
+                            if timedItems.contains(where:{$0.sourceLoops != clip.sourceLoops}) {Text("Mixed").studioType(.caption)}
+                        }.disabled(timedItems.contains{!$0.sourcePlays})
+                        NumberControl(label:"Rate",value:Binding(get:{clip.sourceRate},set:{value in session.editItems(timedIDs,name:"Source rate"){$0.sourceRate=value}}),range:0.25...4,unit:"×",step:0.05,mixed:timedItems.contains{$0.sourceRate != clip.sourceRate},begin:{session.beginGesture("Source rate")},end:session.endGesture).disabled(timedItems.contains{!$0.sourcePlays})
+                        let maximumIn=timedItems.map{max(0,($0.trimEnd ?? $0.duration!)-0.001)}.min() ?? 0
+                        SourceTrimControl(session:session,ids:timedIDs,label:"In",range:0...maximumIn,outPoint:false)
+                        let minimumOut=timedItems.map{$0.trimStart+min(0.001,$0.duration!/2)}.max() ?? 0
+                        let maximumOut=timedItems.compactMap(\.duration).min() ?? 0
                         if minimumOut<=maximumOut {
-                            number("Out",range:minimumOut...maximumOut,unit:"s",step:0.01,get:{$0.trimEnd ?? $0.duration!},set:{$0.trimEnd=$1})
+                            SourceTrimControl(session:session,ids:timedIDs,label:"Out",range:minimumOut...maximumOut,outPoint:true)
                         } else {Text("Select one clip to edit its out point.").studioType(.caption).foregroundStyle(.secondary)}
                     }
                 }

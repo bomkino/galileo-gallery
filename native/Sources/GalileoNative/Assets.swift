@@ -206,6 +206,7 @@ public enum LegacyImporter {
             if let focal=frame["focal"] as? [String:Double] { item.focal=Point(focal["x"] ?? 0.5,focal["y"] ?? 0.5) }
             if frame["aspectMode"] as? String=="custom",let rw=frame["ratioW"] as? Double,let rh=frame["ratioH"] as? Double,rh>0 { item.displayRatio=rw/rh }
             item.sourcePlays=parameters["autoplayVideos"] as? Bool ?? true;item.sourceLoops=parameters["loopVideos"] as? Bool ?? true
+            if item.kind != .image,!item.sourcePlays {item.stillFrameSelection = .legacyFrozen(item.trimStart)}
             project.items.append(item);mapping[path]=filename;expected.insert(path)
         }
         let audio=raw["audio"] as? [String:Any] ?? [:]

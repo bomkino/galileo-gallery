@@ -48,6 +48,12 @@ import GalileoCore
             width=item.width; height=item.height; kind=item.kind
         }
     }
+    let sourceSessionID=UUID()
+    var sourceLoadID=UUID()
+    var sourceEpochs:[String:UInt64]=[:]
+    var sourceOperations:[String:UUID]=[:]
+    var sourceCancellations:[UUID:()->Void]=[:]
+    private var importSourceTicket:SourceEditTicket?
     private var activeMove: MoveTicket?
     public var importGeneration:UUID {generation}
     private var importTask:Task<Void,Never>?
@@ -87,6 +93,7 @@ import GalileoCore
         if project.items.map(OrderSource.init) != candidate.items.map(OrderSource.init) {
             orderEpoch &+= 1; activeMove = nil
         }
+        trackSourceChanges(from:project,to:candidate)
         project=candidate;snapshot=nextSnapshot;revision+=1
         selection.formIntersection(Set(candidate.items.map(\.id)))
         if explicitGroup { manager?.endUndoGrouping() }
@@ -97,7 +104,7 @@ import GalileoCore
     }
     public func endGesture() { guard gesture else { return };gesture=false;gestureUndo=nil;undoManager?.endUndoGrouping() }
     public func load(project:GalleryProject,workspace:Workspace)throws {
-        try project.validate();cancelImport();generation=UUID();moveLoadID=UUID();cancelMediaMove();endGesture();undoManager?.removeAllActions()
+        try project.validate();cancelImport();invalidateSourceEdits();generation=UUID();moveLoadID=UUID();cancelMediaMove();endGesture();undoManager?.removeAllActions()
         self.project=project;self.workspace=workspace;snapshot=try RenderSnapshot(project:project,workspace:workspace)
         revision+=1;selection=[];issue=nil;didLoad?()
     }
@@ -185,6 +192,9 @@ import GalileoCore
         guard !importing else {issue="Finish or cancel the current import before adding more media.";return}
         guard !urls.isEmpty else{return}
         let token=generation,base=project,owned=workspace,limit=importBudgetLimit
+        let sourceTicket=replacing.flatMap {beginSourceEdit([$0],allowImages:true)}
+        if replacing != nil,sourceTicket==nil {issue="The replacement target is no longer available.";return}
+        importSourceTicket=sourceTicket
         importing=true;importStatus="Preparing media"
         let reference=SessionReference(self)
         importTask=Task.detached(priority:.userInitiated) {
@@ -223,17 +233,32 @@ import GalileoCore
                     if !FileManager.default.fileExists(atPath:target.path) {try Workspace.copyOwned(source,to:target)}
                 }}
                 let completed=accepted,notices=failures
+                var preparedReplacement:MediaItem?,preparedNotice:String?
+                if let replacing,let old=base.items.first(where:{$0.id==replacing}) {
+                    let preserved=Replacement.preserving(old,with:completed[0])
+                    let prepared=try SourceEditPreparation.adjust(preserved.0,previous:old,workspace:owned,replacement:true)
+                    preparedReplacement=prepared.0;preparedNotice=prepared.1
+                }
+                let stagedReplacement=preparedReplacement,stagedNotice=preparedNotice
                 await MainActor.run {
                     guard let self=reference.value,self.generation==token,!Task.isCancelled else{return}
-                    defer {self.importing=false;self.importStatus="";self.importTask=nil}
+                    defer {
+                        self.importing=false;self.importStatus="";self.importTask=nil;self.importSourceTicket=nil
+                        if let sourceTicket {self.cancelSourceEdit(sourceTicket)}
+                    }
+                    if let sourceTicket,!self.acceptsSourceEdit(sourceTicket) {return}
                     do {
                         var candidate=self.project;var replacementNotice:String?
                         if let replacing {
                             guard let index=candidate.items.firstIndex(where:{$0.id==replacing}) else {throw GalleryError.cancelled}
                             let result=Replacement.preserving(candidate.items[index],with:completed[0])
-                            candidate.items[index]=result.0;replacementNotice=result.1
+                            var replacement=result.0
+                            replacement.stillFrameSelection=stagedReplacement?.stillFrameSelection
+                            candidate.items[index]=replacement
+                            replacementNotice=[result.1,stagedNotice].compactMap{$0}.joined(separator:"\n")
                         } else {candidate.items+=completed}
                         _ = try owned.validateBudget(project:candidate,limit:limit)
+                        if let sourceTicket {self.sourceCancellations[sourceTicket.operation]=nil}
                         try self.apply(candidate,name:replacing == nil ? "Add media":"Replace media")
                         if replacing == nil {self.selection=Set(completed.map(\.id))}
                         let problems=notices+[replacementNotice].compactMap{$0}
@@ -243,14 +268,20 @@ import GalileoCore
             } catch {
                 await MainActor.run {
                     guard let self=reference.value,self.generation==token else{return}
-                    self.importing=false;self.importStatus="";self.importTask=nil
-                    if !(error is CancellationError) {self.issue=error.localizedDescription}
+                    let current=sourceTicket.map{self.acceptsSourceEdit($0)} ?? true
+                    self.importing=false;self.importStatus="";self.importTask=nil;self.importSourceTicket=nil
+                    if let sourceTicket {self.cancelSourceEdit(sourceTicket)}
+                    if current,!(error is CancellationError) {self.issue=error.localizedDescription}
                 }
             }
         }
+        if let sourceTicket {sourceCancellations[sourceTicket.operation] = { [weak self] in self?.importTask?.cancel() }}
     }
-    public func cancelImport() { importTask?.cancel();importTask=nil;importing=false;importStatus="";generation=UUID() }
-    public func close() { cancelImport();moveLoadID=UUID();cancelMediaMove();endGesture();didEdit=nil;didLoad=nil }
+    public func cancelImport() {
+        importTask?.cancel();importTask=nil;importing=false;importStatus="";generation=UUID()
+        if let ticket=importSourceTicket {cancelSourceEdit(ticket)};importSourceTicket=nil
+    }
+    public func close() { cancelImport();invalidateSourceEdits();moveLoadID=UUID();cancelMediaMove();endGesture();didEdit=nil;didLoad=nil }
 }
 
 @MainActor public final class PlaybackModel: ObservableObject {

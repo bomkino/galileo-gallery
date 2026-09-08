@@ -9,59 +9,95 @@ import GalileoNative
     @Published var thumbnails:[CGImage]=[]
     @Published var seconds=0.0
     @Published var playing=false
+    @Published var loading=false
+    @Published var applying=false
     @Published var error:String?
+    private(set) var displayedSeconds=0.0
+    private(set) var displayed:SourceInterval?
     private let worker=SourcePreviewWorker()
     private var playback:Task<Void,Never>?
     private var seekTask:Task<Void,Never>?
+    private var applyTask:Task<Void,Never>?
     private var identity=UUID()
+    private var closed=false
+    private weak var session:EditorSession?
+    private let ticket:SourceEditTicket?
     let item:MediaItem
     let workspace:Workspace
-    init(item:MediaItem,workspace:Workspace) {self.item=item;self.workspace=workspace;seconds=item.trimStart}
+    init(item:MediaItem,session:EditorSession) {
+        self.item=item;workspace=session.workspace;self.session=session
+        ticket=session.beginSourceEdit([item.id]);seconds=item.trimStart
+    }
+    private func adopt(_ frame:SourceAuditionFrame,seconds:Double,id:UUID) {
+        guard !Task.isCancelled,!closed,identity==id else {return}
+        image=frame.image;displayed=frame.interval;displayedSeconds=seconds;loading=false;error=nil
+    }
+    private func fail(_ failure:Error,id:UUID) {
+        guard !Task.isCancelled,!closed,identity==id else {return}
+        image=nil;displayed=nil;error=failure.localizedDescription;loading=false;playing=false
+    }
     func load() async {
+        let id=identity;loading=true
         do {
-            image=try await worker.frame(item:item,seconds:seconds,workspace:workspace)
+            let first=try await worker.audition(item:item,seconds:seconds,workspace:workspace)
+            adopt(first,seconds:seconds,id:id)
             let end=max(0,(item.duration ?? 0)-0.002)
             for index in 0..<8 {
                 let image=try await worker.frame(item:item,seconds:end*Double(index)/7,workspace:workspace,maximumDimension:160)
-                try Task.checkCancellation();thumbnails.append(image)
+                guard !Task.isCancelled,!closed else {return};thumbnails.append(image)
             }
-        } catch is CancellationError {} catch {self.error=error.localizedDescription}
+        } catch {fail(error,id:id)}
     }
     func seek(_ value:Double) {
-        stop();seconds=bounded(value,0,max(0,(item.duration ?? 0)-0.002));identity=UUID();let id=identity
+        stop();seconds=bounded(value,0,max(0,(item.duration ?? 0)-0.002))
+        let requested=seconds,id=identity;loading=true;image=nil;displayed=nil;error=nil
         seekTask=Task {[weak self] in
             guard let self else{return}
-            do {
-                let result=try await worker.frame(item:item,seconds:seconds,workspace:workspace)
-                if !Task.isCancelled,identity==id {image=result}
-            } catch is CancellationError {} catch {self.error=error.localizedDescription}
+            do {adopt(try await worker.audition(item:item,seconds:requested,workspace:workspace),seconds:requested,id:id)}
+            catch {fail(error,id:id)}
         }
     }
     func play(_ draft:MediaItem) {
         stop();playing=true;error=nil
         let start=draft.trimStart,end=draft.trimEnd ?? draft.duration ?? 0
         if seconds<start || seconds>=end {seconds=start}
-        let initial=seconds,anchor=ProcessInfo.processInfo.systemUptime
+        let initial=seconds,anchor=ProcessInfo.processInfo.systemUptime,id=identity
         playback=Task {[weak self] in
             guard let self else{return}
             do {
-                while !Task.isCancelled {
+                while !Task.isCancelled,!closed,identity==id {
                     let elapsed=(ProcessInfo.processInfo.systemUptime-anchor)*draft.sourceRate
                     let raw=initial-start+elapsed,length=max(0.001,end-start)
-                    if raw>=length && !draft.sourceLoops {
-                        seconds=max(start,end-0.002)
-                        let last=try await worker.frame(item:item,seconds:seconds,workspace:workspace)
-                        try Task.checkCancellation();image=last;playing=false;break
-                    }
-                    seconds=start+(draft.sourceLoops ? raw.truncatingRemainder(dividingBy:length):raw)
-                    let picture=try await worker.frame(item:item,seconds:seconds,workspace:workspace)
-                    try Task.checkCancellation();image=picture
+                    let ended=raw>=length && !draft.sourceLoops
+                    let requested=ended ? max(start,end-0.002):start+(draft.sourceLoops ? raw.truncatingRemainder(dividingBy:length):raw)
+                    let picture=try await worker.audition(item:item,seconds:requested,workspace:workspace)
+                    try Task.checkCancellation();guard identity==id else {return}
+                    seconds=requested;adopt(picture,seconds:requested,id:id)
+                    if ended {playing=false;break}
                     try await Task.sleep(nanoseconds:16_666_667)
                 }
-            } catch is CancellationError {} catch {self.error=error.localizedDescription;playing=false}
+            } catch {fail(error,id:id)}
         }
     }
-    func stop() {playback?.cancel();playback=nil;seekTask?.cancel();seekTask=nil;identity=UUID();playing=false}
+    func apply(_ draft:MediaItem,onSuccess:@escaping @MainActor ()->Void) {
+        guard !applying,let session,let ticket,session.acceptsSourceEdit(ticket) else {
+            error="The source changed while this editor was open. Reopen it to edit the current source.";return
+        }
+        stop();applying=true
+        applyTask=Task { [weak self] in
+            guard let self else {return}
+            let accepted=await session.applySourceDrafts([draft],ticket:ticket)
+            guard !Task.isCancelled,!closed else {return}
+            applying=false
+            if accepted {onSuccess()} else {error=session.issue ?? "The source changed. Reopen its editor and retry."}
+        }
+    }
+    func useFrame(in draft:MediaItem)throws->StillFrameSelection {
+        guard !loading,!playing,let displayed else {throw GalleryError.invalid("Wait for the requested source picture before using it.")}
+        return .custom(try displayed.anchor(in:draft.sourceRange,preferredSeconds:displayedSeconds))
+    }
+    func stop() {playback?.cancel();playback=nil;seekTask?.cancel();seekTask=nil;identity=UUID();playing=false;loading=false}
+    func close() {closed=true;stop();applyTask?.cancel();if let ticket {session?.cancelSourceEdit(ticket)}}
 }
 
 struct SourceClipPreview:View {
@@ -70,28 +106,26 @@ struct SourceClipPreview:View {
     @Environment(\.dismiss) private var dismiss
     @State private var draft:MediaItem
     @StateObject private var model:ClipPreviewModel
-    private let originalHash:String
     init(session:EditorSession,itemID:String) {
         self.session=session;self.itemID=itemID
         let item=session.project.items.first{$0.id==itemID} ?? MediaItem(name:"Unavailable",asset:"missing",sha256:String(repeating:"0",count:64),kind:.image,width:1,height:1)
-        originalHash=item.sha256;_draft=State(initialValue:item)
-        _model=StateObject(wrappedValue:ClipPreviewModel(item:item,workspace:session.workspace))
+        _draft=State(initialValue:item)
+        _model=StateObject(wrappedValue:ClipPreviewModel(item:item,session:session))
     }
     private var duration:Double {draft.duration ?? 0.001}
+    private var unresolvedCustom:Bool {
+        if case .some(.custom(_))=draft.stillFrameSelection {return model.displayed==nil};return false
+    }
     var body:some View {
         VStack(spacing:16) {
             HStack {
                 Text(draft.name).studioType(.panelTitle).lineLimit(1);Spacer()
                 Button("Cancel"){dismiss()}.keyboardShortcut(.cancelAction)
-                Button("Apply") {
-                    guard session.project.items.first(where:{$0.id==itemID})?.sha256==originalHash else {model.error="The source changed while previewing. Reopen the clip preview.";return}
-                    session.editItems([itemID],name:"Edit source playback") {
-                        $0.trimStart=draft.trimStart;$0.trimEnd=draft.trimEnd;$0.sourceRate=draft.sourceRate
-                        $0.sourceLoops=draft.sourceLoops;$0.sourcePlays=draft.sourcePlays
-                    }
-                    dismiss()
-                }.keyboardShortcut(.defaultAction).disabled(model.image==nil)
+                Button(model.applying ? "Applying…":"Apply") {model.apply(draft) {dismiss()}}
+                    .keyboardShortcut(.defaultAction).disabled(model.applying || model.loading || unresolvedCustom)
+
             }
+            Group {
             ZStack {
                 Rectangle().fill(Color(nsColor:.underPageBackgroundColor))
                 if let image=model.image {Image(decorative:image,scale:1).resizable().scaledToFit().padding(8)}
@@ -119,18 +153,24 @@ struct SourceClipPreview:View {
                 Spacer();Button("Reset trim"){draft.trimStart=0;draft.trimEnd=nil;model.seek(0)}
             }.textFieldStyle(.roundedBorder)
             HStack {
-                Toggle("Play source",isOn:$draft.sourcePlays)
+                StudioChoiceBar("Display",selection:Binding(get:{draft.sourcePlays},set:{plays in
+                    draft.sourcePlays=plays;if !plays,draft.stillFrameSelection==nil {draft.stillFrameSelection = .last}
+                }),choices:[StudioChoice(true,draft.kind == .animatedImage ? "Animation":"Video"),StudioChoice(false,"Still")]).frame(width:210)
                 Toggle("Loop source",isOn:$draft.sourceLoops)
                 Text("Rate")
                 TextField("Playback rate",value:Binding(get:{draft.sourceRate},set:{draft.sourceRate=bounded($0,0.25,4);model.stop()}),format:.number.precision(.fractionLength(2))).frame(width:65).textFieldStyle(.roundedBorder)
                 Text("×");Spacer()
-                Button("Freeze here"){draft.trimStart=min(model.seconds,max(0,(draft.trimEnd ?? duration)-0.001));draft.sourcePlays=false;model.stop()}
+                Button("Use this frame") {
+                    do {draft.stillFrameSelection=try model.useFrame(in:draft);draft.sourcePlays=false;model.stop()}
+                    catch {model.error=error.localizedDescription}
+                }.disabled(model.loading || model.playing || model.displayed==nil || model.applying)
             }
+            }.disabled(model.applying)
             if let error=model.error {Text(error).foregroundStyle(.red).studioType(.bodyCompact).textSelection(.enabled)}
         }.padding(22).frame(width:760)
         .task {await model.load()}
         .onChange(of:draft.sourceLoops){_,_ in model.stop()}
         .onChange(of:draft.sourcePlays){_,_ in model.stop()}
-        .onDisappear {model.stop()}
+        .onDisappear {model.close()}
     }
 }

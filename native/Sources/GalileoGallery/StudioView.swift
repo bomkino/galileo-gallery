@@ -139,6 +139,7 @@ struct MediaRow:View {
     let item:MediaItem;let workspace:Workspace
     @Environment(\.studioTheme) private var theme
     @State private var image:NSImage?
+    @State private var frameError:String?
     var body:some View {
         HStack(spacing:9) {
             ZStack {
@@ -149,6 +150,7 @@ struct MediaRow:View {
             VStack(alignment:.leading,spacing:3) {
                 Text(item.name).studioType(.code).lineLimit(1).help(item.name)
                 if item.unavailable != nil { Text("Missing · Replace or locate").studioType(.caption).foregroundStyle(.orange) }
+                else if let frameError {Text("Frame unavailable").studioType(.caption).foregroundStyle(.orange).help(frameError)}
                 else if !item.included { Text("Excluded").studioType(.caption).foregroundStyle(.secondary) }
                 HStack(spacing:6) {
                     if item.opening { Image(systemName:"play.rectangle").help("Opening").accessibilityLabel("Opening") }
@@ -159,11 +161,13 @@ struct MediaRow:View {
             Spacer(minLength:0)
         }.padding(.vertical,4).opacity(item.included ? 1:0.55)
             .accessibilityElement(children:.combine)
-            .task(id:item.sha256+":"+(item.unavailable ?? "")) {
-                image=nil
+            .task(id:workspace.root.path+":"+item.id+":"+item.sourceDisplayIdentity+":"+(item.unavailable ?? "")) {
+                image=nil;frameError=nil
                 let item=item,workspace=workspace
-                let cg=try? await ThumbnailWorker.shared.image(item:item,workspace:workspace)
-                if !Task.isCancelled,let cg { image=NSImage(cgImage:cg,size:.zero) }
+                do {
+                    let cg=try await ThumbnailWorker.shared.image(item:item,workspace:workspace)
+                    if !Task.isCancelled {image=NSImage(cgImage:cg,size:.zero)}
+                } catch {if !Task.isCancelled {frameError=error.localizedDescription}}
             }
     }
 }

@@ -86,6 +86,32 @@ import GalileoNative
                 guard session.project == beforeAppearance else { throw GalleryError.invalid("Interface appearance changed the artwork state.") }
                 outcomes.append("active-" + name + "-capture")
             }
+            var video=try await VerificationFixtures.loopingVideo(workspace:session.workspace)
+            video.trimStart=0.25;video.trimEnd=2.5;video.sourceRate=1.5;video.sourceLoops=false
+            session.commit("Add source acceptance fixture") {$0.items.append(video)}
+            session.selection=[video.id]
+            func selectedSource()->MediaItem? {session.project.items.first{$0.id==video.id}}
+            try step("source-still",directory:directory)
+            try await wait("First Still action must choose Last") {selectedSource()?.sourcePlays==false && selectedSource()?.stillFrameSelection == .last}
+            try step("source-undo",directory:directory)
+            try await wait("One Undo must restore moving source and absent choice") {selectedSource()==video}
+            try step("source-redo",directory:directory)
+            try await wait("One Redo must restore Last") {selectedSource()?.sourcePlays==false && selectedSource()?.stillFrameSelection == .last}
+            try step("source-first",directory:directory)
+            try await wait("The visible First choice must author First") {selectedSource()?.stillFrameSelection == .first}
+            try step("source-moving",directory:directory)
+            try await wait("Video must retain the remembered frame") {selectedSource()?.sourcePlays==true && selectedSource()?.stillFrameSelection == .first}
+            try step("source-still-again",directory:directory)
+            try await wait("Returning to Still must retain First") {selectedSource()?.sourcePlays==false && selectedSource()?.stillFrameSelection == .first}
+            try step("source-middle",directory:directory)
+            try await wait("The visible Middle choice must author Middle") {selectedSource()?.stillFrameSelection == .middle}
+            try step("source-custom",directory:directory)
+            try await wait("Use this frame and Apply must commit an independent Custom anchor") {
+                if case .some(.custom(_))=selectedSource()?.stillFrameSelection {return true};return false
+            }
+            guard let selected=selectedSource(),selected.trimStart==video.trimStart,selected.trimEnd==video.trimEnd,
+                  selected.sourceRate==video.sourceRate,selected.sourceLoops==video.sourceLoops else {throw GalleryError.invalid("Frame selection changed the source trim, rate or loop settings.")}
+            outcomes.append("source-display-last-default-undo-remembered-choice-custom-apply")
             try JSONSerialization.data(withJSONObject: ["result": "passed", "source": source, "checks": outcomes, "dragEvents": dragEvents], options: [.prettyPrinted, .sortedKeys])
                 .write(to: directory.appendingPathComponent("RESULT.json"), options: .atomic)
             document.close()

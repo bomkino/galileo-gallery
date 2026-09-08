@@ -84,7 +84,7 @@ final class SpotlightTests: XCTestCase {
         for i in items.indices { items[i].removeValue(forKey: "spotlight") }
         json["items"] = items
         let old = try GalleryProject.decode(JSONSerialization.data(withJSONObject: json))
-        XCTAssertEqual(old.schemaVersion, 7); XCTAssertTrue(old.items.allSatisfy { $0.spotlight == nil })
+        XCTAssertEqual(old.schemaVersion, GalleryProject.currentSchemaVersion); XCTAssertTrue(old.items.allSatisfy { $0.spotlight == nil })
         p.items[0].spotlight?.holdMilliseconds = 0; XCTAssertThrowsError(try p.validate())
         p.items[0].spotlight?.holdMilliseconds = 3000; p.items[0].spotlight?.scale = .nan
         XCTAssertThrowsError(try p.validate())
@@ -93,7 +93,7 @@ final class SpotlightTests: XCTestCase {
         for rate in [FrameRate(24000,1001), FrameRate(60000,1001)] {
             var p = project(); p.export.frameRate = rate
             p.items[0].kind = .video; p.items[0].duration = 5; p.items[0].trimStart = 1
-            p.items[0].sourcePlays = false; p.items[0].spotlight = Spotlight()
+            p.items[0].sourcePlays = false; p.items[0].stillFrameSelection = .legacyFrozen(1); p.items[0].spotlight = Spotlight()
             let plan = try RenderPlan(project: p), cue = try XCTUnwrap(plan.spotlights.first)
             XCTAssertGreaterThanOrEqual(Double(cue.holdFrames)/rate.value, 3)
             XCTAssertLessThan(Double(cue.holdFrames)/rate.value, 3+1/rate.value)

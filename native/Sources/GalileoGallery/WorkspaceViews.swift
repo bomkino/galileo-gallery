@@ -133,6 +133,7 @@ struct FramingEditor: View {
     private func refreshFilledPreview() {
         guard var media=item else{return};media.crop=crop;media.focal=focal
         media.opening=false;media.closing=false;media.spotlight=nil;media.included=true
+        if media.kind != .image,media.sourcePlays {media.stillFrameSelection = .first}
         media.sourcePlays=false
         var project=GalleryProject();project.items=[media]
         project.canvas.width=640;project.canvas.height=360;project.canvas.background = .transparent
