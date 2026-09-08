@@ -60,7 +60,7 @@ final class VideoFrameCursor {
         guard reader.startReading() else {throw reader.error ?? GalleryError.invalid("The native video reader could not start.")}
         current=try read();next=try read()
     }
-    func frame(at seconds:Double, fingerprint:String, exact:Bool=false) throws -> DecodedSourceFrame {
+    func frame(at seconds:Double, fingerprint:String, exact:Bool=false,includeInterval:Bool=false) throws -> DecodedSourceFrame {
         let target=max(0,seconds)
         if current==nil || target+1e-8 < CMSampleBufferGetPresentationTimeStamp(current!).seconds || target-previousRequest>2 {
             try reset(at:target)
@@ -85,7 +85,7 @@ final class VideoFrameCursor {
         guard pts.seconds <= target+0.002 else {throw GalleryError.invalid("The video contains a gap at the requested time.")}
         let duration=CMSampleBufferGetDuration(sample)
         var interval:SourceInterval?
-        if exact {interval=try VideoPresentationTiming.interval(track:track,pts:pts,duration:duration)}
+        if exact || includeInterval {interval=try VideoPresentationTiming.interval(track:track,pts:pts,duration:duration)}
         else if duration.isNumeric,CMTimeCompare(duration,.zero)>0 {interval=try? SourceInterval(start:SourceTime(pts),end:SourceTime(CMTimeAdd(pts,duration)))}
         if exact,interval?.contains(seconds:target) != true {throw GalleryError.invalid("No source picture covers this audition time.")}
         if let cached {return cached}

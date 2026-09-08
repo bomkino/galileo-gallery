@@ -219,7 +219,7 @@ public final class NativeRenderer {
             }
             readerOrder.append(key)
             let before=cursor.materializedFrames,samplesBefore=cursor.decodedSamples
-            let frame=try cursor.frame(at:seconds,fingerprint:item.sha256,exact:exactAudition)
+            let frame=try cursor.frame(at:seconds,fingerprint:item.sha256,exact:exactAudition,includeInterval:includeInterval)
             preparedSourceFrames+=cursor.materializedFrames-before;decodedVideoSamples+=cursor.decodedSamples-samplesBefore;return frame
         }
         let sourceKey="\(workspace.root.path):\(item.sha256)"

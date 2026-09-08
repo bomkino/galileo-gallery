@@ -1,68 +1,58 @@
-# Native studio update — implementation checkpoint
+# Native studio implementation — 8 September 2026
 
-This is an engineering branch, not a release or a completed visual redesign.
-The baseline is Galileo 2.3.0, source `a1b9010cbcd94d10e6951a2984a2328ce585560e`.
-Do not promote it merely because a build succeeds.
+Engineering candidate on the existing native studio branch. Neither app is released,
+installed, or accepted merely because this implementation builds.
 
-## Implemented first slice
+## Implemented
 
-- Atomic identity-based list ordering with exhaustive production-core tests, block-wise
-  keyboard movement, stale/foreign drag-ticket rejection and captured source/order epochs.
-- Existing media list retains native selection and movement. Row hit regions, explicit
-  filtered-state instructions, disabled filtered movement and contextual alternatives
-  are connected; actual mouse/trackpad acceptance is still required.
-- Opening, Spotlight and Closing roles can be displayed independently.
-- A resource-free, dependency-free SwiftUI/AppKit component pilot owns palette, button,
-  field, choice and native-slider paint. It does not own document or renderer state.
-- Existing Galileo panels and inspector modes remain in place. Initial controls and
-  opaque surfaces use the pilot. Source, crop, export and media decoding remain unchanged.
-- No schema or application-version change. Older projects retain baseline behaviour.
+- Galileo's real NSTableView rail now carries opaque drag tickets into its existing
+  atomic document transaction. Native selection, insertion, Finder import and context
+  actions remain app-owned. Search disables ordering; clearing it releases text focus.
+- Video / Animation / Still, remembered First / Middle / Last (Last on first use),
+  independent Custom anchors, exact source intervals, source auditions and one-edit
+  trim/replacement adjustment. Source tickets reject stale success and failure across
+  edit/undo/load/close. No source image is substituted for a failed export.
+- Schema 8 retains migration-only legacy frozen intent. Older native documents open as
+  protected untitled upgrade copies. Original identity follows aliases and renames;
+  draft autosave/restoration, Save As and failed saves preserve the original package.
+- Immutable still metadata and bitmaps share bounded work (one metadata, two bitmap
+  workers). Cancellation detaches one subscriber; the last subscriber stops cooperative
+  work. Interactive leases allow 30 seconds; exports allow 120 seconds, with at most
+  one million inspected samples. A codec call cannot be forcibly interrupted.
+- Richer dark surfaces, canonical pitch.dog typography, native menu triggers, fields,
+  buttons, selectors and sliders cover the existing inspector and editing/export sheets.
+  Fields and selectors use 32-point rows; primary actions retain 40 points. Canvas size
+  drafts commit complete validated values without warning on intermediate digits.
 
-## Validation boundaries
+## Evidence boundary
 
-Linux core and palette tests are executable checks, not Mac UI proof. The native workflow
-also compiles/tests the components and developer specimen, then uses the existing packaged
-app journey. The specimen is not included in the distributed application.
+Galileo b13212a passed hosted native runs 34177466640 and 34177469096: real mouse drag,
+keyboard/menu Undo/Redo, search, canvas size, numeric entry, Media tab and active light
+and dark captures. Protected upgrade-copy application smoke also passed. Those results
+precede the source-frame integration and do not certify its later source.
 
-Mouse/trackpad drag, VoiceOver, focus and menu behaviour, minimum macOS, physical M2/M1 Pro,
-full application styling and human visual acceptance remain open. Do not claim them from
-screenshots or successful compilation. Last-frame selection, protected schema-upgrade
-copies and the associated media/cache/ownership work are not implemented in this slice.
+The a78f0ab candidate exposed missing compressed-sample durations, an empty replacement
+warning and an offscreen UI target. 6dccdc1 fixes these using native sample-table timing,
+nonempty notices and actual inspector scrolling. Current candidate checks additionally
+exercise Still, Undo/Redo, remembered choices and Custom Apply, plus shared cancellation.
+Read the exact-head CI and artifacts before promoting; historical passes are not reused.
 
-## Sharing with Drift
+Drift's earlier 31d9c816 guarded pilot passed run 34176272771. Its next candidate expands
+shared controls through Look, Motion, Slide and Export without changing bindings,
+catalog exclusions, audio, document journals, rendering or media policy.
 
-The provisional source is `native/Packages/PitchdogStudioUI`. A second-consumer development
-pilot may use an explicit local package override to these exact files; it must not keep a
-permanent duplicate or silently enable itself in a release build. The package owns no
-app settings, codecs, assets, source timing, undo, sound or export. Canonical extraction,
-repository publication, version pinning and both independent release gates remain open.
+## Package and promotion
 
-The reviewed v2 implementation plan remains the governing scope. Continue independent safe
-work; do not bypass missing visual/hardware acceptance or replace the established panels.
+The current canonical development source is native/Packages/PitchdogStudioUI. It is
+resource-free, Apple-framework-only, Swift tools 5.10 / Swift 5, with macOS 13.3 minimum.
+Both apps own their exact font files at the retained type-system revision
+786b4a2b671182319320f922b8de8f927ea3a002. Package source contains no application state.
 
-## 8 September continuation: native drag lifecycle
+Dedicated canonical repository publication and remote dependency resolution remain a
+separate gate. Preserve the explicit Drift pilot override and distribution guards until
+publication and both exact pins are proved. Do not ship sibling paths or copied forks.
 
-The failed baseline run `34148662827` at `ac70858e11743ac40bbd7911e4010af2aa8e2527`
-reached the real pointer assertion but did not reorder. Its recording and raw artifact
-ZIP were preserved locally and the ZIP digest checked against GitHub. Source inspection
-confirmed that the SwiftUI List callback bypassed the existing drag-start tickets.
-
-The media rail now uses an app-owned NSTableView adapter with the existing SwiftUI
-MediaRow presentation. Native pasteboard writers carry opaque session tickets; drop
-validation checks the originating table and current ticket before the existing atomic
-transaction. Native selection, insertion feedback, drag cancellation, context commands
-and append-only Finder imports remain local to Galileo. No shared package owns ordering.
-The external journey retains the mouse assertion and now also requires a drag-start
-ticket to be consumed. Bounded diagnostic event names are recorded only during that proof.
-
-This is implemented and awaiting actual input acceptance. Local macOS 27 beta / Swift
-6.4 Command Line Tools cannot run XCTest and its default SDK lacks a SwiftUI macro
-plugin. The installed macOS 15.4 SDK with SwiftPM's native backend builds the app.
-Local diagnostic pointer attempts have not passed; native hosted CI must establish
-drop, undo and the remaining journey. This is not a release candidate or a gesture PASS.
-
-### Native typography continuation — 2026-09-08
-
-Owner requests richer blacks and the pitch.dog type system in both native apps. Preserve both consumers' existing v13.0.0 pin `786b4a2b671182319320f922b8de8f927ea3a002`; its metadata remains production-candidate, so this is not an upstream version promotion. `native/Resources/StudioFonts/SOURCE.json` records the exact native handoff binaries, hashes and canonical UI roles. The application owns three font resources and their lifecycle. The resource-free package projects all fourteen semantic roles into native fonts. Exact-file Core Text construction avoids the documented v13 Eyebrow installed-name collision. Fonts are resolved once, not per row or frame. SF Symbols retain native icon geometry; artwork/rendering fonts are unchanged.
-
-Native role sizes use the canonical minimum rem bound at 16 points per rem; compact pointer controls are at least 40 points. No hover/selection weight changes. Role values were compared against canonical tokens, generated role contracts and the component map. Local SDK15.4 builds pass; a standalone Core Text proof verifies all 14 actual variable instances, approved weights/widths and representative Latin/numeric glyph mapping. Actual window glyph/geometry, language expansion and accessibility acceptance remain open. Raw proofs are preserved in the shared project's existing `artifacts/galileo-drift-2026-09-08` location.
+Physical trackpad, VoiceOver, minimum-OS execution, hardware/performance acceptance,
+offline packaged launch and pitch.dog visual review remain required acceptance gates.
+Local macOS 27 beta / Swift 6.4 CLT lacks XCTest; earlier SDK15.4 builds passed, while
+hosted CI owns current full builds and actual input checks. No stable-release claim.
