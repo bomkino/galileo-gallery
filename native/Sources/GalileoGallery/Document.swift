@@ -14,6 +14,17 @@ extension Notification.Name {
 private final class DocumentStorage:@unchecked Sendable {
     private let lock=NSLock()
     private var snapshot:RenderSnapshot?
+    private var protection:UpgradeProtection?
+    private var writeFailure:String?
+    func state()throws->(RenderSnapshot,UpgradeProtection?) {
+        lock.lock();defer{lock.unlock()}
+        if let writeFailure {throw GalleryError.invalid(writeFailure)}
+        guard let snapshot else {throw GalleryError.invalid("The document is not ready.")}
+        return (snapshot,protection)
+    }
+    func origin()->UpgradeProtection? {lock.lock();defer{lock.unlock()};return protection}
+    func protect(_ value:UpgradeProtection) {lock.lock();if protection == nil {protection=value};lock.unlock()}
+    func denyWrites(_ reason:String) {lock.lock();writeFailure=reason;lock.unlock()}
     func get()throws->RenderSnapshot { lock.lock();defer{lock.unlock()};guard let snapshot else {throw GalleryError.invalid("The document is not ready.")};return snapshot }
     func set(_ value:RenderSnapshot) { lock.lock();snapshot=value;lock.unlock() }
 }
@@ -36,11 +47,58 @@ private final class DocumentStorage:@unchecked Sendable {
         fileType=Self.typeName
     }
     convenience init(project:GalleryProject,workspace:Workspace)throws { self.init();storage.set(try RenderSnapshot(project:project,workspace:workspace)) }
+    convenience init(loaded:NativePackageRead,originalURL:URL?,contentsURL:URL,recoveryCopy:Bool=false)throws {
+        self.init()
+        var project=loaded.project
+        if loaded.needsUpgradeCopy || recoveryCopy {
+            // Render/scene seeds use item IDs, not this document-routing identity.
+            project.id=UUID().uuidString
+            let protection=try loaded.draftProtection ?? UpgradeProtection(originalURL:originalURL ?? contentsURL)
+            storage.protect(protection);displayName=protection.suggestedName
+            updateChangeCount(.changeDone)
+        } else {
+            if let protection=loaded.draftProtection {storage.protect(protection)}
+            fileURL=originalURL
+            fileModificationDate=try? originalURL?.resourceValues(forKeys:[.contentModificationDateKey]).contentModificationDate
+            if originalURL != contentsURL {autosavedContentsFileURL=contentsURL}
+            if originalURL == nil,let protection=loaded.draftProtection {displayName=protection.suggestedName;updateChangeCount(.changeDone)}
+        }
+        storage.set(try RenderSnapshot(project:project,workspace:loaded.workspace))
+        if storage.origin() != nil {invalidateRestorableState()}
+    }
+    var upgradeProtection:UpgradeProtection? {storage.origin()}
+    override func prepareSavePanel(_ panel:NSSavePanel)->Bool {
+        if fileURL == nil,let origin=storage.origin() {panel.nameFieldStringValue=origin.suggestedName+".galileo"}
+        return super.prepareSavePanel(panel)
+    }
+    override func encodeRestorableState(with coder:NSCoder) {
+        super.encodeRestorableState(with:coder)
+        if let origin=storage.origin(),let data=try? origin.encoded() {coder.encode(data as NSData,forKey:"galileo.upgrade-protection")}
+    }
+    override func restoreState(with coder:NSCoder) {
+        super.restoreState(with:coder)
+        if coder.containsValue(forKey:"galileo.upgrade-protection") {
+            do {
+                guard let data=coder.decodeObject(of:NSData.self,forKey:"galileo.upgrade-protection") as Data? else {throw CocoaError(.coderReadCorrupt)}
+                storage.protect(try UpgradeProtection.decode(data))
+            } catch {storage.denyWrites("The upgraded draft's original-file protection could not be restored. Reopen the original to create a fresh upgraded copy.")}
+        }
+    }
+    override func move(to url:URL,completionHandler:((Error?)->Void)?=nil) {
+        do {try storage.origin()?.validateDestination(url);super.move(to:url,completionHandler:completionHandler)}
+        catch {completionHandler?(error)}
+    }
     nonisolated override class var autosavesInPlace:Bool { true }
     nonisolated override class func canConcurrentlyReadDocuments(ofType typeName:String)->Bool { false }
     nonisolated override func canAsynchronouslyWrite(to url:URL,ofType typeName:String,for saveOperation:NSDocument.SaveOperationType)->Bool { true }
     nonisolated override func read(from url:URL,ofType typeName:String)throws {
-        let (project,workspace)=try NativeDocumentIO.readPackage(url)
+        let loaded=try NativeDocumentIO.readPackageWithProvenance(url)
+        guard !loaded.needsUpgradeCopy else {
+            storage.protect(try UpgradeProtection(originalURL:url))
+            throw GalleryError.invalid("This file now uses an older format. Reopen it as an upgraded copy; the original is protected.")
+        }
+        let project=loaded.project,workspace=loaded.workspace
+        if let protection=loaded.draftProtection {storage.protect(protection)}
         storage.set(try RenderSnapshot(project:project,workspace:workspace))
         let adopt: @MainActor () throws -> Void = { [self] in
             try editor?.load(project:project,workspace:workspace)
@@ -51,9 +109,21 @@ private final class DocumentStorage:@unchecked Sendable {
         else { try DispatchQueue.main.sync { try MainActor.assumeIsolated(adopt) } }
     }
     nonisolated override func write(to url:URL,ofType typeName:String)throws {
-        let snapshot=try storage.get()
-        if !Thread.isMainThread { unblockUserInteraction() }
-        try NativeDocumentIO.writePackage(project:snapshot.plan.project,workspace:snapshot.workspace,to:url)
+        try writeContents(to:url,draft:false)
+    }
+    nonisolated override func writeSafely(to url:URL,ofType typeName:String,for saveOperation:NSDocument.SaveOperationType)throws {
+        let (_,origin)=try storage.state();try origin?.validateDestination(url)
+        try super.writeSafely(to:url,ofType:typeName,for:saveOperation)
+    }
+    nonisolated override func write(to url:URL,ofType typeName:String,for saveOperation:NSDocument.SaveOperationType,originalContentsURL:URL?)throws {
+        try writeContents(to:url,draft:saveOperation == .autosaveElsewhereOperation)
+    }
+    nonisolated private func writeContents(to url:URL,draft:Bool)throws {
+        let (snapshot,origin)=try storage.state()
+        try origin?.validateDestination(url)
+        if !Thread.isMainThread {unblockUserInteraction()}
+        try NativeDocumentIO.writePackage(project:snapshot.plan.project,workspace:snapshot.workspace,to:url,
+                                          protecting:origin,draftProtection:draft ? origin:nil)
     }
     nonisolated override func fileWrapper(ofType typeName:String)throws->FileWrapper {
         let snapshot=try storage.get();return try NativeDocumentIO.wrapper(project:snapshot.plan.project,workspace:snapshot.workspace)
@@ -72,6 +142,7 @@ private final class DocumentStorage:@unchecked Sendable {
             let snapshot=try storage.get(),session=try EditorSession(project:snapshot.plan.project,workspace:snapshot.workspace)
             let playback=PlaybackModel(schedule:snapshot.plan.schedule);playback.update(snapshot.plan)
             self.editor=session;self.playback=playback
+            if storage.origin() != nil, fileURL == nil {session.issue="Upgraded copy. Your original is unchanged."}
             session.undoManager=undoManager;undoManager?.groupsByEvent=false
             session.documentName=fileURL?.deletingPathExtension().lastPathComponent ?? snapshot.plan.project.name
             session.didEdit={ [weak self,weak session] in
@@ -208,12 +279,24 @@ private final class DocumentStorage:@unchecked Sendable {
     override var defaultType:String? {GalleryDocument.typeName}
     override func documentClass(forType typeName:String)->AnyClass? {GalleryDocument.self}
     override func makeUntitledDocument(ofType typeName:String)throws->NSDocument {GalleryDocument()}
-    override func makeDocument(withContentsOf url:URL,ofType typeName:String)throws->NSDocument {try GalleryDocument(contentsOf:url,ofType:GalleryDocument.typeName)}
-    override func makeDocument(for url:URL?,withContentsOf contentsURL:URL,ofType typeName:String)throws->NSDocument {try GalleryDocument(for:url,withContentsOf:contentsURL,ofType:GalleryDocument.typeName)}
+    override func makeDocument(withContentsOf url:URL,ofType typeName:String)throws->NSDocument {
+        try GalleryDocument(loaded:NativeDocumentIO.readPackageWithProvenance(url),originalURL:url,contentsURL:url)
+    }
+    override func makeDocument(for url:URL?,withContentsOf contentsURL:URL,ofType typeName:String)throws->NSDocument {
+        try GalleryDocument(loaded:NativeDocumentIO.readPackageWithProvenance(contentsURL),originalURL:url,contentsURL:contentsURL)
+    }
     override func openDocument(withContentsOf url:URL,display:Bool,completionHandler:@escaping (NSDocument?,Bool,Error?)->Void) {
         let isDirectory=(try? url.resourceValues(forKeys:[.isDirectoryKey]).isDirectory)==true
         if isDirectory {
+            if let existing=documents.compactMap({$0 as? GalleryDocument}).first(where:{$0.upgradeProtection?.protects(url)==true}) {
+                if display {existing.showWindows()};completionHandler(existing,true,nil);return
+            }
             super.openDocument(withContentsOf:url,display:display) { document,alreadyOpen,error in
+                if error == nil,let copy=document as? GalleryDocument,let origin=copy.upgradeProtection,origin.protects(url) {
+                    copy.fileURL=nil;copy.displayName=origin.suggestedName
+                    if !copy.isDocumentEdited {copy.updateChangeCount(.changeDone)}
+                    copy.editor?.issue="Upgraded copy. Your original is unchanged."
+                }
                 guard let error,self.isRecoverable(error as NSError) else {completionHandler(document,alreadyOpen,error);return}
                 let alert=NSAlert();alert.messageText="Some media is missing or damaged."
                 alert.informativeText="Open a recovery copy to locate or replace it. The original document will not be changed."
@@ -221,8 +304,8 @@ private final class DocumentStorage:@unchecked Sendable {
                 guard alert.runModal() == .alertFirstButtonReturn else {completionHandler(nil,false,CocoaError(.userCancelled));return}
                 Task { @MainActor in
                     do {
-                        let recovered=try await Task.detached {try NativeDocumentIO.readPackage(url,allowRecovery:true)}.value
-                        let copy=try GalleryDocument(project:recovered.0,workspace:recovered.1)
+                        let recovered=try await Task.detached {try NativeDocumentIO.readPackageWithProvenance(url,allowRecovery:true)}.value
+                        let copy=try GalleryDocument(loaded:recovered,originalURL:url,contentsURL:url,recoveryCopy:true)
                         self.addDocument(copy);copy.updateChangeCount(.changeDone)
                         if display {copy.makeWindowControllers();copy.showWindows();copy.editor?.issue="Recovery copy. Locate, replace or exclude missing media before exporting."}
                         completionHandler(copy,false,nil)

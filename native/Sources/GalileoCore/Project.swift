@@ -151,7 +151,8 @@ public struct ExportSettings: Codable, Equatable, Sendable {
 }
 public struct GalleryProject: Codable, Equatable, Sendable {
     public var format = "dog.pitch.galileo.native"
-    public var schemaVersion = 7
+    public static let currentSchemaVersion = 7
+    public var schemaVersion = GalleryProject.currentSchemaVersion
     public var id = UUID().uuidString
     public var name = "Untitled"
     public var canvas = Canvas()
@@ -246,11 +247,15 @@ public struct GalleryProject: Codable, Equatable, Sendable {
         return data
     }
     public static func decode(_ data: Data) throws -> GalleryProject {
+        try decodeWithProvenance(data).project
+    }
+    public static func decodeWithProvenance(_ data: Data) throws -> (project: GalleryProject, loadedSchema: Int) {
         guard data.count <= maximumManifestBytes else { throw GalleryError.invalid("The document manifest is too large.") }
         var project = try JSONDecoder().decode(Self.self, from: data)
+        let loadedSchema=project.schemaVersion
         // v3 had no per-media spotlight. Missing optional values decode as nil.
         if [3, 4, 5, 6].contains(project.schemaVersion) { project.schemaVersion = 7 }
-        try project.validate(); return project
+        try project.validate(); return (project,loadedSchema)
     }
 }
 public struct ScenePreset: Codable, Equatable, Sendable {
