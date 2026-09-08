@@ -91,6 +91,7 @@ struct SourceTrimControl:View {
     @ObservedObject var session:EditorSession
     let ids:Set<String>,label:String,range:ClosedRange<Double>,outPoint:Bool
     @State private var text=""
+    @State private var initialText=""
     @State private var value:Double?
     @State private var originals:[MediaItem]=[]
     @State private var ticket:SourceEditTicket?
@@ -120,7 +121,7 @@ struct SourceTrimControl:View {
                 Text("s").studioType(.caption).frame(width:16)
             }
             if !mixed {
-                StudioSlider(label,value:Binding(get:{value ?? live},set:{new in begin();value=new;text=String(format:"%.3f",new)}),in:range,step:0.01,onEditingChanged:{editing in if editing {begin()} else {finish()}}).frame(height:22)
+                StudioSlider(label,value:Binding(get:{value ?? live},set:{new in begin();value=new;text=String(new)}),in:range,step:0.01,onEditingChanged:{editing in if editing {begin()} else {finish()}}).frame(height:22)
             }
             if let error {Text(error).studioType(.caption).foregroundStyle(.red)}
         }.onAppear(perform:sync)
@@ -128,11 +129,11 @@ struct SourceTrimControl:View {
             .onChange(of:ids) {finish();operation=UUID();focused=false;sync()}
             .onDisappear {if ticket != nil {finish()}}
     }
-    private func sync() {value=nil;text=mixed ? "":String(format:"%.3f",live)}
+    private func sync() {value=nil;text=mixed ? "":String(live)}
     private func begin() {
         guard ticket==nil else {return}
         operation=UUID();pending=false;error=nil;originals=items;capturedRange=range
-        ticket=session.beginSourceEdit(Set(originals.map(\.id)))
+        ticket=session.beginSourceEdit(Set(originals.map(\.id)));initialText=text
         value=live
     }
     private func cancel() {
@@ -141,6 +142,7 @@ struct SourceTrimControl:View {
     }
     private func finish() {
         guard let ticket else {return}
+        if text==initialText {session.cancelSourceEdit(ticket);self.ticket=nil;sync();return}
         guard let number=Double(text),number.isFinite,let capturedRange,capturedRange.contains(number) else {error="Enter a time within the available source range.";return}
         var drafts=originals
         for index in drafts.indices {if outPoint {drafts[index].trimEnd=number} else {drafts[index].trimStart=number}}

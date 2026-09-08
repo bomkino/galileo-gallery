@@ -85,7 +85,8 @@ final class VideoFrameCursor {
         guard pts.seconds <= target+0.002 else {throw GalleryError.invalid("The video contains a gap at the requested time.")}
         let duration=CMSampleBufferGetDuration(sample)
         var interval:SourceInterval?
-        if duration.isNumeric,CMTimeCompare(duration,.zero)>0 {interval=try? SourceInterval(start:SourceTime(pts),end:SourceTime(CMTimeAdd(pts,duration)))}
+        if exact {interval=try VideoPresentationTiming.interval(track:track,pts:pts,duration:duration)}
+        else if duration.isNumeric,CMTimeCompare(duration,.zero)>0 {interval=try? SourceInterval(start:SourceTime(pts),end:SourceTime(CMTimeAdd(pts,duration)))}
         if exact,interval?.contains(seconds:target) != true {throw GalleryError.invalid("No source picture covers this audition time.")}
         if let cached {return cached}
         let bitmap=try prepareSourceBitmap(buffer:buffer,transform:transform,maximumDimension:maximumDimension,context:context)

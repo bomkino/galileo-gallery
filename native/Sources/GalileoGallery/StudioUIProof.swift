@@ -74,6 +74,11 @@ import GalileoNative
             try await wait("Driver must finish the visible inspector check and actual frame step") {
                 playback.frame != beforeInspectorCheck
             }
+            guard session.issue==nil else {throw GalleryError.invalid("Valid numeric entry published a spurious validation error: \(session.issue!)")}
+            try step("undo-width",directory:directory)
+            try await wait("One Undo must reverse one completed canvas width edit") {session.project==original}
+            try step("redo-width",directory:directory)
+            try await wait("Redo must restore the completed canvas width") {session.project.canvas.width==2048}
             outcomes.append("styled-field-and-inspector-tabs")
 
             let beforeAppearance = session.project

@@ -28,7 +28,7 @@ struct StudioView:View {
                         Divider()
                         ScrollView { if inspector=="Scene" { SceneInspector(session:session) } else { MediaInspector(session:session,replace:replaceMedia,preview:{ id in
                             if let cue=session.snapshot.plan.spotlights.first(where:{$0.itemID==id}) {playback.preview(cue,cycle:playback.frame/session.snapshot.plan.schedule.cycleFrames)}
-                        }).id(session.selection.sorted().joined(separator:"|")) } }
+                        }).id(session.selection.sorted().joined(separator:"|")) } }.accessibilityIdentifier("galileo.inspector-scroll")
                     }.frame(minWidth:250,idealWidth:270,maxWidth:380).studioSurface(.panel)
                 }
             }
@@ -247,7 +247,6 @@ struct NumberControl:View {
 }
 struct SceneInspector:View {
     @ObservedObject var session:EditorSession
-    @FocusState private var dimensionFocus:String?
     private var variant:SceneVariant { session.snapshot.plan.variant }
     private func scene(_ key:WritableKeyPath<SceneSettings,Double>,factor:Double=1)->Binding<Double> {
         Binding(get:{session.project.scene[keyPath:key]*factor},set:{ value in session.commit("Adjust scene"){$0.scene[keyPath:key]=value/factor} })
@@ -314,6 +313,36 @@ struct SceneInspector:View {
         }
     }
     private func dimension(_ label:String,_ key:WritableKeyPath<GalileoCore.Canvas,Int>)->some View {
-        HStack { Text(label).foregroundStyle(.secondary);TextField(label,value:Binding(get:{session.project.canvas[keyPath:key]},set:{value in session.commit("Resize canvas"){$0.canvas[keyPath:key]=value} }),format:.number.grouping(.never)).textFieldStyle(StudioTextFieldStyle(focused:dimensionFocus==label)).focused($dimensionFocus,equals:label).accessibilityLabel(label=="W" ? "Canvas width":"Canvas height") }
+        CanvasDimensionField(session:session,label:label,key:key)
+    }
+}
+
+/// Keep incomplete typing out of the document and its undo journal.
+private struct CanvasDimensionField:View {
+    @ObservedObject var session:EditorSession
+    let label:String,key:WritableKeyPath<GalileoCore.Canvas,Int>
+    @State private var text=""
+    @State private var revision=0
+    @State private var error:String?
+    @FocusState private var focused:Bool
+    var body:some View {
+        VStack(alignment:.leading,spacing:4) {
+            HStack {
+                Text(label).foregroundStyle(.secondary)
+                TextField(label,text:$text).textFieldStyle(StudioTextFieldStyle(focused:focused,invalid:error != nil)).focused($focused)
+                    .accessibilityLabel(label=="W" ? "Canvas width":"Canvas height")
+                    .onSubmit(commit).onExitCommand {sync();focused=false}
+                    .onChange(of:focused) {_,focus in if focus {sync()} else {commit()} }
+            }
+            if let error {Text(error).studioType(.caption).foregroundStyle(.red).lineLimit(2)}
+        }.onAppear(perform:sync).onChange(of:session.revision) {if !focused {sync()}}
+            .onDisappear {if focused {commit()}}
+    }
+    private func sync() {text=String(session.project.canvas[keyPath:key]);revision=session.revision;error=nil}
+    private func commit() {
+        guard let value=Int(text),revision==session.revision else {error="Enter a whole pixel value for the current canvas.";return}
+        var candidate=session.project;candidate.canvas[keyPath:key]=value
+        do {try candidate.validate()} catch {self.error=error.localizedDescription;return}
+        session.commit("Resize canvas") {$0.canvas[keyPath:key]=value};sync()
     }
 }

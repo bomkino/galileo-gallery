@@ -94,25 +94,18 @@ public final class StillSourceResolver: @unchecked Sendable {
         if item.kind == .video {
             let asset=AVURLAsset(url:url)
             guard let track=asset.tracks(withMediaType:.video).first else {throw GalleryError.invalid("The source has no video track.")}
-            let reader=try AVAssetReader(asset:asset),output=AVAssetReaderTrackOutput(track:track,outputSettings:nil)
-            output.alwaysCopiesSampleData=false
-            guard reader.canAdd(output) else {throw GalleryError.invalid("Source timing could not be read.")}
-            reader.add(output)
-            guard reader.startReading() else {throw reader.error ?? GalleryError.invalid("Source timing reader could not start.")}
-            defer{reader.cancelReading()}
-            var inspected=0
-            while let sample=output.copyNextSampleBuffer() {
-                inspected+=1;try check(deadline:deadline,count:inspected)
-                let pts=CMSampleBufferGetPresentationTimeStamp(sample),duration=CMSampleBufferGetDuration(sample)
-                guard pts.isNumeric,duration.isNumeric,CMTimeCompare(duration,.zero)>0 else {
-                    throw GalleryError.invalid("This source does not declare an exact displayed-picture interval.")
-                }
-                let end=CMTimeAdd(pts,duration)
-                guard !end.flags.contains(.hasBeenRounded) else {throw GalleryError.invalid("Source-picture timing exceeds the supported precision.")}
-                try inspect(SourceInterval(start:SourceTime(pts),end:SourceTime(end)))
+            // Native sample-table navigation stays in presentation order and reads
+            // declared durations without decoding an entire movie's pictures.
+            guard let cursor=track.makeSampleCursorAtFirstSampleInDecodeOrder() else {
+                throw GalleryError.invalid("This source cannot provide exact sample timing.")
             }
+            _=cursor.stepInPresentationOrder(byCount: -Int64.max)
+            var inspected=0
+            repeat {
+                inspected+=1;try check(deadline:deadline,count:inspected)
+                try inspect(VideoPresentationTiming.interval(track:track,pts:cursor.presentationTimeStamp,duration:cursor.currentSampleDuration))
+            } while cursor.stepInPresentationOrder(byCount:1)==1
             count(sample:inspected)
-            if reader.status == .failed {throw reader.error ?? GalleryError.invalid("Source timing inspection failed.")}
             let interval=try finish()
             result=ResolvedStillFrame(interval:interval,sampleIdentity:"\(item.sha256):track\(track.trackID):\(interval.start.value)/\(interval.start.timescale)",trackID:track.trackID,imageIndex:nil)
         } else {

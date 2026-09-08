@@ -255,7 +255,8 @@ import GalileoCore
                             var replacement=result.0
                             replacement.stillFrameSelection=stagedReplacement?.stillFrameSelection
                             candidate.items[index]=replacement
-                            replacementNotice=[result.1,stagedNotice].compactMap{$0}.joined(separator:"\n")
+                            let messages=[result.1,stagedNotice].compactMap{$0}.filter{!$0.isEmpty}
+                            replacementNotice=messages.isEmpty ? nil:messages.joined(separator:"\n")
                         } else {candidate.items+=completed}
                         _ = try owned.validateBudget(project:candidate,limit:limit)
                         if let sourceTicket {self.sourceCancellations[sourceTicket.operation]=nil}

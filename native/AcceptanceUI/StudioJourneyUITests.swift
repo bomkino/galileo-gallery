@@ -6,6 +6,14 @@ final class StudioJourneyUITests: XCTestCase {
         guard let data = try? Data(contentsOf: url) else { return nil }
         return (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
     }
+    @MainActor private func reveal(_ element:XCUIElement,window:XCUIElement) {
+        let inspector=window.scrollViews["galileo.inspector-scroll"]
+        for _ in 0..<8 {
+            if element.exists,element.isHittable {return}
+            let above=element.exists && element.frame.maxY<inspector.frame.minY
+            inspector.scroll(byDeltaX:0,deltaY:above ? 260:-260)
+        }
+    }
     @MainActor func testActualStudioControlsAndDrag() throws {
         continueAfterFailure = false
         let bundle = Bundle(for: Self.self)
@@ -17,7 +25,7 @@ final class StudioJourneyUITests: XCTestCase {
         app.launch()
         defer { if app.state != .notRunning { app.terminate() } }
         do {
-            for name in ["drag", "undo", "redo", "undo-menu", "search", "clear-search", "canvas-menu", "undo-canvas", "numeric-field", "media-tab", "capture-light", "capture-dark", "source-still", "source-undo", "source-redo", "source-first", "source-moving", "source-still-again", "source-middle", "source-custom"] {
+            for name in ["drag", "undo", "redo", "undo-menu", "search", "clear-search", "canvas-menu", "undo-canvas", "numeric-field", "media-tab", "undo-width", "redo-width", "capture-light", "capture-dark", "source-still", "source-undo", "source-redo", "source-first", "source-moving", "source-still-again", "source-middle", "source-custom"] {
                 let ready = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
                     self.json(root.appendingPathComponent("STEP.json"))?["step"] as? String == name ||
                     self.json(root.appendingPathComponent("RESULT.json")) != nil || app.state == .notRunning
@@ -40,8 +48,8 @@ final class StudioJourneyUITests: XCTestCase {
                     XCTAssertTrue(row.isHittable); XCTAssertTrue(target.isHittable)
                     row.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).press(forDuration: 1,
                         thenDragTo: target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0)).withOffset(CGVector(dx: 0, dy: -5)))
-                case "undo", "undo-canvas": app.typeKey("z", modifierFlags: .command)
-                case "redo": app.typeKey("z", modifierFlags: [.command, .shift])
+                case "undo", "undo-canvas", "undo-width": app.typeKey("z", modifierFlags: .command)
+                case "redo", "redo-width": app.typeKey("z", modifierFlags: [.command, .shift])
                 case "undo-menu":
                     app.menuBars.menuBarItems["Edit"].click()
                     let undo = app.menuItems["galileo.edit.undo"]
@@ -72,15 +80,15 @@ final class StudioJourneyUITests: XCTestCase {
                 case "source-still", "source-still-again", "source-moving":
                     let display=window.descendants(matching:.any).matching(identifier:"galileo.source-display").firstMatch
                     let button=display.buttons[name=="source-moving" ? "Video":"Still"]
-                    XCTAssertTrue(button.waitForExistence(timeout:8));XCTAssertTrue(button.isHittable);button.click()
+                    reveal(button,window:window);XCTAssertTrue(button.waitForExistence(timeout:8));XCTAssertTrue(button.isHittable);button.click()
                 case "source-undo":app.typeKey("z",modifierFlags:.command)
                 case "source-redo":app.typeKey("z",modifierFlags:[.command,.shift])
                 case "source-first", "source-middle":
                     let choices=window.descendants(matching:.any).matching(identifier:"galileo.still-choices").firstMatch
                     let button=choices.buttons[name=="source-first" ? "First frame":"Middle frame"]
-                    XCTAssertTrue(button.isHittable);button.click()
+                    reveal(button,window:window);XCTAssertTrue(button.isHittable);button.click()
                 case "source-custom":
-                    let choose=window.buttons["Choose another frame…"];XCTAssertTrue(choose.isHittable);choose.click()
+                    let choose=window.buttons["Choose another frame…"];reveal(choose,window:window);XCTAssertTrue(choose.isHittable);choose.click()
                     let sheet=window.sheets.firstMatch;XCTAssertTrue(sheet.waitForExistence(timeout:8))
                     let use=sheet.buttons["Use this frame"]
                     let ready=XCTNSPredicateExpectation(predicate:NSPredicate {_,_ in use.exists && use.isEnabled},object:nil)
