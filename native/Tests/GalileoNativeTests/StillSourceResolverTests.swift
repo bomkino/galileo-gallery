@@ -32,6 +32,10 @@ final class StillSourceResolverTests:XCTestCase {
         let partial=try SourceRange(start:0.01,end:0.02)
         XCTAssertEqual(try resolver.resolve(item:item,selection:.first,range:partial,workspace:workspace).interval.start,first.interval.start)
         XCTAssertEqual(try resolver.resolve(item:item,selection:.custom(SourceTime(value:15,timescale:1000)),range:partial,workspace:workspace).interval.start,first.interval.start)
+        let custom=try StillFrameSelection.custom(SourceTime(value:15,timescale:1000))
+        let customScans=resolver.counters["metadataScans"]
+        for _ in 0..<8 {_=try resolver.resolve(item:item,selection:custom,range:partial,workspace:workspace)}
+        XCTAssertEqual(resolver.counters["metadataScans"],customScans,"Equivalent Custom payloads must have one stable cache key")
         // An independent audition cursor keeps playing after terminal extraction.
         let renderer=NativeRenderer()
         _=try renderer.sourcePreview(item:item,seconds:0.1,workspace:workspace,maximumDimension:64)

@@ -48,7 +48,8 @@ public final class StillSourceResolver: @unchecked Sendable {
         }
     }
     private func key(item:MediaItem,selection:StillFrameSelection,range:SourceRange)throws->String {
-        let data=try JSONEncoder().encode(selection)
+        let encoder=JSONEncoder();encoder.outputFormatting=[.sortedKeys]
+        let data=try encoder.encode(selection)
         return "\(item.sha256):\(item.originalSHA256 ?? ""): \(item.derivation ?? "native"):\(item.kind.rawValue):\(range.start.bitPattern):\(range.end.bitPattern):\(data.base64EncodedString())"
     }
     public func resolve(item:MediaItem,selection:StillFrameSelection,range:SourceRange,workspace:Workspace,export:Bool=false,nearestTo:SourceTime?=nil)throws->ResolvedStillFrame {
