@@ -1,4 +1,4 @@
-# Media support — 2.3
+# Media support
 
 All import and playback is local. Audio is never played or exported. Originals remain unchanged inside saved projects.
 
@@ -29,4 +29,4 @@ H.264 MP4, ProRes 422/4444 MOV, PNG stills and PNG sequences. ProRes 4444 and PN
 
 ## Codec provenance
 
-The compatibility tools are built from FFmpeg 8.1.2 (`38b88335f99e76ed89ff3c93f877fdefce736c13`) and libvpx 1.15.2 (`d168454ecd099805c675d4a98c66f4891373302a`). Configuration, licensing, source archives and checksums are attached to the release in `Galileo.Gallery-2.3.0-codec-source.zip`. The application does not dynamically link an external FFmpeg library or need Homebrew. See [third-party notices](../../THIRD_PARTY_NOTICES.md).
+The compatibility tools are built from FFmpeg 8.1.2 (`38b88335f99e76ed89ff3c93f877fdefce736c13`) and libvpx 1.15.2 (`d168454ecd099805c675d4a98c66f4891373302a`). Configuration, licensing, source archives and checksums accompany each release in its matching `codec-source.zip` asset. The application does not dynamically link an external FFmpeg library or need Homebrew. See [third-party notices](../../THIRD_PARTY_NOTICES.md).

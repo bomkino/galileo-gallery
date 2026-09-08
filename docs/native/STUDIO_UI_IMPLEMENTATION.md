@@ -1,7 +1,8 @@
 # Native Studio implementation — 8 September 2026
 
-Galileo 2.4.0 prerelease preparation is in progress. The native implementation passes
-the engineering checks below; stable acceptance and installed-app status are separate.
+Galileo 2.4.0 is designated a prerelease. The [release page](https://github.com/bomkino/galileo-gallery/releases/tag/v2.4.0)
+records published downloads and their exact source. The engineering checks below are
+implementation receipts; stable acceptance and installed-app status remain separate.
 
 ## Implemented
 

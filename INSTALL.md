@@ -5,7 +5,7 @@ Requires an **Apple-silicon Mac** (M1 or later) running **macOS 14 or later**. N
 ## Replace the older app
 
 1. Quit Galileo Gallery. In Finder, duplicate important `.galileo` projects before opening them in the new version. Keep an archived copy of the old app until you have checked a project and export.
-2. Open [Releases](https://github.com/bomkino/galileo-gallery/releases/latest). Under **Assets**, download the file ending **`macOS-arm64.dmg`**. Do not download “Source code.”
+2. Open [latest stable](https://github.com/bomkino/galileo-gallery/releases/latest), or choose the [2.4.0 prerelease](https://github.com/bomkino/galileo-gallery/releases/tag/v2.4.0) to try the native Studio update. Under **Assets**, download the file ending **`macOS-arm64.dmg`**. Do not download “Source code.”
 3. Double-click the DMG. Drag **Galileo Gallery** onto **Applications**. Choose **Replace** when Finder asks about the existing app.
 4. Eject the disk image. Open **Applications → Galileo Gallery**. Do not keep running the copy inside the DMG.
 
@@ -19,7 +19,7 @@ After attempting to open the app, use **System Settings → Privacy & Security �
 
 ## Your first project
 
-Use **Add** to import media, including still/animated WebP and SDR VP8/VP9 WebM. WebM prepares locally; bundled tools require no installation. AV1 and HDR WebM are not supported in this release. Select one clip and use **Preview clip…** to inspect, trim, loop or freeze it before directing the sequence. Select **Scene** to choose a composition. To hold a particular slide at the centre, select it in the Media list and enable **Bring to centre** in its inspector. Adjust Hold and Size. A video remains a regular frame; keep **Play source** and **Loop source** enabled to loop it during the hold.
+Use **Add** to import media, including still/animated WebP and SDR VP8/VP9 WebM. WebM prepares locally; bundled tools require no installation. AV1 and HDR WebM are not supported. In 2.4, Display chooses moving **Video** or **Animation**, or a remembered **Still**. **Preview clip…** lets you inspect and trim; **Use this frame** followed by **Apply** saves a Custom still. Select **Scene** to choose a composition. To hold a slide at the centre, select it and enable **Bring to centre**, then adjust Hold and Size. Moving Display and **Loop source** keep a video moving during that hold.
 
 Use **File → Save** to create a native `.galileo` document. Opening a ZIP-based legacy project makes a separate native copy and does not overwrite the legacy original. Save that copy with a different name. Native choreography can differ from old exports. Movies are silent by design. You can also import PDF pages, preview a selected spotlight, visually frame media, and queue range exports.
 
@@ -31,7 +31,7 @@ The release includes `SHA256SUMS.txt`. A checksum proves a download matches that
 
 ## Project compatibility
 
-Version 2.3 reads older native documents but saves schema 7. Keep a copy before saving: 2.0, 2.1 and 2.2 cannot read a new 2.3 save. A recovery copy never repairs the original in place.
+Version 2.4 saves schema 8. Older native documents open as protected upgrade copies and require a new save destination. The original remains intact; earlier releases cannot read schema 8 saves. A recovery copy never repairs the original in place.
 
 ## Roll back
 

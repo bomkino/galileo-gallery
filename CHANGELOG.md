@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.4.0 — prerelease, 8 September 2026
+
+- Native media-rail drag and undo; remembered First/Middle/Last/Custom Still choices.
+- Exact source selection, bounded shared decoding and protected schema-8 upgrade copies.
+- Shared native Studio controls, richer dark surfaces and retained pitch.dog typography.
+- Canonical UI package pinned by immutable revision. Physical-device, accessibility and broader acceptance remain open. See [release notes](docs/releases/v2.4.0.md).
+
 ## 2.3.0 — 6 September 2026
 
 - Still/animated WebP validation; local SDR VP8/VP9 WebM preparation with original retention, alpha and variable frame timing.
