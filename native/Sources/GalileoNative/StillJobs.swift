@@ -8,6 +8,7 @@ final class StillJobs<Value>: @unchecked Sendable {
         let condition=NSCondition()
         var subscribers=0
         var result:Result<Value,Error>?
+        weak var operation:Operation?
         func check()throws {
             condition.lock();defer{condition.unlock()}
             if subscribers==0 {throw CancellationError()}
@@ -35,14 +36,19 @@ final class StillJobs<Value>: @unchecked Sendable {
         job.condition.lock();job.subscribers+=1;job.condition.unlock()
         jobs[key]=job;lock.unlock()
         if existing==nil {
-            queue.addOperation {
+            let operation=BlockOperation {
                 let result=Result {try job.check();return try work {try job.check()}}
                 job.condition.lock();job.result=result;job.condition.broadcast();job.condition.unlock()
             }
+            job.condition.lock();job.operation=operation;job.condition.unlock()
+            queue.addOperation(operation)
         }
         defer {
             lock.lock();job.condition.lock();job.subscribers-=1
-            if job.subscribers==0,jobs[key]===job {jobs[key]=nil}
+            if job.subscribers==0 {
+                job.operation?.cancel()
+                if jobs[key]===job {jobs[key]=nil}
+            }
             job.condition.unlock();lock.unlock()
         }
         while true {
