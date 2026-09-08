@@ -33,6 +33,10 @@ final class StudioJourneyUITests: XCTestCase {
                     XCTAssertTrue(media.waitForExistence(timeout: 5))
                     let row = media.staticTexts[try XCTUnwrap(step["source"] as? String)].firstMatch
                     let target = media.staticTexts[try XCTUnwrap(step["target"] as? String)].firstMatch
+                    if !row.isHittable || !target.isHittable {
+                        let tree = XCTAttachment(string: app.debugDescription)
+                        tree.name = "Media row hit-testing"; tree.lifetime = .keepAlways; add(tree)
+                    }
                     XCTAssertTrue(row.isHittable); XCTAssertTrue(target.isHittable)
                     row.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).press(forDuration: 1,
                         thenDragTo: target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0)).withOffset(CGVector(dx: 0, dy: -5)))

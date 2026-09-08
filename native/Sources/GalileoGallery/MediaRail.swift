@@ -201,7 +201,18 @@ struct MediaRail: NSViewRepresentable {
 /// Labels and thumbnails belong to SwiftUI; selection and pointer tracking belong to the table.
 @MainActor private final class MediaCell: NSTableCellView {
     private var hosting: NSHostingView<AnyView>?
-    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        guard !isHidden, frame.contains(point) else { return nil }
+        return self
+    }
+    override func mouseDown(with event: NSEvent) {
+        var ancestor = superview
+        while let view = ancestor {
+            if let table = view as? NSTableView { table.mouseDown(with: event); return }
+            ancestor = view.superview
+        }
+        super.mouseDown(with: event)
+    }
     func show(_ item: MediaItem, workspace: Workspace, theme: StudioTheme) {
         let content = AnyView(MediaRow(item: item, workspace: workspace).environment(\.studioTheme, theme).padding(.horizontal, 8))
         if let hosting { hosting.rootView = content }
