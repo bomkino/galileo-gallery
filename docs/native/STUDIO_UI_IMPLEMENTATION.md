@@ -39,3 +39,24 @@ repository publication, version pinning and both independent release gates remai
 
 The reviewed v2 implementation plan remains the governing scope. Continue independent safe
 work; do not bypass missing visual/hardware acceptance or replace the established panels.
+
+## 8 September continuation: native drag lifecycle
+
+The failed baseline run `34148662827` at `ac70858e11743ac40bbd7911e4010af2aa8e2527`
+reached the real pointer assertion but did not reorder. Its recording and raw artifact
+ZIP were preserved locally and the ZIP digest checked against GitHub. Source inspection
+confirmed that the SwiftUI List callback bypassed the existing drag-start tickets.
+
+The media rail now uses an app-owned NSTableView adapter with the existing SwiftUI
+MediaRow presentation. Native pasteboard writers carry opaque session tickets; drop
+validation checks the originating table and current ticket before the existing atomic
+transaction. Native selection, insertion feedback, drag cancellation, context commands
+and append-only Finder imports remain local to Galileo. No shared package owns ordering.
+The external journey retains the mouse assertion and now also requires a drag-start
+ticket to be consumed. Bounded diagnostic event names are recorded only during that proof.
+
+This is implemented and awaiting actual input acceptance. Local macOS 27 beta / Swift
+6.4 Command Line Tools cannot run XCTest and its default SDK lacks a SwiftUI macro
+plugin. The installed macOS 15.4 SDK with SwiftPM's native backend builds the app.
+Local diagnostic pointer attempts have not passed; native hosted CI must establish
+drop, undo and the remaining journey. This is not a release candidate or a gesture PASS.

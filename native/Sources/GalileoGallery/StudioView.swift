@@ -62,21 +62,22 @@ struct StudioView:View {
         .sheet(item:Binding(get:{session.previewMediaID.map{FramingSelection(id:$0)}},set:{session.previewMediaID=$0?.id})) { item in SourceClipPreview(session:session,itemID:item.id) }
         .sheet(isPresented:$session.choosingExport) { ExportOptions(session:session,frame:playback.frame) }
         .onChange(of:session.revision) { playback.update(session.snapshot.plan) }
-        .onDrop(of:[UTType.fileURL],isTargeted:nil) { providers in
-            guard !session.importing else { return false }
-            let generation=session.importGeneration
-            Task { @MainActor in
-                do {
-                    let urls=try await MediaDropLoader.urls(providers)
-                    guard generation==session.importGeneration,!session.importing else{return}
-                    if let prepareImport {prepareImport(urls)} else {session.importURLs(urls,expectedGeneration:generation)}
-                } catch {
-                    if generation==session.importGeneration {session.issue=error.localizedDescription}
-                }
-            }
-            return true
-        }
+        .onDrop(of:[UTType.fileURL],isTargeted:nil,perform:acceptMediaDrop)
         .modifier(GalleryChrome())
+    }
+    private func acceptMediaDrop(_ providers:[NSItemProvider])->Bool {
+        guard !session.importing else { return false }
+        let generation=session.importGeneration
+        Task { @MainActor in
+            do {
+                let urls=try await MediaDropLoader.urls(providers)
+                guard generation==session.importGeneration,!session.importing else{return}
+                if let prepareImport {prepareImport(urls)} else {session.importURLs(urls,expectedGeneration:generation)}
+            } catch {
+                if generation==session.importGeneration {session.issue=error.localizedDescription}
+            }
+        }
+        return true
     }
     private var library:some View {
         VStack(spacing:0) {
@@ -92,40 +93,7 @@ struct StudioView:View {
                     Button("Add media",action:addMedia)
                 }.frame(maxWidth:.infinity,maxHeight:.infinity)
             } else {
-                List(selection:$session.selection) {
-                    ForEach(session.project.items.filter{session.mediaQuery.isEmpty || $0.name.localizedCaseInsensitiveContains(session.mediaQuery)}) { item in
-                        MediaRow(item:item,workspace:session.workspace).tag(item.id)
-                            .contentShape(Rectangle())
-                            .moveDisabled(!session.canMoveMedia)
-                            .contextMenu {
-                                let moveTargets = session.selection.contains(item.id) ? session.selection : [item.id]
-                                Button("Move Earlier") { session.moveItems(moveTargets,by:-1) }.disabled(!session.canMoveMedia)
-                                Button("Move Later") { session.moveItems(moveTargets,by:1) }.disabled(!session.canMoveMedia)
-                                Divider()
-                                Button("Use as opening") { session.markOpening(item.id) }
-                                Button("Use as closing") { session.markClosing(item.id) }
-                                Button(item.spotlight?.enabled == true ? "Remove spotlight" : "Spotlight in centre") {
-                                    session.commit("Change spotlight") { p in
-                                        if let i = p.items.firstIndex(where: { $0.id == item.id }) {
-                                            var setting = p.items[i].spotlight ?? Spotlight()
-                                            setting.enabled = !(p.items[i].spotlight?.enabled ?? false)
-                                            p.items[i].spotlight = setting
-                                        }
-                                    }
-                                }
-                                if let cue=session.snapshot.plan.spotlights.first(where:{$0.itemID==item.id}) {
-                                    Button("Preview spotlight") {playback.preview(cue,cycle:playback.frame/session.snapshot.plan.schedule.cycleFrames)}
-                                }
-                                Button("Edit framing…") {session.framingMediaID=item.id}
-                                if item.kind != .image {Button("Preview clip…") {session.previewMediaID=item.id}}
-                                Button(item.included ? "Exclude":"Include") { session.commit("Change inclusion") { p in if let i=p.items.firstIndex(where:{$0.id==item.id}) { p.items[i].included.toggle() } } }
-                                Button("Replace…") { session.selection=[item.id];replaceMedia() }
-                                Divider()
-                                Button("Duplicate") { session.selection=[item.id];session.duplicateSelection() }
-                                Button("Remove") { session.selection=[item.id];session.removeSelection() }
-                            }
-                    }.onMove { offsets,destination in if session.mediaQuery.isEmpty {session.move(from:offsets,to:destination)} }
-                }.listStyle(.sidebar).scrollContentBackground(.hidden).onDeleteCommand(perform:session.removeSelection).accessibilityIdentifier("galileo.media-list")
+                MediaRail(session:session,playback:playback,replaceMedia:replaceMedia,importProviders:acceptMediaDrop)
             }
             Divider()
             if session.importing {
@@ -167,7 +135,7 @@ struct StudioView:View {
         }.studioSurface(.surround)
     }
 }
-private struct MediaRow:View {
+struct MediaRow:View {
     let item:MediaItem;let workspace:Workspace
     @Environment(\.studioTheme) private var theme
     @State private var image:NSImage?

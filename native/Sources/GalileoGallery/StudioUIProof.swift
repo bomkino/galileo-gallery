@@ -6,6 +6,11 @@ import GalileoNative
 /// A synthetic, externally driven acceptance journey. It never drives its own buttons
 /// or substitutes session.move for the mouse gesture under test.
 @MainActor enum StudioUIProof {
+    private static var dragEvents: [String] = []
+    private static var recordingDrag = false
+    static func recordDrag(_ event: String) {
+        if recordingDrag && dragEvents.count < 100 { dragEvents.append(event) }
+    }
     static func run(directory: URL, documents: GalleryDocumentController) async throws {
         let fm = FileManager.default
         try fm.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -14,6 +19,8 @@ import GalileoNative
         }
         let source = (try? JSONSerialization.jsonObject(with: Data(contentsOf: Bundle.main.resourceURL!.appendingPathComponent("build.json"))) as? [String: Any])?["sourceSha"] as? String ?? "unknown"
         var outcomes: [String] = []
+        dragEvents = []; recordingDrag = true
+        defer { recordingDrag = false }
         do {
             let (project, workspace) = try VerificationFixtures.workspace()
             let document = try GalleryDocument(project: project, workspace: workspace)
@@ -31,6 +38,9 @@ import GalileoNative
             try step("drag", directory: directory, values: ["source": original.items[2].name, "target": original.items[0].name])
             try await wait("Mouse drag must reorder the real media list") { session.project.items.map(\.id) == moved }
             guard session.selection == [order[2]] else { throw GalleryError.invalid("Dragging lost the selected slide identity.") }
+            guard dragEvents.contains("begin-ticket"), dragEvents.contains("commit-ticket") else {
+                throw GalleryError.invalid("The real drag must consume its drag-start ticket.")
+            }
             outcomes.append("mouse-drag")
             try step("undo", directory: directory)
             try await wait("Keyboard Undo must restore one media move") { session.project == original }
@@ -75,11 +85,11 @@ import GalileoNative
                 guard session.project == beforeAppearance else { throw GalleryError.invalid("Interface appearance changed the artwork state.") }
                 outcomes.append("active-" + name + "-capture")
             }
-            try JSONSerialization.data(withJSONObject: ["result": "passed", "source": source, "checks": outcomes], options: [.prettyPrinted, .sortedKeys])
+            try JSONSerialization.data(withJSONObject: ["result": "passed", "source": source, "checks": outcomes, "dragEvents": dragEvents], options: [.prettyPrinted, .sortedKeys])
                 .write(to: directory.appendingPathComponent("RESULT.json"), options: .atomic)
             document.close()
         } catch {
-            try? JSONSerialization.data(withJSONObject: ["result": "failed", "source": source, "completed": outcomes, "error": error.localizedDescription], options: [.prettyPrinted, .sortedKeys])
+            try? JSONSerialization.data(withJSONObject: ["result": "failed", "source": source, "completed": outcomes, "dragEvents": dragEvents, "error": error.localizedDescription], options: [.prettyPrinted, .sortedKeys])
                 .write(to: directory.appendingPathComponent("RESULT.json"), options: .atomic)
             throw error
         }
