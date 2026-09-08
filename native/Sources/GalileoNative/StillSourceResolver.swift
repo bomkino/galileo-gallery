@@ -27,14 +27,14 @@ private final class StillResolutionBox: NSObject {
 /// One cold metadata scan and two still-image jobs across all consumers.
 public final class StillSourceResolver: @unchecked Sendable {
     public static let shared=StillSourceResolver()
-    private let metadataGate=DispatchSemaphore(value:1)
-    private let imageGate=DispatchSemaphore(value:2)
+    private let metadataJobs=StillJobs<ResolvedStillFrame>(concurrency:1)
+    private let imageJobs=StillJobs<DecodedSourceFrame>(concurrency:2)
     private let resolutions=NSCache<NSString,StillResolutionBox>()
     private var images:NSCache<NSString,ImageBox> {RenderResources.shared.decoded}
     private var pressure:DispatchSourceMemoryPressure?
     private let countLock=NSLock()
     private var scans=0,samples=0,bitmaps=0,hits=0
-    public var counters:[String:Int] {countLock.lock();defer{countLock.unlock()};return ["metadataScans":scans,"inspectedSamples":samples,"materializedFrames":bitmaps,"cacheHits":hits]}
+    public var counters:[String:Int] {countLock.lock();defer{countLock.unlock()};return ["metadataScans":scans,"inspectedSamples":samples,"materializedFrames":bitmaps,"cacheHits":hits,"pendingMetadata":metadataJobs.pending,"pendingImages":imageJobs.pending]}
     private init() {
         resolutions.countLimit=512
         let source=DispatchSource.makeMemoryPressureSource(eventMask:[.warning,.critical],queue:.global(qos:.utility))
@@ -42,12 +42,7 @@ public final class StillSourceResolver: @unchecked Sendable {
     }
     public func clear() {resolutions.removeAllObjects();images.removeAllObjects()}
     private func count(scan:Int=0,sample:Int=0,bitmap:Int=0,hit:Int=0) {countLock.lock();scans+=scan;samples+=sample;bitmaps+=bitmap;hits+=hit;countLock.unlock()}
-    private func acquire(_ gate:DispatchSemaphore,deadline:Double)throws {
-        while gate.wait(timeout:.now()+0.025) != .success {try check(deadline:deadline,count:0)}
-        do {try check(deadline:deadline,count:0)} catch {gate.signal();throw error}
-    }
     private func check(deadline:Double,count:Int)throws {
-        try Task.checkCancellation()
         guard ProcessInfo.processInfo.systemUptime < deadline,count <= StillResolutionLimits.maximumInspectedSamples else {
             throw GalleryError.invalid("Source-frame resolution reached its work limit. Retry, or shorten the source trim.")
         }
@@ -57,14 +52,16 @@ public final class StillSourceResolver: @unchecked Sendable {
         return "\(item.sha256):\(item.originalSHA256 ?? ""): \(item.derivation ?? "native"):\(item.kind.rawValue):\(range.start.bitPattern):\(range.end.bitPattern):\(data.base64EncodedString())"
     }
     public func resolve(item:MediaItem,selection:StillFrameSelection,range:SourceRange,workspace:Workspace,export:Bool=false,nearestTo:SourceTime?=nil)throws->ResolvedStillFrame {
+        try Task.checkCancellation()
         guard item.kind != .image,item.unavailable == nil else {throw GalleryError.missing("This item has no available time-based source.")}
         if nearestTo == nil {try selection.validate(in:range,duration:item.duration ?? 0)}
         let url=try workspace.url(for:item)
         guard try workspace.verifiedFingerprint(url)==item.sha256 else {throw GalleryError.invalid("The source changed before frame selection.")}
         let key=(try key(item:item,selection:selection,range:range)) + (nearestTo.map{"nearest:\($0.value)/\($0.timescale)"} ?? "") as NSString
         if let cached=resolutions.object(forKey:key) {count(hit:1);return cached.value}
-        let deadline=ProcessInfo.processInfo.systemUptime+(export ? StillResolutionLimits.exportSeconds:StillResolutionLimits.interactiveSeconds)
-        try acquire(metadataGate,deadline:deadline);defer{metadataGate.signal()}
+        return try metadataJobs.run(key:key as String,timeout:export ? StillResolutionLimits.exportSeconds:StillResolutionLimits.interactiveSeconds) { [self,workspace] checkSubscribers in
+        defer {withExtendedLifetime(workspace) {}}
+        let deadline=ProcessInfo.processInfo.systemUptime+StillResolutionLimits.exportSeconds
         if let cached=resolutions.object(forKey:key) {count(hit:1);return cached.value}
         count(scan:1)
         var selector=try StillIntervalSelector(selection:nearestTo == nil ? selection:.last,range:range)
@@ -102,7 +99,7 @@ public final class StillSourceResolver: @unchecked Sendable {
             _=cursor.stepInPresentationOrder(byCount: -Int64.max)
             var inspected=0
             repeat {
-                inspected+=1;try check(deadline:deadline,count:inspected)
+                inspected+=1;try checkSubscribers();try check(deadline:deadline,count:inspected)
                 try inspect(VideoPresentationTiming.interval(track:track,pts:cursor.presentationTimeStamp,duration:cursor.currentSampleDuration))
             } while cursor.stepInPresentationOrder(byCount:1)==1
             count(sample:inspected)
@@ -111,22 +108,25 @@ public final class StillSourceResolver: @unchecked Sendable {
         } else {
             let index=try ImageFrameIndex(url:url,animated:true)
             let intervals=try index.exactIntervals()
-            for (number,interval) in intervals.enumerated() {try check(deadline:deadline,count:number);try inspect(interval)}
+            for (number,interval) in intervals.enumerated() {try checkSubscribers();try check(deadline:deadline,count:number);try inspect(interval)}
             count(sample:intervals.count)
             let interval=try finish()
             guard let number=intervals.firstIndex(of:interval) else {throw GalleryError.invalid("The animation picture could not be identified.")}
             result=ResolvedStillFrame(interval:interval,sampleIdentity:"\(item.sha256):image\(number)",trackID:0,imageIndex:number)
         }
-        try check(deadline:deadline,count:0)
+        try checkSubscribers();try check(deadline:deadline,count:0)
         resolutions.setObject(StillResolutionBox(result),forKey:key);return result
+        }
     }
     func image(item:MediaItem,resolved:ResolvedStillFrame,workspace:Workspace,maximumDimension:Int,context:CIContext,export:Bool=false)throws->DecodedSourceFrame {
+        try Task.checkCancellation()
         let url=try workspace.url(for:item)
         guard try workspace.verifiedFingerprint(url)==item.sha256 else {throw GalleryError.invalid("The selected source changed before decoding.")}
         let key="\(resolved.sampleIdentity):m\(maximumDimension)" as NSString
         if let cached=images.object(forKey:key) {count(hit:1);return DecodedSourceFrame(image:cached.image,identity:key as String)}
-        let deadline=ProcessInfo.processInfo.systemUptime+(export ? StillResolutionLimits.exportSeconds:StillResolutionLimits.interactiveSeconds)
-        try acquire(imageGate,deadline:deadline);defer{imageGate.signal()}
+        return try imageJobs.run(key:key as String,timeout:export ? StillResolutionLimits.exportSeconds:StillResolutionLimits.interactiveSeconds) { [self,workspace] checkSubscribers in
+        defer {withExtendedLifetime(workspace) {}}
+        let deadline=ProcessInfo.processInfo.systemUptime+StillResolutionLimits.exportSeconds
         if let cached=images.object(forKey:key) {count(hit:1);return DecodedSourceFrame(image:cached.image,identity:key as String)}
         let image:CGImage
         if let number=resolved.imageIndex {
@@ -149,9 +149,10 @@ public final class StillSourceResolver: @unchecked Sendable {
                   let buffer=CMSampleBufferGetImageBuffer(sample) else {throw GalleryError.invalid("The decoder did not return the exact selected source picture.")}
             image=try prepareSourceBitmap(buffer:buffer,transform:track.preferredTransform,maximumDimension:maximumDimension,context:context)
         }
-        try check(deadline:deadline,count:0);count(bitmap:1)
+        try checkSubscribers();try check(deadline:deadline,count:0);count(bitmap:1)
         images.setObject(ImageBox(image),forKey:key,cost:image.bytesPerRow*image.height)
         return DecodedSourceFrame(image:image,identity:key as String)
+        }
     }
 }
 
