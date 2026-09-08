@@ -42,7 +42,10 @@ final class StudioJourneyUITests: XCTestCase {
                         thenDragTo: target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0)).withOffset(CGVector(dx: 0, dy: -5)))
                 case "undo", "undo-canvas": app.typeKey("z", modifierFlags: .command)
                 case "redo": app.typeKey("z", modifierFlags: [.command, .shift])
-                case "undo-menu": app.menuBars.menuBarItems["Edit"].click(); app.menuItems["Undo"].click()
+                case "undo-menu":
+                    app.menuBars.menuBarItems["Edit"].click()
+                    let undo = app.menuItems["galileo.edit.undo"]
+                    XCTAssertTrue(undo.isEnabled); undo.click()
                 case "search":
                     let field = window.textFields["Find media"]; XCTAssertTrue(field.isHittable); field.click(); field.typeText("Field")
                 case "clear-search":

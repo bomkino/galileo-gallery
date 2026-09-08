@@ -20,7 +20,9 @@ import PitchdogStudioUI
         let menu=NSMenu()
         func submenu(_ title:String)->NSMenu {let item=NSMenuItem();item.title=title;let child=NSMenu(title:title);item.submenu=child;menu.addItem(item);return child}
         func command(_ parent:NSMenu,_ title:String,_ action:Selector,_ key:String="",target:AnyObject?=nil,modifiers:NSEvent.ModifierFlags = .command) {
-            let item=NSMenuItem(title:title,action:action,keyEquivalent:key);item.target=target;item.keyEquivalentModifierMask=modifiers;parent.addItem(item)
+            let item=NSMenuItem(title:title,action:action,keyEquivalent:key);item.target=target;item.keyEquivalentModifierMask=modifiers
+            if action == NSSelectorFromString("undo:") { item.setAccessibilityIdentifier("galileo.edit.undo") }
+            parent.addItem(item)
         }
         let app=submenu("Galileo Gallery")
         command(app,"About Galileo Gallery",#selector(ApplicationDelegate.about(_:)),target:delegate)
