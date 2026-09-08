@@ -1,10 +1,10 @@
-# Native implementation and validation — 2.3
+# Native implementation and validation
 
 ## Ownership
 
-The shipping source is `native/`: Apple silicon, macOS 14+. `native/VERSION` is authoritative. GalileoCore owns versioned state, validated schedules, geometry, source time and media budgets. GalileoNative owns media, immutable render snapshots, compatibility preparation, Core Image composition and AVFoundation picture export. GalileoGallery owns NSDocument, SwiftUI controls, transport and temporary audition.
+The application source is `native/`: Apple silicon, macOS 14+. `native/VERSION` identifies the source version; the matching GitHub release identifies a published build. GalileoCore owns versioned state, validated schedules, geometry, source time and media budgets. GalileoNative owns media, immutable render snapshots, compatibility preparation, Core Image composition and AVFoundation picture export. GalileoGallery owns NSDocument, SwiftUI controls, transport and temporary audition.
 
-Schema 7 reads schemas 3–6 in memory. Legacy ZIPs become separate documents with conversion notes. Source audio is preserved only inside original files; sound controls, decoding and output are deliberately absent. Historical Electron/React code is reference, not a second runtime or product.
+The native Studio candidate writes schema 8 and opens older native schemas as protected untitled upgrade copies. Saving requires a new destination; the original package remains intact. See [Studio implementation and acceptance](STUDIO_UI_IMPLEMENTATION.md) for current proof and open gates. Legacy ZIPs become separate documents with conversion notes. Source audio is preserved only inside original files; sound controls, decoding and output are deliberately absent. Historical Electron/React code is reference, not a second runtime or product.
 
 ## Project and transaction boundaries
 
