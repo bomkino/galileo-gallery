@@ -89,7 +89,7 @@ struct NativePreview:NSViewRepresentable {
                     self.setAccessibilityValue("Frame \(request.frame), \(request.snapshot.plan.project.activeItems.count) media items")
                 }
             } catch is CancellationError {} catch {
-                if !Task.isCancelled,let self,self.ticket==ticket { self.onError?(error.localizedDescription) }
+                if !Task.isCancelled,let self,self.ticket==ticket { self.image=nil;self.cards=[];self.committedFrame = -1;self.needsDisplay=true;self.onError?(error.localizedDescription) }
             }
             guard let self else { return }
             self.task=nil

@@ -14,7 +14,7 @@ concurrency:
 jobs:
   native:
     runs-on: macos-15
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
       - name: Record exact source and machine
@@ -49,6 +49,14 @@ jobs:
         run: |
           set -o pipefail
           swift test --package-path native 2>&1 | tee native-evidence/tests.log
+      - name: Test and compile the pinned canonical studio package
+        id: studio_ui
+        if: ${{ !cancelled() }}
+        run: |
+          set -o pipefail
+          swift package --package-path native resolve
+          swift test --package-path native/.build/checkouts/pitchdog-studio-ui 2>&1 | tee native-evidence/studio-ui-tests.log
+          swift build --package-path native/.build/checkouts/pitchdog-studio-ui --product StudioUISpecimen 2>&1 | tee native-evidence/studio-ui-build.log
       # A failing image assertion must not hide an unrelated document failure.
       # The job stays failed; this workflow never publishes a release.
       - name: Build and verify native app
@@ -62,6 +70,12 @@ jobs:
         run: |
           set -o pipefail
           GALILEO_MEDIA_FIXTURES="$PWD/native/Tests/GalileoNativeTests/Fixtures" native-evidence/build/Galileo\ Gallery.app/Contents/MacOS/GalileoGallery --smoke "$PWD/native-evidence/journey" 2>&1 | tee native-evidence/journey.log
+      - name: Exercise actual drag, keyboard, menu and active-window appearance
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          command -v xcodegen >/dev/null || brew install xcodegen
+          python3 scripts/native/run-studio-ui-proof.py "native-evidence/build/Galileo Gallery.app" native-evidence/studio-ui-journey 2>&1 | tee native-evidence/studio-ui-journey.log
       - uses: actions/upload-artifact@v6
         if: always()
         with:

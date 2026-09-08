@@ -2,11 +2,14 @@ import AppKit
 import SwiftUI
 import GalileoCore
 import GalileoNative
+import PitchdogStudioUI
 
 @main struct GalileoMain {
     @MainActor static func main() {
         let application=NSApplication.shared
         application.setActivationPolicy(.regular)
+        do { try GalileoType.load() }
+        catch { application.presentError(error); return }
         let documents=GalleryDocumentController()
         let delegate=ApplicationDelegate(documents:documents)
         application.delegate=delegate
@@ -17,7 +20,9 @@ import GalileoNative
         let menu=NSMenu()
         func submenu(_ title:String)->NSMenu {let item=NSMenuItem();item.title=title;let child=NSMenu(title:title);item.submenu=child;menu.addItem(item);return child}
         func command(_ parent:NSMenu,_ title:String,_ action:Selector,_ key:String="",target:AnyObject?=nil,modifiers:NSEvent.ModifierFlags = .command) {
-            let item=NSMenuItem(title:title,action:action,keyEquivalent:key);item.target=target;item.keyEquivalentModifierMask=modifiers;parent.addItem(item)
+            let item=NSMenuItem(title:title,action:action,keyEquivalent:key);item.target=target;item.keyEquivalentModifierMask=modifiers
+            if action == NSSelectorFromString("undo:") { item.setAccessibilityIdentifier("galileo.edit.undo") }
+            parent.addItem(item)
         }
         let app=submenu("Galileo Gallery")
         command(app,"About Galileo Gallery",#selector(ApplicationDelegate.about(_:)),target:delegate)
@@ -67,7 +72,13 @@ import GalileoNative
     func applicationDidFinishLaunching(_ notification:Notification) {
         applyAppearance()
         exportObserver=NotificationCenter.default.addObserver(forName:.showExports,object:nil,queue:.main) { [weak self] _ in MainActor.assumeIsolated {self?.showExports(nil)} }
-        if let index=CommandLine.arguments.firstIndex(of:"--smoke"),CommandLine.arguments.indices.contains(index+1) {
+        if let index=CommandLine.arguments.firstIndex(of:"--studio-ui-proof"),CommandLine.arguments.indices.contains(index+1) {
+            let url=URL(fileURLWithPath:CommandLine.arguments[index+1],isDirectory:true)
+            Task { @MainActor in
+                do {try await StudioUIProof.run(directory:url,documents:documents);fflush(stdout);exit(0)}
+                catch {fputs("STUDIO UI PROOF FAILED: \(error)\n",stderr);exit(1)}
+            }
+        } else if let index=CommandLine.arguments.firstIndex(of:"--smoke"),CommandLine.arguments.indices.contains(index+1) {
             let url=URL(fileURLWithPath:CommandLine.arguments[index+1],isDirectory:true)
             Task { @MainActor in
                 do {try await ApplicationSmoke.run(directory:url,documents:documents);fflush(stdout);exit(0)}
@@ -142,7 +153,7 @@ import GalileoNative
     }
     private func window<V:View>(title:String,view:V,size:NSSize)->NSWindowController {
         let window=NSWindow(contentRect:NSRect(origin:.zero,size:size),styleMask:[.titled,.closable],backing:.buffered,defer:false)
-        window.title=title;window.isReleasedWhenClosed=false;window.contentView=NSHostingView(rootView:view);window.center();return NSWindowController(window:window)
+        window.title=title;window.isReleasedWhenClosed=false;window.contentView=NSHostingView(rootView:view.studioType(.bodyCompact).studioTypography(GalileoType.typography).modifier(GalleryChrome()));window.center();return NSWindowController(window:window)
     }
 }
 @MainActor func applyAppearance() {
@@ -156,8 +167,8 @@ struct SettingsView:View {
     @AppStorage("interfaceAppearance") private var appearance="system"
     var body:some View {
         Form {
-            Picker("Appearance",selection:$appearance) {Text("System").tag("system");Text("Light").tag("light");Text("Dark").tag("dark")}
-            Text("Interface appearance never changes your exported artwork.").font(.callout).foregroundStyle(.secondary)
+            StudioPicker("Appearance",selection:$appearance,valueLabel:appearance.capitalized) {Text("System").tag("system");Text("Light").tag("light");Text("Dark").tag("dark")}
+            Text("Interface appearance never changes your exported artwork.").studioType(.bodyCompact).foregroundStyle(.secondary)
         }.formStyle(.grouped).padding(20).frame(width:440).onChange(of:appearance){ applyAppearance() }
     }
 }

@@ -83,6 +83,7 @@ public struct MediaItem: Codable, Equatable, Identifiable, Sendable {
     public var trimEnd: Double? = nil
     public var sourceLoops = true
     public var sourcePlays = true
+    public var stillFrameSelection: StillFrameSelection? = nil
     public var sourceRate: Double = 1
     public init(name: String, asset: String, sha256: String, kind: MediaKind, width: Int, height: Int, duration: Double? = nil) {
         self.name = name; self.asset = asset; self.sha256 = sha256; self.kind = kind
@@ -151,7 +152,8 @@ public struct ExportSettings: Codable, Equatable, Sendable {
 }
 public struct GalleryProject: Codable, Equatable, Sendable {
     public var format = "dog.pitch.galileo.native"
-    public var schemaVersion = 7
+    public static let currentSchemaVersion = 8
+    public var schemaVersion = GalleryProject.currentSchemaVersion
     public var id = UUID().uuidString
     public var name = "Untitled"
     public var canvas = Canvas()
@@ -178,7 +180,7 @@ public struct GalleryProject: Codable, Equatable, Sendable {
         func finite(_ value: Double, _ range: ClosedRange<Double>, _ label: String) throws {
             try require(value.isFinite && range.contains(value), "\(label) must be between \(range.lowerBound) and \(range.upperBound).")
         }
-        try require(format == "dog.pitch.galileo.native" && schemaVersion == 7, "This document needs a different version of Galileo Gallery. The original was not changed.")
+        try require(format == "dog.pitch.galileo.native" && schemaVersion == Self.currentSchemaVersion, "This document needs a different version of Galileo Gallery. The original was not changed.")
         try require(!id.isEmpty && name.count <= 512, "The document identity is invalid.")
         try require((64...7680).contains(canvas.width) && (64...7680).contains(canvas.height), "Canvas dimensions must be 64–7,680 pixels.")
         try require(canvas.width % 2 == 0 && canvas.height % 2 == 0, "Canvas dimensions must be even pixel counts.")
@@ -227,6 +229,10 @@ public struct GalleryProject: Codable, Equatable, Sendable {
                 try finite(duration, 0.000001...86400, "Source duration")
                 let end = item.trimEnd ?? duration
                 try require(end.isFinite && end <= duration && end > item.trimStart, "\(item.name)'s trim range is invalid.")
+                try require(item.sourcePlays || item.stillFrameSelection != nil, "A frozen source must have a saved frame selection.")
+                if let selection=item.stillFrameSelection {try selection.validate(in:SourceRange(start:item.trimStart,end:end),duration:duration)}
+            } else {
+                try require(item.stillFrameSelection == nil,"Ordinary images cannot contain source-frame selections.")
             }
         }
         try require(migrationNotes.count <= 128 && migrationNotes.allSatisfy { $0.utf8.count <= 8192 }, "The conversion notes exceed the metadata budget.")
@@ -246,11 +252,21 @@ public struct GalleryProject: Codable, Equatable, Sendable {
         return data
     }
     public static func decode(_ data: Data) throws -> GalleryProject {
+        try decodeWithProvenance(data).project
+    }
+    public static func decodeWithProvenance(_ data: Data) throws -> (project: GalleryProject, loadedSchema: Int) {
         guard data.count <= maximumManifestBytes else { throw GalleryError.invalid("The document manifest is too large.") }
         var project = try JSONDecoder().decode(Self.self, from: data)
-        // v3 had no per-media spotlight. Missing optional values decode as nil.
-        if [3, 4, 5, 6].contains(project.schemaVersion) { project.schemaVersion = 7 }
-        try project.validate(); return project
+        let loadedSchema=project.schemaVersion
+        // Read provenance is retained for the native upgrade-copy write boundary.
+        if (3...7).contains(project.schemaVersion) {
+            guard project.items.allSatisfy({$0.stillFrameSelection == nil}) else {throw GalleryError.invalid("The older document contains unsupported source-frame metadata.")}
+            for index in project.items.indices where project.items[index].kind != .image && !project.items[index].sourcePlays {
+                project.items[index].stillFrameSelection = .legacyFrozen(project.items[index].trimStart)
+            }
+            project.schemaVersion=Self.currentSchemaVersion
+        }
+        try project.validate(); return (project,loadedSchema)
     }
 }
 public struct ScenePreset: Codable, Equatable, Sendable {

@@ -157,6 +157,8 @@ import GalileoNative
         guard receipt.scheduledFrames==62,receipt.decodedFrames==62 else{throw GalleryError.invalid("The actual native movie failed its frame count proof.")}
         try JSONEncoder().encode(receipt).write(to:directory.appendingPathComponent("export-receipt.json"))
         var summary:[String:Any]=["backgroundBrowserCancelPreservesDocument":true,"driftBackgroundSavedAndReopened":true,"spotlightNavigation":true,"nativePixelZoom":true,"framingSheet":true,"previewAdvancesDuringPlayback":true,"documentRoundTrip":true,"documentEditedState":true,"failedSavePreservesChanges":true,"nativeAutosave":true,"spotlightSavedAndReopened":true,"importUndoRedo":true,"sceneUndoRedo":true,"nativeMovieDecodedFrames":62,"sceneSamples":visualEvidence,"operatingSystem":ProcessInfo.processInfo.operatingSystemVersionString,"version":Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "development"]
+        let upgradeProof=try await UpgradeApplicationSmoke.run(directory:directory,documents:documents)
+        summary.merge(upgradeProof){_,new in new}
         let mediaProof=try await MediaApplicationSmoke.run(directory:directory,documents:documents)
         summary.merge(mediaProof){_,new in new}
         try JSONSerialization.data(withJSONObject:summary,options:[.prettyPrinted,.sortedKeys]).write(to:directory.appendingPathComponent("journey.json"))

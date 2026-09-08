@@ -13,6 +13,10 @@ extension NativeDocumentIO {
         return kept
     }
     public static func readPackage(_ url: URL, allowRecovery: Bool = false) throws -> (GalleryProject, Workspace) {
+        let result=try readPackageWithProvenance(url,allowRecovery:allowRecovery)
+        return (result.project,result.workspace)
+    }
+    public static func readPackageWithProvenance(_ url: URL, allowRecovery: Bool = false) throws -> NativePackageRead {
         let fm = FileManager.default, scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         let root = try url.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
@@ -20,9 +24,16 @@ extension NativeDocumentIO {
         let manifest = url.appendingPathComponent("project.json")
         let size = try FileStamp(manifest).size
         guard size <= GalleryProject.maximumManifestBytes else { throw GalleryError.invalid("The document manifest is too large.") }
-        var project = try GalleryProject.decode(Data(contentsOf: manifest))
+        let decoded = try GalleryProject.decodeWithProvenance(Data(contentsOf: manifest))
+        var project = decoded.project
+        var protection: UpgradeProtection?
+        let draftURL=url.appendingPathComponent(UpgradeProtection.draftFilename)
+        if fm.fileExists(atPath:draftURL.path) {
+            guard try FileStamp(draftURL).size <= UpgradeProtection.maximumBytes else { throw GalleryError.invalid("Upgrade restoration metadata is too large.") }
+            protection=try UpgradeProtection.decode(Data(contentsOf:draftURL))
+        }
         let workspace = try Workspace()
-        let allowed = Set(["project.json", "Assets", "legacy-manifest.json", "legacy-assets.json", ".DS_Store"])
+        let allowed = Set(["project.json", "Assets", "legacy-manifest.json", "legacy-assets.json", ".DS_Store", UpgradeProtection.draftFilename])
         for file in try fm.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) {
             guard allowed.contains(file.lastPathComponent) else { throw GalleryError.unsupported("Unsupported document resource: \(file.lastPathComponent).") }
             if file.lastPathComponent.hasPrefix("legacy-") {
@@ -87,9 +98,11 @@ extension NativeDocumentIO {
             let kept = mapping.filter { fm.fileExists(atPath: workspace.assets.appendingPathComponent($0.value).path) }
             try JSONSerialization.data(withJSONObject: kept, options: [.sortedKeys]).write(to: workspace.root.appendingPathComponent("legacy-assets.json"), options: .atomic)
         }
-        return (project, workspace)
+        return NativePackageRead(project:project,workspace:workspace,loadedSchema:decoded.loadedSchema,draftProtection:protection)
     }
-    public static func writePackage(project: GalleryProject, workspace: Workspace, to destination: URL) throws {
+    public static func writePackage(project: GalleryProject, workspace: Workspace, to destination: URL,
+                                    protecting original: UpgradeProtection? = nil, draftProtection: UpgradeProtection? = nil) throws {
+        try original?.validateDestination(destination)
         let manifest = try project.encoded()
         let fm = FileManager.default, parent = destination.deletingLastPathComponent()
         let sizes = try workspace.managedSizes(project: project)
@@ -118,10 +131,12 @@ extension NativeDocumentIO {
             if !cloned, try Workspace.fingerprint(target) != hash { throw GalleryError.invalid("A copied source failed its integrity check.") }
         }
         try manifest.write(to: staging.appendingPathComponent("project.json"), options: .atomic)
+        if let draftProtection { try draftProtection.encoded().write(to:staging.appendingPathComponent(UpgradeProtection.draftFilename),options:.atomic) }
         if project.legacyManifestFilename != nil {
             try Workspace.copyOwned(workspace.root.appendingPathComponent("legacy-manifest.json"), to: staging.appendingPathComponent("legacy-manifest.json"))
             try JSONSerialization.data(withJSONObject: legacyMapping(workspace), options: [.sortedKeys]).write(to: staging.appendingPathComponent("legacy-assets.json"), options: .atomic)
         }
+        try original?.validateDestination(destination)
         if fm.fileExists(atPath: destination.path) {
             let meta = try destination.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
             guard meta.isDirectory == true, meta.isSymbolicLink != true else { throw GalleryError.invalid("A native document cannot replace this destination.") }

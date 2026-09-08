@@ -13,11 +13,11 @@ public struct RenderSnapshot: @unchecked Sendable {
     let sourceByID:[String:MediaItem]
     public init(project:GalleryProject,workspace:Workspace)throws { plan=try RenderPlan(project:project);self.workspace=workspace;sourceByID=Dictionary(uniqueKeysWithValues:project.items.map{($0.id,$0)}) }
 }
-private final class ImageBox: NSObject { let image:CGImage;init(_ image:CGImage){self.image=image} }
+final class ImageBox: NSObject { let image:CGImage;init(_ image:CGImage){self.image=image} }
 
 /// Immutable images and a thread-safe CIContext can be shared. Mutable video
 /// generators remain renderer-owned and confined to their worker.
-private final class RenderResources: @unchecked Sendable {
+final class RenderResources: @unchecked Sendable {
     static let shared=RenderResources()
     let context:CIContext
     let backend:String
@@ -61,12 +61,18 @@ public final class NativeRenderer {
     public func clearCaches() {readers.removeAll();readerOrder.removeAll();imageIndexes.removeAll();RenderResources.shared.clear()}
     public func thumbnail(item:MediaItem,workspace:Workspace,maximumDimension:Int=160)throws->CGImage {
         guard item.unavailable==nil else {throw GalleryError.missing("Locate or replace the missing source.")}
-        return try sourceImage(item:item,seconds:item.trimStart,workspace:workspace,maximumDimension:max(64,min(16384,maximumDimension))).image
+        return try compositionSource(item:item,seconds:item.trimStart,workspace:workspace,maximumDimension:max(64,min(16384,maximumDimension)),export:false).image
     }
     public func sourcePreview(item:MediaItem,seconds:Double,workspace:Workspace,maximumDimension:Int=960)throws->CGImage {
         try Task.checkCancellation()
         guard seconds.isFinite else{throw GalleryError.invalid("Invalid source time.")}
         return try sourceImage(item:item,seconds:max(0,seconds),workspace:workspace,maximumDimension:max(64,min(16384,maximumDimension))).image
+    }
+    public func audition(item:MediaItem,seconds:Double,workspace:Workspace,maximumDimension:Int=960,legacy:Bool=false)throws->SourceAuditionFrame {
+        guard seconds.isFinite,item.unavailable==nil else {throw GalleryError.invalid("The source is unavailable for frame selection.")}
+        let source=try sourceImage(item:item,seconds:seconds,workspace:workspace,maximumDimension:maximumDimension,exactAudition:!legacy,includeInterval:true)
+        guard let interval=source.interval else {throw GalleryError.invalid("The displayed picture has no exact presentation interval.")}
+        return SourceAuditionFrame(image:source.image,interval:interval)
     }
     public func image(snapshot:RenderSnapshot,frame:Int64,maximumDimension:Int?=nil,colorSpace:CGColorSpace?=nil)throws->CGImage {
         let result=try composition(snapshot:snapshot,frame:frame,maximumDimension:maximumDimension)
@@ -109,6 +115,28 @@ public final class NativeRenderer {
         if cards.contains(where: \.suspension),let ropes=ropeImage(cards:cards,width:Int(w),height:Int(h),light:luminance(background.color)>0.5) {
             result=CIImage(cgImage:ropes).composited(over:result)
         }
+        func sourceTier(_ card:SceneCard,_ item:MediaItem)->Int {
+            let quad=card.quad(perspective:w*2)
+            func edge(_ a:Point,_ b:Point)->Double {hypot(a.x-b.x,a.y-b.y)}
+            let projectedW=max(edge(quad[0],quad[1]),edge(quad[3],quad[2]))
+            let projectedH=max(edge(quad[0],quad[3]),edge(quad[1],quad[2]))
+            let sourceW=Double(item.width),sourceH=Double(item.height)
+            let sx=projectedW/max(0.0001,sourceW*item.crop.width)
+            let sy=projectedH/max(0.0001,sourceH*item.crop.height)
+            let demand=max(sourceW,sourceH)*(item.fit == .contain ? min(sx,sy):max(sx,sy))
+            return min(16384,max(128,Int(pow(2,ceil(log2(max(128,demand)))))))
+        }
+        // Immutable stills are prepared before touching any sequential playing reader.
+        var stillTiers=[String:Int](),stills=[String:DecodedSourceFrame]()
+        for card in cards {
+            if let item=byID[card.itemID],item.kind != .image,!item.sourcePlays,item.unavailable==nil {
+                stillTiers[item.id]=max(stillTiers[item.id,default:0],sourceTier(card,item))
+            }
+        }
+        for (id,tier) in stillTiers {
+            let item=byID[id]!
+            stills[id]=try compositionSource(item:item,seconds:item.trimStart,workspace:snapshot.workspace,maximumDimension:tier,export:maximumDimension == nil)
+        }
         for card in cards {
             try Task.checkCancellation()
             guard let item=byID[card.itemID] else {throw GalleryError.invalid("A rendered instance has no source media.")}
@@ -117,18 +145,7 @@ public final class NativeRenderer {
                 guard let placeholder=captionImage("Missing source",width:320,fontSize:24,light:true,backing:true) else {throw GalleryError.invalid("The missing-media preview could not be drawn.")}
                 source=DecodedSourceFrame(image:placeholder,identity:"missing")
             } else {
-                // Ask for the projected card, including crop magnification. Stable
-                // size tiers reuse a larger decode instead of re-decoding every pose.
-                let quad=card.quad(perspective:w*2)
-                func edge(_ a:Point,_ b:Point)->Double {hypot(a.x-b.x,a.y-b.y)}
-                let projectedW=max(edge(quad[0],quad[1]),edge(quad[3],quad[2]))
-                let projectedH=max(edge(quad[0],quad[3]),edge(quad[1],quad[2]))
-                let sourceW=Double(item.width),sourceH=Double(item.height)
-                let sx=projectedW/max(0.0001,sourceW*item.crop.width)
-                let sy=projectedH/max(0.0001,sourceH*item.crop.height)
-                let demand=max(sourceW,sourceH)*(item.fit == .contain ? min(sx,sy):max(sx,sy))
-                let tier=min(16384,max(128,Int(pow(2,ceil(log2(max(128,demand)))))))
-                source=try sourceImage(item:item,seconds:card.sourceTime,workspace:snapshot.workspace,maximumDimension:tier)
+                source=try stills[item.id] ?? compositionSource(item:item,seconds:card.sourceTime,workspace:snapshot.workspace,maximumDimension:sourceTier(card,item),export:maximumDimension == nil)
             }
             let bitmap=try artwork(source:source,item:item,card:card,scene:scene)
             let q=card.quad(perspective:w*2)
@@ -172,7 +189,17 @@ public final class NativeRenderer {
         func linear(_ v:Double)->Double {v<=0.04045 ? v/12.92:pow((v+0.055)/1.055,2.4)}
         return 0.2126*linear(c.r)+0.7152*linear(c.g)+0.0722*linear(c.b)
     }
-    private func sourceImage(item:MediaItem,seconds:Double,workspace:Workspace,maximumDimension:Int)throws->DecodedSourceFrame {
+    private func compositionSource(item:MediaItem,seconds:Double,workspace:Workspace,maximumDimension:Int,export:Bool)throws->DecodedSourceFrame {
+        guard item.kind != .image,!item.sourcePlays else {return try sourceImage(item:item,seconds:seconds,workspace:workspace,maximumDimension:maximumDimension)}
+        guard let selection=item.stillFrameSelection else {throw GalleryError.invalid("The still has no valid frame selection.")}
+        if case .legacyFrozen(let time)=selection {
+            return try sourceImage(item:item,seconds:time,workspace:workspace,maximumDimension:maximumDimension,readerPurpose:"legacy-still")
+        }
+        let resolver=StillSourceResolver.shared
+        let resolved=try resolver.resolve(item:item,selection:selection,range:item.sourceRange,workspace:workspace,export:export)
+        return try resolver.image(item:item,resolved:resolved,workspace:workspace,maximumDimension:maximumDimension,context:context,export:export)
+    }
+    private func sourceImage(item:MediaItem,seconds:Double,workspace:Workspace,maximumDimension:Int,exactAudition:Bool=false,includeInterval:Bool=false,readerPurpose:String="moving")throws->DecodedSourceFrame {
         let epoch=RenderResources.shared.pressureEpoch
         if observedPressureEpoch != epoch {
             readers.removeAll();readerOrder.removeAll();imageIndexes.removeAll();observedPressureEpoch=epoch
@@ -180,7 +207,7 @@ public final class NativeRenderer {
         sourceDecodeRequests+=1
         let url=try workspace.url(for:item)
         if item.kind == .video {
-            let key="\(workspace.root.path):\(item.sha256):\(maximumDimension)"
+            let key="\(workspace.root.path):\(item.sha256):\(maximumDimension):\(readerPurpose)"
             let cursor:VideoFrameCursor
             if let old=readers[key] {cursor=old;readerOrder.removeAll{$0==key}}
             else {
@@ -192,7 +219,7 @@ public final class NativeRenderer {
             }
             readerOrder.append(key)
             let before=cursor.materializedFrames,samplesBefore=cursor.decodedSamples
-            let frame=try cursor.frame(at:seconds,fingerprint:item.sha256)
+            let frame=try cursor.frame(at:seconds,fingerprint:item.sha256,exact:exactAudition,includeInterval:includeInterval)
             preparedSourceFrames+=cursor.materializedFrames-before;decodedVideoSamples+=cursor.decodedSamples-samplesBefore;return frame
         }
         let sourceKey="\(workspace.root.path):\(item.sha256)"
@@ -203,12 +230,15 @@ public final class NativeRenderer {
             if imageIndexes.count>=16 {imageIndexes.removeAll()}
             imageIndexes[sourceKey]=index
         }
-        let number=index.index(at:seconds),key="\(item.sha256):i\(number):m\(maximumDimension)"
-        if let cached=RenderResources.shared.decoded.object(forKey:key as NSString) {return DecodedSourceFrame(image:cached.image,identity:key)}
+        let number=index.index(at:seconds)
+        let interval=(exactAudition || includeInterval) ? try index.exactIntervals()[number] : nil
+        if exactAudition,interval?.contains(seconds:seconds) != true {throw GalleryError.invalid("No animation picture covers this audition time.")}
+        let key="\(item.sha256):i\(number):m\(maximumDimension)"
+        if let cached=RenderResources.shared.decoded.object(forKey:key as NSString) {return DecodedSourceFrame(image:cached.image,identity:key,interval:interval)}
         let options:[CFString:Any]=[kCGImageSourceCreateThumbnailFromImageAlways:true,kCGImageSourceCreateThumbnailWithTransform:true,kCGImageSourceThumbnailMaxPixelSize:maximumDimension,kCGImageSourceShouldCacheImmediately:true]
         guard let image=CGImageSourceCreateThumbnailAtIndex(index.source,number,options as CFDictionary) else {throw GalleryError.invalid("\(item.name) could not produce picture \(number+1).")}
         RenderResources.shared.decoded.setObject(ImageBox(image),forKey:key as NSString,cost:image.bytesPerRow*image.height)
-        preparedSourceFrames+=1;return DecodedSourceFrame(image:image,identity:key)
+        preparedSourceFrames+=1;return DecodedSourceFrame(image:image,identity:key,interval:interval)
     }
     /// Keep one source image through fit/crop/rounded masking and fragment
     /// clipping. No new full-card CPU bitmap for each animated pose or slice.
@@ -297,9 +327,17 @@ public actor ThumbnailWorker {
     }
 }
 
+public struct SourceAuditionFrame: @unchecked Sendable {
+    public let image:CGImage
+    public let interval:SourceInterval
+}
 public actor SourcePreviewWorker {
     private let renderer=NativeRenderer()
     public init() {}
+    public func audition(item:MediaItem,seconds:Double,workspace:Workspace,maximumDimension:Int=960)throws->SourceAuditionFrame {
+        try Task.checkCancellation()
+        return try autoreleasepool {try renderer.audition(item:item,seconds:seconds,workspace:workspace,maximumDimension:maximumDimension)}
+    }
     public func frame(item:MediaItem,seconds:Double,workspace:Workspace,maximumDimension:Int=960)throws->CGImage {
         try Task.checkCancellation()
         return try autoreleasepool {try renderer.sourcePreview(item:item,seconds:seconds,workspace:workspace,maximumDimension:maximumDimension)}

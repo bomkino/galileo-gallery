@@ -36,6 +36,8 @@ public enum Replacement {
         item.crop = old.crop; item.focal = old.focal; item.displayRatio = old.displayRatio
         item.included = old.included; item.opening = old.opening; item.closing = old.closing
         item.spotlight = old.spotlight; item.sourcePlays = old.sourcePlays
+        item.stillFrameSelection = source.kind == .image ? nil:old.stillFrameSelection
+        if source.kind != .image,!item.sourcePlays,item.stillFrameSelection == nil {item.stillFrameSelection = .last}
         item.sourceLoops = old.sourceLoops; item.sourceRate = old.sourceRate
         item.unavailable = nil
         guard source.kind != .image, let duration = source.duration else {

@@ -1,4 +1,6 @@
-# Use Galileo Gallery 2.3
+# Use Galileo Gallery
+
+This guide includes the 2.4 native Studio candidate. See [implementation and acceptance](STUDIO_UI_IMPLEMENTATION.md) for its verified scope; the matching GitHub release identifies a downloadable build.
 
 ## Add media
 
@@ -28,7 +30,7 @@ Each cue adds its presentation time to the base motion. Holds are not silently s
 
 **Use as closing** moves that included slide to the end and adds its centre hold without a return. This applies to Once and Repeat; Loop retains the ordered loop and saves the closing choice for finite playback. Excluded slides do not receive cues. Reorder media to change presentation order.
 
-A spotlight holds scene travel, not video time. Enable **Play source** and **Loop source** to repeat a short clip during a long hold. Rate and In/Out control the source independently. Replacing a video preserves those settings where the new clip supports them; a shorter clip produces an adjustment notice. Undo restores the original.
+A spotlight holds scene travel, not video time. Choose **Video** or **Animation** under Display and enable **Loop source** to repeat a short clip during a long hold. Rate and In/Out control the source independently. Replacing a video preserves those settings where the new clip supports them; a shorter clip produces an adjustment notice. Undo restores the original.
 
 ## Inspect and save
 
@@ -40,7 +42,7 @@ Use native Save, Save As and Revert. Autosave is managed through the Mac documen
 
 If required media is missing or damaged, choose **Open Recovery Copy**. Use **Locate original…** for a fingerprint-matching file or **Replace…** for different artwork. Order, framing and spotlight intent stay attached to the slide. Save the repaired copy separately. An unresolved included source blocks export; excluding it is an explicit choice, not a silent omission. An intact PDF page image is retained when only its archived original PDF is missing; a recovery copy reports that distinction instead of deleting usable artwork. Malformed manifests and unsafe paths remain rejected.
 
-Native documents from 2.0–2.2 (schemas 3–6) are upgraded in memory to schema 7. Keep a copy before saving in 2.3 when rollback matters; earlier apps cannot read a new 2.3 save. Legacy ZIP projects open separately and keep their original manifest and visual assets for traceability. Read the conversion notes: translated spotlights, opening/closing and unsupported settings are not pixel-identical reconstruction. Standalone soundtrack files are not imported; the original archive is untouched.
+The native Studio candidate saves schema 8. Older native documents open as protected untitled upgrade copies. Save the copy to a new destination; the original remains protected even if it is renamed or opened through an alias. Autosave and failed writes preserve that protection. Earlier apps cannot read schema 8 saves. Legacy ZIP projects open separately and keep their original manifest and visual assets for traceability. Read the conversion notes: translated spotlights, opening/closing and unsupported settings are not pixel-identical reconstruction. Standalone soundtrack files are not imported; the original archive is untouched.
 
 ## Export
 
@@ -60,8 +62,10 @@ In Scene → Canvas, set Background to Drift and Browse. Search or filter by fam
 
 ## Inspect a source clip
 
-Select one video or animated image and open **Preview clip…** in Media. The preview and filmstrip are loaded only while the sheet is open. Scrub or play the source; set In and Out, use Reset trim, set a rate, or choose **Freeze here**. The source is silent. Apply commits one undoable change; Cancel leaves the document untouched.
+In Media, Display switches between **Video** or **Animation** and **Still**. First use of Still selects **Last**. Choose **First**, **Middle** or **Last** within the current trim; returning to moving playback keeps the remembered still choice.
 
-The source controls and the centre hold are independent. Keep Play source and Loop source enabled for a moving video inside a stationary spotlight. A freeze frame is a source choice, not a request to pause the editor.
+For a custom still, choose **Choose another frame…**, or open **Preview clip…** for one video or animated image. Scrub or play the silent source, pause on the loaded picture, then choose **Use this frame** and **Apply**. The Custom anchor belongs to that source. In/Out, Reset trim, rate and looping are available in the same sheet. Apply commits one undoable change; Cancel leaves the document untouched.
+
+The source controls and the centre hold are independent. Choose moving Display and Loop source for a moving video inside a stationary spotlight. Selecting a still does not pause the editor.
 
 The background browser now shows one live preview on the current composition. Choosing the current study retains its customised values; **Keep palette** preserves custom colours while browsing other studies. Apply changes only the background; Cancel does not modify the document.

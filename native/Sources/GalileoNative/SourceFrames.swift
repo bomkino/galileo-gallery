@@ -7,6 +7,8 @@ import GalileoCore
 struct DecodedSourceFrame {
     let image: CGImage
     let identity: String
+    let interval: SourceInterval?
+    init(image:CGImage,identity:String,interval:SourceInterval?=nil) {self.image=image;self.identity=identity;self.interval=interval}
 }
 
 /// Renderer-confined readers borrow Drift's covering-sample ownership model.
@@ -58,13 +60,22 @@ final class VideoFrameCursor {
         guard reader.startReading() else {throw reader.error ?? GalleryError.invalid("The native video reader could not start.")}
         current=try read();next=try read()
     }
-    func frame(at seconds:Double, fingerprint:String) throws -> DecodedSourceFrame {
+    func frame(at seconds:Double, fingerprint:String, exact:Bool=false,includeInterval:Bool=false) throws -> DecodedSourceFrame {
         let target=max(0,seconds)
         if current==nil || target+1e-8 < CMSampleBufferGetPresentationTimeStamp(current!).seconds || target-previousRequest>2 {
             try reset(at:target)
         }
+        if exact,let current,try SourceTime(CMSampleBufferGetPresentationTimeStamp(current)).compared(to:target) == .orderedDescending {try reset(at:0)}
         previousRequest=target
-        while let lookahead=next,CMSampleBufferGetPresentationTimeStamp(lookahead).seconds<=target+1e-8 {
+        let deadline=ProcessInfo.processInfo.systemUptime+StillResolutionLimits.interactiveSeconds
+        var inspected=0
+        func atOrBefore(_ sample:CMSampleBuffer)throws->Bool {
+            if exact {return try SourceTime(CMSampleBufferGetPresentationTimeStamp(sample)).compared(to:target) != .orderedDescending}
+            return CMSampleBufferGetPresentationTimeStamp(sample).seconds<=target+1e-8
+        }
+        while let lookahead=next,try atOrBefore(lookahead) {
+            inspected+=1
+            if exact, inspected>StillResolutionLimits.maximumInspectedSamples || ProcessInfo.processInfo.systemUptime>deadline {throw GalleryError.invalid("Source audition reached its work limit. Retry the seek.")}
             current=lookahead;cached=nil;next=try read()
         }
         guard let sample=current,let buffer=CMSampleBufferGetImageBuffer(sample) else {
@@ -72,15 +83,14 @@ final class VideoFrameCursor {
         }
         let pts=CMSampleBufferGetPresentationTimeStamp(sample)
         guard pts.seconds <= target+0.002 else {throw GalleryError.invalid("The video contains a gap at the requested time.")}
+        let duration=CMSampleBufferGetDuration(sample)
+        var interval:SourceInterval?
+        if exact || includeInterval {interval=try VideoPresentationTiming.interval(track:track,pts:pts,duration:duration)}
+        else if duration.isNumeric,CMTimeCompare(duration,.zero)>0 {interval=try? SourceInterval(start:SourceTime(pts),end:SourceTime(CMTimeAdd(pts,duration)))}
+        if exact,interval?.contains(seconds:target) != true {throw GalleryError.invalid("No source picture covers this audition time.")}
         if let cached {return cached}
-        var image=CIImage(cvPixelBuffer:buffer).transformed(by:transform)
-        image=image.transformed(by:CGAffineTransform(translationX:-image.extent.minX,y:-image.extent.minY))
-        let factor=min(1,Double(maximumDimension)/max(image.extent.width,image.extent.height))
-        if factor<1 {image=image.applyingFilter("CILanczosScaleTransform",parameters:[kCIInputScaleKey:factor,kCIInputAspectRatioKey:1])}
-        guard let bitmap=context.createCGImage(image,from:image.extent.integral,format:.RGBA8,colorSpace:CGColorSpace(name:CGColorSpace.sRGB)) else {
-            throw GalleryError.invalid("The decoded video sample could not be prepared.")
-        }
-        let result=DecodedSourceFrame(image:bitmap,identity:"\(fingerprint):v\(pts.value)/\(pts.timescale):m\(maximumDimension)")
+        let bitmap=try prepareSourceBitmap(buffer:buffer,transform:transform,maximumDimension:maximumDimension,context:context)
+        let result=DecodedSourceFrame(image:bitmap,identity:"\(fingerprint):v\(pts.value)/\(pts.timescale):m\(maximumDimension)",interval:interval)
         cached=result;materializedFrames+=1;return result
     }
 }
@@ -106,4 +116,15 @@ final class ImageFrameIndex {
         while low<high {let mid=(low+high)/2;if seconds<ends[mid] {high=mid}else{low=mid+1}}
         return min(ends.count-1,low)
     }
+}
+
+func prepareSourceBitmap(buffer:CVPixelBuffer,transform:CGAffineTransform,maximumDimension:Int,context:CIContext)throws->CGImage {
+        var image=CIImage(cvPixelBuffer:buffer).transformed(by:transform)
+        image=image.transformed(by:CGAffineTransform(translationX:-image.extent.minX,y:-image.extent.minY))
+        let factor=min(1,Double(maximumDimension)/max(image.extent.width,image.extent.height))
+        if factor<1 {image=image.applyingFilter("CILanczosScaleTransform",parameters:[kCIInputScaleKey:factor,kCIInputAspectRatioKey:1])}
+        guard let bitmap=context.createCGImage(image,from:image.extent.integral,format:.RGBA8,colorSpace:CGColorSpace(name:CGColorSpace.sRGB)) else {
+            throw GalleryError.invalid("The decoded video sample could not be prepared.")
+        }
+    return bitmap
 }

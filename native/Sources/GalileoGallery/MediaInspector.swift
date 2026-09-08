@@ -1,3 +1,4 @@
+import PitchdogStudioUI
 import SwiftUI
 import AppKit
 import GalileoCore
@@ -14,6 +15,8 @@ struct MediaInspector: View {
         self.session=session; self.replace=replace; self.preview=preview; targets=session.selection
     }
     private var items: [MediaItem] { session.project.items.filter {targets.contains($0.id)} }
+    private var timedItems:[MediaItem] {items.filter{$0.kind != .image && $0.duration != nil}}
+    private var timedIDs:Set<String> {Set(timedItems.map(\.id))}
     private func mixed<T: Equatable>(_ value: (MediaItem) -> T) -> Bool {
         guard let first=items.first else {return false}; return items.contains {value($0) != value(first)}
     }
@@ -21,7 +24,7 @@ struct MediaInspector: View {
     private func toggle(_ title:String,get:@escaping(MediaItem)->Bool,set:@escaping(inout MediaItem,Bool)->Void)->some View {
         HStack {
             Toggle(title,isOn:Binding(get:{items.first.map(get) ?? false},set:{v in edit(title){set(&$0,v)}}))
-            if mixed(get) {Text("Mixed").font(.caption).foregroundStyle(.secondary)}
+            if mixed(get) {Text("Mixed").studioType(.caption).foregroundStyle(.secondary)}
         }
     }
     private func number(_ title:String,range:ClosedRange<Double>,unit:String="",step:Double=1,
@@ -32,11 +35,11 @@ struct MediaInspector: View {
     var body:some View {
         VStack(alignment:.leading,spacing:22) {
             if let item=items.first {
-                Text(items.count>1 ? "\(items.count) selected":item.name).font(.headline).lineLimit(3).textSelection(.enabled)
+                Text(items.count>1 ? "\(items.count) selected":item.name).studioType(.panelTitle).lineLimit(3).textSelection(.enabled)
                 InspectorSection(title:"Source") {
                     if item.unavailable != nil {Label("Source missing",systemImage:"exclamationmark.triangle").foregroundStyle(.orange)}
-                    if let warning=item.originalUnavailable {Text("Archived original unavailable: \(warning)").font(.caption).foregroundStyle(.orange).lineLimit(3)}
-                    if items.count==1 {Text("\(item.width) × \(item.height)").font(.caption).foregroundStyle(.secondary)}
+                    if let warning=item.originalUnavailable {Text("Archived original unavailable: \(warning)").studioType(.caption).foregroundStyle(.orange).lineLimit(3)}
+                    if items.count==1 {Text("\(item.width) × \(item.height)").studioType(.caption).foregroundStyle(.secondary)}
                     toggle("Include",get:{$0.included},set:{$0.included=$1})
                     HStack {
                         Button("Replace…",action:replace).disabled(items.count != 1)
@@ -66,22 +69,22 @@ struct MediaInspector: View {
                             if enabled {session.markClosing(item.id)} else {edit("Clear closing"){$0.closing=false}}
                         }))
                         if item.closing == true {
-                            Text(session.project.timing.playMode == .loop ? "Closing is used in Once or Repeat." : "Closing holds at the end of each cycle.").font(.caption).foregroundStyle(.secondary)
+                            Text(session.project.timing.playMode == .loop ? "Closing is used in Once or Repeat." : "Closing holds at the end of each cycle.").studioType(.caption).foregroundStyle(.secondary)
                         }
                     }
                 }
                 InspectorSection(title:"Framing") {
                     Button("Edit framing…") {session.framingMediaID=item.id}.disabled(items.count != 1 || item.unavailable != nil)
-                    Picker("Ratio",selection:Binding(get:{mixed({$0.displayRatio}) ? -1:(item.displayRatio ?? 0)},set:{value in
+                    StudioPicker("Ratio",selection:Binding(get:{mixed({$0.displayRatio}) ? -1:(item.displayRatio ?? 0)},set:{value in
                         guard value >= 0 else{return};edit("Frame ratio"){$0.displayRatio=value == 0 ? nil:value}
-                    })) {
+                    }),valueLabel:mixed({$0.displayRatio}) ? "Mixed":([0.0:"Source",16.0/9:"16:9",1:"1:1",0.8:"4:5",9.0/16:"9:16"][item.displayRatio ?? 0] ?? "Custom")) {
                         if mixed({$0.displayRatio}) {Text("Mixed").tag(-1.0)}
                         Text("Source").tag(0.0);Text("16:9").tag(16.0/9);Text("1:1").tag(1.0);Text("4:5").tag(0.8);Text("9:16").tag(9.0/16)
                         if let ratio=item.displayRatio,![16.0/9,1,0.8,9.0/16].contains(ratio) {Text("Custom").tag(ratio)}
                     }
-                    Picker("Fit",selection:Binding(get:{mixed({$0.fit}) ? "mixed":item.fit.rawValue},set:{value in
+                    StudioPicker("Fit",selection:Binding(get:{mixed({$0.fit}) ? "mixed":item.fit.rawValue},set:{value in
                         if let fit=MediaFit(rawValue:value){edit("Change fit"){$0.fit=fit}}
-                    })) {
+                    }),valueLabel:mixed({$0.fit}) ? "Mixed":(item.fit == .cover ? "Fill":"Fit")) {
                         if mixed({$0.fit}) {Text("Mixed").tag("mixed")}
                         Text("Fit").tag("contain");Text("Fill").tag("cover")
                     }
@@ -98,28 +101,32 @@ struct MediaInspector: View {
                     }
                 }
                 InspectorSection(title:"Caption") {
-                    TextField(mixed({$0.caption}) ? "Mixed captions":"Caption",text:Binding(get:{mixed({$0.caption}) ? "":item.caption},set:{value in edit("Edit caption"){$0.caption=value}}),axis:.vertical).lineLimit(2...4).textFieldStyle(.roundedBorder)
+                    TextField(mixed({$0.caption}) ? "Mixed captions":"Caption",text:Binding(get:{mixed({$0.caption}) ? "":item.caption},set:{value in edit("Edit caption"){$0.caption=value}}),axis:.vertical).lineLimit(2...4).textFieldStyle(StudioTextFieldStyle())
                     Toggle("Show captions",isOn:Binding(get:{session.project.scene.captions},set:{v in session.commit("Show captions"){$0.scene.captions=v}}))
                     if session.project.scene.captions {
                         Toggle("Caption background",isOn:Binding(get:{session.project.scene.captionBacking ?? true},set:{v in session.commit("Caption background"){$0.scene.captionBacking=v}}))
                     }
                 }
-                if items.allSatisfy({$0.kind != .image && $0.duration != nil}) {
+                if let clip=timedItems.first {
                     InspectorSection(title:"Source playback") {
+                        if timedItems.count != items.count {Text("Applies to \(timedItems.count) of \(items.count) selected items").studioType(.caption)}
                         HStack {
-                            Button("Preview clip…") {session.previewMediaID=item.id}.disabled(items.count != 1 || item.unavailable != nil)
-                            Button("Reset trim") {edit("Reset source trim"){$0.trimStart=0;$0.trimEnd=nil}}
+                            Button("Preview clip…") {session.previewMediaID=clip.id}.disabled(timedItems.count != 1 || clip.unavailable != nil)
+                            Button("Reset trim") {let ids=timedIDs;Task {await session.resetSourceTrim(ids)}}
                         }
-                        toggle("Play source",get:{$0.sourcePlays},set:{$0.sourcePlays=$1})
-                        toggle("Loop source",get:{$0.sourceLoops},set:{$0.sourceLoops=$1})
-                        number("Rate",range:0.25...4,unit:"×",step:0.05,get:{$0.sourceRate},set:{$0.sourceRate=$1})
-                        let maximumIn=items.map{max(0,($0.trimEnd ?? $0.duration!)-0.001)}.min() ?? 0
-                        number("In",range:0...maximumIn,unit:"s",step:0.01,get:{$0.trimStart},set:{$0.trimStart=$1})
-                        let minimumOut=items.map{$0.trimStart+min(0.001,$0.duration!/2)}.max() ?? 0
-                        let maximumOut=items.compactMap(\.duration).min() ?? 0
+                        SourceDisplayControls(session:session,items:timedItems)
+                        HStack {
+                            Toggle("Loop source",isOn:Binding(get:{clip.sourceLoops},set:{value in session.editItems(timedIDs,name:"Loop source"){$0.sourceLoops=value}}))
+                            if timedItems.contains(where:{$0.sourceLoops != clip.sourceLoops}) {Text("Mixed").studioType(.caption)}
+                        }.disabled(timedItems.contains{!$0.sourcePlays})
+                        NumberControl(label:"Rate",value:Binding(get:{clip.sourceRate},set:{value in session.editItems(timedIDs,name:"Source rate"){$0.sourceRate=value}}),range:0.25...4,unit:"×",step:0.05,mixed:timedItems.contains{$0.sourceRate != clip.sourceRate},begin:{session.beginGesture("Source rate")},end:session.endGesture).disabled(timedItems.contains{!$0.sourcePlays})
+                        let maximumIn=timedItems.map{max(0,($0.trimEnd ?? $0.duration!)-0.001)}.min() ?? 0
+                        SourceTrimControl(session:session,ids:timedIDs,label:"In",range:0...maximumIn,outPoint:false)
+                        let minimumOut=timedItems.map{$0.trimStart+min(0.001,$0.duration!/2)}.max() ?? 0
+                        let maximumOut=timedItems.compactMap(\.duration).min() ?? 0
                         if minimumOut<=maximumOut {
-                            number("Out",range:minimumOut...maximumOut,unit:"s",step:0.01,get:{$0.trimEnd ?? $0.duration!},set:{$0.trimEnd=$1})
-                        } else {Text("Select one clip to edit its out point.").font(.caption).foregroundStyle(.secondary)}
+                            SourceTrimControl(session:session,ids:timedIDs,label:"Out",range:minimumOut...maximumOut,outPoint:true)
+                        } else {Text("Select one clip to edit its out point.").studioType(.caption).foregroundStyle(.secondary)}
                     }
                 }
             } else {Text("Select media to edit its framing.").foregroundStyle(.secondary)}

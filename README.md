@@ -10,7 +10,7 @@ A silent, local motion studio for slides, images and looping video.
 
 Import images, still or animated WebP, VP8/VP9 WebM, other supported videos, or selected PDF pages. Choose a scene family and variant. Bring selected slides to the centre, hold them, then return them to the sequence. A short video can keep looping during a long hold. Choose an opening and a finite closing when the sequence needs them.
 
-Inspect a clip and its filmstrip without running the entire composition. Trim, change rate, loop or choose a freeze frame. Frame artwork visually or numerically; view the canvas at Fit, 50%, 100% or 200%. Jump between spotlights, save favourite scenes and named presets, and audition Drift backgrounds against your own artwork. Appearance adjustments remain live; structural edits pause deliberately.
+Inspect a clip and its filmstrip without running the entire composition. Trim, change rate, loop, or switch between moving video/animation and a remembered First, Middle, Last or Custom still. Frame artwork visually or numerically; view the canvas at Fit, 50%, 100% or 200%. Jump between spotlights, save favourite scenes and named presets, and audition Drift backgrounds against your own artwork. Appearance adjustments remain live; structural edits pause deliberately.
 
 ## Keep work intact
 
@@ -18,13 +18,13 @@ Native `.galileo` documents contain their media. Import, save and reopen share r
 
 WebM preparation happens locally using bundled, restricted FFmpeg/libvpx tools. The original file stays unchanged beside its native working copy. This can require more disk space than the compressed source. Successful files remain imported when another file fails; failures name the affected input.
 
-A 2.3 save uses schema 7. Older native projects migrate in memory, but earlier apps cannot read newly saved 2.3 documents. Keep original projects. Native choreography may differ from historical Electron exports.
+The 2.4 native Studio candidate saves schema 8. Older native projects open as protected upgrade copies and must be saved to a new destination; the original stays intact. Earlier apps cannot read schema 8 saves. Native choreography may differ from historical Electron exports. [Studio implementation and acceptance](docs/native/STUDIO_UI_IMPLEMENTATION.md).
 
 ## Output
 
 Silent H.264 MP4, ProRes 422/4444 MOV, PNG stills and PNG sequences. Export the whole sequence, one spotlight, a time interval or the current frame. A serial queue retains each export's document snapshot even if the window closes. ProRes 4444 and PNG support transparency.
 
-Original source audio is retained only as part of the unchanged imported file; it is never played or exported. AV1/HDR WebM intake and WebM output are not supported in 2.3. PDF pages are rasterized. [Media limits](docs/native/MEDIA.md).
+Original source audio is retained only as part of the unchanged imported file; it is never played or exported. AV1/HDR WebM intake and WebM output are not supported. PDF pages are rasterized. [Media limits](docs/native/MEDIA.md).
 
 The app is ad-hoc signed, **not notarized**. The release includes matching DMG/ZIP downloads, validation evidence, checksums and corresponding codec source. This software uses FFmpeg under LGPL-2.1-or-later and libvpx under its retained license; see [notices](THIRD_PARTY_NOTICES.md) and the release's codec-source ZIP.
 

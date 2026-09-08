@@ -1,3 +1,4 @@
+import PitchdogStudioUI
 import SwiftUI
 import AppKit
 import GalileoCore
@@ -43,7 +44,7 @@ struct FramingEditor: View {
     var body:some View {
         VStack(spacing:16) {
             HStack {
-                Text("Framing").font(.title2.weight(.semibold));Spacer()
+                Text("Framing").studioType(.sectionTitle);Spacer()
                 Button("Cancel"){dismiss()}.keyboardShortcut(.cancelAction)
                 Button("Apply") {
                     guard item?.sha256==sourceHash else {error="The source changed. Reopen Framing before applying.";return}
@@ -92,22 +93,22 @@ struct FramingEditor: View {
                 }.frame(height:320)
                 if let filledPreview {
                     HStack(spacing:14) {
-                        Text(item.fit == .cover ? "Filled frame":"Fitted frame").font(.caption).foregroundStyle(.secondary)
+                        Text(item.fit == .cover ? "Filled frame":"Fitted frame").studioType(.caption).foregroundStyle(.secondary)
                         NativePreview(snapshot:filledPreview,revision:filledRevision,frame:0)
                             .frame(maxWidth:.infinity).frame(height:105).accessibilityLabel("Proposed crop in its display frame")
                     }
                 }
                 HStack {
-                    Picker("Lock ratio",selection:$ratioLock) {Text("Free").tag("free");Text("Source").tag("source");Text("16:9").tag("wide");Text("Square").tag("square");Text("4:5").tag("portrait")}.frame(width:220).onChange(of:ratioLock) { _,_ in
+                    StudioPicker("Lock ratio",selection:$ratioLock,valueLabel:["free":"Free","source":"Source","wide":"16:9","square":"Square","portrait":"4:5"][ratioLock] ?? "Free") {Text("Free").tag("free");Text("Source").tag("source");Text("16:9").tag("wide");Text("Square").tag("square");Text("4:5").tag("portrait")}.frame(width:220).onChange(of:ratioLock) { _,_ in
                         crop=CropGeometry.constrained(crop,sourceAspect:Double(item.width)/Double(item.height),ratio:ratio)
                     }
                     Spacer();Button("Reset"){ratioLock="free";crop=Crop();focal=Point()}
                 }
                 if item.fit == .cover {
                     HStack {
-                        Text("Fill position").font(.caption).foregroundStyle(.secondary)
-                        TextField("Horizontal position",value:Binding(get:{focal.x*100},set:{focal.x=bounded($0/100,0,1)}),format:.number.precision(.fractionLength(1))).textFieldStyle(.roundedBorder).frame(width:70).accessibilityLabel("Horizontal fill position percent")
-                        TextField("Vertical position",value:Binding(get:{focal.y*100},set:{focal.y=bounded($0/100,0,1)}),format:.number.precision(.fractionLength(1))).textFieldStyle(.roundedBorder).frame(width:70).accessibilityLabel("Vertical fill position percent")
+                        Text("Fill position").studioType(.caption).foregroundStyle(.secondary)
+                        TextField("Horizontal position",value:Binding(get:{focal.x*100},set:{focal.x=bounded($0/100,0,1)}),format:.number.precision(.fractionLength(1))).textFieldStyle(StudioTextFieldStyle()).frame(width:70).accessibilityLabel("Horizontal fill position percent")
+                        TextField("Vertical position",value:Binding(get:{focal.y*100},set:{focal.y=bounded($0/100,0,1)}),format:.number.precision(.fractionLength(1))).textFieldStyle(StudioTextFieldStyle()).frame(width:70).accessibilityLabel("Vertical fill position percent")
                         Spacer()
                     }
                 }
@@ -132,6 +133,7 @@ struct FramingEditor: View {
     private func refreshFilledPreview() {
         guard var media=item else{return};media.crop=crop;media.focal=focal
         media.opening=false;media.closing=false;media.spotlight=nil;media.included=true
+        if media.kind != .image,media.sourcePlays {media.stillFrameSelection = .first}
         media.sourcePlays=false
         var project=GalleryProject();project.items=[media]
         project.canvas.width=640;project.canvas.height=360;project.canvas.background = .transparent
@@ -141,12 +143,12 @@ struct FramingEditor: View {
     }
     private func cropNumber(_ title:String,key:WritableKeyPath<Crop,Double>,maximum:Double)->some View {
         VStack(alignment:.leading) {
-            Text(title).font(.caption).foregroundStyle(.secondary)
+            Text(title).studioType(.caption).foregroundStyle(.secondary)
             TextField(title,value:Binding(get:{crop[keyPath:key]*100},set:{value in
                 var next=crop;next[keyPath:key]=bounded(value/100,key == \.width || key == \.height ? 0.0001:0,max(0.0001,maximum))
                 if let item {next=CropGeometry.constrained(next,sourceAspect:Double(item.width)/Double(item.height),ratio:ratio,preferHeight:key == \.height)}
                 crop=next
-            }),format:.number.precision(.fractionLength(2))).textFieldStyle(.roundedBorder)
+            }),format:.number.precision(.fractionLength(2))).textFieldStyle(StudioTextFieldStyle())
         }
     }
     private func resize(_ start:Crop,corner:Int,point:CGPoint,size:CGSize,sourceRatio:Double) {
