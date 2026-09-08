@@ -64,7 +64,7 @@ final class StudioJourneyUITests: XCTestCase {
                     let tabs = window.descendants(matching: .any).matching(identifier: "galileo.inspector-tabs").firstMatch
                     let choice = tabs.buttons["Media"]; XCTAssertTrue(choice.isHittable); choice.click()
                     XCTAssertTrue(window.buttons["Edit framing…"].waitForExistence(timeout: 4))
-                    try Data("Visible Media inspector verified by XCUITest".utf8).write(to: root.appendingPathComponent("media-tab.checked"), options: .atomic)
+                    let next = window.buttons["Next frame"]; XCTAssertTrue(next.isHittable); next.click()
                 case "capture-light", "capture-dark":
                     let shot = window.screenshot()
                     let attachment = XCTAttachment(screenshot: shot); attachment.name = name; attachment.lifetime = .keepAlways; add(attachment)

@@ -69,9 +69,10 @@ import GalileoNative
             try step("numeric-field", directory: directory)
             try await wait("Styled numeric field must accept keyboard entry") { session.project.canvas.width == 2048 }
             // The driver moves focus by selecting an inspector tab, not a hidden command.
+            let beforeInspectorCheck = playback.frame
             try step("media-tab", directory: directory)
-            try await wait("Driver must finish the visible inspector check") {
-                fm.fileExists(atPath: directory.appendingPathComponent("media-tab.checked").path)
+            try await wait("Driver must finish the visible inspector check and actual frame step") {
+                playback.frame != beforeInspectorCheck
             }
             outcomes.append("styled-field-and-inspector-tabs")
 
