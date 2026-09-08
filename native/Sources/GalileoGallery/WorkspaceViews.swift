@@ -1,3 +1,4 @@
+import PitchdogStudioUI
 import SwiftUI
 import AppKit
 import GalileoCore
@@ -43,7 +44,7 @@ struct FramingEditor: View {
     var body:some View {
         VStack(spacing:16) {
             HStack {
-                Text("Framing").font(.title2.weight(.semibold));Spacer()
+                Text("Framing").studioType(.sectionTitle);Spacer()
                 Button("Cancel"){dismiss()}.keyboardShortcut(.cancelAction)
                 Button("Apply") {
                     guard item?.sha256==sourceHash else {error="The source changed. Reopen Framing before applying.";return}
@@ -92,7 +93,7 @@ struct FramingEditor: View {
                 }.frame(height:320)
                 if let filledPreview {
                     HStack(spacing:14) {
-                        Text(item.fit == .cover ? "Filled frame":"Fitted frame").font(.caption).foregroundStyle(.secondary)
+                        Text(item.fit == .cover ? "Filled frame":"Fitted frame").studioType(.caption).foregroundStyle(.secondary)
                         NativePreview(snapshot:filledPreview,revision:filledRevision,frame:0)
                             .frame(maxWidth:.infinity).frame(height:105).accessibilityLabel("Proposed crop in its display frame")
                     }
@@ -105,7 +106,7 @@ struct FramingEditor: View {
                 }
                 if item.fit == .cover {
                     HStack {
-                        Text("Fill position").font(.caption).foregroundStyle(.secondary)
+                        Text("Fill position").studioType(.caption).foregroundStyle(.secondary)
                         TextField("Horizontal position",value:Binding(get:{focal.x*100},set:{focal.x=bounded($0/100,0,1)}),format:.number.precision(.fractionLength(1))).textFieldStyle(.roundedBorder).frame(width:70).accessibilityLabel("Horizontal fill position percent")
                         TextField("Vertical position",value:Binding(get:{focal.y*100},set:{focal.y=bounded($0/100,0,1)}),format:.number.precision(.fractionLength(1))).textFieldStyle(.roundedBorder).frame(width:70).accessibilityLabel("Vertical fill position percent")
                         Spacer()
@@ -141,7 +142,7 @@ struct FramingEditor: View {
     }
     private func cropNumber(_ title:String,key:WritableKeyPath<Crop,Double>,maximum:Double)->some View {
         VStack(alignment:.leading) {
-            Text(title).font(.caption).foregroundStyle(.secondary)
+            Text(title).studioType(.caption).foregroundStyle(.secondary)
             TextField(title,value:Binding(get:{crop[keyPath:key]*100},set:{value in
                 var next=crop;next[keyPath:key]=bounded(value/100,key == \.width || key == \.height ? 0.0001:0,max(0.0001,maximum))
                 if let item {next=CropGeometry.constrained(next,sourceAspect:Double(item.width)/Double(item.height),ratio:ratio,preferHeight:key == \.height)}

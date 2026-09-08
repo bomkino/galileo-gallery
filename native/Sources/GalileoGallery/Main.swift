@@ -2,11 +2,14 @@ import AppKit
 import SwiftUI
 import GalileoCore
 import GalileoNative
+import PitchdogStudioUI
 
 @main struct GalileoMain {
     @MainActor static func main() {
         let application=NSApplication.shared
         application.setActivationPolicy(.regular)
+        do { try GalileoType.load() }
+        catch { application.presentError(error); return }
         let documents=GalleryDocumentController()
         let delegate=ApplicationDelegate(documents:documents)
         application.delegate=delegate
@@ -148,7 +151,7 @@ import GalileoNative
     }
     private func window<V:View>(title:String,view:V,size:NSSize)->NSWindowController {
         let window=NSWindow(contentRect:NSRect(origin:.zero,size:size),styleMask:[.titled,.closable],backing:.buffered,defer:false)
-        window.title=title;window.isReleasedWhenClosed=false;window.contentView=NSHostingView(rootView:view);window.center();return NSWindowController(window:window)
+        window.title=title;window.isReleasedWhenClosed=false;window.contentView=NSHostingView(rootView:view.studioType(.bodyCompact).studioTypography(GalileoType.typography));window.center();return NSWindowController(window:window)
     }
 }
 @MainActor func applyAppearance() {
@@ -163,7 +166,7 @@ struct SettingsView:View {
     var body:some View {
         Form {
             Picker("Appearance",selection:$appearance) {Text("System").tag("system");Text("Light").tag("light");Text("Dark").tag("dark")}
-            Text("Interface appearance never changes your exported artwork.").font(.callout).foregroundStyle(.secondary)
+            Text("Interface appearance never changes your exported artwork.").studioType(.bodyCompact).foregroundStyle(.secondary)
         }.formStyle(.grouped).padding(20).frame(width:440).onChange(of:appearance){ applyAppearance() }
     }
 }

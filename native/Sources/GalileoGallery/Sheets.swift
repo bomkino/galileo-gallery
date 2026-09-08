@@ -1,3 +1,4 @@
+import PitchdogStudioUI
 import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
@@ -30,8 +31,8 @@ struct SceneChooser:View {
     var body:some View {
         VStack(spacing:0) {
             HStack {
-                Text("Scenes").font(.title2.weight(.semibold));Spacer()
-                if draft.scene != SceneCatalog.defaults(for:draft.scene.variantID) {Text("Modified").font(.caption).foregroundStyle(.secondary)}
+                Text("Scenes").studioType(.sectionTitle);Spacer()
+                if draft.scene != SceneCatalog.defaults(for:draft.scene.variantID) {Text("Modified").studioType(.caption).foregroundStyle(.secondary)}
                 Button("Cancel"){dismiss()}.keyboardShortcut(.cancelAction)
                 Button("Apply") {
                     let scene=draft.scene,timing=draft.timing
@@ -49,7 +50,7 @@ struct SceneChooser:View {
                         ForEach(SceneFamily.allCases,id:\.self) {family in Label(family.name,systemImage:family.symbol).tag(family)}
                     }.listStyle(.sidebar)
                     if !presets.isEmpty {
-                        Divider();Text("Saved presets").font(.caption).foregroundStyle(.secondary).padding(.horizontal,12)
+                        Divider();Text("Saved presets").studioType(.caption).foregroundStyle(.secondary).padding(.horizontal,12)
                         ScrollView {
                             VStack(alignment:.leading,spacing:8) {
                                 ForEach(presets) { entry in
@@ -79,7 +80,7 @@ struct SceneChooser:View {
                         NativePreview(snapshot:snapshot,revision:previewRevision,frame:playback.frame,onError:{error=$0})
                         TransportBar(playback:playback,schedule:snapshot.plan.schedule,cues:snapshot.plan.spotlights)
                     }
-                    if applyTiming {Text("Applies saved motion timing as well as the scene.").font(.caption).foregroundStyle(.secondary)}
+                    if applyTiming {Text("Applies saved motion timing as well as the scene.").studioType(.caption).foregroundStyle(.secondary)}
                     if draft.items.isEmpty {Text("Add media to preview your scene.").foregroundStyle(.secondary)}
                     if let error {Text(error).foregroundStyle(.red)}
                 }.padding(20)
@@ -135,7 +136,7 @@ struct ExportOptions:View {
     }
     var body:some View {
         VStack(alignment:.leading,spacing:18) {
-            Text("Export").font(.title2.weight(.semibold))
+            Text("Export").studioType(.sectionTitle)
             Form {
                 Picker("Format",selection:$settings.format) {ForEach(OutputFormat.allCases,id:\.self){Text($0.label).tag($0)}}
                 if settings.format != .png {
@@ -188,9 +189,9 @@ struct ExportsView:View {
     @ObservedObject var exports=ExportCenter.shared
     var body:some View {
         VStack(alignment:.leading,spacing:16) {
-            HStack {Text("Exports").font(.title2.weight(.semibold));Spacer();if exports.busy {ProgressView().controlSize(.small)}}
+            HStack {Text("Exports").studioType(.sectionTitle);Spacer();if exports.busy {ProgressView().controlSize(.small)}}
             if exports.busy {
-                Text(exports.activeName).font(.headline).lineLimit(2).textSelection(.enabled)
+                Text(exports.activeName).studioType(.panelTitle).lineLimit(2).textSelection(.enabled)
                 ProgressView(value:exports.progress)
                 HStack {Text(exports.status).monospacedDigit();Spacer();Button("Cancel current",action:exports.cancel).disabled(exports.progress>=0.99)}
             }
@@ -204,7 +205,7 @@ struct ExportsView:View {
                     ForEach(exports.history) {entry in
                         HStack {
                             Image(systemName:entry.result == nil ? "exclamationmark.circle":"checkmark.circle")
-                            VStack(alignment:.leading) {Text(entry.name).lineLimit(1);if let error=entry.error {Text(error).font(.caption).foregroundStyle(.secondary)}}
+                            VStack(alignment:.leading) {Text(entry.name).lineLimit(1);if let error=entry.error {Text(error).studioType(.caption).foregroundStyle(.secondary)}}
                             Spacer()
                             if let result=entry.result {Button("Show"){NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath:result.outputPath)])}}
                         }

@@ -1,3 +1,4 @@
+import PitchdogStudioUI
 import SwiftUI
 import AppKit
 import GalileoCore
@@ -80,7 +81,7 @@ struct SourceClipPreview:View {
     var body:some View {
         VStack(spacing:16) {
             HStack {
-                Text(draft.name).font(.headline).lineLimit(1);Spacer()
+                Text(draft.name).studioType(.panelTitle).lineLimit(1);Spacer()
                 Button("Cancel"){dismiss()}.keyboardShortcut(.cancelAction)
                 Button("Apply") {
                     guard session.project.items.first(where:{$0.id==itemID})?.sha256==originalHash else {model.error="The source changed while previewing. Reopen the clip preview.";return}
@@ -106,7 +107,7 @@ struct SourceClipPreview:View {
             HStack {
                 Button {model.playing ? model.stop():model.play(draft)} label:{Image(systemName:model.playing ? "pause.fill":"play.fill")}.help("Preview trimmed source")
                 Slider(value:Binding(get:{model.seconds},set:model.seek),in:0...max(0.001,duration-0.002)).accessibilityLabel("Source position")
-                Text(String(format:"%.2f / %.2f s",model.seconds,duration)).monospacedDigit().font(.caption).frame(width:125,alignment:.trailing)
+                Text(String(format:"%.2f / %.2f s",model.seconds,duration)).monospacedDigit().studioType(.caption).frame(width:125,alignment:.trailing)
             }
             HStack {
                 Text("In")
@@ -125,7 +126,7 @@ struct SourceClipPreview:View {
                 Text("×");Spacer()
                 Button("Freeze here"){draft.trimStart=min(model.seconds,max(0,(draft.trimEnd ?? duration)-0.001));draft.sourcePlays=false;model.stop()}
             }
-            if let error=model.error {Text(error).foregroundStyle(.red).font(.callout).textSelection(.enabled)}
+            if let error=model.error {Text(error).foregroundStyle(.red).studioType(.bodyCompact).textSelection(.enabled)}
         }.padding(22).frame(width:760)
         .task {await model.load()}
         .onChange(of:draft.sourceLoops){_,_ in model.stop()}

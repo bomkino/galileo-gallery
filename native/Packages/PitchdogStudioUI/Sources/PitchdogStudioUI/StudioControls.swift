@@ -44,10 +44,10 @@ public struct StudioButtonStyle: ButtonStyle {
             enabled && hovering ? theme.hover : emphasis == .quiet ? theme.panel : theme.well
         let foreground = !enabled ? theme.secondary : primary ? theme.accent.readableForeground : theme.text
         configuration.label
-            .font(.system(size: 13, weight: primary ? .semibold : .medium))
+            .studioType(.action)
             .foregroundStyle(foreground.color)
             .padding(.horizontal, compact ? 7 : 11)
-            .frame(minWidth: compact ? 28 : 0, minHeight: compact ? 28 : 30)
+            .frame(minWidth: compact ? 28 : 0, minHeight: 40)
             .background(background.color, in: RoundedRectangle(cornerRadius: 7))
             .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(
                 emphasis == .quiet && !hovering ? Color.clear : theme.border.color,
@@ -73,10 +73,10 @@ public struct StudioTextFieldStyle: TextFieldStyle {
     public init(focused: Bool = false, invalid: Bool = false) { self.focused = focused; self.invalid = invalid }
     public func _body(configuration: TextField<Self._Label>) -> some View {
         configuration.textFieldStyle(.plain)
-            .font(.system(size: 13))
+            .studioType(.input)
             .foregroundStyle((invalid ? theme.error : enabled ? theme.text : theme.secondary).color)
             .padding(.horizontal, 8).padding(.vertical, 5)
-            .frame(minHeight: 28)
+            .frame(minHeight: 40)
             .background(theme.well.color, in: RoundedRectangle(cornerRadius: 6))
             .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(
                 invalid ? theme.error.color : focused && theme.isActive ? theme.focus.color : theme.border.color,
@@ -105,8 +105,8 @@ public struct StudioChoiceBar<Value: Hashable>: View {
         HStack(spacing: 3) {
             ForEach(choices) { choice in
                 Button { if selection != choice.id { selection = choice.id } } label: {
-                    Text(choice.title).font(.system(size: 13, weight: selection == choice.id ? .semibold : .regular))
-                        .lineLimit(1).frame(maxWidth: .infinity, minHeight: 30)
+                    Text(choice.title).studioType(.action)
+                        .lineLimit(1).frame(maxWidth: .infinity, minHeight: 40)
                         .foregroundStyle((enabled ? theme.text : theme.secondary).color)
                         .background(selection == choice.id ? theme.well.color : Color.clear,
                                     in: RoundedRectangle(cornerRadius: 6))
@@ -156,17 +156,17 @@ public struct StudioPicker<Selection: Hashable, Options: View>: View {
     }
     public var body: some View {
         HStack(spacing: 8) {
-            if showsLabel { Text(title).font(.system(size: 13)).foregroundStyle(theme.text.color).accessibilityHidden(true) }
+            if showsLabel { Text(title).studioType(.label).foregroundStyle(theme.text.color).accessibilityHidden(true) }
             Menu {
                 Picker(title, selection: $selection, content: options).labelsHidden()
             } label: {
                 // macOS can flatten a Menu label to native title/image. Paint the
                 // surface outside the Menu rather than losing it inside that label.
-                Text(valueLabel).font(.system(size: 13)).lineLimit(1)
+                Text(valueLabel).studioType(.input).lineLimit(1)
             }
             .menuStyle(.borderlessButton).menuIndicator(.hidden)
             .padding(.leading, 9).padding(.trailing, 24)
-            .frame(maxWidth: .infinity, minHeight: 30, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
             .foregroundStyle((enabled ? theme.text : theme.secondary).color)
             .background((hovering && enabled ? theme.hover : theme.well).color, in: RoundedRectangle(cornerRadius: 6))
             .overlay(alignment: .trailing) {

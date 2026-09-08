@@ -1,3 +1,4 @@
+import PitchdogStudioUI
 import SwiftUI
 import AppKit
 import GalileoCore
@@ -19,7 +20,7 @@ struct BackgroundControls: View {
             }
             if session.project.canvas.background == .drift {
                 HStack {
-                    Text(settings.study?.name ?? "Drift").font(.callout).lineLimit(1)
+                    Text(settings.study?.name ?? "Drift").studioType(.bodyCompact).lineLimit(1)
                     Spacer()
                     Button("Browse…") { session.choosingBackground = true }.accessibilityLabel("Browse Drift backgrounds")
                 }
@@ -112,7 +113,7 @@ struct DriftBackgroundBrowser: View {
     var body:some View {
         VStack(alignment:.leading,spacing:14) {
             HStack {
-                Text("Drift backgrounds").font(.title2.weight(.semibold));Spacer()
+                Text("Drift backgrounds").studioType(.sectionTitle);Spacer()
                 Button("Cancel"){dismiss()}.keyboardShortcut(.cancelAction)
                 Button("Use background"){choose(settings);dismiss()}.keyboardShortcut(.defaultAction).disabled(error != nil)
             }
@@ -131,7 +132,7 @@ struct DriftBackgroundBrowser: View {
                             Button {select(study)} label: {
                                 VStack(alignment:.leading,spacing:6) {
                                     DriftBackgroundThumbnail(study:study).aspectRatio(240.0/136,contentMode:.fit).clipShape(RoundedRectangle(cornerRadius:6))
-                                    Text(study.name).font(.callout).foregroundStyle(.primary).lineLimit(1)
+                                    Text(study.name).studioType(.bodyCompact).foregroundStyle(.primary).lineLimit(1)
                                 }.padding(6).background(settings.studyID==study.id ? Color.accentColor.opacity(0.12):Color.clear)
                                     .overlay(RoundedRectangle(cornerRadius:9).stroke(settings.studyID==study.id ? Color.accentColor:Color.clear,lineWidth:2))
                             }.buttonStyle(.plain).accessibilityLabel(study.name).accessibilityAddTraits(settings.studyID==study.id ? .isSelected:[])
@@ -141,9 +142,9 @@ struct DriftBackgroundBrowser: View {
                 }.frame(width:390)
                 VStack(alignment:.leading,spacing:12) {
                     NativePreview(snapshot:snapshot,revision:revision,frame:playback.frame,onError:{error=$0})
-                    Text(settings.study?.name ?? "Background").font(.headline)
+                    Text(settings.study?.name ?? "Background").studioType(.panelTitle)
                     TransportBar(playback:playback,schedule:snapshot.plan.schedule,cues:snapshot.plan.spotlights)
-                    if let error {Text(error).foregroundStyle(.red).font(.caption)}
+                    if let error {Text(error).foregroundStyle(.red).studioType(.caption)}
                 }.frame(minWidth:360,maxWidth:.infinity)
             }
         }.padding(20).frame(width:880,height:600)

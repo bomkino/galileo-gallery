@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import PitchdogStudioUI
 import UniformTypeIdentifiers
 import GalileoCore
 import GalileoNative
@@ -174,7 +175,7 @@ private final class DocumentStorage:@unchecked Sendable {
         window.setFrameAutosaveName("GalileoStudio");window.center()
         super.init(window:window);galleryDocument=document
         let view=StudioView(session:session,playback:playback,addMedia:{[weak document] in document?.addMedia(nil)},replaceMedia:{[weak document] in document?.replaceMedia(nil)},prepareImport:{[weak document] urls in document?.prepareImport(urls)})
-        window.contentView=NSHostingView(rootView:view)
+        window.contentView=NSHostingView(rootView:view.studioType(.bodyCompact).studioTypography(GalileoType.typography))
         let toolbar=NSToolbar(identifier:"GalileoStudioToolbar");toolbar.delegate=self;toolbar.displayMode = .iconAndLabel;toolbar.allowsUserCustomization=false;window.toolbar=toolbar
         for (name,action) in [(Notification.Name.togglePlayback,0),(.stepBackward,1),(.stepForward,2)] {
             observers.append(NotificationCenter.default.addObserver(forName:name,object:window,queue:.main) { [weak playback] _ in MainActor.assumeIsolated { if action==0 {playback?.toggle()} else {playback?.step(action==1 ? -1:1)} } })

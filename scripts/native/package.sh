@@ -29,6 +29,8 @@ cp native/.codecs/identity.txt "$app/Contents/Resources/MediaTools/identity.txt"
 for tool in ffmpeg ffprobe; do
     codesign --verify --strict "$app/Contents/Resources/MediaTools/$tool"
 done
+python3 scripts/native/verify-studio-fonts.py native/Resources/StudioFonts
+ditto native/Resources/StudioFonts "$app/Contents/Resources/StudioFonts"
 cp native/Resources/Help.html "$app/Contents/Resources/Help.html"
 GALLERY_APP="$app" GALLERY_VERSION="$version" GALLERY_SHA="$(git rev-parse HEAD)" python3 - <<'PY'
 import os, pathlib, plistlib, json

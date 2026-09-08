@@ -60,3 +60,9 @@ This is implemented and awaiting actual input acceptance. Local macOS 27 beta / 
 plugin. The installed macOS 15.4 SDK with SwiftPM's native backend builds the app.
 Local diagnostic pointer attempts have not passed; native hosted CI must establish
 drop, undo and the remaining journey. This is not a release candidate or a gesture PASS.
+
+### Native typography continuation — 2026-09-08
+
+Owner requests richer blacks and the pitch.dog type system in both native apps. Preserve both consumers' existing v13.0.0 pin `786b4a2b671182319320f922b8de8f927ea3a002`; its metadata remains production-candidate, so this is not an upstream version promotion. `native/Resources/StudioFonts/SOURCE.json` records the exact native handoff binaries, hashes and canonical UI roles. The application owns three font resources and their lifecycle. The resource-free package projects all fourteen semantic roles into native fonts. Exact-file Core Text construction avoids the documented v13 Eyebrow installed-name collision. Fonts are resolved once, not per row or frame. SF Symbols retain native icon geometry; artwork/rendering fonts are unchanged.
+
+Native role sizes use the canonical minimum rem bound at 16 points per rem; compact pointer controls are at least 40 points. No hover/selection weight changes. Role values were compared against canonical tokens, generated role contracts and the component map. Local SDK15.4 builds pass; a standalone Core Text proof verifies all 14 actual variable instances, approved weights/widths and representative Latin/numeric glyph mapping. Actual window glyph/geometry, language expansion and accessibility acceptance remain open. Raw proofs are preserved in the shared project's existing `artifacts/galileo-drift-2026-09-08` location.

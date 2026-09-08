@@ -1,3 +1,4 @@
+import PitchdogStudioUI
 import SwiftUI
 import AppKit
 import GalileoCore
@@ -21,7 +22,7 @@ struct MediaInspector: View {
     private func toggle(_ title:String,get:@escaping(MediaItem)->Bool,set:@escaping(inout MediaItem,Bool)->Void)->some View {
         HStack {
             Toggle(title,isOn:Binding(get:{items.first.map(get) ?? false},set:{v in edit(title){set(&$0,v)}}))
-            if mixed(get) {Text("Mixed").font(.caption).foregroundStyle(.secondary)}
+            if mixed(get) {Text("Mixed").studioType(.caption).foregroundStyle(.secondary)}
         }
     }
     private func number(_ title:String,range:ClosedRange<Double>,unit:String="",step:Double=1,
@@ -32,11 +33,11 @@ struct MediaInspector: View {
     var body:some View {
         VStack(alignment:.leading,spacing:22) {
             if let item=items.first {
-                Text(items.count>1 ? "\(items.count) selected":item.name).font(.headline).lineLimit(3).textSelection(.enabled)
+                Text(items.count>1 ? "\(items.count) selected":item.name).studioType(.panelTitle).lineLimit(3).textSelection(.enabled)
                 InspectorSection(title:"Source") {
                     if item.unavailable != nil {Label("Source missing",systemImage:"exclamationmark.triangle").foregroundStyle(.orange)}
-                    if let warning=item.originalUnavailable {Text("Archived original unavailable: \(warning)").font(.caption).foregroundStyle(.orange).lineLimit(3)}
-                    if items.count==1 {Text("\(item.width) × \(item.height)").font(.caption).foregroundStyle(.secondary)}
+                    if let warning=item.originalUnavailable {Text("Archived original unavailable: \(warning)").studioType(.caption).foregroundStyle(.orange).lineLimit(3)}
+                    if items.count==1 {Text("\(item.width) × \(item.height)").studioType(.caption).foregroundStyle(.secondary)}
                     toggle("Include",get:{$0.included},set:{$0.included=$1})
                     HStack {
                         Button("Replace…",action:replace).disabled(items.count != 1)
@@ -66,7 +67,7 @@ struct MediaInspector: View {
                             if enabled {session.markClosing(item.id)} else {edit("Clear closing"){$0.closing=false}}
                         }))
                         if item.closing == true {
-                            Text(session.project.timing.playMode == .loop ? "Closing is used in Once or Repeat." : "Closing holds at the end of each cycle.").font(.caption).foregroundStyle(.secondary)
+                            Text(session.project.timing.playMode == .loop ? "Closing is used in Once or Repeat." : "Closing holds at the end of each cycle.").studioType(.caption).foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -119,7 +120,7 @@ struct MediaInspector: View {
                         let maximumOut=items.compactMap(\.duration).min() ?? 0
                         if minimumOut<=maximumOut {
                             number("Out",range:minimumOut...maximumOut,unit:"s",step:0.01,get:{$0.trimEnd ?? $0.duration!},set:{$0.trimEnd=$1})
-                        } else {Text("Select one clip to edit its out point.").font(.caption).foregroundStyle(.secondary)}
+                        } else {Text("Select one clip to edit its out point.").studioType(.caption).foregroundStyle(.secondary)}
                     }
                 }
             } else {Text("Select media to edit its framing.").foregroundStyle(.secondary)}

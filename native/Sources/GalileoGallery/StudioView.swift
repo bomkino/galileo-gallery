@@ -37,7 +37,7 @@ struct StudioView:View {
                 Divider()
                 HStack(alignment:.top,spacing:10) {
                     Image(systemName:"exclamationmark.triangle").foregroundStyle(.orange)
-                    Text(issue).font(.callout).textSelection(.enabled).frame(maxWidth:.infinity,alignment:.leading)
+                    Text(issue).studioType(.bodyCompact).textSelection(.enabled).frame(maxWidth:.infinity,alignment:.leading)
                     Button("Dismiss") { session.issue=nil }.buttonStyle(.borderless)
                 }.padding(12).background(Color(nsColor:.controlBackgroundColor))
             }
@@ -45,7 +45,7 @@ struct StudioView:View {
                 Divider()
                 HStack {
                     if exports.busy { ProgressView(value:exports.progress).frame(width:100) }
-                    Text("\(exports.activeName) · \(exports.error ?? exports.status)").font(.caption).lineLimit(2)
+                    Text("\(exports.activeName) · \(exports.error ?? exports.status)").studioType(.caption).lineLimit(2)
                     Spacer()
                     Button("Exports") { NotificationCenter.default.post(name:.showExports,object:nil) }.buttonStyle(.borderless)
                 }.padding(.horizontal,16).padding(.vertical,8)
@@ -81,11 +81,11 @@ struct StudioView:View {
     }
     private var library:some View {
         VStack(spacing:0) {
-            HStack { Text("Media").font(.headline);Spacer();Text("\(session.project.items.count)").foregroundStyle(.secondary).monospacedDigit() }.padding(16)
+            HStack { Text("Media").studioType(.panelTitle);Spacer();Text("\(session.project.items.count)").foregroundStyle(.secondary).monospacedDigit() }.padding(16)
             TextField("Find media",text:$session.mediaQuery).textFieldStyle(StudioTextFieldStyle(focused:mediaSearchFocused)).focused($mediaSearchFocused).padding(.horizontal,12).padding(.bottom,8)
             if !session.mediaQuery.isEmpty {
                 Button("Clear search to reorder") { session.mediaQuery="" }
-                    .buttonStyle(StudioButtonStyle(.quiet)).font(.caption).padding(.horizontal,12).padding(.bottom,6)
+                    .buttonStyle(StudioButtonStyle(.quiet)).studioType(.caption).padding(.horizontal,12).padding(.bottom,6)
             }
             if session.project.items.isEmpty {
                 VStack(spacing:12) {
@@ -97,13 +97,13 @@ struct StudioView:View {
             }
             Divider()
             if session.importing {
-                HStack { ProgressView().controlSize(.small);Text(session.importStatus).font(.caption).lineLimit(2);Spacer();Button("Cancel",action:session.cancelImport).buttonStyle(.borderless) }.padding(12)
+                HStack { ProgressView().controlSize(.small);Text(session.importStatus).studioType(.caption).lineLimit(2);Spacer();Button("Cancel",action:session.cancelImport).buttonStyle(.borderless) }.padding(12)
             } else {
                 HStack {
                     Button(action:addMedia) { Image(systemName:"plus") }.help("Add media")
                     Button(action:session.removeSelection) { Image(systemName:"minus") }.disabled(session.selection.isEmpty).help("Remove selected media")
                     Spacer()
-                    Text("\(session.project.activeItems.count) used").font(.caption).foregroundStyle(.secondary)
+                    Text("\(session.project.activeItems.count) used").studioType(.caption).foregroundStyle(.secondary)
                 }.buttonStyle(.borderless).padding(12)
             }
         }.studioSurface(.panel)
@@ -113,7 +113,7 @@ struct StudioView:View {
             if session.project.items.isEmpty {
                 VStack(spacing:16) {
                     Image(systemName:"rectangle.stack").font(.system(size:48,weight:.ultraLight)).foregroundStyle(.secondary)
-                    Text("Drop images, video or a PDF").font(.title2.weight(.medium))
+                    Text("Drop images, video or a PDF").studioType(.display)
                     Button("Add media",action:addMedia).buttonStyle(StudioButtonStyle(.primary)).controlSize(.large)
                 }.frame(maxWidth:.infinity,maxHeight:.infinity)
             } else {
@@ -129,7 +129,7 @@ struct StudioView:View {
                 Text("\(session.project.canvas.width) × \(session.project.canvas.height)")
                 Spacer()
                 Text("\(session.project.export.frameRate.label) fps")
-            }.font(.caption).foregroundStyle(.secondary).monospacedDigit().padding(.horizontal,24).padding(.bottom,12)
+            }.studioType(.caption).foregroundStyle(.secondary).monospacedDigit().padding(.horizontal,24).padding(.bottom,12)
             Divider()
             TransportBar(playback:playback,schedule:session.snapshot.plan.schedule,cues:session.snapshot.plan.spotlights).padding(16)
         }.studioSurface(.surround)
@@ -147,14 +147,14 @@ struct MediaRow:View {
                 else { Image(systemName:item.kind == .image ? "photo":"film").foregroundStyle(.secondary) }
             }.frame(width:52,height:38).clipShape(RoundedRectangle(cornerRadius:4))
             VStack(alignment:.leading,spacing:3) {
-                Text(item.name).font(.system(size:12,weight:.medium)).lineLimit(1).help(item.name)
-                if item.unavailable != nil { Text("Missing · Replace or locate").font(.caption2).foregroundStyle(.orange) }
-                else if !item.included { Text("Excluded").font(.caption2).foregroundStyle(.secondary) }
+                Text(item.name).studioType(.code).lineLimit(1).help(item.name)
+                if item.unavailable != nil { Text("Missing · Replace or locate").studioType(.caption).foregroundStyle(.orange) }
+                else if !item.included { Text("Excluded").studioType(.caption).foregroundStyle(.secondary) }
                 HStack(spacing:6) {
                     if item.opening { Image(systemName:"play.rectangle").help("Opening").accessibilityLabel("Opening") }
                     if item.spotlight?.enabled == true { Image(systemName:"viewfinder").help("Spotlight").accessibilityLabel("Spotlight") }
                     if item.closing == true { Image(systemName:"flag.checkered").help("Closing").accessibilityLabel("Closing") }
-                }.font(.caption).foregroundStyle(.secondary)
+                }.studioType(.caption).foregroundStyle(.secondary)
             }
             Spacer(minLength:0)
         }.padding(.vertical,4).opacity(item.included ? 1:0.55)
@@ -209,17 +209,17 @@ struct TransportBar:View {
     }
     private var frameReadout:some View {
         HStack(spacing:8) {
-            Text(schedule.label(frame:playback.frame)).font(.system(.caption,design:.monospaced)).lineLimit(1).fixedSize()
+            Text(schedule.label(frame:playback.frame)).studioType(.data).lineLimit(1).fixedSize()
             TextField("Frame",value:Binding(get:{playback.frame},set:{playback.seek($0)}),format:.number.grouping(.never))
                 .frame(width:58).textFieldStyle(.roundedBorder).accessibilityLabel("Frame index, starting at zero")
-            Text("/ \(schedule.totalFrames)").font(.caption).foregroundStyle(.secondary).lineLimit(1).fixedSize()
+            Text("/ \(schedule.totalFrames)").studioType(.caption).foregroundStyle(.secondary).lineLimit(1).fixedSize()
         }.monospacedDigit().fixedSize()
     }
 }
 
 struct InspectorSection<Content:View>:View {
     let title:String;@ViewBuilder var content:()->Content
-    var body:some View { VStack(alignment:.leading,spacing:12) { Text(title).font(.system(size:12,weight:.semibold)).foregroundStyle(.secondary);content() } }
+    var body:some View { VStack(alignment:.leading,spacing:12) { Text(title).studioType(.label).foregroundStyle(.secondary);content() } }
 }
 struct NumberControl:View {
     let label:String;@Binding var value:Double;let range:ClosedRange<Double>;var unit="";var step=1.0;var mixed=false
@@ -229,10 +229,10 @@ struct NumberControl:View {
     var body:some View {
         VStack(spacing:5) {
             HStack {
-                Text(label).font(.callout);Spacer()
+                Text(label).studioType(.bodyCompact);Spacer()
                 TextField(mixed ? "Mixed":label,text:$text).multilineTextAlignment(.trailing).frame(width:72).textFieldStyle(StudioTextFieldStyle(focused:focused)).focused($focused)
                     .onSubmit(commit).onChange(of:focused) { _,focus in if focus { begin() } else { commit();end() } }
-                if !unit.isEmpty { Text(unit).font(.caption).foregroundStyle(.secondary).frame(width:16,alignment:.leading) }
+                if !unit.isEmpty { Text(unit).studioType(.caption).foregroundStyle(.secondary).frame(width:16,alignment:.leading) }
             }
             if !mixed { StudioSlider(label, value:$value, in:range, step:step,
                                     onEditingChanged:{ editing in editing ? begin():end() }).frame(height:22) }
@@ -250,7 +250,7 @@ struct SceneInspector:View {
     }
     var body:some View {
         VStack(alignment:.leading,spacing:24) {
-            HStack { VStack(alignment:.leading,spacing:3) { Text(variant.family.name).font(.title3.weight(.semibold));Text(variant.name).font(.caption).foregroundStyle(.secondary) };Spacer();Button("Change") { session.choosingScene=true } }
+            HStack { VStack(alignment:.leading,spacing:3) { Text(variant.family.name).studioType(.panelTitle);Text(variant.name).studioType(.caption).foregroundStyle(.secondary) };Spacer();Button("Change") { session.choosingScene=true } }
             InspectorSection(title:"Canvas") {
                 StudioPicker("Size",selection:Binding(get:{"\(session.project.canvas.width)x\(session.project.canvas.height)"},set:{ value in
                     let parts=value.split(separator:"x").compactMap{Int($0)}
@@ -267,7 +267,7 @@ struct SceneInspector:View {
                 NumberControl(label:"Motion duration",value:Binding(get:{Double(session.project.timing.durationMilliseconds)/1000},set:{value in session.commit("Change duration"){$0.timing.durationMilliseconds=Int64(value*1000)} }),range:1...600,unit:"s",step:0.1,begin:{session.beginGesture("Change duration")},end:session.endGesture)
                 if session.project.activeItems.contains(where: { $0.spotlight?.enabled == true }) {
                     Text(String(format: "With spotlights: %.2f s per cycle", session.snapshot.plan.schedule.cycleDuration))
-                        .font(.caption).foregroundStyle(.secondary)
+                        .studioType(.caption).foregroundStyle(.secondary)
                 }
                 Picker("Playback",selection:Binding(get:{session.project.timing.playMode},set:{mode in session.commit("Change playback"){$0.timing.playMode=mode} })) { Text("Once").tag(PlayMode.once);Text("Repeat").tag(PlayMode.repeatCount);Text("Loop").tag(PlayMode.loop) }
                 if session.project.timing.playMode == .repeatCount {
@@ -280,7 +280,7 @@ struct SceneInspector:View {
                 Button("Reset composition") { session.commit("Reset composition"){$0.scene=SceneCatalog.defaults(for:variant.id)} }.buttonStyle(.borderless)
             }
             if !session.project.migrationNotes.isEmpty {
-                DisclosureGroup("Imported legacy document") { ForEach(session.project.migrationNotes,id:\.self) { Text($0).font(.caption).foregroundStyle(.secondary).padding(.top,6) } }
+                DisclosureGroup("Imported legacy document") { ForEach(session.project.migrationNotes,id:\.self) { Text($0).studioType(.caption).foregroundStyle(.secondary).padding(.top,6) } }
             }
         }.padding(16)
     }
