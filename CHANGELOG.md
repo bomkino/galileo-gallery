@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.0.0 — 5 October 2026 (Galileo 2)
+
+**Galileo 2: a ground-up native rebuild, made for 9:16 first.** Drop artwork, photographs or clips and they open as a moving gallery, previewed exactly as it exports.
+
+- Every scene lays itself out for 1080 × 1920, and the work flows up the screen. 4:5, 1:1 and 16:9 are one click away in the toolbar; Cinema and 4K are in the menu.
+- Fourteen scenes in four sections. One at a time: Vitrine, Hang, Compare. Walk-through: Corridor, Shelf, Wall. In motion: Flow, Orbit, Opening. On the table: Scatter, Hand, Deck, Story, Contact.
+- Scenes sit beside the stage at the shape you are making. Rest the pointer on one to watch it on the stage; click to use it; the arrow keys step through.
+- Loop lengths in one click (10, 15, 30 or 60 s), titles in four macOS faces, recorded foley that follows the motion, a backdrop palette drawn from your own work, and film finishes.
+- Exports MP4, HEVC, ProRes, ProRes 4444 with transparency, PNG frames or a still, for one shape or several at once.
+- Native SwiftUI and Metal on Apple silicon, macOS 14 or later. Opens on sample works, already playing. Comes with Backdrop 1.0.0, the background studio whose library Galileo reads.
+
+The version continues from Galileo Gallery 2.4.0. This release replaces the Galileo Gallery code on `main`; it is kept at the tag `v1-final`. Galileo 2 uses its own bundle identifier and `.galileo` documents, so Galileo Gallery can stay installed beside it.
+
 ## 2.4.0 — prerelease, 8 September 2026
 
 - Native media-rail drag and undo; remembered First/Middle/Last/Custom Still choices.

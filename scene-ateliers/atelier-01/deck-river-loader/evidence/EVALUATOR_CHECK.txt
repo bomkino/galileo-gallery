@@ -1,1 +1,0 @@
-{"scene":"deck-river-loader","pass":true,"finite":true,"momentum":"position-and-size-matched","supportingFrames":"physically-cleared","directedSegments":"validated"}
