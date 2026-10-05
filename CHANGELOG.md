@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.2.0 — 5 October 2026 (Galileo 2)
+
+**A contact sheet that rolls into a turning ring, and new finishes from pitch.dog's HoloCloth research.**
+
+- **Unroll**, a new style of Contact: the works' contact sheet slides into one strip, curls into a ring that turns once and shows its far side, then unrolls and folds back into the sheet. A drum in a wide frame, a reel-like wheel in a tall one. Ripple sets the lines off one after another.
+- **Satin**, a new surface on the Finish page: a woven sheen that gathers in folds and curls, with shade in their valleys, kept light on flat cards and off dark artwork.
+- **Foil** is now a thin film: its colour comes from light interfering in the film, shifts as the card tilts, and shows only on the light parts of a work, so dark passages stay deep.
+- Detail on tilted cards stays sharper: textures are filtered along the slant.
+- Fixed: floor reflections in Orbit and Corridor showed the backs of the cards; they now show a faint mirror image of the work.
+- The background now follows only the work facing you: a card turned away, such as the far side of a ring, no longer tints the room.
+
 ## 3.1.0 — 5 October 2026 (Galileo 2)
 
 **Richer scenes from pitch.dog's carousel research, a room that takes on the colour of the work, and scrubbing that keeps up with you.**
