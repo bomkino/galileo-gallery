@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.1.0 — 5 October 2026 (Galileo 2)
+
+**Richer scenes from pitch.dog's carousel research, a room that takes on the colour of the work, and scrubbing that keeps up with you.**
+
+- New scenes: **Rail** (one work at a time, flat at the centre, its neighbours tilting away) and **Focus** (a strip that zooms in on one work at a time and back out) join One at a time; **Vortex** (one work holds the centre while rings of the others orbit around it) and **Loom** (works weave together from threads and come apart at the top) join In motion.
+- New styles: Flow as **Calm** or **Cascade** (each work arrives turned away and peels flat); Wall as **Tilted** or **Lanes** (three lanes rising at different speeds on slow waves); Contact as **Marks** or **Assemble** (the works fly in from depth and settle into a contact sheet).
+- **Follow work**, on the Colour page, leans the background's colours towards the work in the middle of the frame as it changes. It is on by default where one work leads, as in Vitrine, Rail, Focus and Vortex.
+- Scroll with two fingers over the stage to move through the loop the way the work flows, with the trackpad's own momentum; playback carries on when you let go. The playhead holds on the moments the cards land as you scrub past them (Option scrubs freely), and Command-[ and Command-] jump between them.
+
 ## 3.0.0 — 5 October 2026 (Galileo 2)
 
 **Galileo 2: a ground-up native rebuild, made for 9:16 first.** Drop artwork, photographs or clips and they open as a moving gallery, previewed exactly as it exports.
