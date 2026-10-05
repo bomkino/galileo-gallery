@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.3.0 — 5 October 2026 (Galileo 2)
+
+**New backgrounds from Backdrop 2.0, and backgrounds that loop seamlessly everywhere.**
+
+- Six new backgrounds on the Colour page: **Caustics** (sunlight through moving water), **Iridescence** (a pearl sheen on a folding sheet), and the gradients **Solid**, **Linear**, **Radial** and **Conic**.
+- The Frost, Rays and Dot Grid backgrounds no longer jump where the loop joins.
+- Looks saved in Backdrop 2.0 keep their film finish and loop length in the library; Galileo still applies the scene's own finish.
+- Comes with Backdrop 2.0.0, which now lives at [bomkino/backdrop](https://github.com/bomkino/backdrop).
+
 ## 3.2.0 — 5 October 2026 (Galileo 2)
 
 **A contact sheet that rolls into a turning ring, and new finishes from pitch.dog's HoloCloth research.**
