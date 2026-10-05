@@ -1,1 +1,0 @@
-{"scene":"deck-river","pass":true,"seam":"continuous-arc-length","camera":"fixed","hiddenTeleports":0,"yaw":0}

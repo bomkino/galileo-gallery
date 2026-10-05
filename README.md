@@ -1,41 +1,95 @@
-# Galileo Gallery
+# Galileo 2
 
-A silent, local motion studio for slides, images and looping video.
+Artwork and photographs into moving galleries, made for 9:16 first. Drop your work, pick a scene, press Export.
 
-**Apple silicon · macOS 14 or later.** Native AppKit/SwiftUI, Core Image/Metal composition and AVFoundation picture export. No browser runtime, account, conversion service or sound controls.
+**[Download the latest release](https://github.com/bomkino/galileo-gallery/releases/latest)** · Apple silicon, macOS 14 or later
 
-[Download the latest Mac release](https://github.com/bomkino/galileo-gallery/releases/latest) · [Install](INSTALL.md) · [Use Galileo](docs/native/README.md) · [Supported media](docs/native/MEDIA.md)
+Galileo 2 is a native Mac app, rebuilt from the ground up. This repository holds it together with Drift 2 and Backdrop, which share its engine and interface. Galileo Gallery is kept at the tag [`v1-final`](https://github.com/bomkino/galileo-gallery/tree/v1-final).
 
-## Direct the sequence
+---
 
-Import images, still or animated WebP, VP8/VP9 WebM, other supported videos, or selected PDF pages. Choose a scene family and variant. Bring selected slides to the centre, hold them, then return them to the sequence. A short video can keep looping during a long hold. Choose an opening and a finite closing when the sequence needs them.
+## pitch.dog Studio
 
-Inspect a clip and its filmstrip without running the entire composition. Trim, change rate, loop, or switch between moving video/animation and a remembered First, Middle, Last or Custom still. Frame artwork visually or numerically; view the canvas at Fit, 50%, 100% or 200%. Jump between spotlights, save favourite scenes and named presets, and audition Drift backgrounds against your own artwork. Appearance adjustments remain live; structural edits pause deliberately.
+Three native Mac apps that turn your work into beautiful moving images, made for 9:16 first.
 
-## Keep work intact
+- **Drift 2** turns a deck (a PDF, slide images or short clips) into a reel. Pick a scene, press Export.
+- **Galileo 2** turns artwork, photographs and clips into a moving gallery. Pick a scene, press Export.
+- **Backdrop** makes moving backgrounds, and shares them with Drift and Galileo through its library.
 
-Native `.galileo` documents contain their media. Import, save and reopen share resource and manifest limits. Missing-media recovery keeps usable artwork and its settings. Replacement retains compatible framing, spotlight and source timing. Native save/autosave, failed writes, undo/redo and reopening are exercised in the packaged application.
+Everything loops seamlessly, previews exactly as it exports, and runs locally on Apple silicon. Drift and Galileo can add tactile sound: recorded foley placed on the moments the cards move, looping with the picture.
 
-WebM preparation happens locally using bundled, restricted FFmpeg/libvpx tools. The original file stays unchanged beside its native working copy. This can require more disk space than the compressed source. Successful files remain imported when another file fails; failures name the affected input.
+## Using the apps
 
-The 2.4 native Studio candidate saves schema 8. Older native projects open as protected upgrade copies and must be saved to a new destination; the original stays intact. Earlier apps cannot read schema 8 saves. Native choreography may differ from historical Electron exports. [Studio implementation and acceptance](docs/native/STUDIO_UI_IMPLEMENTATION.md).
+- A new window opens on sample work, already playing. Drop your own files anywhere in the window and they replace the samples.
+- The scenes sit on the left at the shape you are making, each with a line on what happens in it. Rest the pointer on one to watch it on the stage; click to use it; the arrow keys step through them.
+- Drift's Stream comes in nine styles (Editorial, Noir, Sunstruck, Dread, Tender, Velvet, Celluloid, Night Run, Procession); pick one at the top of the inspector. Galileo's scenes are grouped by how the work is met: one at a time, walked past, in motion, or on a table.
+- The inspector has five pages: **Motion** (loop length in one click: 10, 15, 30 or 60 s), **Title**, **Colour**, **Sound** and **Finish**.
+- The toolbar switches between 9:16, 4:5, 1:1 and 16:9; Cinema and 4K are in the menu beside it. Every scene lays itself out for the shape, and in a tall frame the work flows up the screen.
+- Export writes MP4, HEVC, ProRes, ProRes 4444 with transparency, numbered PNG frames or a still, for one shape or several at once.
 
-## Output
+## Installing a release
 
-Silent H.264 MP4, ProRes 422/4444 MOV, PNG stills and PNG sequences. Export the whole sequence, one spotlight, a time interval or the current frame. A serial queue retains each export's document snapshot even if the window closes. ProRes 4444 and PNG support transparency.
+Download the disk image from the repository's Releases page, open it and drag the app to Applications. The apps are ad-hoc signed and not notarized, so the first time, Control-click the app and choose Open (or allow it under System Settings › Privacy & Security). They use their own bundle identifiers, so Drift 1 and Galileo Gallery stay installed and untouched beside them.
 
-Original source audio is retained only as part of the unchanged imported file; it is never played or exported. AV1/HDR WebM intake and WebM output are not supported. PDF pages are rasterized. [Media limits](docs/native/MEDIA.md).
+## Build
 
-The app is ad-hoc signed, **not notarized**. The release includes matching DMG/ZIP downloads, validation evidence, checksums and corresponding codec source. This software uses FFmpeg under LGPL-2.1-or-later and libvpx under its retained license; see [notices](THIRD_PARTY_NOTICES.md) and the release's codec-source ZIP.
+Needs the Command Line Tools (no Xcode) on macOS 14 or later.
 
-## Develop
-
-```sh
-bash scripts/native/build-codecs.sh
-swift test --package-path native
-bash scripts/native/package.sh
+```bash
+bash scripts/build-apps.sh release
 ```
 
-Development requires an Apple-silicon Mac, Xcode/Metal tools, Python 3, Git, Make and pkg-config. The released app needs none of those tools. `native/VERSION` is authoritative. [Engineering and validation](docs/native/ENGINEERING.md) · [2.3 release notes](docs/releases/v2.3.0.md) · [Contributing](CONTRIBUTING.md).
+The apps land in `../dist/` as `Drift 2.app`, `Galileo 2.app` and `Backdrop.app`.
 
-Historical JavaScript/Electron source and atelier reports remain as credited reference, not another product or a runtime requirement. [Documentation map](docs/README.md) · [License](LICENSE).
+The script builds against the macOS 26.5 SDK because the macOS 27 SDK expands SwiftUI's `@State` with a macro plugin that only ships with Xcode.
+
+## Layout
+
+| Module | Job |
+|---|---|
+| `Sources/RenderCore` | Metal context and caches, shader prelude (hashing, looping simplex noise, OKLab), palettes, finishing (bloom, grade, vignette, grain, dither), readback and video writing |
+| `Sources/BackdropKit` | 29 analytic background looks in 8 families, the backdrop renderer and the shared library |
+| `Sources/StageKit` | Card renderer (curl and folds, continuous corners, surfaces, depth of field, analytic shadows, mirror floor, motion blur, stacking layers), the scenes, sound events and the loop mixer, media and video decoding, exporter |
+| `Sources/StudioKit` | Everything Drift and Galileo share: the window, scene browser and previews, stage, inspector, export sheet, document model, theme and type |
+| `Sources/DriftApp`, `GalileoApp`, `BackdropApp` | Each app's scenes and entry point |
+| `Sources/StudioLab` | Headless renders, benchmarks and icon generation |
+| `Resources/Icons` | App icons rendered by the engine |
+| `Resources/Sound` | 23 CC0 foley recordings (Kenney), pinned by hash, with measured trims and levels |
+
+Drift and Galileo share one engine and one interface; what differs is each app's catalogue of scenes, its sample work and its words.
+
+## Checking the apps without a screen
+
+Every app accepts flags for headless checks. Give every flag a value: AppKit reads a bare word after a valueless flag as a document to open.
+
+```bash
+"../dist/Drift 2.app/Contents/MacOS/Drift" --snapshot out.png --scene noir --format square --tab finish
+"../dist/Galileo 2.app/Contents/MacOS/Galileo" --still frame.png --scene hang --time 4
+"../dist/Drift 2.app/Contents/MacOS/Drift" --export reel.mp4 --media deck.pdf --scene editorial --seconds 8
+```
+
+Other flags: `--size 1440x900`, `--tab motion|title|colour|sound|finish`, `--preview-scene <id>` (what resting on a scene shows), `--feature <index>`, `--save-to <path>`, `--show-export 1`, `--samples <n>`, `--transparent 1` (ProRes 4444 or PNG with alpha), `--sound editorial|cinema|paper`, `--probe-preview <out.png>` (reads back the live stage and reports its frame rate), and `-appearance light` for light mode.
+
+Titles: `--title "Fieldnote" --kicker "SERIES A · 2026"`, with `--title-place corner|centre`, `--title-time throughout|opening|closing` and `--title-ink auto|light|dark`. Several formats in one run, as the export sheet writes them: `--export <folder> --formats reel,square,landscape [--kind h264|hevc|prores|prores4444|png|still]`. `--with-samples 1` adds the sample media before `--media`, to check that an import replaces it. `--palette-from-media 1` applies the palette drawn from the work (Drift, Galileo); `--palette-from <picture>` borrows one from a picture (Backdrop). `--export-done a.mp4,b.mp4` shows the export sheet's finished state.
+
+`STUDIO_LAUNCH_PROBE=1` times an ordinary launch: when the window appears, when the samples are in and when the media has loaded.
+
+## Checking everything at once
+
+```bash
+bash scripts/verify.sh
+```
+
+Builds the apps, then checks headlessly the interface type, Stream's styles and scene previews, undo (including typing a title and a change arriving mid-drag), saving, a title card that loops cleanly, a three-format export with sound in every file, and Corridor, Hang, Vitrine and Scatter through the motion audit in landscape and reel. It prints one line per check and exits non-zero if any fails. Output goes to a `studio-verify` folder inside the folder you name (the temporary folder by default); only that folder is replaced. About ten minutes on an M2.
+
+## Checking motion
+
+```bash
+bash scripts/motion-audit.sh /tmp/motion-audit path/to/deck.pdf
+```
+
+Exports every Drift and Galileo look without motion blur, in landscape and reel, then checks each video tile by tile for one-frame pops and for the seam where the loop joins. Some intended motion also trips it (stepped poses, throws, feature exchanges, fast entrances); look at the flagged frames before calling them bugs.
+
+## Rights
+
+No fonts are bundled. The interface uses the system font; titles are set in faces that ship with macOS (Avenir Next, Helvetica Neue, Didot, Futura). Soft Bloom follows LUMEN's region structure (MIT, Leonxlnx); simplex noise is from webgl-noise (MIT, Ashima Arts and Stefan Gustavson). The sound recordings are CC0 (Kenney). See `NOTICES.md`.

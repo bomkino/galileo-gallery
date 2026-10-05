@@ -1,31 +1,6 @@
-node_modules/
-dist/
-release/
-artifacts/
-vendor/
-plans/
-scripts/audit-originals.cjs
-
+.build/
+.swiftpm/
+*.xcodeproj
+DerivedData/
 .DS_Store
-Icon?
-*.log
-
-.env
-.env.*
-!.env.example
-
-# Native build outputs
-native/.build/
-native/.swiftpm/
-release-native/
-native-evidence/
-.native-delivery/
-
-# Keep pinned shader source and its licenses on case-insensitive macOS volumes.
-!native/Vendor/
-!native/Vendor/DriftBackgrounds/
-!native/Vendor/DriftBackgrounds/**
-
-# Rebuilt from pinned source; never commit compiler outputs.
-native/.codecs/
-codec-evidence/
+/dist/
