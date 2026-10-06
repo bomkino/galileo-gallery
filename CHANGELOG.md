@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.4.0 — 6 October 2026
+
+Improvements from the shared engine, made for pitch.dog's 1080 × 1920 reels, most of them exported transparent.
+
+**Transparent exports, fixed and faster**
+- **Shadows now come through.** Transparent exports used to drop every shadow; they now carry them as soft alpha.
+- **ProRes 4444 alpha fixed.** Files said "straight alpha" but held premultiplied colour, so soft edges, motion blur and glow came out too dark in editors. They now hold straight alpha.
+- **PNG frames export about twice as fast**, compressed on several cores while the next frames render.
+- **HEVC can be transparent**: about a hundredth of ProRes 4444's size, for Final Cut Pro, Keynote, QuickTime and Safari.
+- **Background: Backdrop or Transparent**, at the top of the Colour page. Transparent shows the works over a checkerboard on the stage and in the scene browser, as they will export.
+
+**Layouts and use**
+- Deck's pile takes more of a tall frame's width; Story's hand fits inside a tall frame.
+- A length chosen under Motion is kept when you change scene, add, remove or feature works.
+- Dropped files arrive in name order, already at their real shape.
+- Export waits until every work has loaded; files that can't be read are named.
+- The stage holds still under the export sheet; video exports keep two frames in flight; works load three at a time.
+- Exports are named after the document; loops step evenly across the join; memory is released when works are removed.
+
 ## 3.3.0 — 5 October 2026 (Galileo 2)
 
 **New backgrounds from Backdrop 2.0, and backgrounds that loop seamlessly everywhere.**
