@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.5.0 — 6 October 2026
+
+**Updates itself.** Galileo 2 now checks its GitHub releases once a day and offers new versions in the app: read what's new, click Install, and it relaunches on the new version a few seconds later, with no second trip to Privacy & Security. **Check for Updates…** in the app menu checks now.
+
+- Updates are signed with pitch.dog's own key, and anything not signed with it is refused. No Apple developer account is needed.
+- Install this version by hand once; every version after it arrives by itself.
+- Install notes now match current macOS: the first launch of a downloaded app needs System Settings › Privacy & Security › **Open Anyway** (Control-click › Open no longer works). If macOS offers to install from the disk image and says "Could not install", drag the app onto Applications instead. A ZIP is on the release page too.
+- Uses Sparkle 2.10.0 (MIT licence, credited in NOTICES and inside the app).
+
 ## 3.4.0 — 6 October 2026
 
 Improvements from the shared engine, made for pitch.dog's 1080 × 1920 reels, most of them exported transparent.
